@@ -1,18 +1,22 @@
 #pragma once
 
 typedef enum {
-    T_NONE = 0,
-    T_EOF,
-    T_NUMBER,
-    T_IDENT,
-    T_ADD,
-    T_SUB,
-    T_MUL,
-    T_DIV,
-    T_ASSIGN,
-    T_PARAM_OPEN,
-    T_PARAM_CLOSE,
-    T_LINE
+	T_NONE = 0,
+	T_ADD = 1,
+	T_SUB = 2,
+	T_MUL = 3,
+	T_DIV = 4,
+	T_ASSIGN_ADD = 5,
+	T_ASSIGN_SUB = 6,
+	T_ASSIGN_MUL = 7,
+	T_ASSIGN_DIV = 8,
+	T_ASSIGN,
+	T_EOF,
+	T_NUMBER,
+	T_IDENT,
+	T_PARAM_OPEN,
+	T_PARAM_CLOSE,
+	T_LINE
 } token_type;
 
 extern char *token_type_names[];

@@ -57,6 +57,7 @@ int exec_var(struct node *node)
 	if (k == kh_end(var_list))
 	{
 		printf("Unknown variable %s => 0\n", node->left);
+
 		return 0;
 	}
 	else
@@ -75,13 +76,18 @@ int exec_assign(struct node *node)
 
 	int ret;
 
-	khiter_t k = kh_put(var, var_list, (int)node->left, &ret);
+	khiter_t k = kh_get(var, var_list, (int)node->left);
 
-	if(!ret)
+	if (k == kh_end(var_list))
 	{
-		kh_del(var, var_list, k);
+		k = kh_put(var, var_list, (int)node->left, &ret);
 
-		printf("Unable to store value %d to variable %s\n", result, node->left);
+		if(!ret)
+		{
+			kh_del(var, var_list, k);
+
+			printf("Unable to store value %d to variable %s\n", result, node->left);
+		}
 	}
 
 	kh_value(var_list, k) = result;

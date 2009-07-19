@@ -3,7 +3,7 @@
 
 struct token current_token;
 
-char *token_type_names[] = {"None", "End of File", "Number", "Identifier", "+", "-", "*", "/", "=", "Newline"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "End of File", "Number", "Identifier", "Newline"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 
@@ -133,6 +133,41 @@ static token_type ident_proc(struct token *token)
 	return T_IDENT;
 }
 
+#define SINGLE_PROC(name, result) static token_type name##_proc(struct token *token)\
+	{\
+		(token->input)++;\
+		token->stop = token->input;\
+		\
+		return result;\
+	}
+
+SINGLE_PROC(assign, T_ASSIGN);
+SINGLE_PROC(param_open, T_PARAM_OPEN);
+SINGLE_PROC(param_close, T_PARAM_CLOSE);
+
+#define ASSIGN_PROC(name, result) static token_type name##_proc(struct token *token)\
+	{\
+		(token->input)++;\
+	\
+		if(*token->input == '=')\
+		{\
+			(token->input)++;\
+			\
+			token->stop = token->input;\
+			\
+			return result + 4;\
+		}\
+		\
+		token->stop = token->input;\
+		\
+		return result;\
+	}
+
+ASSIGN_PROC(add, T_ADD)
+ASSIGN_PROC(sub, T_SUB)
+ASSIGN_PROC(mul, T_MUL)
+ASSIGN_PROC(div, T_DIV)
+
 static inline void create_single(char input, token_type type)
 {
 	single_table[(unsigned char)input] = type;
@@ -162,15 +197,14 @@ void lexer_setup(void)
 
 	jump_table['_'] = ident_proc;
 
-	// Singles
+	jump_table['+'] = add_proc;
+	jump_table['-'] = sub_proc;
+	jump_table['*'] = mul_proc;
+	jump_table['/'] = div_proc;
 
-	create_single('+', T_ADD);
-	create_single('-', T_SUB);
-	create_single('*', T_MUL);
-	create_single('/', T_DIV);
-	create_single('=', T_ASSIGN);
-	create_single('(', T_PARAM_OPEN);
-	create_single(')', T_PARAM_CLOSE);
+	jump_table['='] = assign_proc;
+	jump_table['('] = param_open_proc;
+	jump_table[')'] = param_close_proc;
 
     jump_table[0] = null_proc;
 }

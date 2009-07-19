@@ -34,8 +34,8 @@ struct node *parse_factor(struct lexer* lexer)
 			{
 				struct node *result = alloc_node(N_NUMBER);
 
-				result->left = get_token_str(lexer->token);
-				result->right = (void*)atoi(result->left);
+				result->left = (void*)get_token_str(lexer->token);
+				result->right = (void*)atoi((char*)result->left);
 
 				lexer_next(lexer);
 
@@ -50,24 +50,49 @@ struct node *parse_factor(struct lexer* lexer)
 
 				lexer_next(lexer);
 
-				if (lexer_current(lexer) == T_ASSIGN)
+				switch(lexer_current(lexer))
 				{
-					struct node *result = alloc_node(N_ASSIGN);
+					case T_ASSIGN_ADD:
+					case T_ASSIGN_SUB:
+					case T_ASSIGN_MUL:
+					case T_ASSIGN_DIV:
+					{
+						struct node *result = alloc_node(N_ASSIGN);
 
-					lexer_next(lexer);
+						token_type op_type = lexer_current(lexer) - 4;
 
-					result->left = symbol;
-					result->right = parse_expression(lexer);
+						lexer_next(lexer);
 
-					return result;
-				}
-				else
-				{
-					struct node *result = alloc_node(N_VAR);
+						result->left = symbol;
+						result->right = alloc_node(N_EXPRESSION);
+						result->right->op = op_type;
+						result->right->left = alloc_node(N_VAR);
+						result->right->left->left = symbol;
+						result->right->right = parse_expression(lexer);
 
-					result->left = symbol;
+						return result;
+					}
 
-					return result;
+					case T_ASSIGN:
+					{
+						struct node *result = alloc_node(N_ASSIGN);
+
+						lexer_next(lexer);
+
+						result->left = symbol;
+						result->right = parse_expression(lexer);
+
+						return result;
+					}
+
+					default:
+					{
+						struct node *result = alloc_node(N_VAR);
+
+						result->left = symbol;
+
+						return result;
+					}
 				}
 			}
 

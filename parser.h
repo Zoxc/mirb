@@ -11,8 +11,8 @@ typedef enum {
 } node_type;
 
 struct node {
-    void *left;
-    void *right;
+    struct node *left;
+    struct node *right;
     node_type type;
     token_type op;
 };
