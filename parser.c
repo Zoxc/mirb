@@ -85,13 +85,33 @@ struct node *parse_factor(struct lexer* lexer)
 						return result;
 					}
 
-					default:
+					// Function call or local variable
+
+					case T_ADD:
+					case T_SUB:
+					case T_MUL:
+					case T_DIV:
+					case T_QUESTION:
+					case T_COLON:
+					case T_LINE:
+					case T_EOF:
 					{
 						struct node *result = alloc_node(N_VAR);
 
 						result->left = symbol;
 
 						return result;
+					}
+
+					// Function call
+
+					default:
+					{
+						(lexer->err_count)++;
+						printf("Unable to find out what identifier is before token %s\n", token_type_names[lexer_current(lexer)]);
+						lexer_next(lexer);
+
+						return 0;
 					}
 				}
 			}
@@ -161,7 +181,7 @@ struct node *parse_arithmetic(struct lexer* lexer)
     return result;
 }
 
-struct node *parse_unary_if(struct lexer* lexer)
+struct node *parse_ternary_if(struct lexer* lexer)
 {
 	struct node *result = parse_arithmetic(lexer);
 
@@ -169,15 +189,18 @@ struct node *parse_unary_if(struct lexer* lexer)
 	{
 		lexer_next(lexer);
 
+		// Create a N_IF node
     	struct node *node = alloc_node(N_IF);
 		node->op = lexer_current(lexer);
 		node->left = result;
+
+		// Create a N_ELSE node
 		node->right = alloc_node(N_ELSE);
-		node->right->left = parse_unary_if(lexer);
+		node->right->left = parse_ternary_if(lexer);
 
 		match(lexer, T_COLON);
 
-		node->right->right = parse_unary_if(lexer);
+		node->right->right = parse_ternary_if(lexer);
 
 		return node;
 	}
@@ -187,5 +210,5 @@ struct node *parse_unary_if(struct lexer* lexer)
 
 struct node *parse_expression(struct lexer *lexer)
 {
-	return parse_unary_if(lexer);
+	return parse_ternary_if(lexer);
 }

@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "symbols.h"
+#include "generator.h"
 
 KHASH_MAP_INIT_INT(var, int);
 
@@ -216,6 +217,7 @@ int main()
 			printf("Tree: %s\n", get_node_name(expression));
 
 			exec_node(expression);
+			gen_block(expression);
 		}
 	}
 
