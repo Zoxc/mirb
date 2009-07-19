@@ -142,7 +142,7 @@ struct node *parse_term(struct lexer* lexer)
 	return result;
 }
 
-struct node *parse_expression(struct lexer* lexer)
+struct node *parse_arithmetic(struct lexer* lexer)
 {
 	struct node *result = parse_term(lexer);
 
@@ -161,3 +161,31 @@ struct node *parse_expression(struct lexer* lexer)
     return result;
 }
 
+struct node *parse_unary_if(struct lexer* lexer)
+{
+	struct node *result = parse_arithmetic(lexer);
+
+	if(lexer_current(lexer) == T_QUESTION)
+	{
+		lexer_next(lexer);
+
+    	struct node *node = alloc_node(N_IF);
+		node->op = lexer_current(lexer);
+		node->left = result;
+		node->right = alloc_node(N_ELSE);
+		node->right->left = parse_unary_if(lexer);
+
+		match(lexer, T_COLON);
+
+		node->right->right = parse_unary_if(lexer);
+
+		return node;
+	}
+
+	return result;
+}
+
+struct node *parse_expression(struct lexer *lexer)
+{
+	return parse_unary_if(lexer);
+}

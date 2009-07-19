@@ -34,7 +34,19 @@ char* name_arithmetics(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics};
+char* name_if(struct node *node)
+{
+	char* result = malloc(100);
+
+	if(node->right->type == N_ELSE)
+		sprintf(result, "(%s ? %s : %s)", get_node_name(node->left), get_node_name(node->right->left), get_node_name(node->right->right));
+	else
+		sprintf(result, "(%s ? %s)", get_node_name(node->left), get_node_name(node->right));
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics, name_if, 0/*N_ELSE*/};
 
 char* get_node_name(struct node *node)
 {
@@ -131,7 +143,42 @@ int exec_arithmetics(struct node *node)
 	return result;
 }
 
-executor executors[] = {exec_num, exec_var, exec_assign, exec_arithmetics, exec_arithmetics};
+int exec_if(struct node *node)
+{
+	int left = exec_node(node->left);
+	int result;
+
+	if(node->right->type == N_ELSE)
+	{
+		if(left)
+		{
+			result = exec_node(node->right->left);
+			printf("%d ? <%d> : %s  => %d\n", left, result, get_node_name(node->right->right), result);
+		}
+		else
+		{
+			result = exec_node(node->right->right);
+			printf("%d ? %s : <%d> => %d\n", left, get_node_name(node->right->left), result, result);
+		}
+	}
+	else
+	{
+		if(left)
+		{
+			result = exec_node(node->right);
+			printf("%d ? <%d> => %d\n", left, result, result);
+		}
+		else
+		{
+			result = -1;
+			printf("%d ? %s => %d\n", left, get_node_name(node->right), result);
+		}
+	}
+
+	return result;
+}
+
+executor executors[] = {exec_num, exec_var, exec_assign, exec_arithmetics, exec_arithmetics, exec_if, 0/*N_ELSE*/};
 
 int exec_node(struct node *node)
 {

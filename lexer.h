@@ -11,6 +11,8 @@ typedef enum {
 	T_ASSIGN_MUL = 7,
 	T_ASSIGN_DIV = 8,
 	T_ASSIGN,
+	T_QUESTION,
+	T_COLON,
 	T_EOF,
 	T_NUMBER,
 	T_IDENT,

@@ -7,7 +7,9 @@ typedef enum {
 	N_VAR,
 	N_ASSIGN,
 	N_TERM,
-	N_EXPRESSION
+	N_EXPRESSION,
+	N_IF,
+	N_ELSE
 } node_type;
 
 struct node {
