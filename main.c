@@ -1,6 +1,11 @@
 #include "globals.h"
 #include "lexer.h"
 #include "parser.h"
+#include "symbols.h"
+
+KHASH_MAP_INIT_INT(var, int);
+
+static khash_t(var) *var_list;
 
 typedef char*(*get_node_name_proc)(struct node *node);
 
@@ -11,18 +16,25 @@ char* name_factor(struct node *node)
 	return (char*)node->left;
 }
 
-char* name_arithmetics(struct node *node)
+char* name_assign(struct node *node)
 {
-	char* left = get_node_name(node->left);
-	char* right = get_node_name(node->right);
 	char* result = malloc(100);
 
-	sprintf(result, "(%s %s %s)", left, token_type_names[node->op], right);
+	sprintf(result, "(%s = %s)", node->left, get_node_name(node->right));
 
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_factor, name_arithmetics, name_arithmetics};
+char* name_arithmetics(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "(%s %s %s)", get_node_name(node->left), token_type_names[node->op], get_node_name(node->right));
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics};
 
 char* get_node_name(struct node *node)
 {
@@ -33,9 +45,50 @@ typedef int(*executor)(struct node *node);
 
 int exec_node(struct node *node);
 
-int exec_factor(struct node *node)
+int exec_num(struct node *node)
 {
 	return (int)node->right;
+}
+
+int exec_var(struct node *node)
+{
+	khiter_t k = kh_get(var, var_list, (int)node->left);
+
+	if (k == kh_end(var_list))
+	{
+		printf("Unknown variable %s => 0\n", node->left);
+		return 0;
+	}
+	else
+	{
+		int result = kh_value(var_list, k);
+
+		printf("Variable %s => %d\n", node->left, result);
+
+		return result;
+	}
+}
+
+int exec_assign(struct node *node)
+{
+	int result = exec_node(node->right);
+
+	int ret;
+
+	khiter_t k = kh_put(var, var_list, (int)node->left, &ret);
+
+	if(!ret)
+	{
+		kh_del(var, var_list, k);
+
+		printf("Unable to store value %d to variable %s\n", result, node->left);
+	}
+
+	kh_value(var_list, k) = result;
+
+	printf("%s = %d => %d\n", node->left, result, result);
+
+	return result;
 }
 
 int exec_arithmetics(struct node *node)
@@ -72,7 +125,7 @@ int exec_arithmetics(struct node *node)
 	return result;
 }
 
-executor executors[] = {exec_factor, exec_arithmetics, exec_arithmetics};
+executor executors[] = {exec_num, exec_var, exec_assign, exec_arithmetics, exec_arithmetics};
 
 int exec_node(struct node *node)
 {
@@ -81,23 +134,39 @@ int exec_node(struct node *node)
 
 int main()
 {
-    setup_lexer();
+	char buffer[800];
 
-    char buffer[800];
-    gets(buffer);
+	lexer_setup();
+	symbols_create();
 
-    printf("Parsing: %s\n", input);
+	var_list = kh_init(var);
 
-    lex(buffer);
-    next();
+	while(1)
+	{
+		gets(buffer);
 
-    struct node* expression = parse_expression();
+		struct lexer *lexer = lexer_create(buffer);
 
-    printf("Tree: %s\n", get_node_name(expression));
+		if(lexer_current(lexer) == T_EOF)
+		{
+			lexer_destroy(lexer);
 
-    exec_node(expression);
+			break;
+		}
 
-    match(T_EOF);
+		struct node* expression = parse_expression(lexer);
+		match(lexer, T_EOF);
+		lexer_destroy(lexer);
 
-    return 0;
+		if (lexer->err_count == 0)
+		{
+			printf("Tree: %s\n", get_node_name(expression));
+
+			exec_node(expression);
+		}
+	}
+
+	symbols_destroy();
+
+	return 0;
 }

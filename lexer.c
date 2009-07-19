@@ -3,17 +3,35 @@
 
 struct token current_token;
 
-char* token_type_names[] = {"None", "End of File", "Number", "+", "-", "*", "/", "Newline"};
+char *token_type_names[] = {"None", "End of File", "Number", "Identifier", "+", "-", "*", "/", "=", "Newline"};
 
-typedef token_type(*jump_table_entry)(void);
+typedef token_type(*jump_table_entry)(struct token *token);
 
 jump_table_entry jump_table[256];
+token_type single_table[256];
 
-void lex(char* input)
+struct lexer* lexer_create(char* input)
 {
-    current_token.line = 0;
-    current_token.type = T_NONE;
-    current_token.input = input;
+	struct lexer* result = malloc(sizeof(struct lexer));
+
+	result->index = 0;
+	result->count = 0;
+	result->err_count = 0;
+    result->lookaheads[0].line = 0;
+    result->lookaheads[0].type = T_NONE;
+    result->lookaheads[0].input = input;
+
+    for(int i = 0; i < sizeof(result->lookaheads) / sizeof(result->lookaheads[0]); i++)
+		result->lookaheads[i].lexer = result;
+
+    lexer_next(result);
+
+    return result;
+}
+
+void lexer_destroy(struct lexer *lexer)
+{
+	free(lexer);
 }
 
 char* get_token_str(struct token *token)
@@ -25,7 +43,7 @@ char* get_token_str(struct token *token)
     return result;
 }
 
-inline bool is_whitespace(char input)
+static inline bool is_whitespace(char input)
 {
     if(input == 0x10 || input == 0x13)
         return false;
@@ -36,13 +54,13 @@ inline bool is_whitespace(char input)
     return false;
 }
 
-inline void skip_whitespace(char **input)
+static inline void skip_whitespace(char **input)
 {
     while(is_whitespace(**input))
         (*input)++;
 }
 
-inline bool is_number(char input)
+static inline bool is_number(char input)
 {
     if(input >= '0' && input <= '9')
         return true;
@@ -50,88 +68,153 @@ inline bool is_number(char input)
     return false;
 }
 
-token_type number_proc(void)
+static token_type number_proc(struct token *token)
 {
-    current_token.input++;
+	(token->input)++;
 
-    while(is_number(*current_token.input))
-        current_token.input++;
+	while(is_number(*(token->input)))
+		(token->input)++;
 
-    current_token.stop = current_token.input;
+	token->stop = token->input;
 
-    return T_NUMBER;
+	return T_NUMBER;
 }
 
-token_type unknown_proc(void)
+static token_type unknown_proc(struct token *token)
 {
-    printf("Unknown character: %c\n", *current_token.input);
-    current_token.input++;
+    printf("Unknown character: %c\n", *(token->input));
+    (token->input)++;
 
-    return next();
+    return lexer_next(token->lexer);
 }
 
-token_type null_proc(void)
+static token_type null_proc(struct token *token)
 {
-    current_token.stop = current_token.input;
+    token->stop = token->input;
 
     return T_EOF;
 }
 
-token_type add_proc(void)
+static token_type single_proc(struct token *token)
 {
-    current_token.input++;
-    current_token.stop = current_token.input;
+	token_type result = single_table[(unsigned char)*(token->input)];
+	(token->input)++;
+    token->stop = token->input;
 
-    return T_ADD;
+    return result;
 }
 
-token_type sub_proc(void)
+static inline bool is_ident(char input)
 {
-    current_token.input++;
-    current_token.stop = current_token.input;
+    if(input >= 'a' && input <= 'z')
+        return true;
 
-    return T_SUB;
+    if(input >= '0' && input <= '9')
+        return true;
+
+	if(input == '_')
+		return true;
+
+    if(input >= 'A' && input <= 'Z')
+        return true;
+
+    return false;
 }
 
-token_type mul_proc(void)
+static token_type ident_proc(struct token *token)
 {
-    current_token.input++;
-    current_token.stop = current_token.input;
+	(token->input)++;
 
-    return T_MUL;
+	while(is_ident(*(token->input)))
+		(token->input)++;
+
+	token->stop = token->input;
+
+	return T_IDENT;
 }
 
-token_type div_proc(void)
+static inline void create_single(char input, token_type type)
 {
-    current_token.input++;
-    current_token.stop = current_token.input;
-
-    return T_DIV;
+	single_table[(unsigned char)input] = type;
+	jump_table[(unsigned char)input] = single_proc;
 }
 
-void setup_lexer(void)
+void lexer_setup(void)
 {
     for(int i = 0; i < 256; i++)
+    {
         jump_table[i] = unknown_proc;
+        single_table[i] = T_NONE;
+    }
+
+	// Numbers
 
     for(int i = '0'; i < '9'; i++)
         jump_table[i] = number_proc;
 
-    jump_table['+'] = add_proc;
-    jump_table['-'] = sub_proc;
-    jump_table['*'] = mul_proc;
-    jump_table['/'] = div_proc;
+	// Identifiers
+
+    for(int i = 'a'; i < 'z'; i++)
+        jump_table[i] = ident_proc;
+
+    for(int i = 'A'; i < 'Z'; i++)
+        jump_table[i] = ident_proc;
+
+	jump_table['_'] = ident_proc;
+
+	// Singles
+
+	create_single('+', T_ADD);
+	create_single('-', T_SUB);
+	create_single('*', T_MUL);
+	create_single('/', T_DIV);
+	create_single('=', T_ASSIGN);
+	create_single('(', T_PARAM_OPEN);
+	create_single(')', T_PARAM_CLOSE);
 
     jump_table[0] = null_proc;
 }
 
-inline token_type next(void)
+inline token_type lexer_lookahead(struct lexer* lexer)
 {
-    skip_whitespace(&current_token.input);
+	(lexer->index)++;
 
-    current_token.start = current_token.input;
+	return lexer_next(lexer);
+}
 
-    current_token.type = jump_table[(unsigned char)*current_token.input]();
+void lexer_restore(struct lexer* lexer)
+{
+	lexer->count = lexer->index;
+	lexer->index = 0;
+	lexer->token = &lexer->lookaheads[0];
+}
 
-    return current_token.type;
+void lexer_resolve(struct lexer* lexer)
+{
+	lexer->lookaheads[0] = lexer->lookaheads[lexer->index];
+	lexer->count = 0;
+	lexer->index = 0;
+	lexer->token = &lexer->lookaheads[0];
+}
+
+inline token_type lexer_next(struct lexer* lexer)
+{
+	struct token* token = &lexer->lookaheads[lexer->index];
+
+	if(lexer->count)
+	{
+		(lexer->count)--;
+
+		if(lexer->count == 0)
+			lexer->index = 0;
+	}
+
+	lexer->token = token;
+
+    skip_whitespace(&token->input);
+
+    token->start = token->input;
+    token->type = jump_table[(unsigned char)*(token->input)](token);
+
+    return token->type;
 }

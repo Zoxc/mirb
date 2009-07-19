@@ -30,10 +30,24 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c99" />
 		</Compiler>
+		<Unit filename="globals.h" />
+		<Unit filename="grammar.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="grammar.h" />
+		<Unit filename="lexer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lexer.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="parser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="parser.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
