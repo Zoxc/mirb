@@ -9,9 +9,9 @@ typedef enum {
 	B_MUL,
 	B_DIV,
 	B_MOV,
-	B_MOV_NUM,
+	B_MOV_IMM,
 	B_PUSH,
-	B_PUSH_NUM,
+	B_PUSH_IMM,
 	B_PUSH_OBJECT,
 	B_CALL,
 	B_TEST,
@@ -19,7 +19,9 @@ typedef enum {
 	B_JMPF,
 	B_JMP,
 	B_RETURN,
-	B_LABEL
+	B_LABEL,
+	B_PHI,
+	B_PHI_IMM
 } opcode_type_t;
 
 typedef unsigned int OP_VAR;
@@ -96,8 +98,10 @@ static inline unsigned int block_push(block_t *block, opcode_type_t type, OP_VAR
 
 static inline void block_print_var(OP_VAR var)
 {
-	if(var & 1)
-		printf("<%d>", (var - 1) / 2);
+	if(var == 1)
+		printf("%%r");
+	else if(var & 1)
+		printf("%%%d", (var - 1) / 2);
 	else
 		printf("%s", var);
 }

@@ -5,25 +5,10 @@ typedef void(*generator)(block_t *block, struct node *node, OP_VAR var);
 
 static inline void gen_node(block_t *block, struct node *node, OP_VAR var);
 
-static inline void print_var(OP_VAR var)
-{
-	block_print_var(var);
-}
-
-static inline void print_label(OP_VAR var)
-{
-	printf("#%d", (var - 1) / 2);
-}
-
-static inline void emmit_label(OP_VAR var)
-{
-	printf("#%d:\n", (var - 1) / 2);
-}
-
 static void gen_num(block_t *block, struct node *node, OP_VAR var)
 {
 	if (var)
-		block_push(block, B_MOV_NUM, var, (OP_VAR)node->right, 0);
+		block_push(block, B_MOV_IMM, var, (OP_VAR)node->right, 0);
 }
 
 static void gen_var(block_t *block, struct node *node, OP_VAR var)
@@ -49,7 +34,7 @@ static void gen_arithmetic(block_t *block, struct node *node, OP_VAR var)
 	gen_node(block, node->right, temp2);
 
 	block_use_var(block, temp2, block_push(block, B_PUSH, temp2, 0, 0));
-	block_push(block, B_PUSH_NUM, 4, 0, 0);
+	block_push(block, B_PUSH_IMM, 4, 0, 0);
 	block_push(block, B_PUSH_OBJECT, (OP_VAR)symbol_get(token_type_names[node->op]), 0, 0);
 	block_use_var(block, temp1, block_push(block, B_PUSH, temp1, 0, 0));
 	block_push(block, B_CALL, 0, 0, 0);
@@ -72,11 +57,30 @@ static void gen_if(block_t *block, struct node *node, OP_VAR var)
 	{
 		OP_VAR label_end = block_get_var(block);
 
-		gen_node(block, node->right->left, var);
-		block_push(block, B_JMP, label_end, 0, 0);
-		block_push(block, B_LABEL, label_else, 0, 0);
-		gen_node(block, node->right->right, var);
-		block_push(block, B_LABEL, label_end, 0, 0);
+		if(var)
+		{
+			OP_VAR result_left = block_get_var(block);
+			OP_VAR result_right = block_get_var(block);
+
+			gen_node(block, node->right->left, result_left);
+			block_use_var(block, result_left, block_push(block, B_PHI, var, result_left, 0));
+			block_push(block, B_JMP, label_end, 0, 0);
+
+			block_push(block, B_LABEL, label_else, 0, 0);
+
+			gen_node(block, node->right->right, result_right);
+			block_use_var(block, result_right, block_push(block, B_PHI, var, result_right, 0));
+
+			block_push(block, B_LABEL, label_end, 0, 0);
+		}
+		else
+		{
+			gen_node(block, node->right->left, 0);
+			block_push(block, B_JMP, label_end, 0, 0);
+			block_push(block, B_LABEL, label_else, 0, 0);
+			gen_node(block, node->right->right, 0);
+			block_push(block, B_LABEL, label_end, 0, 0);
+		}
 	}
 	else
 	{
@@ -84,15 +88,21 @@ static void gen_if(block_t *block, struct node *node, OP_VAR var)
 		{
 			OP_VAR label_end = block_get_var(block);
 
-			gen_node(block, node->right->left, var);
+			OP_VAR result_left = block_get_var(block);
+
+			gen_node(block, node->right->left, result_left);
+			block_use_var(block, result_left, block_push(block, B_PHI, var, result_left, 0));
 			block_push(block, B_JMP, label_end, 0, 0);
+
 			block_push(block, B_LABEL, label_else, 0, 0);
-			block_push(block, B_MOV_NUM, (OP_VAR)-1, 0, 0);
+
+			block_push(block, B_PHI_IMM, var, (OP_VAR)-1, 0);
+
 			block_push(block, B_LABEL, label_end, 0, 0);
 		}
 		else
 		{
-			gen_node(block, node->right, var);
+			gen_node(block, node->right, 0);
 			block_push(block, B_LABEL, label_else, 0, 0);
 		}
 	}
@@ -114,8 +124,6 @@ block_t *gen_block(struct node *node)
 	gen_node(block, node, 0);
 
 	block_print(block);
-
-	printf("Optimizing code:\n");
 
 	block_optimize(block);
 

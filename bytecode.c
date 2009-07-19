@@ -8,7 +8,7 @@ void opcode_print(opcode_t *op)
 			printf("nop\n", op->result);
 			break;
 
-		case B_MOV_NUM:
+		case B_MOV_IMM:
 			printf("mov "); block_print_var(op->result); printf(", %d\n", op->left);
 			break;
 
@@ -21,7 +21,7 @@ void opcode_print(opcode_t *op)
 			printf("push "); block_print_var(op->result); printf("\n");
 			break;
 
-		case B_PUSH_NUM:
+		case B_PUSH_IMM:
 			printf("push %d\n", op->result);
 			break;
 
@@ -49,6 +49,14 @@ void opcode_print(opcode_t *op)
 			printf("#%d:\n", (op->result - 1) / 2);
 			break;
 
+		case B_PHI_IMM:
+			printf("phi "); block_print_var(op->result); printf(", %d\n", op->left);
+			break;
+
+		case B_PHI:
+			printf("phi "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf("\n");
+			break;
+
 		default:
 			printf("unknown opcode %d\n", op->type);
 	}
@@ -71,11 +79,42 @@ void block_optimize(block_t *block)
 			case B_MOV:
 				if(is_temp_var(op->result) && (i + 1) < count)
 				{
-					opcode_t *target = kv_A(block->vector, i + 1);
+					khiter_t k = kh_get(OP_VAR, block->var_usage, op->result);
+
+					if (k == kh_end((block->var_usage)))
+						break;
+
+					unsigned int entry = kh_value(block->var_usage, k);;
+
+					if(op->result == 1) // Result register can be overwritten!
+					{
+						bool safe = true;
+
+						for(unsigned int iter = i + 1; i < entry; i++)
+						{
+							opcode_t *current_op = kv_A(block->vector, iter);
+
+							if(current_op->type == B_CALL)
+							{
+								safe = false;
+								break;
+							}
+						}
+
+						if(!safe)
+							break;
+					}
+
+					opcode_t *target = kv_A(block->vector, entry);
 
 					switch(target->type)
 					{
 						case B_PUSH:
+							target->result = op->left;
+							op->type = B_NOP;
+							break;
+
+						case B_PHI:
 							target->left = op->left;
 							op->type = B_NOP;
 							break;
@@ -86,26 +125,32 @@ void block_optimize(block_t *block)
 				}
 				break;
 
-			case B_MOV_NUM:
+			case B_MOV_IMM:
 				if(is_temp_var(op->result))
 				{
-					khiter_t k = kh_get(OP_VAR, (block->var_usage), op->result);
+					khiter_t k = kh_get(OP_VAR, block->var_usage, op->result);
 
-					if (k != kh_end((block->var_usage)))
+					if (k == kh_end((block->var_usage)))
+						break;
+
+					opcode_t *target = kv_A(block->vector, kh_value(block->var_usage, k));
+
+					switch(target->type)
 					{
-						opcode_t *target = kv_A(block->vector, kh_value((block->var_usage), k));
+						case B_PHI:
+							target->type = B_PHI_IMM;
+							target->left = op->left;
+							op->type = B_NOP;
+							break;
 
-						switch(target->type)
-						{
-							case B_PUSH:
-								target->type = B_PUSH_NUM;
-								target->result = op->left;
-								op->type = B_NOP;
-								break;
+						case B_PUSH:
+							target->type = B_PUSH_IMM;
+							target->result = op->left;
+							op->type = B_NOP;
+							break;
 
-							default:
-								break;
-						}
+						default:
+							break;
 					}
 				}
 				break;
