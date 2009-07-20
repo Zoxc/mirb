@@ -82,10 +82,6 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 {
 	if (symbol || lexer_current(lexer) == T_IDENT)
 	{
-		int in_args = lexer->in_args;
-
-		lexer->in_args++;
-
 		struct node *result = alloc_node(N_MESSAGE);
 
 		if (symbol)
@@ -98,7 +94,7 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 			lexer_next(lexer);
 		}
 
-		printf("N_MESSAGE %s %d\n", (char *)result->left, in_args);
+		printf("N_MESSAGE %s\n", (char *)result->left);
 
 		result->middle = 0;
 
@@ -118,15 +114,7 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 			case T_ADD:
 			case T_SUB:
 			case T_NUMBER:
-				{
-					if(in_args)
-						printf("N_MESSAGE NO_ARGS\n");
-					else
-					{
-						printf("N_MESSAGE ARGS\n");
-						result->middle = parse_argument(lexer);
-					}
-				}
+                result->middle = parse_argument(lexer);
 				break;
 
 			default:
@@ -139,8 +127,6 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 
 			result->right = parse_message(lexer, 0);
 		}
-
-		lexer->in_args--;
 
 		return result;
 	}

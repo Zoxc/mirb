@@ -42,7 +42,6 @@ struct lexer {
 	int count;
 	int err_count;
 	struct token lookaheads[5];
-	int in_args;
 };
 
 void lexer_setup(void);
