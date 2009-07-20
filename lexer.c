@@ -3,7 +3,7 @@
 
 struct token current_token;
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "End of File", "Number", "Identifier", "Newline"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "(", ")", "End of File", "Number", "Identifier", "Newline"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 

@@ -34,6 +34,7 @@ struct node *parse_call_tail(struct lexer* lexer)
 		case T_ASSIGN_SUB:
 		case T_ASSIGN_MUL:
 		case T_ASSIGN_DIV:
+		case T_ASSIGN:
 			{
 				struct node *result = alloc_node(N_CALL_TAIL);
 
@@ -54,26 +55,18 @@ struct node *parse_call_tail(struct lexer* lexer)
 
 struct node *parse_argument(struct lexer* lexer)
 {
-	printf("N_ARGUMENT ENTER\n");
-	printf("N_ARGUMENT %s\n", token_type_names[lexer_current(lexer)]);
-
 	struct node *result = parse_expression(lexer);
 
 	while (lexer_current(lexer) == T_COMMA)
 	{
-		struct node *node = alloc_node(N_ARGUMENT);
-		node->op = lexer_current(lexer);
+		struct node *node = alloc_node(N_ARGUMENT);;
 		node->left = result;
 
 		lexer_next(lexer);
 
-		printf("N_ARGUMENT %s\n", token_type_names[lexer_current(lexer)]);
-
 		node->right = parse_expression(lexer);
 		result = node;
 	}
-
-	printf("N_ARGUMENT LEAVE\n");
 
 	return result;
 }
@@ -94,8 +87,6 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 			lexer_next(lexer);
 		}
 
-		printf("N_MESSAGE %s\n", (char *)result->left);
-
 		result->middle = 0;
 
 		switch (lexer_current(lexer))
@@ -104,7 +95,8 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 				{
 					lexer_next(lexer);
 
-					result->middle = parse_argument(lexer);
+					if(lexer_current(lexer) != T_PARAM_CLOSE)
+                        result->middle = parse_argument(lexer);
 
 					match(lexer, T_PARAM_CLOSE);
 				}
@@ -127,6 +119,8 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 
 			result->right = parse_message(lexer, 0);
 		}
+		else
+            result->right = 0;
 
 		return result;
 	}
@@ -140,12 +134,25 @@ struct node *parse_factor(struct lexer* lexer)
 	{
 		case T_NUMBER:
 			{
-				struct node *result = alloc_node(N_NUMBER);
+			    struct node *result = alloc_node(N_NUMBER);
 
-				result->left = (void*)get_token_str(lexer->token);
-				result->right = (void*)atoi((char*)result->left);
+                result->left = (void *)get_token_str(lexer->token);
+                result->right = (void* )atoi((char*)result->left);
 
-				lexer_next(lexer);
+			    lexer_next(lexer);
+
+                if(lexer_current(lexer) == T_DOT)
+                {
+                    lexer_next(lexer);
+
+                    struct node *call = alloc_node(N_CALL);
+
+                    call->left = result;
+                    call->middle = parse_message(lexer, 0);
+                    call->right = parse_call_tail(lexer);
+
+                    return call;
+                }
 
 				return result;
 			}
@@ -216,14 +223,13 @@ struct node *parse_factor(struct lexer* lexer)
 					{
 						struct node *result;
 
-						printf("N_CALL %s\n", (char *)symbol);
-
 						if(lexer_current(lexer) == T_DOT)
 						{
 							lexer_next(lexer);
 
 							result = alloc_node(N_CALL);
-							result->left = symbol;
+							result->left = alloc_node(N_VAR);
+							result->left->left = symbol;
 							result->middle = parse_message(lexer, 0);
 							result->right = parse_call_tail(lexer);
 						}

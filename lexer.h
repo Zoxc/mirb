@@ -15,11 +15,11 @@ typedef enum {
 	T_DOT,
 	T_COMMA,
 	T_COLON,
+	T_PARAM_OPEN,
+	T_PARAM_CLOSE,
 	T_EOF,
 	T_NUMBER,
 	T_IDENT,
-	T_PARAM_OPEN,
-	T_PARAM_CLOSE,
 	T_LINE
 } token_type;
 
