@@ -48,7 +48,7 @@ struct lexer {
 void lexer_setup(void);
 struct lexer *lexer_create(char *input);
 void lexer_destroy(struct lexer *lexer);
-token_type lexer_next(struct lexer *lexer);
+inline token_type lexer_next(struct lexer *lexer);
 token_type lexer_lookahead(struct lexer *lexer);
 void lexer_restore(struct lexer *lexer);
 void lexer_resolve(struct lexer *lexer);

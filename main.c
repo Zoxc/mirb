@@ -21,7 +21,7 @@ char* name_assign(struct node *node)
 {
 	char* result = malloc(100);
 
-	sprintf(result, "(%s = %s)", node->left, get_node_name(node->right));
+	sprintf(result, "(%s = %s)", (char *)node->left, get_node_name(node->right));
 
 	return result;
 }
@@ -69,7 +69,7 @@ int exec_var(struct node *node)
 
 	if (k == kh_end(var_list))
 	{
-		printf("Unknown variable %s => 0\n", node->left);
+		printf("Unknown variable %s => 0\n", (char *)node->left);
 
 		return 0;
 	}
@@ -77,7 +77,7 @@ int exec_var(struct node *node)
 	{
 		int result = kh_value(var_list, k);
 
-		printf("Variable %s => %d\n", node->left, result);
+		printf("Variable %s => %d\n", (char *)node->left, result);
 
 		return result;
 	}
@@ -99,13 +99,13 @@ int exec_assign(struct node *node)
 		{
 			kh_del(var, var_list, k);
 
-			printf("Unable to store value %d to variable %s\n", result, node->left);
+			printf("Unable to store value %d to variable %s\n", result, (char *)node->left);
 		}
 	}
 
 	kh_value(var_list, k) = result;
 
-	printf("%s = %d => %d\n", node->left, result, result);
+	printf("%s = %d => %d\n", (char *)node->left, result, result);
 
 	return result;
 }

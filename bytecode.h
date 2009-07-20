@@ -78,7 +78,7 @@ static inline void block_use_var(block_t *block, OP_VAR var, unsigned int offset
 	{
 		kh_del(OP_VAR, block->var_usage, k);
 
-		printf("Unable to store use of variable %s\n", var);
+		printf("Unable to store use of variable %s\n", (char *)var);
 	}
 	else
 		kh_value(block->var_usage, k) = offset;
@@ -103,7 +103,7 @@ static inline void block_print_var(OP_VAR var)
 	else if(var & 1)
 		printf("%%%d", (var - 1) / 2);
 	else
-		printf("%s", var);
+		printf("%s", (char *)var);
 }
 
 static inline void block_print_label(OP_VAR var)

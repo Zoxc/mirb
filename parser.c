@@ -98,7 +98,7 @@ struct node *parse_message(struct lexer* lexer, void *symbol)
 			lexer_next(lexer);
 		}
 
-		printf("N_MESSAGE %s %d\n", result->left, in_args);
+		printf("N_MESSAGE %s %d\n", (char *)result->left, in_args);
 
 		result->middle = 0;
 
@@ -230,7 +230,7 @@ struct node *parse_factor(struct lexer* lexer)
 					{
 						struct node *result;
 
-						printf("N_CALL %s\n", symbol);
+						printf("N_CALL %s\n", (char *)symbol);
 
 						if(lexer_current(lexer) == T_DOT)
 						{

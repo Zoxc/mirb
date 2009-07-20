@@ -5,7 +5,7 @@ void opcode_print(opcode_t *op)
 	switch(op->type)
 	{
 		case B_NOP:
-			printf("nop\n", op->result);
+			printf("nop\n");
 			break;
 
 		case B_MOV_IMM:
@@ -26,7 +26,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_CALL:
-			printf("call\n", op->result);
+			printf("call\n");
 			break;
 
 		case B_TEST:
