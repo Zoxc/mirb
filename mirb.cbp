@@ -34,6 +34,14 @@
 			<Add option="-Wall" />
 			<Add option="-std=c99" />
 		</Compiler>
+		<Unit filename="bytecode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="bytecode.h" />
+		<Unit filename="generator.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="generator.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="lexer.c">
 			<Option compilerVar="CC" />
