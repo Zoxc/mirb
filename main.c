@@ -210,6 +210,7 @@ int main()
 
 		struct node* expression = parse_expression(lexer);
 		match(lexer, T_EOF);
+		printf("parser done.");
 		lexer_destroy(lexer);
 
 		if (lexer->err_count == 0)

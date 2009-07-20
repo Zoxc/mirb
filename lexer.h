@@ -12,6 +12,8 @@ typedef enum {
 	T_ASSIGN_DIV = 8,
 	T_ASSIGN,
 	T_QUESTION,
+	T_DOT,
+	T_COMMA,
 	T_COLON,
 	T_EOF,
 	T_NUMBER,
@@ -40,6 +42,7 @@ struct lexer {
 	int count;
 	int err_count;
 	struct token lookaheads[5];
+	int in_args;
 };
 
 void lexer_setup(void);

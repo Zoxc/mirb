@@ -3,7 +3,7 @@
 
 struct token current_token;
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ":", "End of File", "Number", "Identifier", "Newline"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "End of File", "Number", "Identifier", "Newline"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 
@@ -17,6 +17,7 @@ struct lexer* lexer_create(char* input)
 	result->index = 0;
 	result->count = 0;
 	result->err_count = 0;
+	result->in_args = 0;
     result->lookaheads[0].line = 0;
     result->lookaheads[0].type = T_NONE;
     result->lookaheads[0].input = input;
@@ -146,6 +147,8 @@ SINGLE_PROC(param_open, T_PARAM_OPEN);
 SINGLE_PROC(param_close, T_PARAM_CLOSE);
 SINGLE_PROC(question, T_QUESTION);
 SINGLE_PROC(colon, T_COLON);
+SINGLE_PROC(dot, T_DOT);
+SINGLE_PROC(comma, T_COMMA);
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
@@ -208,7 +211,9 @@ void lexer_setup(void)
 	jump_table['('] = param_open_proc;
 	jump_table[')'] = param_close_proc;
 	jump_table['?'] = question_proc;
+	jump_table['.'] = dot_proc;
 	jump_table[':'] = colon_proc;
+	jump_table[','] = comma_proc;
 
     jump_table[0] = null_proc;
 }

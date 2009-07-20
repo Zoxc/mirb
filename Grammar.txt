@@ -1,0 +1,37 @@
+Expression = TernaryIf
+
+TernaryIf = Arithmetic {"?" TernaryIf ":" TernaryIf}
+
+Arithmetic = Term, {TermOp Term}
+
+TermOp = "+" | "-"
+Term = Factor, {FactorOp Factor}*
+
+FactorOp = "*" | "/"
+
+Factor = Value
+	| Assigment
+	| Call
+
+Call = {Value "."}, {Message "."}*, Message, CallTail
+
+CallTail = {AssignOp, Expression}
+
+Message = Identifier, {Arguments | ("(", Arguments, ")")}
+
+Assigment = Variable, AssignOp, Expression
+
+Arguments = Expression, {",", Expression}*
+
+AssignOp = "=" | "+=" | "-=" | "*=" | "/="
+
+Value = Number
+	| Variable
+
+Variable = Identifier
+
+Identifier = Char, {Char | Digit}*
+Char = "_" | "a"-"z" | "A"-"Z"
+
+Number = {Digit}+
+Digit = "0"-"9"

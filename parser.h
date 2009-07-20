@@ -9,11 +9,16 @@ typedef enum {
 	N_TERM,
 	N_EXPRESSION,
 	N_IF,
-	N_ELSE
+	N_ELSE,
+	N_ARGUMENT,
+	N_MESSAGE,
+	N_CALL_TAIL,
+	N_CALL,
 } node_type;
 
 struct node {
     struct node *left;
+    struct node *middle;
     struct node *right;
     node_type type;
     token_type op;

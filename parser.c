@@ -26,6 +26,128 @@ static inline struct node *alloc_node(node_type type)
 	return result;
 }
 
+struct node *parse_call_tail(struct lexer* lexer)
+{
+	switch (lexer_current(lexer))
+	{
+		case T_ASSIGN_ADD:
+		case T_ASSIGN_SUB:
+		case T_ASSIGN_MUL:
+		case T_ASSIGN_DIV:
+			{
+				struct node *result = alloc_node(N_CALL_TAIL);
+
+				result->op = lexer_current(lexer);
+
+				lexer_next(lexer);
+
+				result->left = parse_expression(lexer);
+
+				return result;
+			}
+			break;
+
+		default:
+			return 0;
+	}
+}
+
+struct node *parse_argument(struct lexer* lexer)
+{
+	printf("N_ARGUMENT ENTER\n");
+	printf("N_ARGUMENT %s\n", token_type_names[lexer_current(lexer)]);
+
+	struct node *result = parse_expression(lexer);
+
+	while (lexer_current(lexer) == T_COMMA)
+	{
+		struct node *node = alloc_node(N_ARGUMENT);
+		node->op = lexer_current(lexer);
+		node->left = result;
+
+		lexer_next(lexer);
+
+		printf("N_ARGUMENT %s\n", token_type_names[lexer_current(lexer)]);
+
+		node->right = parse_expression(lexer);
+		result = node;
+	}
+
+	printf("N_ARGUMENT LEAVE\n");
+
+	return result;
+}
+
+struct node *parse_message(struct lexer* lexer, void *symbol)
+{
+	if (symbol || lexer_current(lexer) == T_IDENT)
+	{
+		int in_args = lexer->in_args;
+
+		lexer->in_args++;
+
+		struct node *result = alloc_node(N_MESSAGE);
+
+		if (symbol)
+		{
+			result->left = symbol;
+		}
+		else
+		{
+			result->left = (void *)get_token_str(lexer_current_token(lexer));
+			lexer_next(lexer);
+		}
+
+		printf("N_MESSAGE %s %d\n", result->left, in_args);
+
+		result->middle = 0;
+
+		switch (lexer_current(lexer))
+		{
+			case T_PARAM_OPEN:
+				{
+					lexer_next(lexer);
+
+					result->middle = parse_argument(lexer);
+
+					match(lexer, T_PARAM_CLOSE);
+				}
+				break;
+
+			case T_IDENT:
+			case T_ADD:
+			case T_SUB:
+			case T_NUMBER:
+				{
+					if(in_args)
+						printf("N_MESSAGE NO_ARGS\n");
+					else
+					{
+						printf("N_MESSAGE ARGS\n");
+						result->middle = parse_argument(lexer);
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+
+		if (lexer_current(lexer) == T_DOT)
+		{
+			lexer_next(lexer);
+
+			result->right = parse_message(lexer, 0);
+		}
+
+		lexer->in_args--;
+
+		return result;
+	}
+
+	return 0;
+}
+
 struct node *parse_factor(struct lexer* lexer)
 {
 	switch (lexer_current(lexer))
@@ -44,7 +166,7 @@ struct node *parse_factor(struct lexer* lexer)
 
 		case T_IDENT:
 			{
-				char* name = get_token_str(lexer->token);
+				char* name = get_token_str(lexer_current_token(lexer));
 				void* symbol = symbol_get(name);
 				free(name);
 
@@ -104,14 +226,30 @@ struct node *parse_factor(struct lexer* lexer)
 					}
 
 					// Function call
-
 					default:
 					{
-						(lexer->err_count)++;
-						printf("Unable to find out what identifier is before token %s\n", token_type_names[lexer_current(lexer)]);
-						lexer_next(lexer);
+						struct node *result;
 
-						return 0;
+						printf("N_CALL %s\n", symbol);
+
+						if(lexer_current(lexer) == T_DOT)
+						{
+							lexer_next(lexer);
+
+							result = alloc_node(N_CALL);
+							result->left = symbol;
+							result->middle = parse_message(lexer, 0);
+							result->right = parse_call_tail(lexer);
+						}
+						else
+						{
+							result = alloc_node(N_CALL);
+							result->left = 0;
+							result->middle = parse_message(lexer, symbol);
+							result->right = parse_call_tail(lexer);
+						}
+
+						return result;
 					}
 				}
 			}
