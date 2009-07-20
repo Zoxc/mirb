@@ -3,7 +3,7 @@
 
 struct token current_token;
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "End of File", "Number", "Identifier", "Newline"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "(", ")", "End of File", "Number", "Identifier", "Newline"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 
@@ -17,7 +17,6 @@ struct lexer* lexer_create(char* input)
 	result->index = 0;
 	result->count = 0;
 	result->err_count = 0;
-	result->in_args = 0;
     result->lookaheads[0].line = 0;
     result->lookaheads[0].type = T_NONE;
     result->lookaheads[0].input = input;
@@ -189,7 +188,7 @@ void lexer_setup(void)
 
 	// Numbers
 
-    for(int i = '0'; i < '9'; i++)
+    for(int i = '0'; i <= '9'; i++)
         jump_table[i] = number_proc;
 
 	// Identifiers

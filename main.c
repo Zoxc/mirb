@@ -21,7 +21,7 @@ char* name_assign(struct node *node)
 {
 	char* result = malloc(100);
 
-	sprintf(result, "(%s = %s)", node->left, get_node_name(node->right));
+	sprintf(result, "(%s = %s)", (char *)node->left, get_node_name(node->right));
 
 	return result;
 }
@@ -47,11 +47,66 @@ char* name_if(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics, name_if, 0/*N_ELSE*/};
+char* name_argument(struct node *node)
+{
+	char* result = malloc(100);
+
+    sprintf(result, "%s, %s", get_node_name(node->left), get_node_name(node->right));
+
+	return result;
+}
+
+char* name_message(struct node *node)
+{
+	char* result = malloc(100);
+
+    if(node->middle)
+    {
+        if(node->right)
+            sprintf(result, "%s(%s).%s", (char *)node->left, get_node_name(node->middle), get_node_name(node->right));
+        else
+            sprintf(result, "%s(%s)", (char *)node->left, get_node_name(node->middle));
+    }
+    else
+    {
+        if(node->right)
+            sprintf(result, "%s().%s", (char *)node->left, get_node_name(node->right));
+        else
+            sprintf(result, "%s()", (char *)node->left);
+    }
+
+	return result;
+}
+
+char* name_call_tail(struct node *node)
+{
+	char* result = malloc(100);
+
+    sprintf(result, "%s %s", token_type_names[node->op], get_node_name(node->left));
+
+	return result;
+}
+
+char* name_call(struct node *node)
+{
+	char* result = malloc(100);
+
+    if(node->right)
+        sprintf(result, "(%s.%s %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
+    else
+        sprintf(result, "(%s.%s)", get_node_name(node->left), get_node_name(node->middle));
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics, name_if, 0/*N_ELSE*/, name_argument, name_message, name_call_tail, name_call};
 
 char* get_node_name(struct node *node)
 {
-	return get_node_name_procs[node->type](node);
+    if(node)
+        return get_node_name_procs[node->type](node);
+    else
+        return "";
 }
 
 typedef int(*executor)(struct node *node);
@@ -69,7 +124,7 @@ int exec_var(struct node *node)
 
 	if (k == kh_end(var_list))
 	{
-		printf("Unknown variable %s => 0\n", node->left);
+		printf("Unknown variable %s => 0\n", (char *)node->left);
 
 		return 0;
 	}
@@ -77,7 +132,7 @@ int exec_var(struct node *node)
 	{
 		int result = kh_value(var_list, k);
 
-		printf("Variable %s => %d\n", node->left, result);
+		printf("Variable %s => %d\n", (char *)node->left, result);
 
 		return result;
 	}
@@ -99,13 +154,13 @@ int exec_assign(struct node *node)
 		{
 			kh_del(var, var_list, k);
 
-			printf("Unable to store value %d to variable %s\n", result, node->left);
+			printf("Unable to store value %d to variable %s\n", result, (char *)node->left);
 		}
 	}
 
 	kh_value(var_list, k) = result;
 
-	printf("%s = %d => %d\n", node->left, result, result);
+	printf("%s = %d => %d\n", (char *)node->left, result, result);
 
 	return result;
 }
@@ -210,7 +265,7 @@ int main()
 
 		struct node* expression = parse_expression(lexer);
 		match(lexer, T_EOF);
-		printf("parser done.");
+		printf("Parser done.\n");
 		lexer_destroy(lexer);
 
 		if (lexer->err_count == 0)

@@ -15,11 +15,11 @@ typedef enum {
 	T_DOT,
 	T_COMMA,
 	T_COLON,
+	T_PARAM_OPEN,
+	T_PARAM_CLOSE,
 	T_EOF,
 	T_NUMBER,
 	T_IDENT,
-	T_PARAM_OPEN,
-	T_PARAM_CLOSE,
 	T_LINE
 } token_type;
 
@@ -42,13 +42,12 @@ struct lexer {
 	int count;
 	int err_count;
 	struct token lookaheads[5];
-	int in_args;
 };
 
 void lexer_setup(void);
 struct lexer *lexer_create(char *input);
 void lexer_destroy(struct lexer *lexer);
-token_type lexer_next(struct lexer *lexer);
+inline token_type lexer_next(struct lexer *lexer);
 token_type lexer_lookahead(struct lexer *lexer);
 void lexer_restore(struct lexer *lexer);
 void lexer_resolve(struct lexer *lexer);
