@@ -1,6 +1,6 @@
 #include "globals.h"
-#include "lexer.h"
-#include "parser.h"
+#include "parser/lexer.h"
+#include "parser/parser.h"
 #include "symbols.h"
 #include "generator.h"
 
@@ -39,12 +39,17 @@ char* name_if(struct node *node)
 {
 	char* result = malloc(100);
 
-	if(node->right->type == N_ELSE)
-		sprintf(result, "(%s ? %s : %s)", get_node_name(node->left), get_node_name(node->right->left), get_node_name(node->right->right));
+	if(node->type == T_UNLESS)
+		sprintf(result, "(!%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
 	else
-		sprintf(result, "(%s ? %s)", get_node_name(node->left), get_node_name(node->right));
+		sprintf(result, "(%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
 
 	return result;
+}
+
+char* name_nil(struct node *node)
+{
+	return "nil";
 }
 
 char* name_argument(struct node *node)
@@ -69,11 +74,25 @@ char* name_message(struct node *node)
     }
     else
     {
-        if(node->right)
+        if(node->right && node->right->type == N_MESSAGE)
             sprintf(result, "%s().%s", (char *)node->left, get_node_name(node->right));
+		else if(node->right)
+			sprintf(result, "%s%s", (char *)node->left, get_node_name(node->right));
         else
             sprintf(result, "%s()", (char *)node->left);
     }
+
+	return result;
+}
+
+char* name_array_message(struct node *node)
+{
+	char* result = malloc(100);
+
+	if (node->right)
+		sprintf(result, "[]%s(%s, %s)", get_node_name(node->left), token_type_names[node->op - OP_TO_ASSIGN], get_node_name(node->right));
+	else
+		sprintf(result, "[](%s)", get_node_name(node->left));
 
 	return result;
 }
@@ -82,7 +101,7 @@ char* name_call_tail(struct node *node)
 {
 	char* result = malloc(100);
 
-    sprintf(result, "%s %s", token_type_names[node->op], get_node_name(node->left));
+    sprintf(result, "%s(%s)", token_type_names[node->op], get_node_name(node->left));
 
 	return result;
 }
@@ -91,154 +110,34 @@ char* name_call(struct node *node)
 {
 	char* result = malloc(100);
 
-    if(node->right)
-        sprintf(result, "(%s.%s %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
-    else
-        sprintf(result, "(%s.%s)", get_node_name(node->left), get_node_name(node->middle));
+	if (node->left)
+		sprintf(result, "(%s.%s)", get_node_name(node->left), get_node_name(node->right));
+	else
+		sprintf(result, "(self.%s)", get_node_name(node->right));
 
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics, name_if, 0/*N_ELSE*/, name_argument, name_message, name_call_tail, name_call};
+char* name_expressions(struct node *node)
+{
+	char* result = malloc(100);
+
+	if(node->right)
+		sprintf(result, "%s; %s", get_node_name(node->left), get_node_name(node->right));
+	else
+		return get_node_name(node->left);
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_factor, name_factor, name_assign, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_message, name_array_message, name_call_tail, name_call, name_expressions};
 
 char* get_node_name(struct node *node)
 {
-    if(node)
+    if (node)
         return get_node_name_procs[node->type](node);
     else
         return "";
-}
-
-typedef int(*executor)(struct node *node);
-
-int exec_node(struct node *node);
-
-int exec_num(struct node *node)
-{
-	return (int)node->right;
-}
-
-int exec_var(struct node *node)
-{
-	khiter_t k = kh_get(var, var_list, (int)node->left);
-
-	if (k == kh_end(var_list))
-	{
-		printf("Unknown variable %s => 0\n", (char *)node->left);
-
-		return 0;
-	}
-	else
-	{
-		int result = kh_value(var_list, k);
-
-		printf("Variable %s => %d\n", (char *)node->left, result);
-
-		return result;
-	}
-}
-
-int exec_assign(struct node *node)
-{
-	int result = exec_node(node->right);
-
-	int ret;
-
-	khiter_t k = kh_get(var, var_list, (int)node->left);
-
-	if (k == kh_end(var_list))
-	{
-		k = kh_put(var, var_list, (int)node->left, &ret);
-
-		if(!ret)
-		{
-			kh_del(var, var_list, k);
-
-			printf("Unable to store value %d to variable %s\n", result, (char *)node->left);
-		}
-	}
-
-	kh_value(var_list, k) = result;
-
-	printf("%s = %d => %d\n", (char *)node->left, result, result);
-
-	return result;
-}
-
-int exec_arithmetics(struct node *node)
-{
-	int left = exec_node(node->left);
-	int right = exec_node(node->right);
-	int result;
-
-	switch(node->op)
-	{
-		case T_MUL:
-			result = left * right;
-			break;
-
-		case T_DIV:
-			result = left / right;
-			break;
-
-		case T_ADD:
-			result = left + right;
-			break;
-
-		case T_SUB:
-			result = left - right;
-			break;
-
-		default:
-			printf("Unknown op: %s", token_type_names[node->op]);
-			return -1;
-	}
-
-	printf("%d.%s(%d) => %d\n", left, token_type_names[node->op], right, result);
-
-	return result;
-}
-
-int exec_if(struct node *node)
-{
-	int left = exec_node(node->left);
-	int result;
-
-	if(node->right->type == N_ELSE)
-	{
-		if(left)
-		{
-			result = exec_node(node->right->left);
-			printf("%d ? <%d> : %s  => %d\n", left, result, get_node_name(node->right->right), result);
-		}
-		else
-		{
-			result = exec_node(node->right->right);
-			printf("%d ? %s : <%d> => %d\n", left, get_node_name(node->right->left), result, result);
-		}
-	}
-	else
-	{
-		if(left)
-		{
-			result = exec_node(node->right);
-			printf("%d ? <%d> => %d\n", left, result, result);
-		}
-		else
-		{
-			result = -1;
-			printf("%d ? %s => %d\n", left, get_node_name(node->right), result);
-		}
-	}
-
-	return result;
-}
-
-executor executors[] = {exec_num, exec_var, exec_assign, exec_arithmetics, exec_arithmetics, exec_if, 0/*N_ELSE*/};
-
-int exec_node(struct node *node)
-{
-	return executors[node->type](node);
 }
 
 int main()
@@ -263,18 +162,19 @@ int main()
 			break;
 		}
 
-		struct node* expression = parse_expression(lexer);
+		struct node* expression = parse_expressions(lexer);
 		match(lexer, T_EOF);
-		printf("Parser done.\n");
 		lexer_destroy(lexer);
 
 		if (lexer->err_count == 0)
 		{
+			printf("Parsing done.\n");
 			printf("Tree: %s\n", get_node_name(expression));
 
-			exec_node(expression);
 			gen_block(expression);
 		}
+		else
+			printf("Parsing failed.\n");
 	}
 
 	symbols_destroy();

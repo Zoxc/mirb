@@ -15,6 +15,7 @@ typedef enum {
 	B_PUSH_OBJECT,
 	B_CALL,
 	B_TEST,
+	B_TEST_IMM, //TODO: Remove this
 	B_JMPT,
 	B_JMPF,
 	B_JMP,

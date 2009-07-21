@@ -33,6 +33,10 @@ void opcode_print(opcode_t *op)
 			printf("test "); block_print_var(op->result); printf("\n");
 			break;
 
+		case B_TEST_IMM:
+			printf("test %d", op->result); printf("\n");
+			break;
+
 		case B_JMPF:
 			printf("jmpf "); block_print_label(op->result); printf("\n");
 			break;
@@ -149,6 +153,12 @@ void block_optimize(block_t *block)
 							op->type = B_NOP;
 							break;
 
+						case B_TEST:
+							target->type = B_TEST_IMM;
+							target->result = op->left;
+							op->type = B_NOP;
+							break;
+
 						default:
 							break;
 					}
@@ -164,5 +174,10 @@ void block_optimize(block_t *block)
 void block_print(block_t *block)
 {
 	for(size_t i = 0; i < kv_size(block->vector); i++)
-		opcode_print(kv_A(block->vector, i));
+	{
+		opcode_t *op = kv_A(block->vector, i);
+
+		if(op->type != B_NOP)
+			opcode_print(kv_A(block->vector, i));
+	}
 }

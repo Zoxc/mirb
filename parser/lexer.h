@@ -1,4 +1,5 @@
 #pragma once
+#include "../globals.h"
 
 typedef enum {
 	T_NONE = 0,
@@ -15,13 +16,27 @@ typedef enum {
 	T_DOT,
 	T_COMMA,
 	T_COLON,
+	T_SEP,
 	T_PARAM_OPEN,
 	T_PARAM_CLOSE,
+	T_SQUARE_OPEN,
+	T_SQUARE_CLOSE,
 	T_EOF,
 	T_NUMBER,
 	T_IDENT,
-	T_LINE
+	T_LINE,
+
+	// Keywords
+	T_IF,
+	T_UNLESS,
+	T_ELSE,
+	T_THEN,
+	T_END
 } token_type;
+
+#define OP_TO_ASSIGN 4
+#define T_KEYWORD_START T_IF
+#define T_KEYWORD_STOP T_END
 
 extern char *token_type_names[];
 
@@ -47,7 +62,7 @@ struct lexer {
 void lexer_setup(void);
 struct lexer *lexer_create(char *input);
 void lexer_destroy(struct lexer *lexer);
-inline token_type lexer_next(struct lexer *lexer);
+token_type lexer_next(struct lexer *lexer);
 token_type lexer_lookahead(struct lexer *lexer);
 void lexer_restore(struct lexer *lexer);
 void lexer_resolve(struct lexer *lexer);

@@ -1,37 +1,70 @@
-Expression = TernaryIf
+Expressions <- Sep*, Expression, {Sep+, Expression}*, Sep*
 
-TernaryIf = Arithmetic {"?" TernaryIf ":" TernaryIf}
+Expression <- TernaryIf
 
-Arithmetic = Term, {TermOp Term}
+TernaryIf <- Arithmetic {"?" TernaryIf ":" TernaryIf}
 
-TermOp = "+" | "-"
-Term = Factor, {FactorOp Factor}*
+Arithmetic <- Term, {TermOp Term}
 
-FactorOp = "*" | "/"
+TermOp <- "+"
+	| "-"
 
-Factor = Value
+Term <- Factor, {FactorOp Factor}*
+
+FactorOp <- "*"
+	| "/"
+
+Factor <- Value
 	| Assigment
 	| Call
+	| If
+	| Unless
 
-Call = {Value "."}, {Message "."}*, Message, CallTail
+If <- "if", Expression, ThenSep, Expressions, {"else", Expressions} "end"
 
-CallTail = {AssignOp, Expression}
+Unless <- "unless", Expression, ThenSep, Expressions, "end"
 
-Message = Identifier, {Arguments | ("(", Arguments, ")")}
+Call <- Value, {CallChain}*, (CallChain | CallTail)
+	| Message, {CallChain}*, {CallTail}
 
-Assigment = Variable, AssignOp, Expression
+CallChain = CallChained(Message)
 
-Arguments = Expression, {",", Expression}*
+CallTail = CallChained(SimpleMessage), {AssignTail}
 
-AssignOp = "=" | "+=" | "-=" | "*=" | "/="
+CallChained(NonTerminal) = ".", NonTerminal
+	| "[", Expression, "]"
 
-Value = Number
+Message <- SimpleMessage, {Arguments | "(", Arguments, ")"}
+SimpleMessage <- Identifer
+
+Arguments <- Expression, {",", Expression}*
+
+Assigment <- Variable, AssignTail
+AssignTail <- AssignOp, Expression
+
+AssignOp <- "="
+	| "+="
+	| "-="
+	| "*="
+	| "/="
+
+Value <- Number
 	| Variable
 
-Variable = Identifier
+Variable <- Identifier
 
-Identifier = Char, {Char | Digit}*
-Char = "_" | "a"-"z" | "A"-"Z"
+ThenSep <- "then"
+	| Sep
+	| ":"
 
-Number = {Digit}+
-Digit = "0"-"9"
+Sep <- NewLine
+	| ";"
+
+Identifier <- Char, {Char | Digit}*
+
+Char <- "_"
+	| "a"-"z"
+	| "A"-"Z"
+
+Number <- {Digit}+
+Digit <- "0"-"9"

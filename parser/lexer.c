@@ -1,9 +1,9 @@
-#include "globals.h"
 #include "lexer.h"
 
 struct token current_token;
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "(", ")", "End of File", "Number", "Identifier", "Newline"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", ";", "(", ")", "[", "]", "End of File", "Number", "Identifier", "Newline",
+	"if", "unless", "else", "then", "end"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 
@@ -41,6 +41,27 @@ char* get_token_str(struct token *token)
     memcpy(result, token->start, length);
     result[length] = 0;
     return result;
+}
+
+static inline bool compare_token(struct token *token, const char *str)
+{
+	const char *start = token->start;
+	const char *stop = token->stop;
+	const char *input = str;
+
+	while(*start == *input)
+	{
+		if (start >= stop)
+			return false;
+
+		start++;
+		input++;
+
+		if (*input == 0)
+			return start == stop;
+	}
+
+	return false;
 }
 
 static inline bool is_whitespace(char input)
@@ -123,12 +144,18 @@ static inline bool is_ident(char input)
 
 static token_type ident_proc(struct token *token)
 {
-	(token->input)++;
+	token->input++;
 
-	while(is_ident(*(token->input)))
-		(token->input)++;
+	while (is_ident(*(token->input)))
+		token->input++;
 
 	token->stop = token->input;
+
+	//TODO: Generate a hashtable for this
+
+	for (token_type i = T_KEYWORD_START; i <= T_KEYWORD_STOP; i++)
+		if (compare_token(token, token_type_names[i]))
+			return i;
 
 	return T_IDENT;
 }
@@ -146,8 +173,12 @@ SINGLE_PROC(param_open, T_PARAM_OPEN);
 SINGLE_PROC(param_close, T_PARAM_CLOSE);
 SINGLE_PROC(question, T_QUESTION);
 SINGLE_PROC(colon, T_COLON);
+SINGLE_PROC(sep, T_SEP);
 SINGLE_PROC(dot, T_DOT);
 SINGLE_PROC(comma, T_COMMA);
+SINGLE_PROC(square_open, T_SQUARE_OPEN);
+SINGLE_PROC(square_close, T_SQUARE_CLOSE);
+
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
@@ -212,7 +243,10 @@ void lexer_setup(void)
 	jump_table['?'] = question_proc;
 	jump_table['.'] = dot_proc;
 	jump_table[':'] = colon_proc;
+	jump_table[';'] = sep_proc;
 	jump_table[','] = comma_proc;
+	jump_table['['] = square_open_proc;
+	jump_table[']'] = square_close_proc;
 
     jump_table[0] = null_proc;
 }
