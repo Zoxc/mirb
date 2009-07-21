@@ -1,8 +1,12 @@
-Expressions <- Sep*, Expression, {Sep+, Expression}*, Sep*
+Statements <- Sep*, Statement, {Sep+, Statement}*, Sep*
+
+Statement <- Conditional
+
+Conditional <- TernaryIf, {("if" | "unless"), Statement}
 
 Expression <- TernaryIf
 
-TernaryIf <- Arithmetic {"?" TernaryIf ":" TernaryIf}
+TernaryIf <- Arithmetic, {"?", TernaryIf, ":", TernaryIf}
 
 Arithmetic <- Term, {TermOp Term}
 
@@ -18,11 +22,19 @@ Factor <- Value
 	| Assigment
 	| Call
 	| If
+	| Case
 	| Unless
+	| "(", Expressions, ")"
 
-If <- "if", Expression, ThenSep, Expressions, {"else", Expressions} "end"
+Case <- "case", ((When+ {Else}) | Else), "end"
 
-Unless <- "unless", Expression, ThenSep, Expressions, "end"
+When <- "when", Expression, ThenSep
+
+If <- "if", Expression, ThenSep, Statements, {"elsif", Statements}*, {Else} "end"
+
+Else <- "else", Statements
+
+Unless <- "unless", Expression, ThenSep, Statements, "end"
 
 Call <- Value, {CallChain}*, (CallChain | CallTail)
 	| Message, {CallChain}*, {CallTail}

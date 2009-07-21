@@ -16,7 +16,7 @@ typedef enum {
 	N_ARRAY_MESSAGE,
 	N_CALL_TAIL,
 	N_CALL,
-	N_EXPRESSIONS
+	N_STATEMENTS
 } node_type;
 
 struct node {
@@ -30,7 +30,8 @@ struct node {
 struct node *parse_expression(struct lexer *lexer);
 struct node *parse_argument(struct lexer* lexer);
 struct node *parse_arithmetic(struct lexer* lexer);
-struct node *parse_expressions(struct lexer* lexer);
+struct node *parse_statement(struct lexer* lexer);
+struct node *parse_statements(struct lexer* lexer);
 void parse_sep(struct lexer* lexer);
 
 struct node *parse_expressions(struct lexer* lexer);

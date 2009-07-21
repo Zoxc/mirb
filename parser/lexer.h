@@ -30,7 +30,10 @@ typedef enum {
 	T_IF,
 	T_UNLESS,
 	T_ELSE,
+	T_ELSIF,
 	T_THEN,
+	T_WHEN,
+	T_CASE,
 	T_END
 } token_type;
 

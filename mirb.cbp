@@ -43,17 +43,25 @@
 		</Unit>
 		<Unit filename="generator.h" />
 		<Unit filename="globals.h" />
-		<Unit filename="lexer.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="lexer.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser.c">
+		<Unit filename="parser\calls.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser.h" />
+		<Unit filename="parser\calls.h" />
+		<Unit filename="parser\control_blocks.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="parser\control_blocks.h" />
+		<Unit filename="parser\lexer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="parser\lexer.h" />
+		<Unit filename="parser\parser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="parser\parser.h" />
 		<Unit filename="symbols.c">
 			<Option compilerVar="CC" />
 		</Unit>

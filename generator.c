@@ -92,8 +92,6 @@ static void gen_expressions(block_t *block, struct node *node, OP_VAR var)
 {
 	gen_node(block, node->left, 0);
 
-	//printf("gen expressions in "); block_print_var(var); printf("\n");
-
 	if(node->right)
 		gen_node(block, node->right, var);
 }

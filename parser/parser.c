@@ -135,6 +135,9 @@ struct node *parse_factor(struct lexer* lexer)
 		case T_UNLESS:
 			return parse_unless(lexer);
 
+		case T_CASE:
+			return parse_case(lexer);
+
 		case T_NUMBER:
 			{
 			    struct node *result = alloc_node(N_NUMBER);
@@ -157,7 +160,7 @@ struct node *parse_factor(struct lexer* lexer)
 			{
 				lexer_next(lexer);
 
-				struct node *result = parse_expression(lexer);
+				struct node *result = parse_statements(lexer);
 
 				match(lexer, T_PARAM_CLOSE);
 
@@ -226,6 +229,11 @@ struct node *parse_expression(struct lexer *lexer)
 	return parse_ternary_if(lexer);
 }
 
+struct node *parse_statement(struct lexer* lexer)
+{
+	return parse_conditional(lexer);
+}
+
 static inline bool is_sep(struct lexer* lexer)
 {
 	return lexer_current(lexer) == T_SEP || lexer_current(lexer) == T_LINE;
@@ -237,13 +245,13 @@ static inline void skip_seps(struct lexer* lexer)
 		lexer_next(lexer);
 }
 
-struct node *parse_expressions(struct lexer* lexer)
+struct node *parse_statements(struct lexer* lexer)
 {
 	skip_seps(lexer);
 
 	if(is_expression(lexer))
 	{
-		struct node *result = parse_expression(lexer);
+		struct node *result = parse_statement(lexer);
 
 		if (is_sep(lexer))
 		{
@@ -251,10 +259,10 @@ struct node *parse_expressions(struct lexer* lexer)
 
 			if(is_expression(lexer))
 			{
-				struct node *node = alloc_node(N_EXPRESSIONS);
+				struct node *node = alloc_node(N_STATEMENTS);
 
 				node->left = result;
-				node->right = parse_expressions(lexer);
+				node->right = parse_statements(lexer);
 
 				return node;
 			}

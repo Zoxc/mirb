@@ -39,7 +39,7 @@ char* name_if(struct node *node)
 {
 	char* result = malloc(100);
 
-	if(node->type == T_UNLESS)
+	if(node->type == N_UNLESS)
 		sprintf(result, "(!%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
 	else
 		sprintf(result, "(%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
@@ -162,7 +162,7 @@ int main()
 			break;
 		}
 
-		struct node* expression = parse_expressions(lexer);
+		struct node* expression = parse_statements(lexer);
 		match(lexer, T_EOF);
 		lexer_destroy(lexer);
 
