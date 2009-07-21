@@ -51,7 +51,8 @@ static void gen_if(block_t *block, struct node *node, OP_VAR var)
 	gen_node(block, node->left, temp);
 
 	block_use_var(block, temp, block_push(block, B_TEST, temp, 0, 0));
-	block_push(block, B_JMPF, label_else, 0, 0);
+
+	block_push(block, node->type == N_IF ? B_JMPF : B_JMPT, label_else, 0, 0);
 
 	OP_VAR label_end = block_get_var(block);
 
