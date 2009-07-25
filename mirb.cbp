@@ -62,10 +62,15 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\parser.h" />
-		<Unit filename="symbols.c">
+		<Unit filename="runtime\classes.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="symbols.h" />
+		<Unit filename="runtime\classes.h" />
+		<Unit filename="runtime\runtime.h" />
+		<Unit filename="runtime\symbols.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\symbols.h" />
 		<Unit filename="vendor\khash.h" />
 		<Unit filename="vendor\kvec.h" />
 		<Extensions>

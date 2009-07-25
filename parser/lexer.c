@@ -1,18 +1,16 @@
 #include "lexer.h"
-
-struct token current_token;
+#include "parser.h"
 
 char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", ";", "(", ")", "[", "]", "End of File", "Number", "Identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "end"};
+	"if", "unless", "else", "elsif", "then", "when", "case", "class", "end"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
 
 jump_table_entry jump_table[256];
-token_type single_table[256];
 
-struct lexer* lexer_create(char* input)
+struct parser *parser_create(char* input)
 {
-	struct lexer* result = malloc(sizeof(struct lexer));
+	struct parser* result = malloc(sizeof(struct parser));
 
 	result->index = 0;
 	result->count = 0;
@@ -22,16 +20,16 @@ struct lexer* lexer_create(char* input)
     result->lookaheads[0].input = input;
 
     for(int i = 0; i < sizeof(result->lookaheads) / sizeof(result->lookaheads[0]); i++)
-		result->lookaheads[i].lexer = result;
+		result->lookaheads[i].parser = result;
 
-    lexer_next(result);
+    next(result);
 
     return result;
 }
 
-void lexer_destroy(struct lexer *lexer)
+void parser_destroy(struct parser *parser)
 {
-	free(lexer);
+	free(parser);
 }
 
 char* get_token_str(struct token *token)
@@ -106,7 +104,7 @@ static token_type unknown_proc(struct token *token)
     printf("Unknown character: %c\n", *(token->input));
     (token->input)++;
 
-    return lexer_next(token->lexer);
+    return next(token->parser);
 }
 
 static token_type null_proc(struct token *token)
@@ -114,15 +112,6 @@ static token_type null_proc(struct token *token)
     token->stop = token->input;
 
     return T_EOF;
-}
-
-static token_type single_proc(struct token *token)
-{
-	token_type result = single_table[(unsigned char)*(token->input)];
-	(token->input)++;
-    token->stop = token->input;
-
-    return result;
 }
 
 static inline bool is_ident(char input)
@@ -162,7 +151,7 @@ static token_type ident_proc(struct token *token)
 
 #define SINGLE_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
-		(token->input)++;\
+		token->input++;\
 		token->stop = token->input;\
 		\
 		return result;\
@@ -182,11 +171,11 @@ SINGLE_PROC(square_close, T_SQUARE_CLOSE);
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
-		(token->input)++;\
+		token->input++;\
 	\
 		if(*token->input == '=')\
 		{\
-			(token->input)++;\
+			token->input++;\
 			\
 			token->stop = token->input;\
 			\
@@ -203,19 +192,10 @@ ASSIGN_PROC(sub, T_SUB)
 ASSIGN_PROC(mul, T_MUL)
 ASSIGN_PROC(div, T_DIV)
 
-static inline void create_single(char input, token_type type)
-{
-	single_table[(unsigned char)input] = type;
-	jump_table[(unsigned char)input] = single_proc;
-}
-
-void lexer_setup(void)
+void parser_setup(void)
 {
     for(int i = 0; i < 256; i++)
-    {
         jump_table[i] = unknown_proc;
-        single_table[i] = T_NONE;
-    }
 
 	// Numbers
 
@@ -251,41 +231,41 @@ void lexer_setup(void)
     jump_table[0] = null_proc;
 }
 
-inline token_type lexer_lookahead(struct lexer* lexer)
+inline token_type parser_lookahead(struct parser *parser)
 {
-	(lexer->index)++;
+	parser->index++;
 
-	return lexer_next(lexer);
+	return next(parser);
 }
 
-void lexer_restore(struct lexer* lexer)
+void parser_restore(struct parser *parser)
 {
-	lexer->count = lexer->index;
-	lexer->index = 0;
-	lexer->token = &lexer->lookaheads[0];
+	parser->count = parser->index;
+	parser->index = 0;
+	parser->token = &parser->lookaheads[0];
 }
 
-void lexer_resolve(struct lexer* lexer)
+void parser_resolve(struct parser *parser)
 {
-	lexer->lookaheads[0] = lexer->lookaheads[lexer->index];
-	lexer->count = 0;
-	lexer->index = 0;
-	lexer->token = &lexer->lookaheads[0];
+	parser->lookaheads[0] = parser->lookaheads[parser->index];
+	parser->count = 0;
+	parser->index = 0;
+	parser->token = &parser->lookaheads[0];
 }
 
-inline token_type lexer_next(struct lexer* lexer)
+inline token_type next(struct parser *parser)
 {
-	struct token* token = &lexer->lookaheads[lexer->index];
+	struct token* token = &parser->lookaheads[parser->index];
 
-	if(lexer->count)
+	if (parser->count)
 	{
-		(lexer->count)--;
+		parser->count--;
 
-		if(lexer->count == 0)
-			lexer->index = 0;
+		if (parser->count == 0)
+			parser->index = 0;
 	}
 
-	lexer->token = token;
+	parser->token = token;
 
     skip_whitespace(&token->input);
 

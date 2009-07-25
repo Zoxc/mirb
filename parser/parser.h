@@ -1,5 +1,7 @@
 #pragma once
 #include "../globals.h"
+#include "../runtime/classes.h"
+#include "../runtime/runtime.h"
 #include "lexer.h"
 
 typedef enum {
@@ -16,7 +18,9 @@ typedef enum {
 	N_ARRAY_MESSAGE,
 	N_CALL_TAIL,
 	N_CALL,
-	N_STATEMENTS
+	N_STATEMENTS,
+	N_CLASS,
+	N_SCOPE
 } node_type;
 
 struct node {
@@ -27,36 +31,115 @@ struct node {
     token_type op;
 };
 
-struct node *parse_expression(struct lexer *lexer);
-struct node *parse_argument(struct lexer* lexer);
-struct node *parse_arithmetic(struct lexer* lexer);
-struct node *parse_statement(struct lexer* lexer);
-struct node *parse_statements(struct lexer* lexer);
-void parse_sep(struct lexer* lexer);
+KHASH_MAP_INIT_INT(scope, rt_value);
 
-struct node *parse_expressions(struct lexer* lexer);
+typedef enum {
+	S_MAIN,
+	S_DEF,
+	S_CLASS,
+	S_MODULE
+} scope_type;
 
-static inline bool match(struct lexer* lexer, token_type type)
+typedef struct {
+	scope_type type;
+	rt_value count;
+	khash_t(scope) *locals;
+} scope_t;
+
+static inline bool scope_defined(scope_t *scope, rt_value symbol)
 {
-    if (lexer_current(lexer) == type)
+	return kh_get(scope, scope->locals, symbol) != kh_end(scope->locals);
+}
+
+static inline rt_value scope_define(scope_t *scope, rt_value symbol)
+{
+	khiter_t k = kh_get(scope, scope->locals, symbol);
+
+	if (k != kh_end(scope->locals))
+		return kh_value(scope->locals, k);
+
+	int ret;
+
+	k = kh_put(scope, scope->locals, symbol, &ret);
+
+	if (!ret)
+	{
+		kh_del(scope, scope->locals, k);
+
+		printf("Unable to add symbol %s to the local scope\n", RT_SYMBOL(symbol)->string);
+	}
+
+	rt_value result = scope->count++;
+
+	kh_value(scope->locals, k) = result;
+
+	return result;
+}
+
+struct parser {
+	struct token *token;
+	int index;
+	int count;
+	int err_count;
+	struct token lookaheads[5];
+	scope_t *current_scope;
+};
+
+static inline struct token *parser_current_token(struct parser *parser)
+{
+	return parser->token;
+}
+
+static inline token_type parser_current(struct parser *parser)
+{
+	return parser->token->type;
+}
+
+struct node *parse_expression(struct parser *parser);
+struct node *parse_argument(struct parser *parser);
+struct node *parse_arithmetic(struct parser *parser);
+struct node *parse_statement(struct parser *parser);
+struct node *parse_statements(struct parser *parser);
+void parse_sep(struct parser *parser);
+struct node *parse_main(struct parser *parser);
+
+struct node *parse_expressions(struct parser *parser);
+
+static inline bool match(struct parser *parser, token_type type)
+{
+    if (parser_current(parser) == type)
     {
-        lexer_next(lexer);
+        next(parser);
 
         return true;
     }
     else
     {
-    	lexer->err_count++;
+    	parser->err_count++;
 
-        printf("Excepted token %s but found %s\n", token_type_names[type], token_type_names[lexer_current(lexer)]);
+        printf("Excepted token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
 
         return false;
     }
 }
 
-static inline bool is_expression(struct lexer* lexer)
+static inline bool require(struct parser *parser, token_type type)
 {
-	switch (lexer_current(lexer))
+    if (parser_current(parser) == type)
+        return true;
+    else
+    {
+    	parser->err_count++;
+
+        printf("Excepted token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
+
+        return false;
+    }
+}
+
+static inline bool is_expression(struct parser *parser)
+{
+	switch (parser_current(parser))
 	{
 		case T_IDENT:
 		case T_ADD:
@@ -64,12 +147,32 @@ static inline bool is_expression(struct lexer* lexer)
 		case T_NUMBER:
 		case T_IF:
 		case T_UNLESS:
+		case T_CASE:
+		case T_CLASS:
 			return true;
 
 		default:
 			return false;
 	}
 }
+
+static inline struct node *alloc_scope(struct parser *parser, scope_type type)
+{
+	struct node *result = malloc(sizeof(struct node));
+	scope_t *scope = malloc(sizeof(scope_t));
+
+	scope->locals = kh_init(scope);
+	scope->count = 1;
+	scope->type = type;
+
+	result->left = (void *)scope;
+	result->type = N_SCOPE;
+
+	parser->current_scope = scope;
+
+	return result;
+}
+
 
 static inline struct node *alloc_node(node_type type)
 {

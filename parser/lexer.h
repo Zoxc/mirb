@@ -1,5 +1,6 @@
 #pragma once
 #include "../globals.h"
+#include "../runtime/runtime.h"
 
 typedef enum {
 	T_NONE = 0,
@@ -34,6 +35,7 @@ typedef enum {
 	T_THEN,
 	T_WHEN,
 	T_CASE,
+	T_CLASS,
 	T_END
 } token_type;
 
@@ -43,7 +45,7 @@ typedef enum {
 
 extern char *token_type_names[];
 
-struct lexer;
+struct parser;
 
 struct token {
     token_type type;
@@ -51,33 +53,15 @@ struct token {
     char *start;
     char *stop;
     int line;
-    struct lexer *lexer;
+    struct parser *parser;
 };
 
-struct lexer {
-	struct token *token;
-	int index;
-	int count;
-	int err_count;
-	struct token lookaheads[5];
-};
+void parser_setup(void);
+struct parser *parser_create(char *input);
+void parser_destroy(struct parser *parser);
 
-void lexer_setup(void);
-struct lexer *lexer_create(char *input);
-void lexer_destroy(struct lexer *lexer);
-token_type lexer_next(struct lexer *lexer);
-token_type lexer_lookahead(struct lexer *lexer);
-void lexer_restore(struct lexer *lexer);
-void lexer_resolve(struct lexer *lexer);
+token_type next(struct parser *parser);
+token_type parser_lookahead(struct parser *parser);
+void parser_restore(struct parser *parser);
+void parser_resolve(struct parser *parser);
 char *get_token_str(struct token *token);
-
-static inline struct token* lexer_current_token(struct lexer *lexer)
-{
-	return lexer->token;
-}
-
-static inline token_type lexer_current(struct lexer *lexer)
-{
-	return lexer->token->type;
-}
-

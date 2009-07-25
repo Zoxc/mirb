@@ -1,35 +1,35 @@
 #include "control_blocks.h"
 
-void parse_then_sep(struct lexer* lexer)
+void parse_then_sep(struct parser *parser)
 {
-	switch (lexer_current(lexer))
+	switch (parser_current(parser))
 	{
 		case T_THEN:
 		case T_COLON:
-			lexer_next(lexer);
+			next(parser);
 			break;
 
 		default:
-			parse_sep(lexer);
+			parse_sep(parser);
 	}
 }
 
-struct node *parse_ternary_if(struct lexer* lexer)
+struct node *parse_ternary_if(struct parser *parser)
 {
-	struct node *result = parse_arithmetic(lexer);
+	struct node *result = parse_arithmetic(parser);
 
-	if(lexer_current(lexer) == T_QUESTION)
+	if(parser_current(parser) == T_QUESTION)
 	{
-		lexer_next(lexer);
+		next(parser);
 
     	struct node *node = alloc_node(N_IF);
 
 		node->left = result;
-		node->middle = parse_ternary_if(lexer);
+		node->middle = parse_ternary_if(parser);
 
-		match(lexer, T_COLON);
+		match(parser, T_COLON);
 
-		node->right = parse_ternary_if(lexer);
+		node->right = parse_ternary_if(parser);
 
 		return node;
 	}
@@ -37,18 +37,18 @@ struct node *parse_ternary_if(struct lexer* lexer)
 	return result;
 }
 
-struct node *parse_conditional(struct lexer *lexer)
+struct node *parse_conditional(struct parser *parser)
 {
-	struct node *result = parse_ternary_if(lexer);
+	struct node *result = parse_ternary_if(parser);
 
-    if (lexer_current(lexer) == T_IF || lexer_current(lexer) == T_UNLESS)
+    if (parser_current(parser) == T_IF || parser_current(parser) == T_UNLESS)
     {
-     	struct node *node = alloc_node(lexer_current(lexer) == T_IF ? N_IF : N_UNLESS);
+     	struct node *node = alloc_node(parser_current(parser) == T_IF ? N_IF : N_UNLESS);
 
-		lexer_next(lexer);
+		next(parser);
 
 		node->middle = result;
-		node->left = parse_expression(lexer);
+		node->left = parse_expression(parser);
 		node->right = alloc_nil_node();
 
 		return node;
@@ -57,128 +57,129 @@ struct node *parse_conditional(struct lexer *lexer)
     return result;
 }
 
-struct node *parse_unless(struct lexer* lexer)
+struct node *parse_unless(struct parser *parser)
 {
-				lexer_next(lexer);
+				next(parser);
 
 				struct node *result = alloc_node(N_UNLESS);
-				result->left = parse_expression(lexer);
+				result->left = parse_expression(parser);
 
-				parse_then_sep(lexer);
+				parse_then_sep(parser);
 
-				result->middle = parse_statements(lexer);
+				result->middle = parse_statements(parser);
 				result->right = alloc_nil_node();
 
-				match(lexer, T_END);
+				match(parser, T_END);
 
 				return result;
 }
 
-struct node *parse_if_tail(struct lexer* lexer)
+struct node *parse_if_tail(struct parser *parser)
 {
-	switch(lexer_current(lexer))
+	switch (parser_current(parser))
 	{
 		case T_ELSIF:
 			{
-				lexer_next(lexer);
+				next(parser);
 
 				struct node *result = alloc_node(N_IF);
-				result->left = parse_expression(lexer);
+				result->left = parse_expression(parser);
 
-				parse_then_sep(lexer);
+				parse_then_sep(parser);
 
-				result->middle = parse_statements(lexer);
-				result->right = parse_if_tail(lexer);
+				result->middle = parse_statements(parser);
+				result->right = parse_if_tail(parser);
 
 				return result;
 			}
-		case T_ELSE:
-			lexer_next(lexer);
 
-			return parse_statements(lexer);
+		case T_ELSE:
+			next(parser);
+
+			return parse_statements(parser);
 
 		default:
 			return alloc_nil_node();
 	}
 }
 
-struct node *parse_if(struct lexer* lexer)
+struct node *parse_if(struct parser *parser)
 {
-	lexer_next(lexer);
+	next(parser);
 
 	struct node *result = alloc_node(N_IF);
-	result->left = parse_expression(lexer);
+	result->left = parse_expression(parser);
 
-	parse_then_sep(lexer);
+	parse_then_sep(parser);
 
-	result->middle = parse_statements(lexer);
-	result->right = parse_if_tail(lexer);
+	result->middle = parse_statements(parser);
+	result->right = parse_if_tail(parser);
 
-	match(lexer, T_END);
+	match(parser, T_END);
 
 	return result;
 }
 
-struct node *parse_case_body(struct lexer* lexer)
+struct node *parse_case_body(struct parser *parser)
 {
-	switch(lexer_current(lexer))
+	switch (parser_current(parser))
 	{
 		case T_WHEN:
 			{
-				lexer_next(lexer);
+				next(parser);
 
 				struct node *result = alloc_node(N_IF);
-				result->left = parse_expression(lexer);
+				result->left = parse_expression(parser);
 
-				parse_then_sep(lexer);
+				parse_then_sep(parser);
 
-				result->middle = parse_statements(lexer);
-				result->right = parse_case_body(lexer);
+				result->middle = parse_statements(parser);
+				result->right = parse_case_body(parser);
 
 				return result;
 			}
 
 		case T_ELSE:
 			{
-				lexer_next(lexer);
+				next(parser);
 
-				return parse_statements(lexer);
+				return parse_statements(parser);
 			}
 
 		default:
 			{
-				lexer->err_count++;
-				printf("Excepted else or when but found %s\n", token_type_names[lexer_current(lexer)]);
+				parser->err_count++;
+				printf("Excepted else or when but found %s\n", token_type_names[parser_current(parser)]);
 
 				return 0;
 			}
 	}
 }
 
-struct node *parse_case(struct lexer* lexer)
+struct node *parse_case(struct parser *parser)
 {
-	lexer_next(lexer);
+	next(parser);
 
 	struct node *result = 0;
 
-	switch(lexer_current(lexer))
+	switch (parser_current(parser))
 	{
 		case T_ELSE:
-			lexer_next(lexer);
+			next(parser);
 
-			result = parse_statements(lexer);
+			result = parse_statements(parser);
 			break;
 
 		case T_WHEN:
-			result = parse_case_body(lexer);
+			result = parse_case_body(parser);
 			break;
 
 		default:
-			lexer->err_count++;
-			printf("Excepted else or when but found %s\n", token_type_names[lexer_current(lexer)]);
+			parser->err_count++;
+			printf("Excepted else or when but found %s\n", token_type_names[parser_current(parser)]);
 	}
 
-	match(lexer, T_END);
+	match(parser, T_END);
 
 	return result;
 }

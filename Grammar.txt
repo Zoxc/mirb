@@ -8,12 +8,12 @@ Expression <- TernaryIf
 
 TernaryIf <- Arithmetic, {"?", TernaryIf, ":", TernaryIf}
 
-Arithmetic <- Term, {TermOp Term}
+Arithmetic <- Term, {TermOp, Term}
 
 TermOp <- "+"
 	| "-"
 
-Term <- Factor, {FactorOp Factor}*
+Term <- Factor, {FactorOp, Factor}*
 
 FactorOp <- "*"
 	| "/"
@@ -24,20 +24,23 @@ Factor <- Value
 	| If
 	| Case
 	| Unless
+	| Class
 	| "(", Expressions, ")"
 
-Case <- "case", ((When+ {Else}) | Else), "end"
+Class <- "class", Identifier, Sep, Statements, "end"
+
+Case <- "case", (When+ {Else} | Else), "end"
 
 When <- "when", Expression, ThenSep
 
-If <- "if", Expression, ThenSep, Statements, {"elsif", Statements}*, {Else} "end"
+If <- "if", Expression, ThenSep, Statements, {"elsif", Statements}*, {Else}, "end"
 
 Else <- "else", Statements
 
 Unless <- "unless", Expression, ThenSep, Statements, "end"
 
 Call <- Value, {CallChain}*, (CallChain | CallTail)
-	| Message, {CallChain}*, {CallTail}
+	| (Message | Namespace), {CallChain}*, {CallTail}
 
 CallChain = CallChained(Message)
 
@@ -45,9 +48,11 @@ CallTail = CallChained(SimpleMessage), {AssignTail}
 
 CallChained(NonTerminal) = ".", NonTerminal
 	| "[", Expression, "]"
+	| Namespace
 
+Namespace <- "::", Identifier
 Message <- SimpleMessage, {Arguments | "(", Arguments, ")"}
-SimpleMessage <- Identifer
+SimpleMessage <- Identifier
 
 Arguments <- Expression, {",", Expression}*
 
@@ -80,3 +85,4 @@ Char <- "_"
 
 Number <- {Digit}+
 Digit <- "0"-"9"
+NewLine <- "\n" | "\r" | "\r\n"
