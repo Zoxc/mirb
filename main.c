@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "parser/lexer.h"
 #include "parser/parser.h"
-#include "runtime/symbols.h"
+#include "runtime/symbol.h"
 #include "runtime/classes.h"
 #include "generator/generator.h"
 #include "generator/x86.h"
@@ -28,11 +28,29 @@ char* name_var(struct node *node)
 	return result;
 }
 
+char* name_const(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "%s.%s", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->right));
+
+	return result;
+}
+
 char* name_assign(struct node *node)
 {
 	char* result = malloc(100);
 
 	sprintf(result, "(%%%d = %s)", (rt_value)node->left, get_node_name(node->right));
+
+	return result;
+}
+
+char* name_assign_const(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "(%s.%s = %s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
 
 	return result;
 }
@@ -72,42 +90,6 @@ char* name_argument(struct node *node)
 	return result;
 }
 
-char* name_message(struct node *node)
-{
-	char* result = malloc(100);
-
-    if(node->middle)
-    {
-        if(node->right)
-            sprintf(result, "%s(%s).%s", RT_SYMBOL(node->left)->string, get_node_name(node->middle), get_node_name(node->right));
-        else
-            sprintf(result, "%s(%s)", RT_SYMBOL(node->left)->string, get_node_name(node->middle));
-    }
-    else
-    {
-        if(node->right && node->right->type == N_MESSAGE)
-            sprintf(result, "%s().%s", RT_SYMBOL(node->left)->string, get_node_name(node->right));
-		else if(node->right)
-			sprintf(result, "%s%s", RT_SYMBOL(node->left)->string, get_node_name(node->right));
-        else
-            sprintf(result, "%s()", RT_SYMBOL(node->left)->string);
-    }
-
-	return result;
-}
-
-char* name_array_message(struct node *node)
-{
-	char* result = malloc(100);
-
-	if (node->right)
-		sprintf(result, "[]%s(%s, %s)", get_node_name(node->left), token_type_names[node->op - OP_TO_ASSIGN], get_node_name(node->right));
-	else
-		sprintf(result, "[](%s)", get_node_name(node->left));
-
-	return result;
-}
-
 char* name_call_tail(struct node *node)
 {
 	char* result = malloc(100);
@@ -121,10 +103,19 @@ char* name_call(struct node *node)
 {
 	char* result = malloc(100);
 
-	if (node->left)
-		sprintf(result, "(%s.%s)", get_node_name(node->left), get_node_name(node->right));
+	if(node->right)
+		sprintf(result, "%s.%s(%s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
 	else
-		sprintf(result, "(self.%s)", get_node_name(node->right));
+		sprintf(result, "%s.%s()", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle));
+
+	return result;
+}
+
+char* name_lookup_tail(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "tail!");
 
 	return result;
 }
@@ -146,7 +137,7 @@ char* name_class(struct node *node)
 	char* result = malloc(100);
 
 	if(node->right)
-		sprintf(result, "class %s(%s)", RT_SYMBOL(node->left)->string, get_node_name(node->right));
+		sprintf(result, "class %s(%s)", rt_symbol_to_cstr((rt_value)node->left), get_node_name(node->right));
 	else
 		return get_node_name(node->left);
 
@@ -162,7 +153,24 @@ char* name_scope(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_assign, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_message, name_array_message, name_call_tail, name_call, name_expressions, name_class, name_scope};
+char* name_method(struct node *node)
+{
+	char* result = malloc(100);
+
+	if(node->right)
+		sprintf(result, "def %s(%s)", rt_symbol_to_cstr((rt_value)node->left), get_node_name(node->right));
+	else
+		return get_node_name(node->left);
+
+	return result;
+}
+
+char* name_self(struct node *node)
+{
+	return "self";
+}
+
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_call, name_nil, name_expressions, name_class, name_scope, name_method};
 
 char* get_node_name(struct node *node)
 {
@@ -203,11 +211,11 @@ int main()
 
 			block_t *block = gen_block(expression);
 
-			compiled_block_t compiled_block = compile_block(block);
+			rt_compiled_block_t compiled_block = compile_block(block);
 
 			printf("Running block %x:\n", compiled_block);
 
-			rt_value result = compiled_block();
+			rt_value result = compiled_block(RT_NIL, 1);
 
 			printf(" => "); rt_print(result); printf("\n");
 		}

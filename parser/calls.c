@@ -1,90 +1,95 @@
 #include "calls.h"
-#include "../runtime/symbols.h"
+#include "../runtime/symbol.h"
 
-
-struct node *parse_message(struct parser *parser, struct node **tail, rt_value symbol)
+struct node *parse_self_call(struct parser *parser, rt_value symbol)
 {
-	if (symbol || parser_current(parser) == T_DOT)
-	{
-		struct node *result = alloc_node(N_MESSAGE);
+	struct node *result = alloc_node(N_CALL);
 
-		*tail = result;
+	result->left = alloc_node(N_SELF);
+	result->middle = (void *)symbol;
+	result->right = 0;
 
-		if (symbol)
-		{
-			result->left = (void *)symbol;
-		}
-		else
-		{
-			next(parser);
-
-			if (require(parser, T_IDENT))
-			{
-				result->left = (void *)symbol_from_parser(parser);
-				next(parser);
-			}
-			else
-				result->left = 0;
-		}
-
-		result->middle = 0;
-
-		if (is_expression(parser))
-			result->middle = parse_argument(parser);
-		else if (parser_current(parser) == T_PARAM_OPEN)
-		{
-			next(parser);
-
-			if(parser_current(parser) != T_PARAM_CLOSE)
-				result->middle = parse_argument(parser);
-
-			match(parser, T_PARAM_CLOSE);
-		}
-
-		switch (parser_current(parser))
-		{
-			case T_DOT:
-			case T_SQUARE_OPEN:
-				result->right = parse_message(parser, tail, 0);
-				break;
-
-			default:
-				result->right = 0;
-		}
-
-		return result;
-	}
-	else if (parser_current(parser) == T_SQUARE_OPEN)
+	if (is_expression(parser))
+		result->right = parse_argument(parser);
+	else if (parser_current(parser) == T_PARAM_OPEN)
 	{
 		next(parser);
 
-		struct node *result = alloc_node(N_ARRAY_MESSAGE);
+		if(parser_current(parser) != T_PARAM_CLOSE)
+			result->right = parse_argument(parser);
 
-		result->left = parse_expression(parser);
-
-		match(parser, T_SQUARE_CLOSE);
-
-		switch (parser_current(parser))
-		{
-			case T_DOT:
-			case T_SQUARE_OPEN:
-				result->right = parse_message(parser, tail, 0);
-				break;
-
-			default:
-				result->right = 0;
-		}
-
-		return result;
+		match(parser, T_PARAM_CLOSE);
 	}
 
-	return 0;
+	return result;
 }
 
-void parse_call_tail(struct parser *parser, struct node *tail)
+struct node *parse_call(struct parser *parser, struct node *child)
+{
+	struct node *result = alloc_node(N_CALL);
+
+	if (require(parser, T_IDENT))
+	{
+		result->middle = (void *)rt_symbol_from_parser(parser);
+
+		next(parser);
+	}
+	else
+		result->middle = 0;
+
+	result->left = child;
+
+	result->right = 0;
+
+	if (is_expression(parser))
+		result->right = parse_argument(parser);
+	else if (parser_current(parser) == T_PARAM_OPEN)
+	{
+		next(parser);
+
+		if(parser_current(parser) != T_PARAM_CLOSE)
+			result->right = parse_argument(parser);
+
+		match(parser, T_PARAM_CLOSE);
+	}
+
+	return result;
+}
+
+static inline bool is_lookup(struct parser *parser)
+{
+	return parser_current(parser) == T_DOT || parser_current(parser) == T_SQUARE_OPEN;
+}
+
+struct node *parse_lookup(struct parser *parser, struct node *child)
+{
+	switch(parser_current(parser))
+	{
+		case T_DOT:
+			{
+				next(parser);
+
+				return parse_call(parser, child);
+			}
+
+		case T_SQUARE_OPEN:
+			{
+				next(parser);
+
+				match(parser, T_SQUARE_CLOSE);
+
+				return 0;
+			}
+
+		default:
+			assert(0);
+	}
+}
+
+struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 {
 	if(tail && tail->middle)
-		return;
+		return tail;
 
 	switch (parser_current(parser))
 	{
@@ -94,39 +99,35 @@ void parse_call_tail(struct parser *parser, struct node *tail)
 		case T_ASSIGN_DIV:
 		case T_ASSIGN:
 			{
-				struct node *result = alloc_node(N_CALL_TAIL);
+				struct node *result = alloc_node(N_ASSIGN_MESSAGE);
 
-				tail->right = result;
-
+				result->right = tail;
 				result->op = parser_current(parser);
 
 				next(parser);
 
 				result->left = parse_expression(parser);
+
+				return result;
 			}
 			break;
 
 		default:
-			break;
+			return tail;
 	}
 }
 
-struct node *parse_call(struct parser *parser, struct node *object)
+struct node *parse_lookup_chain(struct parser *parser)
 {
-	struct node *call = alloc_node(N_CALL);
-	struct node *tail;
+ 	struct node *result = parse_factor(parser);
 
-	call->left = object;
-	call->right = parse_message(parser, &tail, 0);
+    while (is_lookup(parser))
+    {
+    	struct node *node = parse_lookup(parser, result);
 
-	if(call->right == 0)
-	{
-    	parser->err_count++;
+		result = node;
+    }
 
-        printf("Excepted message but found %s\n", token_type_names[parser_current(parser)]);
-	}
-
-	parse_call_tail(parser, tail);
-
-	return call;
+	return result;
 }
+

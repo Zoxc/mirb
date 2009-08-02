@@ -7,20 +7,23 @@
 typedef enum {
 	N_NUMBER,
 	N_VAR,
+	N_CONST,
+	N_SELF,
 	N_ASSIGN,
+	N_ASSIGN_CONST,
 	N_TERM,
 	N_EXPRESSION,
 	N_IF,
 	N_UNLESS,
 	N_NIL,
 	N_ARGUMENT,
-	N_MESSAGE,
-	N_ARRAY_MESSAGE,
-	N_CALL_TAIL,
 	N_CALL,
+	N_ASSIGN_MESSAGE,
 	N_STATEMENTS,
 	N_CLASS,
-	N_SCOPE
+	N_SCOPE,
+	N_METHOD,
+	N_PARAMETER
 } node_type;
 
 struct node {
@@ -35,14 +38,15 @@ KHASH_MAP_INIT_INT(scope, rt_value);
 
 typedef enum {
 	S_MAIN,
-	S_DEF,
+	S_METHOD,
 	S_CLASS,
 	S_MODULE
 } scope_type;
 
 typedef struct {
 	scope_type type;
-	rt_value count;
+	rt_value next_local;
+	rt_value next_param;
 	khash_t(scope) *locals;
 } scope_t;
 
@@ -62,14 +66,9 @@ static inline rt_value scope_define(scope_t *scope, rt_value symbol)
 
 	k = kh_put(scope, scope->locals, symbol, &ret);
 
-	if (!ret)
-	{
-		kh_del(scope, scope->locals, k);
+	assert(ret);
 
-		printf("Unable to add symbol %s to the local scope\n", RT_SYMBOL(symbol)->string);
-	}
-
-	rt_value result = scope->count++;
+	rt_value result = scope->next_local++;
 
 	kh_value(scope->locals, k) = result;
 
@@ -95,6 +94,7 @@ static inline token_type parser_current(struct parser *parser)
 	return parser->token->type;
 }
 
+struct node *parse_factor(struct parser *parser);
 struct node *parse_expression(struct parser *parser);
 struct node *parse_argument(struct parser *parser);
 struct node *parse_arithmetic(struct parser *parser);
@@ -123,6 +123,18 @@ static inline bool match(struct parser *parser, token_type type)
     }
 }
 
+static inline bool matches(struct parser *parser, token_type type)
+{
+    if (parser_current(parser) == type)
+    {
+        next(parser);
+
+        return true;
+    }
+    else
+        return false;
+}
+
 static inline bool require(struct parser *parser, token_type type)
 {
     if (parser_current(parser) == type)
@@ -149,6 +161,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_UNLESS:
 		case T_CASE:
 		case T_CLASS:
+		case T_DEF:
 			return true;
 
 		default:
@@ -162,7 +175,8 @@ static inline struct node *alloc_scope(struct parser *parser, scope_type type)
 	scope_t *scope = malloc(sizeof(scope_t));
 
 	scope->locals = kh_init(scope);
-	scope->count = 1;
+	scope->next_local = 1;
+	scope->next_param = 1;
 	scope->type = type;
 
 	result->left = (void *)scope;
@@ -172,7 +186,6 @@ static inline struct node *alloc_scope(struct parser *parser, scope_type type)
 
 	return result;
 }
-
 
 static inline struct node *alloc_node(node_type type)
 {

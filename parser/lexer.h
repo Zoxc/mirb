@@ -36,6 +36,7 @@ typedef enum {
 	T_WHEN,
 	T_CASE,
 	T_CLASS,
+	T_DEF,
 	T_END
 } token_type;
 

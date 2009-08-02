@@ -1,9 +1,12 @@
 #include "runtime.h"
-#include "symbols.h"
+#include "symbol.h"
+#include "string.h"
 #include "code_heap.h"
 
 void rt_create(void)
 {
+	object_var_hashes = kh_init(rt_hash);
+
 	rt_Object = rt_class_create_bare(0);
 	rt_Module = rt_class_create_bare(rt_Object);
 	rt_Class = rt_class_create_bare(rt_Module);
@@ -14,17 +17,25 @@ void rt_create(void)
 	metaclass = rt_class_create_singleton(rt_Module, metaclass);
 	metaclass = rt_class_create_singleton(rt_Class, metaclass);
 
-	symbols_create();
+	rt_symbols_create();
 	code_heap_create();
 
-	rt_Symbol = rt_class_create(rt_Symbol_symbol, rt_Object);
-	RT_COMMON(rt_Symbol_symbol)->class_of = rt_Symbol;
+	rt_Symbol = rt_class_create_unnamed(rt_Object, rt_Object);
+	rt_String = rt_class_create_unnamed(rt_Object, rt_Object);
+
+	rt_class_name(rt_Object, rt_Object, rt_symbol_from_cstr("Object"));
+	rt_class_name(rt_Module, rt_Object, rt_symbol_from_cstr("Module"));
+	rt_class_name(rt_Class, rt_Object, rt_symbol_from_cstr("Class"));
+	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
+	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
 }
 
 void rt_destroy(void)
 {
-	symbols_destroy();
+	rt_symbols_destroy();
 	code_heap_destroy();
+
+	kh_destroy(rt_hash, object_var_hashes);
 }
 
 void rt_print(rt_value obj)
@@ -48,7 +59,7 @@ void rt_print(rt_value obj)
 			break;
 
 		case C_SYMBOL:
-			printf("<:%s:0x%08X>", RT_SYMBOL(obj)->string, obj);
+			printf(":%s", rt_symbol_to_cstr(obj), obj);
 			break;
 
 		default:
@@ -58,7 +69,7 @@ void rt_print(rt_value obj)
 
 void *rt_lookup(rt_value method, rt_value obj)
 {
-	printf("Finding "); rt_print(obj); printf(".%s\n", RT_SYMBOL(method)->string);
+	printf("Finding "); rt_print(obj); printf(".%s\n", rt_symbol_to_cstr(method));
 
 	return rt_dump_call;
 }

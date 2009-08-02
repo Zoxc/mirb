@@ -2,6 +2,7 @@
 
 #include "../globals.h"
 #include "../runtime/classes.h"
+#include "../runtime/symbol.h"
 #include "../parser/parser.h"
 
 typedef enum {
@@ -12,6 +13,7 @@ typedef enum {
 	B_DIV,
 	B_MOV,
 	B_MOV_IMM,
+	B_SELF,
 	B_PUSH,
 	B_PUSH_IMM,
 	B_CALL,
@@ -25,10 +27,12 @@ typedef enum {
 	B_JMP,
 	B_RETURN,
 	B_LABEL,
-	B_PHI,
-	B_PHI_IMM,
-	B_DEF_CLASS,
-	B_DEF_CLASS_MAIN
+	B_GET_CONST,
+	B_SET_CONST,
+	B_CLASS,
+	B_CLASS_MAIN,
+	B_METHOD,
+	B_METHOD_MAIN
 } opcode_type_t;
 
 typedef struct {
@@ -39,23 +43,25 @@ typedef struct {
 } opcode_t;
 
 typedef struct {
-	rt_value var_count;
+	rt_value next_temp;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
 	khash_t(rt_hash) *var_usage;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
+	unsigned int self_ref;
 } block_t;
 
 static inline block_t *block_create(scope_t *scope)
 {
 	block_t *result = malloc(sizeof(block_t));
 
-	result->var_count = scope->count;
+	result->next_temp = scope->next_local;
 	result->label_count = 0;
 	result->scope = scope;
 	result->var_usage = kh_init(rt_hash);
 	result->label_usage = kh_init(rt_hash);
+	result->self_ref = 0;
 
 	kv_init(result->vector);
 
@@ -77,7 +83,7 @@ static inline rt_value block_get_label(block_t *block)
 
 static inline rt_value block_get_var(block_t *block)
 {
-	rt_value result = block->var_count++;
+	rt_value result = block->next_temp++;
 
 	return result;
 }
@@ -138,6 +144,4 @@ static inline void block_print_label(rt_value label)
 }
 
 void block_print(block_t *block);
-void block_optimize(block_t *block);
-
 

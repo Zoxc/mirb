@@ -34,14 +34,25 @@
 			<Add option="-Wall" />
 			<Add option="-std=c99" />
 		</Compiler>
-		<Unit filename="bytecode.c">
+		<Linker>
+			<Add library="BeaEngine" />
+		</Linker>
+		<Unit filename="generator\bytecode.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="bytecode.h" />
-		<Unit filename="generator.c">
+		<Unit filename="generator\bytecode.h" />
+		<Unit filename="generator\disassembly.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator.h" />
+		<Unit filename="generator\disassembly.h" />
+		<Unit filename="generator\generator.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="generator\generator.h" />
+		<Unit filename="generator\x86.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="generator\x86.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
@@ -62,15 +73,38 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\parser.h" />
+		<Unit filename="parser\structures.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="parser\structures.h" />
 		<Unit filename="runtime\classes.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes.h" />
-		<Unit filename="runtime\runtime.h" />
-		<Unit filename="runtime\symbols.c">
+		<Unit filename="runtime\code_heap.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\symbols.h" />
+		<Unit filename="runtime\code_heap.h" />
+		<Unit filename="runtime\constant.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\constant.h" />
+		<Unit filename="runtime\method.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\method.h" />
+		<Unit filename="runtime\runtime.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\runtime.h" />
+		<Unit filename="runtime\string.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\string.h" />
+		<Unit filename="runtime\symbol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\symbol.h" />
 		<Unit filename="vendor\khash.h" />
 		<Unit filename="vendor\kvec.h" />
 		<Extensions>

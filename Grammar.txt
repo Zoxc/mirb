@@ -1,4 +1,4 @@
-Statements <- Sep*, Statement, {Sep+, Statement}*, Sep*
+Statements <- Sep*, Statement, (Sep+, Statement)*, Sep*
 
 Statement <- Conditional
 
@@ -13,21 +13,31 @@ Arithmetic <- Term, {TermOp, Term}
 TermOp <- "+"
 	| "-"
 
-Term <- Factor, {FactorOp, Factor}*
+Term <- LookupChain, (FactorOp, LookupChain)*
 
 FactorOp <- "*"
 	| "/"
 
-Factor <- Value
-	| Assigment
+LookupChain <- Factor, Lookup*, {"::" | ".", Identifier, AssignTail}
+
+Lookup <- "::", Call
+	| ".", Call
+	| "[", Expression, "]"
+
+Factor <- Number
+	| Variable
 	| Call
+	| Assigment
 	| If
 	| Case
 	| Unless
 	| Class
+	| Method
 	| "(", Expressions, ")"
 
 Class <- "class", Identifier, Sep, Statements, "end"
+
+Method <- "def", Identifier, {"(", Arguments, ")"}, Sep, Statements, "end"
 
 Case <- "case", (When+ {Else} | Else), "end"
 
@@ -39,24 +49,8 @@ Else <- "else", Statements
 
 Unless <- "unless", Expression, ThenSep, Statements, "end"
 
-Call <- Value, {CallChain}*, (CallChain | CallTail)
-	| (Message | Namespace), {CallChain}*, {CallTail}
-
-CallChain = CallChained(Message)
-
-CallTail = CallChained(SimpleMessage), {AssignTail}
-
-CallChained(NonTerminal) = ".", NonTerminal
-	| "[", Expression, "]"
-	| Namespace
-
-Namespace <- "::", Identifier
-Message <- SimpleMessage, {Arguments | "(", Arguments, ")"}
-SimpleMessage <- Identifier
-
-Arguments <- Expression, {",", Expression}*
-
 Assigment <- Variable, AssignTail
+
 AssignTail <- AssignOp, Expression
 
 AssignOp <- "="
@@ -65,8 +59,9 @@ AssignOp <- "="
 	| "*="
 	| "/="
 
-Value <- Number
-	| Variable
+Call <- Identifier, {Arguments | "(", Arguments, ")"}
+
+Arguments <- Expression, (",", Expression)*
 
 Variable <- Identifier
 
@@ -77,12 +72,12 @@ ThenSep <- "then"
 Sep <- NewLine
 	| ";"
 
-Identifier <- Char, {Char | Digit}*
+Identifier <- Char, (Char | Digit)*
 
 Char <- "_"
 	| "a"-"z"
 	| "A"-"Z"
 
-Number <- {Digit}+
+Number <- Digit+
 Digit <- "0"-"9"
 NewLine <- "\n" | "\r" | "\r\n"
