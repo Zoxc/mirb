@@ -30,9 +30,7 @@ typedef enum {
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,
-	B_CLASS_MAIN,
-	B_METHOD,
-	B_METHOD_MAIN
+	B_METHOD
 } opcode_type_t;
 
 typedef struct {

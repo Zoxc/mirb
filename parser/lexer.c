@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", ";", "(", ")", "[", "]", "End of File", "Number", "Identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "End of File", "Number", "Identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "end"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
@@ -149,6 +149,23 @@ static token_type ident_proc(struct token *token)
 	return T_IDENT;
 }
 
+static token_type colon_proc(struct token *token)
+{
+	token->input++;
+
+	if(*(token->input) == ':')
+	{
+		token->input++;
+		token->stop = token->input;
+
+		return T_SCOPE;
+	}
+
+    token->stop = token->input;
+
+    return T_COLON;
+}
+
 #define SINGLE_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
 		token->input++;\
@@ -161,7 +178,6 @@ SINGLE_PROC(assign, T_ASSIGN);
 SINGLE_PROC(param_open, T_PARAM_OPEN);
 SINGLE_PROC(param_close, T_PARAM_CLOSE);
 SINGLE_PROC(question, T_QUESTION);
-SINGLE_PROC(colon, T_COLON);
 SINGLE_PROC(sep, T_SEP);
 SINGLE_PROC(dot, T_DOT);
 SINGLE_PROC(comma, T_COMMA);

@@ -15,7 +15,7 @@ static inline bool rt_object_has_vars(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return false;
-	else if (obj <= RT_NIL)
+	else if (obj <= RT_MAIN)
 		return false;
 	else
 		switch(RT_COMMON(obj)->flags & RT_TYPE_MASK)
@@ -34,6 +34,8 @@ khash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 {
 	if (rt_object_has_vars(obj))
 		return RT_OBJECT(obj)->vars;
+	else if(obj == RT_MAIN)
+		return RT_OBJECT(rt_Object)->vars;
 	else
 	{
 		khiter_t k = kh_get(rt_hash, object_var_hashes, obj);
@@ -94,7 +96,7 @@ rt_value rt_class_singleton(rt_value object)
 	return rt_class_create_singleton(object, RT_COMMON(object)->class_of);
 }
 
-rt_value rt_class_create_unnamed(rt_value under, rt_value super)
+rt_value rt_class_create_unnamed(rt_value super)
 {
 	rt_value obj = rt_class_create_bare(super);
 	rt_class_create_singleton(obj, RT_COMMON(super)->class_of);

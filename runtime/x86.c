@@ -20,7 +20,10 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 
 rt_value __stdcall rt_support_class_create(rt_value under, rt_value name, rt_value super)
 {
-	rt_value obj = rt_class_create_unnamed(under, super);
+	if(under == RT_MAIN)
+		under = rt_Object;
+
+	rt_value obj = rt_class_create_unnamed(super);
 
 	rt_class_name(obj, under, name);
 
@@ -29,7 +32,15 @@ rt_value __stdcall rt_support_class_create(rt_value under, rt_value name, rt_val
 	return obj;
 }
 
-rt_value __stdcall rt_support_class_create_main(rt_value name, rt_value super)
+void __stdcall rt_support_method_create(rt_value under, rt_value name, rt_compiled_block_t block)
 {
-	return rt_support_class_create(rt_Object, name, super);
+	if(under == RT_MAIN)
+		under = rt_Object;
+
+	rt_value under_path = rt_object_get_var(under, rt_symbol_from_cstr("__classpath__"));
+
+	printf("Defining method %s.%s\n", rt_string_to_cstr(under_path), rt_symbol_to_cstr(name));
+
+	rt_class_set_method(under, name, block);
 }
+

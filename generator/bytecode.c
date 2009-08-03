@@ -76,16 +76,8 @@ void opcode_print(opcode_t *op)
 			printf("class %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
-		case B_CLASS_MAIN:
-			printf("class_main %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
-			break;
-
 		case B_METHOD:
 			printf("method %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
-			break;
-
-		case B_METHOD_MAIN:
-			printf("method_main %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
 		default:

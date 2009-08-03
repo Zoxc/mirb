@@ -74,6 +74,6 @@ static inline rt_type_t rt_object_get_var(rt_value obj, rt_value name)
 }
 
 void rt_class_name(rt_value obj, rt_value under, rt_value name);
-rt_value rt_class_create_unnamed(rt_value under, rt_value super);
+rt_value rt_class_create_unnamed(rt_value super);
 rt_value rt_class_create_bare(rt_value super);
 rt_value rt_class_create_singleton(rt_value object, rt_value super);

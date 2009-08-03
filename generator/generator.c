@@ -138,13 +138,8 @@ static void gen_expressions(block_t *block, struct node *node, rt_value var)
 
 static void gen_class(block_t *block, struct node *node, rt_value var)
 {
-	if (block->scope->type == S_MAIN)
-		block_push(block, B_CLASS_MAIN, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
-	else
-	{
-		block->self_ref++;
-		block_push(block, B_CLASS, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
-	}
+	block->self_ref++;
+	block_push(block, B_CLASS, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
 
 	if (var)
 		block_push(block, B_STORE, var, 0, 0);
@@ -152,13 +147,8 @@ static void gen_class(block_t *block, struct node *node, rt_value var)
 
 static void gen_method(block_t *block, struct node *node, rt_value var)
 {
-	if (block->scope->type == S_MAIN)
-		block_push(block, B_METHOD_MAIN, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
-	else
-	{
-		block->self_ref++;
-		block_push(block, B_METHOD, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
-	}
+	block->self_ref++;
+	block_push(block, B_METHOD, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
 
 	if (var)
 		block_push(block, B_MOV_IMM, var, RT_NIL, 0);
@@ -186,7 +176,7 @@ static void gen_call(block_t *block, struct node *node, rt_value var)
 
 	int parameters = 0;
 
-	if(node->right)
+	if((rt_value)node->right > 1)
 		parameters = gen_argument(block, node->right, 0);
 
 	block_push(block, B_PUSH_IMM, parameters + 1, 0, 0);

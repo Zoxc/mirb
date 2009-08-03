@@ -23,6 +23,7 @@ typedef enum {
 	C_TRUE,
 	C_FALSE,
 	C_NIL,
+	C_MAIN,
 	C_CLASS,
 	C_MODULE,
 	C_OBJECT,
@@ -40,12 +41,13 @@ struct rt_common {
 #define RT_FALSE 0
 #define RT_TRUE 2
 #define RT_NIL 4
+#define RT_MAIN 6
 
 static inline rt_type_t rt_type(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return C_FIXNUM;
-	else if (obj <= RT_NIL)
+	else if (obj <= RT_MAIN)
 	{
 		switch(obj)
 		{
@@ -57,6 +59,9 @@ static inline rt_type_t rt_type(rt_value obj)
 
 			case RT_NIL:
 				return C_NIL;
+
+			case RT_MAIN:
+				return C_MAIN;
 
 			default:
 				assert(0);

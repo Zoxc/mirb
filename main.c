@@ -32,7 +32,7 @@ char* name_const(struct node *node)
 {
 	char* result = malloc(100);
 
-	sprintf(result, "%s.%s", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->right));
+	sprintf(result, "%s::%s", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->right));
 
 	return result;
 }
@@ -50,7 +50,7 @@ char* name_assign_const(struct node *node)
 {
 	char* result = malloc(100);
 
-	sprintf(result, "(%s.%s = %s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
+	sprintf(result, "(%s::%s = %s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
 
 	return result;
 }
@@ -103,7 +103,7 @@ char* name_call(struct node *node)
 {
 	char* result = malloc(100);
 
-	if(node->right)
+	if((rt_value)node->right > 1)
 		sprintf(result, "%s.%s(%s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
 	else
 		sprintf(result, "%s.%s()", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle));
@@ -215,7 +215,7 @@ int main()
 
 			printf("Running block %x:\n", compiled_block);
 
-			rt_value result = compiled_block(RT_NIL, 1);
+			rt_value result = compiled_block(RT_MAIN, 1);
 
 			printf(" => "); rt_print(result); printf("\n");
 		}

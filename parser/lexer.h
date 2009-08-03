@@ -17,6 +17,7 @@ typedef enum {
 	T_DOT,
 	T_COMMA,
 	T_COLON,
+	T_SCOPE,
 	T_SEP,
 	T_PARAM_OPEN,
 	T_PARAM_CLOSE,

@@ -20,8 +20,8 @@ void rt_create(void)
 	rt_symbols_create();
 	code_heap_create();
 
-	rt_Symbol = rt_class_create_unnamed(rt_Object, rt_Object);
-	rt_String = rt_class_create_unnamed(rt_Object, rt_Object);
+	rt_Symbol = rt_class_create_unnamed(rt_Object);
+	rt_String = rt_class_create_unnamed(rt_Object);
 
 	rt_class_name(rt_Object, rt_Object, rt_symbol_from_cstr("Object"));
 	rt_class_name(rt_Module, rt_Object, rt_symbol_from_cstr("Module"));
@@ -60,6 +60,14 @@ void rt_print(rt_value obj)
 
 		case C_SYMBOL:
 			printf(":%s", rt_symbol_to_cstr(obj), obj);
+			break;
+
+		case C_CLASS:
+			{
+				rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classpath__"));
+
+				printf("%s", rt_string_to_cstr(name));
+			}
 			break;
 
 		default:

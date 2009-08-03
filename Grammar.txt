@@ -18,10 +18,10 @@ Term <- LookupChain, (FactorOp, LookupChain)*
 FactorOp <- "*"
 	| "/"
 
-LookupChain <- Factor, Lookup*, {"::" | ".", Identifier, AssignTail}
+LookupChain <- Factor, Lookup(Call)*, {Lookup(Identifier), AssignTail}
 
-Lookup <- "::", Call
-	| ".", Call
+Lookup(Type) <- "::", Type
+	| ".", Type
 	| "[", Expression, "]"
 
 Factor <- Number
