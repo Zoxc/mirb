@@ -160,6 +160,27 @@ struct node *parse_factor(struct parser *parser)
 				return alloc_node(N_SELF);
 			}
 
+		case T_TRUE:
+			{
+				next(parser);
+
+				return alloc_node(N_TRUE);
+			}
+
+		case T_FALSE:
+			{
+				next(parser);
+
+				return alloc_node(N_FALSE);
+			}
+
+		case T_NIL:
+			{
+				next(parser);
+
+				return alloc_node(N_NIL);
+			}
+
 		case T_NUMBER:
 			{
 			    struct node *result = alloc_node(N_NUMBER);

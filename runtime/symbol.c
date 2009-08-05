@@ -1,4 +1,5 @@
 #include "symbol.h"
+#include "string.h"
 #include "../globals.h"
 
 KHASH_MAP_INIT_STR(symbol, rt_value);

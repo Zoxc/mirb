@@ -13,7 +13,7 @@ void rt_create(void)
 	rt_setup_bool();
 
 	rt_symbol_init();
-
+	rt_string_init();
 }
 
 void rt_destroy(void)

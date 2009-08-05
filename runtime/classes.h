@@ -35,10 +35,10 @@ static inline rt_value rt_class_of(rt_value obj)
 		switch(obj)
 		{
 			case RT_TRUE:
-				return rt_FalseClass;
+				return rt_TrueClass;
 
 			case RT_FALSE:
-				return rt_TrueClass;
+				return rt_FalseClass;
 
 			case RT_NIL:
 				return rt_NilClass;
@@ -55,8 +55,8 @@ static inline rt_value rt_real_class_of(rt_value obj)
 {
 	rt_value result = rt_class_of(obj);
 
-	while(RT_COMMON(obj)->flags & RT_CLASS_SINGLETON)
-		result = RT_CLASS(obj)->super;
+	while(RT_COMMON(result)->flags & RT_CLASS_SINGLETON)
+		result = RT_CLASS(result)->super;
 
 	return result;
 }

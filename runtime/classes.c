@@ -171,7 +171,7 @@ rt_value rt_object_allocate(rt_value obj, unsigned int argc)
 	rt_value result = rt_alloc(sizeof(struct rt_object));
 
 	RT_COMMON(result)->flags = C_OBJECT;
-	RT_COMMON(result)->class_of = rt_Object;
+	RT_COMMON(result)->class_of = obj;
 	RT_OBJECT(result)->vars = 0;
 
 	return result;

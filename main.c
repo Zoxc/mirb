@@ -76,11 +76,6 @@ char* name_if(struct node *node)
 	return result;
 }
 
-char* name_nil(struct node *node)
-{
-	return "nil";
-}
-
 char* name_argument(struct node *node)
 {
 	char* result = malloc(100);
@@ -185,7 +180,22 @@ char* name_self(struct node *node)
 	return "self";
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
+char* name_true(struct node *node)
+{
+	return "true";
+}
+
+char* name_false(struct node *node)
+{
+	return "false";
+}
+
+char* name_nil(struct node *node)
+{
+	return "nil";
+}
+
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
 
 char* get_node_name(struct node *node)
 {
