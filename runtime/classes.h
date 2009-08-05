@@ -2,6 +2,7 @@
 #include "../globals.h"
 #include "runtime.h"
 #include "bool.h"
+#include "fixnum.h"
 
 #define RT_CLASS_SINGLETON RT_USER_FLAG(0)
 
@@ -29,7 +30,7 @@ extern khash_t(rt_hash) *object_var_hashes;
 static inline rt_value rt_class_of(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
-		return RT_NIL;
+		return rt_Fixnum;
 	else if (obj <= RT_NIL)
 	{
 		switch(obj)
@@ -120,6 +121,4 @@ rt_value rt_class_create_unnamed(rt_value super);
 rt_value rt_class_create_bare(rt_value super);
 rt_value rt_class_create_singleton(rt_value object, rt_value super);
 
-rt_value rt_class_to_s(rt_value obj, unsigned int argc);
-
-rt_value rt_object_to_s(rt_value obj, unsigned int argc);
+rt_value rt_object_inspect(rt_value obj, unsigned int argc);

@@ -153,6 +153,21 @@ struct node *parse_factor(struct parser *parser)
 		case T_DEF:
 			return parse_method(parser);
 
+		case T_STRING:
+			{
+			    struct node *result = alloc_node(N_STRING);
+
+				result->left = (void *)parser_current_token(parser)->start;
+
+				next(parser);
+
+				return result;
+			}
+
+		case T_STRING_START:
+			{
+			}
+
 		case T_SELF:
 			{
 				next(parser);
@@ -323,6 +338,8 @@ struct node *parse_main(struct parser *parser)
 	struct node *result = alloc_scope(parser, S_MAIN);
 
 	result->right = parse_statements(parser);
+
+	match(parser, T_EOF);
 
 	return result;
 }

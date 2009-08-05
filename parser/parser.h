@@ -7,6 +7,7 @@
 typedef enum {
 	N_NUMBER,
 	N_VAR,
+	N_STRING,
 	N_CONST,
 	N_SELF,
 	N_TRUE,
@@ -83,6 +84,7 @@ struct parser {
 	int count;
 	int err_count;
 	struct token lookaheads[5];
+	kvec_t(bool) curlys;
 	scope_t *current_scope;
 };
 
@@ -168,6 +170,8 @@ static inline bool is_expression(struct parser *parser)
 		case T_TRUE:
 		case T_FALSE:
 		case T_NIL:
+		case T_STRING:
+		case T_STRING_START:
 			return true;
 
 		default:

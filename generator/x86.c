@@ -84,6 +84,9 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 		case B_SET_CONST:
 			return 3 + 5 + 3 + 5;
 
+		case B_STRING:
+			return 5 + 5 + 3;
+
 		default:
 			break;
 	}
@@ -140,7 +143,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_stack_push(target, op->result);
 				generate_byte(target, 0x57); // push edi
 
-				generate_call(target, rt_support_class_create);
+				generate_call(target, rt_support_define_class);
 
 				generate_stack_push(target, 1);
 				generate_byte(target, 0x50); // push eax
@@ -183,7 +186,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_stack_push(target, op->result);
 				generate_byte(target, 0x57); // push edi
 
-				generate_call(target, rt_support_method_create);
+				generate_call(target, rt_support_define_method);
 			}
 			break;
 
@@ -197,6 +200,17 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0xD0);
 
 				generate_stack_pop(target, op->result * 4);
+			}
+			break;
+
+		case B_STRING:
+			{
+				generate_stack_push(target, op->left);
+				generate_call(target, rt_support_define_string);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
 			}
 			break;
 

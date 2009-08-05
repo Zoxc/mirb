@@ -5,83 +5,87 @@ void opcode_print(opcode_t *op)
 	switch(op->type)
 	{
 		case B_NOP:
-			printf("nop\n");
+			printf("nop");
 			break;
 
 		case B_MOV_IMM:
-			printf("mov "); block_print_var(op->result); printf(", %d\n", op->left);
+			printf("mov "); block_print_var(op->result); printf(", %d", op->left);
 			break;
 
 		case B_MOV:
-			printf("mov "); block_print_var(op->result); printf(", "); block_print_var(op->left);  printf("\n");
+			printf("mov "); block_print_var(op->result); printf(", "); block_print_var(op->left);
 			break;
 
 		case B_PUSH:
-			printf("push "); block_print_var(op->result); printf("\n");
+			printf("push "); block_print_var(op->result);
 			break;
 
 		case B_PUSH_IMM:
-			printf("push %d\n", op->result);
+			printf("push %d", op->result);
 			break;
 
 		case B_CALL:
-			printf("call %d\n", op->result);
+			printf("call %d", op->result);
 			break;
 
 		case B_STORE:
-			printf("store "); block_print_var(op->result); printf("\n");
+			printf("store "); block_print_var(op->result);
 			break;
 
 		case B_SELF:
-			printf("self "); block_print_var(op->result); printf("\n");
+			printf("self "); block_print_var(op->result);
 			break;
 
 		case B_LOAD:
-			printf("load "); block_print_var(op->result); printf("\n");
+			printf("load "); block_print_var(op->result);
 			break;
 
 		case B_TEST:
-			printf("test "); block_print_var(op->result); printf("\n");
+			printf("test "); block_print_var(op->result);
 			break;
 
 		case B_TEST_IMM:
-			printf("test %d", op->result); printf("\n");
+			printf("test %d", op->result);
 			break;
 
 		case B_JMPF:
-			printf("jmpf "); block_print_label(op->result); printf("\n");
+			printf("jmpf "); block_print_label(op->result);
 			break;
 
 		case B_JMPT:
-			printf("jmpt "); block_print_label(op->result); printf("\n");
+			printf("jmpt "); block_print_label(op->result);
 			break;
 
 		case B_JMP:
-			printf("jmp "); block_print_label(op->result); printf("\n");
+			printf("jmp "); block_print_label(op->result);
 			break;
 
 		case B_LABEL:
-			printf("#%d:\n", op->result);
+			printf("#%d:", op->result);
+			break;
+
+		case B_STRING:
+			printf("string "); block_print_var(op->result); printf(", \"%s\"", op->left);
 			break;
 
 		case B_SET_CONST:
-			printf("set_const "); block_print_var(op->result); printf(".%s", rt_symbol_to_cstr(op->left)); printf(", "); block_print_var(op->right); printf("\n");
+			printf("set_const "); block_print_var(op->result); printf(".%s", rt_symbol_to_cstr(op->left)); printf(", "); block_print_var(op->right);
 			break;
 
 		case B_GET_CONST:
-			printf("get_const "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf(".%s", rt_symbol_to_cstr(op->right)); printf("\n");
+			printf("get_const "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf(".%s", rt_symbol_to_cstr(op->right));
 			break;
 
 		case B_CLASS:
-			printf("class %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
+			printf("class %s, %x", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
 		case B_METHOD:
-			printf("method %s, %x\n", rt_symbol_to_cstr(op->result), op->left);
+			printf("method %s, %x", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
 		default:
-			printf("unknown opcode %d\n", op->type);
+			printf("unknown opcode %d", op->type);
 	}
 }
 
@@ -92,6 +96,9 @@ void block_print(block_t *block)
 		opcode_t *op = kv_A(block->vector, i);
 
 		if(op->type != B_NOP)
+		{
 			opcode_print(kv_A(block->vector, i));
+			printf("\n");
+		}
 	}
 }

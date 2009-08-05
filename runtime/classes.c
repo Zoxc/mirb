@@ -141,11 +141,14 @@ void rt_class_name(rt_value obj, rt_value under, rt_value name)
 
 rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 {
+	if(rt_const_defined(under, name))
+		return rt_const_get(under, name);
+
 	rt_value obj = rt_class_create_unnamed(super);
 
 	rt_class_name(obj, under, name);
 
-	printf("Defining class %s\n", rt_string_to_cstr(rt_to_s(obj)));
+	printf("Defining class %s\n", rt_string_to_cstr(rt_inspect(obj)));
 
 	return obj;
 }
@@ -154,7 +157,7 @@ void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)
 {
 	rt_class_set_method(obj, name, block);
 
-	printf("Defining method %s.%s\n", rt_string_to_cstr(rt_to_s(obj)), rt_symbol_to_cstr(name));
+	printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
 }
 
 void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block)
@@ -177,7 +180,7 @@ rt_value rt_object_allocate(rt_value obj, unsigned int argc)
 	return result;
 }
 
-rt_value rt_object_to_s(rt_value obj, unsigned int argc)
+rt_value rt_object_inspect(rt_value obj, unsigned int argc)
 {
 	rt_value c = rt_real_class_of(obj);
 	rt_value name = rt_object_get_var(c, rt_symbol_from_cstr("__classname__"));
@@ -208,7 +211,7 @@ rt_value rt_object_to_s(rt_value obj, unsigned int argc)
 	Class
 */
 
-rt_value rt_class_to_s(rt_value obj, unsigned int argc)
+rt_value rt_class_inspect(rt_value obj, unsigned int argc)
 {
 	rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classname__"));
 
@@ -218,12 +221,12 @@ rt_value rt_class_to_s(rt_value obj, unsigned int argc)
 	{
 		rt_value real = rt_object_get_var(obj, rt_symbol_from_cstr("__attached__"));
 
-		rt_compiled_block_t to_s = rt_lookup(real, rt_symbol_from_cstr("to_s"));
+		rt_compiled_block_t inspect = rt_lookup(real, rt_symbol_from_cstr("inspect"));
 
-		if(to_s)
-			real = to_s(real, 0);
+		if(inspect)
+			real = inspect(real, 0);
 		else
-			real = rt_class_to_s(obj, 0);
+			real = rt_class_inspect(real, 0);
 
 		rt_value result = rt_string_from_cstr("#<Class:");
 		rt_string_concat(result, 1, real);
@@ -274,11 +277,17 @@ void rt_setup_classes(void)
 	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
 	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
 
-	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_class_to_s);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_object_to_s);
+	rt_define_method(rt_Class, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_class_inspect);
+	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_class_inspect);
+
+
+	rt_define_method(rt_Object, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_object_inspect);
+	rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_object_inspect);
+
 	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), (rt_compiled_block_t)rt_object_allocate);
 
 	rt_main = rt_object_allocate(rt_Object, 0);
 
+	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_main_to_s);
 	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_main_to_s);
 }

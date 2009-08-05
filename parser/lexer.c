@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "End of File", "Number", "Identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "true", "false", "nil", "end"};
 
 typedef token_type(*jump_table_entry)(struct token *token);
@@ -19,6 +19,8 @@ struct parser *parser_create(char* input)
     result->lookaheads[0].type = T_NONE;
     result->lookaheads[0].input = input;
 
+    kv_init(result->curlys);
+
     for(int i = 0; i < sizeof(result->lookaheads) / sizeof(result->lookaheads[0]); i++)
 		result->lookaheads[i].parser = result;
 
@@ -29,6 +31,7 @@ struct parser *parser_create(char* input)
 
 void parser_destroy(struct parser *parser)
 {
+	kv_destroy(parser->curlys);
 	free(parser);
 }
 
@@ -89,6 +92,8 @@ static inline bool is_number(char input)
 
 static token_type number_proc(struct token *token)
 {
+	token->start = token->input;
+
 	(token->input)++;
 
 	while(is_number(*(token->input)))
@@ -109,8 +114,6 @@ static token_type unknown_proc(struct token *token)
 
 static token_type null_proc(struct token *token)
 {
-    token->stop = token->input;
-
     return T_EOF;
 }
 
@@ -149,19 +152,132 @@ static token_type ident_proc(struct token *token)
 	return T_IDENT;
 }
 
+static char *build_double_quote_string(const char *start, unsigned int length)
+{
+	char *result = malloc(length + 1);
+	char *writer = result;
+	const char *input = start;
+
+	while(1)
+		switch(*input)
+		{
+			case '"':
+				goto done;
+
+			case '#':
+				{
+					input++;
+
+					if(*input == '{')
+						goto done;
+					else
+					{
+						*writer = '#';
+						writer++;
+					}
+				}
+
+			default:
+				*writer = *input;
+				writer++;
+				input++;
+		}
+
+done:
+	result[length] = 0;
+
+	return result;
+}
+
+static token_type parse_double_quote_string(struct token *token, bool continues)
+{
+	const char *start = token->input;
+    unsigned int length = 0;
+    token_type result = T_STRING;
+
+	while(1)
+		switch(*(token->input))
+		{
+			case 0:
+				return null_proc(token);
+
+			case '"':
+				{
+					token->input++;
+
+					goto done;
+				}
+
+			case '#':
+				{
+					token->input++;
+
+					if(*(token->input) == '{')
+					{
+						kv_push(bool, token->parser->curlys, true);
+
+						result = T_STRING_START;
+						token->input++;
+
+						goto done;
+					}
+					else
+						length++;
+				}
+
+			default:
+				token->input++;
+				length++;
+		}
+
+done:
+	if(continues)
+		result += 1;
+
+	token->start = build_double_quote_string(start, length);
+
+	return result;
+}
+
+static token_type double_quote_proc(struct token *token)
+{
+	token->input++;
+
+	return parse_double_quote_string(token, false);
+}
+
+static token_type curly_open_proc(struct token *token)
+{
+	token->input++;
+
+	kv_push(bool, token->parser->curlys, false);
+
+	return T_CURLY_OPEN;
+}
+
+static token_type curly_close_proc(struct token *token)
+{
+	token->input++;
+
+	if(kv_size(token->parser->curlys) == 0)
+		return T_CURLY_CLOSE;
+	else
+	{
+		bool string = kv_pop(token->parser->curlys);
+
+		if(string)
+			return parse_double_quote_string(token, true);
+		else
+			return T_CURLY_CLOSE;
+	}
+}
+
 static token_type colon_proc(struct token *token)
 {
 	token->input++;
 
 	if(*(token->input) == ':')
-	{
 		token->input++;
-		token->stop = token->input;
-
-		return T_SCOPE;
-	}
-
-    token->stop = token->input;
 
     return T_COLON;
 }
@@ -169,7 +285,6 @@ static token_type colon_proc(struct token *token)
 #define SINGLE_PROC(name, result) static token_type name##_proc(struct token *token)\
 	{\
 		token->input++;\
-		token->stop = token->input;\
 		\
 		return result;\
 	}
@@ -193,12 +308,8 @@ SINGLE_PROC(square_close, T_SQUARE_CLOSE);
 		{\
 			token->input++;\
 			\
-			token->stop = token->input;\
-			\
-			return result + 4;\
+			return result + OP_TO_ASSIGN;\
 		}\
-		\
-		token->stop = token->input;\
 		\
 		return result;\
 	}
@@ -243,6 +354,9 @@ void parser_setup(void)
 	jump_table[','] = comma_proc;
 	jump_table['['] = square_open_proc;
 	jump_table[']'] = square_close_proc;
+	jump_table['{'] = curly_open_proc;
+	jump_table['}'] = curly_close_proc;
+	jump_table['"'] = double_quote_proc;
 
     jump_table[0] = null_proc;
 }
@@ -285,7 +399,6 @@ inline token_type next(struct parser *parser)
 
     skip_whitespace(&token->input);
 
-    token->start = token->input;
     token->type = jump_table[(unsigned char)*(token->input)](token);
 
     return token->type;

@@ -28,15 +28,26 @@ rt_value rt_string_from_hex(rt_value value)
 	return rt_string_from_cstr(buffer);
 }
 
-void rt_string_init(void)
+rt_value rt_string_inspect(rt_value obj, unsigned int argc)
 {
-	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_string_to_s);
-	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), (rt_compiled_block_t)rt_string_concat);
+	rt_value result = rt_string_from_cstr("\"");
+	rt_string_concat(result, 1, obj);
+	rt_string_concat(result, 1, rt_string_from_cstr("\""));
+
+	return result;
 }
 
 rt_value rt_string_to_s(rt_value obj, unsigned int argc)
 {
 	return obj;
+}
+
+void rt_string_init(void)
+{
+	rt_define_method(rt_String, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_string_inspect);
+	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_string_to_s);
+	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), (rt_compiled_block_t)rt_string_concat);
+	rt_define_method(rt_String, rt_symbol_from_cstr("+"), (rt_compiled_block_t)rt_string_concat);
 }
 
 rt_value rt_string_concat(rt_value obj, unsigned int argc, rt_value str)

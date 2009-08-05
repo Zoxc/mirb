@@ -24,4 +24,4 @@ static inline const char *rt_string_to_cstr(rt_value value)
 void rt_string_init(void);
 
 rt_value rt_string_concat(rt_value obj, unsigned int argc, rt_value str);
-rt_value rt_string_to_s(rt_value obj, unsigned int argc);
+

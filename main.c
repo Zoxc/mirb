@@ -195,7 +195,16 @@ char* name_nil(struct node *node)
 	return "nil";
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
+char* name_string(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "\"%s\"", node->left);
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
 
 char* get_node_name(struct node *node)
 {
@@ -227,7 +236,6 @@ int main()
 		}
 
 		struct node* expression = parse_main(parser);
-		match(parser, T_EOF);
 
 		if (parser->err_count == 0)
 		{

@@ -8,9 +8,6 @@
 
 #define RT_FLAG_FIXNUM 1
 
-#define RT_INT2FIX(imm) ((rt_value)(((rt_value)(imm) << 1) | RT_FLAG_FIXNUM))
-#define RT_FIX2INT(imm) ((rt_value)((rt_value)(imm) >> 1))
-
 typedef unsigned int rt_value;
 
 typedef rt_value (*rt_compiled_block_t)(rt_value obj, unsigned int argc, ...);
@@ -86,7 +83,7 @@ void rt_create(void);
 void rt_destroy(void);
 
 void rt_print(rt_value obj);
-rt_value rt_to_s(rt_value obj);
+rt_value rt_inspect(rt_value obj);
 
 rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
 

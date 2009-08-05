@@ -25,6 +25,8 @@ Lookup(Type) <- "::", Type
 	| "[", Expression, "]"
 
 Factor <- Number
+	| String
+	| InterpolatedString
 	| Variable
 	| Call
 	| Assigment
@@ -72,12 +74,14 @@ ThenSep <- "then"
 Sep <- NewLine
 	| ";"
 
-Identifier <- Char, (Char | Digit)*
+InterpolatedString = StringStart, Statements, (StringContinue, Statements)* StringEnd
 
-Char <- "_"
-	| "a"-"z"
-	| "A"-"Z"
+# Tokens from lexer
 
-Number <- Digit+
-Digit <- "0"-"9"
-NewLine <- "\n" | "\r" | "\r\n"
+Identifier
+Number
+NewLine
+String
+StringStart
+StringContinue
+StringEnd
