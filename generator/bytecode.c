@@ -65,11 +65,11 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_SET_CONST:
-			printf("set_const "); block_print_var(op->result); printf("."); rt_symbol_to_cstr(op->left); printf(", "); block_print_var(op->right); printf("\n");
+			printf("set_const "); block_print_var(op->result); printf(".%s", rt_symbol_to_cstr(op->left)); printf(", "); block_print_var(op->right); printf("\n");
 			break;
 
 		case B_GET_CONST:
-			printf("get_const "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf("."); rt_symbol_to_cstr(op->right); printf("\n");
+			printf("get_const "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf(".%s", rt_symbol_to_cstr(op->right)); printf("\n");
 			break;
 
 		case B_CLASS:

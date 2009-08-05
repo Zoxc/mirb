@@ -153,6 +153,13 @@ struct node *parse_factor(struct parser *parser)
 		case T_DEF:
 			return parse_method(parser);
 
+		case T_SELF:
+			{
+				next(parser);
+
+				return alloc_node(N_SELF);
+			}
+
 		case T_NUMBER:
 			{
 			    struct node *result = alloc_node(N_NUMBER);

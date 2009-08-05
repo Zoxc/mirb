@@ -81,6 +81,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\structures.h" />
+		<Unit filename="runtime\bool.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\bool.h" />
 		<Unit filename="runtime\classes.c">
 			<Option compilerVar="CC" />
 		</Unit>

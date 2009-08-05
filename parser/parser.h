@@ -162,6 +162,10 @@ static inline bool is_expression(struct parser *parser)
 		case T_CASE:
 		case T_CLASS:
 		case T_DEF:
+		case T_SELF:
+		case T_TRUE:
+		case T_FALSE:
+		case T_NIL:
 			return true;
 
 		default:

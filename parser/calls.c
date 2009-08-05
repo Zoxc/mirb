@@ -134,6 +134,8 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 
 		case T_ASSIGN:
 			{
+				next(parser);
+
 				switch(tail->type)
 				{
 					case N_CONST:
@@ -142,30 +144,42 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 
 							result->left = tail->left;
 							result->middle = tail->right;
+							result->right = parse_expression(parser);
 
 							free(tail);
 
-							next(parser);
-
-							result->right = parse_expression(parser);
-
 							return result;
+						}
+
+					case N_CALL:
+						{
+							if(tail->middle)
+							{
+								const char *name = rt_symbol_to_cstr((rt_value)tail->middle);
+
+								printf("original %s\n", name);
+
+								char *new_name = malloc(strlen(name) + 2);
+								strcpy(new_name, name);
+								strcat(new_name, "=");
+
+								printf("new %s\n", new_name);
+
+								tail->middle = (void *)rt_symbol_from_cstr(new_name);
+
+								free(new_name);
+							}
+
+							tail->right = alloc_node(N_ARGUMENT);
+							tail->right->left = parse_expression(parser);
+							tail->right->right = 0;
+
+							return tail;
 						}
 
 					default:
 						assert(0);
 				}
-
-				struct node *result = alloc_node(N_ASSIGN_CALL);
-
-				result->right = tail;
-				result->op = parser_current(parser);
-
-				next(parser);
-
-				result->left = parse_expression(parser);
-
-				return result;
 			}
 			break;
 

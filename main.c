@@ -85,7 +85,10 @@ char* name_argument(struct node *node)
 {
 	char* result = malloc(100);
 
-    sprintf(result, "%s, %s", get_node_name(node->left), get_node_name(node->right));
+	if(node->right)
+		sprintf(result, "%s, %s", get_node_name(node->left), get_node_name(node->right));
+	else
+		return get_node_name(node->left);
 
 	return result;
 }
@@ -100,6 +103,18 @@ char* name_call_tail(struct node *node)
 }
 
 char* name_call(struct node *node)
+{
+	char* result = malloc(100);
+
+	if((rt_value)node->right > 1)
+		sprintf(result, "%s.%s(%s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
+	else
+		sprintf(result, "%s.%s()", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle));
+
+	return result;
+}
+
+char* name_assign_call(struct node *node)
 {
 	char* result = malloc(100);
 
@@ -170,7 +185,7 @@ char* name_self(struct node *node)
 	return "self";
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_call, name_nil, name_expressions, name_class, name_scope, name_method};
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_const, name_self, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_nil, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
 
 char* get_node_name(struct node *node)
 {
@@ -215,7 +230,7 @@ int main()
 
 			printf("Running block %x:\n", compiled_block);
 
-			rt_value result = compiled_block(RT_MAIN, 1);
+			rt_value result = compiled_block(rt_main, 1);
 
 			printf(" => "); rt_print(result); printf("\n");
 		}

@@ -8,3 +8,4 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 rt_value __stdcall rt_support_class_create(rt_value under, rt_value name, rt_value super);
 
 void __stdcall rt_support_method_create(rt_value under, rt_value name, rt_compiled_block_t block);
+rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value method, rt_value obj);

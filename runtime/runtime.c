@@ -2,44 +2,56 @@
 #include "symbol.h"
 #include "string.h"
 #include "code_heap.h"
+#include "bool.h"
 
 void rt_create(void)
 {
-	object_var_hashes = kh_init(rt_hash);
-
-	rt_Object = rt_class_create_bare(0);
-	rt_Module = rt_class_create_bare(rt_Object);
-	rt_Class = rt_class_create_bare(rt_Module);
-
-	rt_value metaclass;
-
-	metaclass = rt_class_create_singleton(rt_Object, rt_Class);
-	metaclass = rt_class_create_singleton(rt_Module, metaclass);
-	metaclass = rt_class_create_singleton(rt_Class, metaclass);
-
+	rt_code_heap_create();
 	rt_symbols_create();
-	code_heap_create();
 
-	rt_Symbol = rt_class_create_unnamed(rt_Object);
-	rt_String = rt_class_create_unnamed(rt_Object);
+	rt_setup_classes();
+	rt_setup_bool();
 
-	rt_class_name(rt_Object, rt_Object, rt_symbol_from_cstr("Object"));
-	rt_class_name(rt_Module, rt_Object, rt_symbol_from_cstr("Module"));
-	rt_class_name(rt_Class, rt_Object, rt_symbol_from_cstr("Class"));
-	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
-	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
+	rt_symbol_init();
+
 }
 
 void rt_destroy(void)
 {
 	rt_symbols_destroy();
-	code_heap_destroy();
+	rt_code_heap_destroy();
 
 	kh_destroy(rt_hash, object_var_hashes);
 }
 
-void rt_print(rt_value obj)
+rt_compiled_block_t rt_lookup(rt_value obj, rt_value name)
 {
+	rt_value c = rt_class_of(obj);
+
+	do
+	{
+		rt_compiled_block_t result = rt_class_get_method(c, name);
+
+		if(result)
+			return result;
+
+		c = RT_CLASS(c)->super;
+	}
+	while(c != 0);
+
+	printf("Undefined method %s on %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_to_s(obj)));
+	assert(0);
+
+	return 0;
+}
+
+rt_value rt_to_s(rt_value obj)
+{
+	rt_compiled_block_t to_s = rt_lookup(obj, rt_symbol_from_cstr("to_s"));
+
+	if(to_s)
+		return to_s(obj, 0);
+
 	switch(rt_type(obj))
 	{
 		case C_FIXNUM:
@@ -47,39 +59,38 @@ void rt_print(rt_value obj)
 			break;
 
 		case C_TRUE:
-			printf("true");
-			break;
+			return rt_string_from_cstr("true");
 
 		case C_FALSE:
-			printf("false");
-			break;
+			return rt_string_from_cstr("false");
 
 		case C_NIL:
-			printf("nil");
-			break;
+			return rt_string_from_cstr("nil");
 
 		case C_SYMBOL:
-			printf(":%s", rt_symbol_to_cstr(obj), obj);
-			break;
+			return rt_symbol_to_s(obj, 0);
 
 		case C_CLASS:
-			{
-				rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classpath__"));
+			return rt_class_to_s(obj, 0);
 
-				printf("%s", rt_string_to_cstr(name));
-			}
-			break;
+		case C_OBJECT:
+			return rt_object_to_s(obj, 0);
+
+		case C_STRING:
+			return obj;
 
 		default:
-			printf("<%d:0x%08X>", rt_type(obj), obj);
+			break;
 	}
+
+	assert(0);
 }
 
-void *rt_lookup(rt_value method, rt_value obj)
+void rt_print(rt_value obj)
 {
-	printf("Finding "); rt_print(obj); printf(".%s\n", rt_symbol_to_cstr(method));
+	rt_value string = rt_to_s(obj);
 
-	return rt_dump_call;
+	printf("%s", rt_string_to_cstr(string));
 }
 
 rt_value rt_dump_call(rt_value obj, unsigned int argc, ...)

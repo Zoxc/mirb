@@ -1,6 +1,7 @@
 #pragma once
 #include "../globals.h"
 #include "runtime.h"
+#include "bool.h"
 
 #define RT_CLASS_SINGLETON RT_USER_FLAG(0)
 
@@ -24,6 +25,41 @@ extern rt_value rt_Module;
 extern rt_value rt_Object;
 
 extern khash_t(rt_hash) *object_var_hashes;
+
+static inline rt_value rt_class_of(rt_value obj)
+{
+	if (obj & RT_FLAG_FIXNUM)
+		return RT_NIL;
+	else if (obj <= RT_NIL)
+	{
+		switch(obj)
+		{
+			case RT_TRUE:
+				return rt_FalseClass;
+
+			case RT_FALSE:
+				return rt_TrueClass;
+
+			case RT_NIL:
+				return rt_NilClass;
+
+			default:
+				assert(0);
+		}
+	}
+	else
+		return RT_COMMON(obj)->class_of;
+}
+
+static inline rt_value rt_real_class_of(rt_value obj)
+{
+	rt_value result = rt_class_of(obj);
+
+	while(RT_COMMON(obj)->flags & RT_CLASS_SINGLETON)
+		result = RT_CLASS(obj)->super;
+
+	return result;
+}
 
 static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_block_t block)
 {
@@ -61,7 +97,7 @@ static inline void rt_object_set_var(rt_value obj, rt_value name, rt_value value
 	kh_value(vars, k) = value;
 }
 
-static inline rt_type_t rt_object_get_var(rt_value obj, rt_value name)
+static inline rt_value rt_object_get_var(rt_value obj, rt_value name)
 {
 	khash_t(rt_hash) *vars = rt_object_get_vars(obj);
 
@@ -73,7 +109,17 @@ static inline rt_type_t rt_object_get_var(rt_value obj, rt_value name)
 	return kh_value(vars, k);
 }
 
+void rt_setup_classes(void);
+
+rt_value rt_define_class(rt_value obj, rt_value name, rt_value super);
+void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block);
+rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
+
 void rt_class_name(rt_value obj, rt_value under, rt_value name);
 rt_value rt_class_create_unnamed(rt_value super);
 rt_value rt_class_create_bare(rt_value super);
 rt_value rt_class_create_singleton(rt_value object, rt_value super);
+
+rt_value rt_class_to_s(rt_value obj, unsigned int argc);
+
+rt_value rt_object_to_s(rt_value obj, unsigned int argc);

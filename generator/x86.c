@@ -189,7 +189,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CALL:
 			{
-				generate_call(target, rt_lookup);
+				generate_call(target, rt_support_lookup_method);
 
 				generate_byte(target, 0x59); // pop ecx
 
@@ -341,7 +341,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	block_size += 4;
 
-	rt_compiled_block_t result = code_heap_alloc(block_size);
+	rt_compiled_block_t result = rt_code_heap_alloc(block_size);
 
 	unsigned char *target = (unsigned char *)result;
 

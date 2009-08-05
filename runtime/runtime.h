@@ -41,13 +41,12 @@ struct rt_common {
 #define RT_FALSE 0
 #define RT_TRUE 2
 #define RT_NIL 4
-#define RT_MAIN 6
 
 static inline rt_type_t rt_type(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return C_FIXNUM;
-	else if (obj <= RT_MAIN)
+	else if (obj <= RT_NIL)
 	{
 		switch(obj)
 		{
@@ -59,9 +58,6 @@ static inline rt_type_t rt_type(rt_value obj)
 
 			case RT_NIL:
 				return C_NIL;
-
-			case RT_MAIN:
-				return C_MAIN;
 
 			default:
 				assert(0);
@@ -90,6 +86,11 @@ void rt_create(void);
 void rt_destroy(void);
 
 void rt_print(rt_value obj);
+rt_value rt_to_s(rt_value obj);
 
-void *rt_lookup(rt_value method, rt_value obj);
+rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
+
+#define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), argc, #__VA_ARGS__))
+#define RT_CALL(obj, symbol, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, #__VA_ARGS__))
+
 rt_value rt_dump_call(rt_value obj, unsigned int argc, ...);
