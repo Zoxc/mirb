@@ -47,15 +47,7 @@ void __stdcall rt_support_define_method(rt_value obj, rt_value name, rt_compiled
 
 rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value method, rt_value obj)
 {
-	rt_compiled_block_t result = rt_lookup(obj, method);
-
-	if(!result)
-	{
-		printf("Undefined method %s on %s\n", rt_symbol_to_cstr(method), rt_string_to_cstr(rt_inspect(obj)));
-		assert(0);
-	}
-
-	return result;
+	return rt_lookup(obj, method);
 }
 
 

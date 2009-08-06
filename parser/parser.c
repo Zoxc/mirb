@@ -166,6 +166,42 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_STRING_START:
 			{
+			    struct node *result = alloc_node(N_STRING_CONTINUE);
+
+				result->left = 0;
+				result->middle = (void *)parser_current_token(parser)->start;
+
+				next(parser);
+
+				result->right = parse_expression(parser);
+
+				while(parser_current(parser) == T_STRING_CONTINUE)
+				{
+					struct node *node = alloc_node(N_STRING_CONTINUE);
+
+					node->left = result;
+					node->middle = (void *)parser_current_token(parser)->start;
+
+					next(parser);
+
+					node->right = parse_expression(parser);
+
+					result = node;
+				}
+
+				if(matches(parser, T_STRING_END))
+				{
+					struct node *node = alloc_node(N_STRING_START);
+
+					node->left = result;
+					node->right = (void *)parser_current_token(parser)->start;
+
+					next(parser);
+
+					return node;
+				}
+
+				return result;
 			}
 
 		case T_SELF:

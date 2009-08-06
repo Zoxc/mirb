@@ -5,18 +5,26 @@
 
 rt_value rt_String;
 
-rt_value rt_string_from_cstr(const char *str)
+rt_value rt_string_from_raw_str(char *str, unsigned int length)
 {
 	rt_value string = rt_alloc(sizeof(struct rt_string));
 
 	RT_COMMON(string)->flags = C_STRING;
 	RT_COMMON(string)->class_of = rt_String;
-	RT_STRING(string)->length = strlen(str);
-	RT_STRING(string)->string =  malloc(RT_STRING(string)->length + 1);
-
-	strcpy(RT_STRING(string)->string, str);
+	RT_STRING(string)->length = length;
+	RT_STRING(string)->string = str;
 
 	return string;
+}
+
+rt_value rt_string_from_cstr(const char *str)
+{
+	unsigned int length = strlen(str);
+	char *new_str = malloc(length + 1);
+
+	strcpy(new_str, str);
+
+	return rt_string_from_raw_str(new_str, length);
 }
 
 rt_value rt_string_from_hex(rt_value value)

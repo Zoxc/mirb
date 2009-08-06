@@ -204,7 +204,28 @@ char* name_string(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
+char* name_string_continue(struct node *node)
+{
+	char* result = malloc(100);
+
+	if(node->left)
+		sprintf(result, "%s}%s#{%s", get_node_name(node->left), node->middle, get_node_name(node->right));
+	else
+		sprintf(result, "\"%s#{%s", node->middle, get_node_name(node->right));
+
+	return result;
+}
+
+char* name_string_start(struct node *node)
+{
+	char* result = malloc(100);
+
+	sprintf(result, "%s}%s\"", get_node_name(node->left), node->right);
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
 
 char* get_node_name(struct node *node)
 {

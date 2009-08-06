@@ -25,6 +25,51 @@ static void gen_string(block_t *block, struct node *node, rt_value var)
 		block_push(block, B_STRING, var, (rt_value)node->left, 0);
 }
 
+static void gen_string_continue(block_t *block, struct node *node, rt_value var)
+{
+	if(node->left)
+		gen_node(block, node->left, 0);
+
+	rt_value string = block_get_var(block);
+
+	block_push(block, B_STRING, string, (rt_value)node->middle, 0);
+
+	block_use_var(block, string, block_push(block, B_PUSH, string, 0, 0));
+
+
+	rt_value interpolated = block_get_var(block);
+
+	gen_node(block, node->right, interpolated);
+
+	block_use_var(block, interpolated, block_push(block, B_PUSH, interpolated, 0, 0));
+}
+
+static unsigned int gen_string_arg_count(struct node *node)
+{
+	if(node->left)
+		return 2 + gen_string_arg_count(node->left);
+	else
+		return 2;
+}
+
+static void gen_string_start(block_t *block, struct node *node, rt_value var)
+{
+	gen_node(block, node->left, 0);
+
+
+	rt_value string = block_get_var(block);
+
+	block_push(block, B_STRING, string, (rt_value)node->right, 0);
+
+	block_use_var(block, string, block_push(block, B_PUSH, string, 0, 0));
+
+	unsigned int argc = gen_string_arg_count(node->left) + 1;
+
+	block_push(block, B_PUSH_IMM, argc, 0, 0);
+	block_push(block, B_INTERPOLATE, var, argc + 1, 0);
+}
+
+
 static void gen_const(block_t *block, struct node *node, rt_value var)
 {
 	if (var)
@@ -212,7 +257,7 @@ static void gen_warn(block_t *block, struct node *node, rt_value var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
+generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, rt_value var)
 {

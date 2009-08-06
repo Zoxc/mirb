@@ -114,7 +114,6 @@ void rt_setup_classes(void);
 
 rt_value rt_define_class(rt_value obj, rt_value name, rt_value super);
 void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block);
-rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
 
 void rt_class_name(rt_value obj, rt_value under, rt_value name);
 rt_value rt_class_create_unnamed(rt_value super);

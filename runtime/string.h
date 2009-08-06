@@ -13,6 +13,7 @@ struct rt_string {
 
 extern rt_value rt_String;
 
+rt_value rt_string_from_raw_str(char *str, unsigned int length);
 rt_value rt_string_from_cstr(const char *str);
 rt_value rt_string_from_hex(rt_value value);
 

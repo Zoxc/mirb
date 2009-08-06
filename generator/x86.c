@@ -87,6 +87,9 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 		case B_STRING:
 			return 5 + 5 + 3;
 
+		case B_INTERPOLATE:
+			return 5 + 6 + 3;
+
 		default:
 			break;
 	}
@@ -199,7 +202,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
-				generate_stack_pop(target, op->result * 4);
+				generate_stack_pop(target, (op->result - 1) * 4);
 			}
 			break;
 
@@ -207,6 +210,18 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			{
 				generate_stack_push(target, op->left);
 				generate_call(target, rt_support_define_string);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+			}
+			break;
+
+		case B_INTERPOLATE:
+			{
+				generate_call(target, rt_support_interpolate);
+
+				generate_stack_pop(target, op->left * 4);
 
 				generate_byte(target, 0x89);
 				generate_byte(target, 0x45);

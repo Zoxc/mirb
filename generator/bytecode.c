@@ -68,6 +68,10 @@ void opcode_print(opcode_t *op)
 			printf("string "); block_print_var(op->result); printf(", \"%s\"", op->left);
 			break;
 
+		case B_INTERPOLATE:
+			printf("interpolate "); block_print_var(op->result); printf(", %d", op->left);
+			break;
+
 		case B_SET_CONST:
 			printf("set_const "); block_print_var(op->result); printf(".%s", rt_symbol_to_cstr(op->left)); printf(", "); block_print_var(op->right);
 			break;

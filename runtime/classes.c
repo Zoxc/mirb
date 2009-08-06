@@ -221,7 +221,7 @@ rt_value rt_class_inspect(rt_value obj, unsigned int argc)
 	{
 		rt_value real = rt_object_get_var(obj, rt_symbol_from_cstr("__attached__"));
 
-		rt_compiled_block_t inspect = rt_lookup(real, rt_symbol_from_cstr("inspect"));
+		rt_compiled_block_t inspect = rt_lookup_nothrow(real, rt_symbol_from_cstr("inspect"));
 
 		if(inspect)
 			real = inspect(real, 0);

@@ -28,6 +28,7 @@ typedef enum {
 	B_RETURN,
 	B_LABEL,
 	B_STRING,
+	B_INTERPOLATE,
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,

@@ -8,6 +8,8 @@ typedef enum {
 	N_NUMBER,
 	N_VAR,
 	N_STRING,
+	N_STRING_START,
+	N_STRING_CONTINUE,
 	N_CONST,
 	N_SELF,
 	N_TRUE,
