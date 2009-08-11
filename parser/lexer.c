@@ -4,7 +4,7 @@
 char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "true", "false", "nil", "end"};
 
-typedef token_type(*jump_table_entry)(struct token *token);
+typedef token_type(*jump_table_entry)(token_t *token);
 
 jump_table_entry jump_table[256];
 
@@ -15,14 +15,13 @@ struct parser *parser_create(char* input)
 	result->index = 0;
 	result->count = 0;
 	result->err_count = 0;
-    result->lookaheads[0].line = 0;
-    result->lookaheads[0].type = T_NONE;
-    result->lookaheads[0].input = input;
+    result->token.line = 0;
+    result->token.type = T_NONE;
+    result->token.input = input;
+	result->token.parser = result;
+	result->token.state = TS_DEFAULT;
 
-    kv_init(result->curlys);
-
-    for(int i = 0; i < sizeof(result->lookaheads) / sizeof(result->lookaheads[0]); i++)
-		result->lookaheads[i].parser = result;
+    kv_init(result->token.curlys);
 
     next(result);
 
@@ -31,11 +30,11 @@ struct parser *parser_create(char* input)
 
 void parser_destroy(struct parser *parser)
 {
-	kv_destroy(parser->curlys);
+	kv_destroy(parser->token.curlys);
 	free(parser);
 }
 
-char* get_token_str(struct token *token)
+char* get_token_str(token_t *token)
 {
     unsigned int length = (unsigned int)(token->stop - token->start);
     char* result = malloc(length + 1);
@@ -44,7 +43,7 @@ char* get_token_str(struct token *token)
     return result;
 }
 
-static inline bool compare_token(struct token *token, const char *str)
+static inline bool compare_token(token_t *token, const char *str)
 {
 	const char *start = token->start;
 	const char *stop = token->stop;
@@ -76,10 +75,20 @@ static inline bool is_whitespace(char input)
     return false;
 }
 
-static inline void skip_whitespace(char **input)
+static inline bool skip_whitespace(char **input)
 {
-    while(is_whitespace(**input))
-        (*input)++;
+	if(is_whitespace(**input))
+	{
+		do
+		{
+			(*input)++;
+		}
+		while(is_whitespace(**input));
+
+		return true;
+	}
+	else
+		return false;
 }
 
 static inline bool is_number(char input)
@@ -90,7 +99,7 @@ static inline bool is_number(char input)
     return false;
 }
 
-static token_type number_proc(struct token *token)
+static token_type number_proc(token_t *token)
 {
 	token->start = token->input;
 
@@ -104,7 +113,7 @@ static token_type number_proc(struct token *token)
 	return T_NUMBER;
 }
 
-static token_type unknown_proc(struct token *token)
+static token_type unknown_proc(token_t *token)
 {
     printf("Unknown character: %c\n", *(token->input));
     (token->input)++;
@@ -112,7 +121,7 @@ static token_type unknown_proc(struct token *token)
     return next(token->parser);
 }
 
-static token_type null_proc(struct token *token)
+static token_type null_proc(token_t *token)
 {
     return T_EOF;
 }
@@ -134,14 +143,18 @@ static inline bool is_ident(char input)
     return false;
 }
 
-static token_type ident_proc(struct token *token)
+static token_type ident_proc(token_t *token)
 {
+	token->start = token->input;
 	token->input++;
 
 	while (is_ident(*(token->input)))
 		token->input++;
 
 	token->stop = token->input;
+
+	if(token->state == TS_NOKEYWORDS)
+		return T_IDENT;
 
 	//TODO: Generate a hashtable for this
 
@@ -189,7 +202,7 @@ done:
 	return result;
 }
 
-static token_type parse_double_quote_string(struct token *token, bool continues)
+static token_type parse_double_quote_string(token_t *token, bool continues)
 {
 	const char *start = token->input;
     unsigned int length = 0;
@@ -214,7 +227,7 @@ static token_type parse_double_quote_string(struct token *token, bool continues)
 
 					if(*(token->input) == '{')
 					{
-						kv_push(bool, token->parser->curlys, true);
+						kv_push(bool, token->curlys, true);
 
 						result = T_STRING_START;
 						token->input++;
@@ -239,31 +252,31 @@ done:
 	return result;
 }
 
-static token_type double_quote_proc(struct token *token)
+static token_type double_quote_proc(token_t *token)
 {
 	token->input++;
 
 	return parse_double_quote_string(token, false);
 }
 
-static token_type curly_open_proc(struct token *token)
+static token_type curly_open_proc(token_t *token)
 {
 	token->input++;
 
-	kv_push(bool, token->parser->curlys, false);
+	kv_push(bool, token->curlys, false);
 
 	return T_CURLY_OPEN;
 }
 
-static token_type curly_close_proc(struct token *token)
+static token_type curly_close_proc(token_t *token)
 {
 	token->input++;
 
-	if(kv_size(token->parser->curlys) == 0)
+	if(kv_size(token->curlys) == 0)
 		return T_CURLY_CLOSE;
 	else
 	{
-		bool string = kv_pop(token->parser->curlys);
+		bool string = kv_pop(token->curlys);
 
 		if(string)
 			return parse_double_quote_string(token, true);
@@ -272,7 +285,7 @@ static token_type curly_close_proc(struct token *token)
 	}
 }
 
-static token_type colon_proc(struct token *token)
+static token_type colon_proc(token_t *token)
 {
 	token->input++;
 
@@ -282,7 +295,7 @@ static token_type colon_proc(struct token *token)
     return T_COLON;
 }
 
-#define SINGLE_PROC(name, result) static token_type name##_proc(struct token *token)\
+#define SINGLE_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
 		token->input++;\
 		\
@@ -299,8 +312,7 @@ SINGLE_PROC(comma, T_COMMA);
 SINGLE_PROC(square_open, T_SQUARE_OPEN);
 SINGLE_PROC(square_close, T_SQUARE_CLOSE);
 
-
-#define ASSIGN_PROC(name, result) static token_type name##_proc(struct token *token)\
+#define ASSIGN_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
 		token->input++;\
 	\
@@ -361,45 +373,35 @@ void parser_setup(void)
     jump_table[0] = null_proc;
 }
 
-inline token_type parser_lookahead(struct parser *parser)
+void parser_context(struct parser *parser, token_t *token)
 {
-	parser->index++;
+	memcpy(token, &parser->token, sizeof(token_t));
 
-	return next(parser);
+	unsigned int size = kv_size(parser->token.curlys);
+
+	kv_init(token->curlys);
+	kv_resize(bool, token->curlys, size);
+
+	memcpy(token->curlys.a, &parser->token.curlys.a, size * sizeof(bool));
 }
 
-void parser_restore(struct parser *parser)
+void parser_restore(struct parser *parser, token_t *token)
 {
-	parser->count = parser->index;
-	parser->index = 0;
-	parser->token = &parser->lookaheads[0];
+	kv_destroy(parser->token.curlys);
+
+	memcpy(&parser->token, token, sizeof(token_t));
 }
 
-void parser_resolve(struct parser *parser)
+void parser_state(struct parser *parser, token_state state)
 {
-	parser->lookaheads[0] = parser->lookaheads[parser->index];
-	parser->count = 0;
-	parser->index = 0;
-	parser->token = &parser->lookaheads[0];
+	parser->token.state = state;
 }
 
 inline token_type next(struct parser *parser)
 {
-	struct token* token = &parser->lookaheads[parser->index];
+	parser->token.whitespace = skip_whitespace(&parser->token.input);
 
-	if (parser->count)
-	{
-		parser->count--;
+    parser->token.type = jump_table[(unsigned char)*(parser->token.input)](&parser->token);
 
-		if (parser->count == 0)
-			parser->index = 0;
-	}
-
-	parser->token = token;
-
-    skip_whitespace(&token->input);
-
-    token->type = jump_table[(unsigned char)*(token->input)](token);
-
-    return token->type;
+    return parser->token.type;
 }

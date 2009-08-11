@@ -17,6 +17,7 @@ typedef enum {
 	N_NIL,
 	N_ASSIGN,
 	N_ASSIGN_CONST,
+	N_UNARY,
 	N_TERM,
 	N_EXPRESSION,
 	N_IF,
@@ -45,7 +46,8 @@ typedef enum {
 	S_MAIN,
 	S_METHOD,
 	S_CLASS,
-	S_MODULE
+	S_MODULE,
+	S_CLOSURE
 } scope_type;
 
 typedef struct {
@@ -81,23 +83,21 @@ static inline rt_value scope_define(scope_t *scope, rt_value symbol)
 }
 
 struct parser {
-	struct token *token;
+	token_t token;
 	int index;
 	int count;
 	int err_count;
-	struct token lookaheads[5];
-	kvec_t(bool) curlys;
 	scope_t *current_scope;
 };
 
-static inline struct token *parser_current_token(struct parser *parser)
+static inline token_t *parser_token(struct parser *parser)
 {
-	return parser->token;
+	return &parser->token;
 }
 
 static inline token_type parser_current(struct parser *parser)
 {
-	return parser->token->type;
+	return parser->token.type;
 }
 
 struct node *parse_factor(struct parser *parser);
@@ -174,6 +174,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_NIL:
 		case T_STRING:
 		case T_STRING_START:
+		case T_PARAM_OPEN:
 			return true;
 
 		default:

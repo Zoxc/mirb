@@ -1,61 +1,94 @@
 #include "calls.h"
 #include "../runtime/symbol.h"
 
-struct node *parse_self_call(struct parser *parser, rt_value symbol)
+struct node *parse_call(struct parser *parser, rt_value symbol, struct node *child, bool default_var)
 {
-	struct node *result = alloc_node(N_CALL);
-
-	result->left = alloc_node(N_SELF);
-	result->middle = (void *)symbol;
-	result->right = 0;
-
-	if (is_expression(parser))
-		result->right = parse_argument(parser);
-	else if (parser_current(parser) == T_PARAM_OPEN)
+	if(!symbol && require(parser, T_IDENT))
 	{
-		next(parser);
-
-		if(parser_current(parser) != T_PARAM_CLOSE)
-			result->right = parse_argument(parser);
-
-		match(parser, T_PARAM_CLOSE);
-	}
-
-	return result;
-}
-
-struct node *parse_call(struct parser *parser, struct node *child)
-{
-	struct node *result = alloc_node(N_CALL);
-
-	if (require(parser, T_IDENT))
-	{
-		result->middle = (void *)rt_symbol_from_parser(parser);
+		symbol = rt_symbol_from_parser(parser);
 
 		next(parser);
 	}
-	else
-		result->middle = 0;
 
-	result->left = child;
-
-	result->right = 0;
+	bool has_args = false;
+	bool local = scope_defined(parser->current_scope, symbol);
 
 	if (is_expression(parser))
-		result->right = parse_argument(parser);
-	else if (parser_current(parser) == T_PARAM_OPEN)
 	{
-		next(parser);
+		switch(parser_current(parser))
+		{
+			case T_ADD:
+			case T_SUB:
+				{
+					if (default_var && local)
+						has_args = false;
+					else if(parser_token(parser)->whitespace)
+					{
+						token_t token;
 
-		if(parser_current(parser) != T_PARAM_CLOSE)
-			result->right = parse_argument(parser);
+						parser_context(parser, &token);
+
+						next(parser);
+
+						has_args = !parser_token(parser)->whitespace;
+
+						parser_restore(parser, &token);
+					}
+					else
+						has_args = false;
+				}
+				break;
+
+			default:
+				has_args = true;
+		}
+	}
+
+	if(default_var && !has_args && (local || rt_symbol_is_const(symbol))) // Variable or constant
+	{
+		if(local)
+		{
+			struct node *result = alloc_node(N_VAR);
+
+			result->left = (void *)scope_define(parser->current_scope, symbol);
+
+			return result;
+		}
 		else
-			result->right = (void *)1;
+		{
+			struct node *result = alloc_node(N_CONST);
 
-		match(parser, T_PARAM_CLOSE);
+			result->left = child;
+			result->right = (void *)symbol;
+
+			return result;
+		}
 	}
+	else // Call
+	{
+		struct node *result = alloc_node(N_CALL);
 
-	return result;
+		result->left = child;
+		result->middle = (void *)symbol;
+		result->right = 0;
+
+		if (has_args)
+		{
+			if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
+			{
+				next(parser);
+
+				if(parser_current(parser) != T_PARAM_CLOSE)
+					result->right = parse_argument(parser);
+
+				match(parser, T_PARAM_CLOSE);
+			}
+			else
+				result->right = parse_argument(parser);
+		}
+
+		return result;
+	}
 }
 
 static inline bool is_lookup(struct parser *parser)
@@ -69,7 +102,11 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 	{
 		case T_SCOPE:
 			{
+				parser_state(parser, TS_NOKEYWORDS);
+
 				next(parser);
+
+				parser_state(parser, TS_DEFAULT);
 
 				if(require(parser, T_IDENT))
 				{
@@ -100,9 +137,13 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 
 		case T_DOT:
 			{
+				parser_state(parser, TS_NOKEYWORDS);
+
 				next(parser);
 
-				return parse_call(parser, child);
+				parser_state(parser, TS_DEFAULT);
+
+				return parse_call(parser, 0, child, false);
 			}
 
 		case T_SQUARE_OPEN:

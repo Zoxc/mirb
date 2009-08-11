@@ -22,7 +22,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
 					<Add option="-funroll-loops -fomit-frame-pointer -fstrict-aliasing" />
 				</Compiler>
 				<Linker>
@@ -97,6 +98,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\constant.h" />
+		<Unit filename="runtime\fixnum.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\fixnum.h" />
 		<Unit filename="runtime\method.c">
 			<Option compilerVar="CC" />
 		</Unit>

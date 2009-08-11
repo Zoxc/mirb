@@ -68,7 +68,13 @@ static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_
 
 	khiter_t k = kh_put(rt_block, RT_CLASS(obj)->methods, name, &ret);
 
-	assert(ret);
+	if(!ret)
+	{
+		khiter_t k = kh_get(rt_block, RT_CLASS(obj)->methods, name);
+
+		if (k == kh_end(RT_CLASS(obj)->methods))
+			assert(0);
+	}
 
 	kh_value(RT_CLASS(obj)->methods, k) = block;
 }

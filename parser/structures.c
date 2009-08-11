@@ -75,18 +75,20 @@ struct node *parse_method(struct parser *parser)
 
 	result->right = alloc_scope(parser, S_METHOD);
 
+	scope_t *scope = (scope_t *)result->right->left;
+
 	if(matches(parser, T_PARAM_OPEN))
 	{
-		scope_t *scope = (scope_t *)result->right->left;
-
 		result->middle = parse_parameter(parser, scope);
 
 		match(parser, T_PARAM_CLOSE);
-
-		scope->next_param = scope->next_local;
 	}
+	else if(parser_current(parser) == T_IDENT)
+		result->middle = parse_parameter(parser, scope);
 	else
 		result->middle = 0;
+
+	scope->next_param = scope->next_local;
 
 	parse_sep(parser);
 

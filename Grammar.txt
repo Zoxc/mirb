@@ -2,27 +2,29 @@ Statements <- Sep*, Statement, (Sep+, Statement)*, Sep*
 
 Statement <- Conditional
 
-Conditional <- TernaryIf, {("if" | "unless"), Statement}
+Conditional <- TernaryIf, {("if" | "unless"), NewLine*, Statement}
 
 Expression <- TernaryIf
 
-TernaryIf <- Arithmetic, {"?", TernaryIf, ":", TernaryIf}
+TernaryIf <- Arithmetic, {"?", NewLine*, TernaryIf, ":", NewLine*, TernaryIf}
 
-Arithmetic <- Term, {TermOp, Term}
+Arithmetic <- Term, {TermOp, NewLine*, Term}
 
 TermOp <- "+"
 	| "-"
 
-Term <- LookupChain, (FactorOp, LookupChain)*
+Term <- Unary, (FactorOp, NewLine*, Unary)*
 
 FactorOp <- "*"
 	| "/"
+	
+Unary <- {("+" | "-"), NewLine*}, LookupChain
 
 LookupChain <- Factor, Lookup(Call)*, {Lookup(Identifier), AssignTail}
 
-Lookup(Type) <- "::", Type
-	| ".", Type
-	| "[", Expression, "]"
+Lookup(Type) <- "::", NewLine*, Type
+	| ".", NewLine*, Type
+	| "[", NewLine*, Expression, NewLine*, "]"
 
 Factor <- Number
 	| String
@@ -39,7 +41,9 @@ Factor <- Number
 
 Class <- "class", Identifier, Sep, Statements, "end"
 
-Method <- "def", Identifier, {"(", Arguments, ")"}, Sep, Statements, "end"
+Method <- "def", Identifier, {MethodParameters | "(", MethodParameters, Space*, ")"}, Sep, Statements, "end"
+
+MethodParameters <- Identifier, (",", Identifier)*
 
 Case <- "case", (When+ {Else} | Else), "end"
 
@@ -53,7 +57,7 @@ Unless <- "unless", Expression, ThenSep, Statements, "end"
 
 Assigment <- Variable, AssignTail
 
-AssignTail <- AssignOp, Expression
+AssignTail <- AssignOp, NewLine*, Expression
 
 AssignOp <- "="
 	| "+="
@@ -61,7 +65,12 @@ AssignOp <- "="
 	| "*="
 	| "/="
 
-Call <- Identifier, {Arguments | "(", Arguments, ")"}
+Call <- Identifier, {Arguments | "(", Arguments, ")"}, {Block}
+
+Block <- "{", {BlockParameters}, Statements, "}"
+	| "do", {BlockParameters}, Statements, "end"
+	
+BlockParameters <- "|", MethodParameters, "|"
 
 Arguments <- Expression, (",", Expression)*
 
@@ -71,7 +80,7 @@ ThenSep <- "then"
 	| Sep
 	| ":"
 
-Sep <- NewLine
+Sep <- NewLine+
 	| ";"
 
 InterpolatedString = StringStart, Statements, (StringContinue, Statements)* StringEnd

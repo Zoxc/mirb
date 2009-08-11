@@ -17,7 +17,7 @@ void rt_symbols_destroy(void);
 
 rt_value rt_symbol_from_cstr(const char *name);
 
-static inline rt_value rt_symbol_from_token(struct token *token)
+static inline rt_value rt_symbol_from_token(token_t *token)
 {
 	char *str = get_token_str(token);
 
@@ -42,7 +42,7 @@ static inline bool rt_symbol_is_const(rt_value value)
 
 static inline rt_value rt_symbol_from_parser(struct parser *parser)
 {
-	return rt_symbol_from_token(parser_current_token(parser));
+	return rt_symbol_from_token(parser_token(parser));
 }
 
 void rt_symbol_init(void);

@@ -102,7 +102,7 @@ static inline int get_stack_index(block_t *block, rt_value var)
 	unsigned int next_param = block->scope->next_param;
 
 	if(var < next_param)
-		return 8 + ((next_param - 1) * 4 -  var * 4);
+		return 8 + 8 + ((next_param - 1) * 4 -  var * 4);
 	else
 		return -(var * 4);
 }
@@ -202,7 +202,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
-				generate_stack_pop(target, (op->result - 1) * 4);
+				generate_stack_pop(target, op->result * 4);
 			}
 			break;
 

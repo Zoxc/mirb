@@ -132,6 +132,12 @@ static void gen_const_assign(block_t *block, struct node *node, rt_value var)
 		block_push(block, B_MOV, var, value, 0);
 }
 
+static void gen_unary(block_t *block, struct node *node, rt_value var)
+{
+	printf("generating unary %s\n", token_type_names[node->op]);
+	gen_node(block, node->left, var);
+}
+
 static void gen_arithmetic(block_t *block, struct node *node, rt_value var)
 {
 	rt_value temp1 = block_get_var(block);
@@ -243,7 +249,7 @@ static void gen_call(block_t *block, struct node *node, rt_value var)
 	if((rt_value)node->right > 1)
 		parameters = gen_argument(block, node->right, 0);
 
-	block_push(block, B_PUSH_IMM, parameters + 1, 0, 0);
+	block_push(block, B_PUSH_IMM, parameters, 0, 0);
 	block_use_var(block, self, block_push(block, B_PUSH, self, 0, 0));
 	block_push(block, B_PUSH_IMM, (rt_value)node->middle, 0, 0);
 	block_push(block, B_CALL, 2 + parameters, 0, 0);
@@ -257,7 +263,7 @@ static void gen_warn(block_t *block, struct node *node, rt_value var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
+generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, rt_value var)
 {

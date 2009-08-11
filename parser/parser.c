@@ -40,98 +40,75 @@ struct node *parse_identifier(struct parser *parser)
 
 	next(parser);
 
-	if(is_expression(parser))
-		return parse_self_call(parser, symbol);
-	else
-		switch (parser_current(parser))
+	switch (parser_current(parser))
+	{
+		case T_ASSIGN_ADD:
+		case T_ASSIGN_SUB:
+		case T_ASSIGN_MUL:
+		case T_ASSIGN_DIV:
 		{
-			case T_ASSIGN_ADD:
-			case T_ASSIGN_SUB:
-			case T_ASSIGN_MUL:
-			case T_ASSIGN_DIV:
+			struct node *result;
+
+			token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
+
+			next(parser);
+
+			if (rt_symbol_is_const(symbol))
+				result = alloc_node(N_ASSIGN_CONST);
+			else
+				result = alloc_node(N_ASSIGN);
+
+			result->right = alloc_node(N_EXPRESSION);
+			result->right->op = op_type;
+
+			if (rt_symbol_is_const(symbol))
 			{
-				struct node *result;
-
-				token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
-
-				next(parser);
-
-				if (rt_symbol_is_const(symbol))
-					result = alloc_node(N_ASSIGN_CONST);
-				else
-					result = alloc_node(N_ASSIGN);
-
-				result->right = alloc_node(N_EXPRESSION);
-				result->right->op = op_type;
-
-				if (rt_symbol_is_const(symbol))
-				{
-					result->left = alloc_node(N_SELF);
-					result->middle = (void *)symbol;
-					result->right->left = alloc_node(N_CONST);
-					result->right->left->left = alloc_node(N_SELF);
-					result->right->left->right = (void *)symbol;
-				}
-				else
-				{
-					result->left = (void *)scope_define(parser->current_scope, symbol);
-					result->right->left = alloc_node(N_VAR);
-					result->right->left->left = (void *)scope_define(parser->current_scope, symbol);
-				}
-
-				result->right->right = parse_expression(parser);
-
-				return result;
+				result->left = alloc_node(N_SELF);
+				result->middle = (void *)symbol;
+				result->right->left = alloc_node(N_CONST);
+				result->right->left->left = alloc_node(N_SELF);
+				result->right->left->right = (void *)symbol;
+			}
+			else
+			{
+				result->left = (void *)scope_define(parser->current_scope, symbol);
+				result->right->left = alloc_node(N_VAR);
+				result->right->left->left = (void *)scope_define(parser->current_scope, symbol);
 			}
 
-			case T_ASSIGN:
-			{
-				struct node *result;
+			result->right->right = parse_expression(parser);
 
-				next(parser);
-
-				if (rt_symbol_is_const(symbol))
-				{
-					result = alloc_node(N_ASSIGN_CONST);
-					result->left = alloc_node(N_SELF);
-					result->middle = (void *)symbol;
-				}
-				else
-				{
-					result = alloc_node(N_ASSIGN);
-					result->left = (void *)scope_define(parser->current_scope, symbol);
-				}
-
-				result->right = parse_expression(parser);
-
-				return result;
-			}
-
-			// Function call or local variable
-
-			default:
-			{
-				if (scope_defined(parser->current_scope, symbol))
-				{
-					struct node *result = alloc_node(N_VAR);
-
-					result->left = (void *)scope_define(parser->current_scope, symbol);
-
-					return result;
-				}
-				else if (rt_symbol_is_const(symbol))
-				{
-					struct node *result = alloc_node(N_CONST);
-
-					result->left = alloc_node(N_SELF);
-					result->right = (void *)symbol;
-
-					return result;
-				}
-				else
-					return parse_self_call(parser, symbol);
-			}
+			return result;
 		}
+
+		case T_ASSIGN:
+		{
+			struct node *result;
+
+			next(parser);
+
+			if (rt_symbol_is_const(symbol))
+			{
+				result = alloc_node(N_ASSIGN_CONST);
+				result->left = alloc_node(N_SELF);
+				result->middle = (void *)symbol;
+			}
+			else
+			{
+				result = alloc_node(N_ASSIGN);
+				result->left = (void *)scope_define(parser->current_scope, symbol);
+			}
+
+			result->right = parse_expression(parser);
+
+			return result;
+		}
+
+		// Function call or local variable
+
+		default:
+			return parse_call(parser, symbol, alloc_node(N_SELF), true);
+	}
 }
 
 struct node *parse_factor(struct parser *parser)
@@ -157,7 +134,7 @@ struct node *parse_factor(struct parser *parser)
 			{
 			    struct node *result = alloc_node(N_STRING);
 
-				result->left = (void *)parser_current_token(parser)->start;
+				result->left = (void *)parser_token(parser)->start;
 
 				next(parser);
 
@@ -169,22 +146,22 @@ struct node *parse_factor(struct parser *parser)
 			    struct node *result = alloc_node(N_STRING_CONTINUE);
 
 				result->left = 0;
-				result->middle = (void *)parser_current_token(parser)->start;
+				result->middle = (void *)parser_token(parser)->start;
 
 				next(parser);
 
-				result->right = parse_expression(parser);
+				result->right = parse_statements(parser);
 
 				while(parser_current(parser) == T_STRING_CONTINUE)
 				{
 					struct node *node = alloc_node(N_STRING_CONTINUE);
 
 					node->left = result;
-					node->middle = (void *)parser_current_token(parser)->start;
+					node->middle = (void *)parser_token(parser)->start;
 
 					next(parser);
 
-					node->right = parse_expression(parser);
+					node->right = parse_statements(parser);
 
 					result = node;
 				}
@@ -194,7 +171,7 @@ struct node *parse_factor(struct parser *parser)
 					struct node *node = alloc_node(N_STRING_START);
 
 					node->left = result;
-					node->right = (void *)parser_current_token(parser)->start;
+					node->right = (void *)parser_token(parser)->start;
 
 					next(parser);
 
@@ -236,7 +213,7 @@ struct node *parse_factor(struct parser *parser)
 			{
 			    struct node *result = alloc_node(N_NUMBER);
 
-			    char *text = get_token_str(parser_current_token(parser));
+			    char *text = get_token_str(parser_token(parser));
 
 			    result->left = (void* )atoi(text);
 
@@ -275,14 +252,27 @@ struct node *parse_factor(struct parser *parser)
 
 struct node *parse_unary(struct parser *parser)
 {
-    return parse_lookup_chain(parser);
+    if(parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
+    {
+    	struct node *result = alloc_node(N_UNARY);
+
+		result->op = parser_current(parser);
+
+		next(parser);
+
+		result->left = parse_lookup_chain(parser);;
+
+		return result;
+    }
+    else
+		return parse_lookup_chain(parser);
 }
 
 struct node *parse_term(struct parser *parser)
 {
 	struct node *result = parse_unary(parser);
 
-    while (parser_current(parser) == T_MUL || parser_current(parser) == T_DIV)
+    while(parser_current(parser) == T_MUL || parser_current(parser) == T_DIV)
     {
     	struct node *node = alloc_node(N_TERM);
 

@@ -51,6 +51,11 @@ typedef enum {
 	T_END
 } token_type;
 
+typedef enum {
+	TS_DEFAULT,
+	TS_NOKEYWORDS
+} token_state;
+
 #define OP_TO_ASSIGN 4
 #define T_KEYWORD_START T_IF
 #define T_KEYWORD_STOP T_END
@@ -59,21 +64,24 @@ extern char *token_type_names[];
 
 struct parser;
 
-struct token {
-    token_type type;
+typedef struct {
     char *input;
     char *start;
     char *stop;
-    int line;
     struct parser *parser;
-};
+    kvec_t(bool) curlys;
+    int line;
+	token_type type;
+    bool whitespace;
+    token_state state;
+} token_t;
 
 void parser_setup(void);
 struct parser *parser_create(char *input);
 void parser_destroy(struct parser *parser);
 
 token_type next(struct parser *parser);
-token_type parser_lookahead(struct parser *parser);
-void parser_restore(struct parser *parser);
-void parser_resolve(struct parser *parser);
-char *get_token_str(struct token *token);
+void parser_state(struct parser *parser, token_state state);
+void parser_context(struct parser *parser, token_t *token);
+void parser_restore(struct parser *parser, token_t *token);
+char *get_token_str(token_t *token);
