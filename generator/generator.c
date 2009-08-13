@@ -147,9 +147,9 @@ static void gen_arithmetic(block_t *block, struct node *node, rt_value var)
 	gen_node(block, node->right, temp2);
 
 	block_use_var(block, temp2, block_push(block, B_PUSH, temp2, 0, 0));
-	block_push(block, B_PUSH_IMM, 2, 0, 0);
+	block_push(block, B_PUSH_IMM, 1, 0, 0);
 	block_use_var(block, temp1, block_push(block, B_PUSH, temp1, 0, 0));
-	block_push(block, B_CALL, rt_symbol_from_cstr(token_type_names[node->op]), 2, 0);
+	block_push(block, B_CALL, rt_symbol_from_cstr(token_type_names[node->op]), 1, 0);
 
 	if (var)
 		block_push(block, B_STORE, var, 0, 0);

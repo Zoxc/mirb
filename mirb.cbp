@@ -66,10 +66,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\control_blocks.h" />
-		<Unit filename="parser\freetree.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\freetree.h" />
 		<Unit filename="parser\lexer.c">
 			<Option compilerVar="CC" />
 		</Unit>
