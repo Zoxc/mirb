@@ -83,14 +83,17 @@ struct node *parse_method(struct parser *parser)
 
 		match(parser, T_PARAM_CLOSE);
 	}
-	else if(parser_current(parser) == T_IDENT)
-		result->middle = parse_parameter(parser, scope);
 	else
-		result->middle = 0;
+	{
+		if(parser_current(parser) == T_IDENT)
+			result->middle = parse_parameter(parser, scope);
+		else
+			result->middle = 0;
+
+		parse_sep(parser);
+	}
 
 	scope->next_param = scope->next_local;
-
-	parse_sep(parser);
 
 	result->right->right = parse_statements(parser);
 

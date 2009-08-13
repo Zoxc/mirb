@@ -47,7 +47,7 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 			return 6;
 
 		case B_CALL:
-			return 5 + 3 + 6;
+			return 5 + 5 + 2 + 6;
 
 		case B_PUSH:
 			return 3;
@@ -195,14 +195,15 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CALL:
 			{
-				generate_call(target, rt_support_lookup_method);
+				generate_byte(target, 0xB8); // mov eax,
+				generate_dword(target, op->result);
 
-				generate_byte(target, 0x59); // pop ecx
+				generate_call(target, rt_support_lookup_method);
 
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
-				generate_stack_pop(target, op->result * 4);
+				generate_stack_pop(target, (op->left + 2) * 4);
 			}
 			break;
 

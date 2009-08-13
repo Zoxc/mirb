@@ -45,8 +45,16 @@ void __stdcall rt_support_define_method(rt_value obj, rt_value name, rt_compiled
 	rt_define_method(obj, name, block);
 }
 
-rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value method, rt_value obj)
+rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
 {
+	rt_value method;
+
+	__asm__("" : "=a" (method));
+/*
+	rt_compiled_block_t result = rt_lookup(obj, method);
+
+	__asm__("jmp %0" : : "r" (result));
+*/
 	return rt_lookup(obj, method);
 }
 

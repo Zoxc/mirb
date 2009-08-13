@@ -25,7 +25,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_CALL:
-			printf("call %d", op->result);
+			printf("call %s, %d", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
 		case B_STORE:

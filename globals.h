@@ -6,7 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <windows.h>
-#include "BeaEngine.h"
+#include "vendor/BeaEngine/BeaEngine.h"
 #include "vendor/kvec.h"
 #include "vendor/kvec.h"
 #include "vendor/khash.h"

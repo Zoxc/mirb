@@ -41,7 +41,7 @@ Factor <- Number
 
 Class <- "class", Identifier, Sep, Statements, "end"
 
-Method <- "def", Identifier, {MethodParameters | "(", MethodParameters, Space*, ")"}, Sep, Statements, "end"
+Method <- "def", Identifier, ({MethodParameters}, Sep | "(", MethodParameters, ")"), Statements, "end"
 
 MethodParameters <- Identifier, (",", Identifier)*
 
@@ -69,7 +69,7 @@ Call <- Identifier, {Arguments | "(", Arguments, ")"}, {Block}
 
 Block <- "{", {BlockParameters}, Statements, "}"
 	| "do", {BlockParameters}, Statements, "end"
-	
+
 BlockParameters <- "|", MethodParameters, "|"
 
 Arguments <- Expression, (",", Expression)*
