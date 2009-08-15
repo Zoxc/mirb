@@ -99,12 +99,12 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 
 static inline int get_stack_index(block_t *block, rt_value var)
 {
-	unsigned int next_param = block->scope->next_param;
+	variable_t *_var = (variable_t *)var;
 
-	if(var < next_param)
-		return 8 + 8 + ((next_param - 1) * 4 -  var * 4);
+	if(_var->type == V_PARAMETER)
+		return 8 + 8 + ((block->scope->var_count[V_PARAMETER] - 1) * 4 -  _var->index * 4);
 	else
-		return -(var * 4);
+		return -((_var->index + 1) * 4);
 }
 
 static inline void generate_call(unsigned char **target, void *function)
@@ -353,7 +353,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 rt_compiled_block_t compile_block(block_t *block)
 {
 	unsigned int block_size = 3;
-	unsigned int stack_vars = (block->next_temp - 1) - (block->scope->next_param - 1);
+	unsigned int stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP];
 
 	printf("Compiling block %x:\n", block);
 
@@ -383,7 +383,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	{
 		generate_byte(&target, 0x81);
 		generate_byte(&target, 0xEC);
-		generate_dword(&target, (block->next_temp - 1) * 4);
+		generate_dword(&target, stack_vars * 4);
 	}
 
 	if (block->self_ref > 0)

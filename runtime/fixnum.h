@@ -9,3 +9,5 @@
 extern rt_value rt_Fixnum;
 
 void rt_fixnum_init();
+
+rt_value rt_fixnum_to_s(rt_value obj, unsigned int argc);

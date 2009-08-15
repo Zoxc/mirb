@@ -2,7 +2,7 @@
 #include "parser.h"
 
 char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "true", "false", "nil", "end"};
+	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "do", "true", "false", "nil", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
 
@@ -20,6 +20,7 @@ struct parser *parser_create(char* input)
     result->token.input = input;
 	result->token.parser = result;
 	result->token.state = TS_DEFAULT;
+	result->current_scope = 0;
 
     kv_init(result->token.curlys);
 

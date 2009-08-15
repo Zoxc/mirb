@@ -43,10 +43,8 @@ typedef struct {
 } opcode_t;
 
 typedef struct {
-	rt_value next_temp;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
-	khash_t(rt_hash) *var_usage;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
 	unsigned int self_ref;
@@ -56,10 +54,8 @@ static inline block_t *block_create(scope_t *scope)
 {
 	block_t *result = malloc(sizeof(block_t));
 
-	result->next_temp = scope->next_local;
 	result->label_count = 0;
 	result->scope = scope;
-	result->var_usage = kh_init(rt_hash);
 	result->label_usage = kh_init(rt_hash);
 	result->self_ref = 0;
 
@@ -70,7 +66,6 @@ static inline block_t *block_create(scope_t *scope)
 
 static inline void block_destroy(block_t *block)
 {
-	kh_destroy(rt_hash, block->var_usage);
 	kh_destroy(rt_hash, block->label_usage);
 	kv_destroy(block->vector);
 	free(block);
@@ -83,20 +78,14 @@ static inline rt_value block_get_label(block_t *block)
 
 static inline rt_value block_get_var(block_t *block)
 {
-	rt_value result = block->next_temp++;
+	variable_t *temp = malloc(sizeof(variable_t));
 
-	return result;
-}
+	temp->type = V_TEMP;
+	temp->index = block->scope->var_count[V_TEMP];
 
-static inline void block_use_var(block_t *block, rt_value var, unsigned int offset)
-{
-	int ret;
+	block->scope->var_count[V_TEMP] += 1;
 
-	khiter_t k = kh_put(rt_hash, block->var_usage, var, &ret);
-
-	assert(ret);
-
-	kh_value(block->var_usage, k) = offset;
+	return (rt_value)temp;
 }
 
 static inline unsigned int block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
@@ -133,15 +122,12 @@ static inline rt_value block_get_value(block_t *block, khash_t(rt_hash) *table, 
 	return kh_value(table, k);
 }
 
-static inline void block_print_var(rt_value var)
-{
-	printf("%%%d", var);
-}
-
 static inline void block_print_label(rt_value label)
 {
 	printf("#%d", label);
 }
+
+const char *variable_name(rt_value var);
 
 void block_print(block_t *block);
 

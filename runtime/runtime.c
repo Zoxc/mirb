@@ -61,7 +61,7 @@ rt_value rt_inspect(rt_value obj)
 {
 	rt_compiled_block_t inspect = rt_lookup_nothrow(obj, rt_symbol_from_cstr("inspect"));
 
-	if(inspect && (inspect != rt_object_inspect || rt_lookup_nothrow(obj, rt_symbol_from_cstr("to_s"))))
+	if(inspect && (inspect != (rt_compiled_block_t)rt_object_inspect || rt_lookup_nothrow(obj, rt_symbol_from_cstr("to_s"))))
 		return inspect(obj, 0);
 
 	return rt_object_to_s(obj, 0);

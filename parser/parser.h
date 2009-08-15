@@ -23,6 +23,7 @@ typedef enum {
 	N_IF,
 	N_UNLESS,
 	N_ARGUMENT,
+	N_CALL_ARGUMENTS,
 	N_CALL,
 	N_ASSIGN_CALL,
 	N_STATEMENTS,
@@ -40,7 +41,23 @@ struct node {
     token_type op;
 };
 
-KHASH_MAP_INIT_INT(scope, rt_value);
+typedef enum {
+	V_PARAMETER,
+	V_LOCAL,
+	V_UPVAL,
+	V_TEMP
+} variable_type;
+
+#define VARIABLE_TYPES 4
+
+typedef struct variable_t{
+	struct variable_t *real;
+	rt_value index;
+	rt_value name;
+	variable_type type;
+} variable_t;
+
+KHASH_MAP_INIT_INT(scope, variable_t *);
 
 typedef enum {
 	S_MAIN,
@@ -50,37 +67,16 @@ typedef enum {
 	S_CLOSURE
 } scope_type;
 
-typedef struct {
+typedef struct scope_t {
 	scope_type type;
-	rt_value next_local;
-	rt_value next_param;
-	khash_t(scope) *locals;
+	rt_value var_count[VARIABLE_TYPES];
+	khash_t(scope) *variables;
+	struct scope_t *owner;
 } scope_t;
 
-static inline bool scope_defined(scope_t *scope, rt_value symbol)
-{
-	return kh_get(scope, scope->locals, symbol) != kh_end(scope->locals);
-}
-
-static inline rt_value scope_define(scope_t *scope, rt_value symbol)
-{
-	khiter_t k = kh_get(scope, scope->locals, symbol);
-
-	if (k != kh_end(scope->locals))
-		return kh_value(scope->locals, k);
-
-	int ret;
-
-	k = kh_put(scope, scope->locals, symbol, &ret);
-
-	assert(ret);
-
-	rt_value result = scope->next_local++;
-
-	kh_value(scope->locals, k) = result;
-
-	return result;
-}
+bool scope_defined(scope_t *scope, rt_value name, bool recursive);
+variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type);
+variable_t *scope_define(scope_t *scope, rt_value name, rt_value type);
 
 struct parser {
 	token_t token;
@@ -182,20 +178,25 @@ static inline bool is_expression(struct parser *parser)
 	}
 }
 
-static inline struct node *alloc_scope(struct parser *parser, scope_type type)
+static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_var, scope_type type)
 {
 	struct node *result = malloc(sizeof(struct node));
 	scope_t *scope = malloc(sizeof(scope_t));
 
-	scope->locals = kh_init(scope);
-	scope->next_local = 1;
-	scope->next_param = 1;
+	scope->variables = kh_init(scope);
+
+	for(int i = 0; i < VARIABLE_TYPES; i++)
+		scope->var_count[i] = 0;
+
 	scope->type = type;
+	scope->owner = parser->current_scope;
 
 	result->left = (void *)scope;
 	result->type = N_SCOPE;
 
 	parser->current_scope = scope;
+
+	*scope_var = scope;
 
 	return result;
 }

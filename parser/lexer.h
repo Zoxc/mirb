@@ -45,6 +45,7 @@ typedef enum {
 	T_CLASS,
 	T_DEF,
 	T_SELF,
+	T_DO,
 	T_TRUE,
 	T_FALSE,
 	T_NIL,

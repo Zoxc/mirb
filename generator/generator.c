@@ -33,15 +33,13 @@ static void gen_string_continue(block_t *block, struct node *node, rt_value var)
 	rt_value string = block_get_var(block);
 
 	block_push(block, B_STRING, string, (rt_value)node->middle, 0);
-
-	block_use_var(block, string, block_push(block, B_PUSH, string, 0, 0));
-
+	block_push(block, B_PUSH, string, 0, 0);
 
 	rt_value interpolated = block_get_var(block);
 
 	gen_node(block, node->right, interpolated);
 
-	block_use_var(block, interpolated, block_push(block, B_PUSH, interpolated, 0, 0));
+	block_push(block, B_PUSH, interpolated, 0, 0);
 }
 
 static unsigned int gen_string_arg_count(struct node *node)
@@ -60,8 +58,7 @@ static void gen_string_start(block_t *block, struct node *node, rt_value var)
 	rt_value string = block_get_var(block);
 
 	block_push(block, B_STRING, string, (rt_value)node->right, 0);
-
-	block_use_var(block, string, block_push(block, B_PUSH, string, 0, 0));
+	block_push(block, B_PUSH, string, 0, 0);
 
 	unsigned int argc = gen_string_arg_count(node->left) + 1;
 
@@ -78,7 +75,7 @@ static void gen_const(block_t *block, struct node *node, rt_value var)
 
 		gen_node(block, node->left, self);
 
-		block_use_var(block, self, block_push(block, B_GET_CONST, var, self, (rt_value)node->right));
+		block_push(block, B_GET_CONST, var, self, (rt_value)node->right);
 	}
 }
 
@@ -126,7 +123,7 @@ static void gen_const_assign(block_t *block, struct node *node, rt_value var)
 
 	gen_node(block, node->right, value);
 
-	block_use_var(block, self, block_push(block, B_SET_CONST, self, (rt_value)node->middle, value));
+	block_push(block, B_SET_CONST, self, (rt_value)node->middle, value);
 
 	if (var)
 		block_push(block, B_MOV, var, value, 0);
@@ -146,9 +143,9 @@ static void gen_arithmetic(block_t *block, struct node *node, rt_value var)
 	gen_node(block, node->left, temp1);
 	gen_node(block, node->right, temp2);
 
-	block_use_var(block, temp2, block_push(block, B_PUSH, temp2, 0, 0));
+	block_push(block, B_PUSH, temp2, 0, 0);
 	block_push(block, B_PUSH_IMM, 1, 0, 0);
-	block_use_var(block, temp1, block_push(block, B_PUSH, temp1, 0, 0));
+	block_push(block, B_PUSH, temp1, 0, 0);
 	block_push(block, B_CALL, rt_symbol_from_cstr(token_type_names[node->op]), 1, 0);
 
 	if (var)
@@ -162,8 +159,7 @@ static void gen_if(block_t *block, struct node *node, rt_value var)
 
 	gen_node(block, node->left, temp);
 
-	block_use_var(block, temp, block_push(block, B_TEST, temp, 0, 0));
-
+	block_push(block, B_TEST, temp, 0, 0);
 	block_push(block, node->type == N_IF ? B_JMPF : B_JMPT, label_else, 0, 0);
 
 	rt_value label_end = block_get_label(block);
@@ -174,13 +170,13 @@ static void gen_if(block_t *block, struct node *node, rt_value var)
 		rt_value result_right = block_get_var(block);
 
 		gen_node(block, node->middle, result_left);
-		block_use_var(block, result_left, block_push(block, B_MOV, var, result_left, 0));
+		block_push(block, B_MOV, var, result_left, 0);
 		block_push(block, B_JMP, label_end, 0, 0);
 
 		block_emmit_label(block, label_else);
 
 		gen_node(block, node->right, result_right);
-		block_use_var(block, result_right, block_push(block, B_MOV, var, result_right, 0));
+		block_push(block, B_MOV, var, result_right, 0);
 
 		block_emmit_label(block, label_end);
 	}
@@ -229,7 +225,7 @@ static int gen_argument(block_t *block, struct node *node, rt_value var)
 
 	gen_node(block, node->left, temp);
 
-	block_use_var(block, temp, block_push(block, B_PUSH, temp, 0, 0));
+	block_push(block, B_PUSH, temp, 0, 0);
 
 	if(node->right)
 		return gen_argument(block, node->right, 0) + 1;
@@ -249,7 +245,7 @@ static void gen_call(block_t *block, struct node *node, rt_value var)
 		parameters = gen_argument(block, node->right, 0);
 
 	block_push(block, B_PUSH_IMM, parameters, 0, 0);
-	block_use_var(block, self, block_push(block, B_PUSH, self, 0, 0));
+	block_push(block, B_PUSH, self, 0, 0);
 	block_push(block, B_CALL, (rt_value)node->middle, parameters, 0);
 
 	if (var)
@@ -261,7 +257,7 @@ static void gen_warn(block_t *block, struct node *node, rt_value var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
+generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, /*N_ASSIGN_MESSAGE*/gen_warn, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, rt_value var)
 {

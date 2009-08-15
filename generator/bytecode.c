@@ -1,5 +1,38 @@
 #include "bytecode.h"
 #include "../runtime/string.h"
+#include "../runtime/fixnum.h"
+
+const char *variable_name(rt_value var)
+{
+	rt_value string = rt_string_from_cstr("");
+
+	variable_t *_var = (variable_t *)var;
+
+	switch(_var->type)
+	{
+		case V_TEMP:
+			rt_string_concat(string, 1, rt_string_from_cstr("%"));
+			rt_string_concat(string, 1, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0));
+			break;
+
+		case V_PARAMETER:
+			rt_string_concat(string, 1, rt_string_from_cstr("&"));
+			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			break;
+
+		case V_LOCAL:
+			rt_string_concat(string, 1, rt_string_from_cstr("#"));
+			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			break;
+
+		case V_UPVAL:
+			rt_string_concat(string, 1, rt_string_from_cstr("!"));
+			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			break;
+	}
+
+	return rt_string_to_cstr(string);
+}
 
 void opcode_print(opcode_t *op)
 {
@@ -10,15 +43,15 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_MOV_IMM:
-			printf("mov "); block_print_var(op->result); printf(", %s", rt_string_to_cstr(rt_inspect(op->left)));
+			printf("mov %s, %s", variable_name(op->result), rt_string_to_cstr(rt_inspect(op->left)));
 			break;
 
 		case B_MOV:
-			printf("mov "); block_print_var(op->result); printf(", "); block_print_var(op->left);
+			printf("mov %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
 		case B_PUSH:
-			printf("push "); block_print_var(op->result);
+			printf("push %s", variable_name(op->result));
 			break;
 
 		case B_PUSH_IMM:
@@ -30,23 +63,23 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_STORE:
-			printf("store "); block_print_var(op->result);
+			printf("store %s", variable_name(op->result));
 			break;
 
 		case B_SELF:
-			printf("self "); block_print_var(op->result);
+			printf("self %s", variable_name(op->result));
 			break;
 
 		case B_LOAD:
-			printf("load "); block_print_var(op->result);
+			printf("load %s", variable_name(op->result));
 			break;
 
 		case B_TEST:
-			printf("test "); block_print_var(op->result);
+			printf("test %s", variable_name(op->result));
 			break;
 
 		case B_TEST_IMM:
-			printf("test %d", op->result);
+			printf("test %s", rt_string_to_cstr(rt_inspect(op->result)));
 			break;
 
 		case B_JMPF:
@@ -66,19 +99,19 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_STRING:
-			printf("string "); block_print_var(op->result); printf(", \"%s\"", op->left);
+			printf("string %s, \"%s\"", variable_name(op->result), op->left);
 			break;
 
 		case B_INTERPOLATE:
-			printf("interpolate "); block_print_var(op->result); printf(", %d", op->left);
+			printf("interpolate %s, %d", variable_name(op->result), op->left);
 			break;
 
 		case B_SET_CONST:
-			printf("set_const "); block_print_var(op->result); printf(".%s", rt_symbol_to_cstr(op->left)); printf(", "); block_print_var(op->right);
+			printf("set_const %s.%s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left), variable_name(op->right));
 			break;
 
 		case B_GET_CONST:
-			printf("get_const "); block_print_var(op->result); printf(", "); block_print_var(op->left); printf(".%s", rt_symbol_to_cstr(op->right));
+			printf("get_const %s, %s.%s", variable_name(op->result), variable_name(op->left), rt_symbol_to_cstr(op->right));
 			break;
 
 		case B_CLASS:

@@ -4,6 +4,86 @@
 #include "control_blocks.h"
 #include "structures.h"
 
+
+bool scope_defined(scope_t *scope, rt_value name, bool recursive)
+{
+	if(kh_get(scope, scope->variables, name) != kh_end(scope->variables))
+		return true;
+
+	if(recursive)
+	{
+		while (scope->type == S_CLOSURE)
+		{
+			scope = scope->owner;
+
+			if(kh_get(scope, scope->variables, name) != kh_end(scope->variables))
+				return true;
+		}
+	}
+
+	return false;
+}
+
+variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
+{
+	printf("making var %s(%d) in %x\n", rt_symbol_to_cstr(name), type, scope);
+	khiter_t k = kh_get(scope, scope->variables, name);
+
+	if (k != kh_end(scope->variables))
+		return kh_value(scope->variables, k);
+
+	int ret;
+
+	k = kh_put(scope, scope->variables, name, &ret);
+
+	assert(ret);
+
+	variable_t *var = malloc(sizeof(variable_t));
+	var->type = type;
+	var->name = name;
+	var->index = scope->var_count[type];
+
+	scope->var_count[type] += 1;
+
+	kh_value(scope->variables, k) = var;
+
+	return var;
+}
+
+variable_t *scope_define(scope_t *scope, rt_value name, rt_value type)
+{
+	if(scope_defined(scope, name, false))
+	{
+		return kh_value(scope->variables, kh_get(scope, scope->variables, name));
+	}
+	else if(scope_defined(scope, name, true))
+	{
+		variable_t *result = scope_declare_var(scope, name, V_UPVAL);
+
+		scope_t *temp_scope = scope;
+
+		while (temp_scope->type == S_CLOSURE)
+			temp_scope = temp_scope->owner;
+
+		variable_t *real = kh_value(temp_scope->variables, kh_get(scope, temp_scope->variables, name));
+		result->real = real;
+
+		while (scope->type == S_CLOSURE)
+		{
+			variable_t *var = scope_declare_var(scope, name, V_UPVAL);
+			var->real = real;
+
+			scope = scope->owner;
+		}
+
+		return result;
+	}
+	else
+	{
+		return scope_declare_var(scope, name, type);
+	}
+}
+
 void parse_sep(struct parser *parser)
 {
 	switch (parser_current(parser))
@@ -71,9 +151,9 @@ struct node *parse_identifier(struct parser *parser)
 			}
 			else
 			{
-				result->left = (void *)scope_define(parser->current_scope, symbol);
+				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
 				result->right->left = alloc_node(N_VAR);
-				result->right->left->left = (void *)scope_define(parser->current_scope, symbol);
+				result->right->left->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
 			}
 
 			result->right->right = parse_expression(parser);
@@ -96,7 +176,7 @@ struct node *parse_identifier(struct parser *parser)
 			else
 			{
 				result = alloc_node(N_ASSIGN);
-				result->left = (void *)scope_define(parser->current_scope, symbol);
+				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
 			}
 
 			result->right = parse_expression(parser);
@@ -361,7 +441,9 @@ struct node *parse_statements(struct parser *parser)
 
 struct node *parse_main(struct parser *parser)
 {
-	struct node *result = alloc_scope(parser, S_MAIN);
+	scope_t *scope;
+
+	struct node *result = alloc_scope(parser, &scope, S_MAIN);
 
 	result->right = parse_statements(parser);
 

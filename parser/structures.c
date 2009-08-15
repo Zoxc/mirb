@@ -18,8 +18,12 @@ struct node *parse_class(struct parser *parser)
 
 	parse_sep(parser);
 
-	result->right = alloc_scope(parser, S_CLASS);
+	scope_t *scope;
+
+	result->right = alloc_scope(parser, &scope, S_CLASS);
 	result->right->right = parse_statements(parser);
+
+	parser->current_scope = scope->owner;
 
 	match(parser, T_END);
 
@@ -34,13 +38,13 @@ struct node *parse_parameter(struct parser *parser, scope_t *scope)
 	{
 		result->left = (void *)rt_symbol_from_parser(parser);
 
-		if(scope_defined(scope, (rt_value)result->left))
+		if(scope_defined(scope, (rt_value)result->left, false))
 		{
 			parser->err_count++;
 			printf("Parameter %s already defined.\n", rt_symbol_to_cstr((rt_value)result->left));
 		}
 		else
-			scope_define(scope, (rt_value)result->left);
+			scope_define(scope, (rt_value)result->left, V_PARAMETER);
 
 		next(parser);
 
@@ -73,9 +77,9 @@ struct node *parse_method(struct parser *parser)
 	else
 		result->left = 0;
 
-	result->right = alloc_scope(parser, S_METHOD);
+	scope_t *scope;
 
-	scope_t *scope = (scope_t *)result->right->left;
+	result->right = alloc_scope(parser, &scope, S_METHOD);
 
 	if(matches(parser, T_PARAM_OPEN))
 	{
@@ -93,9 +97,9 @@ struct node *parse_method(struct parser *parser)
 		parse_sep(parser);
 	}
 
-	scope->next_param = scope->next_local;
-
 	result->right->right = parse_statements(parser);
+
+	parser->current_scope = scope->owner;
 
 	match(parser, T_END);
 

@@ -1,6 +1,24 @@
 #include "calls.h"
 #include "../runtime/symbol.h"
 
+struct node *parse_block(struct parser *parser)
+{
+	bool curly = parser_current(parser) == T_CURLY_OPEN;
+	next(parser);
+
+	scope_t *scope;
+
+	struct node *result = alloc_scope(parser, &scope, S_CLOSURE);
+
+	result->right = parse_statements(parser);
+
+	parser->current_scope = scope->owner;
+
+	match(parser, curly ? T_CURLY_CLOSE : T_END);
+
+	return result;
+}
+
 struct node *parse_call(struct parser *parser, rt_value symbol, struct node *child, bool default_var)
 {
 	if(!symbol && require(parser, T_IDENT))
@@ -11,7 +29,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	}
 
 	bool has_args = false;
-	bool local = scope_defined(parser->current_scope, symbol);
+	bool local = scope_defined(parser->current_scope, symbol, true);
 
 	if (is_expression(parser))
 	{
@@ -51,7 +69,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		{
 			struct node *result = alloc_node(N_VAR);
 
-			result->left = (void *)scope_define(parser->current_scope, symbol);
+			result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
 
 			return result;
 		}
@@ -71,21 +89,34 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 
 		result->left = child;
 		result->middle = (void *)symbol;
-		result->right = 0;
+		result->right = alloc_node(N_CALL_ARGUMENTS);
+		result->right->left = 0;
+		result->right->right = 0;
 
-		if (has_args)
+		if (has_args && parser_current(parser) == T_CURLY_OPEN)
 		{
 			if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
 			{
 				next(parser);
 
 				if(parser_current(parser) != T_PARAM_CLOSE)
-					result->right = parse_argument(parser);
+					result->right->left = parse_argument(parser);
 
 				match(parser, T_PARAM_CLOSE);
 			}
 			else
-				result->right = parse_argument(parser);
+				result->right->left = parse_argument(parser);
+		}
+
+		switch(parser_current(parser))
+		{
+		    case T_CURLY_OPEN:
+		    case T_DO:
+                result->right->right = parse_block(parser);
+                break;
+
+		    default:
+                break;
 		}
 
 		return result;
@@ -212,9 +243,11 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 								free(new_name);
 							}
 
-							tail->right = alloc_node(N_ARGUMENT);
-							tail->right->left = parse_expression(parser);
+							tail->right = alloc_node(N_CALL_ARGUMENTS);
 							tail->right->right = 0;
+							tail->right->left = alloc_node(N_ARGUMENT);
+							tail->right->left->left = parse_expression(parser);
+							tail->right->left->right = 0;
 
 							return tail;
 						}
