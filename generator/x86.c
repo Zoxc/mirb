@@ -379,19 +379,19 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x89);
 	generate_byte(&target, 0xE5);
 
+	if (stack_vars > 0)
+	{
+		generate_byte(&target, 0x81);
+		generate_byte(&target, 0xEC);
+		generate_dword(&target, (block->next_temp - 1) * 4);
+	}
+
 	if (block->self_ref > 0)
 	{
 		generate_byte(&target, 0x57);
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x7D);
 		generate_byte(&target, 8);
-	}
-
-	if (stack_vars > 0)
-	{
-		generate_byte(&target, 0x81);
-		generate_byte(&target, 0xEC);
-		generate_dword(&target, (block->next_temp - 1) * 4);
 	}
 
 	for (size_t i = 0; i < kv_size(block->vector); i++)
