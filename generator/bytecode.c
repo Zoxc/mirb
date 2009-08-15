@@ -1,4 +1,5 @@
 #include "bytecode.h"
+#include "../runtime/string.h"
 
 void opcode_print(opcode_t *op)
 {
@@ -9,7 +10,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_MOV_IMM:
-			printf("mov "); block_print_var(op->result); printf(", %d", op->left);
+			printf("mov "); block_print_var(op->result); printf(", %s", rt_string_to_cstr(rt_inspect(op->left)));
 			break;
 
 		case B_MOV:
@@ -21,7 +22,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_PUSH_IMM:
-			printf("push %d", op->result);
+			printf("push %s", rt_string_to_cstr(rt_inspect(op->result)));
 			break;
 
 		case B_CALL:

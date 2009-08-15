@@ -249,10 +249,6 @@ done:
 
 	token->start = build_double_quote_string(start, length);
 
-	printf("found string '%s'\n", token->start);
-
-	token->stop = start;
-
 	return result;
 }
 

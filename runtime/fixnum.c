@@ -8,7 +8,7 @@ rt_value rt_Fixnum;
 rt_value rt_TrueClass;
 rt_value rt_FalseClass;
 
-rt_value rt_fixnum_inspect(rt_value obj, unsigned int argc)
+rt_value rt_fixnum_to_s(rt_value obj, unsigned int argc)
 {
 	char buffer[15];
 
@@ -41,8 +41,7 @@ void rt_fixnum_init()
 {
 	rt_Fixnum = rt_define_class(rt_Object, rt_symbol_from_cstr("Fixnum"), rt_Object);
 
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_fixnum_inspect);
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_fixnum_inspect);
+	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_fixnum_to_s);
 
 	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("+"), (rt_compiled_block_t)rt_fixnum_add);
 	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("-"), (rt_compiled_block_t)rt_fixnum_sub);
