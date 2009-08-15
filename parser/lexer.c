@@ -249,6 +249,10 @@ done:
 
 	token->start = build_double_quote_string(start, length);
 
+	printf("found string '%s'\n", token->start);
+
+	token->stop = start;
+
 	return result;
 }
 
@@ -377,12 +381,7 @@ void parser_context(struct parser *parser, token_t *token)
 {
 	memcpy(token, &parser->token, sizeof(token_t));
 
-	unsigned int size = kv_size(parser->token.curlys);
-
-	kv_init(token->curlys);
-	kv_resize(bool, token->curlys, size);
-
-	memcpy(token->curlys.a, &parser->token.curlys.a, size * sizeof(bool));
+	kv_dup(bool, token->curlys, parser->token.curlys);
 }
 
 void parser_restore(struct parser *parser, token_t *token)

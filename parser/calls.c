@@ -33,6 +33,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 						has_args = !parser_token(parser)->whitespace;
 
 						parser_restore(parser, &token);
+
 					}
 					else
 						has_args = false;

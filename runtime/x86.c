@@ -57,5 +57,3 @@ rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
 */
 	return rt_lookup(obj, method);
 }
-
-

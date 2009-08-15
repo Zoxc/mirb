@@ -166,7 +166,7 @@ struct node *parse_factor(struct parser *parser)
 					result = node;
 				}
 
-				if(matches(parser, T_STRING_END))
+				if(require(parser, T_STRING_END))
 				{
 					struct node *node = alloc_node(N_STRING_START);
 

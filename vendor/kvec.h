@@ -60,6 +60,15 @@ int main() {
 #define kv_size(v) ((v).n)
 #define kv_max(v) ((v).m)
 
+/*
+ * Added by Zoxc
+ */
+#define kv_dup(type, new, old) do { \
+        (new).a = (type*)malloc((old).n * sizeof(type)); \
+        (new).n = (new).m = (old).n; \
+        memcpy((new).a, (old).a, (old).n * sizeof(type)); \
+    } while (0)
+
 #define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)realloc((v).a, sizeof(type) * (v).m))
 
 #define kv_push(type, v, x) do {									\
