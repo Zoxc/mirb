@@ -29,7 +29,10 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	}
 
 	bool has_args = false;
-	bool local = scope_defined(parser->current_scope, symbol, true);
+	bool local = false;
+
+	if(symbol)
+		local = scope_defined(parser->current_scope, symbol, true);
 
 	if (is_expression(parser))
 	{
@@ -63,7 +66,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		}
 	}
 
-	if(default_var && !has_args && (local || rt_symbol_is_const(symbol))) // Variable or constant
+	if(default_var && !has_args && (local || (symbol && rt_symbol_is_const(symbol)))) // Variable or constant
 	{
 		if(local)
 		{
@@ -93,7 +96,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		result->right->left = 0;
 		result->right->right = 0;
 
-		if (has_args && parser_current(parser) == T_CURLY_OPEN)
+		if (has_args && parser_current(parser) != T_CURLY_OPEN)
 		{
 			if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
 			{

@@ -15,8 +15,15 @@ static void gen_num(block_t *block, struct node *node, variable_t *var)
 
 static void gen_var(block_t *block, struct node *node, variable_t *var)
 {
-	if (var)
-		block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
+	if(var)
+	{
+		variable_t *reading = (variable_t *)node->left;
+
+		if(reading->type == V_UPVAL)
+			block_push(block, B_GET_UPVAL, (rt_value)var, (rt_value)reading, 0);
+		else
+			block_push(block, B_MOV, (rt_value)var, (rt_value)reading, 0);
+	}
 }
 
 static void gen_string(block_t *block, struct node *node, variable_t *var)
@@ -108,10 +115,26 @@ static void gen_nil(block_t *block, struct node *node, variable_t *var)
 
 static void gen_assign(block_t *block, struct node *node, variable_t *var)
 {
-	gen_node(block, node->right, (variable_t *)node->left);
+	variable_t *reading = (variable_t *)node->left;
 
-	if (var)
-		block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
+	if(reading->type == V_UPVAL)
+	{
+		variable_t *temp = block_get_var(block);
+
+		gen_node(block, node->right, temp);
+
+		block_push(block, B_SET_UPVAL, (rt_value)reading, (rt_value)temp, 0);
+
+		if (var)
+			block_push(block, B_MOV, (rt_value)var, (rt_value)temp, 0);
+	}
+	else
+	{
+		gen_node(block, node->right, (variable_t *)node->left);
+
+		if (var)
+			block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
+	}
 }
 
 static void gen_const_assign(block_t *block, struct node *node, variable_t *var)
@@ -244,6 +267,9 @@ static variable_t *get_upval(block_t *block, variable_t *var)
 		variable_t *temp = block_get_var(block);
 
 		var->real = temp;
+		var->index = block->scope->var_count[V_UPVAL];
+
+		block->scope->var_count[V_UPVAL] += 1;
 
 		block_push(block, B_UPVAL, (rt_value)temp, (rt_value)var, 0);
 

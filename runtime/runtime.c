@@ -4,6 +4,7 @@
 #include "code_heap.h"
 #include "bool.h"
 #include "fixnum.h"
+#include "proc.h"
 
 void rt_create(void)
 {
@@ -16,6 +17,7 @@ void rt_create(void)
 	rt_symbol_init();
 	rt_string_init();
 	rt_fixnum_init();
+	rt_proc_init();
 }
 
 void rt_destroy(void)
@@ -82,45 +84,6 @@ rt_value rt_to_s(rt_value obj)
 		return inspect(obj, 0);
 
 	return rt_object_inspect(obj, 0);
-}
-
-rt_value rt_support_interpolate(unsigned int argc, ...)
-{
-	rt_value args[argc];
-
-	va_list _args;
-	va_start(_args, argc);
-
-	for(int i = argc -1 ; i >= 0; i--)
-		args[i] = va_arg(_args, rt_value);
-
-	va_end(_args);
-
-	unsigned int length = 0;
-
-	for(int i = 0; i < argc; i++)
-	{
-		if(rt_type(args[i]) != C_STRING)
-			args[i] = RT_CALL_CSTR(args[i], "to_s", 0);
-
-		length += RT_STRING(args[i])->length;
-	}
-
-	char *new_str = malloc(length + 1);
-	char *current = new_str;
-
-	for(int i = 0; i < argc; i++)
-	{
-		unsigned int length = RT_STRING(args[i])->length;
-
-		memcpy(current, RT_STRING(args[i])->string, length);
-
-		current += length;
-	}
-
-	*current = 0;
-
-	return rt_string_from_raw_str(new_str, length);
 }
 
 rt_value rt_dump_call(rt_value obj, unsigned int argc, ...)

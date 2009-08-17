@@ -1,5 +1,4 @@
 #pragma once
-
 #include "classes.h"
 
 struct rt_string {

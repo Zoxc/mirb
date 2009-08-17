@@ -33,6 +33,8 @@ typedef enum {
 	B_UPVAL,
 	B_SEAL,
 	B_CLOSURE,
+	B_GET_UPVAL,
+	B_SET_UPVAL,
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,

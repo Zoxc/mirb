@@ -25,7 +25,8 @@ typedef enum {
 	C_MODULE,
 	C_OBJECT,
 	C_SYMBOL,
-	C_STRING
+	C_STRING,
+	C_PROC
 } rt_type_t;
 
 struct rt_common {
@@ -93,5 +94,4 @@ rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name);
 
 rt_value rt_dump_call(rt_value obj, unsigned int argc, ...);
 
-rt_value rt_support_interpolate(unsigned int argc, ...);
 

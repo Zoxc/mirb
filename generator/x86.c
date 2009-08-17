@@ -1,5 +1,6 @@
 #include "x86.h"
 #include "../runtime/x86.h"
+#include "../runtime/support.h"
 #include "../runtime/code_heap.h"
 #include "../runtime/method.h"
 #include "../runtime/constant.h"
@@ -94,6 +95,21 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 		case B_INTERPOLATE:
 			return 5 + 6 + 3;
 
+		case B_UPVAL:
+			return 3 + 5 + 3;
+
+		case B_CLOSURE:
+			return 5 + 5 + 5 + 6 + 3;
+
+		case B_GET_UPVAL:
+			return 5 + 3 + 5 + 3;
+
+		case B_SET_UPVAL:
+			return 5 + 3 + 3 + 5;
+
+		case B_SEAL:
+			return 3 + 5;
+
 		default:
 			break;
 	}
@@ -106,9 +122,27 @@ static inline int get_stack_index(block_t *block, rt_value var)
 	variable_t *_var = (variable_t *)var;
 
 	if(_var->type == V_PARAMETER)
-		return 8 + 8 + ((block->scope->var_count[V_PARAMETER] - 1) * 4 -  _var->index * 4);
+		return 8 + 8 + (block->scope->var_count[V_PARAMETER] - 1 -  _var->index) * 4;
 	else
-		return -((_var->index + 1) * 4);
+	{
+		int index;
+
+		switch(_var->type)
+		{
+			case V_TEMP:
+				index = block->scope->var_count[V_LOCAL] + _var->index;
+				break;
+
+			case V_LOCAL:
+				index = _var->index;
+				break;
+
+			default:
+				assert(0);
+		}
+
+		return -((index + 1) * 4);
+	}
 }
 
 static inline void generate_call(unsigned char **target, void *function)
@@ -141,6 +175,76 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 {
 	switch(op->type)
 	{
+		case B_SEAL:
+			{
+				generate_stack_var_push(block, target, op->result);
+				generate_call(target, rt_support_seal_upval);
+			}
+			break;
+
+		case B_GET_UPVAL:
+			{
+				generate_byte(target, 0xB8); // mov eax,
+				generate_dword(target, ((variable_t *)op->left)->index);
+
+				// Push closure
+				generate_byte(target, 0xFF);
+				generate_byte(target, 0x75);
+				generate_byte(target, (char)8);
+
+				generate_call(target, rt_support_get_upval);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+			}
+			break;
+
+		case B_SET_UPVAL:
+			{
+				generate_byte(target, 0xB8); // mov eax,
+				generate_dword(target, ((variable_t *)op->result)->index);
+
+				generate_stack_var_push(block, target, op->left);
+
+				// Push closure
+				generate_byte(target, 0xFF);
+				generate_byte(target, 0x75);
+				generate_byte(target, (char)8);
+
+				generate_call(target, rt_support_set_upval);
+			}
+			break;
+
+		case B_CLOSURE:
+			{
+				generate_stack_push(target, op->right);
+				generate_stack_push(target, (unsigned int)compile_block((block_t *)op->left));
+
+				generate_call(target, rt_support_closure);
+
+				generate_stack_pop(target, (op->right + 1) * 4);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+			}
+			break;
+
+		case B_UPVAL:
+			{
+				generate_byte(target, 0x8D);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->left));
+
+				generate_call(target, rt_support_upval_create);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+			}
+			break;
+
 		case B_CLASS:
 			{
 				block_t *class_block = (block_t *)op->left;

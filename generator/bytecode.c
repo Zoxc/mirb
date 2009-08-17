@@ -31,14 +31,8 @@ const char *variable_name(rt_value var)
 		case V_UPVAL:
 			rt_string_concat(string, 1, rt_string_from_cstr("!"));
 			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
-			rt_string_concat(string, 1, rt_string_from_cstr("<"));
-			rt_string_concat(string, 1, rt_string_from_hex((unsigned int)_var->real));
-			rt_string_concat(string, 1, rt_string_from_cstr(">"));
 			break;
 	}
-
-	rt_string_concat(string, 1, rt_string_from_cstr(":"));
-	rt_string_concat(string, 1, rt_string_from_hex((unsigned int)_var));
 
 	return rt_string_to_cstr(string);
 }
@@ -61,6 +55,14 @@ void opcode_print(opcode_t *op)
 
 		case B_PUSH:
 			printf("push %s", variable_name(op->result));
+			break;
+
+		case B_GET_UPVAL:
+			printf("get_upval %s, %s", variable_name(op->result), variable_name(op->left));
+			break;
+
+		case B_SET_UPVAL:
+			printf("set_upval %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
 		case B_PUSH_UPVAL:

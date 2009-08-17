@@ -169,6 +169,23 @@ void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t
 	Object
 */
 
+rt_value rt_object_tap(rt_value obj, unsigned int argc)
+{
+	return obj;
+}
+
+rt_value rt_object_proc(rt_value obj, unsigned int argc)
+{
+	rt_value block;
+
+	__asm__("" : "=c" (block));
+
+	if(block)
+		return block;
+	else
+		return RT_NIL;
+}
+
 rt_value rt_object_allocate(rt_value obj, unsigned int argc)
 {
 	rt_value result = rt_alloc(sizeof(struct rt_object));
@@ -281,6 +298,8 @@ void rt_setup_classes(void)
 	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_class_to_s);
 
     rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_object_to_s);
+    rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), (rt_compiled_block_t)rt_object_tap);
+    rt_define_method(rt_Object, rt_symbol_from_cstr("proc"), (rt_compiled_block_t)rt_object_proc);
 
 	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), (rt_compiled_block_t)rt_object_allocate);
 
