@@ -3,250 +3,277 @@
 #include "parser/parser.h"
 #include "runtime/symbol.h"
 #include "runtime/classes.h"
+#include "runtime/string.h"
 #include "generator/generator.h"
 #include "generator/x86.h"
 
-typedef char*(*get_node_name_proc)(struct node *node);
+typedef rt_value (*get_node_name_proc)(struct node *node);
 
-char* get_node_name(struct node *node);
+rt_value get_node_name(struct node *node);
 
-char* name_num(struct node *node)
+rt_value name_num(struct node *node)
 {
-	char* result = malloc(100);
+	return rt_string_from_int((rt_value)node->left);
+}
 
-	sprintf(result, "%d", node->left);
+rt_value name_var(struct node *node)
+{
+	return rt_string_from_cstr(variable_name((rt_value)node->left));
+}
+
+rt_value name_const(struct node *node)
+{
+	rt_value result = get_node_name(node->left);
+
+	rt_string_concat(result, 1, rt_string_from_cstr("::"));
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->right, 0));
 
 	return result;
 }
 
-char* name_var(struct node *node)
+rt_value name_assign(struct node *node)
 {
-	return (char *)variable_name((rt_value)node->left);
-}
+	rt_value result = rt_string_from_cstr("(");
 
-char* name_const(struct node *node)
-{
-	char* result = malloc(100);
-
-	sprintf(result, "%s::%s", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(variable_name((rt_value)node->left)));
+	rt_string_concat(result, 1, rt_string_from_cstr(" = "));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_assign(struct node *node)
+rt_value name_assign_const(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("(");
 
-	sprintf(result, "(%s = %s)", (char *)variable_name((rt_value)node->left), get_node_name(node->right));
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr("::"));
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->middle, 0));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_assign_const(struct node *node)
+rt_value name_arithmetics(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("(");
 
-	sprintf(result, "(%s::%s = %s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(" "));
+	rt_string_concat(result, 1, rt_string_from_cstr(token_type_names[node->op]));
+	rt_string_concat(result, 1, rt_string_from_cstr(" "));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_arithmetics(struct node *node)
+rt_value name_if(struct node *node)
 {
-	char* result = malloc(100);
-
-	sprintf(result, "(%s %s %s)", get_node_name(node->left), token_type_names[node->op], get_node_name(node->right));
-
-	return result;
-}
-
-char* name_if(struct node *node)
-{
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("(");
 
 	if(node->type == N_UNLESS)
-		sprintf(result, "(!%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
-	else
-		sprintf(result, "(%s ? %s : %s)", get_node_name(node->left), get_node_name(node->middle), get_node_name(node->right));
+		rt_string_concat(result, 1, rt_string_from_cstr("!"));
+
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(" ? "));
+	rt_string_concat(result, 1, get_node_name(node->middle));
+	rt_string_concat(result, 1, rt_string_from_cstr(" : "));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_argument(struct node *node)
+rt_value name_argument(struct node *node)
 {
-	char* result = malloc(100);
-
 	if(node->right)
-		sprintf(result, "%s, %s", get_node_name(node->left), get_node_name(node->right));
+	{
+		rt_value result = get_node_name(node->left);
+
+		rt_string_concat(result, 1, rt_string_from_cstr(", "));
+		rt_string_concat(result, 1, get_node_name(node->right));
+
+		return result;
+	}
 	else
 		return get_node_name(node->left);
+}
+
+rt_value name_call_tail(struct node *node)
+{
+	rt_value result = rt_string_from_cstr(token_type_names[node->op]);
+
+	rt_string_concat(result, 1, rt_string_from_cstr("("));
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_call_tail(struct node *node)
+rt_value name_call_arguments(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("(");
 
-    sprintf(result, "%s(%s)", token_type_names[node->op], get_node_name(node->left));
-
-	return result;
-}
-
-char* name_call_arguments(struct node *node)
-{
-	char *result = malloc(100);
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	if(node->right)
-		sprintf(result, "(%s){%s}", get_node_name(node->left), get_node_name(node->right));
-	else
-		sprintf(result, "(%s)", get_node_name(node->left));
+	{
+		rt_string_concat(result, 1, rt_string_from_cstr("{"));
+		rt_string_concat(result, 1, get_node_name(node->right));
+		rt_string_concat(result, 1, rt_string_from_cstr("})"));
+	}
 
 	return result;
 }
 
-char* name_call(struct node *node)
+rt_value name_call(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = get_node_name(node->left);
 
-	sprintf(result, "%s.%s%s", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr("."));
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->middle, 0));
+	rt_string_concat(result, 1, get_node_name(node->right));
 
 	return result;
 }
 
-char* name_assign_call(struct node *node)
+rt_value name_lookup_tail(struct node *node)
 {
-	char* result = malloc(100);
-
-	if((rt_value)node->right > 1)
-		sprintf(result, "%s.%s(%s)", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle), get_node_name(node->right));
-	else
-		sprintf(result, "%s.%s()", get_node_name(node->left), rt_symbol_to_cstr((rt_value)node->middle));
-
-	return result;
+	return rt_string_from_cstr("(tail!");
 }
 
-char* name_lookup_tail(struct node *node)
+rt_value name_expressions(struct node *node)
 {
-	char* result = malloc(100);
-
-	sprintf(result, "tail!");
-
-	return result;
-}
-
-char* name_expressions(struct node *node)
-{
-	char* result = malloc(100);
+	rt_value result = get_node_name(node->left);
 
 	if(node->right)
-		sprintf(result, "%s; %s", get_node_name(node->left), get_node_name(node->right));
-	else
-		return get_node_name(node->left);
+	{
+		rt_string_concat(result, 1, rt_string_from_cstr("; "));
+		rt_string_concat(result, 1, get_node_name(node->right));
+	}
 
 	return result;
 }
 
-char* name_class(struct node *node)
+rt_value name_class(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("class ");
 
-	if(node->right)
-		sprintf(result, "class %s(%s)", rt_symbol_to_cstr((rt_value)node->left), get_node_name(node->right));
-	else
-		return get_node_name(node->left);
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
+	rt_string_concat(result, 1, rt_string_from_cstr("("));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_scope(struct node *node)
+rt_value name_scope(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("scope:(");
 
-	sprintf(result, "scope:(%s)", get_node_name(node->right));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_method(struct node *node)
+rt_value name_method(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("def ");
 
-	if(node->right)
-		sprintf(result, "def %s(%s)", rt_symbol_to_cstr((rt_value)node->left), get_node_name(node->right));
-	else
-		return get_node_name(node->left);
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
+	rt_string_concat(result, 1, rt_string_from_cstr("("));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-char* name_self(struct node *node)
+rt_value name_self(struct node *node)
 {
-	return "self";
+	return rt_string_from_cstr("self");
 }
 
-char* name_true(struct node *node)
+rt_value name_true(struct node *node)
 {
-	return "true";
+	return rt_string_from_cstr("true");
 }
 
-char* name_false(struct node *node)
+rt_value name_false(struct node *node)
 {
-	return "false";
+	return rt_string_from_cstr("false");
 }
 
-char* name_nil(struct node *node)
+rt_value name_nil(struct node *node)
 {
-	return "nil";
+	return rt_string_from_cstr("nil");
 }
 
-char* name_string(struct node *node)
+rt_value name_string(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("\"");
 
-	sprintf(result, "\"%s\"", node->left);
+	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr("\""));
 
 	return result;
 }
 
-char* name_string_continue(struct node *node)
+rt_value name_string_continue(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result;
 
 	if(node->left)
-		sprintf(result, "%s}%s#{%s", get_node_name(node->left), node->middle, get_node_name(node->right));
+	{
+		result = get_node_name(node->left);
+
+		rt_string_concat(result, 1, rt_string_from_cstr("}"));
+	}
 	else
-		sprintf(result, "\"%s#{%s", node->middle, get_node_name(node->right));
+	{
+		result = rt_string_from_cstr("\"");
+	}
+
+	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->middle));
+	rt_string_concat(result, 1, rt_string_from_cstr("#{"));
+	rt_string_concat(result, 1, get_node_name(node->right));
 
 	return result;
 }
 
-char* name_string_start(struct node *node)
+rt_value name_string_start(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = get_node_name(node->left);
 
-	sprintf(result, "%s}%s\"", get_node_name(node->left), node->right);
+	rt_string_concat(result, 1, rt_string_from_cstr("}"));
+	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->right));
 
 	return result;
 }
 
-char* name_unary(struct node *node)
+rt_value name_unary(struct node *node)
 {
-	char* result = malloc(100);
+	rt_value result = rt_string_from_cstr("(");
 
-	sprintf(result, "(%s%s)", token_type_names[node->op], get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(token_type_names[node->op]));
+	rt_string_concat(result, 1, get_node_name(node->left));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
 
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_assign_call, name_expressions, name_class, name_scope, name_method};
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_expressions, name_class, name_scope, name_method};
 
-char* get_node_name(struct node *node)
+rt_value get_node_name(struct node *node)
 {
     if (node)
         return get_node_name_procs[node->type](node);
     else
-        return "";
+        return rt_string_from_cstr("");
 }
 
 int main()
@@ -275,7 +302,7 @@ int main()
 		if (parser->err_count == 0)
 		{
 			printf("Parsing done.\n");
-			printf("Tree: %s\n", get_node_name(expression));
+			printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
 
 			block_t *block = gen_block(expression);
 

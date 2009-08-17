@@ -16,6 +16,7 @@ extern rt_value rt_String;
 rt_value rt_string_from_raw_str(char *str, unsigned int length);
 rt_value rt_string_from_cstr(const char *str);
 rt_value rt_string_from_hex(rt_value value);
+rt_value rt_string_from_int(rt_value value);
 
 static inline const char *rt_string_to_cstr(rt_value value)
 {

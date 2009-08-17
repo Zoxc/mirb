@@ -16,12 +16,13 @@ typedef enum {
 	B_SELF,
 	B_PUSH,
 	B_PUSH_IMM,
+	B_PUSH_RAW,
+	B_PUSH_UPVAL,
 	B_CALL,
 	B_CALL_SPLAT,
 	B_LOAD,
 	B_STORE,
 	B_TEST,
-	B_TEST_IMM, //TODO: Remove this
 	B_JMPT,
 	B_JMPF,
 	B_JMP,
@@ -29,6 +30,9 @@ typedef enum {
 	B_LABEL,
 	B_STRING,
 	B_INTERPOLATE,
+	B_UPVAL,
+	B_SEAL,
+	B_CLOSURE,
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,
@@ -45,6 +49,7 @@ typedef struct {
 typedef struct {
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
+	kvec_t(variable_t *) upvals;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
 	unsigned int self_ref;
@@ -60,6 +65,7 @@ static inline block_t *block_create(scope_t *scope)
 	result->self_ref = 0;
 
 	kv_init(result->vector);
+	kv_init(result->upvals);
 
 	return result;
 }
@@ -68,6 +74,7 @@ static inline void block_destroy(block_t *block)
 {
 	kh_destroy(rt_hash, block->label_usage);
 	kv_destroy(block->vector);
+	kv_destroy(block->upvals);
 	free(block);
 }
 
@@ -76,7 +83,7 @@ static inline rt_value block_get_label(block_t *block)
 	return block->label_count++;
 }
 
-static inline rt_value block_get_var(block_t *block)
+static inline variable_t *block_get_var(block_t *block)
 {
 	variable_t *temp = malloc(sizeof(variable_t));
 
@@ -85,7 +92,7 @@ static inline rt_value block_get_var(block_t *block)
 
 	block->scope->var_count[V_TEMP] += 1;
 
-	return (rt_value)temp;
+	return temp;
 }
 
 static inline unsigned int block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)

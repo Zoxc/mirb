@@ -26,7 +26,6 @@ bool scope_defined(scope_t *scope, rt_value name, bool recursive)
 
 variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 {
-	printf("making var %s(%d) in %x\n", rt_symbol_to_cstr(name), type, scope);
 	khiter_t k = kh_get(scope, scope->variables, name);
 
 	if (k != kh_end(scope->variables))
@@ -42,6 +41,7 @@ variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 	var->type = type;
 	var->name = name;
 	var->index = scope->var_count[type];
+	var->real = 0;
 
 	scope->var_count[type] += 1;
 

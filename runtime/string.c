@@ -36,6 +36,15 @@ rt_value rt_string_from_hex(rt_value value)
 	return rt_string_from_cstr(buffer);
 }
 
+rt_value rt_string_from_int(rt_value value)
+{
+	char buffer[15];
+
+	sprintf(buffer, "%d", value);
+
+	return rt_string_from_cstr(buffer);
+}
+
 rt_value rt_string_inspect(rt_value obj, unsigned int argc)
 {
 	rt_value result = rt_string_from_cstr("\"");

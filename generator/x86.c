@@ -47,11 +47,15 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 			return 6;
 
 		case B_CALL:
-			return 5 + 5 + 2 + 6;
+			if(op->right)
+				return 5 + 5 + 3 + 2 + 6;
+			else
+				return 5 + 5 + 2 + 2 + 6;
 
 		case B_PUSH:
 			return 3;
 
+		case B_PUSH_RAW:
 		case B_PUSH_IMM:
 			return 5;
 
@@ -200,6 +204,18 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 				generate_call(target, rt_support_lookup_method);
 
+				if(op->right)
+				{
+					generate_byte(target, 0x8B);
+					generate_byte(target, 0x4D);
+					generate_byte(target, (char)get_stack_index(block, op->right));
+				}
+				else
+				{
+					generate_byte(target, 0x31); // xor ecx, ecx
+					generate_byte(target, 0xC9);
+				}
+
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
@@ -234,6 +250,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			generate_stack_var_push(block, target, op->result);
 			break;
 
+		case B_PUSH_RAW:
 		case B_PUSH_IMM:
 			generate_stack_push(target, op->result);
 			break;
