@@ -50,13 +50,13 @@ variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 	return var;
 }
 
-variable_t *scope_define(scope_t *scope, rt_value name, rt_value type)
+variable_t *scope_define(scope_t *scope, rt_value name, rt_value type, bool recursive)
 {
 	if(scope_defined(scope, name, false))
 	{
 		return kh_value(scope->variables, kh_get(scope, scope->variables, name));
 	}
-	else if(scope_defined(scope, name, true))
+	else if(scope_defined(scope, name, true) && recursive)
 	{
 		variable_t *result = scope_declare_var(scope, name, V_UPVAL);
 
@@ -151,9 +151,9 @@ struct node *parse_identifier(struct parser *parser)
 			}
 			else
 			{
-				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
+				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 				result->right->left = alloc_node(N_VAR);
-				result->right->left->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
+				result->right->left->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 			}
 
 			result->right->right = parse_expression(parser);
@@ -176,7 +176,7 @@ struct node *parse_identifier(struct parser *parser)
 			else
 			{
 				result = alloc_node(N_ASSIGN);
-				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
+				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 			}
 
 			result->right = parse_expression(parser);
@@ -209,6 +209,9 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_DEF:
 			return parse_method(parser);
+
+		case T_YIELD:
+			return parse_yield(parser);
 
 		case T_STRING:
 			{

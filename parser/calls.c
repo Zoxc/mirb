@@ -19,6 +19,88 @@ struct node *parse_block(struct parser *parser)
 	return result;
 }
 
+bool has_arguments(struct parser *parser, bool force)
+{
+	if(is_expression(parser))
+	{
+		switch(parser_current(parser))
+		{
+			case T_ADD:
+			case T_SUB:
+				{
+					if(force)
+						return false;
+					else if(parser_token(parser)->whitespace)
+					{
+						token_t token;
+
+						parser_context(parser, &token);
+
+						next(parser);
+
+						bool result = !parser_token(parser)->whitespace;
+
+						parser_restore(parser, &token);
+
+						return result;
+					}
+					else
+						return false;
+				}
+				break;
+
+			default:
+				return true;
+		}
+	}
+	else
+		return false;
+}
+
+struct node *parse_arguments(struct parser *parser, bool has_args)
+{
+	if (has_args && parser_current(parser) != T_CURLY_OPEN)
+	{
+		if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
+		{
+			next(parser);
+
+			if(parser_current(parser) != T_PARAM_CLOSE)
+				return parse_argument(parser);
+
+			match(parser, T_PARAM_CLOSE);
+
+			return 0;
+		}
+		else
+			return parse_argument(parser);
+	}
+	else
+		return 0;
+}
+
+struct node *parse_yield(struct parser *parser)
+{
+	next(parser);
+
+	struct node *result = alloc_node(N_CALL);
+
+	result->left = alloc_node(N_VAR);
+
+	if(!parser->current_scope->block_var)
+		parser->current_scope->block_var = scope_define(parser->current_scope, 0, V_TEMP, false);
+
+	result->left->left = (void *)parser->current_scope->block_var;
+
+	result->middle = (void *)rt_symbol_from_cstr("call");
+
+	result->right = alloc_node(N_CALL_ARGUMENTS);
+	result->right->left = parse_arguments(parser, has_arguments(parser, false));
+	result->right->right = 0;
+
+	return result;
+}
+
 struct node *parse_call(struct parser *parser, rt_value symbol, struct node *child, bool default_var)
 {
 	if(!symbol && require(parser, T_IDENT))
@@ -28,43 +110,12 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		next(parser);
 	}
 
-	bool has_args = false;
 	bool local = false;
 
 	if(symbol)
 		local = scope_defined(parser->current_scope, symbol, true);
 
-	if (is_expression(parser))
-	{
-		switch(parser_current(parser))
-		{
-			case T_ADD:
-			case T_SUB:
-				{
-					if (default_var && local)
-						has_args = false;
-					else if(parser_token(parser)->whitespace)
-					{
-						token_t token;
-
-						parser_context(parser, &token);
-
-						next(parser);
-
-						has_args = !parser_token(parser)->whitespace;
-
-						parser_restore(parser, &token);
-
-					}
-					else
-						has_args = false;
-				}
-				break;
-
-			default:
-				has_args = true;
-		}
-	}
+	bool has_args = has_arguments(parser, default_var && local);
 
 	if(default_var && !has_args && (local || (symbol && rt_symbol_is_const(symbol)))) // Variable or constant
 	{
@@ -72,7 +123,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		{
 			struct node *result = alloc_node(N_VAR);
 
-			result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL);
+			result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 
 			return result;
 		}
@@ -93,23 +144,8 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		result->left = child;
 		result->middle = (void *)symbol;
 		result->right = alloc_node(N_CALL_ARGUMENTS);
-		result->right->left = 0;
+		result->right->left = parse_arguments(parser, has_args);
 		result->right->right = 0;
-
-		if (has_args && parser_current(parser) != T_CURLY_OPEN)
-		{
-			if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
-			{
-				next(parser);
-
-				if(parser_current(parser) != T_PARAM_CLOSE)
-					result->right->left = parse_argument(parser);
-
-				match(parser, T_PARAM_CLOSE);
-			}
-			else
-				result->right->left = parse_argument(parser);
-		}
 
 		switch(parser_current(parser))
 		{

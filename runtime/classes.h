@@ -31,7 +31,7 @@ static inline rt_value rt_class_of(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return rt_Fixnum;
-	else if (obj <= RT_NIL)
+	else if (obj <= RT_MAX)
 	{
 		switch(obj)
 		{

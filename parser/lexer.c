@@ -1,8 +1,8 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "do", "true", "false", "nil", "end"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
+	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "do", "yield", "true", "false", "nil", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
 
@@ -312,6 +312,7 @@ SINGLE_PROC(dot, T_DOT);
 SINGLE_PROC(comma, T_COMMA);
 SINGLE_PROC(square_open, T_SQUARE_OPEN);
 SINGLE_PROC(square_close, T_SQUARE_CLOSE);
+SINGLE_PROC(amp, T_AMP);
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
@@ -370,6 +371,7 @@ void parser_setup(void)
 	jump_table['{'] = curly_open_proc;
 	jump_table['}'] = curly_close_proc;
 	jump_table['"'] = double_quote_proc;
+	jump_table['&'] = amp_proc;
 
     jump_table[0] = null_proc;
 }

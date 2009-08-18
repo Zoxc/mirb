@@ -37,13 +37,16 @@ Factor <- Number
 	| Unless
 	| Class
 	| Method
+	| Yield
 	| "(", Expressions, ")"
 
 Class <- "class", Identifier, Sep, Statements, "end"
 
 Method <- "def", Identifier, ({MethodParameters}, Sep | "(", MethodParameters, ")"), Statements, "end"
 
-MethodParameters <- Identifier, (",", Identifier)*
+MethodParameters <- MethodParameter, (",", MethodParameter)*
+
+MethodParameter <- {"&" | "*"}, Identifier
 
 Case <- "case", (When+ {Else} | Else), "end"
 
@@ -66,6 +69,8 @@ AssignOp <- "="
 	| "/="
 
 Call <- Identifier, {Arguments | "(", Arguments, ")"}, {Block}
+
+Yield  <- {Arguments | "(", Arguments, ")"}
 
 Block <- "{", {BlockParameters}, Statements, "}"
 	| "do", {BlockParameters}, Statements, "end"

@@ -15,7 +15,7 @@ static inline bool rt_object_has_vars(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return false;
-	else if (obj <= RT_NIL)
+	else if (obj <= RT_MAX)
 		return false;
 	else
 		switch(RT_COMMON(obj)->flags & RT_TYPE_MASK)

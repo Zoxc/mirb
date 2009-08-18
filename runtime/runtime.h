@@ -36,15 +36,16 @@ struct rt_common {
 
 #define RT_COMMON(value) ((struct rt_common *)value)
 
-#define RT_FALSE 0
+#define RT_NIL 0
 #define RT_TRUE 2
-#define RT_NIL 4
+#define RT_FALSE 4
+#define RT_MAX 4
 
 static inline rt_type_t rt_type(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return C_FIXNUM;
-	else if (obj <= RT_NIL)
+	else if (obj <= RT_MAX)
 	{
 		switch(obj)
 		{
@@ -67,7 +68,7 @@ static inline rt_type_t rt_type(rt_value obj)
 
 static inline bool rt_test(rt_value value)
 {
-	return value & ~RT_NIL;
+	return value & ~RT_FALSE;
 }
 
 static inline rt_value rt_alloc(size_t size)

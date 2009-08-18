@@ -484,6 +484,9 @@ rt_compiled_block_t compile_block(block_t *block)
 	if (block->self_ref > 0)
 		block_size += 4;
 
+	if (block->scope->block_var)
+		block_size += 3;
+
 	for (size_t i = 0; i < kv_size(block->vector); i++)
 		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
 
@@ -513,6 +516,13 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x7D);
 		generate_byte(&target, 8);
+	}
+
+	if (block->scope->block_var)
+	{
+		generate_byte(&target, 0x89);
+		generate_byte(&target, 0x4D);
+		generate_byte(&target, (char)get_stack_index(block, (rt_value)block->scope->block_var));
 	}
 
 	for (size_t i = 0; i < kv_size(block->vector); i++)

@@ -71,11 +71,12 @@ typedef struct scope_t {
 	rt_value var_count[VARIABLE_TYPES];
 	khash_t(scope) *variables;
 	struct scope_t *owner;
+	variable_t *block_var;
 } scope_t;
 
 bool scope_defined(scope_t *scope, rt_value name, bool recursive);
 variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type);
-variable_t *scope_define(scope_t *scope, rt_value name, rt_value type);
+variable_t *scope_define(scope_t *scope, rt_value name, rt_value type, bool recursive);
 
 struct parser {
 	token_t token;
@@ -169,6 +170,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_NIL:
 		case T_STRING:
 		case T_STRING_START:
+		case T_YIELD:
 		case T_PARAM_OPEN:
 			return true;
 
