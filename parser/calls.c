@@ -19,7 +19,7 @@ struct node *parse_block(struct parser *parser)
 	return result;
 }
 
-bool has_arguments(struct parser *parser, bool force)
+bool has_arguments(struct parser *parser)
 {
 	if(is_expression(parser))
 	{
@@ -28,9 +28,7 @@ bool has_arguments(struct parser *parser, bool force)
 			case T_ADD:
 			case T_SUB:
 				{
-					if(force)
-						return false;
-					else if(parser_token(parser)->whitespace)
+					if(parser_token(parser)->whitespace)
 					{
 						token_t token;
 
@@ -95,7 +93,7 @@ struct node *parse_yield(struct parser *parser)
 	result->middle = (void *)rt_symbol_from_cstr("call");
 
 	result->right = alloc_node(N_CALL_ARGUMENTS);
-	result->right->left = parse_arguments(parser, has_arguments(parser, false));
+	result->right->left = parse_arguments(parser, has_arguments(parser));
 	result->right->right = 0;
 
 	return result;
@@ -115,7 +113,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	if(symbol)
 		local = scope_defined(parser->current_scope, symbol, true);
 
-	bool has_args = has_arguments(parser, default_var && local);
+	bool has_args = has_arguments(parser);
 
 	if(default_var && !has_args && (local || (symbol && rt_symbol_is_const(symbol)))) // Variable or constant
 	{
