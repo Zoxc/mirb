@@ -191,6 +191,7 @@ static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_va
 
 	scope->type = type;
 	scope->owner = parser->current_scope;
+	scope->block_var = 0;
 
 	result->left = (void *)scope;
 	result->type = N_SCOPE;

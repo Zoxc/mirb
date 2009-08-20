@@ -63,14 +63,16 @@ struct node *parse_arguments(struct parser *parser, bool has_args)
 	{
 		if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
 		{
+		    struct node *result = 0;
+
 			next(parser);
 
 			if(parser_current(parser) != T_PARAM_CLOSE)
-				return parse_argument(parser);
+				result = parse_argument(parser);
 
 			match(parser, T_PARAM_CLOSE);
 
-			return 0;
+			return result;
 		}
 		else
 			return parse_argument(parser);
