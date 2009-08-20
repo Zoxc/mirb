@@ -19,6 +19,31 @@ rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
 	return rt_lookup(obj, method);
 }
 
+rt_value __stdcall rt_support_define_class(rt_value name, rt_value super)
+{
+	rt_value obj;
+
+	__asm__("" : "=D" (obj));
+
+	if(obj == rt_main)
+		obj = rt_Object;
+
+	return rt_define_class(obj, name, super);
+}
+
+void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block)
+{
+	rt_value obj;
+
+	__asm__("" : "=D" (obj));
+
+	if(obj == rt_main)
+		obj = rt_Object;
+
+	rt_define_method(obj, name, block);
+}
+
+
 rt_upval_t *rt_support_upval_create()
 {
 	rt_value *real;

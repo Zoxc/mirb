@@ -30,29 +30,13 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 	rt_const_set(obj, name, value);
 }
 
-rt_value __stdcall rt_support_define_class(rt_value under, rt_value name, rt_value super)
-{
-	if(under == rt_main)
-		under = rt_Object;
-
-	return rt_define_class(under, name, super);
-}
-
-void __stdcall rt_support_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)
-{
-	if(obj == rt_main)
-		obj = rt_Object;
-
-	rt_define_method(obj, name, block);
-}
-
 rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
 {
 	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc));
 
 	RT_COMMON(closure)->flags = C_PROC;
 	RT_COMMON(closure)->class_of = rt_Proc;
-	RT_PROC(closure)->closure = closure;
+	RT_PROC(closure)->closure = block;
 	RT_PROC(closure)->upval_count = argc;
 	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
 

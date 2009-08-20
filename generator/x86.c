@@ -78,10 +78,10 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 			return 6;
 
 		case B_CLASS:
-			return 5 + 5 + 5 + 1 + 5 + 1 + 5 + 6;
+			return 5 + 5 + 1 + 5 + 6;
 
 		case B_METHOD:
-			return 5 + 5 + 1 + 5;
+			return 5 + 5 + 5;
 
 		case B_GET_CONST:
 			return 5 + 3 + 5 + 3;
@@ -249,11 +249,11 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			{
 				block_t *class_block = (block_t *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
-
+/*
 				generate_stack_push(target, rt_Object);
 				generate_stack_push(target, op->result);
 				generate_byte(target, 0x57); // push edi
-
+*/
 				generate_call(target, rt_support_define_class);
 
 				generate_stack_push(target, 1);
@@ -295,7 +295,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 				generate_stack_push(target, (rt_value)compiled);
 				generate_stack_push(target, op->result);
-				generate_byte(target, 0x57); // push edi
+				//generate_byte(target, 0x57); // push edi
 
 				generate_call(target, rt_support_define_method);
 			}
