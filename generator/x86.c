@@ -122,7 +122,7 @@ static inline int get_stack_index(block_t *block, rt_value var)
 	variable_t *_var = (variable_t *)var;
 
 	if(_var->type == V_PARAMETER)
-		return 8 + 8 + (block->scope->var_count[V_PARAMETER] - 1 -  _var->index) * 4;
+		return 8 + 8 + (block->scope->var_count[V_PARAMETER] - 1 -  _var->index) * 4 + (block->scope->type == S_CLOSURE ? 4 : 0);
 	else
 	{
 		int index;

@@ -46,13 +46,13 @@ void __stdcall rt_support_define_method(rt_value obj, rt_value name, rt_compiled
 	rt_define_method(obj, name, block);
 }
 
-rt_value rt_support_closure(rt_compiled_block_t block, unsigned int argc, ...)
+rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
 {
 	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc));
 
 	RT_COMMON(closure)->flags = C_PROC;
 	RT_COMMON(closure)->class_of = rt_Proc;
-	RT_PROC(closure)->block = block;
+	RT_PROC(closure)->closure = closure;
 	RT_PROC(closure)->upval_count = argc;
 	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
 
