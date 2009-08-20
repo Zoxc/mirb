@@ -22,19 +22,19 @@ rt_value __cdecl rt_proc_call(rt_value obj, unsigned int argc, ...)
 	switch(argc)
 	{
 		case 0:
-			return RT_PROC(obj)->block(obj, argc);
+			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, obj, argc);
 
 		case 1:
-			return RT_PROC(obj)->block(obj, argc, args[0]);
+			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, obj, argc, args[0]);
 
 		case 2:
-			return RT_PROC(obj)->block(obj, argc, args[0], args[1]);
+			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, obj, argc, args[0], args[1]);
 
 		case 3:
-			return RT_PROC(obj)->block(obj, argc, args[0], args[1], args[2]);
+			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, obj, argc, args[0], args[1], args[2]);
 
 		case 4:
-			return RT_PROC(obj)->block(obj, argc, args[0], args[1], args[2], args[3]);
+			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, obj, argc, args[0], args[1], args[2], args[3]);
 
 		default:
 			assert(0);

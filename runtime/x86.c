@@ -35,13 +35,13 @@ rt_upval_t *rt_support_upval_create()
 	return result;
 }
 
-rt_value __stdcall rt_support_get_upval(rt_value closure)
+rt_value __stdcall rt_support_get_upval(rt_upval_t **upvals)
 {
 	unsigned int index;
 
 	__asm__("" : "=a" (index));
 
-	rt_upval_t *upval = RT_PROC(closure)->upvals[index];
+	rt_upval_t *upval = upvals[index];
 
 	if(!upval->sealed)
 		return *(upval->val.upval);
@@ -49,13 +49,13 @@ rt_value __stdcall rt_support_get_upval(rt_value closure)
 		return upval->val.local;
 }
 
-void __stdcall rt_support_set_upval(rt_value closure, rt_value value)
+void __stdcall rt_support_set_upval(rt_upval_t **upvals, rt_value value)
 {
 	unsigned int index;
 
 	__asm__("" : "=a" (index));
 
-	rt_upval_t *upval = RT_PROC(closure)->upvals[index];
+	rt_upval_t *upval = upvals[index];
 
 	if(!upval->sealed)
 		*(upval->val.upval) = value;
