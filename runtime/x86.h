@@ -3,6 +3,8 @@
 #include "classes.h"
 #include "support.h"
 
+rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...);
+
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super);
 void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block);
 

@@ -4,6 +4,7 @@
 
 struct rt_proc {
 	struct rt_common common;
+	rt_value self;
 	rt_compiled_closure_t closure;
 	rt_upval_t **upvals;
 	unsigned int upval_count;

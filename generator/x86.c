@@ -515,7 +515,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x57);
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x7D);
-		generate_byte(&target, 8);
+		generate_byte(&target, block->scope->type == S_CLOSURE ? 12 : 8);
 	}
 
 	if (block->scope->block_var)

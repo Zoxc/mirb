@@ -6,6 +6,37 @@
 #include "proc.h"
 #include "x86.h"
 
+rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
+{
+	rt_value self;
+
+	__asm__("" : "=D" (self));
+
+	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc));
+
+	RT_COMMON(closure)->flags = C_PROC;
+	RT_COMMON(closure)->class_of = rt_Proc;
+	RT_PROC(closure)->self = self;
+	RT_PROC(closure)->closure = block;
+	RT_PROC(closure)->upval_count = argc;
+	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
+
+	printf("making a closure off block %x on %s\n", block, rt_string_to_cstr(rt_inspect(self)));
+
+	va_list _args;
+	va_start(_args, argc);
+
+	for(int i = argc - 1; i >= 0; i--)
+	{
+		RT_PROC(closure)->upvals[i] = va_arg(_args, rt_upval_t *);
+		printf("adding upval with value %s as index %d\n", rt_string_to_cstr(rt_inspect(*RT_PROC(closure)->upvals[i]->val.upval)), (argc - 1) - i);
+	}
+
+	va_end(_args);
+
+	return closure;
+}
+
 rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
 {
 	rt_value method;

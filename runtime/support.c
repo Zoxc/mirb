@@ -30,32 +30,6 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 	rt_const_set(obj, name, value);
 }
 
-rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
-{
-	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc));
-
-	RT_COMMON(closure)->flags = C_PROC;
-	RT_COMMON(closure)->class_of = rt_Proc;
-	RT_PROC(closure)->closure = block;
-	RT_PROC(closure)->upval_count = argc;
-	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
-
-	printf("making a closure off block %x\n", block);
-
-	va_list _args;
-	va_start(_args, argc);
-
-	for(int i = argc - 1; i >= 0; i--)
-	{
-		RT_PROC(closure)->upvals[i] = va_arg(_args, rt_upval_t *);
-		printf("adding upval with value %s as index %d\n", rt_string_to_cstr(rt_inspect(*RT_PROC(closure)->upvals[i]->val.upval)), (argc - 1) - i);
-	}
-
-	va_end(_args);
-
-	return closure;
-}
-
 void __stdcall rt_support_seal_upval(rt_upval_t *upval)
 {
 	printf("sealing upval with value %s\n", rt_string_to_cstr(rt_inspect(*(upval->val.upval))));
