@@ -21,7 +21,7 @@ rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
 	RT_PROC(closure)->upval_count = argc;
 	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
 
-	printf("making a closure off block %x on %s\n", block, rt_string_to_cstr(rt_inspect(self)));
+	printf("making a closure off block %x on %s\n", (rt_value)block, rt_string_to_cstr(rt_inspect(self)));
 
 	va_list _args;
 	va_start(_args, argc);
@@ -37,7 +37,7 @@ rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
 	return closure;
 }
 
-rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
+rt_compiled_block_t rt_support_lookup_method(rt_value obj, ...)
 {
 	rt_value method;
 

@@ -7,8 +7,8 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin\Debug\mirb" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj\Debug\" />
+				<Option output="bin/Debug/mirb" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -17,8 +17,8 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin\Release\mirb" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj\Release\" />
+				<Option output="bin/Release/mirb" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -35,99 +35,96 @@
 			<Add option="-Wall" />
 			<Add option="-std=c99" />
 		</Compiler>
-		<Linker>
-			<Add library="BeaEngine" />
-		</Linker>
-		<Unit filename="generator\bytecode.c">
+		<Unit filename="generator/bytecode.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\bytecode.h" />
-		<Unit filename="generator\disassembly.c">
+		<Unit filename="generator/bytecode.h" />
+		<Unit filename="generator/disassembly.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\disassembly.h" />
-		<Unit filename="generator\generator.c">
+		<Unit filename="generator/disassembly.h" />
+		<Unit filename="generator/generator.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\generator.h" />
-		<Unit filename="generator\x86.c">
+		<Unit filename="generator/generator.h" />
+		<Unit filename="generator/x86.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\x86.h" />
+		<Unit filename="generator/x86.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\calls.c">
+		<Unit filename="parser/calls.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\calls.h" />
-		<Unit filename="parser\control_blocks.c">
+		<Unit filename="parser/calls.h" />
+		<Unit filename="parser/control_blocks.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\control_blocks.h" />
-		<Unit filename="parser\lexer.c">
+		<Unit filename="parser/control_blocks.h" />
+		<Unit filename="parser/lexer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\lexer.h" />
-		<Unit filename="parser\parser.c">
+		<Unit filename="parser/lexer.h" />
+		<Unit filename="parser/parser.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\parser.h" />
-		<Unit filename="parser\structures.c">
+		<Unit filename="parser/parser.h" />
+		<Unit filename="parser/structures.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\structures.h" />
-		<Unit filename="runtime\bool.c">
+		<Unit filename="parser/structures.h" />
+		<Unit filename="runtime/bool.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\bool.h" />
-		<Unit filename="runtime\classes.c">
+		<Unit filename="runtime/bool.h" />
+		<Unit filename="runtime/classes.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\classes.h" />
-		<Unit filename="runtime\code_heap.c">
+		<Unit filename="runtime/classes.h" />
+		<Unit filename="runtime/code_heap.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\code_heap.h" />
-		<Unit filename="runtime\constant.c">
+		<Unit filename="runtime/code_heap.h" />
+		<Unit filename="runtime/constant.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\constant.h" />
-		<Unit filename="runtime\fixnum.c">
+		<Unit filename="runtime/constant.h" />
+		<Unit filename="runtime/fixnum.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\fixnum.h" />
-		<Unit filename="runtime\method.c">
+		<Unit filename="runtime/fixnum.h" />
+		<Unit filename="runtime/method.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\method.h" />
-		<Unit filename="runtime\proc.c">
+		<Unit filename="runtime/method.h" />
+		<Unit filename="runtime/proc.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\proc.h" />
-		<Unit filename="runtime\runtime.c">
+		<Unit filename="runtime/proc.h" />
+		<Unit filename="runtime/runtime.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\runtime.h" />
-		<Unit filename="runtime\string.c">
+		<Unit filename="runtime/runtime.h" />
+		<Unit filename="runtime/string.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\string.h" />
-		<Unit filename="runtime\support.c">
+		<Unit filename="runtime/string.h" />
+		<Unit filename="runtime/support.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\support.h" />
-		<Unit filename="runtime\symbol.c">
+		<Unit filename="runtime/support.h" />
+		<Unit filename="runtime/symbol.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\symbol.h" />
-		<Unit filename="runtime\x86.c">
+		<Unit filename="runtime/symbol.h" />
+		<Unit filename="runtime/x86.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\x86.h" />
-		<Unit filename="vendor\khash.h" />
-		<Unit filename="vendor\kvec.h" />
+		<Unit filename="runtime/x86.h" />
+		<Unit filename="vendor/khash.h" />
+		<Unit filename="vendor/kvec.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

@@ -476,7 +476,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	unsigned int block_size = 3;
 	unsigned int stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP];
 
-	printf("Compiling block %x:\n", block);
+	printf("Compiling block %x:\n", (rt_value)block);
 
 	if (stack_vars > 0)
 		block_size += 6;
@@ -536,11 +536,13 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x5D);
 	generate_byte(&target, 0xC3);
 
-	dump_code((void *)result, target - (unsigned char *)result);
+    #ifdef WINDOWS
+        dump_code((void *)result, target - (unsigned char *)result);
+	#endif
 
 	assert((unsigned char *)result + block_size == target);
 
-	printf("End compiling block %x:\n", block);
+	printf("End compiling block %x:\n", (rt_value)block);
 
 	return result;
 }

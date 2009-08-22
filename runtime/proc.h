@@ -16,4 +16,4 @@ extern rt_value rt_Proc;
 
 void rt_proc_init(void);
 
-rt_value __cdecl rt_proc_call(rt_value obj, unsigned int argc, ...);
+rt_value rt_proc_call(rt_value obj, unsigned int argc, ...);

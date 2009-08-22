@@ -9,7 +9,7 @@ typedef struct {
 	bool sealed;
 } rt_upval_t;
 
-typedef rt_value (__cdecl *rt_compiled_closure_t)(rt_upval_t **upvals, rt_value obj, unsigned int argc, ...);
+typedef rt_value (*rt_compiled_closure_t)(rt_upval_t **upvals, rt_value obj, unsigned int argc, ...);
 
 void __stdcall rt_support_seal_upval(rt_upval_t *upval);
 

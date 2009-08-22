@@ -1,5 +1,6 @@
 #include "disassembly.h"
 
+#ifdef WINDOWS
 void dump_hex(unsigned char* address, int length)
 {
 	int MinLength = 7 - length;
@@ -51,3 +52,4 @@ void dump_code(unsigned char* address, int length)
 
 	assert(VirtualProtect(address, length, Flags, &Flags)); // Terminate("DumpCode: Unable to restore address 0x%08X (%u).\n", address, GetLastError());
 }
+#endif

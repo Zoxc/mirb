@@ -350,7 +350,7 @@ block_t *gen_block(struct node *node)
 {
 	block_t *block = block_create((void *)node->left);
 
-	printf("Generating block %x:\n", block);
+	printf("Generating block %x:\n", (rt_value)block);
 
 	variable_t *result = block_get_var(block);
 
@@ -363,7 +363,7 @@ block_t *gen_block(struct node *node)
 
 	block_print(block);
 
-	printf("End generating block %x:\n", block);
+	printf("End generating block %x:\n", (rt_value)block);
 
 	return block;
 }

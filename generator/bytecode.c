@@ -126,7 +126,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_STRING:
-			printf("string %s, \"%s\"", variable_name(op->result), op->left);
+			printf("string %s, \"%s\"", variable_name(op->result), (char *)op->left);
 			break;
 
 		case B_INTERPOLATE:
