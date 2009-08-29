@@ -1,13 +1,11 @@
 #include "classes.h"
 #include "runtime.h"
-#include "symbol.h"
-#include "string.h"
 #include "constant.h"
+#include "classes/symbol.h"
+#include "classes/string.h"
+#include "classes/module.h"
 
 rt_value rt_main;
-rt_value rt_Class;
-rt_value rt_Module;
-rt_value rt_Object;
 
 khash_t(rt_hash) *object_var_hashes;
 
@@ -71,6 +69,19 @@ rt_value rt_class_create_bare(rt_value super)
 
 	RT_COMMON(c)->flags = C_CLASS;
 	RT_COMMON(c)->class_of = rt_Class;
+	RT_OBJECT(c)->vars = kh_init(rt_hash);
+	RT_CLASS(c)->super = super;
+	RT_CLASS(c)->methods = kh_init(rt_block);
+
+	return c;
+}
+
+rt_value rt_module_create_bare(rt_value super)
+{
+	rt_value c = rt_alloc(sizeof(struct rt_class));
+
+	RT_COMMON(c)->flags = C_MODULE;
+	RT_COMMON(c)->class_of = rt_Module;
 	RT_OBJECT(c)->vars = kh_init(rt_hash);
 	RT_CLASS(c)->super = super;
 	RT_CLASS(c)->methods = kh_init(rt_block);
@@ -153,6 +164,20 @@ rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 	return obj;
 }
 
+rt_value rt_define_module(rt_value under, rt_value name)
+{
+	if(rt_const_defined(under, name))
+		return rt_const_get(under, name);
+
+	rt_value obj = rt_module_create_bare(0);
+
+	rt_class_name(obj, under, name);
+
+	printf("Defining module %s\n", rt_string_to_cstr(rt_inspect(obj)));
+
+	return obj;
+}
+
 void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)
 {
 	rt_class_set_method(obj, name, block);
@@ -166,107 +191,10 @@ void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t
 }
 
 /*
-	Object
-*/
-
-rt_value rt_object_tap(rt_value obj, unsigned int argc)
-{
-	return obj;
-}
-
-rt_value rt_object_proc(rt_value obj, unsigned int argc)
-{
-	rt_value block;
-
-	__asm__("" : "=c" (block));
-
-	if(block)
-		return block;
-	else
-		return RT_NIL;
-}
-
-rt_value rt_object_allocate(rt_value obj, unsigned int argc)
-{
-	rt_value result = rt_alloc(sizeof(struct rt_object));
-
-	RT_COMMON(result)->flags = C_OBJECT;
-	RT_COMMON(result)->class_of = obj;
-	RT_OBJECT(result)->vars = 0;
-
-	return result;
-}
-
-rt_value rt_object_inspect(rt_value obj, unsigned int argc)
-{
-    return RT_CALL_CSTR(obj, "to_s", 0);
-}
-
-rt_value rt_object_to_s(rt_value obj, unsigned int argc)
-{
-	rt_value c = rt_real_class_of(obj);
-	rt_value name = rt_object_get_var(c, rt_symbol_from_cstr("__classname__"));
-
-	if(rt_test(name))
-	{
-		rt_value result = rt_string_from_cstr("#<");
-
-		rt_string_concat(result, 1, name);
-		rt_string_concat(result, 1, rt_string_from_cstr(":0x"));
-		rt_string_concat(result, 1, rt_string_from_hex(obj));
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
-
-		return result;
-	}
-	else
-	{
-		rt_value result = rt_string_from_cstr("#<0x");
-
-		rt_string_concat(result, 1, rt_string_from_hex(obj));
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
-
-		return result;
-	}
-}
-
-/*
-	Class
-*/
-
-rt_value rt_class_to_s(rt_value obj, unsigned int argc)
-{
-	rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classname__"));
-
-	if(rt_test(name))
-		return name;
-	else if(RT_COMMON(obj)->flags & RT_CLASS_SINGLETON)
-	{
-		rt_value real = rt_object_get_var(obj, rt_symbol_from_cstr("__attached__"));
-
-		real = RT_CALL_CSTR(real, "inspect", 0);
-
-		rt_value result = rt_string_from_cstr("#<Class:");
-		rt_string_concat(result, 1, real);
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
-
-		return result;
-	}
-	else
-	{
-		rt_value result = rt_string_from_cstr("#<Class:0x");
-
-		rt_string_concat(result, 1, rt_string_from_hex(obj));
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
-
-		return result;
-	}
-}
-
-/*
 	main
 */
 
-rt_value rt_main_to_s(rt_value obj, unsigned int argc)
+rt_value rt_main_to_s(rt_value obj, size_t argc)
 {
 	return rt_string_from_cstr("main");
 }
@@ -293,15 +221,6 @@ void rt_setup_classes(void)
 	rt_class_name(rt_Class, rt_Object, rt_symbol_from_cstr("Class"));
 	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
 	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
-
-    rt_define_method(rt_Object, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_object_inspect);
-	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_class_to_s);
-
-    rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_object_to_s);
-    rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), (rt_compiled_block_t)rt_object_tap);
-    rt_define_method(rt_Object, rt_symbol_from_cstr("proc"), (rt_compiled_block_t)rt_object_proc);
-
-	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), (rt_compiled_block_t)rt_object_allocate);
 
 	rt_main = rt_object_allocate(rt_Object, 0);
 

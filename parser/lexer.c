@@ -2,7 +2,7 @@
 #include "parser.h"
 
 char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "class", "def", "self", "do", "yield", "true", "false", "nil", "end"};
+	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
 
@@ -37,7 +37,7 @@ void parser_destroy(struct parser *parser)
 
 char* get_token_str(token_t *token)
 {
-    unsigned int length = (unsigned int)(token->stop - token->start);
+    size_t length = (size_t)(token->stop - token->start);
     char* result = malloc(length + 1);
     memcpy(result, token->start, length);
     result[length] = 0;
@@ -166,7 +166,7 @@ static token_type ident_proc(token_t *token)
 	return T_IDENT;
 }
 
-static char *build_double_quote_string(const char *start, unsigned int length)
+static char *build_double_quote_string(const char *start, size_t length)
 {
 	char *result = malloc(length + 1);
 	char *writer = result;
@@ -206,7 +206,7 @@ done:
 static token_type parse_double_quote_string(token_t *token, bool continues)
 {
 	const char *start = token->input;
-    unsigned int length = 0;
+    size_t length = 0;
     token_type result = T_STRING;
 
 	while(1)

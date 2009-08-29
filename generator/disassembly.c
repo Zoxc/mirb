@@ -8,7 +8,7 @@ void dump_hex(unsigned char* address, int length)
 	int Index = 0;
 
 	while(Index < length)
-		printf(" %.2X", (unsigned int)*(address + Index++));
+		printf(" %.2X", (size_t)*(address + Index++));
 
 	while(MinLength-- > 0)
 		printf("   ");
@@ -16,9 +16,9 @@ void dump_hex(unsigned char* address, int length)
 
 void dump_instruction(DISASM* instruction, int length)
 {
-	printf("0x%08X:", instruction->VirtualAddr == 0 ? (unsigned int)instruction->EIP : (unsigned int)instruction->VirtualAddr);
+	printf("0x%08X:", instruction->VirtualAddr == 0 ? (size_t)instruction->EIP : (size_t)instruction->VirtualAddr);
 
-	dump_hex((unsigned char*)(unsigned int)instruction->EIP, length == -1 ? 1 : length);
+	dump_hex((unsigned char*)(size_t)instruction->EIP, length == -1 ? 1 : length);
 
 	if(length == -1)
 		printf(" ??\n");
@@ -38,7 +38,7 @@ void dump_code(unsigned char* address, int length)
 
 	memset(&Instruction, 0, sizeof(DISASM));
 	Instruction.Options = NasmSyntax | PrefixedNumeral;
-	Instruction.EIP = (unsigned int)address;
+	Instruction.EIP = (size_t)address;
 
 	do
 	{
@@ -48,7 +48,7 @@ void dump_code(unsigned char* address, int length)
 
 		Instruction.EIP += InstructionLength;
 	}
-	while((unsigned int)Instruction.EIP < (unsigned int)address + length);
+	while((size_t)Instruction.EIP < (size_t)address + length);
 
 	assert(VirtualProtect(address, length, Flags, &Flags)); // Terminate("DumpCode: Unable to restore address 0x%08X (%u).\n", address, GetLastError());
 }

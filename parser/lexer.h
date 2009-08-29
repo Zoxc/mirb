@@ -44,6 +44,7 @@ typedef enum {
 	T_WHEN,
 	T_CASE,
 	T_CLASS,
+	T_MODULE,
 	T_DEF,
 	T_SELF,
 	T_DO,

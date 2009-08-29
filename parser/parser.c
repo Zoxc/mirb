@@ -1,4 +1,4 @@
-#include "../runtime/symbol.h"
+#include "../runtime/classes/symbol.h"
 #include "parser.h"
 #include "calls.h"
 #include "control_blocks.h"
@@ -206,6 +206,9 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_CLASS:
 			return parse_class(parser);
+
+		case T_MODULE:
+			return parse_module(parser);
 
 		case T_DEF:
 			return parse_method(parser);

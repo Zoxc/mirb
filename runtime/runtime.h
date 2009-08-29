@@ -8,9 +8,9 @@
 
 #define RT_FLAG_FIXNUM 1
 
-typedef unsigned int rt_value;
+typedef size_t rt_value;
 
-typedef rt_value (*rt_compiled_block_t)(rt_value obj, unsigned int argc, ...);
+typedef rt_value (*rt_compiled_block_t)(rt_value obj, size_t argc, ...);
 
 KHASH_MAP_INIT_INT(rt_hash, rt_value);
 KHASH_MAP_INIT_INT(rt_block, rt_compiled_block_t);
@@ -30,7 +30,7 @@ typedef enum {
 } rt_type_t;
 
 struct rt_common {
-	unsigned int flags;
+	size_t flags;
 	rt_value class_of;
 };
 
@@ -93,6 +93,6 @@ rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name);
 #define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), argc, #__VA_ARGS__))
 #define RT_CALL(obj, symbol, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, #__VA_ARGS__))
 
-rt_value rt_dump_call(rt_value obj, unsigned int argc, ...);
+rt_value rt_dump_call(rt_value obj, size_t argc, ...);
 
 

@@ -1,6 +1,6 @@
 #include "bytecode.h"
-#include "../runtime/string.h"
-#include "../runtime/fixnum.h"
+#include "../runtime/classes/string.h"
+#include "../runtime/classes/fixnum.h"
 
 const char *variable_name(rt_value var)
 {
@@ -143,6 +143,10 @@ void opcode_print(opcode_t *op)
 
 		case B_CLASS:
 			printf("class %s, %x", rt_symbol_to_cstr(op->result), op->left);
+			break;
+
+		case B_MODULE:
+			printf("module %s, %x", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
 		case B_METHOD:

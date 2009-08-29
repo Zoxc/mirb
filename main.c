@@ -1,9 +1,9 @@
 #include "globals.h"
 #include "parser/lexer.h"
 #include "parser/parser.h"
-#include "runtime/symbol.h"
 #include "runtime/classes.h"
-#include "runtime/string.h"
+#include "runtime/classes/symbol.h"
+#include "runtime/classes/string.h"
 #include "generator/generator.h"
 #include "generator/x86.h"
 
@@ -171,6 +171,18 @@ rt_value name_class(struct node *node)
 	return result;
 }
 
+rt_value name_module(struct node *node)
+{
+	rt_value result = rt_string_from_cstr("module ");
+
+	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
+	rt_string_concat(result, 1, rt_string_from_cstr("("));
+	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+
+	return result;
+}
+
 rt_value name_scope(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("scope:(");
@@ -266,7 +278,7 @@ rt_value name_unary(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_expressions, name_class, name_scope, name_method};
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_expressions, name_class, name_module, name_scope, name_method};
 
 rt_value get_node_name(struct node *node)
 {

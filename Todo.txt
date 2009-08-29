@@ -1,0 +1,18 @@
+[X] Local variables
+[X] Methods
+[X] Blocks/Closures
+[X] Classes
+[X] Strings
+[X] String interpolation
+[ ] Arrays
+[ ] Hashes
+[ ] Class inheritance
+[ ] Instance variables
+[ ] Singleton class of variable syntax
+[ ] Class variables
+[ ] Global variables
+[ ] Exception handling
+[ ] Garbage collection
+[ ] Splat operators
+[ ] Modules
+[ ] BasicObject

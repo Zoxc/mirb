@@ -1,6 +1,7 @@
 #pragma once
 #include "../globals.h"
 #include "classes.h"
+#include "classes/symbol.h"
 
 static inline bool rt_const_defined(rt_value obj, rt_value name)
 {

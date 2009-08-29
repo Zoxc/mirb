@@ -1,12 +1,12 @@
 #include "classes.h"
 #include "runtime.h"
-#include "symbol.h"
-#include "string.h"
 #include "constant.h"
-#include "proc.h"
 #include "x86.h"
+#include "classes/symbol.h"
+#include "classes/string.h"
+#include "classes/proc.h"
 
-rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...)
+rt_value rt_support_closure(rt_compiled_closure_t block, size_t argc, ...)
 {
 	rt_value self;
 
@@ -62,6 +62,18 @@ rt_value __stdcall rt_support_define_class(rt_value name, rt_value super)
 	return rt_define_class(obj, name, super);
 }
 
+rt_value __stdcall rt_support_define_module(rt_value name)
+{
+	rt_value obj;
+
+	__asm__("" : "=D" (obj));
+
+	if(obj == rt_main)
+		obj = rt_Object;
+
+	return rt_define_module(obj, name);
+}
+
 void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block)
 {
 	rt_value obj;
@@ -93,7 +105,7 @@ rt_upval_t *rt_support_upval_create()
 
 rt_value __stdcall rt_support_get_upval(rt_upval_t **upvals)
 {
-	unsigned int index;
+	size_t index;
 
 	__asm__("" : "=a" (index));
 
@@ -107,7 +119,7 @@ rt_value __stdcall rt_support_get_upval(rt_upval_t **upvals)
 
 void __stdcall rt_support_set_upval(rt_upval_t **upvals, rt_value value)
 {
-	unsigned int index;
+	size_t index;
 
 	__asm__("" : "=a" (index));
 

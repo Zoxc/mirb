@@ -2,7 +2,7 @@
 
 #include "../globals.h"
 #include "../runtime/classes.h"
-#include "../runtime/symbol.h"
+#include "../runtime/classes/symbol.h"
 #include "../parser/parser.h"
 
 typedef enum {
@@ -38,6 +38,7 @@ typedef enum {
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,
+	B_MODULE,
 	B_METHOD
 } opcode_type_t;
 
@@ -54,7 +55,7 @@ typedef struct {
 	kvec_t(variable_t *) upvals;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
-	unsigned int self_ref;
+	size_t self_ref;
 } block_t;
 
 static inline block_t *block_create(scope_t *scope)
@@ -97,7 +98,7 @@ static inline variable_t *block_get_var(block_t *block)
 	return temp;
 }
 
-static inline unsigned int block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
+static inline size_t block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
 {
 	opcode_t *op = malloc(sizeof(opcode_t));
 	op->type = type;

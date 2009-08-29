@@ -1,5 +1,5 @@
 #include "structures.h"
-#include "../runtime/symbol.h"
+#include "../runtime/classes/symbol.h"
 
 struct node *parse_class(struct parser *parser)
 {
@@ -21,6 +21,35 @@ struct node *parse_class(struct parser *parser)
 	scope_t *scope;
 
 	result->right = alloc_scope(parser, &scope, S_CLASS);
+	result->right->right = parse_statements(parser);
+
+	parser->current_scope = scope->owner;
+
+	match(parser, T_END);
+
+	return result;
+}
+
+struct node *parse_module(struct parser *parser)
+{
+	next(parser);
+
+	struct node *result = alloc_node(N_MODULE);
+
+	if(require(parser, T_IDENT))
+	{
+		result->left = (void *)rt_symbol_from_parser(parser);
+
+		next(parser);
+	}
+	else
+		result->left = 0;
+
+	parse_sep(parser);
+
+	scope_t *scope;
+
+	result->right = alloc_scope(parser, &scope, S_MODULE);
 	result->right->right = parse_statements(parser);
 
 	parser->current_scope = scope->owner;

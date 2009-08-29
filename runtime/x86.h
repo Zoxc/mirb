@@ -3,9 +3,11 @@
 #include "classes.h"
 #include "support.h"
 
-rt_value rt_support_closure(rt_compiled_closure_t block, unsigned int argc, ...);
+rt_value rt_support_closure(rt_compiled_closure_t block, size_t argc, ...);
 
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super);
+rt_value __stdcall rt_support_define_module(rt_value name);
+
 void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block);
 
 rt_compiled_block_t rt_support_lookup_method(rt_value obj, ...);

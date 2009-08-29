@@ -1,7 +1,7 @@
 #include "generator.h"
-#include "../runtime/symbol.h"
 #include "../runtime/classes.h"
-#include "../runtime/fixnum.h"
+#include "../runtime/classes/symbol.h"
+#include "../runtime/classes/fixnum.h"
 
 typedef void(*generator)(block_t *block, struct node *node, variable_t *var);
 
@@ -49,7 +49,7 @@ static void gen_string_continue(block_t *block, struct node *node, variable_t *v
 	block_push(block, B_PUSH, (rt_value)interpolated, 0, 0);
 }
 
-static unsigned int gen_string_arg_count(struct node *node)
+static size_t gen_string_arg_count(struct node *node)
 {
 	if(node->left)
 		return 2 + gen_string_arg_count(node->left);
@@ -67,7 +67,7 @@ static void gen_string_start(block_t *block, struct node *node, variable_t *var)
 	block_push(block, B_STRING, (rt_value)string, (rt_value)node->right, 0);
 	block_push(block, B_PUSH, (rt_value)string, 0, 0);
 
-	unsigned int argc = gen_string_arg_count(node->left) + 1;
+	size_t argc = gen_string_arg_count(node->left) + 1;
 
 	block_push(block, B_PUSH_IMM, argc, 0, 0);
 	block_push(block, B_INTERPOLATE, (rt_value)var, argc + 1, 0);
@@ -233,6 +233,15 @@ static void gen_class(block_t *block, struct node *node, variable_t *var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
 }
 
+static void gen_module(block_t *block, struct node *node, variable_t *var)
+{
+	block->self_ref++;
+	block_push(block, B_MODULE, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
+
+	if (var)
+		block_push(block, B_STORE, (rt_value)var, 0, 0);
+}
+
 static void gen_method(block_t *block, struct node *node, variable_t *var)
 {
 	block->self_ref++;
@@ -299,7 +308,7 @@ static void gen_call(block_t *block, struct node *node, variable_t *var)
 
 		khiter_t k;
 		khash_t(scope) *hash = block_attach->scope->variables;
-		unsigned int upvals = 0;
+		size_t upvals = 0;
 
 		for (k = kh_begin(hash); k != kh_end(hash); ++k)
 		{
@@ -337,7 +346,7 @@ static void gen_warn(block_t *block, struct node *node, variable_t *var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_expressions, gen_class, /*N_SCOPE*/gen_warn, gen_method};
+generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, (generator)gen_argument, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, variable_t *var)
 {

@@ -1,29 +1,12 @@
 #pragma once
 #include "../globals.h"
 #include "runtime.h"
-#include "bool.h"
-#include "fixnum.h"
-
-#define RT_CLASS_SINGLETON RT_USER_FLAG(0)
-
-struct rt_object {
-	struct rt_common common;
-	khash_t(rt_hash) *vars;
-};
-
-struct rt_class {
-	struct rt_object object;
-	rt_value super;
-	khash_t(rt_block) *methods;
-};
-
-#define RT_CLASS(value) ((struct rt_class *)value)
-#define RT_OBJECT(value) ((struct rt_object *)value)
+#include "classes/bool.h"
+#include "classes/fixnum.h"
+#include "classes/class.h"
+#include "classes/object.h"
 
 extern rt_value rt_main;
-extern rt_value rt_Class;
-extern rt_value rt_Module;
-extern rt_value rt_Object;
 
 extern khash_t(rt_hash) *object_var_hashes;
 
@@ -119,12 +102,15 @@ static inline rt_value rt_object_get_var(rt_value obj, rt_value name)
 void rt_setup_classes(void);
 
 rt_value rt_define_class(rt_value obj, rt_value name, rt_value super);
+rt_value rt_define_module(rt_value obj, rt_value name);
+
 void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block);
+void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block);
 
 void rt_class_name(rt_value obj, rt_value under, rt_value name);
 rt_value rt_class_create_unnamed(rt_value super);
 rt_value rt_class_create_bare(rt_value super);
 rt_value rt_class_create_singleton(rt_value object, rt_value super);
 
-rt_value rt_object_inspect(rt_value obj, unsigned int argc);
-rt_value rt_object_to_s(rt_value obj, unsigned int argc);
+rt_value rt_object_inspect(rt_value obj, size_t argc);
+rt_value rt_object_to_s(rt_value obj, size_t argc);

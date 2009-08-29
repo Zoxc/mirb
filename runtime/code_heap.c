@@ -30,7 +30,7 @@ void rt_code_heap_destroy(void)
 {
 }
 
-void* rt_code_heap_alloc(unsigned int size)
+void* rt_code_heap_alloc(size_t size)
 {
 	unsigned char* result = next;
 

@@ -36,11 +36,14 @@ Factor <- Number
 	| Case
 	| Unless
 	| Class
+	| Module
 	| Method
 	| Yield
 	| "(", Expressions, ")"
 
 Class <- "class", Identifier, Sep, Statements, "end"
+
+Module <- "module", Identifier, Sep, Statements, "end"
 
 Method <- "def", Identifier, ({MethodParameters}, Sep | "(", MethodParameters, ")"), Statements, "end"
 

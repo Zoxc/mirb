@@ -1,10 +1,10 @@
 #include "runtime.h"
-#include "symbol.h"
-#include "string.h"
 #include "code_heap.h"
-#include "bool.h"
-#include "fixnum.h"
-#include "proc.h"
+#include "classes/symbol.h"
+#include "classes/string.h"
+#include "classes/bool.h"
+#include "classes/fixnum.h"
+#include "classes/proc.h"
 
 void rt_create(void)
 {
@@ -13,6 +13,8 @@ void rt_create(void)
 
 	rt_setup_classes();
 
+	rt_class_init();
+	rt_object_init();
 	rt_bool_init();
 	rt_symbol_init();
 	rt_string_init();
@@ -86,7 +88,7 @@ rt_value rt_to_s(rt_value obj)
 	return rt_object_inspect(obj, 0);
 }
 
-rt_value rt_dump_call(rt_value obj, unsigned int argc, ...)
+rt_value rt_dump_call(rt_value obj, size_t argc, ...)
 {
 	printf("Dumped call to "); rt_print(obj); printf(".(");
 

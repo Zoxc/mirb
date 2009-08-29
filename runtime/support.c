@@ -1,9 +1,9 @@
 #include "support.h"
-#include "string.h"
-#include "symbol.h"
 #include "classes.h"
 #include "constant.h"
-#include "proc.h"
+#include "classes/string.h"
+#include "classes/symbol.h"
+#include "classes/proc.h"
 
 rt_value __stdcall rt_support_define_string(const char* string)
 {
@@ -38,7 +38,7 @@ void __stdcall rt_support_seal_upval(rt_upval_t *upval)
 	upval->sealed = true;
 }
 
-rt_value rt_support_interpolate(unsigned int argc, ...)
+rt_value rt_support_interpolate(size_t argc, ...)
 {
 	rt_value args[argc];
 
@@ -50,7 +50,7 @@ rt_value rt_support_interpolate(unsigned int argc, ...)
 
 	va_end(_args);
 
-	unsigned int length = 0;
+	size_t length = 0;
 
 	for(int i = 0; i < argc; i++)
 	{
@@ -65,7 +65,7 @@ rt_value rt_support_interpolate(unsigned int argc, ...)
 
 	for(int i = 0; i < argc; i++)
 	{
-		unsigned int length = RT_STRING(args[i])->length;
+		size_t length = RT_STRING(args[i])->length;
 
 		memcpy(current, RT_STRING(args[i])->string, length);
 

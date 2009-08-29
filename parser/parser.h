@@ -27,6 +27,7 @@ typedef enum {
 	N_CALL,
 	N_STATEMENTS,
 	N_CLASS,
+	N_MODULE,
 	N_SCOPE,
 	N_METHOD,
 	N_PARAMETER
@@ -163,6 +164,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_UNLESS:
 		case T_CASE:
 		case T_CLASS:
+		case T_MODULE:
 		case T_DEF:
 		case T_SELF:
 		case T_TRUE:

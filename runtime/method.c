@@ -1,4 +1,5 @@
-#include "symbol.h"
-#include "method.h"
-#include "string.h"
 #include "../globals.h"
+#include "method.h"
+#include "classes/symbol.h"
+#include "classes/string.h"
+

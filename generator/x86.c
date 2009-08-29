@@ -6,12 +6,6 @@
 #include "../runtime/constant.h"
 #include "disassembly.h"
 
-typedef struct {
-	int base : 3;
-	int index : 3;
-	unsigned int scale : 2;
-} sib_t;
-
 static inline void generate_byte(unsigned char **target, unsigned char byte)
 {
 	**target = byte;
@@ -24,13 +18,13 @@ static inline void generate_word(unsigned char **target, unsigned short word)
 	*target += sizeof(word);
 }
 
-static inline void generate_dword(unsigned char **target, unsigned int dword)
+static inline void generate_dword(unsigned char **target, size_t dword)
 {
-	**(unsigned int**)target = dword;
+	**(size_t**)target = dword;
 	*target += sizeof(dword);
 }
 
-static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t i, size_t current)
+static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, size_t current)
 {
 	switch(op->type)
 	{
@@ -77,8 +71,11 @@ static inline unsigned int instruction_size(block_t *block, opcode_t *op, size_t
 		case B_JMPF:
 			return 6;
 
+		case B_MODULE:
+			return 5 + 5 + 5 + 1 + 5 + 6;
+
 		case B_CLASS:
-			return 5 + 5 + 1 + 5 + 6;
+			return 5 + 5 + 5 + 5 + 1 + 5 + 6;
 
 		case B_METHOD:
 			return 5 + 5 + 5;
@@ -148,10 +145,10 @@ static inline int get_stack_index(block_t *block, rt_value var)
 static inline void generate_call(unsigned char **target, void *function)
 {
 	generate_byte(target, 0xE8);
-	generate_dword(target, (unsigned int)function - ((unsigned int)*target - 1) - 5);
+	generate_dword(target, (size_t)function - ((size_t)*target - 1) - 5);
 }
 
-static inline void generate_stack_push(unsigned char **target, unsigned int dword)
+static inline void generate_stack_push(unsigned char **target, size_t dword)
 {
 	generate_byte(target, 0x68);
 	generate_dword(target, dword);
@@ -164,7 +161,7 @@ static inline void generate_stack_var_push(block_t *block, unsigned char **targe
 	generate_byte(target, (char)get_stack_index(block, var));
 }
 
-static inline void generate_stack_pop(unsigned char **target, unsigned int bytes)
+static inline void generate_stack_pop(unsigned char **target, size_t bytes)
 {
 	generate_byte(target, 0x81);
 	generate_byte(target, 0xC4);
@@ -219,7 +216,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 		case B_CLOSURE:
 			{
 				generate_stack_push(target, op->right);
-				generate_stack_push(target, (unsigned int)compile_block((block_t *)op->left));
+				generate_stack_push(target, (size_t)compile_block((block_t *)op->left));
 
 				generate_call(target, rt_support_closure);
 
@@ -249,12 +246,27 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			{
 				block_t *class_block = (block_t *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
-/*
+
 				generate_stack_push(target, rt_Object);
 				generate_stack_push(target, op->result);
-				generate_byte(target, 0x57); // push edi
-*/
 				generate_call(target, rt_support_define_class);
+
+				generate_stack_push(target, 1);
+				generate_byte(target, 0x50); // push eax
+
+				generate_call(target, compiled);
+
+				generate_stack_pop(target, 4);
+			}
+			break;
+
+		case B_MODULE:
+			{
+				block_t *class_block = (block_t *)op->left;
+				rt_compiled_block_t compiled = compile_block(class_block);
+
+				generate_stack_push(target, op->result);
+				generate_call(target, rt_support_define_module);
 
 				generate_stack_push(target, 1);
 				generate_byte(target, 0x50); // push eax
@@ -385,42 +397,42 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_JMP:
 			{
-				unsigned int label_index = block_get_value(block, block->label_usage, op->result);
+				size_t label_index = block_get_value(block, block->label_usage, op->result);
 
 				opcode_t *label = kv_A(block->vector, label_index);
 
-				unsigned int label_address = (unsigned int)start + label->right;
+				size_t label_address = (size_t)start + label->right;
 
 				generate_byte(target, 0xE9);
-				generate_dword(target, label_address - ((unsigned int)*target - 1) - 5);
+				generate_dword(target, label_address - ((size_t)*target - 1) - 5);
 			}
 			break;
 
 		case B_JMPT:
 			{
-				unsigned int label_index = block_get_value(block, block->label_usage, op->result);
+				size_t label_index = block_get_value(block, block->label_usage, op->result);
 
 				opcode_t *label = kv_A(block->vector, label_index);
 
-				unsigned int label_address = (unsigned int)start + label->right;
+				size_t label_address = (size_t)start + label->right;
 
 				generate_byte(target, 0x0F);
 				generate_byte(target, 0x85);
-				generate_dword(target, label_address - ((unsigned int)*target - 2) - 6);
+				generate_dword(target, label_address - ((size_t)*target - 2) - 6);
 			}
 			break;
 
 		case B_JMPF:
 			{
-				unsigned int label_index = block_get_value(block, block->label_usage, op->result);
+				size_t label_index = block_get_value(block, block->label_usage, op->result);
 
 				opcode_t *label = kv_A(block->vector, label_index);
 
-				unsigned int label_address = (unsigned int)start + label->right;
+				size_t label_address = (size_t)start + label->right;
 
 				generate_byte(target, 0x0F);
 				generate_byte(target, 0x84);
-				generate_dword(target, label_address - ((unsigned int)*target - 2) - 6);
+				generate_dword(target, label_address - ((size_t)*target - 2) - 6);
 			}
 			break;
 
@@ -473,8 +485,8 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 rt_compiled_block_t compile_block(block_t *block)
 {
-	unsigned int block_size = 3;
-	unsigned int stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP];
+	size_t block_size = 3;
+	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP];
 
 	printf("Compiling block %x:\n", (rt_value)block);
 
