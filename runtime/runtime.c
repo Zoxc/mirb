@@ -5,6 +5,8 @@
 #include "classes/bool.h"
 #include "classes/fixnum.h"
 #include "classes/proc.h"
+#include "classes/module.h"
+#include "modules/kernel.h"
 
 void rt_create(void)
 {
@@ -15,6 +17,10 @@ void rt_create(void)
 
 	rt_class_init();
 	rt_object_init();
+	rt_module_init();
+
+	rt_kernel_init();
+
 	rt_bool_init();
 	rt_symbol_init();
 	rt_string_init();
@@ -33,6 +39,8 @@ void rt_destroy(void)
 rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name)
 {
 	rt_value c = rt_class_of(obj);
+
+	printf("class of %d is %d\n", obj, c);
 
 	do
 	{

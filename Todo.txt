@@ -14,5 +14,5 @@
 [ ] Exception handling
 [ ] Garbage collection
 [ ] Splat operators
-[ ] Modules
+[X] Modules
 [ ] BasicObject

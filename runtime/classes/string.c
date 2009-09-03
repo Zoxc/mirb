@@ -45,7 +45,11 @@ rt_value rt_string_from_int(rt_value value)
 	return rt_string_from_cstr(buffer);
 }
 
-rt_value rt_string_inspect(rt_value obj, size_t argc)
+/*
+ * String
+ */
+
+rt_value __cdecl rt_string_inspect(rt_value obj, size_t argc)
 {
 	rt_value result = rt_string_from_cstr("\"");
 	rt_string_concat(result, 1, obj);
@@ -54,20 +58,12 @@ rt_value rt_string_inspect(rt_value obj, size_t argc)
 	return result;
 }
 
-rt_value rt_string_to_s(rt_value obj, size_t argc)
+rt_value __cdecl rt_string_to_s(rt_value obj, size_t argc)
 {
 	return obj;
 }
 
-void rt_string_init(void)
-{
-	rt_define_method(rt_String, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_string_inspect);
-	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_string_to_s);
-	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), (rt_compiled_block_t)rt_string_concat);
-	rt_define_method(rt_String, rt_symbol_from_cstr("+"), (rt_compiled_block_t)rt_string_concat);
-}
-
-rt_value rt_string_concat(rt_value obj, size_t argc, rt_value str)
+rt_value __cdecl rt_string_concat(rt_value obj, size_t argc, rt_value str)
 {
 	size_t new_length = RT_STRING(obj)->length + RT_STRING(str)->length;
 	char *new_str = malloc(new_length + 1);
@@ -84,3 +80,12 @@ rt_value rt_string_concat(rt_value obj, size_t argc, rt_value str)
 
 	return obj;
 }
+
+void rt_string_init(void)
+{
+	rt_define_method(rt_String, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_string_inspect);
+	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_string_to_s);
+	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), (rt_compiled_block_t)rt_string_concat);
+	rt_define_method(rt_String, rt_symbol_from_cstr("+"), (rt_compiled_block_t)rt_string_concat);
+}
+

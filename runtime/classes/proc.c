@@ -6,7 +6,7 @@
 
 rt_value rt_Proc;
 
-rt_value rt_proc_call(rt_value obj, size_t argc, ...)
+rt_value __cdecl rt_proc_call(rt_value obj, size_t argc, ...)
 {
 	printf("calling block %x\n", obj);
 

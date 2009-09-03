@@ -6,7 +6,7 @@
 
 rt_value rt_Class;
 
-rt_value rt_class_to_s(rt_value obj, size_t argc)
+rt_value __cdecl rt_class_to_s(rt_value obj, size_t argc)
 {
 	rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classname__"));
 
@@ -35,7 +35,18 @@ rt_value rt_class_to_s(rt_value obj, size_t argc)
 	}
 }
 
+rt_value __cdecl rt_class_superclass(rt_value obj, size_t argc)
+{
+	rt_value super = rt_real_class(RT_CLASS(obj)->super);
+
+	if(super)
+		return super;
+	else
+		return RT_NIL;
+}
+
 void rt_class_init(void)
 {
 	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_class_to_s);
+	rt_define_method(rt_Class, rt_symbol_from_cstr("superclass"), (rt_compiled_block_t)rt_class_superclass);
 }

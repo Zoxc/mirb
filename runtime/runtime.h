@@ -22,6 +22,7 @@ typedef enum {
 	C_NIL,
 	C_MAIN,
 	C_CLASS,
+	C_ICLASS,
 	C_MODULE,
 	C_OBJECT,
 	C_SYMBOL,
@@ -90,8 +91,8 @@ rt_value rt_inspect(rt_value obj);
 rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
 rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name);
 
-#define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), argc, #__VA_ARGS__))
-#define RT_CALL(obj, symbol, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, #__VA_ARGS__))
+#define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), argc, ##__VA_ARGS__))
+#define RT_CALL(obj, symbol, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, ##__VA_ARGS__))
 
 rt_value rt_dump_call(rt_value obj, size_t argc, ...);
 

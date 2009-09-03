@@ -13,7 +13,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-fstrict-aliasing" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -24,7 +23,7 @@
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
-					<Add option="-funroll-loops -fomit-frame-pointer -fstrict-aliasing" />
+					<Add option="-funroll-loops -fomit-frame-pointer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -33,7 +32,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-std=c99" />
+			<Add option="-std=gnu99 -fstrict-aliasing" />
 		</Compiler>
 		<Unit filename="generator\bytecode.c">
 			<Option compilerVar="CC" />
@@ -75,10 +74,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\structures.h" />
-		<Unit filename="runtime\bool.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\bool.h" />
 		<Unit filename="runtime\classes.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -123,34 +118,22 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\constant.h" />
-		<Unit filename="runtime\fixnum.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\fixnum.h" />
 		<Unit filename="runtime\method.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\method.h" />
-		<Unit filename="runtime\proc.c">
+		<Unit filename="runtime\modules\kernel.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="runtime\proc.h" />
+		<Unit filename="runtime\modules\kernel.h" />
 		<Unit filename="runtime\runtime.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\runtime.h" />
-		<Unit filename="runtime\string.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\string.h" />
 		<Unit filename="runtime\support.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\support.h" />
-		<Unit filename="runtime\symbol.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\symbol.h" />
 		<Unit filename="runtime\x86.c">
 			<Option compilerVar="CC" />
 		</Unit>

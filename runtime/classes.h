@@ -12,9 +12,9 @@ extern khash_t(rt_hash) *object_var_hashes;
 
 static inline rt_value rt_class_of(rt_value obj)
 {
-	if (obj & RT_FLAG_FIXNUM)
+	if(obj & RT_FLAG_FIXNUM)
 		return rt_Fixnum;
-	else if (obj <= RT_MAX)
+	else if(obj <= RT_MAX)
 	{
 		switch(obj)
 		{
@@ -35,21 +35,24 @@ static inline rt_value rt_class_of(rt_value obj)
 		return RT_COMMON(obj)->class_of;
 }
 
+static inline rt_value rt_real_class(rt_value obj)
+{
+	while(obj && ((RT_COMMON(obj)->flags & RT_CLASS_SINGLETON) || (RT_COMMON(obj)->flags & RT_TYPE_MASK) == C_ICLASS))
+		obj = RT_CLASS(obj)->super;
+
+	return obj;
+}
+
 static inline rt_value rt_real_class_of(rt_value obj)
 {
-	rt_value result = rt_class_of(obj);
-
-	while(RT_COMMON(result)->flags & RT_CLASS_SINGLETON)
-		result = RT_CLASS(result)->super;
-
-	return result;
+	return rt_real_class(rt_class_of(obj));
 }
 
 static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_block_t block)
 {
 	int ret;
 
-	khiter_t k = kh_put(rt_block, RT_CLASS(obj)->methods, name, &ret);
+	khiter_t k = kh_put(rt_block, rt_get_methods(obj), name, &ret);
 
 	if(!ret)
 	{
@@ -64,6 +67,9 @@ static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_
 
 static inline rt_compiled_block_t rt_class_get_method(rt_value obj, rt_value name)
 {
+	if(!RT_CLASS(obj)->methods)
+		return 0;
+
 	khiter_t k = kh_get(rt_block, RT_CLASS(obj)->methods, name);
 
 	if (k == kh_end(RT_CLASS(obj)->methods))
@@ -103,6 +109,8 @@ void rt_setup_classes(void);
 
 rt_value rt_define_class(rt_value obj, rt_value name, rt_value super);
 rt_value rt_define_module(rt_value obj, rt_value name);
+
+void rt_include_module(rt_value obj, rt_value module);
 
 void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block);
 void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block);

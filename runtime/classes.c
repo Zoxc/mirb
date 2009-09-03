@@ -21,6 +21,7 @@ static inline bool rt_object_has_vars(rt_value obj)
 			case C_CLASS:
 			case C_MODULE:
 			case C_OBJECT:
+			case C_ICLASS:
 				return true;
 
 			default:
@@ -32,15 +33,7 @@ khash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 {
 	if (rt_object_has_vars(obj))
 	{
-		khash_t(rt_hash) *result = RT_OBJECT(obj)->vars;
-
-		if(!result)
-		{
-			result = kh_init(rt_hash);
-			RT_OBJECT(obj)->vars = result;
-		}
-
-		return result;
+		return rt_get_vars(obj);
 	}
 	else
 	{
@@ -69,22 +62,22 @@ rt_value rt_class_create_bare(rt_value super)
 
 	RT_COMMON(c)->flags = C_CLASS;
 	RT_COMMON(c)->class_of = rt_Class;
-	RT_OBJECT(c)->vars = kh_init(rt_hash);
+	RT_OBJECT(c)->vars = 0;
 	RT_CLASS(c)->super = super;
-	RT_CLASS(c)->methods = kh_init(rt_block);
+	RT_CLASS(c)->methods = 0;
 
 	return c;
 }
 
-rt_value rt_module_create_bare(rt_value super)
+rt_value rt_module_create_bare()
 {
 	rt_value c = rt_alloc(sizeof(struct rt_class));
 
 	RT_COMMON(c)->flags = C_MODULE;
 	RT_COMMON(c)->class_of = rt_Module;
-	RT_OBJECT(c)->vars = kh_init(rt_hash);
-	RT_CLASS(c)->super = super;
-	RT_CLASS(c)->methods = kh_init(rt_block);
+	RT_OBJECT(c)->vars = 0;
+	RT_CLASS(c)->super = 0;
+	RT_CLASS(c)->methods = 0;
 
 	return c;
 }
@@ -159,7 +152,9 @@ rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 
 	rt_class_name(obj, under, name);
 
-	printf("Defining class %s\n", rt_string_to_cstr(rt_inspect(obj)));
+	printf("done defining\n");
+
+	printf("Defining class %s(%d) < %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj, rt_string_to_cstr(rt_inspect(super)), super);
 
 	return obj;
 }
@@ -169,13 +164,71 @@ rt_value rt_define_module(rt_value under, rt_value name)
 	if(rt_const_defined(under, name))
 		return rt_const_get(under, name);
 
-	rt_value obj = rt_module_create_bare(0);
+	rt_value obj = rt_module_create_bare();
 
 	rt_class_name(obj, under, name);
 
-	printf("Defining module %s\n", rt_string_to_cstr(rt_inspect(obj)));
+	printf("Defining module %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj);
 
 	return obj;
+}
+
+rt_value rt_create_include_class(rt_value module, rt_value super)
+{
+	if(rt_type(module) == C_ICLASS)
+		module = RT_COMMON(module)->class_of;
+
+	rt_value c = rt_alloc(sizeof(struct rt_class));
+
+	RT_COMMON(c)->flags = C_ICLASS;
+	RT_COMMON(c)->class_of = module;
+	RT_OBJECT(c)->vars = rt_get_vars(module);
+	RT_CLASS(c)->super = super;
+	RT_CLASS(c)->methods = rt_get_methods(module);
+
+	return c;
+}
+
+void rt_include_module(rt_value obj, rt_value module)
+{
+	rt_value c = obj;
+
+	printf("Starting inclusing of module %s in %s\n", rt_string_to_cstr(rt_inspect(module)), rt_string_to_cstr(rt_inspect(obj)));
+
+	while(module)
+	{
+		bool found_superclass = false;
+
+		for (rt_value i = RT_CLASS(obj)->super; i; i = RT_CLASS(i)->super)
+		{
+			switch(rt_type(i))
+			{
+				case C_ICLASS:
+					if(RT_OBJECT(i)->vars == RT_OBJECT(module)->vars)
+					{
+						if(!found_superclass)
+							c = i;
+
+						goto skip;
+					}
+					break;
+
+				case C_CLASS:
+					found_superclass = true;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		printf("Including module %s in %s\n", rt_string_to_cstr(rt_inspect(module)), rt_string_to_cstr(rt_inspect(obj)));
+
+		c = RT_CLASS(c)->super = rt_create_include_class(module, RT_CLASS(c)->super);
+
+		skip:
+			module = RT_CLASS(module)->super;
+	}
 }
 
 void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)

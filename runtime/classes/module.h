@@ -6,4 +6,6 @@
 
 extern rt_value rt_Module;
 
+rt_value __cdecl rt_module_include(rt_value obj, size_t argc, ...);
+
 void rt_module_init(void);

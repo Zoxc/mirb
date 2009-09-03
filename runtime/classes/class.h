@@ -15,4 +15,12 @@ struct rt_class {
 
 extern rt_value rt_Class;
 
+static inline khash_t(rt_block) *rt_get_methods(rt_value object)
+{
+	if(!RT_CLASS(object)->methods)
+		RT_CLASS(object)->methods = kh_init(rt_block);
+
+	return RT_CLASS(object)->methods;
+}
+
 void rt_class_init(void);

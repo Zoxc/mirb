@@ -10,4 +10,4 @@ extern rt_value rt_Fixnum;
 
 void rt_fixnum_init();
 
-rt_value rt_fixnum_to_s(rt_value obj, size_t argc);
+rt_value __cdecl rt_fixnum_to_s(rt_value obj, size_t argc);

@@ -8,23 +8,24 @@ rt_value rt_NilClass;
 rt_value rt_TrueClass;
 rt_value rt_FalseClass;
 
-rt_value rt_nilclass_to_s(rt_value obj, size_t argc)
+rt_value __cdecl rt_nilclass_to_s(rt_value obj, size_t argc)
 {
 	return rt_string_from_cstr("nil");
 }
 
-rt_value rt_trueclass_to_s(rt_value obj, size_t argc)
+rt_value __cdecl rt_trueclass_to_s(rt_value obj, size_t argc)
 {
 	return rt_string_from_cstr("true");
 }
 
-rt_value rt_falseclass_to_s(rt_value obj, size_t argc)
+rt_value __cdecl rt_falseclass_to_s(rt_value obj, size_t argc)
 {
 	return rt_string_from_cstr("false");
 }
 
 void rt_bool_init()
 {
+	printf("start nilclass\n");
 	rt_NilClass = rt_define_class(rt_Object, rt_symbol_from_cstr("NilClass"), rt_Object);
 	rt_TrueClass = rt_define_class(rt_Object, rt_symbol_from_cstr("TrueClass"), rt_Object);
 	rt_FalseClass = rt_define_class(rt_Object, rt_symbol_from_cstr("FalseClass"), rt_Object);

@@ -18,25 +18,6 @@ void rt_symbols_destroy(void)
 	kh_destroy(symbol, symbols);
 }
 
-rt_value rt_symbol_inspect(rt_value obj, size_t argc)
-{
-	rt_value result = rt_string_from_cstr(":");
-	rt_string_concat(result, 1, rt_string_from_cstr(RT_SYMBOL(obj)->string));
-
-	return result;
-}
-
-rt_value rt_symbol_to_s(rt_value obj, size_t argc)
-{
-	return rt_string_from_cstr(RT_SYMBOL(obj)->string);
-}
-
-void rt_symbol_init(void)
-{
-	rt_define_method(rt_Symbol, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_symbol_to_s);
-	rt_define_method(rt_Symbol, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_symbol_inspect);
-}
-
 rt_value rt_symbol_from_cstr(const char* name)
 {
 	khiter_t k = kh_get(symbol, symbols, name);
@@ -73,3 +54,26 @@ rt_value rt_symbol_from_cstr(const char* name)
 	return kh_value(symbols, k);
 }
 
+
+/*
+ * Symbol
+ */
+
+rt_value __cdecl rt_symbol_inspect(rt_value obj, size_t argc)
+{
+	rt_value result = rt_string_from_cstr(":");
+	rt_string_concat(result, 1, rt_string_from_cstr(RT_SYMBOL(obj)->string));
+
+	return result;
+}
+
+rt_value __cdecl rt_symbol_to_s(rt_value obj, size_t argc)
+{
+	return rt_string_from_cstr(RT_SYMBOL(obj)->string);
+}
+
+void rt_symbol_init(void)
+{
+	rt_define_method(rt_Symbol, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_symbol_to_s);
+	rt_define_method(rt_Symbol, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_symbol_inspect);
+}

@@ -37,7 +37,7 @@ rt_value rt_support_closure(rt_compiled_closure_t block, size_t argc, ...)
 	return closure;
 }
 
-rt_compiled_block_t rt_support_lookup_method(rt_value obj, ...)
+rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
 {
 	rt_value method;
 
