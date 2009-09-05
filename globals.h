@@ -12,6 +12,7 @@
     #include "BeaEngine.h"
 #else
 	#define __stdcall __attribute__((__stdcall__))
+	#define __cdecl __attribute__((__cdecl__))
 #endif
 
 #include "vendor/kvec.h"
