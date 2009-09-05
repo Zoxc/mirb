@@ -37,6 +37,30 @@ static inline rt_value rt_const_get(rt_value obj, rt_value name)
 		}
 	}
 
+	obj = rt_Object;
+
+	while(obj)
+	{
+		khash_t(rt_hash) *vars = rt_object_get_vars(obj);
+
+		khiter_t k = kh_get(rt_hash, vars, name);
+
+		if(k != kh_end(vars))
+			return kh_value(vars, k);
+
+		switch(rt_type(obj))
+		{
+			case C_CLASS:
+			case C_ICLASS:
+			case C_MODULE:
+				obj = RT_CLASS(obj)->super;
+				break;
+
+			default:
+				assert(0);
+		}
+	}
+
 	assert(0);
 }
 

@@ -152,8 +152,6 @@ rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 
 	rt_class_name(obj, under, name);
 
-	printf("done defining\n");
-
 	printf("Defining class %s(%d) < %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj, rt_string_to_cstr(rt_inspect(super)), super);
 
 	return obj;
@@ -192,8 +190,6 @@ rt_value rt_create_include_class(rt_value module, rt_value super)
 void rt_include_module(rt_value obj, rt_value module)
 {
 	rt_value c = obj;
-
-	printf("Starting inclusing of module %s in %s\n", rt_string_to_cstr(rt_inspect(module)), rt_string_to_cstr(rt_inspect(obj)));
 
 	while(module)
 	{

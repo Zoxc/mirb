@@ -40,8 +40,6 @@ rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name)
 {
 	rt_value c = rt_class_of(obj);
 
-	printf("class of %d is %d\n", obj, c);
-
 	do
 	{
 		rt_compiled_block_t result = rt_class_get_method(c, name);

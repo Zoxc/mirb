@@ -16,3 +16,4 @@
 [ ] Splat operators
 [X] Modules
 [ ] BasicObject
+[ ] Fix constant resolution path

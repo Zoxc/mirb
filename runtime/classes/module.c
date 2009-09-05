@@ -44,8 +44,6 @@ rt_value __cdecl rt_module_include(rt_value obj, size_t argc, ...)
 
 	for(int i = 0; i < argc; i++)
 	{
-		printf("including %s\n", rt_string_to_cstr(rt_inspect(args[i])));
-
 		RT_CALL_CSTR(args[i], "append_features", 1, obj);
 		RT_CALL_CSTR(args[i], "included", 1, obj);
 	}
