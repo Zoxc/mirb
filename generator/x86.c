@@ -42,10 +42,10 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			return 6;
 
 		case B_CALL:
-			if(op->right)
-				return 5 + 5 + 3 + 2 + 6;
+			if(op->left)
+				return 5 + 5 + 2 + 6;
 			else
-				return 5 + 5 + 2 + 2 + 6;
+				return 5 + 5 + 2;
 
 		case B_PUSH:
 			return 3;
@@ -99,13 +99,16 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			return 5 + 5 + 5 + 6 + 3;
 
 		case B_GET_UPVAL:
-			return 5 + 3 + 5 + 3;
+			return 5 + 5 + 3;
 
 		case B_SET_UPVAL:
-			return 5 + 3 + 3 + 5;
+			return 5 + 3 + 5;
 
 		case B_SEAL:
 			return 3 + 5;
+
+		case B_ARGS:
+			return 1;
 
 		default:
 			break;
@@ -118,28 +121,30 @@ static inline int get_stack_index(block_t *block, rt_value var)
 {
 	variable_t *_var = (variable_t *)var;
 
-	if(_var->type == V_PARAMETER)
-		return 8 + 8 + (block->scope->var_count[V_PARAMETER] - 1 -  _var->index) * 4 + (block->scope->type == S_CLOSURE ? 4 : 0);
-	else
+	int index;
+
+	switch(_var->type)
 	{
-		int index;
+		case V_BLOCK:
+			return 12;
 
-		switch(_var->type)
-		{
-			case V_TEMP:
-				index = block->scope->var_count[V_LOCAL] + _var->index;
-				break;
+		case V_PARAMETER:
+			index = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + _var->index;
+			break;
 
-			case V_LOCAL:
-				index = _var->index;
-				break;
+		case V_TEMP:
+			index = block->scope->var_count[V_LOCAL] + _var->index;
+			break;
 
-			default:
-				assert(0);
-		}
+		case V_LOCAL:
+			index = _var->index;
+			break;
 
-		return -((index + 1) * 4);
+		default:
+			assert(0);
 	}
+
+	return -((index + 1) * 4);
 }
 
 static inline void generate_call(unsigned char **target, void *function)
@@ -184,11 +189,6 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0xB8); // mov eax,
 				generate_dword(target, ((variable_t *)op->left)->index);
 
-				// Push closure
-				generate_byte(target, 0xFF);
-				generate_byte(target, 0x75);
-				generate_byte(target, (char)8);
-
 				generate_call(target, rt_support_get_upval);
 
 				generate_byte(target, 0x89);
@@ -203,11 +203,6 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_dword(target, ((variable_t *)op->result)->index);
 
 				generate_stack_var_push(block, target, op->left);
-
-				// Push closure
-				generate_byte(target, 0xFF);
-				generate_byte(target, 0x75);
-				generate_byte(target, (char)8);
 
 				generate_call(target, rt_support_set_upval);
 			}
@@ -251,12 +246,12 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_stack_push(target, op->result);
 				generate_call(target, rt_support_define_class);
 
-				generate_stack_push(target, 1);
-				generate_byte(target, 0x50); // push eax
+				generate_byte(target, 0x50); // push dummy argv
+				generate_stack_push(target, 0); // push argc
+				generate_stack_push(target, 0); // push block
+				generate_byte(target, 0x50); // push obj(eax)
 
 				generate_call(target, compiled);
-
-				generate_stack_pop(target, 4);
 			}
 			break;
 
@@ -268,12 +263,12 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_stack_push(target, op->result);
 				generate_call(target, rt_support_define_module);
 
-				generate_stack_push(target, 1);
-				generate_byte(target, 0x50); // push eax
+				generate_byte(target, 0x50); // push dummy argv
+				generate_stack_push(target, 0); // push argc
+				generate_stack_push(target, 0); // push block
+				generate_byte(target, 0x50); // push obj(eax)
 
 				generate_call(target, compiled);
-
-				generate_stack_pop(target, 4);
 			}
 			break;
 
@@ -320,22 +315,17 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 				generate_call(target, rt_support_lookup_method);
 
-				if(op->right)
-				{
-					generate_byte(target, 0x8B);
-					generate_byte(target, 0x4D);
-					generate_byte(target, (char)get_stack_index(block, op->right));
-				}
-				else
-				{
-					generate_byte(target, 0x31); // xor ecx, ecx
-					generate_byte(target, 0xC9);
-				}
-
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
-				generate_stack_pop(target, (op->left + 2) * 4);
+				if(op->left)
+					generate_stack_pop(target, op->left * 4);
+			}
+			break;
+
+		case B_ARGS:
+			{
+				generate_byte(target, 0x54); // push esp
 			}
 			break;
 
@@ -486,26 +476,42 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 rt_compiled_block_t compile_block(block_t *block)
 {
 	size_t block_size = 3;
-	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP];
+	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + block->scope->var_count[V_PARAMETER];
 
 	printf("Compiling block %x:\n", (rt_value)block);
 
-	if (stack_vars > 0)
+	if(stack_vars > 0)
 		block_size += 6;
 
-	if (block->self_ref > 0)
-		block_size += 4;
-
-	if (block->scope->block_var)
+	if(block->scope->type == S_CLOSURE)
 		block_size += 3;
 
-	for (size_t i = 0; i < kv_size(block->vector); i++)
+	if(block->self_ref > 0)
+		block_size += 4;
+
+	if(block->scope->var_count[V_PARAMETER])
+	{
+		khash_t(scope) *variables = block->scope->variables;
+
+		block_size += 3;
+
+		for(khiter_t k = kh_begin(variables); k != kh_end(variables); ++k)
+		{
+			if(kh_exist(variables, k) && kh_value(variables, k)->type == V_PARAMETER)
+				block_size += 6;
+		}
+	}
+
+	for(size_t i = 0; i < kv_size(block->vector); i++)
 		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
 
-	if (block->self_ref > 0)
+	if(block->self_ref > 0)
 		block_size += 1;
 
-	block_size += 4;
+	if(block->scope->type == S_CLOSURE)
+		block_size += 1;
+
+	block_size += 6;
 
 	rt_compiled_block_t result = rt_code_heap_alloc(block_size);
 
@@ -515,38 +521,73 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x89);
 	generate_byte(&target, 0xE5);
 
-	if (stack_vars > 0)
+	if(stack_vars > 0)
 	{
 		generate_byte(&target, 0x81);
 		generate_byte(&target, 0xEC);
 		generate_dword(&target, stack_vars * 4);
 	}
 
-	if (block->self_ref > 0)
+	if(block->scope->type == S_CLOSURE)
+	{
+		generate_byte(&target, 0x56); // push esi
+
+		generate_byte(&target, 0x89); // mov esi, eax
+		generate_byte(&target, 0xC6);
+	}
+
+	if(block->self_ref > 0)
 	{
 		generate_byte(&target, 0x57);
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x7D);
-		generate_byte(&target, block->scope->type == S_CLOSURE ? 12 : 8);
+		generate_byte(&target, 8);
 	}
 
-	if (block->scope->block_var)
+	if(block->scope->var_count[V_PARAMETER])
 	{
-		generate_byte(&target, 0x89);
+		khash_t(scope) *variables = block->scope->variables;
+
+		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x4D);
-		generate_byte(&target, (char)get_stack_index(block, (rt_value)block->scope->block_var));
+		generate_byte(&target, (char)20);
+
+		for(khiter_t k = kh_begin(variables); k != kh_end(variables); ++k)
+		{
+			if(kh_exist(variables, k))
+			{
+				variable_t *var = kh_value(variables, k);
+
+				if(var->type == V_PARAMETER)
+				{
+					// Load to edx
+					generate_byte(&target, 0x8B);
+					generate_byte(&target, 0x51);
+					generate_byte(&target, (char)((block->scope->var_count[V_PARAMETER] - var->index - 1) * 4));
+
+					// Store from edx
+					generate_byte(&target, 0x89);
+					generate_byte(&target, 0x55);
+					generate_byte(&target, (char)get_stack_index(block, (rt_value)var));
+				}
+			}
+		}
 	}
 
-	for (size_t i = 0; i < kv_size(block->vector); i++)
+	for(size_t i = 0; i < kv_size(block->vector); i++)
 		generate_instruction(block, kv_A(block->vector, i), i, (unsigned char *)result, &target);
 
-	if (block->self_ref > 0)
+	if(block->self_ref > 0)
 		generate_byte(&target, 0x5F);
+
+	if(block->scope->type == S_CLOSURE)
+		generate_byte(&target, 0x5E); // pop esi
 
 	generate_byte(&target, 0x89);
 	generate_byte(&target, 0xEC);
 	generate_byte(&target, 0x5D);
-	generate_byte(&target, 0xC3);
+	generate_byte(&target, 0xC2);
+	generate_word(&target, 16);
 
     #ifdef WINDOWS
         dump_code((void *)result, target - (unsigned char *)result);

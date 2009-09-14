@@ -55,7 +55,7 @@ rt_value __cdecl rt_support_interpolate(size_t argc, ...)
 	for(int i = 0; i < argc; i++)
 	{
 		if(rt_type(args[i]) != C_STRING)
-			args[i] = RT_CALL_CSTR(args[i], "to_s", 0);
+			args[i] = RT_CALL_CSTR(args[i], "to_s", 0, 0);
 
 		length += RT_STRING(args[i])->length;
 	}

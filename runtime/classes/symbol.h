@@ -47,4 +47,4 @@ static inline rt_value rt_symbol_from_parser(struct parser *parser)
 
 void rt_symbol_init(void);
 
-rt_value __cdecl rt_symbol_to_s(rt_value obj, size_t argc);
+rt_value __stdcall rt_symbol_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[]);

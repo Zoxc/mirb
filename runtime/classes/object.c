@@ -6,12 +6,12 @@
 
 rt_value rt_Object;
 
-rt_value __cdecl rt_object_tap(rt_value obj, size_t argc)
+rt_value __stdcall rt_object_tap(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	return obj;
 }
 
-rt_value __cdecl rt_object_allocate(rt_value obj, size_t argc)
+rt_value __stdcall rt_object_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value result = rt_alloc(sizeof(struct rt_object));
 
@@ -22,12 +22,12 @@ rt_value __cdecl rt_object_allocate(rt_value obj, size_t argc)
 	return result;
 }
 
-rt_value __cdecl rt_object_inspect(rt_value obj, size_t argc)
+rt_value __stdcall rt_object_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
-    return RT_CALL_CSTR(obj, "to_s", 0);
+    return RT_CALL_CSTR(obj, "to_s", 0, 0);
 }
 
-rt_value __cdecl rt_object_to_s(rt_value obj, size_t argc)
+rt_value __stdcall rt_object_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value c = rt_real_class_of(obj);
 	rt_value name = rt_object_get_var(c, rt_symbol_from_cstr("__classname__"));
@@ -36,10 +36,10 @@ rt_value __cdecl rt_object_to_s(rt_value obj, size_t argc)
 	{
 		rt_value result = rt_string_from_cstr("#<");
 
-		rt_string_concat(result, 1, name);
-		rt_string_concat(result, 1, rt_string_from_cstr(":0x"));
-		rt_string_concat(result, 1, rt_string_from_hex(obj));
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
+		rt_concat_string(result, name);
+		rt_concat_string(result, rt_string_from_cstr(":0x"));
+		rt_concat_string(result, rt_string_from_hex(obj));
+		rt_concat_string(result, rt_string_from_cstr(">"));
 
 		return result;
 	}
@@ -47,8 +47,8 @@ rt_value __cdecl rt_object_to_s(rt_value obj, size_t argc)
 	{
 		rt_value result = rt_string_from_cstr("#<0x");
 
-		rt_string_concat(result, 1, rt_string_from_hex(obj));
-		rt_string_concat(result, 1, rt_string_from_cstr(">"));
+		rt_concat_string(result, rt_string_from_hex(obj));
+		rt_concat_string(result, rt_string_from_cstr(">"));
 
 		return result;
 	}
@@ -56,9 +56,9 @@ rt_value __cdecl rt_object_to_s(rt_value obj, size_t argc)
 
 void rt_object_init(void)
 {
-    rt_define_method(rt_Object, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_object_inspect);
-    rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_object_to_s);
-    rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), (rt_compiled_block_t)rt_object_tap);
+    rt_define_method(rt_Object, rt_symbol_from_cstr("inspect"), rt_object_inspect);
+    rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), rt_object_to_s);
+    rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), rt_object_tap);
 
-	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), (rt_compiled_block_t)rt_object_allocate);
+	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), rt_object_allocate);
 }

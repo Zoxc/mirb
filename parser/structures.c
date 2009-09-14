@@ -91,7 +91,7 @@ struct node *parse_parameter(struct parser *parser, scope_t *scope)
 			}
 			else
 			{
-				scope->block_var = scope_define(scope, (rt_value)result->left, V_TEMP, false);
+				scope->block_var = scope_define(scope, (rt_value)result->left, V_BLOCK, false);
 			}
 		}
 		else

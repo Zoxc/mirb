@@ -22,7 +22,13 @@ static inline const char *rt_string_to_cstr(rt_value value)
 	return RT_STRING(value)->string;
 }
 
+rt_value __stdcall rt_string_concat(rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+
+static inline void rt_concat_string(rt_value string, rt_value add)
+{
+	rt_string_concat(string, 0, 1, &add);
+}
+
 void rt_string_init(void);
 
-rt_value __cdecl rt_string_concat(rt_value obj, size_t argc, rt_value str);
 

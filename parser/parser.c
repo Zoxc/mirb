@@ -50,7 +50,7 @@ variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 	return var;
 }
 
-variable_t *scope_define(scope_t *scope, rt_value name, rt_value type, bool recursive)
+variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool recursive)
 {
 	if(scope_defined(scope, name, false))
 	{

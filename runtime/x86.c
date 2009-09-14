@@ -6,7 +6,7 @@
 #include "classes/string.h"
 #include "classes/proc.h"
 
-rt_value rt_support_closure(rt_compiled_closure_t block, size_t argc, ...)
+rt_value rt_support_closure(rt_compiled_block_t block, size_t argc, ...)
 {
 	rt_value self;
 
@@ -103,11 +103,13 @@ rt_upval_t *rt_support_upval_create()
 	return result;
 }
 
-rt_value __stdcall rt_support_get_upval(rt_upval_t **upvals)
+rt_value rt_support_get_upval()
 {
 	size_t index;
+	rt_upval_t **upvals;
 
 	__asm__("" : "=a" (index));
+	__asm__("" : "=S" (upvals));
 
 	rt_upval_t *upval = upvals[index];
 
@@ -117,11 +119,13 @@ rt_value __stdcall rt_support_get_upval(rt_upval_t **upvals)
 		return upval->val.local;
 }
 
-void __stdcall rt_support_set_upval(rt_upval_t **upvals, rt_value value)
+void __stdcall rt_support_set_upval(rt_value value)
 {
 	size_t index;
+	rt_upval_t **upvals;
 
 	__asm__("" : "=a" (index));
+	__asm__("" : "=S" (upvals));
 
 	rt_upval_t *upval = upvals[index];
 

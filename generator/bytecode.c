@@ -5,7 +5,7 @@
 const char *variable_name(rt_value var)
 {
 	if(!var)
-		return "nil";
+		return "<nil>";
 
 	rt_value string = rt_string_from_cstr("");
 
@@ -14,23 +14,31 @@ const char *variable_name(rt_value var)
 	switch(_var->type)
 	{
 		case V_TEMP:
-			rt_string_concat(string, 1, rt_string_from_cstr("%"));
-			rt_string_concat(string, 1, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0));
+			rt_concat_string(string, rt_string_from_cstr("%"));
+			rt_concat_string(string, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0, 0, 0));
 			break;
 
 		case V_PARAMETER:
-			rt_string_concat(string, 1, rt_string_from_cstr("&"));
-			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			rt_concat_string(string, rt_string_from_cstr("*"));
+			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
 			break;
 
 		case V_LOCAL:
-			rt_string_concat(string, 1, rt_string_from_cstr("#"));
-			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			rt_concat_string(string, rt_string_from_cstr("#"));
+			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
 			break;
 
 		case V_UPVAL:
-			rt_string_concat(string, 1, rt_string_from_cstr("!"));
-			rt_string_concat(string, 1, rt_symbol_to_s(_var->name, 0));
+			rt_concat_string(string, rt_string_from_cstr("!"));
+			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
+			break;
+
+		case V_BLOCK:
+			rt_concat_string(string, rt_string_from_cstr("&"));
+
+			if(_var->name)
+				rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
+
 			break;
 	}
 
@@ -107,6 +115,10 @@ void opcode_print(opcode_t *op)
 
 		case B_TEST:
 			printf("test %s", variable_name(op->result));
+			break;
+
+		case B_ARGS:
+			printf("arg");
 			break;
 
 		case B_JMPF:

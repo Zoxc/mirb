@@ -5,7 +5,7 @@
 struct rt_proc {
 	struct rt_common common;
 	rt_value self;
-	rt_compiled_closure_t closure;
+	rt_compiled_block_t closure;
 	rt_upval_t **upvals;
 	size_t upval_count;
 };
@@ -16,4 +16,4 @@ extern rt_value rt_Proc;
 
 void rt_proc_init(void);
 
-rt_value __cdecl rt_proc_call(rt_value obj, size_t argc, ...);
+rt_value __stdcall rt_proc_call(rt_value obj, rt_value block, size_t argc, rt_value argv[]);

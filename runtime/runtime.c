@@ -72,9 +72,9 @@ rt_value rt_inspect(rt_value obj)
 	rt_compiled_block_t inspect = rt_lookup_nothrow(obj, rt_symbol_from_cstr("inspect"));
 
 	if(inspect && (inspect != (rt_compiled_block_t)rt_object_inspect || rt_lookup_nothrow(obj, rt_symbol_from_cstr("to_s"))))
-		return inspect(obj, 0);
+		return inspect(obj, 0, 0, 0);
 
-	return rt_object_to_s(obj, 0);
+	return rt_object_to_s(obj, 0, 0, 0);
 }
 
 void rt_print(rt_value obj)
@@ -82,16 +82,6 @@ void rt_print(rt_value obj)
 	rt_value string = rt_inspect(obj);
 
 	printf("%s", rt_string_to_cstr(string));
-}
-
-rt_value rt_to_s(rt_value obj)
-{
-	rt_compiled_block_t inspect = rt_lookup_nothrow(obj, rt_symbol_from_cstr("inspect"));
-
-	if(inspect)
-		return inspect(obj, 0);
-
-	return rt_object_inspect(obj, 0);
 }
 
 rt_value rt_dump_call(rt_value obj, size_t argc, ...)

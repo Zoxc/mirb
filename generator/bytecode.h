@@ -19,7 +19,7 @@ typedef enum {
 	B_PUSH_RAW,
 	B_PUSH_UPVAL,
 	B_CALL,
-	B_CALL_SPLAT,
+	B_ARGS,
 	B_LOAD,
 	B_STORE,
 	B_TEST,

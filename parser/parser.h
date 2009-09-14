@@ -45,10 +45,11 @@ typedef enum {
 	V_PARAMETER,
 	V_LOCAL,
 	V_UPVAL,
-	V_TEMP
+	V_TEMP,
+	V_BLOCK
 } variable_type;
 
-#define VARIABLE_TYPES 4
+#define VARIABLE_TYPES 5
 
 typedef struct variable_t{
 	struct variable_t *real;
@@ -77,7 +78,7 @@ typedef struct scope_t {
 
 bool scope_defined(scope_t *scope, rt_value name, bool recursive);
 variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type);
-variable_t *scope_define(scope_t *scope, rt_value name, rt_value type, bool recursive);
+variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool recursive);
 
 struct parser {
 	token_t token;

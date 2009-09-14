@@ -49,22 +49,23 @@ rt_value rt_string_from_int(rt_value value)
  * String
  */
 
-rt_value __cdecl rt_string_inspect(rt_value obj, size_t argc)
+rt_value __stdcall rt_string_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value result = rt_string_from_cstr("\"");
-	rt_string_concat(result, 1, obj);
-	rt_string_concat(result, 1, rt_string_from_cstr("\""));
+	rt_concat_string(result, obj);
+	rt_concat_string(result, rt_string_from_cstr("\""));
 
 	return result;
 }
 
-rt_value __cdecl rt_string_to_s(rt_value obj, size_t argc)
+rt_value __stdcall rt_string_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	return obj;
 }
 
-rt_value __cdecl rt_string_concat(rt_value obj, size_t argc, rt_value str)
+rt_value __stdcall rt_string_concat(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
+	rt_value str = RT_ARG(0);
 	size_t new_length = RT_STRING(obj)->length + RT_STRING(str)->length;
 	char *new_str = malloc(new_length + 1);
 
@@ -83,9 +84,9 @@ rt_value __cdecl rt_string_concat(rt_value obj, size_t argc, rt_value str)
 
 void rt_string_init(void)
 {
-	rt_define_method(rt_String, rt_symbol_from_cstr("inspect"), (rt_compiled_block_t)rt_string_inspect);
-	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_string_to_s);
-	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), (rt_compiled_block_t)rt_string_concat);
-	rt_define_method(rt_String, rt_symbol_from_cstr("+"), (rt_compiled_block_t)rt_string_concat);
+	rt_define_method(rt_String, rt_symbol_from_cstr("inspect"), rt_string_inspect);
+	rt_define_method(rt_String, rt_symbol_from_cstr("to_s"), rt_string_to_s);
+	rt_define_method(rt_String, rt_symbol_from_cstr("concat"), rt_string_concat);
+	rt_define_method(rt_String, rt_symbol_from_cstr("+"), rt_string_concat);
 }
 

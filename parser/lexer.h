@@ -85,6 +85,7 @@ struct parser *parser_create(char *input);
 void parser_destroy(struct parser *parser);
 
 token_type next(struct parser *parser);
+
 void parser_state(struct parser *parser, token_state state);
 void parser_context(struct parser *parser, token_t *token);
 void parser_restore(struct parser *parser, token_t *token);

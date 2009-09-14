@@ -120,5 +120,3 @@ rt_value rt_class_create_unnamed(rt_value super);
 rt_value rt_class_create_bare(rt_value super);
 rt_value rt_class_create_singleton(rt_value object, rt_value super);
 
-rt_value rt_object_inspect(rt_value obj, size_t argc);
-rt_value rt_object_to_s(rt_value obj, size_t argc);

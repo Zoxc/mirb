@@ -10,7 +10,12 @@
 
 typedef size_t rt_value;
 
-typedef rt_value (*rt_compiled_block_t)(rt_value obj, size_t argc, ...);
+typedef rt_value (__stdcall *rt_compiled_block_t)(rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+
+#define RT_ARG_INDEX(index) (argc - 1 - (index))
+#define RT_ARG(index) (argv[RT_ARG_INDEX(index)])
+#define RT_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
+#define RT_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 
 KHASH_MAP_INIT_INT(rt_hash, rt_value);
 KHASH_MAP_INIT_INT(rt_block, rt_compiled_block_t);
@@ -91,8 +96,8 @@ rt_value rt_inspect(rt_value obj);
 rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
 rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name);
 
-#define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), argc, ##__VA_ARGS__))
-#define RT_CALL(obj, symbol, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, ##__VA_ARGS__))
+#define RT_CALL_CSTR(obj, cstr, argc, ...) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), RT_NIL, argc, ##__VA_ARGS__))
+#define RT_CALL(obj, symbol, block, argc, ...) (rt_lookup((obj), (cstr))((obj), argc, ##__VA_ARGS__))
 
 rt_value rt_dump_call(rt_value obj, size_t argc, ...);
 

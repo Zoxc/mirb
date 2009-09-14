@@ -88,7 +88,7 @@ struct node *parse_yield(struct parser *parser)
 	result->left = alloc_node(N_VAR);
 
 	if(!parser->current_scope->block_var)
-		parser->current_scope->block_var = scope_define(parser->current_scope, 0, V_TEMP, false);
+		parser->current_scope->block_var = scope_define(parser->current_scope, 0, V_BLOCK, false);
 
 	result->left->left = (void *)parser->current_scope->block_var;
 

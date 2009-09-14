@@ -271,7 +271,7 @@ void rt_setup_classes(void)
 	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
 	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
 
-	rt_main = rt_object_allocate(rt_Object, 0);
+	rt_main = rt_object_allocate(rt_Object, 0, 0, 0);
 
 	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_main_to_s);
 }

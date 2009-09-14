@@ -167,7 +167,9 @@ static void gen_arithmetic(block_t *block, struct node *node, variable_t *var)
 	gen_node(block, node->right, temp2);
 
 	block_push(block, B_PUSH, (rt_value)temp2, 0, 0);
-	block_push(block, B_PUSH_IMM, 1, 0, 0);
+	block_push(block, B_ARGS, 1, 0, 0);
+	block_push(block, B_PUSH_RAW, 1, 0, 0);
+	block_push(block, B_PUSH_IMM, RT_NIL, 0, 0);
 	block_push(block, B_PUSH, (rt_value)temp1, 0, 0);
 	block_push(block, B_CALL, rt_symbol_from_cstr(token_type_names[node->op]), 1, 0);
 
@@ -333,7 +335,14 @@ static void gen_call(block_t *block, struct node *node, variable_t *var)
 		block_push(block, B_CLOSURE, (rt_value)block_var, (rt_value)block_attach, upvals);
 	}
 
+	block_push(block, B_ARGS, 1, 0, 0);
 	block_push(block, B_PUSH_RAW, parameters, 0, 0);
+
+	if(block_var)
+		block_push(block, B_PUSH, (rt_value)block_var, 0, 0);
+	else
+		block_push(block, B_PUSH_IMM, RT_NIL, 0, 0);
+
 	block_push(block, B_PUSH, (rt_value)self, 0, 0);
 	block_push(block, B_CALL, (rt_value)node->middle, parameters, (rt_value)block_var);
 

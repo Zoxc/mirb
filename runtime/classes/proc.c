@@ -6,42 +6,27 @@
 
 rt_value rt_Proc;
 
-rt_value __cdecl rt_proc_call(rt_value obj, size_t argc, ...)
+rt_value __stdcall rt_proc_call(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	printf("calling block %x\n", obj);
 
-	rt_value args[argc];
+	rt_value result;
 
-	va_list _args;
-	va_start(_args, argc);
+	__asm__("push %[argv]\n"
+		"push %[argc]\n"
+		"push %[block]\n"
+		"push %[obj]\n"
+		"call *%[proc]\n"
+		: "=a" (result)
+		: [proc] "g" (RT_PROC(obj)->closure),
+			[obj] "g" (RT_PROC(obj)->self),
+			[block] "g" (block),
+			[argc] "g" (argc),
+			[argv] "g" (argv),
+			"a" (RT_PROC(obj)->upvals)
+		: "%ecx", "%edx");
 
-	for(int i = argc - 1; i >= 0; i--)
-		args[i] = va_arg(_args, rt_value);
-
-	va_end(_args);
-
-	switch(argc)
-	{
-		case 0:
-			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, RT_PROC(obj)->self, argc);
-
-		case 1:
-			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, RT_PROC(obj)->self, argc, args[0]);
-
-		case 2:
-			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, RT_PROC(obj)->self, argc, args[0], args[1]);
-
-		case 3:
-			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, RT_PROC(obj)->self, argc, args[0], args[1], args[2]);
-
-		case 4:
-			return RT_PROC(obj)->closure(RT_PROC(obj)->upvals, RT_PROC(obj)->self, argc, args[0], args[1], args[2], args[3]);
-
-		default:
-			assert(0);
-	}
-
-	return RT_NIL;
+	return result;
 }
 
 void rt_proc_init(void)

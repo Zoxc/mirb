@@ -25,8 +25,8 @@ rt_value name_const(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
-	rt_string_concat(result, 1, rt_string_from_cstr("::"));
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->right, 0));
+	rt_concat_string(result, rt_string_from_cstr("::"));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->right, 0, 0, 0));
 
 	return result;
 }
@@ -35,10 +35,10 @@ rt_value name_assign(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_string_concat(result, 1, rt_string_from_cstr(variable_name((rt_value)node->left)));
-	rt_string_concat(result, 1, rt_string_from_cstr(" = "));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_string_from_cstr(variable_name((rt_value)node->left)));
+	rt_concat_string(result, rt_string_from_cstr(" = "));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -47,11 +47,11 @@ rt_value name_assign_const(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr("::"));
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->middle, 0));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr("::"));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->middle, 0, 0, 0));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -60,12 +60,12 @@ rt_value name_arithmetics(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr(" "));
-	rt_string_concat(result, 1, rt_string_from_cstr(token_type_names[node->op]));
-	rt_string_concat(result, 1, rt_string_from_cstr(" "));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(" "));
+	rt_concat_string(result, rt_string_from_cstr(token_type_names[node->op]));
+	rt_concat_string(result, rt_string_from_cstr(" "));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -75,14 +75,14 @@ rt_value name_if(struct node *node)
 	rt_value result = rt_string_from_cstr("(");
 
 	if(node->type == N_UNLESS)
-		rt_string_concat(result, 1, rt_string_from_cstr("!"));
+		rt_concat_string(result, rt_string_from_cstr("!"));
 
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr(" ? "));
-	rt_string_concat(result, 1, get_node_name(node->middle));
-	rt_string_concat(result, 1, rt_string_from_cstr(" : "));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(" ? "));
+	rt_concat_string(result, get_node_name(node->middle));
+	rt_concat_string(result, rt_string_from_cstr(" : "));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -93,8 +93,8 @@ rt_value name_argument(struct node *node)
 	{
 		rt_value result = get_node_name(node->left);
 
-		rt_string_concat(result, 1, rt_string_from_cstr(", "));
-		rt_string_concat(result, 1, get_node_name(node->right));
+		rt_concat_string(result, rt_string_from_cstr(", "));
+		rt_concat_string(result, get_node_name(node->right));
 
 		return result;
 	}
@@ -106,9 +106,9 @@ rt_value name_call_tail(struct node *node)
 {
 	rt_value result = rt_string_from_cstr(token_type_names[node->op]);
 
-	rt_string_concat(result, 1, rt_string_from_cstr("("));
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_string_from_cstr("("));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -117,14 +117,14 @@ rt_value name_call_arguments(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	if(node->right)
 	{
-		rt_string_concat(result, 1, rt_string_from_cstr("{"));
-		rt_string_concat(result, 1, get_node_name(node->right));
-		rt_string_concat(result, 1, rt_string_from_cstr("})"));
+		rt_concat_string(result, rt_string_from_cstr("{"));
+		rt_concat_string(result, get_node_name(node->right));
+		rt_concat_string(result, rt_string_from_cstr("})"));
 	}
 
 	return result;
@@ -134,9 +134,9 @@ rt_value name_call(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
-	rt_string_concat(result, 1, rt_string_from_cstr("."));
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->middle, 0));
-	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr("."));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->middle, 0, 0, 0));
+	rt_concat_string(result, get_node_name(node->right));
 
 	return result;
 }
@@ -152,8 +152,8 @@ rt_value name_expressions(struct node *node)
 
 	if(node->right)
 	{
-		rt_string_concat(result, 1, rt_string_from_cstr("; "));
-		rt_string_concat(result, 1, get_node_name(node->right));
+		rt_concat_string(result, rt_string_from_cstr("; "));
+		rt_concat_string(result, get_node_name(node->right));
 	}
 
 	return result;
@@ -163,10 +163,10 @@ rt_value name_class(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("class ");
 
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
-	rt_string_concat(result, 1, rt_string_from_cstr("("));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_cstr("("));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -175,10 +175,10 @@ rt_value name_module(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("module ");
 
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
-	rt_string_concat(result, 1, rt_string_from_cstr("("));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_cstr("("));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -187,8 +187,8 @@ rt_value name_scope(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("scope:(");
 
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -197,10 +197,10 @@ rt_value name_method(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("def ");
 
-	rt_string_concat(result, 1, rt_symbol_to_s((rt_value)node->left, 0));
-	rt_string_concat(result, 1, rt_string_from_cstr("("));
-	rt_string_concat(result, 1, get_node_name(node->right));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_cstr("("));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -229,8 +229,8 @@ rt_value name_string(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("\"");
 
-	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr("\""));
+	rt_concat_string(result, rt_string_from_cstr((const char *)node->left));
+	rt_concat_string(result, rt_string_from_cstr("\""));
 
 	return result;
 }
@@ -243,16 +243,16 @@ rt_value name_string_continue(struct node *node)
 	{
 		result = get_node_name(node->left);
 
-		rt_string_concat(result, 1, rt_string_from_cstr("}"));
+		rt_concat_string(result, rt_string_from_cstr("}"));
 	}
 	else
 	{
 		result = rt_string_from_cstr("\"");
 	}
 
-	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->middle));
-	rt_string_concat(result, 1, rt_string_from_cstr("#{"));
-	rt_string_concat(result, 1, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr((const char *)node->middle));
+	rt_concat_string(result, rt_string_from_cstr("#{"));
+	rt_concat_string(result, get_node_name(node->right));
 
 	return result;
 }
@@ -261,8 +261,8 @@ rt_value name_string_start(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
-	rt_string_concat(result, 1, rt_string_from_cstr("}"));
-	rt_string_concat(result, 1, rt_string_from_cstr((const char *)node->right));
+	rt_concat_string(result, rt_string_from_cstr("}"));
+	rt_concat_string(result, rt_string_from_cstr((const char *)node->right));
 
 	return result;
 }
@@ -271,9 +271,9 @@ rt_value name_unary(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_string_concat(result, 1, rt_string_from_cstr(token_type_names[node->op]));
-	rt_string_concat(result, 1, get_node_name(node->left));
-	rt_string_concat(result, 1, rt_string_from_cstr(")"));
+	rt_concat_string(result, rt_string_from_cstr(token_type_names[node->op]));
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(")"));
 
 	return result;
 }
@@ -311,7 +311,7 @@ int main()
 
 		struct node* expression = parse_main(parser);
 
-		if (parser->err_count == 0)
+		if(parser->err_count == 0)
 		{
 			printf("Parsing done.\n");
 			printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
@@ -322,7 +322,7 @@ int main()
 
 			printf("Running block %x:\n", (rt_value)compiled_block);
 
-			rt_value result = compiled_block(rt_main, 1);
+			rt_value result = compiled_block(rt_main, RT_NIL, 0, 0);
 
 			printf(" => "); rt_print(result); printf("\n");
 		}
