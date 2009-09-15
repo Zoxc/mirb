@@ -1,0 +1,92 @@
+#include "../classes.h"
+#include "../runtime.h"
+#include "symbol.h"
+#include "array.h"
+#include "string.h"
+
+rt_value rt_Array;
+
+rt_value rt_array_from_raw(rt_value *data, size_t length)
+{
+	rt_value array = rt_alloc(sizeof(struct rt_array));
+
+	RT_COMMON(array)->flags = C_ARRAY;
+	RT_COMMON(array)->class_of = rt_Array;
+
+	RT_ARRAY(array)->data.n = length;
+	RT_ARRAY(array)->data.m = length;
+	RT_ARRAY(array)->data.a = (rt_value*)malloc(length * sizeof(rt_value));
+
+	memcpy(RT_ARRAY(array)->data.a, data, length * sizeof(rt_value));
+
+	return array;
+}
+
+/*
+ * Array
+ */
+
+rt_value __stdcall rt_Array_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	rt_value array = rt_alloc(sizeof(struct rt_array));
+
+	RT_COMMON(array)->flags = C_ARRAY;
+	RT_COMMON(array)->class_of = rt_Array;
+
+	kv_init(RT_ARRAY(array)->data);
+
+	return array;
+}
+
+rt_value __stdcall rt_array_push(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	RT_ARG_EACH(i)
+	{
+		kv_push(rt_value, RT_ARRAY(obj)->data, argv[i]);
+	}
+
+	return obj;
+}
+
+rt_value __stdcall rt_array_pop(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	if(kv_size(RT_ARRAY(obj)->data))
+		return kv_pop(RT_ARRAY(obj)->data);
+	else
+		return RT_NIL;
+}
+
+rt_value __stdcall rt_array_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	rt_value result = rt_string_from_cstr("[");
+
+	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
+	{
+		rt_concat_string(result, RT_CALL_CSTR(kv_A(RT_ARRAY(obj)->data, i), "inspect", 0, 0));
+
+		if(i != kv_size(RT_ARRAY(obj)->data) - 1)
+			rt_concat_string(result, rt_string_from_cstr(", "));
+	}
+
+	rt_concat_string(result, rt_string_from_cstr("]"));
+
+	return result;
+}
+
+rt_value __stdcall rt_array_length(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	return RT_INT2FIX(kv_size(RT_ARRAY(obj)->data));
+}
+
+void rt_array_init(void)
+{
+	rt_Array = rt_define_class(rt_Object, rt_symbol_from_cstr("Array"), rt_Object);
+
+	rt_define_singleton_method(rt_Array, rt_symbol_from_cstr("allocate"), rt_Array_allocate);
+
+	rt_define_method(rt_Array, rt_symbol_from_cstr("push"), rt_array_push);
+	rt_define_method(rt_Array, rt_symbol_from_cstr("pop"), rt_array_pop);
+	rt_define_method(rt_Array, rt_symbol_from_cstr("length"), rt_array_length);
+	rt_define_method(rt_Array, rt_symbol_from_cstr("inspect"), rt_array_inspect);
+}
+

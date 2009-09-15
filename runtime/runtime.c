@@ -6,6 +6,7 @@
 #include "classes/fixnum.h"
 #include "classes/proc.h"
 #include "classes/module.h"
+#include "classes/array.h"
 #include "modules/kernel.h"
 
 void rt_create(void)
@@ -26,6 +27,7 @@ void rt_create(void)
 	rt_string_init();
 	rt_fixnum_init();
 	rt_proc_init();
+	rt_array_init();
 }
 
 void rt_destroy(void)

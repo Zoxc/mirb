@@ -78,6 +78,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes.h" />
+		<Unit filename="runtime\classes\array.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\classes\array.h" />
 		<Unit filename="runtime\classes\bool.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -11,7 +11,7 @@ rt_value __stdcall rt_object_tap(rt_value obj, rt_value block, size_t argc, rt_v
 	return obj;
 }
 
-rt_value __stdcall rt_object_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_value __stdcall rt_Object_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value result = rt_alloc(sizeof(struct rt_object));
 
@@ -60,5 +60,5 @@ void rt_object_init(void)
     rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), rt_object_to_s);
     rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), rt_object_tap);
 
-	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), rt_object_allocate);
+	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), rt_Object_allocate);
 }
