@@ -154,6 +154,10 @@ void opcode_print(opcode_t *op)
 			printf("interpolate %s", variable_name(op->result));
 			break;
 
+		case B_ARRAY:
+			printf("array %s", variable_name(op->result));
+			break;
+
 		case B_SET_CONST:
 			printf("set_const %s.%s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left), variable_name(op->right));
 			break;

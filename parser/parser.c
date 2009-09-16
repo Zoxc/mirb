@@ -191,6 +191,24 @@ struct node *parse_identifier(struct parser *parser)
 	}
 }
 
+struct node *parse_array_element(struct parser *parser)
+{
+	struct node *result = alloc_node(N_ARRAY_ELEMENT);
+
+	result->left = parse_expression(parser);
+
+	if(parser_current(parser) == T_COMMA)
+	{
+		next(parser);
+
+		result->right  = parse_array_element(parser);
+	}
+	else
+		result->right = 0;
+
+	return result;
+}
+
 struct node *parse_factor(struct parser *parser)
 {
 	switch (parser_current(parser))
@@ -215,6 +233,22 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_YIELD:
 			return parse_yield(parser);
+
+		case T_SQUARE_OPEN:
+			{
+			    struct node *result = alloc_node(N_ARRAY);
+
+			    next(parser);
+
+			    if(parser_current(parser) == T_SQUARE_CLOSE)
+					result->left  = 0;
+				else
+					result->left = parse_array_element(parser);
+
+				match(parser, T_SQUARE_CLOSE);
+
+				return result;
+			}
 
 		case T_STRING:
 			{

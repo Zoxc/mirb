@@ -40,6 +40,9 @@ bool has_arguments(struct parser *parser)
 	{
 		switch(parser_current(parser))
 		{
+			case T_SQUARE_OPEN:
+				return parser_token(parser)->whitespace;
+
 			case T_ADD:
 			case T_SUB:
 				{

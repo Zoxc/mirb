@@ -28,6 +28,7 @@ Lookup(Type) <- "::", NewLine*, Type
 
 Factor <- Number
 	| String
+	| Array
 	| InterpolatedString
 	| Variable
 	| Call
@@ -39,7 +40,9 @@ Factor <- Number
 	| Module
 	| Method
 	| Yield
-	| "(", Expressions, ")"
+	| "(", Statements, ")"
+
+Array <- "[", {Expression, (",", Expression)*}, "]"
 
 Class <- "class", Identifier, Sep, Statements, "end"
 

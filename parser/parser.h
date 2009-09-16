@@ -10,6 +10,8 @@ typedef enum {
 	N_STRING,
 	N_STRING_START,
 	N_STRING_CONTINUE,
+	N_ARRAY,
+	N_ARRAY_ELEMENT,
 	N_CONST,
 	N_SELF,
 	N_TRUE,
@@ -177,6 +179,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_STRING_START:
 		case T_YIELD:
 		case T_PARAM_OPEN:
+		case T_SQUARE_OPEN:
 			return true;
 
 		default:

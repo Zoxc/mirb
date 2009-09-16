@@ -89,6 +89,9 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 		case B_INTERPOLATE:
 			return 5 + 6 + 3;
 
+		case B_ARRAY:
+			return 5 + 6 + 3;
+
 		case B_UPVAL:
 			return 3 + 5 + 3;
 
@@ -353,6 +356,18 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 		case B_INTERPOLATE:
 			{
 				generate_call(target, rt_support_interpolate);
+
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4);
+
+				generate_byte(target, 0x89);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+			}
+			break;
+
+		case B_ARRAY:
+			{
+				generate_call(target, rt_support_array);
 
 				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4);
 

@@ -14,6 +14,7 @@ typedef rt_value (__stdcall *rt_compiled_block_t)(rt_value obj, rt_value block, 
 
 #define RT_ARG_INDEX(index) (argc - 1 - (index))
 #define RT_ARG(index) (argv[RT_ARG_INDEX(index)])
+#define RT_ARG_EACH_RAW(i) for(size_t i = 0; i < argc; i++)
 #define RT_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
 #define RT_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 

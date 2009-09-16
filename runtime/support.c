@@ -4,6 +4,7 @@
 #include "classes/string.h"
 #include "classes/symbol.h"
 #include "classes/proc.h"
+#include "classes/array.h"
 
 rt_value __stdcall rt_support_define_string(const char* string)
 {
@@ -65,4 +66,23 @@ rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[])
 	*current = 0;
 
 	return rt_string_from_raw_str(new_str, length);
+}
+
+rt_value __cdecl rt_support_array(size_t argc, rt_value argv[])
+{
+	rt_value array = rt_alloc(sizeof(struct rt_array));
+
+	RT_COMMON(array)->flags = C_ARRAY;
+	RT_COMMON(array)->class_of = rt_Array;
+
+	RT_ARRAY(array)->data.n = argc;
+	RT_ARRAY(array)->data.m = argc;
+	RT_ARRAY(array)->data.a = (rt_value*)malloc(argc * sizeof(rt_value));
+
+	RT_ARG_EACH_RAW(i)
+	{
+		RT_ARRAY(array)->data.a[i] = RT_ARG(i);
+	}
+
+	return array;
 }

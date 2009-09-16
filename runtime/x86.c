@@ -23,7 +23,7 @@ rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_u
 
 	printf("making a closure off block %x on %s\n", (rt_value)block, rt_string_to_cstr(rt_inspect(self)));
 
-	for(int i = 0; i < argc; i++)
+	RT_ARG_EACH_RAW(i)
 	{
 		RT_PROC(closure)->upvals[i] = RT_ARG(i);
 		printf("adding upval with value %s as index %d\n", rt_string_to_cstr(rt_inspect(*RT_PROC(closure)->upvals[i]->val.upval)), i);

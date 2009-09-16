@@ -28,6 +28,7 @@ typedef enum {
 	B_JMP,
 	B_RETURN,
 	B_LABEL,
+	B_ARRAY,
 	B_STRING,
 	B_INTERPOLATE,
 	B_UPVAL,
