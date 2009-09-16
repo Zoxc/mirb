@@ -38,36 +38,26 @@ void __stdcall rt_support_seal_upval(rt_upval_t *upval)
 	upval->sealed = true;
 }
 
-rt_value __cdecl rt_support_interpolate(size_t argc, ...)
+rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[])
 {
-	rt_value args[argc];
-
-	va_list _args;
-	va_start(_args, argc);
-
-	for(int i = argc - 1; i >= 0; i--)
-		args[i] = va_arg(_args, rt_value);
-
-	va_end(_args);
-
 	size_t length = 0;
 
-	for(int i = 0; i < argc; i++)
+	RT_ARG_EACH(i)
 	{
-		if(rt_type(args[i]) != C_STRING)
-			args[i] = RT_CALL_CSTR(args[i], "to_s", 0, 0);
+		if(rt_type(argv[i]) != C_STRING)
+			argv[i] = RT_CALL_CSTR(argv[i], "to_s", 0, 0);
 
-		length += RT_STRING(args[i])->length;
+		length += RT_STRING(argv[i])->length;
 	}
 
 	char *new_str = malloc(length + 1);
 	char *current = new_str;
 
-	for(int i = 0; i < argc; i++)
+	RT_ARG_EACH(i)
 	{
-		size_t length = RT_STRING(args[i])->length;
+		size_t length = RT_STRING(argv[i])->length;
 
-		memcpy(current, RT_STRING(args[i])->string, length);
+		memcpy(current, RT_STRING(argv[i])->string, length);
 
 		current += length;
 	}

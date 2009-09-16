@@ -3,7 +3,7 @@
 #include "classes.h"
 #include "support.h"
 
-rt_value rt_support_closure(rt_compiled_block_t block, size_t argc, ...);
+rt_value rt_support_closure(rt_compiled_block_t block, size_t argc, rt_upval_t *argv[]);
 
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super);
 rt_value __stdcall rt_support_define_module(rt_value name);

@@ -11,7 +11,7 @@ typedef struct {
 
 void __stdcall rt_support_seal_upval(rt_upval_t *upval);
 
-rt_value __cdecl rt_support_interpolate(size_t argc, ...);
+rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[]);
 
 rt_value __stdcall rt_support_get_const(rt_value obj, rt_value name);
 void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value);

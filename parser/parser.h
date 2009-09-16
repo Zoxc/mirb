@@ -25,6 +25,7 @@ typedef enum {
 	N_ARGUMENT,
 	N_CALL_ARGUMENTS,
 	N_CALL,
+	N_ARRAY_CALL,
 	N_STATEMENTS,
 	N_CLASS,
 	N_MODULE,
@@ -46,10 +47,11 @@ typedef enum {
 	V_LOCAL,
 	V_UPVAL,
 	V_TEMP,
-	V_BLOCK
+	V_BLOCK,
+	V_ARGS
 } variable_type;
 
-#define VARIABLE_TYPES 5
+#define VARIABLE_TYPES 6
 
 typedef struct variable_t{
 	struct variable_t *real;

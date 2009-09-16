@@ -3,7 +3,22 @@
 
 struct node *parse_block(struct parser *parser)
 {
-	bool curly = parser_current(parser) == T_CURLY_OPEN;
+	bool curly;
+
+	switch(parser_current(parser))
+	{
+		case T_CURLY_OPEN:
+			curly = true;
+			break;
+
+		case T_DO:
+			curly = false;
+			break;
+
+		default:
+			return 0;
+	}
+
 	next(parser);
 
 	scope_t *scope;
@@ -143,20 +158,10 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 
 		result->left = child;
 		result->middle = (void *)symbol;
+
 		result->right = alloc_node(N_CALL_ARGUMENTS);
 		result->right->left = parse_arguments(parser, has_args);
-		result->right->right = 0;
-
-		switch(parser_current(parser))
-		{
-		    case T_CURLY_OPEN:
-		    case T_DO:
-                result->right->right = parse_block(parser);
-                break;
-
-		    default:
-                break;
-		}
+		result->right->right = parse_block(parser);
 
 		return result;
 	}
@@ -221,9 +226,15 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 			{
 				next(parser);
 
+				struct node *result = alloc_node(N_ARRAY_CALL);
+
+				result->left = child;
+				result->middle = parse_argument(parser);
+				result->right = parse_block(parser);
+
 				match(parser, T_SQUARE_CLOSE);
 
-				return child;
+				return result;
 			}
 
 		default:
@@ -287,6 +298,30 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 							tail->right->left = alloc_node(N_ARGUMENT);
 							tail->right->left->left = parse_expression(parser);
 							tail->right->left->right = 0;
+
+							return tail;
+						}
+
+					case N_ARRAY_CALL:
+						{
+							tail->type = N_CALL;
+
+							struct node *block = tail->right;
+							struct node *argument = tail->middle;
+
+							tail->middle = (void *)rt_symbol_from_cstr("[]=");
+							tail->right = alloc_node(N_CALL_ARGUMENTS);
+							tail->right->right = block;
+							tail->right->left = argument;
+
+							while(argument->right)
+							{
+								argument = argument->right;
+							}
+
+							argument->right = alloc_node(N_ARGUMENT);
+							argument->right->left = parse_expression(parser);
+							argument->right->right = 0;
 
 							return tail;
 						}

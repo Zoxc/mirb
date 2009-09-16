@@ -6,7 +6,7 @@
 #include "classes/string.h"
 #include "classes/proc.h"
 
-rt_value rt_support_closure(rt_compiled_block_t block, size_t argc, ...)
+rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_upval_t *argv[])
 {
 	rt_value self;
 
@@ -23,16 +23,11 @@ rt_value rt_support_closure(rt_compiled_block_t block, size_t argc, ...)
 
 	printf("making a closure off block %x on %s\n", (rt_value)block, rt_string_to_cstr(rt_inspect(self)));
 
-	va_list _args;
-	va_start(_args, argc);
-
-	for(int i = argc - 1; i >= 0; i--)
+	for(int i = 0; i < argc; i++)
 	{
-		RT_PROC(closure)->upvals[i] = va_arg(_args, rt_upval_t *);
-		printf("adding upval with value %s as index %d\n", rt_string_to_cstr(rt_inspect(*RT_PROC(closure)->upvals[i]->val.upval)), (argc - 1) - i);
+		RT_PROC(closure)->upvals[i] = RT_ARG(i);
+		printf("adding upval with value %s as index %d\n", rt_string_to_cstr(rt_inspect(*RT_PROC(closure)->upvals[i]->val.upval)), i);
 	}
-
-	va_end(_args);
 
 	return closure;
 }

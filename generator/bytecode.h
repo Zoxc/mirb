@@ -110,6 +110,25 @@ static inline size_t block_push(block_t *block, opcode_type_t type, rt_value res
 	return kv_size(block->vector) - 1;
 }
 
+static inline variable_t *block_gen_args(block_t *block)
+{
+	variable_t *var = malloc(sizeof(variable_t));
+
+	var->type = V_ARGS;
+	var->index = block->scope->var_count[V_ARGS];
+
+	block->scope->var_count[V_ARGS] += 1;
+
+	block_push(block, B_ARGS, (rt_value)var, (rt_value)false, 0);
+
+	return var;
+}
+
+static inline void block_end_args(block_t *block, variable_t *var, size_t argc)
+{
+	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
+}
+
 static inline void block_emmit_label(block_t *block, rt_value label)
 {
 	int index = block_push(block, B_LABEL, label, 0, 0);

@@ -42,10 +42,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			return 6;
 
 		case B_CALL:
-			if(op->left)
-				return 5 + 5 + 2 + 6;
-			else
-				return 5 + 5 + 2;
+			return (op->right ? 3 : 5) + 3 + 5 + 5 + 2 + (kv_A(block->vector, i - 1)->right ? 6 : 0);
 
 		case B_PUSH:
 			return 3;
@@ -96,7 +93,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			return 3 + 5 + 3;
 
 		case B_CLOSURE:
-			return 5 + 5 + 5 + 6 + 3;
+			return 5 + 5 + 6 + 3;
 
 		case B_GET_UPVAL:
 			return 5 + 5 + 3;
@@ -108,7 +105,10 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			return 3 + 5;
 
 		case B_ARGS:
-			return 1;
+			if(op->left)
+				return 1 + 5;
+			else
+				return 0;
 
 		default:
 			break;
@@ -210,12 +210,11 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CLOSURE:
 			{
-				generate_stack_push(target, op->right);
 				generate_stack_push(target, (size_t)compile_block((block_t *)op->left));
 
 				generate_call(target, rt_support_closure);
 
-				generate_stack_pop(target, (op->right + 1) * 4);
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 3) * 4);
 
 				generate_byte(target, 0x89);
 				generate_byte(target, 0x45);
@@ -310,22 +309,33 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CALL:
 			{
+				if(op->right)
+					generate_stack_var_push(block, target, op->right);
+				else
+					generate_stack_push(target, 0);
+
+				generate_stack_var_push(block, target, op->result);
+
 				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, op->result);
+				generate_dword(target, op->left);
 
 				generate_call(target, rt_support_lookup_method);
 
 				generate_byte(target, 0xFF); // call eax
 				generate_byte(target, 0xD0);
 
-				if(op->left)
-					generate_stack_pop(target, op->left * 4);
+				if(kv_A(block->vector, i - 1)->right)
+					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4);
 			}
 			break;
 
 		case B_ARGS:
 			{
-				generate_byte(target, 0x54); // push esp
+				if(op->left)
+				{
+					generate_byte(target, 0x54); // push esp
+					generate_stack_push(target, op->right);
+				}
 			}
 			break;
 
@@ -344,7 +354,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			{
 				generate_call(target, rt_support_interpolate);
 
-				generate_stack_pop(target, op->left * 4);
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4);
 
 				generate_byte(target, 0x89);
 				generate_byte(target, 0x45);

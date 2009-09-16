@@ -18,6 +18,12 @@ const char *variable_name(rt_value var)
 			rt_concat_string(string, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0, 0, 0));
 			break;
 
+		case V_ARGS:
+			rt_concat_string(string, rt_string_from_cstr("<a:"));
+			rt_concat_string(string, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0, 0, 0));
+			rt_concat_string(string, rt_string_from_cstr(">"));
+			break;
+
 		case V_PARAMETER:
 			rt_concat_string(string, rt_string_from_cstr("*"));
 			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
@@ -94,11 +100,11 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_CLOSURE:
-			printf("closure %s, %x, %d", variable_name(op->result), op->left, op->right);
+			printf("closure %s, %x", variable_name(op->result), op->left);
 			break;
 
 		case B_CALL:
-			printf("call %s, %d, %s", rt_symbol_to_cstr(op->result), op->left, variable_name(op->right));
+			printf("call %s, %s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left), variable_name(op->right));
 			break;
 
 		case B_STORE:
@@ -118,7 +124,10 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_ARGS:
-			printf("arg");
+			if(op->left)
+				printf("end_args %s, %d", variable_name(op->result), op->right);
+			else
+				printf("start_args %s", variable_name(op->result));
 			break;
 
 		case B_JMPF:
@@ -142,7 +151,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_INTERPOLATE:
-			printf("interpolate %s, %d", variable_name(op->result), op->left);
+			printf("interpolate %s", variable_name(op->result));
 			break;
 
 		case B_SET_CONST:
