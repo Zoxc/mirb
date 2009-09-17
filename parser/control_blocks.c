@@ -16,7 +16,7 @@ void parse_then_sep(struct parser *parser)
 
 struct node *parse_ternary_if(struct parser *parser)
 {
-	struct node *result = parse_arithmetic(parser);
+	struct node *result = parse_boolean(parser);
 
 	if(parser_current(parser) == T_QUESTION)
 	{
@@ -39,7 +39,7 @@ struct node *parse_ternary_if(struct parser *parser)
 
 struct node *parse_conditional(struct parser *parser)
 {
-	struct node *result = parse_ternary_if(parser);
+	struct node *result = parse_low_boolean(parser);
 
     if (parser_current(parser) == T_IF || parser_current(parser) == T_UNLESS)
     {
@@ -48,7 +48,7 @@ struct node *parse_conditional(struct parser *parser)
 		next(parser);
 
 		node->middle = result;
-		node->left = parse_expression(parser);
+		node->left = parse_statement(parser);
 		node->right = alloc_nil_node();
 
 		return node;

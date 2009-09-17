@@ -26,6 +26,9 @@ typedef enum {
 	T_SQUARE_CLOSE,
 	T_CURLY_OPEN,
 	T_CURLY_CLOSE,
+	T_AND_SIGN,
+	T_OR_SIGN,
+	T_NOT_SIGN,
 	T_EOF,
 	T_STRING_START,
 	T_STRING_CONTINUE,
@@ -52,6 +55,9 @@ typedef enum {
 	T_TRUE,
 	T_FALSE,
 	T_NIL,
+	T_NOT,
+	T_AND,
+	T_OR,
 	T_END
 } token_type;
 

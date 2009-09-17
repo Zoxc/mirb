@@ -34,13 +34,13 @@ static void gen_string(block_t *block, struct node *node, variable_t *var)
 
 static void gen_string_continue(block_t *block, struct node *node, variable_t *var)
 {
+	variable_t *temp = var ? var : block_get_var(block);
+
 	if(node->left)
-		gen_node(block, node->left, 0);
+		gen_node(block, node->left, temp);
 
-	variable_t *string = block_get_var(block);
-
-	block_push(block, B_STRING, (rt_value)string, (rt_value)node->middle, 0);
-	block_push(block, B_PUSH, (rt_value)string, 0, 0);
+	block_push(block, B_STRING, (rt_value)temp, (rt_value)node->middle, 0);
+	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
 
 	variable_t *interpolated = block_get_var(block);
 
@@ -61,13 +61,13 @@ static void gen_string_start(block_t *block, struct node *node, variable_t *var)
 {
 	variable_t *args = block_gen_args(block);
 
-	gen_node(block, node->left, 0);
+	variable_t *temp = var ? var : block_get_var(block);
 
-	variable_t *string = block_get_var(block);
+	gen_node(block, node->left, temp);
 
-	block_push(block, B_STRING, (rt_value)string, (rt_value)node->right, 0);
+	block_push(block, B_STRING, (rt_value)temp, (rt_value)node->right, 0);
 
-	block_push(block, B_PUSH, (rt_value)string, 0, 0);
+	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
 
 	block_end_args(block, args, gen_string_arg_count(node->left) + 1);
 
@@ -161,14 +161,14 @@ static void gen_unary(block_t *block, struct node *node, variable_t *var)
 
 static void gen_arithmetic(block_t *block, struct node *node, variable_t *var)
 {
-	variable_t *temp1 = block_get_var(block);
+	variable_t *temp1 = var ? var : block_get_var(block);
 	variable_t *temp2 = block_get_var(block);
 
 	gen_node(block, node->left, temp1);
-	gen_node(block, node->right, temp2);
 
 	variable_t *args = block_gen_args(block);
 
+	gen_node(block, node->right, temp2);
 	block_push(block, B_PUSH, (rt_value)temp2, 0, 0);
 
 	block_end_args(block, args, 1);
@@ -180,7 +180,7 @@ static void gen_arithmetic(block_t *block, struct node *node, variable_t *var)
 
 static void gen_if(block_t *block, struct node *node, variable_t *var)
 {
-	variable_t *temp = block_get_var(block);
+	variable_t *temp = var ? var : block_get_var(block);
 	rt_value label_else = block_get_label(block);
 
 	gen_node(block, node->left, temp);
@@ -256,12 +256,14 @@ static void gen_method(block_t *block, struct node *node, variable_t *var)
 
 static int gen_argument(block_t *block, struct node *node, variable_t *var)
 {
-	gen_node(block, node->left, var);
+	variable_t *temp = var ? var : block_get_var(block);
 
-	block_push(block, B_PUSH, (rt_value)var, 0, 0);
+	gen_node(block, node->left, temp);
+
+	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
 
 	if(node->right)
-		return gen_argument(block, node->right, var) + 1;
+		return gen_argument(block, node->right, temp) + 1;
 	else
 		return 1;
 }
@@ -299,8 +301,10 @@ static void generate_call(block_t *block, struct node *self, rt_value name, stru
 
 	variable_t *args = block_gen_args(block);
 
+	variable_t *temp = var ? var : block_get_var(block);
+
 	if(arguments)
-		parameters = gen_argument(block, arguments, var);
+		parameters = gen_argument(block, arguments, temp);
 
 	variable_t* block_var = 0;
 
@@ -371,11 +375,54 @@ static void gen_array(block_t *block, struct node *node, variable_t *var)
 {
 	variable_t *args = block_gen_args(block);
 
-	size_t elements = node->left ? gen_array_element(block, node->left, var) : 0;
+	size_t elements = node->left ? gen_array_element(block, node->left, var ? var : block_get_var(block)) : 0;
 
 	block_end_args(block, args, elements);
 
 	block_push(block, B_ARRAY, (rt_value)var, 0, 0);
+}
+
+static void gen_boolean(block_t *block, struct node *node, variable_t *var)
+{
+	variable_t *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->left, temp);
+
+	rt_value label_end = block_get_label(block);
+
+	block_push(block, B_TEST, (rt_value)temp, 0, 0);
+	block_push(block, (node->op == T_OR || node->op == T_OR_SIGN) ? B_JMPT : B_JMPF, label_end, 0, 0);
+
+	gen_node(block, node->right, var);
+
+	block_emmit_label(block, label_end);
+}
+
+static void gen_not(block_t *block, struct node *node, variable_t *var)
+{
+	if(var)
+	{
+		variable_t *temp = var ? var : block_get_var(block);
+
+		gen_node(block, node->left, temp);
+
+		rt_value label_true = block_get_label(block);
+		rt_value label_end = block_get_label(block);
+
+		block_push(block, B_TEST, (rt_value)temp, 0, 0);
+
+		block_push(block, B_JMPT, label_true, 0, 0);
+
+		block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
+		block_push(block, B_JMP, (rt_value)label_end, 0, 0);
+
+		block_emmit_label(block, label_true);
+		block_push(block, B_MOV_IMM, (rt_value)var, RT_FALSE, 0);
+
+		block_emmit_label(block, label_end);
+	}
+	else
+		gen_node(block, node->left, 0);
 }
 
 static void gen_warn(block_t *block, struct node *node, variable_t *var)
@@ -383,7 +430,7 @@ static void gen_warn(block_t *block, struct node *node, variable_t *var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_array, /*N_ARRAY_ELEMENT*/gen_warn, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, /*N_ARGUMENT*/gen_warn, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_array_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
+generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_array, /*N_ARRAY_ELEMENT*/gen_warn, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_boolean, gen_not, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, /*N_ARGUMENT*/gen_warn, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_array_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, variable_t *var)
 {

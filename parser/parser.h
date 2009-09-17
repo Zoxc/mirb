@@ -19,6 +19,8 @@ typedef enum {
 	N_NIL,
 	N_ASSIGN,
 	N_ASSIGN_CONST,
+	N_BOOLEAN,
+	N_NOT,
 	N_UNARY,
 	N_TERM,
 	N_EXPRESSION,
@@ -106,6 +108,8 @@ struct node *parse_factor(struct parser *parser);
 struct node *parse_expression(struct parser *parser);
 struct node *parse_argument(struct parser *parser);
 struct node *parse_arithmetic(struct parser *parser);
+struct node *parse_boolean(struct parser *parser);
+struct node *parse_low_boolean(struct parser *parser);
 struct node *parse_statement(struct parser *parser);
 struct node *parse_statements(struct parser *parser);
 void parse_sep(struct parser *parser);
@@ -170,6 +174,8 @@ static inline bool is_expression(struct parser *parser)
 		case T_CASE:
 		case T_CLASS:
 		case T_MODULE:
+		case T_NOT:
+		case T_NOT_SIGN:
 		case T_DEF:
 		case T_SELF:
 		case T_TRUE:

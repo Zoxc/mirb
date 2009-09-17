@@ -1,8 +1,8 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "end"};
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
+	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
 
@@ -291,9 +291,39 @@ static token_type colon_proc(token_t *token)
 	token->input++;
 
 	if(*(token->input) == ':')
+	{
 		token->input++;
 
+		return T_SCOPE;
+	}
+
     return T_COLON;
+}
+
+static token_type or_sign_proc(token_t *token)
+{
+	if(token->input[1] == '|')
+	{
+		token->input += 2;
+
+		return T_OR_SIGN;
+	}
+
+	return unknown_proc(token);
+}
+
+static token_type amp_proc(token_t *token)
+{
+	token->input++;
+
+	if(*(token->input) == '&')
+	{
+		token->input++;
+
+		return T_AND_SIGN;
+	}
+
+    return T_AMP;
 }
 
 #define SINGLE_PROC(name, result) static token_type name##_proc(token_t *token)\
@@ -312,7 +342,7 @@ SINGLE_PROC(dot, T_DOT);
 SINGLE_PROC(comma, T_COMMA);
 SINGLE_PROC(square_open, T_SQUARE_OPEN);
 SINGLE_PROC(square_close, T_SQUARE_CLOSE);
-SINGLE_PROC(amp, T_AMP);
+SINGLE_PROC(not_sign, T_NOT_SIGN);
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
@@ -372,6 +402,8 @@ void parser_setup(void)
 	jump_table['}'] = curly_close_proc;
 	jump_table['"'] = double_quote_proc;
 	jump_table['&'] = amp_proc;
+	jump_table['!'] = not_sign_proc;
+	jump_table['|'] = or_sign_proc;
 
     jump_table[0] = null_proc;
 }

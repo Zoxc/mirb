@@ -113,6 +113,12 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 			else
 				return 0;
 
+		case B_PUSH_UPVAL:
+			if(((variable_t *)op->result)->index)
+				return 3;
+			else
+				return 2;
+
 		default:
 			break;
 	}
@@ -208,6 +214,24 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_stack_var_push(block, target, op->left);
 
 				generate_call(target, rt_support_set_upval);
+			}
+			break;
+
+		case B_PUSH_UPVAL:
+			{
+				size_t index = ((variable_t *)op->result)->index * 4;
+
+				if(index)
+				{
+					generate_byte(target, 0xFF); // push dword [esi + index]
+					generate_byte(target, 0x76);
+					generate_byte(target, ((variable_t *)op->result)->index * 4);
+				}
+				else
+				{
+					generate_byte(target, 0xFF); // push dword [esi]
+					generate_byte(target, 0x36);
+				}
 			}
 			break;
 
@@ -458,10 +482,10 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0x45);
 				generate_byte(target, (char)get_stack_index(block, op->result));
 
-				// and eax, -5
+				// and eax, ~RT_FALSE
 
 				generate_byte(target, 0x25);
-				generate_dword(target, -5);
+				generate_dword(target, ~RT_FALSE);
 			}
 			break;
 

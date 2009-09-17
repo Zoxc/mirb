@@ -428,9 +428,81 @@ struct node *parse_arithmetic(struct parser *parser)
     return result;
 }
 
+struct node *parse_boolean_unary(struct parser *parser)
+{
+    if(parser_current(parser) == T_NOT_SIGN)
+    {
+    	struct node *result = alloc_node(N_NOT);
+
+		next(parser);
+
+		result->left = parse_arithmetic(parser);
+
+		return result;
+    }
+    else
+		return parse_arithmetic(parser);
+}
+
+struct node *parse_boolean(struct parser *parser)
+{
+	struct node *result = parse_boolean_unary(parser);
+
+    while(parser_current(parser) == T_AND_SIGN || parser_current(parser) == T_OR_SIGN)
+    {
+    	struct node *node = alloc_node(N_BOOLEAN);
+
+		node->op = parser_current(parser);
+		node->left = result;
+
+		next(parser);
+
+		node->right = parse_boolean_unary(parser);
+		result = node;
+    }
+
+    return result;
+}
+
 struct node *parse_expression(struct parser *parser)
 {
 	return parse_ternary_if(parser);
+}
+
+struct node *parse_low_boolean_unary(struct parser *parser)
+{
+    if(parser_current(parser) == T_NOT)
+    {
+    	struct node *result = alloc_node(N_NOT);
+
+		next(parser);
+
+		result->left = parse_expression(parser);
+
+		return result;
+    }
+    else
+		return parse_expression(parser);
+}
+
+struct node *parse_low_boolean(struct parser *parser)
+{
+	struct node *result = parse_low_boolean_unary(parser);
+
+    while(parser_current(parser) == T_AND || parser_current(parser) == T_OR)
+    {
+    	struct node *node = alloc_node(N_BOOLEAN);
+
+		node->op = parser_current(parser);
+		node->left = result;
+
+		next(parser);
+
+		node->right = parse_low_boolean_unary(parser);
+		result = node;
+    }
+
+    return result;
 }
 
 struct node *parse_statement(struct parser *parser)

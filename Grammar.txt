@@ -2,13 +2,27 @@ Statements <- Sep*, Statement, (Sep+, Statement)*, Sep*
 
 Statement <- Conditional
 
-Conditional <- TernaryIf, {("if" | "unless"), NewLine*, Statement}
+Conditional <- LowBoolean, {("if" | "unless"), NewLine*, Statement}
+
+LowBoolean <- LowBooleanFactor, (LowBooleanOp, NewLine*, LowBooleanFactor)*
+
+LowBooleanOp <- "and"
+	| "or"
+
+LowBooleanUnary <- {"not"}, Expression
 
 Expression <- TernaryIf
 
-TernaryIf <- Arithmetic, {"?", NewLine*, TernaryIf, ":", NewLine*, TernaryIf}
+TernaryIf <- Boolean, {"?", NewLine*, TernaryIf, NewLine*, ":", NewLine*, TernaryIf}
 
-Arithmetic <- Term, {TermOp, NewLine*, Term}
+Boolean <- BooleanFactor, (BooleanOp, NewLine*, BooleanFactor)*
+
+BooleanOp <- "&&"
+	| "||"
+
+BooleanUnary <- {"!"}, Arithmetic
+
+Arithmetic <- Term, (TermOp, NewLine*, Term)*
 
 TermOp <- "+"
 	| "-"

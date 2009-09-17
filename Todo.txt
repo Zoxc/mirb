@@ -6,6 +6,7 @@
 [X] String interpolation
 [X] Arrays
 [ ] Hashes
+[ ] Ranges
 [ ] Class inheritance
 [ ] Instance variables
 [ ] Singleton class of variable syntax
