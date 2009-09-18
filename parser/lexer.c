@@ -148,15 +148,20 @@ static inline bool is_ident(char input)
 
 static token_type ivar_proc(token_t *token)
 {
-	token->start = token->input;
-	token->input++;
-
-	while(is_ident(*(token->input)))
+	if(is_ident(token->input[1]))
+	{
+		token->start = token->input;
 		token->input++;
 
-	token->stop = token->input;
+		while(is_ident(*(token->input)))
+			token->input++;
 
-	return T_IVAR;
+		token->stop = token->input;
+
+		return T_IVAR;
+	}
+	else
+		return unknown_proc(token);
 }
 
 static token_type ident_proc(token_t *token)
