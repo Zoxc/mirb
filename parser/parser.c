@@ -337,8 +337,6 @@ struct node *parse_factor(struct parser *parser)
 
 			    result->left = (void* )atoi(text);
 
-			    free(text);
-
 			    next(parser);
 
 				return result;

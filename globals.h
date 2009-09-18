@@ -13,6 +13,8 @@
 #else
 	#define __stdcall __attribute__((__stdcall__))
 	#define __cdecl __attribute__((__cdecl__))
+
+	#include <sys/mman.h>
 #endif
 
 #include "vendor/kvec.h"

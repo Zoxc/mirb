@@ -23,8 +23,6 @@ static inline rt_value rt_symbol_from_token(token_t *token)
 
 	rt_value result = rt_symbol_from_cstr(str);
 
-	free(str);
-
 	return result;
 }
 

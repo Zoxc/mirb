@@ -6,7 +6,7 @@ static void *get_page(void)
 {
 	void *result;
 
-    #ifdef WINDOWS
+	#ifdef WINDOWS
 		result = VirtualAlloc(0, ALLOCATOR_PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 		assert(result);

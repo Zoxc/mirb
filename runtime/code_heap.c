@@ -1,9 +1,5 @@
 #include "../globals.h"
 
-#ifndef WINDOWS
-	#include <sys/mman.h>
-#endif
-
 static unsigned char *heap;
 static unsigned char *next;
 static unsigned char *end;
@@ -12,7 +8,7 @@ static unsigned char *end;
 
 void rt_code_heap_create(void)
 {
-    #ifdef WINDOWS
+	#ifdef WINDOWS
 		heap = (unsigned char *)VirtualAlloc(0, CODE_HEAP_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 		assert(heap);
