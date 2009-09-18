@@ -42,6 +42,8 @@ void allocator_free(allocator_t *allocator)
 
 	for(size_t i = 0; i < kv_size(allocator->pages); i++)
 		free_page(kv_A(allocator->pages, i) - ALLOCATOR_PAGE_SIZE);
+
+	kv_destroy(allocator->pages);
 }
 
 void *allocator_page_alloc(allocator_t *allocator, size_t length)

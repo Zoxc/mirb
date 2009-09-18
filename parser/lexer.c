@@ -8,7 +8,7 @@ typedef token_type(*jump_table_entry)(token_t *token);
 
 jump_table_entry jump_table[256];
 
-struct parser *parser_create(char* input)
+struct parser *parser_create(const char* input)
 {
 	struct parser* result = malloc(sizeof(struct parser));
 
@@ -67,7 +67,7 @@ static inline bool compare_token(token_t *token, const char *str)
 	return false;
 }
 
-static inline bool is_whitespace(char input)
+static inline bool is_whitespace(const char input)
 {
     if(input == 0x10 || input == 0x13)
         return false;
@@ -78,7 +78,7 @@ static inline bool is_whitespace(char input)
     return false;
 }
 
-static inline bool skip_whitespace(char **input)
+static inline bool skip_whitespace(const char **input)
 {
 	if(is_whitespace(**input))
 	{
@@ -94,7 +94,7 @@ static inline bool skip_whitespace(char **input)
 		return false;
 }
 
-static inline bool is_number(char input)
+static inline bool is_number(const char input)
 {
     if(input >= '0' && input <= '9')
         return true;

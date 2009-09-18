@@ -8,6 +8,9 @@
 #include "classes/module.h"
 #include "classes/array.h"
 #include "modules/kernel.h"
+#include "../generator/bytecode.h"
+#include "../generator/generator.h"
+#include "../generator/x86.h"
 
 void rt_create(void)
 {
@@ -36,6 +39,24 @@ void rt_destroy(void)
 	rt_code_heap_destroy();
 
 	kh_destroy(rt_hash, object_var_hashes);
+}
+
+rt_value rt_eval(rt_value self, const char *input)
+{
+	struct parser *parser = parser_create(input);
+
+	struct node* expression = parse_main(parser);
+
+	if(parser->err_count != 0)
+		return RT_NIL;
+
+	block_t *code_block = gen_block(expression);
+
+	rt_compiled_block_t compiled_block = compile_block(code_block);
+
+	parser_destroy(parser);
+
+	return compiled_block(self, RT_NIL, 0, 0);
 }
 
 rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name)

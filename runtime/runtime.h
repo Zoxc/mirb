@@ -92,6 +92,7 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 void rt_create(void);
 void rt_destroy(void);
 
+rt_value rt_eval(rt_value self, const char *input);
 void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 

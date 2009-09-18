@@ -75,9 +75,9 @@ extern char *token_type_names[];
 struct parser;
 
 typedef struct {
-    char *input;
-    char *start;
-    char *stop;
+    const char *input;
+    const char *start;
+    const char *stop;
     struct parser *parser;
     kvec_t(bool) curlys;
     int line;
@@ -87,7 +87,7 @@ typedef struct {
 } token_t;
 
 void parser_setup(void);
-struct parser *parser_create(char *input);
+struct parser *parser_create(const char *input);
 void parser_destroy(struct parser *parser);
 
 token_type next(struct parser *parser);
