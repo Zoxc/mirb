@@ -133,14 +133,28 @@ struct node *parse_method(struct parser *parser)
 
 	struct node *result = alloc_node(parser, N_METHOD);
 
-	if(require(parser, T_IDENT))
-	{
-		result->left = (void *)rt_symbol_from_parser(parser);
+	printf("current:%s\n", token_type_names[parser_current(parser)]);
 
-		next(parser);
+	switch(parser_current(parser))
+	{
+		case T_IDENT:
+		case T_EXT_IDENT:
+			{
+				result->left = (void *)rt_symbol_from_parser(parser);
+
+				next(parser);
+			}
+			break;
+
+		default:
+			{
+				parser->err_count++;
+
+				printf("Expected identifier but found %s\n", token_type_names[parser_current(parser)]);
+
+				result->left = 0;
+			}
 	}
-	else
-		result->left = 0;
 
 	scope_t *scope;
 

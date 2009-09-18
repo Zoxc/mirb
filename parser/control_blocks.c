@@ -149,7 +149,7 @@ struct node *parse_case_body(struct parser *parser)
 		default:
 			{
 				parser->err_count++;
-				printf("Excepted else or when but found %s\n", token_type_names[parser_current(parser)]);
+				printf("Expected else or when but found %s\n", token_type_names[parser_current(parser)]);
 
 				return 0;
 			}
@@ -176,7 +176,7 @@ struct node *parse_case(struct parser *parser)
 
 		default:
 			parser->err_count++;
-			printf("Excepted else or when but found %s\n", token_type_names[parser_current(parser)]);
+			printf("Expected else or when but found %s\n", token_type_names[parser_current(parser)]);
 	}
 
 	match(parser, T_END);

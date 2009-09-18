@@ -95,7 +95,7 @@ void parse_sep(struct parser *parser)
 
 		default:
 			parser->err_count++;
-			printf("Excepted seperator but found %s\n", token_type_names[parser_current(parser)]);
+			printf("Expected seperator but found %s\n", token_type_names[parser_current(parser)]);
 	}
 }
 
@@ -345,6 +345,9 @@ struct node *parse_factor(struct parser *parser)
 		case T_IDENT:
 			return parse_identifier(parser);
 
+		case T_EXT_IDENT:
+			return parse_call(parser, 0, alloc_node(parser, N_SELF), false);
+
 		case T_PARAM_OPEN:
 			{
 				next(parser);
@@ -359,7 +362,7 @@ struct node *parse_factor(struct parser *parser)
 		default:
 			{
 				parser->err_count++;
-				printf("Excepted expression but found %s\n", token_type_names[parser_current(parser)]);
+				printf("Expected expression but found %s\n", token_type_names[parser_current(parser)]);
 
 				next(parser);
 

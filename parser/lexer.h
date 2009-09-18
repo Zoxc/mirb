@@ -36,6 +36,7 @@ typedef enum {
 	T_STRING_END,
 	T_NUMBER,
 	T_IDENT,
+	T_EXT_IDENT,
 	T_LINE,
 
 	// Keywords

@@ -134,7 +134,7 @@ static inline bool match(struct parser *parser, token_type type)
     {
     	parser->err_count++;
 
-        printf("Excepted token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
+        printf("Expected token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
 
         return false;
     }
@@ -160,7 +160,7 @@ static inline bool require(struct parser *parser, token_type type)
     {
     	parser->err_count++;
 
-        printf("Excepted token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
+        printf("Expected token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
 
         return false;
     }
@@ -171,6 +171,7 @@ static inline bool is_expression(struct parser *parser)
 	switch (parser_current(parser))
 	{
 		case T_IDENT:
+		case T_EXT_IDENT:
 		case T_ADD:
 		case T_SUB:
 		case T_NUMBER:

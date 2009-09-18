@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Extended-Identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
@@ -151,8 +151,24 @@ static token_type ident_proc(token_t *token)
 	token->start = token->input;
 	token->input++;
 
-	while (is_ident(*(token->input)))
+	while(is_ident(*(token->input)))
 		token->input++;
+
+	switch(*(token->input))
+	{
+		case '?':
+		case '!':
+			{
+				token->input++;
+
+				token->stop = token->input;
+
+				return T_EXT_IDENT;
+			}
+
+		default:
+			break;
+	}
 
 	token->stop = token->input;
 

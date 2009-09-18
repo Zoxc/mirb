@@ -62,7 +62,7 @@ Class <- "class", Identifier, Sep, Statements, "end"
 
 Module <- "module", Identifier, Sep, Statements, "end"
 
-Method <- "def", Identifier, ({MethodParameters}, Sep | "(", MethodParameters, ")"), Statements, "end"
+Method <- "def", CallIdent, ({MethodParameters}, Sep | "(", MethodParameters, ")"), Statements, "end"
 
 MethodParameters <- MethodParameter, (",", MethodParameter)*
 
@@ -88,7 +88,7 @@ AssignOp <- "="
 	| "*="
 	| "/="
 
-Call <- Identifier, {Arguments | "(", Arguments, ")"}, {Block}
+Call <- CallIdent, {Arguments | "(", Arguments, ")"}, {Block}
 
 Yield  <- {Arguments | "(", Arguments, ")"}
 
@@ -110,8 +110,12 @@ Sep <- NewLine+
 
 InterpolatedString = StringStart, Statements, (StringContinue, Statements)* StringEnd
 
+CallIdent <- Identifier
+	| ExtendedIdentifier
+
 # Tokens from lexer
 
+ExtendedIdentifier
 Identifier
 Number
 NewLine

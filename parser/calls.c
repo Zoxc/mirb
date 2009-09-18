@@ -121,11 +121,26 @@ struct node *parse_yield(struct parser *parser)
 
 struct node *parse_call(struct parser *parser, rt_value symbol, struct node *child, bool default_var)
 {
-	if(!symbol && require(parser, T_IDENT))
+	if(!symbol)
 	{
-		symbol = rt_symbol_from_parser(parser);
+		switch(parser_current(parser))
+		{
+			case T_IDENT:
+			case T_EXT_IDENT:
+				{
+					symbol = rt_symbol_from_parser(parser);
 
-		next(parser);
+					next(parser);
+				}
+				break;
+
+			default:
+				{
+					parser->err_count++;
+
+					printf("Expected identifier but found %s\n", token_type_names[parser_current(parser)]);
+				}
+		}
 	}
 
 	bool local = false;
