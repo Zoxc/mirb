@@ -3,6 +3,7 @@
 #include "../runtime/classes.h"
 #include "../runtime/runtime.h"
 #include "lexer.h"
+#include "allocator.h"
 
 typedef enum {
 	N_NUMBER,
@@ -74,7 +75,10 @@ typedef enum {
 	S_CLOSURE
 } scope_type;
 
+struct parser;
+
 typedef struct scope_t {
+	struct parser *parser;
 	scope_type type;
 	rt_value var_count[VARIABLE_TYPES];
 	khash_t(scope) *variables;
@@ -92,6 +96,7 @@ struct parser {
 	int count;
 	int err_count;
 	scope_t *current_scope;
+	allocator_t allocator;
 };
 
 static inline token_t *parser_token(struct parser *parser)
@@ -193,11 +198,17 @@ static inline bool is_expression(struct parser *parser)
 	}
 }
 
+static inline void *parser_alloc(struct parser *parser, size_t length)
+{
+	return allocator_alloc(&parser->allocator, length);
+}
+
 static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_var, scope_type type)
 {
-	struct node *result = malloc(sizeof(struct node));
-	scope_t *scope = malloc(sizeof(scope_t));
+	struct node *result = parser_alloc(parser, sizeof(struct node));
+	scope_t *scope = parser_alloc(parser, sizeof(scope_t));
 
+	scope->parser = parser;
 	scope->variables = kh_init(scope);
 
 	for(int i = 0; i < VARIABLE_TYPES; i++)
@@ -217,17 +228,17 @@ static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_va
 	return result;
 }
 
-static inline struct node *alloc_node(node_type type)
+static inline struct node *alloc_node(struct parser *parser, node_type type)
 {
-	struct node *result = malloc(sizeof(struct node));
+	struct node *result = parser_alloc(parser, sizeof(struct node));
 	result->type = type;
 
 	return result;
 }
 
-static inline struct node *alloc_nil_node()
+static inline struct node *alloc_nil_node(struct parser *parser)
 {
-	struct node *result = malloc(sizeof(struct node));
+	struct node *result = parser_alloc(parser, sizeof(struct node));
 	result->type = N_NIL;
 
 	return result;

@@ -51,6 +51,7 @@ typedef struct {
 } opcode_t;
 
 typedef struct {
+	struct parser* parser;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
@@ -61,8 +62,9 @@ typedef struct {
 
 static inline block_t *block_create(scope_t *scope)
 {
-	block_t *result = malloc(sizeof(block_t));
+	block_t *result = parser_alloc(scope->parser, sizeof(block_t));
 
+	result->parser = scope->parser;
 	result->label_count = 0;
 	result->scope = scope;
 	result->label_usage = kh_init(rt_hash);
@@ -89,7 +91,7 @@ static inline rt_value block_get_label(block_t *block)
 
 static inline variable_t *block_get_var(block_t *block)
 {
-	variable_t *temp = malloc(sizeof(variable_t));
+	variable_t *temp = parser_alloc(block->parser, sizeof(variable_t));
 
 	temp->type = V_TEMP;
 	temp->index = block->scope->var_count[V_TEMP];
@@ -101,7 +103,7 @@ static inline variable_t *block_get_var(block_t *block)
 
 static inline size_t block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
 {
-	opcode_t *op = malloc(sizeof(opcode_t));
+	opcode_t *op = parser_alloc(block->parser, sizeof(opcode_t));
 	op->type = type;
 	op->result = result;
 	op->left = left;
@@ -113,7 +115,7 @@ static inline size_t block_push(block_t *block, opcode_type_t type, rt_value res
 
 static inline variable_t *block_gen_args(block_t *block)
 {
-	variable_t *var = malloc(sizeof(variable_t));
+	variable_t *var = parser_alloc(block->parser, sizeof(variable_t));
 
 	var->type = V_ARGS;
 	var->index = block->scope->var_count[V_ARGS];

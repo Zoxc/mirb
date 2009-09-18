@@ -101,9 +101,9 @@ struct node *parse_yield(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(N_CALL);
+	struct node *result = alloc_node(parser, N_CALL);
 
-	result->left = alloc_node(N_VAR);
+	result->left = alloc_node(parser, N_VAR);
 
 	if(!parser->current_scope->block_var)
 		parser->current_scope->block_var = scope_define(parser->current_scope, 0, V_BLOCK, false);
@@ -112,7 +112,7 @@ struct node *parse_yield(struct parser *parser)
 
 	result->middle = (void *)rt_symbol_from_cstr("call");
 
-	result->right = alloc_node(N_CALL_ARGUMENTS);
+	result->right = alloc_node(parser, N_CALL_ARGUMENTS);
 	result->right->left = parse_arguments(parser, has_arguments(parser));
 	result->right->right = 0;
 
@@ -139,7 +139,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	{
 		if(local)
 		{
-			struct node *result = alloc_node(N_VAR);
+			struct node *result = alloc_node(parser, N_VAR);
 
 			result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 
@@ -147,7 +147,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		}
 		else
 		{
-			struct node *result = alloc_node(N_CONST);
+			struct node *result = alloc_node(parser, N_CONST);
 
 			result->left = child;
 			result->right = (void *)symbol;
@@ -157,12 +157,12 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	}
 	else // Call
 	{
-		struct node *result = alloc_node(N_CALL);
+		struct node *result = alloc_node(parser, N_CALL);
 
 		result->left = child;
 		result->middle = (void *)symbol;
 
-		result->right = alloc_node(N_CALL_ARGUMENTS);
+		result->right = alloc_node(parser, N_CALL_ARGUMENTS);
 		result->right->left = parse_arguments(parser, has_args);
 		result->right->right = parse_block(parser);
 
@@ -194,13 +194,13 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 
 					if(rt_symbol_is_const(symbol))
 					{
-						result = alloc_node(N_CONST);
+						result = alloc_node(parser, N_CONST);
 						result->left = child;
 						result->right = (void *)symbol;
 					}
 					else
 					{
-						result = alloc_node(N_CALL);
+						result = alloc_node(parser, N_CALL);
 						result->left = child;
 						result->middle = (void *)symbol;
 						result->right = 0;
@@ -229,7 +229,7 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(N_ARRAY_CALL);
+				struct node *result = alloc_node(parser, N_ARRAY_CALL);
 
 				result->left = child;
 				result->middle = parse_argument(parser);
@@ -266,7 +266,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 				{
 					case N_CONST:
 						{
-							struct node *result = alloc_node(N_ASSIGN_CONST);
+							struct node *result = alloc_node(parser, N_ASSIGN_CONST);
 
 							result->left = tail->left;
 							result->middle = tail->right;
@@ -285,20 +285,18 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 
 								printf("original %s\n", name);
 
-								char *new_name = malloc(strlen(name) + 2);
+								char *new_name = parser_alloc(parser, strlen(name) + 2);
 								strcpy(new_name, name);
 								strcat(new_name, "=");
 
 								printf("new %s\n", new_name);
 
 								tail->middle = (void *)rt_symbol_from_cstr(new_name);
-
-								free(new_name);
 							}
 
-							tail->right = alloc_node(N_CALL_ARGUMENTS);
+							tail->right = alloc_node(parser, N_CALL_ARGUMENTS);
 							tail->right->right = 0;
-							tail->right->left = alloc_node(N_ARGUMENT);
+							tail->right->left = alloc_node(parser, N_ARGUMENT);
 							tail->right->left->left = parse_expression(parser);
 							tail->right->left->right = 0;
 
@@ -313,7 +311,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 							struct node *argument = tail->middle;
 
 							tail->middle = (void *)rt_symbol_from_cstr("[]=");
-							tail->right = alloc_node(N_CALL_ARGUMENTS);
+							tail->right = alloc_node(parser, N_CALL_ARGUMENTS);
 							tail->right->right = block;
 							tail->right->left = argument;
 
@@ -322,7 +320,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 								argument = argument->right;
 							}
 
-							argument->right = alloc_node(N_ARGUMENT);
+							argument->right = alloc_node(parser, N_ARGUMENT);
 							argument->right->left = parse_expression(parser);
 							argument->right->right = 0;
 

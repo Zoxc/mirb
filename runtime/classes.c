@@ -140,6 +140,8 @@ void rt_class_name(rt_value obj, rt_value under, rt_value name)
 	rt_object_set_var(obj, rt_symbol_from_cstr("__classname__"), rt_string_from_cstr(rt_symbol_to_cstr(name)));
 	rt_object_set_var(obj, rt_symbol_from_cstr("__classpath__"), rt_string_from_cstr(new_path));
 
+	free(new_path);
+
 	rt_const_set(under, name, obj);
 }
 

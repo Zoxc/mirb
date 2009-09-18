@@ -5,7 +5,7 @@ struct node *parse_class(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(N_CLASS);
+	struct node *result = alloc_node(parser, N_CLASS);
 
 	if(require(parser, T_IDENT))
 	{
@@ -34,7 +34,7 @@ struct node *parse_module(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(N_MODULE);
+	struct node *result = alloc_node(parser, N_MODULE);
 
 	if(require(parser, T_IDENT))
 	{
@@ -76,7 +76,7 @@ struct node *parse_parameter(struct parser *parser, scope_t *scope)
 {
 	if(is_parameter(parser))
 	{
-		struct node *result = alloc_node(N_PARAMETER);
+		struct node *result = alloc_node(parser, N_PARAMETER);
 
 		result->middle = (void *)matches(parser, T_AMP);
 
@@ -131,7 +131,7 @@ struct node *parse_method(struct parser *parser)
 
 	parser_state(parser, TS_DEFAULT);
 
-	struct node *result = alloc_node(N_METHOD);
+	struct node *result = alloc_node(parser, N_METHOD);
 
 	if(require(parser, T_IDENT))
 	{

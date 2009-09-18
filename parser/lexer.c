@@ -23,6 +23,7 @@ struct parser *parser_create(char* input)
 	result->current_scope = 0;
 
     kv_init(result->token.curlys);
+    allocator_init(&result->allocator);
 
     next(result);
 
@@ -31,6 +32,7 @@ struct parser *parser_create(char* input)
 
 void parser_destroy(struct parser *parser)
 {
+	allocator_free(&parser->allocator);
 	kv_destroy(parser->token.curlys);
 	free(parser);
 }
@@ -38,7 +40,7 @@ void parser_destroy(struct parser *parser)
 char* get_token_str(token_t *token)
 {
     size_t length = (size_t)(token->stop - token->start);
-    char* result = malloc(length + 1);
+    char* result = parser_alloc(token->parser, length + 1);
     memcpy(result, token->start, length);
     result[length] = 0;
     return result;

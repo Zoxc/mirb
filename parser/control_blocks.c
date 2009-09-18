@@ -22,7 +22,7 @@ struct node *parse_ternary_if(struct parser *parser)
 	{
 		next(parser);
 
-    	struct node *node = alloc_node(N_IF);
+    	struct node *node = alloc_node(parser, N_IF);
 
 		node->left = result;
 		node->middle = parse_ternary_if(parser);
@@ -43,13 +43,13 @@ struct node *parse_conditional(struct parser *parser)
 
     if (parser_current(parser) == T_IF || parser_current(parser) == T_UNLESS)
     {
-     	struct node *node = alloc_node(parser_current(parser) == T_IF ? N_IF : N_UNLESS);
+     	struct node *node = alloc_node(parser, parser_current(parser) == T_IF ? N_IF : N_UNLESS);
 
 		next(parser);
 
 		node->middle = result;
 		node->left = parse_statement(parser);
-		node->right = alloc_nil_node();
+		node->right = alloc_nil_node(parser);
 
 		return node;
     }
@@ -61,13 +61,13 @@ struct node *parse_unless(struct parser *parser)
 {
 				next(parser);
 
-				struct node *result = alloc_node(N_UNLESS);
+				struct node *result = alloc_node(parser, N_UNLESS);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
 
 				result->middle = parse_statements(parser);
-				result->right = alloc_nil_node();
+				result->right = alloc_nil_node(parser);
 
 				match(parser, T_END);
 
@@ -82,7 +82,7 @@ struct node *parse_if_tail(struct parser *parser)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(N_IF);
+				struct node *result = alloc_node(parser, N_IF);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
@@ -99,7 +99,7 @@ struct node *parse_if_tail(struct parser *parser)
 			return parse_statements(parser);
 
 		default:
-			return alloc_nil_node();
+			return alloc_nil_node(parser);
 	}
 }
 
@@ -107,7 +107,7 @@ struct node *parse_if(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(N_IF);
+	struct node *result = alloc_node(parser, N_IF);
 	result->left = parse_expression(parser);
 
 	parse_then_sep(parser);
@@ -128,7 +128,7 @@ struct node *parse_case_body(struct parser *parser)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(N_IF);
+				struct node *result = alloc_node(parser, N_IF);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
