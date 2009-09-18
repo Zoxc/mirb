@@ -8,6 +8,8 @@
 typedef enum {
 	N_NUMBER,
 	N_VAR,
+	N_IVAR,
+	N_IVAR_ASSIGN,
 	N_STRING,
 	N_STRING_START,
 	N_STRING_CONTINUE,
@@ -172,6 +174,7 @@ static inline bool is_expression(struct parser *parser)
 	{
 		case T_IDENT:
 		case T_EXT_IDENT:
+		case T_IVAR:
 		case T_ADD:
 		case T_SUB:
 		case T_NUMBER:

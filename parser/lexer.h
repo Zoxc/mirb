@@ -35,6 +35,7 @@ typedef enum {
 	T_STRING,
 	T_STRING_END,
 	T_NUMBER,
+	T_IVAR,
 	T_IDENT,
 	T_EXT_IDENT,
 	T_LINE,

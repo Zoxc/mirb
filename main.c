@@ -345,7 +345,24 @@ rt_value name_not(struct node *node)
 	return result;
 }
 
-get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_string, name_string_start, name_string_continue, name_array, name_array_element, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_boolean, name_not, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_array_call, name_expressions, name_class, name_module, name_scope, name_method};
+rt_value name_ivar(struct node *node)
+{
+	return rt_symbol_to_s((rt_value)node->left, 0, 0, 0);
+}
+
+rt_value name_ivar_assign(struct node *node)
+{
+	rt_value result = rt_string_from_cstr("(");
+
+	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_cstr(" = "));
+	rt_concat_string(result, get_node_name(node->right));
+	rt_concat_string(result, rt_string_from_cstr(")"));
+
+	return result;
+}
+
+get_node_name_proc get_node_name_procs[] = {name_num, name_var, name_ivar, name_ivar_assign, name_string, name_string_start, name_string_continue, name_array, name_array_element, name_const, name_self, name_true, name_false, name_nil, name_assign, name_assign_const, name_boolean, name_not, name_unary, name_arithmetics, name_arithmetics, name_if, name_if, name_argument, name_call_arguments, name_call, name_array_call, name_expressions, name_class, name_module, name_scope, name_method};
 
 rt_value get_node_name(struct node *node)
 {

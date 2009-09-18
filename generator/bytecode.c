@@ -79,6 +79,14 @@ void opcode_print(opcode_t *op)
 			printf("set_upval %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
+		case B_GET_IVAR:
+			printf("get_ivar %s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left));
+			break;
+
+		case B_SET_IVAR:
+			printf("set_ivar %s, %s", rt_symbol_to_cstr(op->result), variable_name(op->left));
+			break;
+
 		case B_PUSH_UPVAL:
 			printf("push_upval %s", variable_name(op->result));
 			break;

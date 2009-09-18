@@ -342,6 +342,62 @@ struct node *parse_factor(struct parser *parser)
 				return result;
 			}
 
+		case T_IVAR:
+			{
+				rt_value symbol = rt_symbol_from_parser(parser);
+
+				next(parser);
+
+				switch (parser_current(parser))
+				{
+					case T_ASSIGN_ADD:
+					case T_ASSIGN_SUB:
+					case T_ASSIGN_MUL:
+					case T_ASSIGN_DIV:
+					{
+						struct node *result;
+
+						token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
+
+						next(parser);
+
+						result = alloc_node(parser, N_IVAR_ASSIGN);
+
+						result->right = alloc_node(parser, N_EXPRESSION);
+						result->right->op = op_type;
+						result->right->left = alloc_node(parser, N_IVAR);
+						result->right->left->left = (void *)symbol;
+						result->right->right = parse_expression(parser);
+
+						result->left = (void *)symbol;
+
+						return result;
+					}
+
+					case T_ASSIGN:
+					{
+						struct node *result;
+
+						next(parser);
+
+						result = alloc_node(parser, N_IVAR_ASSIGN);
+						result->left = (void *)symbol;
+						result->right = parse_expression(parser);
+
+						return result;
+					}
+
+					default:
+					{
+						struct node *result = alloc_node(parser, N_IVAR);
+
+						result->left = (void *)symbol;
+
+						return result;
+					}
+				}
+			}
+
 		case T_IDENT:
 			return parse_identifier(parser);
 

@@ -82,7 +82,7 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 }
 
 
-rt_upval_t *rt_support_upval_create()
+rt_upval_t *rt_support_upval_create(void)
 {
 	rt_value *real;
 
@@ -98,7 +98,29 @@ rt_upval_t *rt_support_upval_create()
 	return result;
 }
 
-rt_value rt_support_get_upval()
+rt_value rt_support_get_ivar(void)
+{
+	rt_value obj;
+	rt_value name;
+
+	__asm__("" : "=D" (obj));
+	__asm__("" : "=a" (name));
+
+	return rt_object_get_var(obj, name);
+}
+
+void __stdcall rt_support_set_ivar(rt_value value)
+{
+	rt_value obj;
+	rt_value name;
+
+	__asm__("" : "=D" (obj));
+	__asm__("" : "=a" (name));
+
+	rt_object_set_var(obj, name, value);
+}
+
+rt_value rt_support_get_upval(void)
 {
 	size_t index;
 	rt_upval_t **upvals;

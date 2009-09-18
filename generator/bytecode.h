@@ -36,6 +36,8 @@ typedef enum {
 	B_CLOSURE,
 	B_GET_UPVAL,
 	B_SET_UPVAL,
+	B_GET_IVAR,
+	B_SET_IVAR,
 	B_GET_CONST,
 	B_SET_CONST,
 	B_CLASS,

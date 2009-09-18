@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Identifier", "Extended-Identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
@@ -144,6 +144,19 @@ static inline bool is_ident(char input)
         return true;
 
     return false;
+}
+
+static token_type ivar_proc(token_t *token)
+{
+	token->start = token->input;
+	token->input++;
+
+	while(is_ident(*(token->input)))
+		token->input++;
+
+	token->stop = token->input;
+
+	return T_IVAR;
 }
 
 static token_type ident_proc(token_t *token)
@@ -422,6 +435,7 @@ void parser_setup(void)
 	jump_table['&'] = amp_proc;
 	jump_table['!'] = not_sign_proc;
 	jump_table['|'] = or_sign_proc;
+	jump_table['@'] = ivar_proc;
 
     jump_table[0] = null_proc;
 }

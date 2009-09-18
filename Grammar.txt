@@ -78,7 +78,7 @@ Else <- "else", Statements
 
 Unless <- "unless", Expression, ThenSep, Statements, "end"
 
-Assigment <- Variable, AssignTail
+Assigment <- (Variable | InstanceVariable), AssignTail
 
 AssignTail <- AssignOp, NewLine*, Expression
 
@@ -115,6 +115,7 @@ CallIdent <- Identifier
 
 # Tokens from lexer
 
+InstanceVariable
 ExtendedIdentifier
 Identifier
 Number

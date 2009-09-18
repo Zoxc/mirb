@@ -430,7 +430,22 @@ static void gen_warn(block_t *block, struct node *node, variable_t *var)
 	printf("node %d entered in code generation\n", node->type);
 }
 
-generator generators[] = {gen_num, gen_var, gen_string, gen_string_start, gen_string_continue, gen_array, /*N_ARRAY_ELEMENT*/gen_warn, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_boolean, gen_not, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, /*N_ARGUMENT*/gen_warn, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_array_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
+static void gen_ivar(block_t *block, struct node *node, variable_t *var)
+{
+	if(var)
+		block_push(block, B_GET_IVAR, (rt_value)var, (rt_value)node->left, 0);
+}
+
+static void gen_ivar_assign(block_t *block, struct node *node, variable_t *var)
+{
+	variable_t *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->right, temp);
+
+	block_push(block, B_SET_IVAR, (rt_value)node->left, (rt_value)temp, 0);
+}
+
+generator generators[] = {gen_num, gen_var, gen_ivar, gen_ivar_assign, gen_string, gen_string_start, gen_string_continue, gen_array, /*N_ARRAY_ELEMENT*/gen_warn, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_boolean, gen_not, gen_unary, gen_arithmetic, gen_arithmetic, gen_if, gen_if, /*N_ARGUMENT*/gen_warn, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_array_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
 
 static inline void gen_node(block_t *block, struct node *node, variable_t *var)
 {
