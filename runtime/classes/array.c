@@ -3,6 +3,7 @@
 #include "symbol.h"
 #include "array.h"
 #include "string.h"
+#include "proc.h"
 
 rt_value rt_Array;
 
@@ -78,6 +79,16 @@ rt_value __stdcall rt_array_length(rt_value obj, rt_value block, size_t argc, rt
 	return RT_INT2FIX(kv_size(RT_ARRAY(obj)->data));
 }
 
+rt_value __stdcall rt_array_each(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
+	{
+		rt_proc_call(block, RT_NIL, 1, &kv_A(RT_ARRAY(obj)->data, i));
+	}
+
+	return obj;
+}
+
 void rt_array_init(void)
 {
 	rt_Array = rt_define_class(rt_Object, rt_symbol_from_cstr("Array"), rt_Object);
@@ -88,5 +99,6 @@ void rt_array_init(void)
 	rt_define_method(rt_Array, rt_symbol_from_cstr("pop"), rt_array_pop);
 	rt_define_method(rt_Array, rt_symbol_from_cstr("length"), rt_array_length);
 	rt_define_method(rt_Array, rt_symbol_from_cstr("inspect"), rt_array_inspect);
+	rt_define_method(rt_Array, rt_symbol_from_cstr("each"), rt_array_each);
 }
 

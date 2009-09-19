@@ -45,8 +45,18 @@ rt_value __stdcall rt_class_superclass(rt_value obj, rt_value block, size_t argc
 		return RT_NIL;
 }
 
+rt_value __stdcall rt_class_new(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	rt_value result = RT_CALL_CSTR(obj, "allocate", 0, 0);
+
+	RT_CALL_CSTR(result, "initialize", argc, argv);
+
+	return result;
+}
+
 void rt_class_init(void)
 {
 	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), rt_class_to_s);
 	rt_define_method(rt_Class, rt_symbol_from_cstr("superclass"), rt_class_superclass);
+	rt_define_method(rt_Class, rt_symbol_from_cstr("new"), rt_class_new);
 }

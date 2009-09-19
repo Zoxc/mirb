@@ -8,8 +8,6 @@ rt_value rt_Proc;
 
 rt_value __stdcall rt_proc_call(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
-	printf("calling block %x\n", obj);
-
 	rt_value result;
 
 	__asm__("push %[argv]\n"
