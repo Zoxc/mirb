@@ -501,11 +501,11 @@ struct node *parse_boolean_unary(struct parser *parser)
 		return parse_arithmetic(parser);
 }
 
-struct node *parse_boolean(struct parser *parser)
+struct node *parse_boolean_and(struct parser *parser)
 {
 	struct node *result = parse_boolean_unary(parser);
 
-    while(parser_current(parser) == T_AND_BOOLEAN || parser_current(parser) == T_OR_BOOLEAN)
+    while(parser_current(parser) == T_AND_BOOLEAN)
     {
     	struct node *node = alloc_node(parser, N_BOOLEAN);
 
@@ -515,6 +515,26 @@ struct node *parse_boolean(struct parser *parser)
 		next(parser);
 
 		node->right = parse_boolean_unary(parser);
+		result = node;
+    }
+
+    return result;
+}
+
+struct node *parse_boolean_or(struct parser *parser)
+{
+	struct node *result = parse_boolean_and(parser);
+
+    while(parser_current(parser) == T_OR_BOOLEAN)
+    {
+    	struct node *node = alloc_node(parser, N_BOOLEAN);
+
+		node->op = parser_current(parser);
+		node->left = result;
+
+		next(parser);
+
+		node->right = parse_boolean_and(parser);
 		result = node;
     }
 

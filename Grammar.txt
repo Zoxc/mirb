@@ -13,12 +13,11 @@ LowBooleanUnary <- {"not"}, Expression
 
 Expression <- TernaryIf
 
-TernaryIf <- Boolean, {"?", NewLine*, TernaryIf, NewLine*, ":", NewLine*, TernaryIf}
+TernaryIf <- BooleanOr, {"?", NewLine*, TernaryIf, NewLine*, ":", NewLine*, TernaryIf}
 
-Boolean <- BooleanFactor, (BooleanOp, NewLine*, BooleanFactor)*
+BooleanOr <- BooleanAnd, ("||", NewLine*, BooleanAnd)*
 
-BooleanOp <- "&&"
-	| "||"
+BooleanAnd <- BooleanUnary, ("&&", NewLine*, BooleanUnary)*
 
 BooleanUnary <- {"!"}, Arithmetic
 

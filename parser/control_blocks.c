@@ -16,7 +16,7 @@ void parse_then_sep(struct parser *parser)
 
 struct node *parse_ternary_if(struct parser *parser)
 {
-	struct node *result = parse_boolean(parser);
+	struct node *result = parse_boolean_or(parser);
 
 	if(parser_current(parser) == T_QUESTION)
 	{

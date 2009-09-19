@@ -115,7 +115,7 @@ struct node *parse_factor(struct parser *parser);
 struct node *parse_expression(struct parser *parser);
 struct node *parse_argument(struct parser *parser);
 struct node *parse_arithmetic(struct parser *parser);
-struct node *parse_boolean(struct parser *parser);
+struct node *parse_boolean_or(struct parser *parser);
 struct node *parse_low_boolean(struct parser *parser);
 struct node *parse_statement(struct parser *parser);
 struct node *parse_statements(struct parser *parser);
