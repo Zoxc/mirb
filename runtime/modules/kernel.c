@@ -25,17 +25,38 @@ rt_value __stdcall rt_kernel_eval(rt_value obj, rt_value block, size_t argc, rt_
 	if(rt_type(arg) != C_STRING)
 		return RT_NIL;
 
-	return rt_eval(obj, rt_string_to_cstr(arg));
+	return rt_eval(obj, rt_string_to_cstr(arg), 0);
 }
+
+static FILE *open_file(rt_value *filename)
+{
+	FILE* file = fopen(rt_string_to_cstr(*filename), "r");
+
+	if(!file)
+	{
+		rt_value append = rt_dup_string(*filename);
+
+		rt_concat_string(append, rt_string_from_cstr(".rb"));
+
+		file = fopen(rt_string_to_cstr(append), "r");
+
+		if(!file)
+			return 0;
+
+		*filename = append;
+
+		return file;
+	}
+
+	return file;
+}
+
 
 rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value filename = RT_ARG(0);
 
-	if(rt_type(filename) != C_STRING)
-		return RT_NIL;
-
-	FILE* file = fopen(rt_string_to_cstr(filename), "r");
+	FILE* file = open_file(&filename);
 
 	if(!file)
 		return RT_NIL;
@@ -56,7 +77,7 @@ rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_
 		return RT_NIL;
 	}
 
-	rt_value result = rt_eval(obj, data);
+	rt_value result = rt_eval(obj, data, rt_string_to_cstr(filename));
 
 	free(data);
 	fclose(file);
@@ -88,4 +109,5 @@ void rt_kernel_init(void)
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
+    rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
 }

@@ -398,7 +398,7 @@ int main()
 	{
 		gets(buffer);
 
-		struct parser *parser = parser_create(buffer);
+		struct parser *parser = parser_create(buffer, "Input");
 
 		if(parser_current(parser) == T_EOF)
 		{

@@ -41,9 +41,9 @@ void rt_destroy(void)
 	kh_destroy(rt_hash, object_var_hashes);
 }
 
-rt_value rt_eval(rt_value self, const char *input)
+rt_value rt_eval(rt_value self, const char *input, const char *filename)
 {
-	struct parser *parser = parser_create(input);
+	struct parser *parser = parser_create(input, filename);
 
 	struct node* expression = parse_main(parser);
 

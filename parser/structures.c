@@ -83,10 +83,7 @@ void parse_parameter(struct parser *parser, scope_t *scope)
 		if(block_var)
 		{
 			if(scope->block_var)
-			{
-				parser->err_count++;
-				printf("You can only receive the block in one parameter.\n");
-			}
+				PARSER_ERROR(parser, "You can only receive the block in one parameter.");
 			else
 			{
 				scope->block_var = scope_define(scope, symbol, V_BLOCK, false);
@@ -95,10 +92,7 @@ void parse_parameter(struct parser *parser, scope_t *scope)
 		else
 		{
 			if(scope_defined(scope, symbol, false))
-			{
-				parser->err_count++;
-				printf("Parameter %s already defined.\n", rt_symbol_to_cstr(symbol));
-			}
+				PARSER_ERROR(parser, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
 			else
 				scope_define(scope, symbol, V_PARAMETER, false);
 		}
@@ -109,10 +103,7 @@ void parse_parameter(struct parser *parser, scope_t *scope)
 			parse_parameter(parser, scope);
 	}
 	else
-	{
-		parser->err_count++;
-		printf("Expected paramater, but found %s.\n", token_type_names[parser_current(parser)]);
-	}
+		PARSER_ERROR(parser, "Expected paramater, but found %s.", token_type_names[parser_current(parser)]);
 }
 
 struct node *parse_method(struct parser *parser)
@@ -124,8 +115,6 @@ struct node *parse_method(struct parser *parser)
 	parser_state(parser, TS_DEFAULT);
 
 	struct node *result = alloc_node(parser, N_METHOD);
-
-	printf("current:%s\n", token_type_names[parser_current(parser)]);
 
 	switch(parser_current(parser))
 	{
@@ -140,9 +129,7 @@ struct node *parse_method(struct parser *parser)
 
 		default:
 			{
-				parser->err_count++;
-
-				printf("Expected identifier but found %s\n", token_type_names[parser_current(parser)]);
+				PARSER_ERROR(parser, "Expected identifier but found %s", token_type_names[parser_current(parser)]);
 
 				result->left = 0;
 			}

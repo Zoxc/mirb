@@ -98,6 +98,7 @@ struct parser {
 	int count;
 	int err_count;
 	scope_t *current_scope;
+	const char* filename;
 	allocator_t allocator;
 };
 
@@ -124,6 +125,13 @@ struct node *parse_main(struct parser *parser);
 
 struct node *parse_expressions(struct parser *parser);
 
+#define PARSER_ERROR(parser, msg, ...) do \
+	{ \
+		parser->err_count++; \
+		printf("(%s: %d) "msg"\n", parser->filename ? parser->filename : "Line ", parser_token(parser)->line + 1, ##__VA_ARGS__); \
+	} \
+	while(0)
+
 static inline void skip_lines(struct parser *parser)
 {
 	while(parser_current(parser) == T_LINE)
@@ -140,9 +148,7 @@ static inline bool match(struct parser *parser, token_type type)
     }
     else
     {
-    	parser->err_count++;
-
-        printf("Expected token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
+        PARSER_ERROR(parser, "Expected token %s but found %s", token_type_names[type], token_type_names[parser_current(parser)]);
 
         return false;
     }
@@ -166,9 +172,7 @@ static inline bool require(struct parser *parser, token_type type)
         return true;
     else
     {
-    	parser->err_count++;
-
-        printf("Expected token %s but found %s\n", token_type_names[type], token_type_names[parser_current(parser)]);
+        PARSER_ERROR(parser, "Expected token %s but found %s", token_type_names[type], token_type_names[parser_current(parser)]);
 
         return false;
     }

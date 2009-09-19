@@ -8,12 +8,13 @@ typedef token_type(*jump_table_entry)(token_t *token);
 
 jump_table_entry jump_table[256];
 
-struct parser *parser_create(const char* input)
+struct parser *parser_create(const char* input, const char *filename)
 {
 	struct parser* result = malloc(sizeof(struct parser));
 
 	result->index = 0;
 	result->count = 0;
+	result->filename = filename;
 	result->err_count = 0;
     result->token.line = 0;
     result->token.type = T_NONE;
@@ -69,8 +70,10 @@ static inline bool compare_token(token_t *token, const char *str)
 
 static inline bool is_whitespace(const char input)
 {
-    if(input == 0x10 || input == 0x13)
+    if(input == '\n' || input == '\r')
+    {
         return false;
+    }
 
     if(input <= 32 && input >= 1)
         return true;
@@ -251,7 +254,7 @@ static token_type parse_double_quote_string(token_t *token, bool continues)
 			case 0:
 				return null_proc(token);
 
-			case '\'':
+			case '"':
 				{
 					token->input++;
 
@@ -490,6 +493,25 @@ static token_type not_sign_proc(token_t *token)
     return T_NOT_SIGN;
 }
 
+static token_type newline_proc(token_t *token)
+{
+	token->input++;
+	token->line++;
+
+    return T_LINE;
+}
+
+static token_type carrige_return_proc(token_t *token)
+{
+	token->input++;
+	token->line++;
+
+	if(*token->input == '\n')
+		token->input++;
+
+    return T_LINE;
+}
+
 #define SINGLE_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
 		token->input++;\
@@ -545,29 +567,44 @@ void parser_setup(void)
 
 	jump_table['_'] = ident_proc;
 
+	// Newlines
+
+	jump_table['\n'] = newline_proc;
+	jump_table['\r'] = carrige_return_proc;
+
+	// Funny signs
+
+	// ASSIGN_PROC
 	jump_table['+'] = add_proc;
 	jump_table['-'] = sub_proc;
 	jump_table['*'] = mul_proc;
 	jump_table['/'] = div_proc;
 
-	jump_table['='] = assign_proc;
+	// SINGLE_PROC
 	jump_table['('] = param_open_proc;
 	jump_table[')'] = param_close_proc;
 	jump_table['?'] = question_proc;
-	jump_table['.'] = dot_proc;
-	jump_table[':'] = colon_proc;
 	jump_table[';'] = sep_proc;
+	jump_table['.'] = dot_proc;
 	jump_table[','] = comma_proc;
 	jump_table['['] = square_open_proc;
 	jump_table[']'] = square_close_proc;
+
+	jump_table['='] = assign_proc;
+	jump_table[':'] = colon_proc;
 	jump_table['{'] = curly_open_proc;
 	jump_table['}'] = curly_close_proc;
-	jump_table['"'] = double_quote_proc;
-	jump_table['\''] = single_quote_proc;
 	jump_table['&'] = amp_proc;
 	jump_table['!'] = not_sign_proc;
 	jump_table['|'] = or_sign_proc;
 	jump_table['@'] = ivar_proc;
+
+	// Strings
+
+	jump_table['"'] = double_quote_proc;
+	jump_table['\''] = single_quote_proc;
+
+	// Null!
 
     jump_table[0] = null_proc;
 }

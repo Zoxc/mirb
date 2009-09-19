@@ -14,12 +14,18 @@ extern rt_value rt_String;
 
 rt_value rt_string_from_raw_str(char *str, size_t length);
 rt_value rt_string_from_cstr(const char *str);
+rt_value rt_string_from_str(const char *str, size_t length);
 rt_value rt_string_from_hex(rt_value value);
 rt_value rt_string_from_int(rt_value value);
 
 static inline const char *rt_string_to_cstr(rt_value value)
 {
 	return RT_STRING(value)->string;
+}
+
+static inline rt_value rt_dup_string(rt_value value)
+{
+	return rt_string_from_str(RT_STRING(value)->string, RT_STRING(value)->length);
 }
 
 rt_value __stdcall rt_string_concat(rt_value obj, rt_value block, size_t argc, rt_value argv[]);

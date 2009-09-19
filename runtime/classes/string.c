@@ -17,6 +17,15 @@ rt_value rt_string_from_raw_str(char *str, size_t length)
 	return string;
 }
 
+rt_value rt_string_from_str(const char *str, size_t length)
+{
+	char *new_str = malloc(length + 1);
+
+	memcpy(new_str, str, length);
+
+	return rt_string_from_raw_str(new_str, length);
+}
+
 rt_value rt_string_from_cstr(const char *str)
 {
 	size_t length = strlen(str);

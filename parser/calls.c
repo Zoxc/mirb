@@ -147,11 +147,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 				break;
 
 			default:
-				{
-					parser->err_count++;
-
-					printf("Expected identifier but found %s\n", token_type_names[parser_current(parser)]);
-				}
+				PARSER_ERROR(parser, "Expected identifier but found %s", token_type_names[parser_current(parser)]);
 		}
 	}
 

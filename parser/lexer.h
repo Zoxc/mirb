@@ -89,14 +89,14 @@ typedef struct {
     const char *stop;
     struct parser *parser;
     kvec_t(bool) curlys;
-    int line;
+    size_t line;
 	token_type type;
     bool whitespace;
     token_state state;
 } token_t;
 
 void parser_setup(void);
-struct parser *parser_create(const char *input);
+struct parser *parser_create(const char *input, const char *filename);
 void parser_destroy(struct parser *parser);
 
 token_type next(struct parser *parser);

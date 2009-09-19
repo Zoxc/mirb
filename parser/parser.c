@@ -94,8 +94,7 @@ void parse_sep(struct parser *parser)
 			break;
 
 		default:
-			parser->err_count++;
-			printf("Expected seperator but found %s\n", token_type_names[parser_current(parser)]);
+			PARSER_ERROR(parser, "Expected seperator but found %s", token_type_names[parser_current(parser)]);
 	}
 }
 
@@ -417,8 +416,7 @@ struct node *parse_factor(struct parser *parser)
 
 		default:
 			{
-				parser->err_count++;
-				printf("Expected expression but found %s\n", token_type_names[parser_current(parser)]);
+				PARSER_ERROR(parser, "Expected expression but found %s", token_type_names[parser_current(parser)]);
 
 				next(parser);
 
