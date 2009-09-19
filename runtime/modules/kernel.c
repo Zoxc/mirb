@@ -67,7 +67,7 @@ rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_
 
 	fseek(file, 0, SEEK_SET);
 
-	unsigned char* data = malloc(length + 1);
+	char* data = malloc(length + 1);
 
 	if(fread(data, 1, length, file) != length)
 	{

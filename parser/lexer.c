@@ -512,6 +512,18 @@ static token_type carrige_return_proc(token_t *token)
     return T_LINE;
 }
 
+static token_type comment_proc(token_t *token)
+{
+	token->input++;
+
+	while(*token->input != '\n' && *token->input != '\r' && *token->input != 0)
+		token->input++;
+
+    return next(token->parser);
+}
+
+
+
 #define SINGLE_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
 		token->input++;\
@@ -598,6 +610,10 @@ void parser_setup(void)
 	jump_table['!'] = not_sign_proc;
 	jump_table['|'] = or_sign_proc;
 	jump_table['@'] = ivar_proc;
+
+	// Comments
+
+	jump_table['#'] = comment_proc;
 
 	// Strings
 

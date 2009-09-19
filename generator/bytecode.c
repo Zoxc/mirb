@@ -211,6 +211,9 @@ void block_print(block_t *block)
 
 		if(op->type != B_NOP)
 		{
+			if(op->type == B_LABEL)
+				printf("\n");
+
 			opcode_print(kv_A(block->vector, i));
 			printf("\n");
 		}

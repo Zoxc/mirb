@@ -442,7 +442,10 @@ static void gen_warn(block_t *block, struct node *node, variable_t *var)
 static void gen_ivar(block_t *block, struct node *node, variable_t *var)
 {
 	if(var)
+	{
+		block->self_ref++;
 		block_push(block, B_GET_IVAR, (rt_value)var, (rt_value)node->left, 0);
+	}
 }
 
 static void gen_ivar_assign(block_t *block, struct node *node, variable_t *var)
@@ -450,6 +453,8 @@ static void gen_ivar_assign(block_t *block, struct node *node, variable_t *var)
 	variable_t *temp = var ? var : block_get_var(block);
 
 	gen_node(block, node->right, temp);
+
+	block->self_ref++;
 
 	block_push(block, B_SET_IVAR, (rt_value)node->left, (rt_value)temp, 0);
 }
@@ -499,8 +504,6 @@ block_t *gen_block(struct node *node)
 {
 	block_t *block = block_create((void *)node->left);
 
-	printf("Generating block %x:\n", (rt_value)block);
-
 	variable_t *result = block_get_var(block);
 
 	gen_node(block, node->right, result);
@@ -510,9 +513,11 @@ block_t *gen_block(struct node *node)
 
 	block_push(block, B_LOAD, (rt_value)result, 0, 0);
 
+	printf(";\n; block %x\n;\n", (rt_value)block);
+
 	block_print(block);
 
-	printf("End generating block %x:\n", (rt_value)block);
+	printf("\n\n");
 
 	return block;
 }
