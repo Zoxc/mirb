@@ -17,7 +17,13 @@ TernaryIf <- BooleanOr, {"?", NewLine*, TernaryIf, NewLine*, ":", NewLine*, Tern
 
 BooleanOr <- BooleanAnd, ("||", NewLine*, BooleanAnd)*
 
-BooleanAnd <- BooleanUnary, ("&&", NewLine*, BooleanUnary)*
+BooleanAnd <- Equality, ("&&", NewLine*, Equality)*
+
+Equality <- BooleanUnary, (EqualityOp, NewLine*, BooleanUnary)*
+
+EqualityOp <- "=="
+	| "==="
+	| "!="
 
 BooleanUnary <- {"!"}, Arithmetic
 

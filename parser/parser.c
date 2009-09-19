@@ -138,7 +138,7 @@ struct node *parse_identifier(struct parser *parser)
 			else
 				result = alloc_node(parser, N_ASSIGN);
 
-			result->right = alloc_node(parser, N_EXPRESSION);
+			result->right = alloc_node(parser, N_BINARY_OP);
 			result->right->op = op_type;
 
 			if (rt_symbol_is_const(symbol))
@@ -363,7 +363,7 @@ struct node *parse_factor(struct parser *parser)
 
 						result = alloc_node(parser, N_IVAR_ASSIGN);
 
-						result->right = alloc_node(parser, N_EXPRESSION);
+						result->right = alloc_node(parser, N_BINARY_OP);
 						result->right->op = op_type;
 						result->right->left = alloc_node(parser, N_IVAR);
 						result->right->left->left = (void *)symbol;
@@ -431,9 +431,9 @@ struct node *parse_unary(struct parser *parser)
 {
     if(parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
     {
-    	struct node *result = alloc_node(parser, N_UNARY);
+    	struct node *result = alloc_node(parser, N_UNARY_OP);
 
-		result->op = parser_current(parser);
+		result->op = parser_current(parser) + OP_TO_UNARY;
 
 		next(parser);
 
@@ -451,7 +451,7 @@ struct node *parse_term(struct parser *parser)
 
     while(parser_current(parser) == T_MUL || parser_current(parser) == T_DIV)
     {
-    	struct node *node = alloc_node(parser, N_TERM);
+    	struct node *node = alloc_node(parser, N_BINARY_OP);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -471,7 +471,7 @@ struct node *parse_arithmetic(struct parser *parser)
 
     while (parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
     {
-    	struct node *node = alloc_node(parser, N_EXPRESSION);
+    	struct node *node = alloc_node(parser, N_BINARY_OP);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -501,9 +501,50 @@ struct node *parse_boolean_unary(struct parser *parser)
 		return parse_arithmetic(parser);
 }
 
-struct node *parse_boolean_and(struct parser *parser)
+static inline bool is_equality_op(struct parser *parser)
+{
+	switch(parser_current(parser))
+	{
+		case T_EQUALITY:
+		case T_CASE_EQUALITY:
+		case T_NO_EQUALITY:
+			return true;
+
+		default:
+			return false;
+	}
+}
+
+struct node *parse_equality(struct parser *parser)
 {
 	struct node *result = parse_boolean_unary(parser);
+
+    while(is_equality_op(parser))
+    {
+    	struct node *node;
+
+    	if(parser_current(parser) == T_NO_EQUALITY)
+    		node = alloc_node(parser,  N_NO_EQUALITY);
+		else
+		{
+			node = alloc_node(parser,  N_BINARY_OP);
+			node->op = parser_current(parser);
+		}
+
+		node->left = result;
+
+		next(parser);
+
+		node->right = parse_boolean_unary(parser);
+		result = node;
+    }
+
+    return result;
+}
+
+struct node *parse_boolean_and(struct parser *parser)
+{
+	struct node *result = parse_equality(parser);
 
     while(parser_current(parser) == T_AND_BOOLEAN)
     {
@@ -514,7 +555,7 @@ struct node *parse_boolean_and(struct parser *parser)
 
 		next(parser);
 
-		node->right = parse_boolean_unary(parser);
+		node->right = parse_equality(parser);
 		result = node;
     }
 

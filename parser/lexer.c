@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "+@", "-@", "=", "==", "===", "!=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
@@ -251,7 +251,7 @@ static token_type parse_double_quote_string(token_t *token, bool continues)
 			case 0:
 				return null_proc(token);
 
-			case '"':
+			case '\'':
 				{
 					token->input++;
 
@@ -294,6 +294,97 @@ static token_type double_quote_proc(token_t *token)
 	token->input++;
 
 	return parse_double_quote_string(token, false);
+}
+
+static char *build_single_quote_string(const char *start, size_t length)
+{
+	char *result = malloc(length + 1);
+	char *writer = result;
+	const char *input = start;
+
+	while(1)
+		switch(*input)
+		{
+			case '\'':
+				goto done;
+
+			case '\\':
+				{
+					input++;
+
+					switch(*input)
+					{
+						case '\\':
+						case '\'':
+							*writer = *input;
+							writer++;
+							input++;
+							break;
+
+						default:
+							*writer = '\\';
+							writer++;
+					}
+				}
+
+			default:
+				*writer = *input;
+				writer++;
+				input++;
+		}
+
+done:
+	result[length] = 0;
+
+	return result;
+}
+
+static token_type single_quote_proc(token_t *token)
+{
+	token->input++;
+
+	const char *start = token->input;
+    size_t length = 0;
+
+	while(1)
+		switch(*(token->input))
+		{
+			case 0:
+				return null_proc(token);
+
+			case '\'':
+				{
+					token->input++;
+
+					goto done;
+				}
+
+			case '\\':
+				{
+					token->input++;
+
+					switch(*(token->input))
+					{
+						case '\\':
+						case '\'':
+							length++;
+							token->input++;
+							break;
+
+						default:
+							length++;
+					}
+				}
+
+			default:
+				token->input++;
+				length++;
+		}
+
+done:
+	token->start = build_single_quote_string(start, length);
+
+	return T_STRING;
 }
 
 static token_type curly_open_proc(token_t *token)
@@ -364,6 +455,41 @@ static token_type amp_proc(token_t *token)
     return T_AMP;
 }
 
+static token_type assign_proc(token_t *token)
+{
+	token->input++;
+
+	if(*(token->input) == '=')
+	{
+		token->input++;
+
+		if(*(token->input) == '=')
+		{
+			token->input++;
+
+			return T_CASE_EQUALITY;
+		}
+
+		return T_EQUALITY;
+	}
+
+    return T_ASSIGN;
+}
+
+static token_type not_sign_proc(token_t *token)
+{
+	token->input++;
+
+	if(*(token->input) == '=')
+	{
+		token->input++;
+
+		return T_NO_EQUALITY;
+	}
+
+    return T_NOT_SIGN;
+}
+
 #define SINGLE_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
 		token->input++;\
@@ -371,7 +497,6 @@ static token_type amp_proc(token_t *token)
 		return result;\
 	}
 
-SINGLE_PROC(assign, T_ASSIGN);
 SINGLE_PROC(param_open, T_PARAM_OPEN);
 SINGLE_PROC(param_close, T_PARAM_CLOSE);
 SINGLE_PROC(question, T_QUESTION);
@@ -380,7 +505,6 @@ SINGLE_PROC(dot, T_DOT);
 SINGLE_PROC(comma, T_COMMA);
 SINGLE_PROC(square_open, T_SQUARE_OPEN);
 SINGLE_PROC(square_close, T_SQUARE_CLOSE);
-SINGLE_PROC(not_sign, T_NOT_SIGN);
 
 #define ASSIGN_PROC(name, result) static token_type name##_proc(token_t *token)\
 	{\
@@ -439,6 +563,7 @@ void parser_setup(void)
 	jump_table['{'] = curly_open_proc;
 	jump_table['}'] = curly_close_proc;
 	jump_table['"'] = double_quote_proc;
+	jump_table['\''] = single_quote_proc;
 	jump_table['&'] = amp_proc;
 	jump_table['!'] = not_sign_proc;
 	jump_table['|'] = or_sign_proc;

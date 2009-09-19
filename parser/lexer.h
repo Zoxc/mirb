@@ -12,7 +12,12 @@ typedef enum {
 	T_ASSIGN_SUB = 6,
 	T_ASSIGN_MUL = 7,
 	T_ASSIGN_DIV = 8,
+	T_UNARY_ADD = 9,
+	T_UNARY_SUB = 10,
 	T_ASSIGN,
+	T_EQUALITY,
+	T_CASE_EQUALITY,
+	T_NO_EQUALITY,
 	T_QUESTION,
 	T_DOT,
 	T_COMMA,
@@ -69,7 +74,8 @@ typedef enum {
 	TS_NOKEYWORDS
 } token_state;
 
-#define OP_TO_ASSIGN 4
+#define OP_TO_ASSIGN (T_ASSIGN_ADD - T_ADD)
+#define OP_TO_UNARY (T_UNARY_ADD - T_ADD)
 #define T_KEYWORD_START T_IF
 #define T_KEYWORD_STOP T_END
 

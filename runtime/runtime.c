@@ -50,6 +50,10 @@ rt_value rt_eval(rt_value self, const char *input)
 	if(parser->err_count != 0)
 		return RT_NIL;
 
+	extern rt_value get_node_name(struct node *node);
+
+	printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
+
 	block_t *code_block = gen_block(expression);
 
 	rt_compiled_block_t compiled_block = compile_block(code_block);

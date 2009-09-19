@@ -66,6 +66,8 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 
 		case B_JMPT:
 		case B_JMPF:
+		case B_JMPE:
+		case B_JMPNE:
 			return 6;
 
 		case B_MODULE:
@@ -124,6 +126,9 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 
 		case B_SET_IVAR:
 			return 5 + 3 + 5;
+
+		case B_CMP:
+			return 6;
 
 		default:
 			break;
@@ -477,6 +482,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_JMPNE:
 		case B_JMPT:
 			{
 				size_t label_index = block_get_value(block, block->label_usage, op->result);
@@ -491,6 +497,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_JMPE:
 		case B_JMPF:
 			{
 				size_t label_index = block_get_value(block, block->label_usage, op->result);
@@ -502,6 +509,19 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				generate_byte(target, 0x0F);
 				generate_byte(target, 0x84);
 				generate_dword(target, label_address - ((size_t)*target - 2) - 6);
+			}
+			break;
+
+		case B_CMP:
+			{
+				// Load to eax
+				generate_byte(target, 0x8B);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+
+				generate_byte(target, 0x3B); // cmp eax, [ebp + var]
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->left));
 			}
 			break;
 

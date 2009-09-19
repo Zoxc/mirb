@@ -6,6 +6,8 @@
 #include "allocator.h"
 
 typedef enum {
+	N_UNARY_OP,
+	N_BINARY_OP,
 	N_NUMBER,
 	N_VAR,
 	N_IVAR,
@@ -24,9 +26,7 @@ typedef enum {
 	N_ASSIGN_CONST,
 	N_BOOLEAN,
 	N_NOT,
-	N_UNARY,
-	N_TERM,
-	N_EXPRESSION,
+	N_NO_EQUALITY,
 	N_IF,
 	N_UNLESS,
 	N_ARGUMENT,

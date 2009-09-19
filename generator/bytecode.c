@@ -131,6 +131,10 @@ void opcode_print(opcode_t *op)
 			printf("test %s", variable_name(op->result));
 			break;
 
+		case B_CMP:
+			printf("cmp %s, %s", variable_name(op->result), variable_name(op->left));
+			break;
+
 		case B_ARGS:
 			if(op->left)
 				printf("end_args %s, %d", variable_name(op->result), op->right);
@@ -144,6 +148,14 @@ void opcode_print(opcode_t *op)
 
 		case B_JMPT:
 			printf("jmpt "); block_print_label(op->result);
+			break;
+
+		case B_JMPNE:
+			printf("jmpne "); block_print_label(op->result);
+			break;
+
+		case B_JMPE:
+			printf("jmpe "); block_print_label(op->result);
 			break;
 
 		case B_JMP:
