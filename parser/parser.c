@@ -505,7 +505,7 @@ struct node *parse_boolean(struct parser *parser)
 {
 	struct node *result = parse_boolean_unary(parser);
 
-    while(parser_current(parser) == T_AND_SIGN || parser_current(parser) == T_OR_SIGN)
+    while(parser_current(parser) == T_AND_BOOLEAN || parser_current(parser) == T_OR_BOOLEAN)
     {
     	struct node *node = alloc_node(parser, N_BOOLEAN);
 

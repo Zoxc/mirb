@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
@@ -338,14 +338,16 @@ static token_type colon_proc(token_t *token)
 
 static token_type or_sign_proc(token_t *token)
 {
-	if(token->input[1] == '|')
-	{
-		token->input += 2;
+	token->input++;
 
-		return T_OR_SIGN;
+	if(*(token->input) == '|')
+	{
+		token->input++;
+
+		return T_OR_BOOLEAN;
 	}
 
-	return unknown_proc(token);
+    return T_OR_BINARY;
 }
 
 static token_type amp_proc(token_t *token)
@@ -356,7 +358,7 @@ static token_type amp_proc(token_t *token)
 	{
 		token->input++;
 
-		return T_AND_SIGN;
+		return T_AND_BOOLEAN;
 	}
 
     return T_AMP;

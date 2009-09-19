@@ -92,8 +92,8 @@ Call <- CallIdent, {Arguments | "(", Arguments, ")"}, {Block}
 
 Yield  <- {Arguments | "(", Arguments, ")"}
 
-Block <- "{", {BlockParameters}, Statements, "}"
-	| "do", {BlockParameters}, Statements, "end"
+Block <- "{", NewLine*, {BlockParameters}, Statements, "}"
+	| "do", NewLine*, {BlockParameters}, Statements, "end"
 
 BlockParameters <- "|", MethodParameters, "|"
 

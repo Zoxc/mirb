@@ -72,17 +72,15 @@ bool is_parameter(struct parser *parser)
 	}
 }
 
-struct node *parse_parameter(struct parser *parser, scope_t *scope)
+void parse_parameter(struct parser *parser, scope_t *scope)
 {
 	if(is_parameter(parser))
 	{
-		struct node *result = alloc_node(parser, N_PARAMETER);
+		bool block_var = matches(parser, T_AMP);
 
-		result->middle = (void *)matches(parser, T_AMP);
+		rt_value symbol = rt_symbol_from_parser(parser);
 
-		result->left = (void *)rt_symbol_from_parser(parser);
-
-		if(result->middle)
+		if(block_var)
 		{
 			if(scope->block_var)
 			{
@@ -91,35 +89,29 @@ struct node *parse_parameter(struct parser *parser, scope_t *scope)
 			}
 			else
 			{
-				scope->block_var = scope_define(scope, (rt_value)result->left, V_BLOCK, false);
+				scope->block_var = scope_define(scope, symbol, V_BLOCK, false);
 			}
 		}
 		else
 		{
-			if(scope_defined(scope, (rt_value)result->left, false))
+			if(scope_defined(scope, symbol, false))
 			{
 				parser->err_count++;
-				printf("Parameter %s already defined.\n", rt_symbol_to_cstr((rt_value)result->left));
+				printf("Parameter %s already defined.\n", rt_symbol_to_cstr(symbol));
 			}
 			else
-				scope_define(scope, (rt_value)result->left, V_PARAMETER, false);
+				scope_define(scope, symbol, V_PARAMETER, false);
 		}
 
 		next(parser);
 
 		if(matches(parser, T_COMMA))
-			result->right = parse_parameter(parser, scope);
-		else
-			result->right = 0;
-
-		return result;
+			parse_parameter(parser, scope);
 	}
 	else
 	{
 		parser->err_count++;
 		printf("Expected paramater, but found %s.\n", token_type_names[parser_current(parser)]);
-
-		return 0;
 	}
 }
 
@@ -162,16 +154,14 @@ struct node *parse_method(struct parser *parser)
 
 	if(matches(parser, T_PARAM_OPEN))
 	{
-		result->middle = parse_parameter(parser, scope);
+		parse_parameter(parser, scope);
 
 		match(parser, T_PARAM_CLOSE);
 	}
 	else
 	{
 		if(is_parameter(parser))
-			result->middle = parse_parameter(parser, scope);
-		else
-			result->middle = 0;
+			parse_parameter(parser, scope);
 
 		parse_sep(parser);
 	}

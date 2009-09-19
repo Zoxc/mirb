@@ -124,6 +124,12 @@ struct node *parse_main(struct parser *parser);
 
 struct node *parse_expressions(struct parser *parser);
 
+static inline void skip_lines(struct parser *parser)
+{
+	while(parser_current(parser) == T_LINE)
+		next(parser);
+}
+
 static inline bool match(struct parser *parser, token_type type)
 {
     if (parser_current(parser) == type)

@@ -1,4 +1,5 @@
 #include "calls.h"
+#include "structures.h"
 #include "../runtime/classes/symbol.h"
 
 struct node *parse_block(struct parser *parser)
@@ -24,6 +25,17 @@ struct node *parse_block(struct parser *parser)
 	scope_t *scope;
 
 	struct node *result = alloc_scope(parser, &scope, S_CLOSURE);
+
+	skip_lines(parser);
+
+	if(parser_current(parser) == T_OR_BINARY)
+	{
+		next(parser);
+
+		parse_parameter(parser, scope);
+
+		match(parser, T_OR_BINARY);
+	}
 
 	result->right = parse_statements(parser);
 
