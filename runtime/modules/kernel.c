@@ -51,12 +51,9 @@ static FILE *open_file(rt_value *filename)
 	return file;
 }
 
-
-rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+static rt_value run_file(rt_value self, rt_value *filename)
 {
-	rt_value filename = RT_ARG(0);
-
-	FILE* file = open_file(&filename);
+	FILE* file = open_file(filename);
 
 	if(!file)
 		return RT_NIL;
@@ -77,12 +74,21 @@ rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_
 		return RT_NIL;
 	}
 
-	rt_value result = rt_eval(obj, data, rt_string_to_cstr(filename));
+	data[length] = 0;
+
+	rt_value result = rt_eval(self, data, rt_string_to_cstr(*filename));
 
 	free(data);
 	fclose(file);
 
 	return result;
+}
+
+rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	rt_value filename = RT_ARG(0);
+
+	return run_file(obj, &filename);
 }
 
 rt_value __stdcall rt_kernel_print(rt_value obj, rt_value block, size_t argc, rt_value argv[])

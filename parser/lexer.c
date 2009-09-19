@@ -121,7 +121,7 @@ static token_type number_proc(token_t *token)
 
 static token_type unknown_proc(token_t *token)
 {
-    printf("Unknown character: %c\n", *(token->input));
+	PARSER_ERROR(token->parser, "Unknown character: %c", *(token->input));
     (token->input)++;
 
     return next(token->parser);
@@ -217,6 +217,38 @@ static char *build_double_quote_string(const char *start, size_t length)
 			case '"':
 				goto done;
 
+			case '\\':
+				{
+					input++;
+
+					switch(*input)
+					{
+						case 'n':
+							*writer = 10;
+							writer++;
+							input++;
+							break;
+
+						case 'r':
+							*writer = 13;
+							writer++;
+							input++;
+							break;
+
+						case '\\':
+						case '\'':
+							*writer = *input;
+							writer++;
+							input++;
+							break;
+
+						default:
+							*writer = '\\';
+							writer++;
+					}
+				}
+				break;
+
 			case '#':
 				{
 					input++;
@@ -229,6 +261,7 @@ static char *build_double_quote_string(const char *start, size_t length)
 						writer++;
 					}
 				}
+				break;
 
 			default:
 				*writer = *input;
@@ -261,6 +294,27 @@ static token_type parse_double_quote_string(token_t *token, bool continues)
 					goto done;
 				}
 
+			case '\\':
+				{
+					token->input++;
+
+					switch(*(token->input))
+					{
+						case '\\':
+						case '\'':
+						case 'n':
+						case 'r':
+							length++;
+							token->input++;
+							break;
+
+						default:
+							length++;
+					}
+				}
+				break;
+
+
 			case '#':
 				{
 					token->input++;
@@ -277,6 +331,7 @@ static token_type parse_double_quote_string(token_t *token, bool continues)
 					else
 						length++;
 				}
+				break;
 
 			default:
 				token->input++;
@@ -329,6 +384,7 @@ static char *build_single_quote_string(const char *start, size_t length)
 							writer++;
 					}
 				}
+				break;
 
 			default:
 				*writer = *input;
@@ -361,6 +417,7 @@ static token_type single_quote_proc(token_t *token)
 
 					goto done;
 				}
+				break;
 
 			case '\\':
 				{
@@ -378,6 +435,7 @@ static token_type single_quote_proc(token_t *token)
 							length++;
 					}
 				}
+				break;
 
 			default:
 				token->input++;

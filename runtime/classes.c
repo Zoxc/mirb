@@ -154,7 +154,9 @@ rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 
 	rt_class_name(obj, under, name);
 
-	printf("Defining class %s(%d) < %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj, rt_string_to_cstr(rt_inspect(super)), super);
+	#ifdef DEBUG
+		printf("Defining class %s(%d) < %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj, rt_string_to_cstr(rt_inspect(super)), super);
+	#endif
 
 	return obj;
 }
@@ -168,7 +170,9 @@ rt_value rt_define_module(rt_value under, rt_value name)
 
 	rt_class_name(obj, under, name);
 
-	printf("Defining module %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj);
+	#ifdef DEBUG
+		printf("Defining module %s(%d)\n", rt_string_to_cstr(rt_inspect(obj)), obj);
+	#endif
 
 	return obj;
 }
@@ -220,7 +224,9 @@ void rt_include_module(rt_value obj, rt_value module)
 			}
 		}
 
-		printf("Including module %s in %s\n", rt_string_to_cstr(rt_inspect(module)), rt_string_to_cstr(rt_inspect(obj)));
+		#ifdef DEBUG
+			printf("Including module %s in %s\n", rt_string_to_cstr(rt_inspect(module)), rt_string_to_cstr(rt_inspect(obj)));
+		#endif
 
 		c = RT_CLASS(c)->super = rt_create_include_class(module, RT_CLASS(c)->super);
 
@@ -233,7 +239,9 @@ void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)
 {
 	rt_class_set_method(obj, name, block);
 
-	printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+	#ifdef DEBUG
+		printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+	#endif
 }
 
 void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block)

@@ -411,21 +411,23 @@ int main()
 
 		if(parser->err_count == 0)
 		{
-			printf("Parsing done.\n");
-			printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
+			#ifdef DEBUG
+				printf("Parsing done.\n");
+				printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
+			#endif
 
 			block_t *block = gen_block(expression);
 
 			rt_compiled_block_t compiled_block = compile_block(block);
 
-			printf("Running block %x: ", (rt_value)compiled_block);
+			#ifdef DEBUG
+				printf("Running block %x: ", (rt_value)compiled_block);
+			#endif
 
 			rt_value result = compiled_block(rt_main, RT_NIL, 0, 0);
 
-			printf("\n => "); rt_print(result); printf("\n");
+			printf("=> "); rt_print(result); printf("\n");
 		}
-		else
-			printf("Parsing failed.\n");
 
 		parser_destroy(parser);
 	}

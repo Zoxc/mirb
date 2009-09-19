@@ -16,7 +16,9 @@ rt_value __stdcall rt_support_get_const(rt_value obj, rt_value name)
 	if(obj == rt_main)
 		obj = rt_Object;
 
-	printf("Looking up constant %s in %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
+	#ifdef DEBUG
+		printf("Looking up constant %s in %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
+	#endif
 
 	return rt_const_get(obj, name);
 }
@@ -26,15 +28,15 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 	if(obj == rt_main)
 		obj = rt_Object;
 
-	printf("Setting constant %s in %s to %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)), rt_string_to_cstr(rt_inspect(value)));
+	#ifdef DEBUG
+		printf("Setting constant %s in %s to %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)), rt_string_to_cstr(rt_inspect(value)));
+	#endif
 
 	rt_const_set(obj, name, value);
 }
 
 void __stdcall rt_support_seal_upval(rt_upval_t *upval)
 {
-	printf("sealing upval with value %s\n", rt_string_to_cstr(rt_inspect(*(upval->val.upval))));
-
 	upval->val.local = *(upval->val.upval);
 	upval->sealed = true;
 }

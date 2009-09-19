@@ -60,15 +60,27 @@ variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool
 	{
 		variable_t *result = scope_declare_var(scope, name, V_UPVAL);
 
+		scope = scope->owner;
+
 		scope_t *temp_scope = scope;
+		variable_t *real;
 
-		while (temp_scope->type == S_CLOSURE)
+		while(1)
+		{
+			khiter_t k = kh_get(scope, temp_scope->variables, name);
+
+			if(k != kh_end(temp_scope->variables) && kh_value(temp_scope->variables, k)->type != V_UPVAL)
+			{
+				real = kh_value(temp_scope->variables, k);
+				break;
+			}
+
 			temp_scope = temp_scope->owner;
+		}
 
-		variable_t *real = kh_value(temp_scope->variables, kh_get(scope, temp_scope->variables, name));
 		result->real = real;
 
-		while (scope->type == S_CLOSURE)
+		while (scope != temp_scope)
 		{
 			variable_t *var = scope_declare_var(scope, name, V_UPVAL);
 			var->real = real;

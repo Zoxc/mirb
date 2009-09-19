@@ -25,8 +25,6 @@ rt_value __stdcall rt_module_append_features(rt_value obj, rt_value block, size_
 
 rt_value __stdcall rt_module_included(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
-	printf("Included module %s in %s\n", rt_string_to_cstr(rt_inspect(obj)), rt_string_to_cstr(rt_inspect(RT_ARG(0))));
-
 	return obj;
 }
 

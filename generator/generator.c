@@ -513,11 +513,13 @@ block_t *gen_block(struct node *node)
 
 	block_push(block, B_LOAD, (rt_value)result, 0, 0);
 
-	printf(";\n; block %x\n;\n", (rt_value)block);
+	#ifdef DEBUG
+		printf(";\n; block %x\n;\n", (rt_value)block);
 
-	block_print(block);
+		block_print(block);
 
-	printf("\n\n");
+		printf("\n\n");
+	#endif
 
 	return block;
 }

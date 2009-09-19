@@ -61,6 +61,7 @@ static inline rt_value rt_const_get(rt_value obj, rt_value name)
 		}
 	}
 
+	printf("Unable to find constant %s on %s.\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
 	assert(0);
 }
 
@@ -74,7 +75,7 @@ static inline void rt_const_set(rt_value obj, rt_value name, rt_value value)
 		rt_object_set_var(obj, name, value);
 	else
 	{
-		printf("Warning: Reassigning constant %s to", rt_symbol_to_cstr(name)); rt_print(value); printf("\n");
+		printf("Warning: Reassigning constant %s to ", rt_symbol_to_cstr(name)); rt_print(value); printf("\n");
 		kh_value(vars, k) = value;
 	}
 }

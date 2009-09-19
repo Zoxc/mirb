@@ -687,11 +687,13 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_word(&target, 16);
 
 	#ifdef WINDOWS
-		printf(";\n; compiled block %x\n;\n", (rt_value)block);
+		#ifdef DEBUG
+			printf(";\n; compiled block %x\n;\n", (rt_value)block);
 
-        dump_code((void *)result, target - (unsigned char *)result);
+			dump_code((void *)result, target - (unsigned char *)result);
 
-        printf("\n\n");
+			printf("\n\n");
+		#endif
 	#endif
 
 	assert((unsigned char *)result + block_size == target);
