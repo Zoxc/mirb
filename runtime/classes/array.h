@@ -6,7 +6,7 @@ struct rt_array {
 	kvec_t(rt_value) data;
 };
 
-#define RT_ARRAY(value) ((struct rt_array *)value)
+#define RT_ARRAY(value) ((struct rt_array *)(value))
 
 extern rt_value rt_Array;
 

@@ -11,7 +11,7 @@ struct rt_class {
 	khash_t(rt_block) *methods;
 };
 
-#define RT_CLASS(value) ((struct rt_class *)value)
+#define RT_CLASS(value) ((struct rt_class *)(value))
 
 extern rt_value rt_Class;
 

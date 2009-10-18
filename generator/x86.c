@@ -130,6 +130,20 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 		case B_CMP:
 			return 6;
 
+		case B_HANDLER:
+			{
+				size_t current_id = block->current_handler_id;
+
+				block->current_handler_id = op->result;
+
+				if(op->result ==current_id - 1)
+					return 3;
+				else if(op->result ==current_id + 1)
+					return 3;
+				else
+					return 3 + 4;
+			}
+
 		default:
 			break;
 	}
@@ -153,11 +167,11 @@ static inline int get_stack_index(block_t *block, rt_value var)
 			break;
 
 		case V_TEMP:
-			index = block->scope->var_count[V_LOCAL] + _var->index;
+			index = block->local_offset + block->scope->var_count[V_LOCAL] + _var->index;
 			break;
 
 		case V_LOCAL:
-			index = _var->index;
+			index = block->local_offset + _var->index;
 			break;
 
 		default:
@@ -567,6 +581,33 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_HANDLER:
+			{
+				if(op->result == block->current_handler_id - 1)
+				{
+					generate_byte(target, 0xFF);
+					generate_byte(target, 0x4D);
+					generate_byte(target, -8);
+				}
+				else if(op->result == block->current_handler_id + 1)
+				{
+					generate_byte(target, 0xFF);
+					generate_byte(target, 0x45);
+					generate_byte(target, -8);
+				}
+				else
+				{
+					generate_byte(target, 0xC7);
+					generate_byte(target, 0x45);
+					generate_byte(target, -8);
+
+					generate_dword(target, op->result);
+				}
+
+				block->current_handler_id = op->result;
+			}
+			break;
+
 		default:
 			break;
 	}
@@ -574,8 +615,19 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 rt_compiled_block_t compile_block(block_t *block)
 {
+	size_t handler_count = kv_size(block->handlers);
 	size_t block_size = 3;
 	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + block->scope->var_count[V_PARAMETER];
+
+	if(handler_count)
+	{
+		block->current_handler_id = -1;
+
+		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4);
+		block->local_offset = 5 * 4;
+	}
+	else
+		block->local_offset = 0;
 
 	if(stack_vars > 0)
 		block_size += 6;
@@ -608,19 +660,79 @@ rt_compiled_block_t compile_block(block_t *block)
 	if(block->scope->type == S_CLOSURE)
 		block_size += 1;
 
+	if(handler_count)
+		block_size += 3 + (3 + 4);
+
 	block_size += 6;
 
 	rt_compiled_block_t result = rt_code_heap_alloc(block_size);
 
 	unsigned char *target = (unsigned char *)result;
 
-	generate_byte(&target, 0x55);
-	generate_byte(&target, 0x89);
+	generate_byte(&target, 0x55); // push ebp
+	generate_byte(&target, 0x89); // mov esp, ebp
 	generate_byte(&target, 0xE5);
+
+	if(handler_count)
+	{
+		block->current_handler_id = -1;
+
+		/*
+		 * Setup block data structure
+		 */
+		block_data_t *data = malloc(sizeof(block_data_t));
+
+		data->handlers = block->handlers.a;
+		kv_init(block->handlers);
+
+		data->local_storage = stack_vars * 4;
+
+		/*
+		 * Generate seh_frame_t struct
+		 *
+
+		typedef struct seh_frame_t {
+			struct seh_frame_t *prev;
+			void *handler;
+			size_t handler_index;
+			block_data_t *block;
+			size_t ebp;
+		} seh_frame_t;
+
+		 */
+
+		// ebp is already pushed
+
+		// block @ ebp - 4
+		generate_stack_push(&target, (size_t)data);
+
+		// handler_index @ ebp - 8
+		generate_stack_push(&target, -1);
+
+		// handling @ ebp - 12
+		generate_stack_push(&target, 0);
+
+		// handler @ ebp - 16
+		generate_stack_push(&target, (size_t)&rt_seh_handler);
+
+		// prev @ ebp - 20
+		generate_byte(&target, 0x64); // push dword [fs:0]
+		generate_byte(&target, 0xFF);
+		generate_byte(&target, 0x35);
+		generate_dword(&target, 0);
+
+		/*
+		 * Append the struct to the linked list
+		 */
+		generate_byte(&target, 0x64); // mov dword [fs:0], esp
+		generate_byte(&target, 0x89);
+		generate_byte(&target, 0x25);
+		generate_dword(&target, 0);
+	}
 
 	if(stack_vars > 0)
 	{
-		generate_byte(&target, 0x81);
+		generate_byte(&target, 0x81); // add esp,
 		generate_byte(&target, 0xEC);
 		generate_dword(&target, stack_vars * 4);
 	}
@@ -679,6 +791,18 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(block->scope->type == S_CLOSURE)
 		generate_byte(&target, 0x5E); // pop esi
+
+	if(handler_count)
+	{
+		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+		generate_byte(&target, 0x4D);
+		generate_byte(&target, -20);
+
+		generate_byte(&target, 0x64); // mov dword [fs:0], ecx
+		generate_byte(&target, 0x89);
+		generate_byte(&target, 0x0D);
+		generate_dword(&target, 0);
+	}
 
 	generate_byte(&target, 0x89);
 	generate_byte(&target, 0xEC);

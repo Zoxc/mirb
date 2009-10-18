@@ -7,6 +7,7 @@
 #include "classes/proc.h"
 #include "classes/module.h"
 #include "classes/array.h"
+#include "classes/exception.h"
 #include "modules/kernel.h"
 #include "../generator/bytecode.h"
 #include "../generator/generator.h"
@@ -31,6 +32,7 @@ void rt_create(void)
 	rt_fixnum_init();
 	rt_proc_init();
 	rt_array_init();
+	rt_exception_init();
 }
 
 void rt_destroy(void)
@@ -100,10 +102,15 @@ rt_value rt_inspect(rt_value obj)
 {
 	rt_compiled_block_t inspect = rt_lookup_nothrow(obj, rt_symbol_from_cstr("inspect"));
 
-	if(inspect && (inspect != (rt_compiled_block_t)rt_object_inspect || rt_lookup_nothrow(obj, rt_symbol_from_cstr("to_s"))))
-		return inspect(obj, 0, 0, 0);
+	rt_value result = RT_NIL;
 
-	return rt_object_to_s(obj, 0, 0, 0);
+	if(inspect && (inspect != (rt_compiled_block_t)rt_object_inspect || rt_lookup_nothrow(obj, rt_symbol_from_cstr("to_s"))))
+		result = inspect(obj, 0, 0, 0);
+
+	if(rt_type(result) == C_STRING)
+		return result;
+	else
+		return rt_object_to_s(obj, 0, 0, 0);
 }
 
 void rt_print(rt_value obj)

@@ -1,5 +1,70 @@
 #include "control_blocks.h"
 
+struct node *parse_exception_handlers(struct parser *parser, struct node *block)
+{
+	struct node *parent = alloc_node(parser, N_HANDLER);
+
+	parent->left = block;
+
+	if(parser_current(parser) == T_RESCUE)
+	{
+		next(parser);
+
+		struct node *rescue = alloc_node(parser, N_RESCUE);
+		rescue->left = parse_statements(parser);
+		rescue->right = 0;
+
+		parent->middle = rescue;
+
+		while(parser_current(parser) == T_RESCUE)
+		{
+			next(parser);
+
+			struct node *node = alloc_node(parser, N_RESCUE);
+			node->left = parse_statements(parser);
+			node->right = 0;
+
+			rescue->right = node;
+			rescue = node;
+		}
+	}
+	else
+		parent->middle = 0;
+
+	if(parser_current(parser) == T_ENSURE)
+	{
+		next(parser);
+
+		parent->right = parse_statements(parser);
+	}
+	else
+		parent->right = 0;
+
+	return parent;
+}
+
+struct node *parse_begin(struct parser *parser)
+{
+	next(parser);
+
+	struct node *result = parse_statements(parser);
+
+	switch (parser_current(parser))
+	{
+		case T_ENSURE:
+		case T_RESCUE:
+			result = parse_exception_handlers(parser, result);
+			break;
+
+		default:
+			break;
+	}
+
+	match(parser, T_END);
+
+	return result;
+}
+
 void parse_then_sep(struct parser *parser)
 {
 	switch (parser_current(parser))

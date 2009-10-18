@@ -8,7 +8,7 @@ struct rt_symbol {
 	const char* string;
 };
 
-#define RT_SYMBOL(value) ((struct rt_symbol *)value)
+#define RT_SYMBOL(value) ((struct rt_symbol *)(value))
 
 extern rt_value rt_Symbol;
 

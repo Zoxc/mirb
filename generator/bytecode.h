@@ -30,6 +30,8 @@ typedef enum {
 	B_JMP,
 	B_RETURN,
 	B_LABEL,
+	B_ENSURE_RET,
+	B_HANDLER,
 	B_ARRAY,
 	B_STRING,
 	B_INTERPOLATE,
@@ -55,11 +57,26 @@ typedef struct {
 	rt_value right;
 } opcode_t;
 
+typedef struct exception_handler_t {
+	struct exception_handler_t *parent;
+	void *rescue;
+	void *ensure;
+} exception_handler_t;
+
+typedef struct {
+	exception_handler_t **handlers;
+	size_t local_storage;
+} block_data_t;
+
 typedef struct {
 	struct parser* parser;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
+	kvec_t(exception_handler_t *) handlers;
+	exception_handler_t *current_handler;
+	size_t local_offset;
+	size_t current_handler_id;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
 	size_t self_ref;
@@ -74,8 +91,11 @@ static inline block_t *block_create(scope_t *scope)
 	result->scope = scope;
 	result->label_usage = kh_init(rt_hash);
 	result->self_ref = 0;
+	result->current_handler = 0;
+	result->current_handler_id = (size_t)-1;
 
 	kv_init(result->vector);
+	kv_init(result->handlers);
 	kv_init(result->upvals);
 
 	return result;
@@ -137,9 +157,9 @@ static inline void block_end_args(block_t *block, variable_t *var, size_t argc)
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
 }
 
-static inline void block_emmit_label(block_t *block, rt_value label)
+static inline size_t block_emmit_label(block_t *block, rt_value label)
 {
-	int index = block_push(block, B_LABEL, label, 0, 0);
+	size_t index = block_push(block, B_LABEL, label, 0, 0);
 
 	int ret;
 
@@ -148,6 +168,8 @@ static inline void block_emmit_label(block_t *block, rt_value label)
 	assert(ret);
 
 	kh_value(block->label_usage, k) = index;
+
+	return index;
 }
 
 static inline rt_value block_get_value(block_t *block, khash_t(rt_hash) *table, rt_value key)

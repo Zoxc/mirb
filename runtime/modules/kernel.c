@@ -3,6 +3,8 @@
 #include "../constant.h"
 #include "../classes/symbol.h"
 #include "../classes/string.h"
+#include "../classes/exception.h"
+#include "../x86.h"
 
 rt_value rt_Kernel;
 
@@ -105,6 +107,43 @@ rt_value __stdcall rt_kernel_print(rt_value obj, rt_value block, size_t argc, rt
 	return RT_NIL;
 }
 
+rt_value __stdcall rt_kernel_raise(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+{
+	rt_value exception = rt_alloc(sizeof(struct rt_exception));
+
+	RT_COMMON(exception)->flags = C_EXCEPTION;
+
+	size_t i = 0;
+
+	if(rt_type(RT_ARG(0)) == C_CLASS)
+	{
+		RT_COMMON(exception)->class_of = RT_ARG(0);
+		i++;
+	}
+	else
+		RT_COMMON(exception)->class_of = rt_Exception;
+
+	if(argc > i)
+	{
+		RT_EXCEPTION(exception)->message = RT_ARG(i);
+		i++;
+	}
+	else
+		RT_EXCEPTION(exception)->message = RT_NIL;
+
+	if(argc > i)
+	{
+		RT_EXCEPTION(exception)->backtrace = RT_ARG(i);
+		i++;
+	}
+	else
+		RT_EXCEPTION(exception)->backtrace = RT_NIL;
+
+	RaiseException(RT_SEH_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
+
+	return RT_NIL;
+}
+
 void rt_kernel_init(void)
 {
 	rt_Kernel = rt_define_module(rt_Object, rt_symbol_from_cstr("Kernel"));
@@ -116,4 +155,5 @@ void rt_kernel_init(void)
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
     rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
+    rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
 }

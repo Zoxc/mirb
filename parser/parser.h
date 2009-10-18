@@ -29,6 +29,8 @@ typedef enum {
 	N_NO_EQUALITY,
 	N_IF,
 	N_UNLESS,
+	N_HANDLER,
+	N_RESCUE,
 	N_ARGUMENT,
 	N_CALL_ARGUMENTS,
 	N_CALL,
@@ -123,8 +125,6 @@ struct node *parse_statements(struct parser *parser);
 void parse_sep(struct parser *parser);
 struct node *parse_main(struct parser *parser);
 
-struct node *parse_expressions(struct parser *parser);
-
 #define PARSER_ERROR(parser, msg, ...) do \
 	{ \
 		parser->err_count++; \
@@ -191,6 +191,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_IF:
 		case T_UNLESS:
 		case T_CASE:
+		case T_BEGIN:
 		case T_CLASS:
 		case T_MODULE:
 		case T_NOT:

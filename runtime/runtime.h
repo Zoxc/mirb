@@ -34,7 +34,8 @@ typedef enum {
 	C_SYMBOL,
 	C_STRING,
 	C_ARRAY,
-	C_PROC
+	C_PROC,
+	C_EXCEPTION
 } rt_type_t;
 
 struct rt_common {

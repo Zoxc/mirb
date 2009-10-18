@@ -9,6 +9,7 @@
 
 #ifdef WINDOWS
     #include <windows.h>
+    #include <excpt.h>
     #include "BeaEngine.h"
 #else
 	#define __stdcall __attribute__((__stdcall__))

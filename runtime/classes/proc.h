@@ -12,7 +12,7 @@ struct rt_proc {
 
 extern rt_value rt_Proc;
 
-#define RT_PROC(value) ((struct rt_proc *)value)
+#define RT_PROC(value) ((struct rt_proc *)(value))
 
 void rt_proc_init(void);
 

@@ -59,7 +59,12 @@ Factor <- Number
 	| Module
 	| Method
 	| Yield
+	| BeginBlock
 	| "(", Statements, ")"
+
+BeginBlock <- "begin", Statements, ExceptionHandlers, "end"
+
+ExceptionHandlers <- ("rescue", Expression, {"=>", Identifier})*, {Else}, {"ensure", Statements}
 
 Array <- "[", {Expression, (",", Expression)*}, "]"
 

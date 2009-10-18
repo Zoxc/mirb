@@ -224,6 +224,9 @@ struct node *parse_factor(struct parser *parser)
 {
 	switch (parser_current(parser))
 	{
+		case T_BEGIN:
+			return parse_begin(parser);
+
 		case T_IF:
 			return parse_if(parser);
 

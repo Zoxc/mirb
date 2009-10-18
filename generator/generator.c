@@ -491,7 +491,89 @@ static void gen_no_equality(block_t *block, struct node *node, variable_t *var)
 	}
 }
 
-generator generators[] = {gen_unary_op, gen_binary_op, gen_num, gen_var, gen_ivar, gen_ivar_assign, gen_string, gen_string_start, gen_string_continue, gen_array, /*N_ARRAY_ELEMENT*/gen_warn, gen_const, gen_self, gen_true, gen_false, gen_nil, gen_assign, gen_const_assign, gen_boolean, gen_not, gen_no_equality, gen_if, gen_if, /*N_ARGUMENT*/gen_warn, /*N_CALL_ARGUMENTS*/gen_warn, gen_call, gen_array_call, gen_expressions, gen_class, gen_module, /*N_SCOPE*/gen_warn, gen_method};
+static void gen_handler(block_t *block, struct node *node, variable_t *var)
+{
+	exception_handler_t *handler = malloc(sizeof(exception_handler_t));
+	size_t index = kv_size(block->handlers);
+	size_t old_index = block->current_handler_id;
+	exception_handler_t *old = block->current_handler;
+
+	handler->parent = old;
+
+	kv_push(exception_handler_t *, block->handlers, handler);
+
+	// Use the new exception frame
+	block->current_handler = handler;
+	block->current_handler_id = index;
+	block_push(block, B_HANDLER, index, 0, 0);
+
+	// Output the regular code
+	gen_node(block, node->left, var);
+
+
+	if(node->middle)
+	{
+		// Skip the rescue block
+		rt_value ok_label = block_get_label(block);
+		block_push(block, B_JMP, ok_label, 0, 0);
+
+		// Output rescue nodes
+		handler->rescue = (void *)block_emmit_label(block, block_get_label(block));
+		gen_node(block, node->middle->left, var);
+
+		block_emmit_label(block, ok_label);
+	}
+
+	if(node->right)
+	{
+		// Output ensure node
+		gen_node(block, node->right, 0);
+
+		block_push(block, B_ENSURE_RET, index, 0, 0);
+	}
+
+	// Restore the old exception frame
+	block->current_handler = old;
+	block->current_handler_id = old_index;
+	block_push(block, B_HANDLER, old_index, 0, 0);
+}
+
+generator generators[] = {
+	gen_unary_op,
+	gen_binary_op,
+	gen_num,
+	gen_var,
+	gen_ivar,
+	gen_ivar_assign,
+	gen_string,
+	gen_string_start,
+	gen_string_continue,
+	gen_array,
+	/*N_ARRAY_ELEMENT*/gen_warn,
+	gen_const,
+	gen_self,
+	gen_true,
+	gen_false,
+	gen_nil,
+	gen_assign,
+	gen_const_assign,
+	gen_boolean,
+	gen_not,
+	gen_no_equality,
+	gen_if,
+	gen_if,
+	gen_handler,
+	/*N_RESCUE*/gen_warn,
+	/*N_ARGUMENT*/gen_warn,
+	/*N_CALL_ARGUMENTS*/gen_warn,
+	gen_call,
+	gen_array_call,
+	gen_expressions,
+	gen_class,
+	gen_module,
+	/*N_SCOPE*/gen_warn,
+	gen_method
+};
 
 static inline void gen_node(block_t *block, struct node *node, variable_t *var)
 {

@@ -142,3 +142,10 @@ void __stdcall rt_support_set_upval(rt_value value)
 	else
 		upval->val.local = value;
 }
+
+#ifdef WINDOWS
+	EXCEPTION_DISPOSITION __cdecl rt_seh_handler (EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
+	{
+		return ExceptionContinueSearch;
+	}
+#endif

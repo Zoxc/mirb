@@ -8,7 +8,7 @@ struct rt_string {
 };
 
 #undef RT_STRING
-#define RT_STRING(value) ((struct rt_string *)value)
+#define RT_STRING(value) ((struct rt_string *)(value))
 
 extern rt_value rt_String;
 

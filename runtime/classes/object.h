@@ -7,7 +7,7 @@ struct rt_object {
 	khash_t(rt_hash) *vars;
 };
 
-#define RT_OBJECT(value) ((struct rt_object *)value)
+#define RT_OBJECT(value) ((struct rt_object *)(value))
 
 extern rt_value rt_Object;
 

@@ -162,6 +162,14 @@ void opcode_print(opcode_t *op)
 			printf("jmp "); block_print_label(op->result);
 			break;
 
+		case B_ENSURE_RET:
+			printf("ensure_ret");
+			break;
+
+		case B_HANDLER:
+			printf("handler %d", op->result);
+			break;
+
 		case B_LABEL:
 			printf("#%d:", op->result);
 			break;
