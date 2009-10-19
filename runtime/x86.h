@@ -15,7 +15,7 @@
 		size_t handling;
 		size_t handler_index;
 		block_data_t *block;
-		size_t ebp;
+		size_t old_ebp;
 	} rt_seh_frame_t;
 #endif
 

@@ -700,21 +700,25 @@ rt_compiled_block_t compile_block(block_t *block)
 		if(block->scope->type == S_CLOSURE)
 			data->local_storage += 4;
 
+        if(block->self_ref > 0)
+            data->local_storage += 4;
+
 		/*
 		 * Generate seh_frame_t struct
 		 *
 
-		typedef struct seh_frame_t {
-			struct seh_frame_t *prev;
-			void *handler;
-			size_t handler_index;
-			block_data_t *block;
-			size_t ebp;
-		} seh_frame_t;
+        typedef struct seh_frame_t {
+            struct seh_frame_t *prev;
+            void *handler;
+            size_t handling;
+            size_t handler_index;
+            block_data_t *block;
+            size_t old_ebp;
+        } rt_seh_frame_t;
 
 		 */
 
-		// ebp is already pushed
+		// old_ebp is already pushed
 
 		// block @ ebp - 4
 		generate_stack_push(&target, (size_t)data);
@@ -758,11 +762,10 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0xC6);
 	}
 
-
 	if(block->self_ref > 0)
 	{
-		generate_byte(&target, 0x57);
-		generate_byte(&target, 0x8B);
+		generate_byte(&target, 0x57); // push edi
+		generate_byte(&target, 0x8B); // mov edi, dword [ebp + 8]
 		generate_byte(&target, 0x7D);
 		generate_byte(&target, 8);
 	}

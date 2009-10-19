@@ -161,7 +161,6 @@ void __stdcall rt_support_set_upval(rt_value value)
 		{
 			if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
 			{
-
 				exception_handler_t *handler = &frame_data->block->handlers[frame_data->handler_index];
 				exception_handler_t *current = handler;
 
@@ -179,10 +178,19 @@ void __stdcall rt_support_set_upval(rt_value value)
 						else
 							frame_data->handler_index = -1;
 
+                        size_t ebp = (size_t)&frame_data->old_ebp;
+
 						printf("Rescue block found\n");
-						printf("Ebp: %x\n", frame_data->ebp);
-						printf("Esp: %x\n", frame_data->ebp - 20 - frame_data->block->local_storage);
+						printf("Ebp: %x\n", ebp);
+						printf("Esp: %x\n", ebp - 20 - frame_data->block->local_storage);
 						printf("Eip: %x\n", current->rescue);
+
+						void *current_handler;
+
+						__asm__("mov %%fs:0, %0" : "=r" (current_handler));
+
+						printf("SEH handler: %x (%x)\n", current_handler, frame_data);
+
 						printf("New handler: %d\n", frame_data->handler_index);
 
 						__asm__("mov %0, %%eax\n"
@@ -191,8 +199,8 @@ void __stdcall rt_support_set_upval(rt_value value)
 							"jmp *%%eax\n"
 						:
 						: "r" (current->rescue),
-							"r" (frame_data->ebp - 20 - frame_data->block->local_storage),
-							"r" (frame_data->ebp)
+							"r" (ebp - 20 - frame_data->block->local_storage),
+							"r" (ebp)
 						: "%eax");
 					}
 
