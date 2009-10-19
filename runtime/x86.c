@@ -144,8 +144,63 @@ void __stdcall rt_support_set_upval(rt_value value)
 }
 
 #ifdef WINDOWS
-	EXCEPTION_DISPOSITION __cdecl rt_seh_handler (EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
+	extern void WINAPI RtlUnwind(
+	  PVOID TargetFrame,
+	  PVOID TargetIp,
+	  PEXCEPTION_RECORD ExceptionRecord,
+	  PVOID ReturnValue
+	);
+
+	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
-		return ExceptionContinueSearch;
+		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
+		{
+			return ExceptionContinueSearch;
+		}
+		else
+		{
+			if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
+			{
+
+				exception_handler_t *handler = &frame_data->block->handlers[frame_data->handler_index];
+				exception_handler_t *current = handler;
+
+				while(current)
+				{
+					if(current->rescue)
+					{
+						RtlUnwind(frame_data, &&continue_label, 0, 0);
+
+						continue_label:
+						MessageBox(0, "hi", 0, 0);
+
+						if(handler->parent)
+							frame_data->handler_index = (current - frame_data->block->handlers) / sizeof(exception_handler_t);
+						else
+							frame_data->handler_index = -1;
+
+						printf("Rescue block found\n");
+						printf("Ebp: %x\n", frame_data->ebp);
+						printf("Esp: %x\n", frame_data->ebp - 20 - frame_data->block->local_storage);
+						printf("Eip: %x\n", current->rescue);
+						printf("New handler: %d\n", frame_data->handler_index);
+
+						__asm__("mov %0, %%eax\n"
+							"mov %1, %%esp\n"
+							"mov %2, %%ebp\n"
+							"jmp *%%eax\n"
+						:
+						: "r" (current->rescue),
+							"r" (frame_data->ebp - 20 - frame_data->block->local_storage),
+							"r" (frame_data->ebp)
+						: "%eax");
+					}
+
+					current = current->parent;
+				}
+			}
+
+			return ExceptionContinueSearch;
+		}
 	}
 #endif

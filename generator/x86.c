@@ -624,7 +624,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		block->current_handler_id = -1;
 
 		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4);
-		block->local_offset = 5 * 4;
+		block->local_offset = 5;
 	}
 	else
 		block->local_offset = 0;
@@ -682,10 +682,23 @@ rt_compiled_block_t compile_block(block_t *block)
 		 */
 		block_data_t *data = malloc(sizeof(block_data_t));
 
-		data->handlers = block->handlers.a;
-		kv_init(block->handlers);
+		data->handlers = malloc(sizeof(exception_handler_t) * handler_count);
 
-		data->local_storage = stack_vars * 4;
+		for(size_t i = 0; i < handler_count; i++)
+		{
+			memcpy(&data->handlers[i], kv_A(block->handlers, i), sizeof(exception_handler_t));
+
+			if(data->handlers[i].rescue)
+				data->handlers[i].rescue = result + (size_t)kv_A(block->vector, (size_t)data->handlers[i].rescue)->right;
+
+			if(data->handlers[i].ensure)
+				data->handlers[i].ensure = result + (size_t)kv_A(block->vector, (size_t)data->handlers[i].ensure)->right;
+		}
+
+		data->local_storage = stack_vars  * 4;
+
+		if(block->scope->type == S_CLOSURE)
+			data->local_storage += 4;
 
 		/*
 		 * Generate seh_frame_t struct
@@ -744,6 +757,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x89); // mov esi, eax
 		generate_byte(&target, 0xC6);
 	}
+
 
 	if(block->self_ref > 0)
 	{

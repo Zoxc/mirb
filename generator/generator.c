@@ -523,14 +523,20 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 
 		block_emmit_label(block, ok_label);
 	}
+	else
+		handler->rescue = 0;
 
 	if(node->right)
 	{
+		handler->ensure = (void *)block_emmit_label(block, block_get_label(block));
+
 		// Output ensure node
 		gen_node(block, node->right, 0);
 
 		block_push(block, B_ENSURE_RET, index, 0, 0);
 	}
+	else
+		handler->ensure = 0;
 
 	// Restore the old exception frame
 	block->current_handler = old;

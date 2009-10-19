@@ -95,6 +95,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes\class.h" />
+		<Unit filename="runtime\classes\exception.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\classes\exception.h" />
 		<Unit filename="runtime\classes\fixnum.c">
 			<Option compilerVar="CC" />
 		</Unit>

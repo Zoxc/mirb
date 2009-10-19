@@ -64,7 +64,7 @@ typedef struct exception_handler_t {
 } exception_handler_t;
 
 typedef struct {
-	exception_handler_t **handlers;
+	exception_handler_t *handlers;
 	size_t local_storage;
 } block_data_t;
 
@@ -106,6 +106,7 @@ static inline void block_destroy(block_t *block)
 	kh_destroy(rt_hash, block->label_usage);
 	kv_destroy(block->vector);
 	kv_destroy(block->upvals);
+	kv_destroy(block->handlers);
 	free(block);
 }
 

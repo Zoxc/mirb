@@ -477,6 +477,8 @@ int main()
 		parser_destroy(parser);
 	}
 
+	printf("Exiting gracefully...");
+
 	rt_destroy();
 
 	return 0;
