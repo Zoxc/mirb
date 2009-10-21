@@ -130,6 +130,9 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 		case B_CMP:
 			return 6;
 
+        case B_ENSURE_RET:
+            return (3 + 4) + 2 + 1;
+
 		case B_HANDLER:
 			{
 				size_t current_id = block->current_handler_id;
@@ -581,6 +584,20 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_ENSURE_RET:
+			{
+			    generate_byte(target, 0x81); // cmp dword [ebp - 12], 0
+                generate_byte(target, 0x7D);
+                generate_byte(target, -12);
+                generate_dword(target, 0);
+
+                generate_byte(target, 0x74); // jz +1
+                generate_byte(target, 1);
+
+                generate_byte(target, 0xC3); // ret
+			}
+			break;
+
 		case B_HANDLER:
 			{
 				if(op->result == block->current_handler_id - 1)
@@ -682,18 +699,21 @@ rt_compiled_block_t compile_block(block_t *block)
 		 */
 		block_data_t *data = malloc(sizeof(block_data_t));
 
-		data->handlers = malloc(sizeof(exception_handler_t) * handler_count);
+		data->handlers = block->handlers.a;
 
 		for(size_t i = 0; i < handler_count; i++)
 		{
-			memcpy(&data->handlers[i], kv_A(block->handlers, i), sizeof(exception_handler_t));
+		    exception_handler_t *handler = kv_A(block->handlers, i);
 
-			if(data->handlers[i].rescue)
-				data->handlers[i].rescue = result + (size_t)kv_A(block->vector, (size_t)data->handlers[i].rescue)->right;
+			/*
+			 * These tricky things just translate labels into real addreses
+			 */
 
-			if(data->handlers[i].ensure)
-				data->handlers[i].ensure = result + (size_t)kv_A(block->vector, (size_t)data->handlers[i].ensure)->right;
+            handler->rescue = handler->rescue == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)handler->rescue)->right);
+            handler->ensure = handler->ensure == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)handler->ensure)->right);
 		}
+
+		kv_init(block->handlers);
 
 		data->local_storage = stack_vars  * 4;
 

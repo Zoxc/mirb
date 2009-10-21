@@ -498,6 +498,7 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 	size_t old_index = block->current_handler_id;
 	exception_handler_t *old = block->current_handler;
 
+	handler->parent_index = old_index;
 	handler->parent = old;
 
 	kv_push(exception_handler_t *, block->handlers, handler);
@@ -524,7 +525,7 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 		block_emmit_label(block, ok_label);
 	}
 	else
-		handler->rescue = 0;
+		handler->rescue = (void *)-1;
 
 	if(node->right)
 	{
@@ -536,7 +537,7 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 		block_push(block, B_ENSURE_RET, index, 0, 0);
 	}
 	else
-		handler->ensure = 0;
+		handler->ensure = (void *)-1;
 
 	// Restore the old exception frame
 	block->current_handler = old;

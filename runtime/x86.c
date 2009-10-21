@@ -151,64 +151,93 @@ void __stdcall rt_support_set_upval(rt_value value)
 	  PVOID ReturnValue
 	);
 
+	void rt_seh_unwind(rt_seh_frame_t *frame_data, exception_handler_t *handler, exception_handler_t *target)
+	{
+	    frame_data->handling = 1;
+
+	    size_t ebp = (size_t)&frame_data->old_ebp;
+
+        while(handler != target)
+        {
+            if(handler->ensure)
+            {
+                printf("Ensure block found\n");
+                printf("Ebp: %x\n", ebp);
+                printf("Eip: %x\n", handler->ensure);
+
+                __asm__("push %%ebp\n"
+                    "mov %0, %%ebp\n"
+                    "call *%1\n"
+                    "pop %%ebp\n"
+                :
+                : "r" (ebp), "r" (handler->ensure));
+            }
+
+            handler = handler->parent;
+        }
+
+        frame_data->handling = 0;
+	}
+
 	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
+	    printf("rt_seh_handler invoked\n");
+
 		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
 		{
-			return ExceptionContinueSearch;
+            rt_seh_unwind(frame_data, frame_data->block->handlers[frame_data->handler_index], 0);
 		}
-		else
+		else if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
 		{
-			if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
-			{
-				exception_handler_t *handler = &frame_data->block->handlers[frame_data->handler_index];
-				exception_handler_t *current = handler;
+            exception_handler_t *handler = frame_data->block->handlers[frame_data->handler_index];
+            exception_handler_t *current = handler;
 
-				while(current)
-				{
-					if(current->rescue)
-					{
-						RtlUnwind(frame_data, &&continue_label, 0, 0);
+            while(current)
+            {
+                if(current->rescue)
+                {
+                    RtlUnwind(frame_data, &&continue_label, 0, 0);
 
-						continue_label:
-						MessageBox(0, "hi", 0, 0);
+                    continue_label:
 
-						if(handler->parent)
-							frame_data->handler_index = (current - frame_data->block->handlers) / sizeof(exception_handler_t);
-						else
-							frame_data->handler_index = -1;
+                    /*
+                     * Execute frame local ensure handlers
+                     */
 
-                        size_t ebp = (size_t)&frame_data->old_ebp;
+                    rt_seh_unwind(frame_data, handler, current);
 
-						printf("Rescue block found\n");
-						printf("Ebp: %x\n", ebp);
-						printf("Esp: %x\n", ebp - 20 - frame_data->block->local_storage);
-						printf("Eip: %x\n", current->rescue);
+                    /*
+                     * Set to the current handler index to the parent
+                     */
 
-						void *current_handler;
+                    frame_data->handler_index = current->parent_index;
 
-						__asm__("mov %%fs:0, %0" : "=r" (current_handler));
+                    /*
+                     * Go to the handler and never return
+                     */
 
-						printf("SEH handler: %x (%x)\n", current_handler, frame_data);
+                    size_t ebp = (size_t)&frame_data->old_ebp;
 
-						printf("New handler: %d\n", frame_data->handler_index);
+                    printf("Rescue block found\n");
+                    printf("Ebp: %x\n", ebp);
+                    printf("Esp: %x\n", ebp - 20 - frame_data->block->local_storage);
+                    printf("Eip: %x\n", current->rescue);
 
-						__asm__("mov %0, %%eax\n"
-							"mov %1, %%esp\n"
-							"mov %2, %%ebp\n"
-							"jmp *%%eax\n"
-						:
-						: "r" (current->rescue),
-							"r" (ebp - 20 - frame_data->block->local_storage),
-							"r" (ebp)
-						: "%eax");
-					}
+                    __asm__("mov %0, %%eax\n"
+                        "mov %1, %%esp\n"
+                        "mov %2, %%ebp\n"
+                        "jmp *%%eax\n"
+                    :
+                    : "r" (current->rescue),
+                        "r" (ebp - 20 - frame_data->block->local_storage),
+                        "r" (ebp)
+                    : "%eax");
+                }
 
-					current = current->parent;
-				}
-			}
-
-			return ExceptionContinueSearch;
+                current = current->parent;
+            }
 		}
+
+		return ExceptionContinueSearch;
 	}
 #endif

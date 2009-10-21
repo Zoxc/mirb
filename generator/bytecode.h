@@ -58,13 +58,14 @@ typedef struct {
 } opcode_t;
 
 typedef struct exception_handler_t {
+	size_t parent_index;
 	struct exception_handler_t *parent;
 	void *rescue;
 	void *ensure;
 } exception_handler_t;
 
 typedef struct {
-	exception_handler_t *handlers;
+	exception_handler_t **handlers;
 	size_t local_storage;
 } block_data_t;
 
