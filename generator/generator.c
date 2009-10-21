@@ -519,7 +519,7 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 		block_push(block, B_JMP, ok_label, 0, 0);
 
 		// Output rescue nodes
-		handler->rescue = (void *)block_emmit_label(block, block_get_label(block));
+		handler->rescue = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
 		gen_node(block, node->middle->left, var);
 
 		block_emmit_label(block, ok_label);
@@ -529,7 +529,7 @@ static void gen_handler(block_t *block, struct node *node, variable_t *var)
 
 	if(node->right)
 	{
-		handler->ensure = (void *)block_emmit_label(block, block_get_label(block));
+		handler->ensure = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
 
 		// Output ensure node
 		gen_node(block, node->right, 0);

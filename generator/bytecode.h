@@ -50,6 +50,11 @@ typedef enum {
 	B_METHOD
 } opcode_type_t;
 
+typedef enum {
+	L_DEFAULT,
+	L_FLUSH
+} label_type_t;
+
 typedef struct {
 	opcode_type_t type;
 	rt_value result;
@@ -157,6 +162,21 @@ static inline variable_t *block_gen_args(block_t *block)
 static inline void block_end_args(block_t *block, variable_t *var, size_t argc)
 {
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
+}
+
+static inline size_t block_emmit_label_type(block_t *block, rt_value label, label_type_t label_type)
+{
+	size_t index = block_push(block, B_LABEL, label, label_type, 0);
+
+	int ret;
+
+	khiter_t k = kh_put(rt_hash, block->label_usage, label, &ret);
+
+	assert(ret);
+
+	kh_value(block->label_usage, k) = index;
+
+	return index;
 }
 
 static inline size_t block_emmit_label(block_t *block, rt_value label)

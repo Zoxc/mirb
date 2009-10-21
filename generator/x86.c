@@ -29,8 +29,18 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 	switch(op->type)
 	{
 		case B_LABEL:
-			op->right = (rt_value)current;
-			return 0;
+			{
+				op->right = (rt_value)current;
+
+				switch(op->left)
+				{
+					case L_FLUSH:
+						return 3;
+
+					default:
+						return 0;
+				}
+			}
 
 		case B_NOP:
 			return 0;
@@ -624,6 +634,21 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 				block->current_handler_id = op->result;
 			}
 			break;
+
+		case B_LABEL:
+			{
+				switch(op->left)
+				{
+					case L_FLUSH:
+						generate_byte(target, 0x8B); // mov edi, dword [ebp + 8]
+						generate_byte(target, 0x7D);
+						generate_byte(target, 8);
+						break;
+
+					default:
+						break;
+				}
+			}
 
 		default:
 			break;

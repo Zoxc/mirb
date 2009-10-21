@@ -78,7 +78,6 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 	rt_define_method(obj, name, block);
 }
 
-
 rt_upval_t *rt_support_upval_create(void)
 {
 	rt_value *real;
@@ -144,67 +143,87 @@ void __stdcall rt_support_set_upval(rt_value value)
 }
 
 #ifdef WINDOWS
-	extern void WINAPI RtlUnwind(
-	  PVOID TargetFrame,
-	  PVOID TargetIp,
-	  PEXCEPTION_RECORD ExceptionRecord,
-	  PVOID ReturnValue
+	extern void __stdcall RtlUnwind(
+		PVOID TargetFrame,
+		PVOID TargetIp,
+		PEXCEPTION_RECORD ExceptionRecord,
+		PVOID ReturnValue
 	);
 
-	void rt_seh_unwind(rt_seh_frame_t *frame_data, exception_handler_t *handler, exception_handler_t *target)
+	static void rt_seh_global_unwind(rt_seh_frame_t *target)
 	{
-	    frame_data->handling = 1;
+		int dummy;
 
-	    size_t ebp = (size_t)&frame_data->old_ebp;
+		__asm__ __volatile__("pushl %%ebp\n"
+			"pushl %%ebx\n"
+			"pushl $0\n"
+			"pushl $0\n"
+			"pushl rt_seh_global_unwind_continue\n"
+			"pushl %0\n"
+			"call _RtlUnwind@16\n"
+			"rt_seh_global_unwind_continue:\n"
+			"popl %%ebx\n"
+			"popl %%ebp\n"
+		: "=a" (dummy)
+		: "0" (target)
+		: "esi", "edi", "edx", "ecx", "memory");
+	}
 
-        while(handler != target)
-        {
-            if(handler->ensure)
-            {
-                printf("Ensure block found\n");
-                printf("Ebp: %x\n", ebp);
-                printf("Eip: %x\n", handler->ensure);
+	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, exception_handler_t *handler, exception_handler_t *target)
+	{
+		frame_data->handling = 1;
 
-                __asm__("push %%ebp\n"
-                    "mov %0, %%ebp\n"
-                    "call *%1\n"
-                    "pop %%ebp\n"
-                :
-                : "r" (ebp), "r" (handler->ensure));
-            }
+		size_t ebp = (size_t)&frame_data->old_ebp;
 
-            handler = handler->parent;
-        }
+		while(handler != target)
+		{
+			if(handler->ensure)
+			{
+				printf("Ensure block found\n");
+				printf("Ebp: %x\n", ebp);
+				printf("Eip: %x\n", handler->ensure);
 
-        frame_data->handling = 0;
+				int dummy1, dummy2;
+
+				__asm__ __volatile__("pushl %%ebp\n"
+					"pushl %%ebx\n"
+					"mov %0, %%ebp\n"
+					"call *%1\n"
+					"popl %%ebx\n"
+					"popl %%ebp\n"
+				: "=a" (dummy1), "=c" (dummy2)
+				: "0" (ebp), "1" (handler->ensure)
+				: "esi", "edi", "edx", "memory");
+			}
+
+			handler = handler->parent;
+		}
+
+		frame_data->handling = 0;
 	}
 
 	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
-	    printf("rt_seh_handler invoked\n");
-
 		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
 		{
-            rt_seh_unwind(frame_data, frame_data->block->handlers[frame_data->handler_index], 0);
+			rt_seh_local_unwind(frame_data, frame_data->block->handlers[frame_data->handler_index], 0);
 		}
 		else if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
 		{
-            exception_handler_t *handler = frame_data->block->handlers[frame_data->handler_index];
-            exception_handler_t *current = handler;
+			exception_handler_t *handler = frame_data->block->handlers[frame_data->handler_index];
+			exception_handler_t *current = handler;
 
             while(current)
             {
                 if(current->rescue)
                 {
-                    RtlUnwind(frame_data, &&continue_label, 0, 0);
-
-                    continue_label:
+                    rt_seh_global_unwind(frame_data);
 
                     /*
                      * Execute frame local ensure handlers
                      */
 
-                    rt_seh_unwind(frame_data, handler, current);
+                    rt_seh_local_unwind(frame_data, handler, current);
 
                     /*
                      * Set to the current handler index to the parent
@@ -223,7 +242,7 @@ void __stdcall rt_support_set_upval(rt_value value)
                     printf("Esp: %x\n", ebp - 20 - frame_data->block->local_storage);
                     printf("Eip: %x\n", current->rescue);
 
-                    __asm__("mov %0, %%eax\n"
+                    __asm__ __volatile__("mov %0, %%eax\n"
                         "mov %1, %%esp\n"
                         "mov %2, %%ebp\n"
                         "jmp *%%eax\n"
