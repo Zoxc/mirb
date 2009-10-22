@@ -663,9 +663,13 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(handler_count)
 	{
+		if(block->scope->type == S_CLOSURE)
+			stack_vars += 1;
+
 		block->current_handler_id = -1;
 
-		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4);
+		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4) + 3;
+
 		block->local_offset = 5;
 	}
 	else
@@ -675,10 +679,10 @@ rt_compiled_block_t compile_block(block_t *block)
 		block_size += 6;
 
 	if(block->scope->type == S_CLOSURE)
-		block_size += 3;
+		block_size += 2 + (handler_count == 0);
 
 	if(block->self_ref > 0)
-		block_size += 4;
+		block_size += 3 + (handler_count == 0);
 
 	if(block->scope->var_count[V_PARAMETER])
 	{
@@ -696,14 +700,16 @@ rt_compiled_block_t compile_block(block_t *block)
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
 
-	if(block->self_ref > 0)
-		block_size += 1;
-
-	if(block->scope->type == S_CLOSURE)
-		block_size += 1;
-
 	if(handler_count)
-		block_size += 3 + (3 + 4);
+		block_size += 3 + (3 + 4) + 3;
+	else
+	{
+		if(block->self_ref > 0)
+			block_size += 1;
+
+		if(block->scope->type == S_CLOSURE)
+			block_size += 1;
+	}
 
 	block_size += 6;
 
@@ -740,13 +746,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 		kv_init(block->handlers);
 
-		data->local_storage = stack_vars  * 4;
-
-		if(block->scope->type == S_CLOSURE)
-			data->local_storage += 4;
-
-        if(block->self_ref > 0)
-            data->local_storage += 4;
+		data->local_storage = stack_vars * 4;
 
 		/*
 		 * Generate seh_frame_t struct
@@ -799,9 +799,17 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_dword(&target, stack_vars * 4);
 	}
 
-	if(block->scope->type == S_CLOSURE)
+	if(handler_count)
 	{
 		generate_byte(&target, 0x56); // push esi
+		generate_byte(&target, 0x57); // push edi
+		generate_byte(&target, 0x53); // push ebx
+	}
+
+	if(block->scope->type == S_CLOSURE)
+	{
+		if(handler_count == 0)
+			generate_byte(&target, 0x56); // push esi
 
 		generate_byte(&target, 0x89); // mov esi, eax
 		generate_byte(&target, 0xC6);
@@ -809,7 +817,9 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(block->self_ref > 0)
 	{
-		generate_byte(&target, 0x57); // push edi
+		if(handler_count == 0)
+			generate_byte(&target, 0x57); // push edi
+
 		generate_byte(&target, 0x8B); // mov edi, dword [ebp + 8]
 		generate_byte(&target, 0x7D);
 		generate_byte(&target, 8);
@@ -848,12 +858,6 @@ rt_compiled_block_t compile_block(block_t *block)
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		generate_instruction(block, kv_A(block->vector, i), i, (unsigned char *)result, &target);
 
-	if(block->self_ref > 0)
-		generate_byte(&target, 0x5F);
-
-	if(block->scope->type == S_CLOSURE)
-		generate_byte(&target, 0x5E); // pop esi
-
 	if(handler_count)
 	{
 		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
@@ -864,6 +868,18 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x89);
 		generate_byte(&target, 0x0D);
 		generate_dword(&target, 0);
+
+		generate_byte(&target, 0x5B); // pop ebx
+		generate_byte(&target, 0x5F); // pop edi
+		generate_byte(&target, 0x5E); // pop esi
+	}
+	else
+	{
+		if(block->self_ref > 0)
+			generate_byte(&target, 0x5F); // pop edi
+
+		if(block->scope->type == S_CLOSURE)
+			generate_byte(&target, 0x5E); // pop esi
 	}
 
 	generate_byte(&target, 0x89);

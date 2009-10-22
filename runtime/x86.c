@@ -179,9 +179,11 @@ void __stdcall rt_support_set_upval(rt_value value)
 		{
 			if(handler->ensure)
 			{
-				printf("Ensure block found\n");
-				printf("Ebp: %x\n", ebp);
-				printf("Eip: %x\n", handler->ensure);
+				#ifdef DEBUG
+					printf("Ensure block found\n");
+					printf("Ebp: %x\n", ebp);
+					printf("Eip: %x\n", handler->ensure);
+				#endif
 
 				int dummy1, dummy2;
 
@@ -237,10 +239,12 @@ void __stdcall rt_support_set_upval(rt_value value)
 
                     size_t ebp = (size_t)&frame_data->old_ebp;
 
-                    printf("Rescue block found\n");
-                    printf("Ebp: %x\n", ebp);
-                    printf("Esp: %x\n", ebp - 20 - frame_data->block->local_storage);
-                    printf("Eip: %x\n", current->rescue);
+					#ifdef DEBUG
+						printf("Rescue block found\n");
+						printf("Ebp: %x\n", ebp);
+						printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
+						printf("Eip: %x\n", current->rescue);
+                    #endif
 
                     __asm__ __volatile__("mov %0, %%eax\n"
                         "mov %1, %%esp\n"
@@ -248,7 +252,7 @@ void __stdcall rt_support_set_upval(rt_value value)
                         "jmp *%%eax\n"
                     :
                     : "r" (current->rescue),
-                        "r" (ebp - 20 - frame_data->block->local_storage),
+                        "r" (ebp - 20 - 12 - frame_data->block->local_storage),
                         "r" (ebp)
                     : "%eax");
                 }
