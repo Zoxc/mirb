@@ -62,30 +62,54 @@ typedef struct {
 	rt_value right;
 } opcode_t;
 
+typedef enum {
+	E_RUNTIME_EXCEPTION,
+	E_CLASS_EXCEPTION,
+	E_FILTER_EXCEPTION,
+	E_RETURN
+} exception_handler_type_t;
+
 typedef struct exception_handler_t {
-	size_t parent_index;
-	struct exception_handler_t *parent;
-	void *rescue;
-	void *ensure;
+	exception_handler_type_t type;
+	struct exception_handler_t *next;
 } exception_handler_t;
 
 typedef struct {
-	exception_handler_t **handlers;
+	exception_handler_t common;
+	void *rescue_label;
+} runtime_exception_handler_t;
+
+typedef struct {
+	runtime_exception_handler_t common;
+} class_exception_handler_t;
+
+typedef struct exception_block_t {
+	size_t parent_index;
+	struct exception_block_t *parent;
+	kvec_t(exception_handler_t *) handlers;
+	void *block_label;
+	void *ensure_label;
+} exception_block_t;
+
+typedef struct {
+	kvec_t(exception_block_t *) exception_blocks;
 	size_t local_storage;
+	void *epilog;
 } block_data_t;
 
 typedef struct {
-	struct parser* parser;
+	struct parser *parser;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
-	kvec_t(exception_handler_t *) handlers;
-	exception_handler_t *current_handler;
+	kvec_t(exception_block_t *) exception_blocks;
+	exception_block_t *current_exception_block;
 	size_t local_offset;
-	size_t current_handler_id;
+	size_t current_exception_block_id;
 	khash_t(rt_hash) *label_usage;
 	scope_t *scope;
 	size_t self_ref;
+	bool require_exceptions;
 } block_t;
 
 static inline block_t *block_create(scope_t *scope)
@@ -97,11 +121,11 @@ static inline block_t *block_create(scope_t *scope)
 	result->scope = scope;
 	result->label_usage = kh_init(rt_hash);
 	result->self_ref = 0;
-	result->current_handler = 0;
-	result->current_handler_id = (size_t)-1;
+	result->current_exception_block = 0;
+	result->current_exception_block_id = (size_t)-1;
 
 	kv_init(result->vector);
-	kv_init(result->handlers);
+	kv_init(result->exception_blocks);
 	kv_init(result->upvals);
 
 	return result;
@@ -112,7 +136,7 @@ static inline void block_destroy(block_t *block)
 	kh_destroy(rt_hash, block->label_usage);
 	kv_destroy(block->vector);
 	kv_destroy(block->upvals);
-	kv_destroy(block->handlers);
+	kv_destroy(block->exception_blocks);
 	free(block);
 }
 

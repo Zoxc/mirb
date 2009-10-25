@@ -169,20 +169,20 @@ void __stdcall rt_support_set_upval(rt_value value)
 		: "esi", "edi", "edx", "ecx", "memory");
 	}
 
-	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, exception_handler_t *handler, exception_handler_t *target)
+	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *target)
 	{
 		frame_data->handling = 1;
 
 		size_t ebp = (size_t)&frame_data->old_ebp;
 
-		while(handler != target)
+		while(block != target)
 		{
-			if(handler->ensure)
+			if(block->ensure_label)
 			{
 				#ifdef DEBUG
 					printf("Ensure block found\n");
 					printf("Ebp: %x\n", ebp);
-					printf("Eip: %x\n", handler->ensure);
+					printf("Eip: %x\n", block->ensure_label);
 				#endif
 
 				int dummy1, dummy2;
@@ -194,70 +194,85 @@ void __stdcall rt_support_set_upval(rt_value value)
 					"popl %%ebx\n"
 					"popl %%ebp\n"
 				: "=a" (dummy1), "=c" (dummy2)
-				: "0" (ebp), "1" (handler->ensure)
+				: "0" (ebp), "1" (block->ensure_label)
 				: "esi", "edi", "edx", "memory");
 			}
 
-			handler = handler->parent;
+			block = block->parent;
 		}
 
 		frame_data->handling = 0;
 	}
 
+	static void rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
+	{
+		rt_seh_global_unwind(frame_data);
+
+		/*
+		 * Execute frame local ensure handlers
+		 */
+
+		rt_seh_local_unwind(frame_data, block, current_block);
+
+		/*
+		 * Set to the current handler index to the parent
+		 */
+
+		frame_data->block_index = current_block->parent_index;
+
+		/*
+		 * Go to the handler and never return
+		 */
+
+		size_t ebp = (size_t)&frame_data->old_ebp;
+
+		#ifdef DEBUG
+			printf("Rescue block found\n");
+			printf("Ebp: %x\n", ebp);
+			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
+			printf("Eip: %x\n", rescue_label);
+		#endif
+
+		__asm__ __volatile__("mov %0, %%eax\n"
+			"mov %1, %%esp\n"
+			"mov %2, %%ebp\n"
+			"jmp *%%eax\n"
+		:
+		: "r" (rescue_label),
+			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
+			"r" (ebp)
+		: "%eax");
+	}
+
 	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
+		exception_block_t *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
+
 		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
 		{
-			rt_seh_local_unwind(frame_data, frame_data->block->handlers[frame_data->handler_index], 0);
+			rt_seh_local_unwind(frame_data, block, 0);
 		}
 		else if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
 		{
-			exception_handler_t *handler = frame_data->block->handlers[frame_data->handler_index];
-			exception_handler_t *current = handler;
+			exception_block_t *current_block = block;
 
-            while(current)
+            while(current_block)
             {
-                if(current->rescue)
-                {
-                    rt_seh_global_unwind(frame_data);
+				for(size_t i = 0; i < kv_size(current_block->handlers); i++)
+				{
+					exception_handler_t *handler = kv_A(current_block->handlers, i);
 
-                    /*
-                     * Execute frame local ensure handlers
-                     */
+					switch(handler->type)
+					{
+						case E_RUNTIME_EXCEPTION:
+							rt_seh_rescue(frame_data, block, current_block, ((runtime_exception_handler_t *)handler)->rescue_label);
 
-                    rt_seh_local_unwind(frame_data, handler, current);
+						default:
+							break;
+					}
+				}
 
-                    /*
-                     * Set to the current handler index to the parent
-                     */
-
-                    frame_data->handler_index = current->parent_index;
-
-                    /*
-                     * Go to the handler and never return
-                     */
-
-                    size_t ebp = (size_t)&frame_data->old_ebp;
-
-					#ifdef DEBUG
-						printf("Rescue block found\n");
-						printf("Ebp: %x\n", ebp);
-						printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-						printf("Eip: %x\n", current->rescue);
-                    #endif
-
-                    __asm__ __volatile__("mov %0, %%eax\n"
-                        "mov %1, %%esp\n"
-                        "mov %2, %%ebp\n"
-                        "jmp *%%eax\n"
-                    :
-                    : "r" (current->rescue),
-                        "r" (ebp - 20 - 12 - frame_data->block->local_storage),
-                        "r" (ebp)
-                    : "%eax");
-                }
-
-                current = current->parent;
+                current_block = current_block->parent;
             }
 		}
 

@@ -69,6 +69,16 @@ int main() {
         memcpy((new).a, (old).a, (old).n * sizeof(type)); \
     } while (0)
 
+#define kv_mov(new, old) do { \
+        (new).a = (old).a; \
+        (new).n = (old).n; \
+        (new).m = (old).m; \
+        kv_init(old);\
+    } while (0)
+/*
+ * End of modifications
+ */
+
 #define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)realloc((v).a, sizeof(type) * (v).m))
 
 #define kv_push(type, v, x) do {									\

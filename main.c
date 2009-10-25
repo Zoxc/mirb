@@ -469,6 +469,8 @@ int main()
 				printf("Running block %x: ", (rt_value)compiled_block);
 			#endif
 
+			//__asm__("int3\n"); // Make debugging life easier
+
 			rt_value result = compiled_block(rt_main, RT_NIL, 0, 0);
 
 			printf("=> "); rt_print(result); printf("\n");

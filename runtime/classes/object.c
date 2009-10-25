@@ -8,6 +8,7 @@ rt_value rt_Object;
 
 rt_value __stdcall rt_object_tap(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
+	RT_CALL_CSTR(block, "call", 1, &obj);
 	return obj;
 }
 

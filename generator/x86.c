@@ -145,9 +145,9 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 
 		case B_HANDLER:
 			{
-				size_t current_id = block->current_handler_id;
+				size_t current_id = block->current_exception_block_id;
 
-				block->current_handler_id = op->result;
+				block->current_exception_block_id = op->result;
 
 				if(op->result ==current_id - 1)
 					return 3;
@@ -610,13 +610,13 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_HANDLER:
 			{
-				if(op->result == block->current_handler_id - 1)
+				if(op->result == block->current_exception_block_id - 1)
 				{
 					generate_byte(target, 0xFF);
 					generate_byte(target, 0x4D);
 					generate_byte(target, -8);
 				}
-				else if(op->result == block->current_handler_id + 1)
+				else if(op->result == block->current_exception_block_id + 1)
 				{
 					generate_byte(target, 0xFF);
 					generate_byte(target, 0x45);
@@ -631,7 +631,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 					generate_dword(target, op->result);
 				}
 
-				block->current_handler_id = op->result;
+				block->current_exception_block_id = op->result;
 			}
 			break;
 
@@ -657,16 +657,16 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 rt_compiled_block_t compile_block(block_t *block)
 {
-	size_t handler_count = kv_size(block->handlers);
+	bool require_exceptions = block->require_exceptions;
 	size_t block_size = 3;
 	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + block->scope->var_count[V_PARAMETER];
 
-	if(handler_count)
+	if(require_exceptions)
 	{
 		if(block->scope->type == S_CLOSURE)
 			stack_vars += 1;
 
-		block->current_handler_id = -1;
+		block->current_exception_block_id = -1;
 
 		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4) + 3;
 
@@ -679,10 +679,10 @@ rt_compiled_block_t compile_block(block_t *block)
 		block_size += 6;
 
 	if(block->scope->type == S_CLOSURE)
-		block_size += 2 + (handler_count == 0);
+		block_size += 2 + (require_exceptions ? 0 : 1);
 
 	if(block->self_ref > 0)
-		block_size += 3 + (handler_count == 0);
+		block_size += 3 + (require_exceptions ? 0 : 1);
 
 	if(block->scope->var_count[V_PARAMETER])
 	{
@@ -700,7 +700,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
 
-	if(handler_count)
+	if(require_exceptions)
 		block_size += 3 + (3 + 4) + 3;
 	else
 	{
@@ -721,30 +721,45 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x89); // mov esp, ebp
 	generate_byte(&target, 0xE5);
 
-	if(handler_count)
+	block_data_t *data = 0;
+
+	if(require_exceptions)
 	{
-		block->current_handler_id = -1;
+		block->current_exception_block_id = -1;
 
 		/*
 		 * Setup block data structure
 		 */
-		block_data_t *data = malloc(sizeof(block_data_t));
+		data = malloc(sizeof(block_data_t));
 
-		data->handlers = block->handlers.a;
+		kv_mov(data->exception_blocks, block->exception_blocks);
 
-		for(size_t i = 0; i < handler_count; i++)
+		for(size_t i = 0; i < kv_size(data->exception_blocks); i++)
 		{
-		    exception_handler_t *handler = kv_A(block->handlers, i);
+		    exception_block_t *exception_block = kv_A(data->exception_blocks, i);
 
-			/*
-			 * These tricky things just translate labels into real addreses
-			 */
+			exception_block->ensure_label = exception_block->ensure_label == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)exception_block->ensure_label)->right);
 
-            handler->rescue = handler->rescue == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)handler->rescue)->right);
-            handler->ensure = handler->ensure == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)handler->ensure)->right);
+			for(size_t j = 0; j < kv_size(exception_block->handlers); j++)
+			{
+				exception_handler_t *handler = kv_A(exception_block->handlers, j);
+
+				switch(handler->type)
+				{
+					case E_RUNTIME_EXCEPTION:
+					case E_CLASS_EXCEPTION:
+					case E_FILTER_EXCEPTION:
+						{
+							runtime_exception_handler_t *exception_handler = (runtime_exception_handler_t *)handler;
+							exception_handler->rescue_label = exception_handler->rescue_label == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)exception_handler->rescue_label)->right);
+						}
+						break;
+
+					default:
+						break;
+				}
+			}
 		}
-
-		kv_init(block->handlers);
 
 		data->local_storage = stack_vars * 4;
 
@@ -768,7 +783,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		// block @ ebp - 4
 		generate_stack_push(&target, (size_t)data);
 
-		// handler_index @ ebp - 8
+		// block_index @ ebp - 8
 		generate_stack_push(&target, -1);
 
 		// handling @ ebp - 12
@@ -799,7 +814,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_dword(&target, stack_vars * 4);
 	}
 
-	if(handler_count)
+	if(require_exceptions)
 	{
 		generate_byte(&target, 0x56); // push esi
 		generate_byte(&target, 0x57); // push edi
@@ -808,7 +823,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(block->scope->type == S_CLOSURE)
 	{
-		if(handler_count == 0)
+		if(!require_exceptions)
 			generate_byte(&target, 0x56); // push esi
 
 		generate_byte(&target, 0x89); // mov esi, eax
@@ -817,7 +832,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(block->self_ref > 0)
 	{
-		if(handler_count == 0)
+		if(!require_exceptions)
 			generate_byte(&target, 0x57); // push edi
 
 		generate_byte(&target, 0x8B); // mov edi, dword [ebp + 8]
@@ -858,7 +873,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		generate_instruction(block, kv_A(block->vector, i), i, (unsigned char *)result, &target);
 
-	if(handler_count)
+	if(require_exceptions)
 	{
 		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
 		generate_byte(&target, 0x4D);
@@ -892,7 +907,20 @@ rt_compiled_block_t compile_block(block_t *block)
 		#ifdef DEBUG
 			printf(";\n; compiled block %x\n;\n", (rt_value)block);
 
-			dump_code((void *)result, target - (unsigned char *)result);
+			disassembly_symbol_vector_t symbols;
+
+			kv_init(symbols);
+
+			if(data)
+			{
+				disassembly_symbol_t block_data = {data, "block_data"};
+
+				kv_push(disassembly_symbol_t *, symbols, &block_data);
+			}
+
+			dump_code((void *)result, target - (unsigned char *)result, &symbols);
+
+			kv_destroy(symbols);
 
 			printf("\n\n");
 		#endif

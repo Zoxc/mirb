@@ -8,7 +8,7 @@ end
 
 test "Rescue block", 2 do
 	begin
-		raise "hi"
+		raise
 	rescue
 		2
 	end
@@ -18,7 +18,7 @@ test "Ensure block", 2 do
 	x = 1
 	begin
 		begin
-			raise "hi"
+			raise
 		ensure
 			x = 2
 		end

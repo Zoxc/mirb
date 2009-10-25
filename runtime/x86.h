@@ -13,7 +13,7 @@
 		struct seh_frame_t *prev;
 		void *handler;
 		size_t handling;
-		size_t handler_index;
+		size_t block_index;
 		block_data_t *block;
 		size_t old_ebp;
 	} rt_seh_frame_t;

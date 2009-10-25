@@ -493,56 +493,80 @@ static void gen_no_equality(block_t *block, struct node *node, variable_t *var)
 
 static void gen_handler(block_t *block, struct node *node, variable_t *var)
 {
-	exception_handler_t *handler = malloc(sizeof(exception_handler_t));
-	size_t index = kv_size(block->handlers);
-	size_t old_index = block->current_handler_id;
-	exception_handler_t *old = block->current_handler;
+	block->require_exceptions = true; // duh
 
-	handler->parent_index = old_index;
-	handler->parent = old;
+	/*
+	 * Allocate and setup the new exception block
+	 */
+	exception_block_t *exception_block = malloc(sizeof(exception_block_t));
+	size_t index = kv_size(block->exception_blocks);
+	size_t old_index = block->current_exception_block_id;
 
-	kv_push(exception_handler_t *, block->handlers, handler);
+	exception_block->parent_index = old_index;
+	exception_block->parent = block->current_exception_block;
+	kv_init(exception_block->handlers);
 
-	// Use the new exception frame
-	block->current_handler = handler;
-	block->current_handler_id = index;
+	kv_push(exception_block_t *, block->exception_blocks, exception_block);
+
+	/*
+	 * Use the new exception block
+	 */
+	block->current_exception_block = exception_block;
+	block->current_exception_block_id = index;
 	block_push(block, B_HANDLER, index, 0, 0);
 
-	// Output the regular code
-	gen_node(block, node->left, var);
+	/*
+	 * Output the regular code
+	 */
+	exception_block->block_label = (void *)block_emmit_label(block, block_get_label(block));
 
+	gen_node(block, node->left, var);
 
 	if(node->middle)
 	{
-		// Skip the rescue block
+		/*
+		 * Skip the rescue block
+		 */
 		rt_value ok_label = block_get_label(block);
 		block_push(block, B_JMP, ok_label, 0, 0);
 
-		// Output rescue nodes
-		handler->rescue = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+		/*
+		 * Output rescue node
+		 */
+		runtime_exception_handler_t *handler = malloc(sizeof(runtime_exception_handler_t));
+		handler->common.type = E_RUNTIME_EXCEPTION;
+		handler->rescue_label = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+		kv_push(exception_handler_t *, exception_block->handlers, (exception_handler_t *)handler);
+
 		gen_node(block, node->middle->left, var);
 
 		block_emmit_label(block, ok_label);
 	}
-	else
-		handler->rescue = (void *)-1;
 
+	/*
+	 * Restore the old exception frame
+	 */
+	block->current_exception_block_id = old_index;
+	block->current_exception_block = exception_block->parent;
+	block_push(block, B_HANDLER, old_index, 0, 0);
+
+	/*
+	 * Check for ensure node
+	 */
 	if(node->right)
 	{
-		handler->ensure = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+		exception_block->ensure_label = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
 
-		// Output ensure node
+		/*
+		 * Output ensure node
+		 */
 		gen_node(block, node->right, 0);
 
 		block_push(block, B_ENSURE_RET, index, 0, 0);
 	}
 	else
-		handler->ensure = (void *)-1;
+		exception_block->ensure_label = (void *)-1;
 
-	// Restore the old exception frame
-	block->current_handler = old;
-	block->current_handler_id = old_index;
-	block_push(block, B_HANDLER, old_index, 0, 0);
 }
 
 generator generators[] = {
