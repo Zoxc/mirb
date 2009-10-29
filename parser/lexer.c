@@ -2,7 +2,7 @@
 #include "parser.h"
 
 char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "+@", "-@", "=", "==", "===", "!=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
-	"if", "unless", "else", "elsif", "then", "when", "case", "begin", "ensure", "rescue", "class", "module", "def", "self", "do", "yield", "true", "false", "nil", "not", "and", "or", "end"};
+	"if", "unless", "else", "elsif", "then", "when", "case", "begin", "ensure", "rescue", "class", "module", "def", "self", "do", "yield", "return", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef token_type(*jump_table_entry)(token_t *token);
 

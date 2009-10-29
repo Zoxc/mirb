@@ -491,6 +491,22 @@ static void gen_no_equality(block_t *block, struct node *node, variable_t *var)
 	}
 }
 
+static void gen_return(block_t *block, struct node *node, variable_t *var)
+{
+	block->require_exceptions = true;
+
+	variable_t *temp = 0;
+
+	if(node->left)
+	{
+		temp = var ? var : block_get_var(block);
+
+		gen_node(block, node->left, temp);
+	}
+
+	block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+}
+
 static void gen_handler(block_t *block, struct node *node, variable_t *var)
 {
 	block->require_exceptions = true; // duh
@@ -593,6 +609,7 @@ generator generators[] = {
 	gen_no_equality,
 	gen_if,
 	gen_if,
+	gen_return,
 	gen_handler,
 	/*N_RESCUE*/gen_warn,
 	/*N_ARGUMENT*/gen_warn,

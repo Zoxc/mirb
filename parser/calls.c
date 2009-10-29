@@ -39,7 +39,7 @@ struct node *parse_block(struct parser *parser)
 
 	result->right = parse_statements(parser);
 
-	parser->current_scope = scope->owner;
+	parser->current_scope = scope->parent;
 
 	match(parser, curly ? T_CURLY_CLOSE : T_END);
 
@@ -124,9 +124,10 @@ struct node *parse_yield(struct parser *parser)
 
 	result->middle = (void *)rt_symbol_from_cstr("call");
 
-	result->right = alloc_node(parser, N_CALL_ARGUMENTS);
-	result->right->left = parse_arguments(parser, has_arguments(parser));
-	result->right->right = 0;
+	if(is_expression(parser))
+		result->right = parse_expression(parser);
+	else
+		result->right = 0;
 
 	return result;
 }

@@ -242,6 +242,8 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
 			"r" (ebp)
 		: "%eax");
+
+		//__builtin_unreachable(); // This seems undeclared in gcc...
 	}
 
 	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)

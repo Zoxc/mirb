@@ -63,6 +63,7 @@ typedef enum {
 	T_SELF,
 	T_DO,
 	T_YIELD,
+	T_RETURN,
 	T_TRUE,
 	T_FALSE,
 	T_NIL,

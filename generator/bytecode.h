@@ -121,6 +121,7 @@ static inline block_t *block_create(scope_t *scope)
 	result->scope = scope;
 	result->label_usage = kh_init(rt_hash);
 	result->self_ref = 0;
+	result->require_exceptions = false;
 	result->current_exception_block = 0;
 	result->current_exception_block_id = (size_t)-1;
 

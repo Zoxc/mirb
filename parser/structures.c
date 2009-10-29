@@ -23,7 +23,7 @@ struct node *parse_class(struct parser *parser)
 	result->right = alloc_scope(parser, &scope, S_CLASS);
 	result->right->right = parse_statements(parser);
 
-	parser->current_scope = scope->owner;
+	parser->current_scope = scope->parent;
 
 	match(parser, T_END);
 
@@ -52,7 +52,7 @@ struct node *parse_module(struct parser *parser)
 	result->right = alloc_scope(parser, &scope, S_MODULE);
 	result->right->right = parse_statements(parser);
 
-	parser->current_scope = scope->owner;
+	parser->current_scope = scope->parent;
 
 	match(parser, T_END);
 
@@ -139,6 +139,8 @@ struct node *parse_method(struct parser *parser)
 
 	result->right = alloc_scope(parser, &scope, S_METHOD);
 
+	scope->owner = scope;
+
 	if(matches(parser, T_PARAM_OPEN))
 	{
 		parse_parameter(parser, scope);
@@ -155,7 +157,7 @@ struct node *parse_method(struct parser *parser)
 
 	result->right->right = parse_statements(parser);
 
-	parser->current_scope = scope->owner;
+	parser->current_scope = scope->parent;
 
 	match(parser, T_END);
 

@@ -12,6 +12,7 @@
 [ ] Singleton class of variable syntax
 [ ] Class variables
 [ ] Global variables
+[ ] Super
 [X] Exception handling
 [ ] Garbage collection
 [ ] Splat operators

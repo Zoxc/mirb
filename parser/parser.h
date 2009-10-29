@@ -29,6 +29,7 @@ typedef enum {
 	N_NO_EQUALITY,
 	N_IF,
 	N_UNLESS,
+	N_RETURN,
 	N_HANDLER,
 	N_RESCUE,
 	N_ARGUMENT,
@@ -87,6 +88,7 @@ typedef struct scope_t {
 	rt_value var_count[VARIABLE_TYPES];
 	khash_t(scope) *variables;
 	struct scope_t *owner;
+	struct scope_t *parent;
 	variable_t *block_var;
 } scope_t;
 
@@ -204,6 +206,7 @@ static inline bool is_expression(struct parser *parser)
 		case T_STRING:
 		case T_STRING_START:
 		case T_YIELD:
+		case T_RETURN:
 		case T_PARAM_OPEN:
 		case T_SQUARE_OPEN:
 			return true;
@@ -230,7 +233,8 @@ static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_va
 		scope->var_count[i] = 0;
 
 	scope->type = type;
-	scope->owner = parser->current_scope;
+	scope->parent = parser->current_scope;
+	scope->owner = parser->current_scope ? parser->current_scope->owner : 0;
 	scope->block_var = 0;
 
 	result->left = (void *)scope;

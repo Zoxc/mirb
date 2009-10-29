@@ -1,9 +1,8 @@
 #include "../runtime/classes/symbol.h"
 #include "parser.h"
 #include "calls.h"
-#include "control_blocks.h"
+#include "control_flow.h"
 #include "structures.h"
-
 
 bool scope_defined(scope_t *scope, rt_value name, bool recursive)
 {
@@ -14,7 +13,7 @@ bool scope_defined(scope_t *scope, rt_value name, bool recursive)
 	{
 		while (scope->type == S_CLOSURE)
 		{
-			scope = scope->owner;
+			scope = scope->parent;
 
 			if(kh_get(scope, scope->variables, name) != kh_end(scope->variables))
 				return true;
@@ -60,7 +59,7 @@ variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool
 	{
 		variable_t *result = scope_declare_var(scope, name, V_UPVAL);
 
-		scope = scope->owner;
+		scope = scope->parent;
 
 		scope_t *temp_scope = scope;
 		variable_t *real;
@@ -75,7 +74,7 @@ variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool
 				break;
 			}
 
-			temp_scope = temp_scope->owner;
+			temp_scope = temp_scope->parent;
 		}
 
 		result->real = real;
@@ -85,7 +84,7 @@ variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool
 			variable_t *var = scope_declare_var(scope, name, V_UPVAL);
 			var->real = real;
 
-			scope = scope->owner;
+			scope = scope->parent;
 		}
 
 		return result;
@@ -247,6 +246,9 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_YIELD:
 			return parse_yield(parser);
+
+		case T_RETURN:
+			return parse_return(parser);
 
 		case T_SQUARE_OPEN:
 			{
@@ -687,6 +689,8 @@ struct node *parse_main(struct parser *parser)
 	scope_t *scope;
 
 	struct node *result = alloc_scope(parser, &scope, S_MAIN);
+
+	scope->owner = scope;
 
 	result->right = parse_statements(parser);
 
