@@ -63,10 +63,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="parser\calls.h" />
-		<Unit filename="parser\control_blocks.c">
+		<Unit filename="parser\control_flow.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\control_blocks.h" />
+		<Unit filename="parser\control_flow.h" />
 		<Unit filename="parser\lexer.c">
 			<Option compilerVar="CC" />
 		</Unit>
