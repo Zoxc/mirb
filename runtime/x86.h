@@ -1,6 +1,6 @@
 #pragma once
 #include "../globals.h"
-#include "../generator/bytecode.h"
+#include "../compiler/generator/bytecode.h"
 #include "classes.h"
 #include "support.h"
 

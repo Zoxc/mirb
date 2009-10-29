@@ -1,11 +1,11 @@
 #include "globals.h"
-#include "parser/lexer.h"
-#include "parser/parser.h"
+#include "compiler/parser/lexer.h"
+#include "compiler/parser/parser.h"
 #include "runtime/classes.h"
 #include "runtime/classes/symbol.h"
 #include "runtime/classes/string.h"
-#include "generator/generator.h"
-#include "generator/x86.h"
+#include "compiler/generator/generator.h"
+#include "compiler/generator/x86.h"
 
 typedef rt_value (*get_node_name_proc)(struct node *node);
 

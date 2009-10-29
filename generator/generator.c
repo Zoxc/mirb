@@ -1,7 +1,7 @@
 #include "generator.h"
-#include "../runtime/classes.h"
-#include "../runtime/classes/symbol.h"
-#include "../runtime/classes/fixnum.h"
+#include "../../runtime/classes.h"
+#include "../../runtime/classes/symbol.h"
+#include "../../runtime/classes/fixnum.h"
 
 typedef void(*generator)(block_t *block, struct node *node, variable_t *var);
 

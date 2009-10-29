@@ -1,4 +1,4 @@
-#include "../runtime/classes/symbol.h"
+#include "../../runtime/classes/symbol.h"
 #include "parser.h"
 #include "calls.h"
 #include "control_flow.h"

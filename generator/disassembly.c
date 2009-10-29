@@ -1,6 +1,6 @@
 #include "disassembly.h"
-#include "../runtime/support.h"
-#include "../runtime/x86.h"
+#include "../../runtime/support.h"
+#include "../../runtime/x86.h"
 
 disassembly_symbol_t disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_closure),

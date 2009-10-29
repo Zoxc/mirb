@@ -1,9 +1,9 @@
 #include "x86.h"
-#include "../runtime/x86.h"
-#include "../runtime/support.h"
-#include "../runtime/code_heap.h"
-#include "../runtime/method.h"
-#include "../runtime/constant.h"
+#include "../../runtime/x86.h"
+#include "../../runtime/support.h"
+#include "../../runtime/code_heap.h"
+#include "../../runtime/method.h"
+#include "../../runtime/constant.h"
 #include "disassembly.h"
 
 static inline void generate_byte(unsigned char **target, unsigned char byte)

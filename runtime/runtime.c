@@ -9,9 +9,9 @@
 #include "classes/array.h"
 #include "classes/exception.h"
 #include "modules/kernel.h"
-#include "../generator/bytecode.h"
-#include "../generator/generator.h"
-#include "../generator/x86.h"
+#include "../compiler/generator/bytecode.h"
+#include "../compiler/generator/generator.h"
+#include "../compiler/generator/x86.h"
 
 void rt_create(void)
 {

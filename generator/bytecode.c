@@ -1,6 +1,6 @@
 #include "bytecode.h"
-#include "../runtime/classes/string.h"
-#include "../runtime/classes/fixnum.h"
+#include "../../runtime/classes/string.h"
+#include "../../runtime/classes/fixnum.h"
 
 const char *variable_name(rt_value var)
 {

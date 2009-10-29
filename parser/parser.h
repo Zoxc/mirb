@@ -1,7 +1,7 @@
 #pragma once
-#include "../globals.h"
-#include "../runtime/classes.h"
-#include "../runtime/runtime.h"
+#include "../../globals.h"
+#include "../../runtime/classes.h"
+#include "../../runtime/runtime.h"
 #include "lexer.h"
 #include "allocator.h"
 

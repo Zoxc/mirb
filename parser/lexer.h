@@ -1,6 +1,6 @@
 #pragma once
-#include "../globals.h"
-#include "../runtime/runtime.h"
+#include "../../globals.h"
+#include "../../runtime/runtime.h"
 
 typedef enum {
 	T_NONE = 0,

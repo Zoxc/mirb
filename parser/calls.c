@@ -1,6 +1,6 @@
 #include "calls.h"
 #include "structures.h"
-#include "../runtime/classes/symbol.h"
+#include "../../runtime/classes/symbol.h"
 
 struct node *parse_block(struct parser *parser)
 {

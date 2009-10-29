@@ -1,5 +1,5 @@
 #include "structures.h"
-#include "../runtime/classes/symbol.h"
+#include "../../runtime/classes/symbol.h"
 
 struct node *parse_class(struct parser *parser)
 {

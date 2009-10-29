@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../globals.h"
-#include "../runtime/classes.h"
-#include "../runtime/classes/symbol.h"
+#include "../../globals.h"
+#include "../../runtime/classes.h"
+#include "../../runtime/classes/symbol.h"
 #include "../parser/parser.h"
 
 typedef enum {

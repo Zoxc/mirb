@@ -35,50 +35,50 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu99 -fstrict-aliasing" />
 		</Compiler>
-		<Unit filename="generator\bytecode.c">
+		<Unit filename="compiler\generator\bytecode.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\bytecode.h" />
-		<Unit filename="generator\disassembly.c">
+		<Unit filename="compiler\generator\bytecode.h" />
+		<Unit filename="compiler\generator\disassembly.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\disassembly.h" />
-		<Unit filename="generator\generator.c">
+		<Unit filename="compiler\generator\disassembly.h" />
+		<Unit filename="compiler\generator\generator.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\generator.h" />
-		<Unit filename="generator\x86.c">
+		<Unit filename="compiler\generator\generator.h" />
+		<Unit filename="compiler\generator\x86.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="generator\x86.h" />
+		<Unit filename="compiler\generator\x86.h" />
+		<Unit filename="compiler\parser\allocator.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\allocator.h" />
+		<Unit filename="compiler\parser\calls.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\calls.h" />
+		<Unit filename="compiler\parser\control_flow.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\control_flow.h" />
+		<Unit filename="compiler\parser\lexer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\lexer.h" />
+		<Unit filename="compiler\parser\parser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\parser.h" />
+		<Unit filename="compiler\parser\structures.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\parser\structures.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="parser\allocator.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\allocator.h" />
-		<Unit filename="parser\calls.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\calls.h" />
-		<Unit filename="parser\control_flow.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\control_flow.h" />
-		<Unit filename="parser\lexer.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\lexer.h" />
-		<Unit filename="parser\parser.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\parser.h" />
-		<Unit filename="parser\structures.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="parser\structures.h" />
 		<Unit filename="runtime\classes.c">
 			<Option compilerVar="CC" />
 		</Unit>
