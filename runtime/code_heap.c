@@ -11,11 +11,11 @@ void rt_code_heap_create(void)
 	#ifdef WINDOWS
 		heap = (unsigned char *)VirtualAlloc(0, CODE_HEAP_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
-		assert(heap);
+		RT_ASSERT(heap);
 	#else
 		heap = mmap(0, CODE_HEAP_SIZE, PROT_READ | PROT_EXEC | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-		assert(heap != MAP_FAILED);
+		RT_ASSERT(heap != MAP_FAILED);
 	#endif
 
 	next = heap;
@@ -32,7 +32,7 @@ void* rt_code_heap_alloc(size_t size)
 
 	next = next + size;
 
-	assert(next < end); // Heap is out of memory!
+	RT_ASSERT(next < end); // Heap is out of memory!
 
 	return result;
 }

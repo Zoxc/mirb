@@ -86,7 +86,7 @@ void dump_code(unsigned char* address, int length, disassembly_symbol_vector_t *
 
 	size_t InstructionLength;
 
-	assert(VirtualProtect(address, length, PAGE_EXECUTE_READWRITE, &Flags)); // Terminate("DumpCode: Unable to get read permissions from address 0x%08X (%u).\n", address, GetLastError());
+	RT_ASSERT(VirtualProtect(address, length, PAGE_EXECUTE_READWRITE, &Flags)); // Terminate("DumpCode: Unable to get read permissions from address 0x%08X (%u).\n", address, GetLastError());
 
 	memset(&Instruction, 0, sizeof(DISASM));
 	Instruction.Options = NasmSyntax | PrefixedNumeral;
@@ -102,6 +102,6 @@ void dump_code(unsigned char* address, int length, disassembly_symbol_vector_t *
 	}
 	while((size_t)Instruction.EIP < (size_t)address + length);
 
-	assert(VirtualProtect(address, length, Flags, &Flags)); // Terminate("DumpCode: Unable to restore address 0x%08X (%u).\n", address, GetLastError());
+	RT_ASSERT(VirtualProtect(address, length, Flags, &Flags)); // Terminate("DumpCode: Unable to restore address 0x%08X (%u).\n", address, GetLastError());
 }
 #endif

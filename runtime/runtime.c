@@ -92,7 +92,7 @@ rt_compiled_block_t rt_lookup(rt_value obj, rt_value name)
 	if(!result)
 	{
 		printf("Undefined method %s on %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
-		assert(0);
+		RT_ASSERT(0);
 	}
 
 	return result;

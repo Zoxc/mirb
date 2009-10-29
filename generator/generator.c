@@ -625,7 +625,7 @@ generator generators[] = {
 
 static inline void gen_node(block_t *block, struct node *node, variable_t *var)
 {
-	assert(node != 0);
+	RT_ASSERT(node != 0);
 
 	generators[node->type](block, node, var);
 }

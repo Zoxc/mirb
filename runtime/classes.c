@@ -46,7 +46,7 @@ khash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 
 		k = kh_put(rt_hash, object_var_hashes, obj, &ret);
 
-		assert(ret);
+		RT_ASSERT(ret);
 
 		khash_t(rt_hash) *hash = kh_init(rt_hash);
 

@@ -188,7 +188,7 @@ static inline int get_stack_index(block_t *block, rt_value var)
 			break;
 
 		default:
-			assert(0);
+			RT_ASSERT(0);
 	}
 
 	return -((index + 1) * 4);
@@ -926,7 +926,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		#endif
 	#endif
 
-	assert((unsigned char *)result + block_size == target);
+	RT_ASSERT((unsigned char *)result + block_size == target);
 
 	return result;
 }

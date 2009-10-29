@@ -7,6 +7,17 @@
 #include <string.h>
 #include <assert.h>
 
+#ifdef DEBUG
+	#define RT_ASSERT(condition) do { \
+		if(!(condition)) { \
+			__asm__("int3\n"); \
+			assert(0); \
+		} \
+	} while(0)
+#else
+	#define RT_ASSERT(condition) assert(condition)
+#endif
+
 #ifdef WINDOWS
     #include <windows.h>
     #include <excpt.h>

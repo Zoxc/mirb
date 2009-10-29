@@ -197,7 +197,7 @@ static inline size_t block_emmit_label_type(block_t *block, rt_value label, labe
 
 	khiter_t k = kh_put(rt_hash, block->label_usage, label, &ret);
 
-	assert(ret);
+	RT_ASSERT(ret);
 
 	kh_value(block->label_usage, k) = index;
 
@@ -212,7 +212,7 @@ static inline size_t block_emmit_label(block_t *block, rt_value label)
 
 	khiter_t k = kh_put(rt_hash, block->label_usage, label, &ret);
 
-	assert(ret);
+	RT_ASSERT(ret);
 
 	kh_value(block->label_usage, k) = index;
 
@@ -223,7 +223,7 @@ static inline rt_value block_get_value(block_t *block, khash_t(rt_hash) *table, 
 {
 	khiter_t k = kh_get(rt_hash, table, key);
 
-	assert(k != kh_end(table));
+	RT_ASSERT(k != kh_end(table));
 
 	return kh_value(table, k);
 }

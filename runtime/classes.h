@@ -28,7 +28,7 @@ static inline rt_value rt_class_of(rt_value obj)
 				return rt_NilClass;
 
 			default:
-				assert(0);
+				RT_ASSERT(0);
 		}
 	}
 	else
@@ -59,7 +59,7 @@ static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_
 		khiter_t k = kh_get(rt_block, RT_CLASS(obj)->methods, name);
 
 		if (k == kh_end(RT_CLASS(obj)->methods))
-			assert(0);
+			RT_ASSERT(0);
 	}
 
 	kh_value(RT_CLASS(obj)->methods, k) = block;
@@ -88,7 +88,7 @@ static inline void rt_object_set_var(rt_value obj, rt_value name, rt_value value
 
 	khiter_t k = kh_put(rt_hash, vars, name, &ret);
 
-	assert(ret);
+	RT_ASSERT(ret);
 
 	kh_value(vars, k) = value;
 }

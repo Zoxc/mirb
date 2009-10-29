@@ -9,11 +9,11 @@ static void *get_page(void)
 	#ifdef WINDOWS
 		result = VirtualAlloc(0, ALLOCATOR_PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
-		assert(result);
+		RT_ASSERT(result);
 	#else
 		result = mmap(0, ALLOCATOR_PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-		assert(result != MAP_FAILED);
+		RT_ASSERT(result != MAP_FAILED);
 	#endif
 
 	return result;

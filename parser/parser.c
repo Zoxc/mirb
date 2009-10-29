@@ -34,7 +34,7 @@ variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 
 	k = kh_put(scope, scope->variables, name, &ret);
 
-	assert(ret);
+	RT_ASSERT(ret);
 
 	variable_t *var = parser_alloc(scope->parser, sizeof(variable_t));
 	var->type = type;

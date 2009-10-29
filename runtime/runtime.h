@@ -68,7 +68,7 @@ static inline rt_type_t rt_type(rt_value obj)
 				return C_NIL;
 
 			default:
-				assert(0);
+				RT_ASSERT(0);
 		}
 	}
 	else

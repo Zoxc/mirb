@@ -265,7 +265,7 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 			}
 
 		default:
-			assert(0);
+			RT_ASSERT(0);
 	}
 }
 
@@ -280,7 +280,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 		case T_ASSIGN_SUB:
 		case T_ASSIGN_MUL:
 		case T_ASSIGN_DIV:
-			assert(0);
+			RT_ASSERT(0);
 
 		case T_ASSIGN:
 			{
@@ -352,7 +352,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 						}
 
 					default:
-						assert(0);
+						RT_ASSERT(0);
 				}
 			}
 			break;
