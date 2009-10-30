@@ -6,6 +6,6 @@
 
 extern rt_value rt_Module;
 
-rt_value __stdcall rt_module_include(rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+rt_compiled_block(rt_module_include);
 
 void rt_module_init(void);

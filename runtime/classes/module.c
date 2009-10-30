@@ -6,7 +6,7 @@
 
 rt_value rt_Module;
 
-rt_value __stdcall rt_module_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_module_to_s)
 {
 	rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classname__"));
 
@@ -16,19 +16,19 @@ rt_value __stdcall rt_module_to_s(rt_value obj, rt_value block, size_t argc, rt_
 	return rt_object_to_s(obj, 0, 0, 0);
 }
 
-rt_value __stdcall rt_module_append_features(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_module_append_features)
 {
 	rt_include_module(RT_ARG(0), obj);
 
 	return obj;
 }
 
-rt_value __stdcall rt_module_included(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_module_included)
 {
 	return obj;
 }
 
-rt_value __stdcall rt_module_include(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_module_include)
 {
 	RT_ARG_EACH(i)
 	{

@@ -27,7 +27,7 @@ rt_value rt_array_from_raw(rt_value *data, size_t length)
  * Array
  */
 
-rt_value __stdcall rt_Array_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_Array_allocate)
 {
 	rt_value array = rt_alloc(sizeof(struct rt_array));
 
@@ -39,7 +39,7 @@ rt_value __stdcall rt_Array_allocate(rt_value obj, rt_value block, size_t argc, 
 	return array;
 }
 
-rt_value __stdcall rt_array_push(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_array_push)
 {
 	RT_ARG_EACH(i)
 	{
@@ -49,7 +49,7 @@ rt_value __stdcall rt_array_push(rt_value obj, rt_value block, size_t argc, rt_v
 	return obj;
 }
 
-rt_value __stdcall rt_array_pop(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_array_pop)
 {
 	if(kv_size(RT_ARRAY(obj)->data))
 		return kv_pop(RT_ARRAY(obj)->data);
@@ -57,7 +57,7 @@ rt_value __stdcall rt_array_pop(rt_value obj, rt_value block, size_t argc, rt_va
 		return RT_NIL;
 }
 
-rt_value __stdcall rt_array_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_array_inspect)
 {
 	rt_value result = rt_string_from_cstr("[");
 
@@ -74,12 +74,12 @@ rt_value __stdcall rt_array_inspect(rt_value obj, rt_value block, size_t argc, r
 	return result;
 }
 
-rt_value __stdcall rt_array_length(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_array_length)
 {
 	return RT_INT2FIX(kv_size(RT_ARRAY(obj)->data));
 }
 
-rt_value __stdcall rt_array_each(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_array_each)
 {
 	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
 	{

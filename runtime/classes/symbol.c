@@ -59,7 +59,7 @@ rt_value rt_symbol_from_cstr(const char* name)
  * Symbol
  */
 
-rt_value __stdcall rt_symbol_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_symbol_inspect)
 {
 	rt_value result = rt_string_from_cstr(":");
 	rt_concat_string(result, rt_string_from_cstr(RT_SYMBOL(obj)->string));
@@ -67,7 +67,7 @@ rt_value __stdcall rt_symbol_inspect(rt_value obj, rt_value block, size_t argc, 
 	return result;
 }
 
-rt_value __stdcall rt_symbol_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_symbol_to_s)
 {
 	return rt_string_from_cstr(RT_SYMBOL(obj)->string);
 }

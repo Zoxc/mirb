@@ -6,7 +6,7 @@
 
 rt_value rt_Class;
 
-rt_value __stdcall rt_class_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_class_to_s)
 {
 	rt_value name = rt_object_get_var(obj, rt_symbol_from_cstr("__classname__"));
 
@@ -35,7 +35,7 @@ rt_value __stdcall rt_class_to_s(rt_value obj, rt_value block, size_t argc, rt_v
 	}
 }
 
-rt_value __stdcall rt_class_superclass(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_class_superclass)
 {
 	rt_value super = rt_real_class(RT_CLASS(obj)->super);
 
@@ -45,7 +45,7 @@ rt_value __stdcall rt_class_superclass(rt_value obj, rt_value block, size_t argc
 		return RT_NIL;
 }
 
-rt_value __stdcall rt_class_new(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_class_new)
 {
 	rt_value result = RT_CALL_CSTR(obj, "allocate", 0, 0);
 

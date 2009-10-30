@@ -6,13 +6,13 @@
 
 rt_value rt_Object;
 
-rt_value __stdcall rt_object_tap(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_object_tap)
 {
 	RT_CALL_CSTR(block, "call", 1, &obj);
 	return obj;
 }
 
-rt_value __stdcall rt_Object_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_Object_allocate)
 {
 	rt_value result = rt_alloc(sizeof(struct rt_object));
 
@@ -23,12 +23,12 @@ rt_value __stdcall rt_Object_allocate(rt_value obj, rt_value block, size_t argc,
 	return result;
 }
 
-rt_value __stdcall rt_object_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_object_inspect)
 {
     return RT_CALL_CSTR(obj, "to_s", 0, 0);
 }
 
-rt_value __stdcall rt_object_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_object_to_s)
 {
 	rt_value c = rt_real_class_of(obj);
 	rt_value name = rt_object_get_var(c, rt_symbol_from_cstr("__classname__"));
@@ -55,12 +55,12 @@ rt_value __stdcall rt_object_to_s(rt_value obj, rt_value block, size_t argc, rt_
 	}
 }
 
-rt_value __stdcall rt_object_dummy(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_object_dummy)
 {
 	return RT_NIL;
 }
 
-rt_value __stdcall rt_object_equal(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_object_equal)
 {
 	return RT_BOOL(obj == RT_ARG(0));
 }

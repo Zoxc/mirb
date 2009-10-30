@@ -253,12 +253,12 @@ void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t
 	main
 */
 
-rt_value __stdcall rt_main_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_main_to_s)
 {
 	return rt_string_from_cstr("main");
 }
 
-rt_value __stdcall rt_main_include(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_main_include)
 {
 	return rt_module_include(rt_Object, block, argc, argv);
 }

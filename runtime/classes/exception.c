@@ -10,7 +10,7 @@ rt_value rt_Exception;
  * Exception
  */
 
-rt_value __stdcall rt_Exception_allocate(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_Exception_allocate)
 {
 	rt_value exception = rt_alloc(sizeof(struct rt_exception));
 
@@ -23,12 +23,12 @@ rt_value __stdcall rt_Exception_allocate(rt_value obj, rt_value block, size_t ar
 	return exception;
 }
 
-rt_value __stdcall rt_exception_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_exception_to_s)
 {
 	return RT_EXCEPTION(obj)->message;
 }
 
-rt_value __stdcall rt_exception_initialize(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_exception_initialize)
 {
 	RT_EXCEPTION(obj)->message = RT_ARG(0);
 

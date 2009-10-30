@@ -28,7 +28,7 @@ static inline rt_value rt_dup_string(rt_value value)
 	return rt_string_from_str(RT_STRING(value)->string, RT_STRING(value)->length);
 }
 
-rt_value __stdcall rt_string_concat(rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+rt_compiled_block(rt_string_concat);
 
 static inline void rt_concat_string(rt_value string, rt_value add)
 {

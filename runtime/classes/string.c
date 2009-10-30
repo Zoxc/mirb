@@ -58,7 +58,7 @@ rt_value rt_string_from_int(rt_value value)
  * String
  */
 
-rt_value __stdcall rt_string_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_string_inspect)
 {
 	rt_value result = rt_string_from_cstr("\"");
 	rt_concat_string(result, obj);
@@ -67,12 +67,12 @@ rt_value __stdcall rt_string_inspect(rt_value obj, rt_value block, size_t argc, 
 	return result;
 }
 
-rt_value __stdcall rt_string_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_string_to_s)
 {
 	return obj;
 }
 
-rt_value __stdcall rt_string_concat(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_string_concat)
 {
 	rt_value str = RT_ARG(0);
 	size_t new_length = RT_STRING(obj)->length + RT_STRING(str)->length;

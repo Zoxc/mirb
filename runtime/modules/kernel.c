@@ -12,7 +12,7 @@ rt_value rt_Kernel;
  * Kernel
  */
 
-rt_value __stdcall rt_kernel_proc(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_kernel_proc)
 {
 	if(block)
 		return block;
@@ -20,7 +20,7 @@ rt_value __stdcall rt_kernel_proc(rt_value obj, rt_value block, size_t argc, rt_
 		return RT_NIL;
 }
 
-rt_value __stdcall rt_kernel_eval(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_kernel_eval)
 {
 	rt_value arg = RT_ARG(0);
 
@@ -86,14 +86,14 @@ static rt_value run_file(rt_value self, rt_value *filename)
 	return result;
 }
 
-rt_value __stdcall rt_kernel_load(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_kernel_load)
 {
 	rt_value filename = RT_ARG(0);
 
 	return run_file(obj, &filename);
 }
 
-rt_value __stdcall rt_kernel_print(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_kernel_print)
 {
 	RT_ARG_EACH(i)
 	{
@@ -107,7 +107,7 @@ rt_value __stdcall rt_kernel_print(rt_value obj, rt_value block, size_t argc, rt
 	return RT_NIL;
 }
 
-rt_value __stdcall rt_kernel_raise(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_kernel_raise)
 {
 	rt_value exception = rt_alloc(sizeof(struct rt_exception));
 

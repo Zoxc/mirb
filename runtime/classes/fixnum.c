@@ -8,7 +8,7 @@ rt_value rt_Fixnum;
 rt_value rt_TrueClass;
 rt_value rt_FalseClass;
 
-rt_value __stdcall rt_fixnum_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_fixnum_to_s)
 {
 	char buffer[15];
 
@@ -17,22 +17,22 @@ rt_value __stdcall rt_fixnum_to_s(rt_value obj, rt_value block, size_t argc, rt_
 	return rt_string_from_cstr(buffer);
 }
 
-rt_value __stdcall rt_fixnum_add(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_fixnum_add)
 {
 	return RT_INT2FIX(RT_FIX2INT(obj) + RT_FIX2INT(RT_ARG(0)));
 }
 
-rt_value __stdcall rt_fixnum_sub(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_fixnum_sub)
 {
 	return RT_INT2FIX(RT_FIX2INT(obj) - RT_FIX2INT(RT_ARG(0)));
 }
 
-rt_value __stdcall rt_fixnum_mul(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_fixnum_mul)
 {
 	return RT_INT2FIX(RT_FIX2INT(obj) * RT_FIX2INT(RT_ARG(0)));
 }
 
-rt_value __stdcall rt_fixnum_div(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_fixnum_div)
 {
 	return RT_INT2FIX(RT_FIX2INT(obj) / RT_FIX2INT(RT_ARG(0)));
 }

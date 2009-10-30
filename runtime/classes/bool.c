@@ -8,22 +8,22 @@ rt_value rt_NilClass;
 rt_value rt_TrueClass;
 rt_value rt_FalseClass;
 
-rt_value __stdcall rt_nilclass_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_nilclass_to_s)
 {
 	return rt_string_from_cstr("");
 }
 
-rt_value __stdcall rt_nilclass_inspect(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_nilclass_inspect)
 {
 	return rt_string_from_cstr("nil");
 }
 
-rt_value __stdcall rt_trueclass_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_trueclass_to_s)
 {
 	return rt_string_from_cstr("true");
 }
 
-rt_value __stdcall rt_falseclass_to_s(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+rt_compiled_block(rt_falseclass_to_s)
 {
 	return rt_string_from_cstr("false");
 }
