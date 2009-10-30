@@ -32,7 +32,7 @@ rt_value __stdcall rt_kernel_eval(rt_value obj, rt_value block, size_t argc, rt_
 
 static FILE *open_file(rt_value *filename)
 {
-	FILE* file = fopen(rt_string_to_cstr(*filename), "r");
+	FILE* file = fopen(rt_string_to_cstr(*filename), "rb");
 
 	if(!file)
 	{
@@ -40,7 +40,7 @@ static FILE *open_file(rt_value *filename)
 
 		rt_concat_string(append, rt_string_from_cstr(".rb"));
 
-		file = fopen(rt_string_to_cstr(append), "r");
+		file = fopen(rt_string_to_cstr(append), "rb");
 
 		if(!file)
 			return 0;
