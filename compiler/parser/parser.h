@@ -3,54 +3,8 @@
 #include "../../runtime/classes.h"
 #include "../../runtime/runtime.h"
 #include "lexer.h"
-#include "allocator.h"
-
-typedef enum {
-	N_UNARY_OP,
-	N_BINARY_OP,
-	N_NUMBER,
-	N_VAR,
-	N_IVAR,
-	N_IVAR_ASSIGN,
-	N_STRING,
-	N_STRING_START,
-	N_STRING_CONTINUE,
-	N_ARRAY,
-	N_ARRAY_ELEMENT,
-	N_CONST,
-	N_SELF,
-	N_TRUE,
-	N_FALSE,
-	N_NIL,
-	N_ASSIGN,
-	N_ASSIGN_CONST,
-	N_BOOLEAN,
-	N_NOT,
-	N_NO_EQUALITY,
-	N_IF,
-	N_UNLESS,
-	N_RETURN,
-	N_HANDLER,
-	N_RESCUE,
-	N_ARGUMENT,
-	N_CALL_ARGUMENTS,
-	N_CALL,
-	N_ARRAY_CALL,
-	N_STATEMENTS,
-	N_CLASS,
-	N_MODULE,
-	N_SCOPE,
-	N_METHOD,
-	N_PARAMETER
-} node_type;
-
-struct node {
-    struct node *left;
-    struct node *middle;
-    struct node *right;
-    node_type type;
-    token_type op;
-};
+#include "../allocator.h"
+#include "../ast.h"
 
 typedef enum {
 	V_PARAMETER,
@@ -116,16 +70,16 @@ static inline token_type parser_current(struct parser *parser)
 	return parser->token.type;
 }
 
-struct node *parse_factor(struct parser *parser);
-struct node *parse_expression(struct parser *parser);
-struct node *parse_argument(struct parser *parser);
-struct node *parse_arithmetic(struct parser *parser);
-struct node *parse_boolean_or(struct parser *parser);
-struct node *parse_low_boolean(struct parser *parser);
-struct node *parse_statement(struct parser *parser);
-struct node *parse_statements(struct parser *parser);
+node_t *parse_factor(struct parser *parser);
+node_t *parse_expression(struct parser *parser);
+node_t *parse_argument(struct parser *parser);
+node_t *parse_arithmetic(struct parser *parser);
+node_t *parse_boolean_or(struct parser *parser);
+node_t *parse_low_boolean(struct parser *parser);
+node_t *parse_statement(struct parser *parser);
+node_t *parse_statements(struct parser *parser);
 void parse_sep(struct parser *parser);
-struct node *parse_main(struct parser *parser);
+node_t *parse_main(struct parser *parser);
 
 #define PARSER_ERROR(parser, msg, ...) do \
 	{ \
@@ -221,9 +175,9 @@ static inline void *parser_alloc(struct parser *parser, size_t length)
 	return allocator_alloc(&parser->allocator, length);
 }
 
-static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_var, scope_type type)
+static inline node_t *alloc_scope(struct parser *parser, scope_t **scope_var, scope_type type)
 {
-	struct node *result = parser_alloc(parser, sizeof(struct node));
+	node_t *result = parser_alloc(parser, sizeof(node_t));
 	scope_t *scope = parser_alloc(parser, sizeof(scope_t));
 
 	scope->parser = parser;
@@ -247,17 +201,17 @@ static inline struct node *alloc_scope(struct parser *parser, scope_t **scope_va
 	return result;
 }
 
-static inline struct node *alloc_node(struct parser *parser, node_type type)
+static inline node_t *alloc_node(struct parser *parser, node_type_t type)
 {
-	struct node *result = parser_alloc(parser, sizeof(struct node));
+	node_t *result = parser_alloc(parser, sizeof(node_t));
 	result->type = type;
 
 	return result;
 }
 
-static inline struct node *alloc_nil_node(struct parser *parser)
+static inline node_t *alloc_nil_node(struct parser *parser)
 {
-	struct node *result = parser_alloc(parser, sizeof(struct node));
+	node_t *result = parser_alloc(parser, sizeof(node_t));
 	result->type = N_NIL;
 
 	return result;

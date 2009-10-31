@@ -35,10 +35,22 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu99 -fstrict-aliasing" />
 		</Compiler>
-		<Unit filename="compiler\generator\bytecode.c">
+		<Unit filename="compiler\allocator.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="compiler\generator\bytecode.h" />
+		<Unit filename="compiler\allocator.h" />
+		<Unit filename="compiler\ast.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\ast.h" />
+		<Unit filename="compiler\block.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\block.h" />
+		<Unit filename="compiler\bytecode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\bytecode.h" />
 		<Unit filename="compiler\generator\disassembly.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -51,10 +63,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\generator\x86.h" />
-		<Unit filename="compiler\parser\allocator.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\allocator.h" />
 		<Unit filename="compiler\parser\calls.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -1,10 +1,10 @@
 #include "control_flow.h"
 
-struct node *parse_return(struct parser *parser)
+node_t *parse_return(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(parser, N_RETURN);
+	node_t *result = alloc_node(parser, N_RETURN);
 
 	if(is_expression(parser))
 		result->left = parse_expression(parser);
@@ -14,9 +14,9 @@ struct node *parse_return(struct parser *parser)
 	return result;
 }
 
-struct node *parse_exception_handlers(struct parser *parser, struct node *block)
+node_t *parse_exception_handlers(struct parser *parser, node_t *block)
 {
-	struct node *parent = alloc_node(parser, N_HANDLER);
+	node_t *parent = alloc_node(parser, N_HANDLER);
 
 	parent->left = block;
 
@@ -24,7 +24,7 @@ struct node *parse_exception_handlers(struct parser *parser, struct node *block)
 	{
 		next(parser);
 
-		struct node *rescue = alloc_node(parser, N_RESCUE);
+		node_t *rescue = alloc_node(parser, N_RESCUE);
 		rescue->left = parse_statements(parser);
 		rescue->right = 0;
 
@@ -34,7 +34,7 @@ struct node *parse_exception_handlers(struct parser *parser, struct node *block)
 		{
 			next(parser);
 
-			struct node *node = alloc_node(parser, N_RESCUE);
+			node_t *node = alloc_node(parser, N_RESCUE);
 			node->left = parse_statements(parser);
 			node->right = 0;
 
@@ -57,11 +57,11 @@ struct node *parse_exception_handlers(struct parser *parser, struct node *block)
 	return parent;
 }
 
-struct node *parse_begin(struct parser *parser)
+node_t *parse_begin(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = parse_statements(parser);
+	node_t *result = parse_statements(parser);
 
 	switch (parser_current(parser))
 	{
@@ -93,15 +93,15 @@ void parse_then_sep(struct parser *parser)
 	}
 }
 
-struct node *parse_ternary_if(struct parser *parser)
+node_t *parse_ternary_if(struct parser *parser)
 {
-	struct node *result = parse_boolean_or(parser);
+	node_t *result = parse_boolean_or(parser);
 
 	if(parser_current(parser) == T_QUESTION)
 	{
 		next(parser);
 
-    	struct node *node = alloc_node(parser, N_IF);
+    	node_t *node = alloc_node(parser, N_IF);
 
 		node->left = result;
 		node->middle = parse_ternary_if(parser);
@@ -116,13 +116,13 @@ struct node *parse_ternary_if(struct parser *parser)
 	return result;
 }
 
-struct node *parse_conditional(struct parser *parser)
+node_t *parse_conditional(struct parser *parser)
 {
-	struct node *result = parse_low_boolean(parser);
+	node_t *result = parse_low_boolean(parser);
 
     if (parser_current(parser) == T_IF || parser_current(parser) == T_UNLESS)
     {
-     	struct node *node = alloc_node(parser, parser_current(parser) == T_IF ? N_IF : N_UNLESS);
+     	node_t *node = alloc_node(parser, parser_current(parser) == T_IF ? N_IF : N_UNLESS);
 
 		next(parser);
 
@@ -136,11 +136,11 @@ struct node *parse_conditional(struct parser *parser)
     return result;
 }
 
-struct node *parse_unless(struct parser *parser)
+node_t *parse_unless(struct parser *parser)
 {
 				next(parser);
 
-				struct node *result = alloc_node(parser, N_UNLESS);
+				node_t *result = alloc_node(parser, N_UNLESS);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
@@ -153,7 +153,7 @@ struct node *parse_unless(struct parser *parser)
 				return result;
 }
 
-struct node *parse_if_tail(struct parser *parser)
+node_t *parse_if_tail(struct parser *parser)
 {
 	switch (parser_current(parser))
 	{
@@ -161,7 +161,7 @@ struct node *parse_if_tail(struct parser *parser)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(parser, N_IF);
+				node_t *result = alloc_node(parser, N_IF);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
@@ -182,11 +182,11 @@ struct node *parse_if_tail(struct parser *parser)
 	}
 }
 
-struct node *parse_if(struct parser *parser)
+node_t *parse_if(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(parser, N_IF);
+	node_t *result = alloc_node(parser, N_IF);
 	result->left = parse_expression(parser);
 
 	parse_then_sep(parser);
@@ -199,7 +199,7 @@ struct node *parse_if(struct parser *parser)
 	return result;
 }
 
-struct node *parse_case_body(struct parser *parser)
+node_t *parse_case_body(struct parser *parser)
 {
 	switch (parser_current(parser))
 	{
@@ -207,7 +207,7 @@ struct node *parse_case_body(struct parser *parser)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(parser, N_IF);
+				node_t *result = alloc_node(parser, N_IF);
 				result->left = parse_expression(parser);
 
 				parse_then_sep(parser);
@@ -234,11 +234,11 @@ struct node *parse_case_body(struct parser *parser)
 	}
 }
 
-struct node *parse_case(struct parser *parser)
+node_t *parse_case(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = 0;
+	node_t *result = 0;
 
 	switch (parser_current(parser))
 	{

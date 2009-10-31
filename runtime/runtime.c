@@ -9,7 +9,8 @@
 #include "classes/array.h"
 #include "classes/exception.h"
 #include "modules/kernel.h"
-#include "../compiler/generator/bytecode.h"
+#include "../compiler/bytecode.h"
+#include "../compiler/block.h"
 #include "../compiler/generator/generator.h"
 #include "../compiler/generator/x86.h"
 
@@ -47,12 +48,12 @@ rt_value rt_eval(rt_value self, const char *input, const char *filename)
 {
 	struct parser *parser = parser_create(input, filename);
 
-	struct node* expression = parse_main(parser);
+	node_t* expression = parse_main(parser);
 
 	if(parser->err_count != 0)
 		return RT_NIL;
 
-	extern rt_value get_node_name(struct node *node);
+	extern rt_value get_node_name(node_t *node);
 
 	#ifdef DEBUG
 		printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));

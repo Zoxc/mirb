@@ -1,11 +1,11 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
-struct node *parse_class(struct parser *parser)
+node_t *parse_class(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(parser, N_CLASS);
+	node_t *result = alloc_node(parser, N_CLASS);
 
 	if(require(parser, T_IDENT))
 	{
@@ -30,11 +30,11 @@ struct node *parse_class(struct parser *parser)
 	return result;
 }
 
-struct node *parse_module(struct parser *parser)
+node_t *parse_module(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(parser, N_MODULE);
+	node_t *result = alloc_node(parser, N_MODULE);
 
 	if(require(parser, T_IDENT))
 	{
@@ -106,7 +106,7 @@ void parse_parameter(struct parser *parser, scope_t *scope)
 		PARSER_ERROR(parser, "Expected paramater, but found %s.", token_type_names[parser_current(parser)]);
 }
 
-struct node *parse_method(struct parser *parser)
+node_t *parse_method(struct parser *parser)
 {
 	parser_state(parser, TS_NOKEYWORDS);
 
@@ -114,7 +114,7 @@ struct node *parse_method(struct parser *parser)
 
 	parser_state(parser, TS_DEFAULT);
 
-	struct node *result = alloc_node(parser, N_METHOD);
+	node_t *result = alloc_node(parser, N_METHOD);
 
 	switch(parser_current(parser))
 	{

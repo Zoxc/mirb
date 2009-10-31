@@ -2,7 +2,7 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
-struct node *parse_block(struct parser *parser)
+node_t *parse_block(struct parser *parser)
 {
 	bool curly;
 
@@ -24,7 +24,7 @@ struct node *parse_block(struct parser *parser)
 
 	scope_t *scope;
 
-	struct node *result = alloc_scope(parser, &scope, S_CLOSURE);
+	node_t *result = alloc_scope(parser, &scope, S_CLOSURE);
 
 	skip_lines(parser);
 
@@ -85,13 +85,13 @@ bool has_arguments(struct parser *parser)
 		return false;
 }
 
-struct node *parse_arguments(struct parser *parser, bool has_args)
+node_t *parse_arguments(struct parser *parser, bool has_args)
 {
 	if (has_args && parser_current(parser) != T_CURLY_OPEN)
 	{
 		if (parser_current(parser) == T_PARAM_OPEN && !parser_token(parser)->whitespace)
 		{
-		    struct node *result = 0;
+		    node_t *result = 0;
 
 			next(parser);
 
@@ -109,11 +109,11 @@ struct node *parse_arguments(struct parser *parser, bool has_args)
 		return 0;
 }
 
-struct node *parse_yield(struct parser *parser)
+node_t *parse_yield(struct parser *parser)
 {
 	next(parser);
 
-	struct node *result = alloc_node(parser, N_CALL);
+	node_t *result = alloc_node(parser, N_CALL);
 
 	result->left = alloc_node(parser, N_VAR);
 
@@ -131,7 +131,7 @@ struct node *parse_yield(struct parser *parser)
 	return result;
 }
 
-struct node *parse_call(struct parser *parser, rt_value symbol, struct node *child, bool default_var)
+node_t *parse_call(struct parser *parser, rt_value symbol, node_t *child, bool default_var)
 {
 	if(!symbol)
 	{
@@ -162,7 +162,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	{
 		if(local)
 		{
-			struct node *result = alloc_node(parser, N_VAR);
+			node_t *result = alloc_node(parser, N_VAR);
 
 			result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
 
@@ -170,7 +170,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 		}
 		else
 		{
-			struct node *result = alloc_node(parser, N_CONST);
+			node_t *result = alloc_node(parser, N_CONST);
 
 			result->left = child;
 			result->right = (void *)symbol;
@@ -180,7 +180,7 @@ struct node *parse_call(struct parser *parser, rt_value symbol, struct node *chi
 	}
 	else // Call
 	{
-		struct node *result = alloc_node(parser, N_CALL);
+		node_t *result = alloc_node(parser, N_CALL);
 
 		result->left = child;
 		result->middle = (void *)symbol;
@@ -198,7 +198,7 @@ static inline bool is_lookup(struct parser *parser)
 	return parser_current(parser) == T_DOT || parser_current(parser) == T_SQUARE_OPEN || parser_current(parser) == T_SCOPE;
 }
 
-struct node *parse_lookup(struct parser *parser, struct node *child)
+node_t *parse_lookup(struct parser *parser, node_t *child)
 {
 	switch(parser_current(parser))
 	{
@@ -213,7 +213,7 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 				if(require(parser, T_IDENT))
 				{
 					rt_value symbol = rt_symbol_from_parser(parser);
-					struct node *result;
+					node_t *result;
 
 					if(rt_symbol_is_const(symbol))
 					{
@@ -252,7 +252,7 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 			{
 				next(parser);
 
-				struct node *result = alloc_node(parser, N_ARRAY_CALL);
+				node_t *result = alloc_node(parser, N_ARRAY_CALL);
 
 				result->left = child;
 				result->middle = parse_argument(parser);
@@ -268,7 +268,7 @@ struct node *parse_lookup(struct parser *parser, struct node *child)
 	}
 }
 
-struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
+node_t *parse_lookup_tail(struct parser *parser, node_t *tail)
 {
 	if(tail && tail->type == N_CALL && tail->right)
 		return tail;
@@ -289,7 +289,7 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 				{
 					case N_CONST:
 						{
-							struct node *result = alloc_node(parser, N_ASSIGN_CONST);
+							node_t *result = alloc_node(parser, N_ASSIGN_CONST);
 
 							result->left = tail->left;
 							result->middle = tail->right;
@@ -330,8 +330,8 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 						{
 							tail->type = N_CALL;
 
-							struct node *block = tail->right;
-							struct node *argument = tail->middle;
+							node_t *block = tail->right;
+							node_t *argument = tail->middle;
 
 							tail->middle = (void *)rt_symbol_from_cstr("[]=");
 							tail->right = alloc_node(parser, N_CALL_ARGUMENTS);
@@ -361,13 +361,13 @@ struct node *parse_lookup_tail(struct parser *parser, struct node *tail)
 	}
 }
 
-struct node *parse_lookup_chain(struct parser *parser)
+node_t *parse_lookup_chain(struct parser *parser)
 {
- 	struct node *result = parse_factor(parser);
+ 	node_t *result = parse_factor(parser);
 
     while(is_lookup(parser))
     {
-    	struct node *node = parse_lookup(parser, result);
+    	node_t *node = parse_lookup(parser, result);
 
 		result = node;
     }

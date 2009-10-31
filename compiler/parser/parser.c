@@ -109,9 +109,9 @@ void parse_sep(struct parser *parser)
 	}
 }
 
-struct node *parse_argument(struct parser *parser)
+node_t *parse_argument(struct parser *parser)
 {
-	struct node *result = alloc_node(parser, N_ARGUMENT);
+	node_t *result = alloc_node(parser, N_ARGUMENT);
 
 	result->left = parse_expression(parser);
 	result->right = 0;
@@ -124,7 +124,7 @@ struct node *parse_argument(struct parser *parser)
 	return result;
 }
 
-struct node *parse_identifier(struct parser *parser)
+node_t *parse_identifier(struct parser *parser)
 {
 	rt_value symbol = rt_symbol_from_parser(parser);
 
@@ -137,7 +137,7 @@ struct node *parse_identifier(struct parser *parser)
 		case T_ASSIGN_MUL:
 		case T_ASSIGN_DIV:
 		{
-			struct node *result;
+			node_t *result;
 
 			token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
 
@@ -173,7 +173,7 @@ struct node *parse_identifier(struct parser *parser)
 
 		case T_ASSIGN:
 		{
-			struct node *result;
+			node_t *result;
 
 			next(parser);
 
@@ -201,9 +201,9 @@ struct node *parse_identifier(struct parser *parser)
 	}
 }
 
-struct node *parse_array_element(struct parser *parser)
+node_t *parse_array_element(struct parser *parser)
 {
-	struct node *result = alloc_node(parser, N_ARRAY_ELEMENT);
+	node_t *result = alloc_node(parser, N_ARRAY_ELEMENT);
 
 	result->left = parse_expression(parser);
 
@@ -219,7 +219,7 @@ struct node *parse_array_element(struct parser *parser)
 	return result;
 }
 
-struct node *parse_factor(struct parser *parser)
+node_t *parse_factor(struct parser *parser)
 {
 	switch (parser_current(parser))
 	{
@@ -252,7 +252,7 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_SQUARE_OPEN:
 			{
-			    struct node *result = alloc_node(parser, N_ARRAY);
+			    node_t *result = alloc_node(parser, N_ARRAY);
 
 			    next(parser);
 
@@ -268,7 +268,7 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_STRING:
 			{
-			    struct node *result = alloc_node(parser, N_STRING);
+			    node_t *result = alloc_node(parser, N_STRING);
 
 				result->left = (void *)parser_token(parser)->start;
 
@@ -279,7 +279,7 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_STRING_START:
 			{
-			    struct node *result = alloc_node(parser, N_STRING_CONTINUE);
+			    node_t *result = alloc_node(parser, N_STRING_CONTINUE);
 
 				result->left = 0;
 				result->middle = (void *)parser_token(parser)->start;
@@ -290,7 +290,7 @@ struct node *parse_factor(struct parser *parser)
 
 				while(parser_current(parser) == T_STRING_CONTINUE)
 				{
-					struct node *node = alloc_node(parser, N_STRING_CONTINUE);
+					node_t *node = alloc_node(parser, N_STRING_CONTINUE);
 
 					node->left = result;
 					node->middle = (void *)parser_token(parser)->start;
@@ -304,7 +304,7 @@ struct node *parse_factor(struct parser *parser)
 
 				if(require(parser, T_STRING_END))
 				{
-					struct node *node = alloc_node(parser, N_STRING_START);
+					node_t *node = alloc_node(parser, N_STRING_START);
 
 					node->left = result;
 					node->right = (void *)parser_token(parser)->start;
@@ -347,7 +347,7 @@ struct node *parse_factor(struct parser *parser)
 
 		case T_NUMBER:
 			{
-			    struct node *result = alloc_node(parser, N_NUMBER);
+			    node_t *result = alloc_node(parser, N_NUMBER);
 
 			    char *text = get_token_str(parser_token(parser));
 
@@ -371,7 +371,7 @@ struct node *parse_factor(struct parser *parser)
 					case T_ASSIGN_MUL:
 					case T_ASSIGN_DIV:
 					{
-						struct node *result;
+						node_t *result;
 
 						token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
 
@@ -392,7 +392,7 @@ struct node *parse_factor(struct parser *parser)
 
 					case T_ASSIGN:
 					{
-						struct node *result;
+						node_t *result;
 
 						next(parser);
 
@@ -405,7 +405,7 @@ struct node *parse_factor(struct parser *parser)
 
 					default:
 					{
-						struct node *result = alloc_node(parser, N_IVAR);
+						node_t *result = alloc_node(parser, N_IVAR);
 
 						result->left = (void *)symbol;
 
@@ -424,7 +424,7 @@ struct node *parse_factor(struct parser *parser)
 			{
 				next(parser);
 
-				struct node *result = parse_statements(parser);
+				node_t *result = parse_statements(parser);
 
 				match(parser, T_PARAM_CLOSE);
 
@@ -442,11 +442,11 @@ struct node *parse_factor(struct parser *parser)
 	}
 }
 
-struct node *parse_unary(struct parser *parser)
+node_t *parse_unary(struct parser *parser)
 {
     if(parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
     {
-    	struct node *result = alloc_node(parser, N_UNARY_OP);
+    	node_t *result = alloc_node(parser, N_UNARY_OP);
 
 		result->op = parser_current(parser) + OP_TO_UNARY;
 
@@ -460,13 +460,13 @@ struct node *parse_unary(struct parser *parser)
 		return parse_lookup_chain(parser);
 }
 
-struct node *parse_term(struct parser *parser)
+node_t *parse_term(struct parser *parser)
 {
-	struct node *result = parse_unary(parser);
+	node_t *result = parse_unary(parser);
 
     while(parser_current(parser) == T_MUL || parser_current(parser) == T_DIV)
     {
-    	struct node *node = alloc_node(parser, N_BINARY_OP);
+    	node_t *node = alloc_node(parser, N_BINARY_OP);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -480,13 +480,13 @@ struct node *parse_term(struct parser *parser)
 	return result;
 }
 
-struct node *parse_arithmetic(struct parser *parser)
+node_t *parse_arithmetic(struct parser *parser)
 {
-	struct node *result = parse_term(parser);
+	node_t *result = parse_term(parser);
 
     while (parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
     {
-    	struct node *node = alloc_node(parser, N_BINARY_OP);
+    	node_t *node = alloc_node(parser, N_BINARY_OP);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -500,11 +500,11 @@ struct node *parse_arithmetic(struct parser *parser)
     return result;
 }
 
-struct node *parse_boolean_unary(struct parser *parser)
+node_t *parse_boolean_unary(struct parser *parser)
 {
     if(parser_current(parser) == T_NOT_SIGN)
     {
-    	struct node *result = alloc_node(parser, N_NOT);
+    	node_t *result = alloc_node(parser, N_NOT);
 
 		next(parser);
 
@@ -530,13 +530,13 @@ static inline bool is_equality_op(struct parser *parser)
 	}
 }
 
-struct node *parse_equality(struct parser *parser)
+node_t *parse_equality(struct parser *parser)
 {
-	struct node *result = parse_boolean_unary(parser);
+	node_t *result = parse_boolean_unary(parser);
 
     while(is_equality_op(parser))
     {
-    	struct node *node;
+    	node_t *node;
 
     	if(parser_current(parser) == T_NO_EQUALITY)
     		node = alloc_node(parser,  N_NO_EQUALITY);
@@ -557,13 +557,13 @@ struct node *parse_equality(struct parser *parser)
     return result;
 }
 
-struct node *parse_boolean_and(struct parser *parser)
+node_t *parse_boolean_and(struct parser *parser)
 {
-	struct node *result = parse_equality(parser);
+	node_t *result = parse_equality(parser);
 
     while(parser_current(parser) == T_AND_BOOLEAN)
     {
-    	struct node *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(parser, N_BOOLEAN);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -577,13 +577,13 @@ struct node *parse_boolean_and(struct parser *parser)
     return result;
 }
 
-struct node *parse_boolean_or(struct parser *parser)
+node_t *parse_boolean_or(struct parser *parser)
 {
-	struct node *result = parse_boolean_and(parser);
+	node_t *result = parse_boolean_and(parser);
 
     while(parser_current(parser) == T_OR_BOOLEAN)
     {
-    	struct node *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(parser, N_BOOLEAN);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -597,16 +597,16 @@ struct node *parse_boolean_or(struct parser *parser)
     return result;
 }
 
-struct node *parse_expression(struct parser *parser)
+node_t *parse_expression(struct parser *parser)
 {
 	return parse_ternary_if(parser);
 }
 
-struct node *parse_low_boolean_unary(struct parser *parser)
+node_t *parse_low_boolean_unary(struct parser *parser)
 {
     if(parser_current(parser) == T_NOT)
     {
-    	struct node *result = alloc_node(parser, N_NOT);
+    	node_t *result = alloc_node(parser, N_NOT);
 
 		next(parser);
 
@@ -618,13 +618,13 @@ struct node *parse_low_boolean_unary(struct parser *parser)
 		return parse_expression(parser);
 }
 
-struct node *parse_low_boolean(struct parser *parser)
+node_t *parse_low_boolean(struct parser *parser)
 {
-	struct node *result = parse_low_boolean_unary(parser);
+	node_t *result = parse_low_boolean_unary(parser);
 
     while(parser_current(parser) == T_AND || parser_current(parser) == T_OR)
     {
-    	struct node *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(parser, N_BOOLEAN);
 
 		node->op = parser_current(parser);
 		node->left = result;
@@ -638,7 +638,7 @@ struct node *parse_low_boolean(struct parser *parser)
     return result;
 }
 
-struct node *parse_statement(struct parser *parser)
+node_t *parse_statement(struct parser *parser)
 {
 	return parse_conditional(parser);
 }
@@ -654,13 +654,13 @@ static inline void skip_seps(struct parser *parser)
 		next(parser);
 }
 
-struct node *parse_statements(struct parser *parser)
+node_t *parse_statements(struct parser *parser)
 {
 	skip_seps(parser);
 
 	if(is_expression(parser))
 	{
-		struct node *result = parse_statement(parser);
+		node_t *result = parse_statement(parser);
 
 		if (is_sep(parser))
 		{
@@ -668,7 +668,7 @@ struct node *parse_statements(struct parser *parser)
 
 			if(is_expression(parser))
 			{
-				struct node *node = alloc_node(parser, N_STATEMENTS);
+				node_t *node = alloc_node(parser, N_STATEMENTS);
 
 				node->left = result;
 				node->right = parse_statements(parser);
@@ -684,11 +684,11 @@ struct node *parse_statements(struct parser *parser)
 		return alloc_nil_node(parser);
 }
 
-struct node *parse_main(struct parser *parser)
+node_t *parse_main(struct parser *parser)
 {
 	scope_t *scope;
 
-	struct node *result = alloc_scope(parser, &scope, S_MAIN);
+	node_t *result = alloc_scope(parser, &scope, S_MAIN);
 
 	scope->owner = scope;
 
