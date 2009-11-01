@@ -51,6 +51,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\bytecode.h" />
+		<Unit filename="compiler\compiler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\compiler.h" />
 		<Unit filename="compiler\generator\disassembly.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -63,6 +67,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\generator\x86.h" />
+		<Unit filename="compiler\lexer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="compiler\lexer.h" />
 		<Unit filename="compiler\parser\calls.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -71,10 +79,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\parser\control_flow.h" />
-		<Unit filename="compiler\parser\lexer.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\lexer.h" />
 		<Unit filename="compiler\parser\parser.c">
 			<Option compilerVar="CC" />
 		</Unit>
