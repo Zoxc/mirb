@@ -1,67 +1,67 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
-node_t *parse_class(struct parser *parser)
+node_t *parse_class(struct compiler *compiler)
 {
-	next(parser);
+	lexer_next(compiler);
 
-	node_t *result = alloc_node(parser, N_CLASS);
+	node_t *result = alloc_node(compiler, N_CLASS);
 
-	if(require(parser, T_IDENT))
+	if(lexer_require(compiler, T_IDENT))
 	{
-		result->left = (void *)rt_symbol_from_parser(parser);
+		result->left = (void *)rt_symbol_from_parser(compiler);
 
-		next(parser);
+		lexer_next(compiler);
 	}
 	else
 		result->left = 0;
 
-	parse_sep(parser);
+	parse_sep(compiler);
 
 	scope_t *scope;
 
-	result->right = alloc_scope(parser, &scope, S_CLASS);
-	result->right->right = parse_statements(parser);
+	result->right = alloc_scope(compiler, &scope, S_CLASS);
+	result->right->right = parse_statements(compiler);
 
-	parser->current_scope = scope->parent;
+	compiler->current_scope = scope->parent;
 
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }
 
-node_t *parse_module(struct parser *parser)
+node_t *parse_module(struct compiler *compiler)
 {
-	next(parser);
+	lexer_next(compiler);
 
-	node_t *result = alloc_node(parser, N_MODULE);
+	node_t *result = alloc_node(compiler, N_MODULE);
 
-	if(require(parser, T_IDENT))
+	if(lexer_require(compiler, T_IDENT))
 	{
-		result->left = (void *)rt_symbol_from_parser(parser);
+		result->left = (void *)rt_symbol_from_parser(compiler);
 
-		next(parser);
+		lexer_next(compiler);
 	}
 	else
 		result->left = 0;
 
-	parse_sep(parser);
+	parse_sep(compiler);
 
 	scope_t *scope;
 
-	result->right = alloc_scope(parser, &scope, S_MODULE);
-	result->right->right = parse_statements(parser);
+	result->right = alloc_scope(compiler, &scope, S_MODULE);
+	result->right->right = parse_statements(compiler);
 
-	parser->current_scope = scope->parent;
+	compiler->current_scope = scope->parent;
 
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }
 
-bool is_parameter(struct parser *parser)
+bool is_parameter(struct compiler *compiler)
 {
-	switch(parser_current(parser))
+	switch(lexer_current(compiler))
 	{
 		case T_AMP:
 		case T_IDENT:
@@ -72,18 +72,18 @@ bool is_parameter(struct parser *parser)
 	}
 }
 
-void parse_parameter(struct parser *parser, scope_t *scope)
+void parse_parameter(struct compiler *compiler, scope_t *scope)
 {
-	if(is_parameter(parser))
+	if(is_parameter(compiler))
 	{
-		bool block_var = matches(parser, T_AMP);
+		bool block_var = lexer_matches(compiler, T_AMP);
 
-		rt_value symbol = rt_symbol_from_parser(parser);
+		rt_value symbol = rt_symbol_from_parser(compiler);
 
 		if(block_var)
 		{
 			if(scope->block_var)
-				PARSER_ERROR(parser, "You can only receive the block in one parameter.");
+				COMPILER_ERROR(compiler, "You can only receive the block in one parameter.");
 			else
 			{
 				scope->block_var = scope_define(scope, symbol, V_BLOCK, false);
@@ -92,44 +92,44 @@ void parse_parameter(struct parser *parser, scope_t *scope)
 		else
 		{
 			if(scope_defined(scope, symbol, false))
-				PARSER_ERROR(parser, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
+				COMPILER_ERROR(compiler, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
 			else
 				scope_define(scope, symbol, V_PARAMETER, false);
 		}
 
-		next(parser);
+		lexer_next(compiler);
 
-		if(matches(parser, T_COMMA))
-			parse_parameter(parser, scope);
+		if(lexer_matches(compiler, T_COMMA))
+			parse_parameter(compiler, scope);
 	}
 	else
-		PARSER_ERROR(parser, "Expected paramater, but found %s.", token_type_names[parser_current(parser)]);
+		COMPILER_ERROR(compiler, "Expected paramater, but found %s.", token_type_names[lexer_current(compiler)]);
 }
 
-node_t *parse_method(struct parser *parser)
+node_t *parse_method(struct compiler *compiler)
 {
-	parser_state(parser, TS_NOKEYWORDS);
+	lexer_state(compiler, TS_NOKEYWORDS);
 
-	next(parser);
+	lexer_next(compiler);
 
-	parser_state(parser, TS_DEFAULT);
+	lexer_state(compiler, TS_DEFAULT);
 
-	node_t *result = alloc_node(parser, N_METHOD);
+	node_t *result = alloc_node(compiler, N_METHOD);
 
-	switch(parser_current(parser))
+	switch(lexer_current(compiler))
 	{
 		case T_IDENT:
 		case T_EXT_IDENT:
 			{
-				result->left = (void *)rt_symbol_from_parser(parser);
+				result->left = (void *)rt_symbol_from_parser(compiler);
 
-				next(parser);
+				lexer_next(compiler);
 			}
 			break;
 
 		default:
 			{
-				PARSER_ERROR(parser, "Expected identifier but found %s", token_type_names[parser_current(parser)]);
+				COMPILER_ERROR(compiler, "Expected identifier but found %s", token_type_names[lexer_current(compiler)]);
 
 				result->left = 0;
 			}
@@ -137,29 +137,29 @@ node_t *parse_method(struct parser *parser)
 
 	scope_t *scope;
 
-	result->right = alloc_scope(parser, &scope, S_METHOD);
+	result->right = alloc_scope(compiler, &scope, S_METHOD);
 
 	scope->owner = scope;
 
-	if(matches(parser, T_PARAM_OPEN))
+	if(lexer_matches(compiler, T_PARAM_OPEN))
 	{
-		parse_parameter(parser, scope);
+		parse_parameter(compiler, scope);
 
-		match(parser, T_PARAM_CLOSE);
+		lexer_match(compiler, T_PARAM_CLOSE);
 	}
 	else
 	{
-		if(is_parameter(parser))
-			parse_parameter(parser, scope);
+		if(is_parameter(compiler))
+			parse_parameter(compiler, scope);
 
-		parse_sep(parser);
+		parse_sep(compiler);
 	}
 
-	result->right->right = parse_statements(parser);
+	result->right->right = parse_statements(compiler);
 
-	parser->current_scope = scope->parent;
+	compiler->current_scope = scope->parent;
 
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }

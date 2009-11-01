@@ -40,12 +40,12 @@ typedef enum {
 	N_PARAMETER
 } node_type_t;
 
-typedef struct node_t {
-    struct node_t *left;
-    struct node_t *middle;
-    struct node_t *right;
+typedef struct node {
+    struct node *left;
+    struct node *middle;
+    struct node *right;
     node_type_t type;
-    token_type op;
+    enum token_type op;
 } node_t;
 
 rt_value get_node_name(node_t *node);

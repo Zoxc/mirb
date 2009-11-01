@@ -1,3 +1,4 @@
+#include "compiler.h"
 #include "ast.h"
 #include "bytecode.h"
 #include "block.h"

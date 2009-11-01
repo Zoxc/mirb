@@ -1,6 +1,7 @@
 #pragma once
 #include "ast.h"
 #include "bytecode.h"
+#include "compiler.h"
 #include "parser/parser.h"
 #include "../runtime/runtime.h"
 
@@ -15,9 +16,9 @@ typedef enum {
 	E_RETURN
 } exception_handler_type_t;
 
-typedef struct exception_handler_t {
+typedef struct exception_handler {
 	exception_handler_type_t type;
-	struct exception_handler_t *next;
+	struct exception_handler *next;
 } exception_handler_t;
 
 typedef struct {
@@ -29,9 +30,9 @@ typedef struct {
 	runtime_exception_handler_t common;
 } class_exception_handler_t;
 
-typedef struct exception_block_t {
+typedef struct exception_block {
 	size_t parent_index;
-	struct exception_block_t *parent;
+	struct exception_block *parent;
 	kvec_t(exception_handler_t *) handlers;
 	void *block_label;
 	void *ensure_label;
@@ -52,11 +53,22 @@ typedef struct {
  * Block definition
  */
 
-typedef struct block_t {
+typedef struct block {
+	struct compiler *compiler; // The compiler which owns this block
+
+	/*
+	 * parser stuff
+	 */
+	scope_type type;
+	rt_value var_count[VARIABLE_TYPES];
+	khash_t(scope) *variables;
+	struct block *owner;
+	struct block *parent;
+	variable_t *block_var;
+
 	/*
 	 * bytecode compiler stuff
 	 */
-	struct parser *parser;
 	rt_value label_count;
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
@@ -76,9 +88,9 @@ typedef struct block_t {
 
 static inline block_t *block_create(scope_t *scope)
 {
-	block_t *result = parser_alloc(scope->parser, sizeof(block_t));
+	block_t *result = compiler_alloc(scope->compiler, sizeof(block_t));
 
-	result->parser = scope->parser;
+	result->compiler = scope->compiler;
 	result->label_count = 0;
 	result->scope = scope;
 	result->label_usage = kh_init(rt_hash);
@@ -110,7 +122,7 @@ static inline rt_value block_get_label(block_t *block)
 
 static inline variable_t *block_get_var(block_t *block)
 {
-	variable_t *temp = parser_alloc(block->parser, sizeof(variable_t));
+	variable_t *temp = compiler_alloc(block->compiler, sizeof(variable_t));
 
 	temp->type = V_TEMP;
 	temp->index = block->scope->var_count[V_TEMP];
@@ -122,7 +134,7 @@ static inline variable_t *block_get_var(block_t *block)
 
 static inline size_t block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
 {
-	opcode_t *op = parser_alloc(block->parser, sizeof(opcode_t));
+	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
 	op->type = type;
 	op->result = result;
 	op->left = left;
@@ -134,7 +146,7 @@ static inline size_t block_push(block_t *block, opcode_type_t type, rt_value res
 
 static inline variable_t *block_gen_args(block_t *block)
 {
-	variable_t *var = parser_alloc(block->parser, sizeof(variable_t));
+	variable_t *var = compiler_alloc(block->compiler, sizeof(variable_t));
 
 	var->type = V_ARGS;
 	var->index = block->scope->var_count[V_ARGS];

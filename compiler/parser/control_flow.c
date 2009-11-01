@@ -1,41 +1,41 @@
 #include "control_flow.h"
 
-node_t *parse_return(struct parser *parser)
+node_t *parse_return(struct compiler *compiler)
 {
-	next(parser);
+	lexer_next(compiler);
 
-	node_t *result = alloc_node(parser, N_RETURN);
+	node_t *result = alloc_node(compiler, N_RETURN);
 
-	if(is_expression(parser))
-		result->left = parse_expression(parser);
+	if(is_expression(compiler))
+		result->left = parse_expression(compiler);
 	else
 		result->left = 0;
 
 	return result;
 }
 
-node_t *parse_exception_handlers(struct parser *parser, node_t *block)
+node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
 {
-	node_t *parent = alloc_node(parser, N_HANDLER);
+	node_t *parent = alloc_node(compiler, N_HANDLER);
 
 	parent->left = block;
 
-	if(parser_current(parser) == T_RESCUE)
+	if(lexer_current(compiler) == T_RESCUE)
 	{
-		next(parser);
+		lexer_next(compiler);
 
-		node_t *rescue = alloc_node(parser, N_RESCUE);
-		rescue->left = parse_statements(parser);
+		node_t *rescue = alloc_node(compiler, N_RESCUE);
+		rescue->left = parse_statements(compiler);
 		rescue->right = 0;
 
 		parent->middle = rescue;
 
-		while(parser_current(parser) == T_RESCUE)
+		while(lexer_current(compiler) == T_RESCUE)
 		{
-			next(parser);
+			lexer_next(compiler);
 
-			node_t *node = alloc_node(parser, N_RESCUE);
-			node->left = parse_statements(parser);
+			node_t *node = alloc_node(compiler, N_RESCUE);
+			node->left = parse_statements(compiler);
 			node->right = 0;
 
 			rescue->right = node;
@@ -45,11 +45,11 @@ node_t *parse_exception_handlers(struct parser *parser, node_t *block)
 	else
 		parent->middle = 0;
 
-	if(parser_current(parser) == T_ENSURE)
+	if(lexer_current(compiler) == T_ENSURE)
 	{
-		next(parser);
+		lexer_next(compiler);
 
-		parent->right = parse_statements(parser);
+		parent->right = parse_statements(compiler);
 	}
 	else
 		parent->right = 0;
@@ -57,58 +57,58 @@ node_t *parse_exception_handlers(struct parser *parser, node_t *block)
 	return parent;
 }
 
-node_t *parse_begin(struct parser *parser)
+node_t *parse_begin(struct compiler *compiler)
 {
-	next(parser);
+	lexer_next(compiler);
 
-	node_t *result = parse_statements(parser);
+	node_t *result = parse_statements(compiler);
 
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_ENSURE:
 		case T_RESCUE:
-			result = parse_exception_handlers(parser, result);
+			result = parse_exception_handlers(compiler, result);
 			break;
 
 		default:
 			break;
 	}
 
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }
 
-void parse_then_sep(struct parser *parser)
+void parse_then_sep(struct compiler *compiler)
 {
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_THEN:
 		case T_COLON:
-			next(parser);
+			lexer_next(compiler);
 			break;
 
 		default:
-			parse_sep(parser);
+			parse_sep(compiler);
 	}
 }
 
-node_t *parse_ternary_if(struct parser *parser)
+node_t *parse_ternary_if(struct compiler *compiler)
 {
-	node_t *result = parse_boolean_or(parser);
+	node_t *result = parse_boolean_or(compiler);
 
-	if(parser_current(parser) == T_QUESTION)
+	if(lexer_current(compiler) == T_QUESTION)
 	{
-		next(parser);
+		lexer_next(compiler);
 
-    	node_t *node = alloc_node(parser, N_IF);
+    	node_t *node = alloc_node(compiler, N_IF);
 
 		node->left = result;
-		node->middle = parse_ternary_if(parser);
+		node->middle = parse_ternary_if(compiler);
 
-		match(parser, T_COLON);
+		lexer_match(compiler, T_COLON);
 
-		node->right = parse_ternary_if(parser);
+		node->right = parse_ternary_if(compiler);
 
 		return node;
 	}
@@ -116,19 +116,19 @@ node_t *parse_ternary_if(struct parser *parser)
 	return result;
 }
 
-node_t *parse_conditional(struct parser *parser)
+node_t *parse_conditional(struct compiler *compiler)
 {
-	node_t *result = parse_low_boolean(parser);
+	node_t *result = parse_low_boolean(compiler);
 
-    if (parser_current(parser) == T_IF || parser_current(parser) == T_UNLESS)
+    if (lexer_current(compiler) == T_IF || lexer_current(compiler) == T_UNLESS)
     {
-     	node_t *node = alloc_node(parser, parser_current(parser) == T_IF ? N_IF : N_UNLESS);
+     	node_t *node = alloc_node(compiler, lexer_current(compiler) == T_IF ? N_IF : N_UNLESS);
 
-		next(parser);
+		lexer_next(compiler);
 
 		node->middle = result;
-		node->left = parse_statement(parser);
-		node->right = alloc_nil_node(parser);
+		node->left = parse_statement(compiler);
+		node->right = alloc_nil_node(compiler);
 
 		return node;
     }
@@ -136,127 +136,127 @@ node_t *parse_conditional(struct parser *parser)
     return result;
 }
 
-node_t *parse_unless(struct parser *parser)
+node_t *parse_unless(struct compiler *compiler)
 {
-				next(parser);
+	lexer_next(compiler);
 
-				node_t *result = alloc_node(parser, N_UNLESS);
-				result->left = parse_expression(parser);
+	node_t *result = alloc_node(compiler, N_UNLESS);
+	result->left = parse_expression(compiler);
 
-				parse_then_sep(parser);
+	parse_then_sep(compiler);
 
-				result->middle = parse_statements(parser);
-				result->right = alloc_nil_node(parser);
+	result->middle = parse_statements(compiler);
+	result->right = alloc_nil_node(compiler);
 
-				match(parser, T_END);
-
-				return result;
-}
-
-node_t *parse_if_tail(struct parser *parser)
-{
-	switch (parser_current(parser))
-	{
-		case T_ELSIF:
-			{
-				next(parser);
-
-				node_t *result = alloc_node(parser, N_IF);
-				result->left = parse_expression(parser);
-
-				parse_then_sep(parser);
-
-				result->middle = parse_statements(parser);
-				result->right = parse_if_tail(parser);
-
-				return result;
-			}
-
-		case T_ELSE:
-			next(parser);
-
-			return parse_statements(parser);
-
-		default:
-			return alloc_nil_node(parser);
-	}
-}
-
-node_t *parse_if(struct parser *parser)
-{
-	next(parser);
-
-	node_t *result = alloc_node(parser, N_IF);
-	result->left = parse_expression(parser);
-
-	parse_then_sep(parser);
-
-	result->middle = parse_statements(parser);
-	result->right = parse_if_tail(parser);
-
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }
 
-node_t *parse_case_body(struct parser *parser)
+node_t *parse_if_tail(struct compiler *compiler)
 {
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
+	{
+		case T_ELSIF:
+			{
+				lexer_next(compiler);
+
+				node_t *result = alloc_node(compiler, N_IF);
+				result->left = parse_expression(compiler);
+
+				parse_then_sep(compiler);
+
+				result->middle = parse_statements(compiler);
+				result->right = parse_if_tail(compiler);
+
+				return result;
+			}
+
+		case T_ELSE:
+			lexer_next(compiler);
+
+			return parse_statements(compiler);
+
+		default:
+			return alloc_nil_node(compiler);
+	}
+}
+
+node_t *parse_if(struct compiler *compiler)
+{
+	lexer_next(compiler);
+
+	node_t *result = alloc_node(compiler, N_IF);
+	result->left = parse_expression(compiler);
+
+	parse_then_sep(compiler);
+
+	result->middle = parse_statements(compiler);
+	result->right = parse_if_tail(compiler);
+
+	lexer_match(compiler, T_END);
+
+	return result;
+}
+
+node_t *parse_case_body(struct compiler *compiler)
+{
+	switch (lexer_current(compiler))
 	{
 		case T_WHEN:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				node_t *result = alloc_node(parser, N_IF);
-				result->left = parse_expression(parser);
+				node_t *result = alloc_node(compiler, N_IF);
+				result->left = parse_expression(compiler);
 
-				parse_then_sep(parser);
+				parse_then_sep(compiler);
 
-				result->middle = parse_statements(parser);
-				result->right = parse_case_body(parser);
+				result->middle = parse_statements(compiler);
+				result->right = parse_case_body(compiler);
 
 				return result;
 			}
 
 		case T_ELSE:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				return parse_statements(parser);
+				return parse_statements(compiler);
 			}
 
 		default:
 			{
-				PARSER_ERROR(parser, "Expected else or when but found %s", token_type_names[parser_current(parser)]);
+				COMPILER_ERROR(compiler, "Expected else or when but found %s", token_type_names[lexer_current(compiler)]);
 
 				return 0;
 			}
 	}
 }
 
-node_t *parse_case(struct parser *parser)
+node_t *parse_case(struct compiler *compiler)
 {
-	next(parser);
+	lexer_next(compiler);
 
 	node_t *result = 0;
 
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_ELSE:
-			next(parser);
+			lexer_next(compiler);
 
-			result = parse_statements(parser);
+			result = parse_statements(compiler);
 			break;
 
 		case T_WHEN:
-			result = parse_case_body(parser);
+			result = parse_case_body(compiler);
 			break;
 
 		default:
-			PARSER_ERROR(parser, "Expected else or when but found %s", token_type_names[parser_current(parser)]);
+			COMPILER_ERROR(compiler, "Expected else or when but found %s", token_type_names[lexer_current(compiler)]);
 	}
 
-	match(parser, T_END);
+	lexer_match(compiler, T_END);
 
 	return result;
 }

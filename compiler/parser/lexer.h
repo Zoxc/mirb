@@ -2,7 +2,7 @@
 #include "../../globals.h"
 #include "../../runtime/runtime.h"
 
-typedef enum {
+enum token_type {
 	T_NONE = 0,
 	T_ADD = 1,
 	T_SUB = 2,
@@ -71,12 +71,12 @@ typedef enum {
 	T_AND,
 	T_OR,
 	T_END
-} token_type;
+};
 
-typedef enum {
+enum token_state {
 	TS_DEFAULT,
 	TS_NOKEYWORDS
-} token_state;
+};
 
 #define OP_TO_ASSIGN (T_ASSIGN_ADD - T_ADD)
 #define OP_TO_UNARY (T_UNARY_ADD - T_ADD)
@@ -85,27 +85,31 @@ typedef enum {
 
 extern char *token_type_names[];
 
-struct parser;
-
-typedef struct {
+struct token {
     const char *input;
     const char *start;
     const char *stop;
-    struct parser *parser;
+    struct compiler *compiler;
     kvec_t(bool) curlys;
     size_t line;
-	token_type type;
+	enum token_type type;
     bool whitespace;
-    token_state state;
-} token_t;
+    enum token_state state;
+};
 
-void parser_setup(void);
-struct parser *parser_create(const char *input, const char *filename);
-void parser_destroy(struct parser *parser);
+void lexer_setup(void);
+void lexer_create(struct compiler *compiler, const char *input);
+void lexer_destroy(struct compiler *compiler);
 
-token_type next(struct parser *parser);
+enum token_type lexer_next(struct compiler *compiler);
 
-void parser_state(struct parser *parser, token_state state);
-void parser_context(struct parser *parser, token_t *token);
-void parser_restore(struct parser *parser, token_t *token);
-char *get_token_str(token_t *token);
+struct token *lexer_token(struct compiler *compiler);
+enum token_type lexer_current(struct compiler *compiler);
+void lexer_state(struct compiler *compiler, enum token_state state);
+void lexer_context(struct compiler *compiler, struct token *token);
+void lexer_restore(struct compiler *compiler, struct token *token);
+char *get_token_str(struct token *token);
+
+bool lexer_match(struct compiler *compiler, enum token_type type);
+bool lexer_matches(struct compiler *compiler, enum token_type type);
+bool lexer_require(struct compiler *compiler, enum token_type type);

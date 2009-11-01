@@ -11,7 +11,7 @@ int main()
 {
 	char buffer[800];
 
-	parser_setup();
+	compiler_setup();
 
 	rt_create();
 
@@ -19,18 +19,18 @@ int main()
 	{
 		gets(buffer);
 
-		struct parser *parser = parser_create(buffer, "Input");
+		struct compiler *compiler = compiler_create(buffer, "Input");
 
-		if(parser_current(parser) == T_EOF)
+		if(lexer_current(compiler) == T_EOF)
 		{
-			parser_destroy(parser);
+			compiler_destroy(compiler);
 
 			break;
 		}
 
-		node_t* expression = parse_main(parser);
+		node_t* expression = parse_main(compiler);
 
-		if(parser->err_count == 0)
+		if(compiler->err_count == 0)
 		{
 			#ifdef DEBUG
 				printf("Parsing done.\n");
@@ -52,7 +52,7 @@ int main()
 			printf("=> "); rt_print(result); printf("\n");
 		}
 
-		parser_destroy(parser);
+		compiler_destroy(compiler);
 	}
 
 	printf("Exiting gracefully...");

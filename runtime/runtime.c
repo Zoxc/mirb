@@ -46,11 +46,11 @@ void rt_destroy(void)
 
 rt_value rt_eval(rt_value self, const char *input, const char *filename)
 {
-	struct parser *parser = parser_create(input, filename);
+	struct compiler *compiler = compiler_create(input, filename);
 
-	node_t* expression = parse_main(parser);
+	node_t* expression = parse_main(compiler);
 
-	if(parser->err_count != 0)
+	if(compiler->err_count != 0)
 		return RT_NIL;
 
 	extern rt_value get_node_name(node_t *node);
@@ -63,7 +63,7 @@ rt_value rt_eval(rt_value self, const char *input, const char *filename)
 
 	rt_compiled_block_t compiled_block = compile_block(code_block);
 
-	parser_destroy(parser);
+	compiler_destroy(compiler);
 
 	return compiled_block(self, RT_NIL, 0, 0);
 }

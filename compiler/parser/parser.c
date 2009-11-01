@@ -36,7 +36,7 @@ variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
 
 	RT_ASSERT(ret);
 
-	variable_t *var = parser_alloc(scope->parser, sizeof(variable_t));
+	variable_t *var = compiler_alloc(scope->compiler, sizeof(variable_t));
 	var->type = type;
 	var->name = name;
 	var->index = scope->var_count[type];
@@ -95,42 +95,42 @@ variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool
 	}
 }
 
-void parse_sep(struct parser *parser)
+void parse_sep(struct compiler *compiler)
 {
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_LINE:
 		case T_SEP:
-			next(parser);
+			lexer_next(compiler);
 			break;
 
 		default:
-			PARSER_ERROR(parser, "Expected seperator but found %s", token_type_names[parser_current(parser)]);
+			COMPILER_ERROR(compiler, "Expected seperator but found %s", token_type_names[lexer_current(compiler)]);
 	}
 }
 
-node_t *parse_argument(struct parser *parser)
+node_t *parse_argument(struct compiler *compiler)
 {
-	node_t *result = alloc_node(parser, N_ARGUMENT);
+	node_t *result = alloc_node(compiler, N_ARGUMENT);
 
-	result->left = parse_expression(parser);
+	result->left = parse_expression(compiler);
 	result->right = 0;
 
-	if(matches(parser, T_COMMA))
-		result->right = parse_argument(parser);
+	if(lexer_matches(compiler, T_COMMA))
+		result->right = parse_argument(compiler);
 	else
 		result->right = 0;
 
 	return result;
 }
 
-node_t *parse_identifier(struct parser *parser)
+node_t *parse_identifier(struct compiler *compiler)
 {
-	rt_value symbol = rt_symbol_from_parser(parser);
+	rt_value symbol = rt_symbol_from_parser(compiler);
 
-	next(parser);
+	lexer_next(compiler);
 
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_ASSIGN_ADD:
 		case T_ASSIGN_SUB:
@@ -139,34 +139,34 @@ node_t *parse_identifier(struct parser *parser)
 		{
 			node_t *result;
 
-			token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
+			enum token_type op_type = lexer_current(compiler) - OP_TO_ASSIGN;
 
-			next(parser);
+			lexer_next(compiler);
 
 			if (rt_symbol_is_const(symbol))
-				result = alloc_node(parser, N_ASSIGN_CONST);
+				result = alloc_node(compiler, N_ASSIGN_CONST);
 			else
-				result = alloc_node(parser, N_ASSIGN);
+				result = alloc_node(compiler, N_ASSIGN);
 
-			result->right = alloc_node(parser, N_BINARY_OP);
+			result->right = alloc_node(compiler, N_BINARY_OP);
 			result->right->op = op_type;
 
 			if (rt_symbol_is_const(symbol))
 			{
-				result->left = alloc_node(parser, N_SELF);
+				result->left = alloc_node(compiler, N_SELF);
 				result->middle = (void *)symbol;
-				result->right->left = alloc_node(parser, N_CONST);
-				result->right->left->left = alloc_node(parser, N_SELF);
+				result->right->left = alloc_node(compiler, N_CONST);
+				result->right->left->left = alloc_node(compiler, N_SELF);
 				result->right->left->right = (void *)symbol;
 			}
 			else
 			{
-				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
-				result->right->left = alloc_node(parser, N_VAR);
-				result->right->left->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
+				result->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
+				result->right->left = alloc_node(compiler, N_VAR);
+				result->right->left->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
 			}
 
-			result->right->right = parse_expression(parser);
+			result->right->right = parse_expression(compiler);
 
 			return result;
 		}
@@ -175,21 +175,21 @@ node_t *parse_identifier(struct parser *parser)
 		{
 			node_t *result;
 
-			next(parser);
+			lexer_next(compiler);
 
 			if (rt_symbol_is_const(symbol))
 			{
-				result = alloc_node(parser, N_ASSIGN_CONST);
-				result->left = alloc_node(parser, N_SELF);
+				result = alloc_node(compiler, N_ASSIGN_CONST);
+				result->left = alloc_node(compiler, N_SELF);
 				result->middle = (void *)symbol;
 			}
 			else
 			{
-				result = alloc_node(parser, N_ASSIGN);
-				result->left = (void *)scope_define(parser->current_scope, symbol, V_LOCAL, true);
+				result = alloc_node(compiler, N_ASSIGN);
+				result->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
 			}
 
-			result->right = parse_expression(parser);
+			result->right = parse_expression(compiler);
 
 			return result;
 		}
@@ -197,21 +197,21 @@ node_t *parse_identifier(struct parser *parser)
 		// Function call or local variable
 
 		default:
-			return parse_call(parser, symbol, alloc_node(parser, N_SELF), true);
+			return parse_call(compiler, symbol, alloc_node(compiler, N_SELF), true);
 	}
 }
 
-node_t *parse_array_element(struct parser *parser)
+node_t *parse_array_element(struct compiler *compiler)
 {
-	node_t *result = alloc_node(parser, N_ARRAY_ELEMENT);
+	node_t *result = alloc_node(compiler, N_ARRAY_ELEMENT);
 
-	result->left = parse_expression(parser);
+	result->left = parse_expression(compiler);
 
-	if(parser_current(parser) == T_COMMA)
+	if(lexer_current(compiler) == T_COMMA)
 	{
-		next(parser);
+		lexer_next(compiler);
 
-		result->right  = parse_array_element(parser);
+		result->right  = parse_array_element(compiler);
 	}
 	else
 		result->right = 0;
@@ -219,97 +219,97 @@ node_t *parse_array_element(struct parser *parser)
 	return result;
 }
 
-node_t *parse_factor(struct parser *parser)
+node_t *parse_factor(struct compiler *compiler)
 {
-	switch (parser_current(parser))
+	switch (lexer_current(compiler))
 	{
 		case T_BEGIN:
-			return parse_begin(parser);
+			return parse_begin(compiler);
 
 		case T_IF:
-			return parse_if(parser);
+			return parse_if(compiler);
 
 		case T_UNLESS:
-			return parse_unless(parser);
+			return parse_unless(compiler);
 
 		case T_CASE:
-			return parse_case(parser);
+			return parse_case(compiler);
 
 		case T_CLASS:
-			return parse_class(parser);
+			return parse_class(compiler);
 
 		case T_MODULE:
-			return parse_module(parser);
+			return parse_module(compiler);
 
 		case T_DEF:
-			return parse_method(parser);
+			return parse_method(compiler);
 
 		case T_YIELD:
-			return parse_yield(parser);
+			return parse_yield(compiler);
 
 		case T_RETURN:
-			return parse_return(parser);
+			return parse_return(compiler);
 
 		case T_SQUARE_OPEN:
 			{
-			    node_t *result = alloc_node(parser, N_ARRAY);
+			    node_t *result = alloc_node(compiler, N_ARRAY);
 
-			    next(parser);
+			    lexer_next(compiler);
 
-			    if(parser_current(parser) == T_SQUARE_CLOSE)
+			    if(lexer_current(compiler) == T_SQUARE_CLOSE)
 					result->left  = 0;
 				else
-					result->left = parse_array_element(parser);
+					result->left = parse_array_element(compiler);
 
-				match(parser, T_SQUARE_CLOSE);
+				lexer_match(compiler, T_SQUARE_CLOSE);
 
 				return result;
 			}
 
 		case T_STRING:
 			{
-			    node_t *result = alloc_node(parser, N_STRING);
+			    node_t *result = alloc_node(compiler, N_STRING);
 
-				result->left = (void *)parser_token(parser)->start;
+				result->left = (void *)lexer_token(compiler)->start;
 
-				next(parser);
+				lexer_next(compiler);
 
 				return result;
 			}
 
 		case T_STRING_START:
 			{
-			    node_t *result = alloc_node(parser, N_STRING_CONTINUE);
+			    node_t *result = alloc_node(compiler, N_STRING_CONTINUE);
 
 				result->left = 0;
-				result->middle = (void *)parser_token(parser)->start;
+				result->middle = (void *)lexer_token(compiler)->start;
 
-				next(parser);
+				lexer_next(compiler);
 
-				result->right = parse_statements(parser);
+				result->right = parse_statements(compiler);
 
-				while(parser_current(parser) == T_STRING_CONTINUE)
+				while(lexer_current(compiler) == T_STRING_CONTINUE)
 				{
-					node_t *node = alloc_node(parser, N_STRING_CONTINUE);
+					node_t *node = alloc_node(compiler, N_STRING_CONTINUE);
 
 					node->left = result;
-					node->middle = (void *)parser_token(parser)->start;
+					node->middle = (void *)lexer_token(compiler)->start;
 
-					next(parser);
+					lexer_next(compiler);
 
-					node->right = parse_statements(parser);
+					node->right = parse_statements(compiler);
 
 					result = node;
 				}
 
-				if(require(parser, T_STRING_END))
+				if(lexer_require(compiler, T_STRING_END))
 				{
-					node_t *node = alloc_node(parser, N_STRING_START);
+					node_t *node = alloc_node(compiler, N_STRING_START);
 
 					node->left = result;
-					node->right = (void *)parser_token(parser)->start;
+					node->right = (void *)lexer_token(compiler)->start;
 
-					next(parser);
+					lexer_next(compiler);
 
 					return node;
 				}
@@ -319,52 +319,52 @@ node_t *parse_factor(struct parser *parser)
 
 		case T_SELF:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				return alloc_node(parser, N_SELF);
+				return alloc_node(compiler, N_SELF);
 			}
 
 		case T_TRUE:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				return alloc_node(parser, N_TRUE);
+				return alloc_node(compiler, N_TRUE);
 			}
 
 		case T_FALSE:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				return alloc_node(parser, N_FALSE);
+				return alloc_node(compiler, N_FALSE);
 			}
 
 		case T_NIL:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				return alloc_node(parser, N_NIL);
+				return alloc_node(compiler, N_NIL);
 			}
 
 		case T_NUMBER:
 			{
-			    node_t *result = alloc_node(parser, N_NUMBER);
+			    node_t *result = alloc_node(compiler, N_NUMBER);
 
-			    char *text = get_token_str(parser_token(parser));
+			    char *text = get_token_str(lexer_token(compiler));
 
 			    result->left = (void* )atoi(text);
 
-			    next(parser);
+			    lexer_next(compiler);
 
 				return result;
 			}
 
 		case T_IVAR:
 			{
-				rt_value symbol = rt_symbol_from_parser(parser);
+				rt_value symbol = rt_symbol_from_parser(compiler);
 
-				next(parser);
+				lexer_next(compiler);
 
-				switch (parser_current(parser))
+				switch (lexer_current(compiler))
 				{
 					case T_ASSIGN_ADD:
 					case T_ASSIGN_SUB:
@@ -373,17 +373,17 @@ node_t *parse_factor(struct parser *parser)
 					{
 						node_t *result;
 
-						token_type op_type = parser_current(parser) - OP_TO_ASSIGN;
+						enum token_type op_type = lexer_current(compiler) - OP_TO_ASSIGN;
 
-						next(parser);
+						lexer_next(compiler);
 
-						result = alloc_node(parser, N_IVAR_ASSIGN);
+						result = alloc_node(compiler, N_IVAR_ASSIGN);
 
-						result->right = alloc_node(parser, N_BINARY_OP);
+						result->right = alloc_node(compiler, N_BINARY_OP);
 						result->right->op = op_type;
-						result->right->left = alloc_node(parser, N_IVAR);
+						result->right->left = alloc_node(compiler, N_IVAR);
 						result->right->left->left = (void *)symbol;
-						result->right->right = parse_expression(parser);
+						result->right->right = parse_expression(compiler);
 
 						result->left = (void *)symbol;
 
@@ -394,18 +394,18 @@ node_t *parse_factor(struct parser *parser)
 					{
 						node_t *result;
 
-						next(parser);
+						lexer_next(compiler);
 
-						result = alloc_node(parser, N_IVAR_ASSIGN);
+						result = alloc_node(compiler, N_IVAR_ASSIGN);
 						result->left = (void *)symbol;
-						result->right = parse_expression(parser);
+						result->right = parse_expression(compiler);
 
 						return result;
 					}
 
 					default:
 					{
-						node_t *result = alloc_node(parser, N_IVAR);
+						node_t *result = alloc_node(compiler, N_IVAR);
 
 						result->left = (void *)symbol;
 
@@ -415,110 +415,110 @@ node_t *parse_factor(struct parser *parser)
 			}
 
 		case T_IDENT:
-			return parse_identifier(parser);
+			return parse_identifier(compiler);
 
 		case T_EXT_IDENT:
-			return parse_call(parser, 0, alloc_node(parser, N_SELF), false);
+			return parse_call(compiler, 0, alloc_node(compiler, N_SELF), false);
 
 		case T_PARAM_OPEN:
 			{
-				next(parser);
+				lexer_next(compiler);
 
-				node_t *result = parse_statements(parser);
+				node_t *result = parse_statements(compiler);
 
-				match(parser, T_PARAM_CLOSE);
+				lexer_match(compiler, T_PARAM_CLOSE);
 
 				return result;
 			}
 
 		default:
 			{
-				PARSER_ERROR(parser, "Expected expression but found %s", token_type_names[parser_current(parser)]);
+				COMPILER_ERROR(compiler, "Expected expression but found %s", token_type_names[lexer_current(compiler)]);
 
-				next(parser);
+				lexer_next(compiler);
 
 				return 0;
 			}
 	}
 }
 
-node_t *parse_unary(struct parser *parser)
+node_t *parse_unary(struct compiler *compiler)
 {
-    if(parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
+    if(lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
     {
-    	node_t *result = alloc_node(parser, N_UNARY_OP);
+    	node_t *result = alloc_node(compiler, N_UNARY_OP);
 
-		result->op = parser_current(parser) + OP_TO_UNARY;
+		result->op = lexer_current(compiler) + OP_TO_UNARY;
 
-		next(parser);
+		lexer_next(compiler);
 
-		result->left = parse_lookup_chain(parser);;
+		result->left = parse_lookup_chain(compiler);;
 
 		return result;
     }
     else
-		return parse_lookup_chain(parser);
+		return parse_lookup_chain(compiler);
 }
 
-node_t *parse_term(struct parser *parser)
+node_t *parse_term(struct compiler *compiler)
 {
-	node_t *result = parse_unary(parser);
+	node_t *result = parse_unary(compiler);
 
-    while(parser_current(parser) == T_MUL || parser_current(parser) == T_DIV)
+    while(lexer_current(compiler) == T_MUL || lexer_current(compiler) == T_DIV)
     {
-    	node_t *node = alloc_node(parser, N_BINARY_OP);
+    	node_t *node = alloc_node(compiler, N_BINARY_OP);
 
-		node->op = parser_current(parser);
+		node->op = lexer_current(compiler);
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_unary(parser);
+		node->right = parse_unary(compiler);
 		result = node;
     }
 
 	return result;
 }
 
-node_t *parse_arithmetic(struct parser *parser)
+node_t *parse_arithmetic(struct compiler *compiler)
 {
-	node_t *result = parse_term(parser);
+	node_t *result = parse_term(compiler);
 
-    while (parser_current(parser) == T_ADD || parser_current(parser) == T_SUB)
+    while (lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
     {
-    	node_t *node = alloc_node(parser, N_BINARY_OP);
+    	node_t *node = alloc_node(compiler, N_BINARY_OP);
 
-		node->op = parser_current(parser);
+		node->op = lexer_current(compiler);
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_term(parser);
+		node->right = parse_term(compiler);
 		result = node;
     }
 
     return result;
 }
 
-node_t *parse_boolean_unary(struct parser *parser)
+node_t *parse_boolean_unary(struct compiler *compiler)
 {
-    if(parser_current(parser) == T_NOT_SIGN)
+    if(lexer_current(compiler) == T_NOT_SIGN)
     {
-    	node_t *result = alloc_node(parser, N_NOT);
+    	node_t *result = alloc_node(compiler, N_NOT);
 
-		next(parser);
+		lexer_next(compiler);
 
-		result->left = parse_arithmetic(parser);
+		result->left = parse_arithmetic(compiler);
 
 		return result;
     }
     else
-		return parse_arithmetic(parser);
+		return parse_arithmetic(compiler);
 }
 
-static inline bool is_equality_op(struct parser *parser)
+static inline bool is_equality_op(struct compiler *compiler)
 {
-	switch(parser_current(parser))
+	switch(lexer_current(compiler))
 	{
 		case T_EQUALITY:
 		case T_CASE_EQUALITY:
@@ -530,148 +530,148 @@ static inline bool is_equality_op(struct parser *parser)
 	}
 }
 
-node_t *parse_equality(struct parser *parser)
+node_t *parse_equality(struct compiler *compiler)
 {
-	node_t *result = parse_boolean_unary(parser);
+	node_t *result = parse_boolean_unary(compiler);
 
-    while(is_equality_op(parser))
+    while(is_equality_op(compiler))
     {
     	node_t *node;
 
-    	if(parser_current(parser) == T_NO_EQUALITY)
-    		node = alloc_node(parser,  N_NO_EQUALITY);
+    	if(lexer_current(compiler) == T_NO_EQUALITY)
+    		node = alloc_node(compiler,  N_NO_EQUALITY);
 		else
 		{
-			node = alloc_node(parser,  N_BINARY_OP);
-			node->op = parser_current(parser);
+			node = alloc_node(compiler,  N_BINARY_OP);
+			node->op = lexer_current(compiler);
 		}
 
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_boolean_unary(parser);
+		node->right = parse_boolean_unary(compiler);
 		result = node;
     }
 
     return result;
 }
 
-node_t *parse_boolean_and(struct parser *parser)
+node_t *parse_boolean_and(struct compiler *compiler)
 {
-	node_t *result = parse_equality(parser);
+	node_t *result = parse_equality(compiler);
 
-    while(parser_current(parser) == T_AND_BOOLEAN)
+    while(lexer_current(compiler) == T_AND_BOOLEAN)
     {
-    	node_t *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(compiler, N_BOOLEAN);
 
-		node->op = parser_current(parser);
+		node->op = lexer_current(compiler);
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_equality(parser);
+		node->right = parse_equality(compiler);
 		result = node;
     }
 
     return result;
 }
 
-node_t *parse_boolean_or(struct parser *parser)
+node_t *parse_boolean_or(struct compiler *compiler)
 {
-	node_t *result = parse_boolean_and(parser);
+	node_t *result = parse_boolean_and(compiler);
 
-    while(parser_current(parser) == T_OR_BOOLEAN)
+    while(lexer_current(compiler) == T_OR_BOOLEAN)
     {
-    	node_t *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(compiler, N_BOOLEAN);
 
-		node->op = parser_current(parser);
+		node->op = lexer_current(compiler);
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_boolean_and(parser);
+		node->right = parse_boolean_and(compiler);
 		result = node;
     }
 
     return result;
 }
 
-node_t *parse_expression(struct parser *parser)
+node_t *parse_expression(struct compiler *compiler)
 {
-	return parse_ternary_if(parser);
+	return parse_ternary_if(compiler);
 }
 
-node_t *parse_low_boolean_unary(struct parser *parser)
+node_t *parse_low_boolean_unary(struct compiler *compiler)
 {
-    if(parser_current(parser) == T_NOT)
+    if(lexer_current(compiler) == T_NOT)
     {
-    	node_t *result = alloc_node(parser, N_NOT);
+    	node_t *result = alloc_node(compiler, N_NOT);
 
-		next(parser);
+		lexer_next(compiler);
 
-		result->left = parse_expression(parser);
+		result->left = parse_expression(compiler);
 
 		return result;
     }
     else
-		return parse_expression(parser);
+		return parse_expression(compiler);
 }
 
-node_t *parse_low_boolean(struct parser *parser)
+node_t *parse_low_boolean(struct compiler *compiler)
 {
-	node_t *result = parse_low_boolean_unary(parser);
+	node_t *result = parse_low_boolean_unary(compiler);
 
-    while(parser_current(parser) == T_AND || parser_current(parser) == T_OR)
+    while(lexer_current(compiler) == T_AND || lexer_current(compiler) == T_OR)
     {
-    	node_t *node = alloc_node(parser, N_BOOLEAN);
+    	node_t *node = alloc_node(compiler, N_BOOLEAN);
 
-		node->op = parser_current(parser);
+		node->op = lexer_current(compiler);
 		node->left = result;
 
-		next(parser);
+		lexer_next(compiler);
 
-		node->right = parse_low_boolean_unary(parser);
+		node->right = parse_low_boolean_unary(compiler);
 		result = node;
     }
 
     return result;
 }
 
-node_t *parse_statement(struct parser *parser)
+node_t *parse_statement(struct compiler *compiler)
 {
-	return parse_conditional(parser);
+	return parse_conditional(compiler);
 }
 
-static inline bool is_sep(struct parser *parser)
+static inline bool is_sep(struct compiler *compiler)
 {
-	return parser_current(parser) == T_SEP || parser_current(parser) == T_LINE;
+	return lexer_current(compiler) == T_SEP || lexer_current(compiler) == T_LINE;
 }
 
-static inline void skip_seps(struct parser *parser)
+static inline void skip_seps(struct compiler *compiler)
 {
-	while (is_sep(parser))
-		next(parser);
+	while (is_sep(compiler))
+		lexer_next(compiler);
 }
 
-node_t *parse_statements(struct parser *parser)
+node_t *parse_statements(struct compiler *compiler)
 {
-	skip_seps(parser);
+	skip_seps(compiler);
 
-	if(is_expression(parser))
+	if(is_expression(compiler))
 	{
-		node_t *result = parse_statement(parser);
+		node_t *result = parse_statement(compiler);
 
-		if (is_sep(parser))
+		if (is_sep(compiler))
 		{
-			skip_seps(parser);
+			skip_seps(compiler);
 
-			if(is_expression(parser))
+			if(is_expression(compiler))
 			{
-				node_t *node = alloc_node(parser, N_STATEMENTS);
+				node_t *node = alloc_node(compiler, N_STATEMENTS);
 
 				node->left = result;
-				node->right = parse_statements(parser);
+				node->right = parse_statements(compiler);
 
 				return node;
 			}
@@ -681,20 +681,20 @@ node_t *parse_statements(struct parser *parser)
 
 	}
 	else
-		return alloc_nil_node(parser);
+		return alloc_nil_node(compiler);
 }
 
-node_t *parse_main(struct parser *parser)
+node_t *parse_main(struct compiler *compiler)
 {
 	scope_t *scope;
 
-	node_t *result = alloc_scope(parser, &scope, S_MAIN);
+	node_t *result = alloc_scope(compiler, &scope, S_MAIN);
 
 	scope->owner = scope;
 
-	result->right = parse_statements(parser);
+	result->right = parse_statements(compiler);
 
-	match(parser, T_EOF);
+	lexer_match(compiler, T_EOF);
 
 	return result;
 }
