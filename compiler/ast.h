@@ -1,5 +1,5 @@
 #pragma once
-#include "parser/lexer.h"
+#include "lexer.h"
 
 typedef enum {
 	N_UNARY_OP,

@@ -126,7 +126,7 @@ node_t *parse_argument(struct compiler *compiler)
 
 node_t *parse_identifier(struct compiler *compiler)
 {
-	rt_value symbol = rt_symbol_from_parser(compiler);
+	rt_value symbol = rt_symbol_from_lexer(compiler);
 
 	lexer_next(compiler);
 
@@ -360,7 +360,7 @@ node_t *parse_factor(struct compiler *compiler)
 
 		case T_IVAR:
 			{
-				rt_value symbol = rt_symbol_from_parser(compiler);
+				rt_value symbol = rt_symbol_from_lexer(compiler);
 
 				lexer_next(compiler);
 

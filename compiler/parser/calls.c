@@ -140,7 +140,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 			case T_IDENT:
 			case T_EXT_IDENT:
 				{
-					symbol = rt_symbol_from_parser(compiler);
+					symbol = rt_symbol_from_lexer(compiler);
 
 					lexer_next(compiler);
 				}
@@ -212,7 +212,7 @@ node_t *parse_lookup(struct compiler *compiler, node_t *child)
 
 				if(lexer_require(compiler, T_IDENT))
 				{
-					rt_value symbol = rt_symbol_from_parser(compiler);
+					rt_value symbol = rt_symbol_from_lexer(compiler);
 					node_t *result;
 
 					if(rt_symbol_is_const(symbol))

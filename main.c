@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "compiler/parser/lexer.h"
+#include "compiler/lexer.h"
 #include "compiler/parser/parser.h"
 #include "runtime/classes.h"
 #include "runtime/classes/symbol.h"

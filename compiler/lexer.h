@@ -1,6 +1,6 @@
 #pragma once
-#include "../../globals.h"
-#include "../../runtime/runtime.h"
+#include "../globals.h"
+#include "../runtime/runtime.h"
 
 enum token_type {
 	T_NONE = 0,

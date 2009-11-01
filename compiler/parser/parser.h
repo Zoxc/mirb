@@ -2,8 +2,7 @@
 #include "../../globals.h"
 #include "../../runtime/classes.h"
 #include "../../runtime/runtime.h"
-#include "lexer.h"
-#include "../allocator.h"
+#include "../lexer.h"
 #include "../ast.h"
 #include "../compiler.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../classes.h"
-#include "../../compiler/parser/lexer.h"
+#include "../../compiler/lexer.h"
 #include "../../compiler/parser/parser.h"
 
 struct rt_symbol {
@@ -38,7 +38,7 @@ static inline bool rt_symbol_is_const(rt_value value)
 	return c >= 'A' && c <= 'Z';
 }
 
-static inline rt_value rt_symbol_from_parser(struct compiler *compiler)
+static inline rt_value rt_symbol_from_lexer(struct compiler *compiler)
 {
 	return rt_symbol_from_token(lexer_token(compiler));
 }

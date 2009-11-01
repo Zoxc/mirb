@@ -9,7 +9,7 @@ node_t *parse_class(struct compiler *compiler)
 
 	if(lexer_require(compiler, T_IDENT))
 	{
-		result->left = (void *)rt_symbol_from_parser(compiler);
+		result->left = (void *)rt_symbol_from_lexer(compiler);
 
 		lexer_next(compiler);
 	}
@@ -38,7 +38,7 @@ node_t *parse_module(struct compiler *compiler)
 
 	if(lexer_require(compiler, T_IDENT))
 	{
-		result->left = (void *)rt_symbol_from_parser(compiler);
+		result->left = (void *)rt_symbol_from_lexer(compiler);
 
 		lexer_next(compiler);
 	}
@@ -78,7 +78,7 @@ void parse_parameter(struct compiler *compiler, scope_t *scope)
 	{
 		bool block_var = lexer_matches(compiler, T_AMP);
 
-		rt_value symbol = rt_symbol_from_parser(compiler);
+		rt_value symbol = rt_symbol_from_lexer(compiler);
 
 		if(block_var)
 		{
@@ -121,7 +121,7 @@ node_t *parse_method(struct compiler *compiler)
 		case T_IDENT:
 		case T_EXT_IDENT:
 			{
-				result->left = (void *)rt_symbol_from_parser(compiler);
+				result->left = (void *)rt_symbol_from_lexer(compiler);
 
 				lexer_next(compiler);
 			}

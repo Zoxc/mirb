@@ -1,7 +1,7 @@
 #pragma once
 #include "../globals.h"
 #include "allocator.h"
-#include "parser/lexer.h"
+#include "lexer.h"
 
 struct block;
 struct scope;
