@@ -4,18 +4,37 @@
 #include "control_flow.h"
 #include "structures.h"
 
-bool scope_defined(scope_t *scope, rt_value name, bool recursive)
+node_t *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type)
 {
-	if(kh_get(scope, scope->variables, name) != kh_end(scope->variables))
+	struct block *block = block_create(compiler, type);
+
+	node_t *result = compiler_alloc(compiler, sizeof(node_t));
+
+	block->parent = compiler->current_block;
+	block->owner = compiler->current_block ? compiler->current_block->owner : 0;
+
+	result->left = (void *)block;
+	result->type = N_SCOPE;
+
+	compiler->current_block = block;
+
+	*block_var = block;
+
+	return result;
+}
+
+bool scope_defined(struct block *block, rt_value name, bool recursive)
+{
+	if(kh_get(block, block->variables, name) != kh_end(block->variables))
 		return true;
 
 	if(recursive)
 	{
-		while (scope->type == S_CLOSURE)
+		while (block->type == S_CLOSURE)
 		{
-			scope = scope->parent;
+			block = block->parent;
 
-			if(kh_get(scope, scope->variables, name) != kh_end(scope->variables))
+			if(kh_get(block, block->variables, name) != kh_end(block->variables))
 				return true;
 		}
 	}
@@ -23,75 +42,75 @@ bool scope_defined(scope_t *scope, rt_value name, bool recursive)
 	return false;
 }
 
-variable_t *scope_declare_var(scope_t *scope, rt_value name, variable_type type)
+variable_t *scope_declare_var(struct block *block, rt_value name, variable_type type)
 {
-	khiter_t k = kh_get(scope, scope->variables, name);
+	khiter_t k = kh_get(block, block->variables, name);
 
-	if (k != kh_end(scope->variables))
-		return kh_value(scope->variables, k);
+	if (k != kh_end(block->variables))
+		return kh_value(block->variables, k);
 
 	int ret;
 
-	k = kh_put(scope, scope->variables, name, &ret);
+	k = kh_put(block, block->variables, name, &ret);
 
 	RT_ASSERT(ret);
 
-	variable_t *var = compiler_alloc(scope->compiler, sizeof(variable_t));
+	variable_t *var = compiler_alloc(block->compiler, sizeof(variable_t));
 	var->type = type;
 	var->name = name;
-	var->index = scope->var_count[type];
+	var->index = block->var_count[type];
 	var->real = 0;
 
-	scope->var_count[type] += 1;
+	block->var_count[type] += 1;
 
-	kh_value(scope->variables, k) = var;
+	kh_value(block->variables, k) = var;
 
 	return var;
 }
 
-variable_t *scope_define(scope_t *scope, rt_value name, variable_type type, bool recursive)
+variable_t *scope_define(struct block *block, rt_value name, variable_type type, bool recursive)
 {
-	if(scope_defined(scope, name, false))
+	if(scope_defined(block, name, false))
 	{
-		return kh_value(scope->variables, kh_get(scope, scope->variables, name));
+		return kh_value(block->variables, kh_get(block, block->variables, name));
 	}
-	else if(scope_defined(scope, name, true) && recursive)
+	else if(scope_defined(block, name, true) && recursive)
 	{
-		variable_t *result = scope_declare_var(scope, name, V_UPVAL);
+		variable_t *result = scope_declare_var(block, name, V_UPVAL);
 
-		scope = scope->parent;
+		block = block->parent;
 
-		scope_t *temp_scope = scope;
+		struct block *temp_block = block;
 		variable_t *real;
 
 		while(1)
 		{
-			khiter_t k = kh_get(scope, temp_scope->variables, name);
+			khiter_t k = kh_get(block, temp_block->variables, name);
 
-			if(k != kh_end(temp_scope->variables) && kh_value(temp_scope->variables, k)->type != V_UPVAL)
+			if(k != kh_end(temp_block->variables) && kh_value(temp_block->variables, k)->type != V_UPVAL)
 			{
-				real = kh_value(temp_scope->variables, k);
+				real = kh_value(temp_block->variables, k);
 				break;
 			}
 
-			temp_scope = temp_scope->parent;
+			temp_block = temp_block->parent;
 		}
 
 		result->real = real;
 
-		while (scope != temp_scope)
+		while (block != temp_block)
 		{
-			variable_t *var = scope_declare_var(scope, name, V_UPVAL);
+			variable_t *var = scope_declare_var(block, name, V_UPVAL);
 			var->real = real;
 
-			scope = scope->parent;
+			block = block->parent;
 		}
 
 		return result;
 	}
 	else
 	{
-		return scope_declare_var(scope, name, type);
+		return scope_declare_var(block, name, type);
 	}
 }
 
@@ -161,9 +180,9 @@ node_t *parse_identifier(struct compiler *compiler)
 			}
 			else
 			{
-				result->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
+				result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
 				result->right->left = alloc_node(compiler, N_VAR);
-				result->right->left->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
+				result->right->left->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
 			}
 
 			result->right->right = parse_expression(compiler);
@@ -186,7 +205,7 @@ node_t *parse_identifier(struct compiler *compiler)
 			else
 			{
 				result = alloc_node(compiler, N_ASSIGN);
-				result->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
+				result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
 			}
 
 			result->right = parse_expression(compiler);
@@ -686,11 +705,11 @@ node_t *parse_statements(struct compiler *compiler)
 
 node_t *parse_main(struct compiler *compiler)
 {
-	scope_t *scope;
+	struct block *block;
 
-	node_t *result = alloc_scope(compiler, &scope, S_MAIN);
+	node_t *result = alloc_scope(compiler, &block, S_MAIN);
 
-	scope->owner = scope;
+	block->owner = block;
 
 	result->right = parse_statements(compiler);
 

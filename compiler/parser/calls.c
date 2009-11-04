@@ -22,9 +22,9 @@ node_t *parse_block(struct compiler *compiler)
 
 	lexer_next(compiler);
 
-	scope_t *scope;
+	struct block *block;
 
-	node_t *result = alloc_scope(compiler, &scope, S_CLOSURE);
+	node_t *result = alloc_scope(compiler, &block, S_CLOSURE);
 
 	skip_lines(compiler);
 
@@ -32,14 +32,14 @@ node_t *parse_block(struct compiler *compiler)
 	{
 		lexer_next(compiler);
 
-		parse_parameter(compiler, scope);
+		parse_parameter(compiler, block);
 
 		lexer_match(compiler, T_OR_BINARY);
 	}
 
 	result->right = parse_statements(compiler);
 
-	compiler->current_scope = scope->parent;
+	compiler->current_block = block->parent;
 
 	lexer_match(compiler, curly ? T_CURLY_CLOSE : T_END);
 
@@ -117,10 +117,10 @@ node_t *parse_yield(struct compiler *compiler)
 
 	result->left = alloc_node(compiler, N_VAR);
 
-	if(!compiler->current_scope->block_var)
-		compiler->current_scope->block_var = scope_define(compiler->current_scope, 0, V_BLOCK, false);
+	if(!compiler->current_block->block_var)
+		compiler->current_block->block_var = scope_define(compiler->current_block, 0, V_BLOCK, false);
 
-	result->left->left = (void *)compiler->current_scope->block_var;
+	result->left->left = (void *)compiler->current_block->block_var;
 
 	result->middle = (void *)rt_symbol_from_cstr("call");
 
@@ -154,7 +154,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 	bool local = false;
 
 	if(symbol)
-		local = scope_defined(compiler->current_scope, symbol, true);
+		local = scope_defined(compiler->current_block, symbol, true);
 
 	bool has_args = has_arguments(compiler);
 
@@ -164,7 +164,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 		{
 			node_t *result = alloc_node(compiler, N_VAR);
 
-			result->left = (void *)scope_define(compiler->current_scope, symbol, V_LOCAL, true);
+			result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
 
 			return result;
 		}

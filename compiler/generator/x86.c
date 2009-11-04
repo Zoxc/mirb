@@ -176,11 +176,11 @@ static inline int get_stack_index(block_t *block, rt_value var)
 			return 12;
 
 		case V_PARAMETER:
-			index = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + _var->index;
+			index = block->var_count[V_LOCAL] + block->var_count[V_TEMP] + _var->index;
 			break;
 
 		case V_TEMP:
-			index = block->local_offset + block->scope->var_count[V_LOCAL] + _var->index;
+			index = block->local_offset + block->var_count[V_LOCAL] + _var->index;
 			break;
 
 		case V_LOCAL:
@@ -659,11 +659,11 @@ rt_compiled_block_t compile_block(block_t *block)
 {
 	bool require_exceptions = block->require_exceptions;
 	size_t block_size = 3;
-	size_t stack_vars = block->scope->var_count[V_LOCAL] + block->scope->var_count[V_TEMP] + block->scope->var_count[V_PARAMETER];
+	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP] + block->var_count[V_PARAMETER];
 
 	if(require_exceptions)
 	{
-		if(block->scope->type == S_CLOSURE)
+		if(block->type == S_CLOSURE)
 			stack_vars += 1;
 
 		block->current_exception_block_id = -1;
@@ -678,15 +678,15 @@ rt_compiled_block_t compile_block(block_t *block)
 	if(stack_vars > 0)
 		block_size += 6;
 
-	if(block->scope->type == S_CLOSURE)
+	if(block->type == S_CLOSURE)
 		block_size += 2 + (require_exceptions ? 0 : 1);
 
 	if(block->self_ref > 0)
 		block_size += 3 + (require_exceptions ? 0 : 1);
 
-	if(block->scope->var_count[V_PARAMETER])
+	if(block->var_count[V_PARAMETER])
 	{
-		khash_t(scope) *variables = block->scope->variables;
+		khash_t(block) *variables = block->variables;
 
 		block_size += 3;
 
@@ -707,7 +707,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		if(block->self_ref > 0)
 			block_size += 1;
 
-		if(block->scope->type == S_CLOSURE)
+		if(block->type == S_CLOSURE)
 			block_size += 1;
 	}
 
@@ -821,7 +821,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x53); // push ebx
 	}
 
-	if(block->scope->type == S_CLOSURE)
+	if(block->type == S_CLOSURE)
 	{
 		if(!require_exceptions)
 			generate_byte(&target, 0x56); // push esi
@@ -840,9 +840,9 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 8);
 	}
 
-	if(block->scope->var_count[V_PARAMETER])
+	if(block->var_count[V_PARAMETER])
 	{
-		khash_t(scope) *variables = block->scope->variables;
+		khash_t(block) *variables = block->variables;
 
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x4D);
@@ -859,7 +859,7 @@ rt_compiled_block_t compile_block(block_t *block)
 					// Load to edx
 					generate_byte(&target, 0x8B);
 					generate_byte(&target, 0x51);
-					generate_byte(&target, (char)((block->scope->var_count[V_PARAMETER] - var->index - 1) * 4));
+					generate_byte(&target, (char)((block->var_count[V_PARAMETER] - var->index - 1) * 4));
 
 					// Store from edx
 					generate_byte(&target, 0x89);
@@ -893,7 +893,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		if(block->self_ref > 0)
 			generate_byte(&target, 0x5F); // pop edi
 
-		if(block->scope->type == S_CLOSURE)
+		if(block->type == S_CLOSURE)
 			generate_byte(&target, 0x5E); // pop esi
 	}
 

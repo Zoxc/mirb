@@ -288,9 +288,9 @@ static variable_t *get_upval(block_t *block, variable_t *var)
 		variable_t *temp = block_get_var(block);
 
 		var->real = temp;
-		var->index = block->scope->var_count[V_UPVAL];
+		var->index = block->var_count[V_UPVAL];
 
-		block->scope->var_count[V_UPVAL] += 1;
+		block->var_count[V_UPVAL] += 1;
 
 		block_push(block, B_UPVAL, (rt_value)temp, (rt_value)var, 0);
 
@@ -323,7 +323,7 @@ static void generate_call(block_t *block, node_t *self, rt_value name, node_t *a
 		block_t *block_attach = gen_block(block_node);
 
 		khiter_t k;
-		khash_t(scope) *hash = block_attach->scope->variables;
+		khash_t(block) *hash = block_attach->variables;
 		size_t upvals = 0;
 		variable_t *closure_args = block_gen_args(block);
 
@@ -335,10 +335,10 @@ static void generate_call(block_t *block, node_t *self, rt_value name, node_t *a
 
 				if(var->type == V_UPVAL)
 				{
-					khiter_t k = kh_get(scope, block->scope->variables, var->name);
+					khiter_t k = kh_get(block, block->variables, var->name);
 
-					if(k != kh_end(block->scope->variables) && kh_value(block->scope->variables, k)->real == var->real)
-						block_push(block, B_PUSH_UPVAL, (rt_value)kh_value(block->scope->variables, k), 0, 0);
+					if(k != kh_end(block->variables) && kh_value(block->variables, k)->real == var->real)
+						block_push(block, B_PUSH_UPVAL, (rt_value)kh_value(block->variables, k), 0, 0);
 					else
 						block_push(block, B_PUSH, (rt_value)get_upval(block, var->real), 0, 0);
 
@@ -632,7 +632,7 @@ static inline void gen_node(block_t *block, node_t *node, variable_t *var)
 
 block_t *gen_block(node_t *node)
 {
-	block_t *block = block_create((void *)node->left);
+	struct block *block = (void *)node->left;
 
 	variable_t *result = block_get_var(block);
 

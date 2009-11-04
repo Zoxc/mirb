@@ -18,7 +18,6 @@ void lexer_create(struct compiler *compiler, const char* input)
     compiler->token.input = input;
 	compiler->token.compiler = compiler;
 	compiler->token.state = TS_DEFAULT;
-	compiler->current_scope = 0;
 
     kv_init(compiler->token.curlys);
 

@@ -11,7 +11,7 @@ struct compiler *compiler_create(const char* input, const char *filename)
 
 	result->filename = filename;
 	result->err_count = 0;
-	result->current_scope = 0;
+	result->current_block = 0;
 
     allocator_init(&result->allocator);
 

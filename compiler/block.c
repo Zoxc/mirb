@@ -67,3 +67,42 @@ void block_print(block_t *block)
 		}
 	}
 }
+
+block_t *block_create(struct compiler *compiler, enum block_type type)
+{
+	block_t *result = compiler_alloc(compiler, sizeof(struct block));
+
+	result->compiler = compiler;
+	result->label_count = 0;
+	result->label_usage = kh_init(rt_hash);
+	result->self_ref = 0;
+	result->require_exceptions = false;
+	result->current_exception_block = 0;
+	result->current_exception_block_id = (size_t)-1;
+
+	kv_init(result->vector);
+	kv_init(result->exception_blocks);
+	kv_init(result->upvals);
+
+	result->variables = kh_init(block);
+
+	for(int i = 0; i < VARIABLE_TYPES; i++)
+		result->var_count[i] = 0;
+
+	result->type = type;
+	result->block_var = 0;
+
+	result->owner = 0;
+	result->parent = 0;
+
+	return result;
+}
+
+void block_destroy(block_t *block)
+{
+	kh_destroy(rt_hash, block->label_usage);
+	kv_destroy(block->vector);
+	kv_destroy(block->upvals);
+	kv_destroy(block->exception_blocks);
+	free(block);
+}

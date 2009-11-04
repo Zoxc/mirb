@@ -2,7 +2,6 @@
 #include "ast.h"
 #include "bytecode.h"
 #include "compiler.h"
-#include "parser/parser.h"
 #include "../runtime/runtime.h"
 
 /*
@@ -50,8 +49,40 @@ typedef struct {
 } block_data_t;
 
 /*
+ * Variables
+ */
+
+typedef enum {
+	V_PARAMETER,
+	V_LOCAL,
+	V_UPVAL,
+	V_TEMP,
+	V_BLOCK,
+	V_ARGS
+} variable_type;
+
+#define VARIABLE_TYPES 6
+
+typedef struct variable_t {
+	struct variable_t *real;
+	rt_value index;
+	rt_value name;
+	variable_type type;
+} variable_t;
+
+KHASH_MAP_INIT_INT(block, variable_t *);
+
+/*
  * Block definition
  */
+
+enum block_type {
+	S_MAIN,
+	S_METHOD,
+	S_CLASS,
+	S_MODULE,
+	S_CLOSURE
+};
 
 typedef struct block {
 	struct compiler *compiler; // The compiler which owns this block
@@ -59,9 +90,9 @@ typedef struct block {
 	/*
 	 * parser stuff
 	 */
-	scope_type type;
+	enum block_type type;
 	rt_value var_count[VARIABLE_TYPES];
-	khash_t(scope) *variables;
+	khash_t(block) *variables;
 	struct block *owner;
 	struct block *parent;
 	variable_t *block_var;
@@ -77,7 +108,6 @@ typedef struct block {
 	size_t local_offset;
 	size_t current_exception_block_id;
 	khash_t(rt_hash) *label_usage;
-	scope_t *scope;
 	size_t self_ref;
 	bool require_exceptions;
 } block_t;
@@ -86,34 +116,8 @@ typedef struct block {
  * Block functions
  */
 
-static inline block_t *block_create(scope_t *scope)
-{
-	block_t *result = compiler_alloc(scope->compiler, sizeof(block_t));
-
-	result->compiler = scope->compiler;
-	result->label_count = 0;
-	result->scope = scope;
-	result->label_usage = kh_init(rt_hash);
-	result->self_ref = 0;
-	result->require_exceptions = false;
-	result->current_exception_block = 0;
-	result->current_exception_block_id = (size_t)-1;
-
-	kv_init(result->vector);
-	kv_init(result->exception_blocks);
-	kv_init(result->upvals);
-
-	return result;
-}
-
-static inline void block_destroy(block_t *block)
-{
-	kh_destroy(rt_hash, block->label_usage);
-	kv_destroy(block->vector);
-	kv_destroy(block->upvals);
-	kv_destroy(block->exception_blocks);
-	free(block);
-}
+block_t *block_create(struct compiler *compiler, enum block_type type);
+void block_destroy(block_t *block);
 
 static inline rt_value block_get_label(block_t *block)
 {
@@ -125,9 +129,9 @@ static inline variable_t *block_get_var(block_t *block)
 	variable_t *temp = compiler_alloc(block->compiler, sizeof(variable_t));
 
 	temp->type = V_TEMP;
-	temp->index = block->scope->var_count[V_TEMP];
+	temp->index = block->var_count[V_TEMP];
 
-	block->scope->var_count[V_TEMP] += 1;
+	block->var_count[V_TEMP] += 1;
 
 	return temp;
 }
@@ -149,9 +153,9 @@ static inline variable_t *block_gen_args(block_t *block)
 	variable_t *var = compiler_alloc(block->compiler, sizeof(variable_t));
 
 	var->type = V_ARGS;
-	var->index = block->scope->var_count[V_ARGS];
+	var->index = block->var_count[V_ARGS];
 
-	block->scope->var_count[V_ARGS] += 1;
+	block->var_count[V_ARGS] += 1;
 
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)false, 0);
 

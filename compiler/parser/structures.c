@@ -18,12 +18,12 @@ node_t *parse_class(struct compiler *compiler)
 
 	parse_sep(compiler);
 
-	scope_t *scope;
+	struct block *block;
 
-	result->right = alloc_scope(compiler, &scope, S_CLASS);
+	result->right = alloc_scope(compiler, &block, S_CLASS);
 	result->right->right = parse_statements(compiler);
 
-	compiler->current_scope = scope->parent;
+	compiler->current_block = block->parent;
 
 	lexer_match(compiler, T_END);
 
@@ -47,12 +47,12 @@ node_t *parse_module(struct compiler *compiler)
 
 	parse_sep(compiler);
 
-	scope_t *scope;
+	struct block *block;
 
-	result->right = alloc_scope(compiler, &scope, S_MODULE);
+	result->right = alloc_scope(compiler, &block, S_MODULE);
 	result->right->right = parse_statements(compiler);
 
-	compiler->current_scope = scope->parent;
+	compiler->current_block = block->parent;
 
 	lexer_match(compiler, T_END);
 
@@ -72,7 +72,7 @@ bool is_parameter(struct compiler *compiler)
 	}
 }
 
-void parse_parameter(struct compiler *compiler, scope_t *scope)
+void parse_parameter(struct compiler *compiler, struct block *block)
 {
 	if(is_parameter(compiler))
 	{
@@ -82,25 +82,25 @@ void parse_parameter(struct compiler *compiler, scope_t *scope)
 
 		if(block_var)
 		{
-			if(scope->block_var)
+			if(block->block_var)
 				COMPILER_ERROR(compiler, "You can only receive the block in one parameter.");
 			else
 			{
-				scope->block_var = scope_define(scope, symbol, V_BLOCK, false);
+				block->block_var = scope_define(block, symbol, V_BLOCK, false);
 			}
 		}
 		else
 		{
-			if(scope_defined(scope, symbol, false))
+			if(scope_defined(block, symbol, false))
 				COMPILER_ERROR(compiler, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
 			else
-				scope_define(scope, symbol, V_PARAMETER, false);
+				scope_define(block, symbol, V_PARAMETER, false);
 		}
 
 		lexer_next(compiler);
 
 		if(lexer_matches(compiler, T_COMMA))
-			parse_parameter(compiler, scope);
+			parse_parameter(compiler, block);
 	}
 	else
 		COMPILER_ERROR(compiler, "Expected paramater, but found %s.", token_type_names[lexer_current(compiler)]);
@@ -135,29 +135,29 @@ node_t *parse_method(struct compiler *compiler)
 			}
 	}
 
-	scope_t *scope;
+	struct block *block;
 
-	result->right = alloc_scope(compiler, &scope, S_METHOD);
+	result->right = alloc_scope(compiler, &block, S_METHOD);
 
-	scope->owner = scope;
+	block->owner = block;
 
 	if(lexer_matches(compiler, T_PARAM_OPEN))
 	{
-		parse_parameter(compiler, scope);
+		parse_parameter(compiler, block);
 
 		lexer_match(compiler, T_PARAM_CLOSE);
 	}
 	else
 	{
 		if(is_parameter(compiler))
-			parse_parameter(compiler, scope);
+			parse_parameter(compiler, block);
 
 		parse_sep(compiler);
 	}
 
 	result->right->right = parse_statements(compiler);
 
-	compiler->current_scope = scope->parent;
+	compiler->current_block = block->parent;
 
 	lexer_match(compiler, T_END);
 

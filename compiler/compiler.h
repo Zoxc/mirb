@@ -4,7 +4,6 @@
 #include "lexer.h"
 
 struct block;
-struct scope;
 
 struct compiler {
 	/*
@@ -19,7 +18,7 @@ struct compiler {
 	int index;
 	int count;
 	int err_count;
-	struct scope *current_scope;
+	struct block *current_block;
 
 	/*
 	 * Memory allocator
