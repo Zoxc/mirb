@@ -159,6 +159,14 @@ void opcode_print(opcode_t *op)
 			printf("method %s, %x", rt_symbol_to_cstr(op->result), op->left);
 			break;
 
+		case B_RETURN:
+			printf("return %s", variable_name(op->result));
+			break;
+
+		case B_RAISE:
+			printf("raise %s, %d, %d", variable_name(op->result), op->left, op->right);
+			break;
+
 		default:
 			printf("unknown opcode %d", op->type);
 	}

@@ -143,6 +143,37 @@ void __stdcall rt_support_set_upval(rt_value value)
 }
 
 #ifdef WINDOWS
+	void __stdcall __attribute__((noreturn)) rt_support_raise(rt_value value, enum rt_exception_type type, void *target)
+	{
+		rt_seh_frame_t *frame;
+
+		__asm__ __volatile__("movl %%fs:(0), %0\n" : "=r" (frame));
+
+		while(true)
+		{
+			if(frame == (void *)-1)
+				assert(0);
+
+			if(frame->handler == rt_support_seh_handler)
+			{
+				if(frame->block == target)
+					break;
+			}
+
+			frame = frame->prev;
+		}
+
+		rt_value data[2];
+
+		data[0] = (rt_value)target;
+		data[1] = value;
+
+		RaiseException(RT_SEH_RUBY + type, 0, 2, (const DWORD *)&data);
+
+		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+		while(1); // So we use workarounds instead
+	}
+
 	extern void __stdcall RtlUnwind(
 		PVOID TargetFrame,
 		PVOID TargetIp,
@@ -158,10 +189,10 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"pushl %%ebx\n"
 			"pushl $0\n"
 			"pushl $0\n"
-			"pushl rt_seh_global_unwind_continue\n"
+			"pushl 0f\n"
 			"pushl %0\n"
 			"call _RtlUnwind@16\n"
-			"rt_seh_global_unwind_continue:\n"
+			"0:\n"
 			"popl %%ebx\n"
 			"popl %%ebp\n"
 		: "=a" (dummy)
@@ -204,7 +235,45 @@ void __stdcall rt_support_set_upval(rt_value value)
 		frame_data->handling = 0;
 	}
 
-	static void rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
+	static void __attribute__((noreturn)) rt_seh_return(rt_seh_frame_t *frame_data, exception_block_t *block, rt_value value)
+	{
+		rt_seh_global_unwind(frame_data);
+
+		/*
+		 * Execute frame local ensure handlers
+		 */
+
+		rt_seh_local_unwind(frame_data, block, 0);
+
+		/*
+		 * Go to the handler and never return
+		 */
+
+		size_t ebp = (size_t)&frame_data->old_ebp;
+
+		#ifdef DEBUG
+			printf("Return target found\n");
+			printf("Ebp: %x\n", ebp);
+			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
+			printf("Eip: %x\n", frame_data->block->epilog);
+		#endif
+
+		__asm__ __volatile__("mov %0, %%ecx\n"
+			"mov %1, %%esp\n"
+			"mov %2, %%ebp\n"
+			"jmp *%%ecx\n"
+		:
+		: "r" (frame_data->block->epilog),
+			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
+			"r" (ebp),
+			"a" (value)
+		: "%ecx");
+
+		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+		while(1); // So we use workarounds instead
+	}
+
+	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -243,39 +312,63 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"r" (ebp)
 		: "%eax");
 
-		//__builtin_unreachable(); // This seems undeclared in gcc...
+		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+		while(1); // So we use workarounds instead
 	}
 
-	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
+	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
+		if(frame_data->block_index == -1)
+		{
+			if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
+				return ExceptionContinueSearch;
+			else if(exception->ExceptionCode == RT_SEH_RUBY + E_RETURN_EXCEPTION && (void *)exception->ExceptionInformation[0] == frame_data->block)
+			{
+				rt_seh_return(frame_data, 0, exception->ExceptionInformation[1]);
+			}
+		}
+
 		exception_block_t *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
 
 		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
 		{
 			rt_seh_local_unwind(frame_data, block, 0);
+
+			return ExceptionContinueSearch;
 		}
-		else if(exception->ExceptionCode == RT_SEH_RUBY_EXCEPTION)
+
+		switch(exception->ExceptionCode)
 		{
-			exception_block_t *current_block = block;
+			case RT_SEH_RUBY + E_RETURN_EXCEPTION:
+			{
+				rt_seh_return(frame_data, block, exception->ExceptionInformation[1]);
+			}
+			break;
 
-            while(current_block)
-            {
-				for(size_t i = 0; i < kv_size(current_block->handlers); i++)
+			case RT_SEH_RUBY + E_RUBY_EXCEPTION:
+			{
+				exception_block_t *current_block = block;
+
+				while(current_block)
 				{
-					exception_handler_t *handler = kv_A(current_block->handlers, i);
-
-					switch(handler->type)
+					for(size_t i = 0; i < kv_size(current_block->handlers); i++)
 					{
-						case E_RUNTIME_EXCEPTION:
-							rt_seh_rescue(frame_data, block, current_block, ((runtime_exception_handler_t *)handler)->rescue_label);
+						exception_handler_t *handler = kv_A(current_block->handlers, i);
 
-						default:
-							break;
+						switch(handler->type)
+						{
+							case E_RUNTIME_EXCEPTION:
+								rt_seh_rescue(frame_data, block, current_block, ((runtime_exception_handler_t *)handler)->rescue_label);
+
+							default:
+								break;
+						}
 					}
-				}
 
-                current_block = current_block->parent;
-            }
+					current_block = current_block->parent;
+				}
+			}
+			break;
 		}
 
 		return ExceptionContinueSearch;

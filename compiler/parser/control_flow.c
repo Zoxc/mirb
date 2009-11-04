@@ -6,10 +6,13 @@ node_t *parse_return(struct compiler *compiler)
 
 	node_t *result = alloc_node(compiler, N_RETURN);
 
+	if(compiler->current_block->type == S_CLOSURE)
+		compiler->current_block->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
+
 	if(is_expression(compiler))
 		result->left = parse_expression(compiler);
 	else
-		result->left = 0;
+		result->left = &nil_node;
 
 	return result;
 }
@@ -128,7 +131,7 @@ node_t *parse_conditional(struct compiler *compiler)
 
 		node->middle = result;
 		node->left = parse_statement(compiler);
-		node->right = alloc_nil_node(compiler);
+		node->right = &nil_node;
 
 		return node;
     }
@@ -146,7 +149,7 @@ node_t *parse_unless(struct compiler *compiler)
 	parse_then_sep(compiler);
 
 	result->middle = parse_statements(compiler);
-	result->right = alloc_nil_node(compiler);
+	result->right = &nil_node;
 
 	lexer_match(compiler, T_END);
 
@@ -178,7 +181,7 @@ node_t *parse_if_tail(struct compiler *compiler)
 			return parse_statements(compiler);
 
 		default:
-			return alloc_nil_node(compiler);
+			return &nil_node;
 	}
 }
 

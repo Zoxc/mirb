@@ -107,7 +107,7 @@ rt_compiled_block(rt_kernel_print)
 	return RT_NIL;
 }
 
-rt_compiled_block(rt_kernel_raise)
+rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 {
 	rt_value exception = rt_alloc(sizeof(struct rt_exception));
 
@@ -139,9 +139,10 @@ rt_compiled_block(rt_kernel_raise)
 	else
 		RT_EXCEPTION(exception)->backtrace = RT_NIL;
 
-	RaiseException(RT_SEH_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
+	RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
 
-	return RT_NIL;
+	//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+	while(1); // So we use workarounds instead
 }
 
 void rt_kernel_init(void)

@@ -423,11 +423,8 @@ rt_value name_return(node_t *node)
 {
 	rt_value result = rt_string_from_cstr("return");
 
-	if(node->left)
-	{
-		rt_concat_string(result, rt_string_from_cstr(" "));
-		rt_concat_string(result, get_node_name(node->left));
-	}
+	rt_concat_string(result, rt_string_from_cstr(" "));
+	rt_concat_string(result, get_node_name(node->left));
 
 	return result;
 }

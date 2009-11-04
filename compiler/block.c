@@ -72,6 +72,8 @@ block_t *block_create(struct compiler *compiler, enum block_type type)
 {
 	block_t *result = compiler_alloc(compiler, sizeof(struct block));
 
+	result->data = malloc(sizeof(struct block_data));
+
 	result->compiler = compiler;
 	result->label_count = 0;
 	result->label_usage = kh_init(rt_hash);
@@ -96,13 +98,4 @@ block_t *block_create(struct compiler *compiler, enum block_type type)
 	result->parent = 0;
 
 	return result;
-}
-
-void block_destroy(block_t *block)
-{
-	kh_destroy(rt_hash, block->label_usage);
-	kv_destroy(block->vector);
-	kv_destroy(block->upvals);
-	kv_destroy(block->exception_blocks);
-	free(block);
 }

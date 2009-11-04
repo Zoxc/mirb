@@ -157,6 +157,12 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 					return 3 + 4;
 			}
 
+		case B_RETURN:
+			return 3 + 5;
+
+		case B_RAISE:
+			return 5 + 5 + 3 + 5;
+
 		default:
 			break;
 	}
@@ -509,6 +515,34 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_RAISE:
+			{
+				generate_stack_push(target, op->right);
+				generate_stack_push(target, op->left);
+				generate_stack_var_push(block, target, op->result);
+				generate_call(target, rt_support_raise);
+			}
+			break;
+
+		case B_RETURN:
+			{
+				size_t label_index = block_get_value(block, block->label_usage, block->epilog);
+
+				opcode_t *label = kv_A(block->vector, label_index);
+
+				size_t label_address = (size_t)start + label->right;
+
+				// Load to eax
+				generate_byte(target, 0x8B);
+				generate_byte(target, 0x45);
+				generate_byte(target, (char)get_stack_index(block, op->result));
+
+				// Jump to epilogue
+				generate_byte(target, 0xE9);
+				generate_dword(target, label_address - ((size_t)*target - 1) - 5);
+			}
+			break;
+
 		case B_JMPNE:
 		case B_JMPT:
 			{
@@ -721,7 +755,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x89); // mov esp, ebp
 	generate_byte(&target, 0xE5);
 
-	block_data_t *data = 0;
+	block_data_t *data = block->data;
 
 	if(require_exceptions)
 	{
@@ -730,7 +764,6 @@ rt_compiled_block_t compile_block(block_t *block)
 		/*
 		 * Setup block data structure
 		 */
-		data = malloc(sizeof(block_data_t));
 
 		kv_mov(data->exception_blocks, block->exception_blocks);
 
@@ -790,7 +823,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_stack_push(&target, 0);
 
 		// handler @ ebp - 16
-		generate_stack_push(&target, (size_t)&rt_seh_handler);
+		generate_stack_push(&target, (size_t)&rt_support_seh_handler);
 
 		// prev @ ebp - 20
 		generate_byte(&target, 0x64); // push dword [fs:0]
@@ -875,6 +908,10 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(require_exceptions)
 	{
+		size_t epilog_index = block_get_value(block, block->label_usage, block->epilog);
+
+		data->epilog = (void *)((size_t)result + kv_A(block->vector, epilog_index)->right);
+
 		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
 		generate_byte(&target, 0x4D);
 		generate_byte(&target, -20);

@@ -4,6 +4,8 @@
 #include "control_flow.h"
 #include "structures.h"
 
+struct node nil_node = {0, 0, 0, N_NIL, 0};
+
 node_t *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type)
 {
 	struct block *block = block_create(compiler, type);
@@ -361,7 +363,7 @@ node_t *parse_factor(struct compiler *compiler)
 			{
 				lexer_next(compiler);
 
-				return alloc_node(compiler, N_NIL);
+				return &nil_node;
 			}
 
 		case T_NUMBER:
@@ -700,7 +702,7 @@ node_t *parse_statements(struct compiler *compiler)
 
 	}
 	else
-		return alloc_nil_node(compiler);
+		return &nil_node;
 }
 
 node_t *parse_main(struct compiler *compiler)

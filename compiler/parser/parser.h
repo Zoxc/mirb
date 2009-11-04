@@ -73,10 +73,4 @@ static inline node_t *alloc_node(struct compiler *compiler, node_type_t type)
 	return result;
 }
 
-static inline node_t *alloc_nil_node(struct compiler *compiler)
-{
-	node_t *result = compiler_alloc(compiler, sizeof(node_t));
-	result->type = N_NIL;
-
-	return result;
-}
+extern struct node nil_node;

@@ -1,6 +1,13 @@
 #pragma once
 #include "runtime.h"
 
+enum rt_exception_type {
+	E_RUBY_EXCEPTION,
+	E_RETURN_EXCEPTION,
+	E_BREAK_EXCEPTION,
+	E_THROW_EXCEPTION
+};
+
 typedef struct {
 	union {
 		rt_value *upval;

@@ -12,7 +12,6 @@ typedef enum {
 	E_RUNTIME_EXCEPTION,
 	E_CLASS_EXCEPTION,
 	E_FILTER_EXCEPTION,
-	E_RETURN
 } exception_handler_type_t;
 
 typedef struct exception_handler {
@@ -41,8 +40,7 @@ typedef struct exception_block {
  * Block runtime data
  */
 
-typedef struct {
-	rt_compiled_block_t block;
+typedef struct block_data {
 	kvec_t(exception_block_t *) exception_blocks;
 	size_t local_storage;
 	void *epilog;
@@ -85,17 +83,22 @@ enum block_type {
 };
 
 typedef struct block {
+	enum block_type type;
 	struct compiler *compiler; // The compiler which owns this block
+
+	bool can_break; // If this block can raise a exception because of a break.
+
+	struct block_data *data; // Runtime data
 
 	/*
 	 * parser stuff
 	 */
-	enum block_type type;
 	rt_value var_count[VARIABLE_TYPES];
 	khash_t(block) *variables;
 	struct block *owner;
 	struct block *parent;
 	variable_t *block_var;
+	size_t ensure_count; // This decides if local returns and breaks should use exceptions.
 
 	/*
 	 * bytecode compiler stuff
@@ -110,6 +113,7 @@ typedef struct block {
 	khash_t(rt_hash) *label_usage;
 	size_t self_ref;
 	bool require_exceptions;
+	size_t epilog; // The end of the block
 } block_t;
 
 /*
@@ -117,7 +121,6 @@ typedef struct block {
  */
 
 block_t *block_create(struct compiler *compiler, enum block_type type);
-void block_destroy(block_t *block);
 
 static inline rt_value block_get_label(block_t *block)
 {

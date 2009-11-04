@@ -2,6 +2,7 @@
 #include "../../runtime/classes.h"
 #include "../../runtime/classes/symbol.h"
 #include "../../runtime/classes/fixnum.h"
+#include "../../runtime/support.h"
 
 typedef void(*generator)(block_t *block, node_t *node, variable_t *var);
 
@@ -491,20 +492,41 @@ static void gen_no_equality(block_t *block, node_t *node, variable_t *var)
 	}
 }
 
-static void gen_return(block_t *block, node_t *node, variable_t *var)
+static bool has_ensure_block(struct block *block)
 {
-	block->require_exceptions = true;
+	exception_block_t *exception_block = block->current_exception_block;
 
-	variable_t *temp = 0;
-
-	if(node->left)
+	while(exception_block)
 	{
-		temp = var ? var : block_get_var(block);
+		if(exception_block->ensure_label != (void *)-1)
+			return true;
 
-		gen_node(block, node->left, temp);
+		exception_block = exception_block->parent;
 	}
 
-	block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+	return false;
+}
+
+static void gen_return(block_t *block, node_t *node, variable_t *var)
+{
+	variable_t *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->left, temp);
+
+	if(block->type == S_CLOSURE)
+	{
+		//rt_value label = block_get_label(block);
+
+		//block_push(block, B_TEST_PROC, 0, 0, 0);
+		//block_push(block, B_JMPNE, label, 0, 0);
+		block_push(block, B_RAISE, (rt_value)temp, E_RETURN_EXCEPTION, (rt_value)block->owner->data);
+
+		//block_emmit_label(block, label);
+	}
+	else if(has_ensure_block(block))
+		block_push(block, B_RAISE, (rt_value)temp, E_RETURN_EXCEPTION, (rt_value)block->data);
+	else
+		block_push(block, B_RETURN, (rt_value)temp, 0, 0);
 }
 
 static void gen_handler(block_t *block, node_t *node, variable_t *var)
@@ -520,6 +542,15 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 
 	exception_block->parent_index = old_index;
 	exception_block->parent = block->current_exception_block;
+
+	/*
+	 * Check for ensure node
+	 */
+	if(node->right)
+		exception_block->ensure_label = (void *)block_get_label(block);
+	else
+		exception_block->ensure_label = (void *)-1;
+
 	kv_init(exception_block->handlers);
 
 	kv_push(exception_block_t *, block->exception_blocks, exception_block);
@@ -571,7 +602,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 	 */
 	if(node->right)
 	{
-		exception_block->ensure_label = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+		exception_block->ensure_label = (void *)block_emmit_label_type(block, (rt_value)exception_block->ensure_label, L_FLUSH);
 
 		/*
 		 * Output ensure node
@@ -580,9 +611,6 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 
 		block_push(block, B_ENSURE_RET, index, 0, 0);
 	}
-	else
-		exception_block->ensure_label = (void *)-1;
-
 }
 
 generator generators[] = {
@@ -636,12 +664,21 @@ block_t *gen_block(node_t *node)
 
 	variable_t *result = block_get_var(block);
 
+	block->epilog = block_get_label(block);
+
 	gen_node(block, node->right, result);
 
 	for(int i = 0; i < kv_size(block->upvals); i++)
 		block_push(block, B_SEAL, (rt_value)kv_A(block->upvals, i), 0, 0);
 
-	block_push(block, B_LOAD, (rt_value)result, 0, 0);
+	opcode_t *last = kv_A(block->vector, kv_size(block->vector) - 1);
+
+	if(last->type == B_RETURN && last->left == (rt_value)result)
+		last->type = B_LOAD;
+	else
+		block_push(block, B_LOAD, (rt_value)result, 0, 0);
+
+	block_emmit_label(block, block->epilog);
 
 	#ifdef DEBUG
 		printf(";\n; block %x\n;\n", (rt_value)block);

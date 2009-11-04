@@ -6,9 +6,7 @@
 #include "support.h"
 
 #ifdef WINDOWS
-	typedef enum {
-		RT_SEH_RUBY_EXCEPTION = 0x4D520000
-	} rt_seh_exception_code;
+	#define RT_SEH_RUBY 0x4D520000
 
 	typedef struct seh_frame_t {
 		struct seh_frame_t *prev;
@@ -37,5 +35,7 @@ rt_value rt_support_get_upval(void);
 void __stdcall rt_support_set_upval(rt_value value);
 
 #ifdef WINDOWS
-	EXCEPTION_DISPOSITION __cdecl rt_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context);
+	void __stdcall rt_support_raise(rt_value value, enum rt_exception_type type, void *target);
+
+	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context);
 #endif
