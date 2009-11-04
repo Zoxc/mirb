@@ -98,7 +98,6 @@ typedef struct block {
 	struct block *owner;
 	struct block *parent;
 	variable_t *block_var;
-	size_t ensure_count; // This decides if local returns and breaks should use exceptions.
 
 	/*
 	 * bytecode compiler stuff
