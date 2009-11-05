@@ -538,6 +538,20 @@ static void gen_break(block_t *block, node_t *node, variable_t *var)
 	block_push(block, B_RAISE_BREAK, (rt_value)temp, (rt_value)block->parent->data, block->break_id);
 }
 
+static void gen_next(block_t *block, node_t *node, variable_t *var)
+{
+	variable_t *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->left, temp);
+
+	block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+}
+
+static void gen_redo(block_t *block, node_t *node, variable_t *var)
+{
+	block_push(block, B_REDO, 0, 0, 0);
+}
+
 static void gen_break_handler(block_t *block, node_t *node, variable_t *var)
 {
 	struct block *child = (void *)node->right;
@@ -678,6 +692,8 @@ generator generators[] = {
 	gen_if,
 	gen_if,
 	gen_return,
+	gen_next,
+	gen_redo,
 	gen_break,
 	gen_break_handler,
 	gen_handler,

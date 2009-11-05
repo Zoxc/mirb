@@ -10,3 +10,5 @@ node_t *parse_begin(struct compiler *compiler);
 node_t *parse_exception_handlers(struct compiler *compiler, node_t *block);
 node_t *parse_return(struct compiler *compiler);
 node_t *parse_break(struct compiler *compiler);
+node_t *parse_next(struct compiler *compiler);
+node_t *parse_redo(struct compiler *compiler);

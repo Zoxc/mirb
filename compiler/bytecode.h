@@ -26,6 +26,7 @@ typedef enum {
 	B_JMPNE,
 	B_JMP,
 	B_RETURN,
+	B_REDO,
 	B_LABEL,
 	B_ENSURE_RET,
 	B_HANDLER,

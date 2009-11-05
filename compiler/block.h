@@ -115,6 +115,7 @@ typedef struct block {
 	khash_t(rt_hash) *label_usage;
 	size_t self_ref;
 	bool require_exceptions;
+	void *prolog; // The after the prolog of the block.
 	size_t epilog; // The end of the block
 } block_t;
 

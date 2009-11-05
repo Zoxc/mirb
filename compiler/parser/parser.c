@@ -274,6 +274,12 @@ node_t *parse_factor(struct compiler *compiler)
 		case T_BREAK:
 			return parse_break(compiler);
 
+		case T_NEXT:
+			return parse_next(compiler);
+
+		case T_REDO:
+			return parse_redo(compiler);
+
 		case T_SQUARE_OPEN:
 			{
 			    node_t *result = alloc_node(compiler, N_ARRAY);

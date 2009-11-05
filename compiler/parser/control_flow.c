@@ -17,6 +17,35 @@ node_t *parse_return(struct compiler *compiler)
 	return result;
 }
 
+node_t *parse_next(struct compiler *compiler)
+{
+	lexer_next(compiler);
+
+	node_t *result = alloc_node(compiler, N_NEXT);
+
+	if(compiler->current_block->type != S_CLOSURE)
+		COMPILER_ERROR(compiler, "Next outside of block.");
+
+	if(is_expression(compiler))
+		result->left = parse_expression(compiler);
+	else
+		result->left = &nil_node;
+
+	return result;
+}
+
+node_t *parse_redo(struct compiler *compiler)
+{
+	lexer_next(compiler);
+
+	node_t *result = alloc_node(compiler, N_REDO);
+
+	if(compiler->current_block->type != S_CLOSURE)
+		COMPILER_ERROR(compiler, "Redo outside of block.");
+
+	return result;
+}
+
 node_t *parse_break(struct compiler *compiler)
 {
 	lexer_next(compiler);

@@ -163,6 +163,10 @@ void opcode_print(opcode_t *op)
 			printf("return %s", variable_name(op->result));
 			break;
 
+		case B_REDO:
+			printf("redo");
+			break;
+
 		case B_RAISE_RETURN:
 			printf("raise_return %s, %d", variable_name(op->result), op->left);
 			break;

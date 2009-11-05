@@ -55,6 +55,8 @@ static inline bool is_expression(struct compiler *compiler)
 		case T_YIELD:
 		case T_RETURN:
 		case T_BREAK:
+		case T_REDO:
+		case T_NEXT:
 		case T_PARAM_OPEN:
 		case T_SQUARE_OPEN:
 			return true;

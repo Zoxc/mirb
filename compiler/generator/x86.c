@@ -166,6 +166,9 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 		case B_RAISE_BREAK:
 			return 5 + 5 + 3 + 5;
 
+		case B_REDO:
+			return (block->require_exceptions ? 7 : 0) + 5;
+
 		default:
 			break;
 	}
@@ -680,6 +683,23 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
+		case B_REDO:
+			{
+				if(block->require_exceptions)
+				{
+					// Restore exception handler index
+					generate_byte(target, 0xC7);
+					generate_byte(target, 0x45);
+					generate_byte(target, -8);
+					generate_dword(target, -1);
+				}
+
+				// Jump to epilogue
+				generate_byte(target, 0xE9);
+				generate_dword(target, (size_t)block->prolog - ((size_t)*target - 1) - 5);
+			}
+			break;
+
 		case B_LABEL:
 			{
 				switch(op->left)
@@ -890,6 +910,8 @@ rt_compiled_block_t compile_block(block_t *block)
 		generate_byte(&target, 0x7D);
 		generate_byte(&target, 8);
 	}
+
+	block->prolog = target;
 
 	if(block->var_count[V_PARAMETER])
 	{

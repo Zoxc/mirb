@@ -65,6 +65,8 @@ enum token_type {
 	T_YIELD,
 	T_RETURN,
 	T_BREAK,
+	T_NEXT,
+	T_REDO,
 	T_TRUE,
 	T_FALSE,
 	T_NIL,

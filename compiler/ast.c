@@ -448,6 +448,24 @@ rt_value name_break(node_t *node)
 	return result;
 }
 
+rt_value name_next(node_t *node)
+{
+	rt_value result = rt_string_from_cstr("next ");
+
+	rt_concat_string(result, get_node_name(node->left));
+
+	return result;
+}
+
+rt_value name_redo(node_t *node)
+{
+	rt_value result = rt_string_from_cstr("redo ");
+
+	rt_concat_string(result, get_node_name(node->left));
+
+	return result;
+}
+
 get_node_name_proc get_node_name_procs[] = {
 	name_unary_op,
 	name_binary_op,
@@ -473,6 +491,8 @@ get_node_name_proc get_node_name_procs[] = {
 	name_if,
 	name_if,
 	name_return,
+	name_next,
+	name_redo,
 	name_break,
 	name_break_handler,
 	name_handler,
