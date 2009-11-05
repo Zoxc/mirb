@@ -402,6 +402,17 @@ rt_value name_handler(node_t *node)
 	return result;
 }
 
+rt_value name_break_handler(node_t *node)
+{
+	rt_value result = rt_string_from_cstr("(begin (");
+
+	rt_concat_string(result, get_node_name(node->left));
+
+	rt_concat_string(result, rt_string_from_cstr(") catch break)"));
+
+	return result;
+}
+
 rt_value name_rescue(node_t *node)
 {
 	rt_value result = rt_string_from_cstr("rescue (");
@@ -421,9 +432,17 @@ rt_value name_rescue(node_t *node)
 
 rt_value name_return(node_t *node)
 {
-	rt_value result = rt_string_from_cstr("return");
+	rt_value result = rt_string_from_cstr("return ");
 
-	rt_concat_string(result, rt_string_from_cstr(" "));
+	rt_concat_string(result, get_node_name(node->left));
+
+	return result;
+}
+
+rt_value name_break(node_t *node)
+{
+	rt_value result = rt_string_from_cstr("break ");
+
 	rt_concat_string(result, get_node_name(node->left));
 
 	return result;
@@ -454,6 +473,8 @@ get_node_name_proc get_node_name_procs[] = {
 	name_if,
 	name_if,
 	name_return,
+	name_break,
+	name_break_handler,
 	name_handler,
 	name_rescue,
 	name_argument,

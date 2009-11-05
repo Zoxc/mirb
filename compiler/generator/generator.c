@@ -519,14 +519,54 @@ static void gen_return(block_t *block, node_t *node, variable_t *var)
 
 		//block_push(block, B_TEST_PROC, 0, 0, 0);
 		//block_push(block, B_JMPNE, label, 0, 0);
-		block_push(block, B_RAISE, (rt_value)temp, E_RETURN_EXCEPTION, (rt_value)block->owner->data);
+		block_push(block, B_RAISE_RETURN, (rt_value)temp, (rt_value)block->owner->data, 0);
 
 		//block_emmit_label(block, label);
 	}
 	else if(has_ensure_block(block))
-		block_push(block, B_RAISE, (rt_value)temp, E_RETURN_EXCEPTION, (rt_value)block->data);
+		block_push(block, B_RAISE_RETURN, (rt_value)temp, (rt_value)block->data, 0);
 	else
 		block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+}
+
+static void gen_break(block_t *block, node_t *node, variable_t *var)
+{
+	variable_t *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->left, temp);
+
+	block_push(block, B_RAISE_BREAK, (rt_value)temp, (rt_value)block->parent->data, block->break_id);
+}
+
+static void gen_break_handler(block_t *block, node_t *node, variable_t *var)
+{
+	struct block *child = (void *)node->right;
+
+	gen_node(block, node->left, var);
+
+	rt_value label = 0;
+
+	if(var)
+	{
+		/*
+		 * Skip the break handler
+		 */
+
+		label = block_get_label(block);
+		block_push(block, B_JMP, label, 0, 0);
+	}
+
+	/*
+	 * Output target label
+	 */
+
+	block->data->break_targets[child->break_id] = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+
+	if(var)
+	{
+		block_push(block, B_STORE, (rt_value)var, 0, 0);
+		block_emmit_label(block, label);
+	}
 }
 
 static void gen_handler(block_t *block, node_t *node, variable_t *var)
@@ -638,6 +678,8 @@ generator generators[] = {
 	gen_if,
 	gen_if,
 	gen_return,
+	gen_break,
+	gen_break_handler,
 	gen_handler,
 	/*N_RESCUE*/gen_warn,
 	/*N_ARGUMENT*/gen_warn,
@@ -665,6 +707,14 @@ block_t *gen_block(node_t *node)
 	variable_t *result = block_get_var(block);
 
 	block->epilog = block_get_label(block);
+
+	if(block->break_targets)
+	{
+		block->require_exceptions = true;
+		block->data->break_targets = malloc(block->break_targets * sizeof(void *));
+	}
+	else
+		block->data->break_targets = 0;
 
 	gen_node(block, node->right, result);
 

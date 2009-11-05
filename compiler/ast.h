@@ -26,6 +26,8 @@ typedef enum {
 	N_IF,
 	N_UNLESS,
 	N_RETURN,
+	N_BREAK,
+	N_BREAK_HANDLER,
 	N_HANDLER,
 	N_RESCUE,
 	N_ARGUMENT,

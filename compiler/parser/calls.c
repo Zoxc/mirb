@@ -46,6 +46,28 @@ node_t *parse_block(struct compiler *compiler)
 	return result;
 }
 
+node_t *secure_block(struct compiler *compiler, node_t *result, node_t *parent)
+{
+	if(!result)
+		return parent;
+
+	struct block *block = (void *)result->left;
+
+	if(block->can_break)
+	{
+		node_t *handler = alloc_node(compiler, N_BREAK_HANDLER);
+
+		block->break_id = compiler->current_block->break_targets++; // Assign a break id to the block and increase the break target count.
+
+		handler->left = parent;
+		handler->right = (void *)block;
+
+		return handler;
+	}
+
+	return parent;
+}
+
 bool has_arguments(struct compiler *compiler)
 {
 	if(is_expression(compiler))
@@ -189,7 +211,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 		result->right->left = parse_arguments(compiler, has_args);
 		result->right->right = parse_block(compiler);
 
-		return result;
+		return secure_block(compiler, result->right->right, result);
 	}
 }
 
@@ -260,7 +282,7 @@ node_t *parse_lookup(struct compiler *compiler, node_t *child)
 
 				lexer_match(compiler, T_SQUARE_CLOSE);
 
-				return result;
+				return secure_block(compiler, result->right, result);
 			}
 
 		default:

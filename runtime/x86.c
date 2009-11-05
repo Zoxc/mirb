@@ -143,7 +143,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 }
 
 #ifdef WINDOWS
-	void __stdcall __attribute__((noreturn)) rt_support_raise(rt_value value, enum rt_exception_type type, void *target)
+	static bool rt_find_seh_target(void *target)
 	{
 		rt_seh_frame_t *frame;
 
@@ -152,23 +152,46 @@ void __stdcall rt_support_set_upval(rt_value value)
 		while(true)
 		{
 			if(frame == (void *)-1)
-				assert(0);
+				return false;
 
 			if(frame->handler == rt_support_seh_handler)
 			{
 				if(frame->block == target)
-					break;
+					return true;
 			}
 
 			frame = frame->prev;
 		}
+	}
+
+	void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target)
+	{
+		if(!rt_find_seh_target(target))
+			assert(0);
 
 		rt_value data[2];
 
 		data[0] = (rt_value)target;
 		data[1] = value;
 
-		RaiseException(RT_SEH_RUBY + type, 0, 2, (const DWORD *)&data);
+		RaiseException(RT_SEH_RUBY + E_RETURN_EXCEPTION, 0, 2, (const DWORD *)&data);
+
+		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+		while(1); // So we use workarounds instead
+	}
+
+	void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id)
+	{
+		if(!rt_find_seh_target(target))
+			assert(0);
+
+		rt_value data[3];
+
+		data[0] = (rt_value)target;
+		data[1] = value;
+		data[2] = id;
+
+		RaiseException(RT_SEH_RUBY + E_BREAK_EXCEPTION, 0, 3, (const DWORD *)&data);
 
 		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
 		while(1); // So we use workarounds instead
@@ -273,6 +296,38 @@ void __stdcall rt_support_set_upval(rt_value value)
 		while(1); // So we use workarounds instead
 	}
 
+	static void __attribute__((noreturn)) rt_seh_break(rt_seh_frame_t *frame_data, rt_value value, size_t id)
+	{
+		rt_seh_global_unwind(frame_data);
+
+		/*
+		 * Go to the handler and never return
+		 */
+
+		size_t ebp = (size_t)&frame_data->old_ebp;
+
+		#ifdef DEBUG
+			printf("Break target found\n");
+			printf("Ebp: %x\n", ebp);
+			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
+			printf("Eip: %x\n", frame_data->block->break_targets[id]);
+		#endif
+
+		__asm__ __volatile__("mov %0, %%ecx\n"
+			"mov %1, %%esp\n"
+			"mov %2, %%ebp\n"
+			"jmp *%%ecx\n"
+		:
+		: "r" (frame_data->block->break_targets[id]),
+			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
+			"r" (ebp),
+			"a" (value)
+		: "%ecx");
+
+		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
+		while(1); // So we use workarounds instead
+	}
+
 	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
 	{
 		rt_seh_global_unwind(frame_data);
@@ -326,6 +381,10 @@ void __stdcall rt_support_set_upval(rt_value value)
 			{
 				rt_seh_return(frame_data, 0, exception->ExceptionInformation[1]);
 			}
+			else if(exception->ExceptionCode == RT_SEH_RUBY + E_BREAK_EXCEPTION && (void *)exception->ExceptionInformation[0] == frame_data->block)
+			{
+				rt_seh_break(frame_data, exception->ExceptionInformation[1], exception->ExceptionInformation[2]);
+			}
 		}
 
 		exception_block_t *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
@@ -339,6 +398,12 @@ void __stdcall rt_support_set_upval(rt_value value)
 
 		switch(exception->ExceptionCode)
 		{
+			case RT_SEH_RUBY + E_BREAK_EXCEPTION:
+			{
+				rt_seh_break(frame_data, exception->ExceptionInformation[1], exception->ExceptionInformation[2]);
+			}
+			break;
+
 			case RT_SEH_RUBY + E_RETURN_EXCEPTION:
 			{
 				rt_seh_return(frame_data, block, exception->ExceptionInformation[1]);

@@ -160,7 +160,10 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 		case B_RETURN:
 			return 3 + 5;
 
-		case B_RAISE:
+		case B_RAISE_RETURN:
+			return 5 + 3 + 5;
+
+		case B_RAISE_BREAK:
 			return 5 + 5 + 3 + 5;
 
 		default:
@@ -515,12 +518,20 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 			}
 			break;
 
-		case B_RAISE:
+		case B_RAISE_RETURN:
+			{
+				generate_stack_push(target, op->left);
+				generate_stack_var_push(block, target, op->result);
+				generate_call(target, rt_support_return);
+			}
+			break;
+
+		case B_RAISE_BREAK:
 			{
 				generate_stack_push(target, op->right);
 				generate_stack_push(target, op->left);
 				generate_stack_var_push(block, target, op->result);
-				generate_call(target, rt_support_raise);
+				generate_call(target, rt_support_break);
 			}
 			break;
 
@@ -793,6 +804,13 @@ rt_compiled_block_t compile_block(block_t *block)
 				}
 			}
 		}
+
+		/*
+		 * Translate break target labels
+		 */
+
+		for(size_t i = 0; i < block->break_targets; i++)
+			data->break_targets[i] = (void *)((size_t)result + kv_A(block->vector, (size_t)data->break_targets[i])->right);
 
 		data->local_storage = stack_vars * 4;
 

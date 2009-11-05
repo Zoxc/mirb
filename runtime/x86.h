@@ -35,7 +35,8 @@ rt_value rt_support_get_upval(void);
 void __stdcall rt_support_set_upval(rt_value value);
 
 #ifdef WINDOWS
-	void __stdcall rt_support_raise(rt_value value, enum rt_exception_type type, void *target);
+	void __stdcall rt_support_return(rt_value value, void *target);
+	void __stdcall rt_support_break(rt_value value, void *target, size_t id);
 
 	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context);
 #endif

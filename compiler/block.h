@@ -42,6 +42,7 @@ typedef struct exception_block {
 
 typedef struct block_data {
 	kvec_t(exception_block_t *) exception_blocks;
+	void **break_targets;
 	size_t local_storage;
 	void *epilog;
 } block_data_t;
@@ -87,6 +88,8 @@ typedef struct block {
 	struct compiler *compiler; // The compiler which owns this block
 
 	bool can_break; // If this block can raise a exception because of a break.
+	size_t break_id; // Which of the parent break targets this block belongs to.
+	size_t break_targets; // Number of child blocks that can raise a break exception.
 
 	struct block_data *data; // Runtime data
 

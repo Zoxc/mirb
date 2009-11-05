@@ -81,6 +81,7 @@ block_t *block_create(struct compiler *compiler, enum block_type type)
 	result->require_exceptions = false;
 	result->current_exception_block = 0;
 	result->current_exception_block_id = (size_t)-1;
+	result->break_targets = 0;
 
 	kv_init(result->vector);
 	kv_init(result->exception_blocks);

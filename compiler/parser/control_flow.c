@@ -17,6 +17,27 @@ node_t *parse_return(struct compiler *compiler)
 	return result;
 }
 
+node_t *parse_break(struct compiler *compiler)
+{
+	lexer_next(compiler);
+
+	node_t *result = alloc_node(compiler, N_BREAK);
+
+	if(compiler->current_block->type == S_CLOSURE)
+	{
+		compiler->current_block->can_break = true; // Flag our parent should check
+	}
+	else
+		COMPILER_ERROR(compiler, "Break outside of block.");
+
+	if(is_expression(compiler))
+		result->left = parse_expression(compiler);
+	else
+		result->left = &nil_node;
+
+	return result;
+}
+
 node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
 {
 	node_t *parent = alloc_node(compiler, N_HANDLER);
