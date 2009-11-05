@@ -141,8 +141,7 @@ rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 
 	RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
 
-	//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-	while(1); // So we use workarounds instead
+	__builtin_unreachable();
 }
 
 void rt_kernel_init(void)

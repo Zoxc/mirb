@@ -176,8 +176,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 
 		RaiseException(RT_SEH_RUBY + E_RETURN_EXCEPTION, 0, 2, (const DWORD *)&data);
 
-		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-		while(1); // So we use workarounds instead
+		__builtin_unreachable();
 	}
 
 	void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id)
@@ -193,8 +192,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 
 		RaiseException(RT_SEH_RUBY + E_BREAK_EXCEPTION, 0, 3, (const DWORD *)&data);
 
-		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-		while(1); // So we use workarounds instead
+		__builtin_unreachable();
 	}
 
 	extern void __stdcall RtlUnwind(
@@ -292,8 +290,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"a" (value)
 		: "%ecx");
 
-		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-		while(1); // So we use workarounds instead
+		__builtin_unreachable();
 	}
 
 	static void __attribute__((noreturn)) rt_seh_break(rt_seh_frame_t *frame_data, rt_value value, size_t id)
@@ -324,8 +321,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"a" (value)
 		: "%ecx");
 
-		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-		while(1); // So we use workarounds instead
+		__builtin_unreachable();
 	}
 
 	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
@@ -367,8 +363,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			"r" (ebp)
 		: "%eax");
 
-		//__builtin_unreachable(); // This seems undeclared in gcc 4.4.1...
-		while(1); // So we use workarounds instead
+		__builtin_unreachable();
 	}
 
 	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)

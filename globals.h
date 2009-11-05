@@ -29,5 +29,10 @@
 	#include <sys/mman.h>
 #endif
 
+static inline void __attribute__((noreturn)) __builtin_unreachable(void)
+{
+	while(1);
+}
+
 #include "vendor/kvec.h"
 #include "vendor/khash.h"
