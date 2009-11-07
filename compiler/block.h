@@ -24,24 +24,24 @@ struct runtime_exception_handler {
 	void *rescue_label;
 };
 
-struct class_exception_handler_t {
+struct class_exception_handler {
 	struct runtime_exception_handler common;
 };
 
-typedef struct exception_block {
+struct exception_block {
 	size_t parent_index;
 	struct exception_block *parent;
 	kvec_t(struct exception_handler *) handlers;
 	void *block_label;
 	void *ensure_label;
-} exception_block_t;
+};
 
 /*
  * Block runtime data
  */
 
 typedef struct block_data {
-	kvec_t(exception_block_t *) exception_blocks;
+	kvec_t(struct exception_block *) exception_blocks;
 	void **break_targets;
 	size_t local_storage;
 	void *epilog;
@@ -112,8 +112,8 @@ typedef struct block {
 
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
-	kvec_t(exception_block_t *) exception_blocks;
-	exception_block_t *current_exception_block;
+	kvec_t(struct exception_block *) exception_blocks;
+	struct exception_block *current_exception_block;
 	size_t local_offset;
 	size_t current_exception_block_id;
 	khash_t(rt_hash) *label_usage;

@@ -783,7 +783,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 		for(size_t i = 0; i < kv_size(data->exception_blocks); i++)
 		{
-		    exception_block_t *exception_block = kv_A(data->exception_blocks, i);
+		    struct exception_block *exception_block = kv_A(data->exception_blocks, i);
 
 			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target(result, (rt_value)exception_block->ensure_label) : 0);
 

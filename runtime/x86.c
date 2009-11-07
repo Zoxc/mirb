@@ -221,7 +221,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		: "esi", "edi", "edx", "ecx", "memory");
 	}
 
-	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *target)
+	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, struct exception_block *block, struct exception_block *target)
 	{
 		frame_data->handling = 1;
 
@@ -256,7 +256,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		frame_data->handling = 0;
 	}
 
-	static void __attribute__((noreturn)) rt_seh_return(rt_seh_frame_t *frame_data, exception_block_t *block, rt_value value)
+	static void __attribute__((noreturn)) rt_seh_return(rt_seh_frame_t *frame_data, struct exception_block *block, rt_value value)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -324,7 +324,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		__builtin_unreachable();
 	}
 
-	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, exception_block_t *block, exception_block_t *current_block, void *rescue_label)
+	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, struct exception_block *block, struct exception_block *current_block, void *rescue_label)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -382,7 +382,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			}
 		}
 
-		exception_block_t *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
+		struct exception_block *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
 
 		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
 		{
@@ -407,7 +407,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 
 			case RT_SEH_RUBY + E_RUBY_EXCEPTION:
 			{
-				exception_block_t *current_block = block;
+				struct exception_block *current_block = block;
 
 				while(current_block)
 				{

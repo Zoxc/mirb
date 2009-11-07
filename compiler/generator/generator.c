@@ -494,7 +494,7 @@ static void gen_no_equality(block_t *block, node_t *node, variable_t *var)
 
 static bool has_ensure_block(struct block *block)
 {
-	exception_block_t *exception_block = block->current_exception_block;
+	struct exception_block *exception_block = block->current_exception_block;
 
 	while(exception_block)
 	{
@@ -588,7 +588,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 	/*
 	 * Allocate and setup the new exception block
 	 */
-	exception_block_t *exception_block = malloc(sizeof(exception_block_t));
+	struct exception_block *exception_block = malloc(sizeof(struct exception_block));
 	size_t index = kv_size(block->exception_blocks);
 	size_t old_index = block->current_exception_block_id;
 
@@ -605,7 +605,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 
 	kv_init(exception_block->handlers);
 
-	kv_push(exception_block_t *, block->exception_blocks, exception_block);
+	kv_push(struct exception_block *, block->exception_blocks, exception_block);
 
 	/*
 	 * Use the new exception block
