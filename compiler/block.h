@@ -8,14 +8,14 @@
  * Exception runtime data
  */
 
-typedef enum {
+enum exception_handler_type {
 	E_RUNTIME_EXCEPTION,
 	E_CLASS_EXCEPTION,
 	E_FILTER_EXCEPTION,
-} exception_handler_type_t;
+};
 
 typedef struct exception_handler {
-	exception_handler_type_t type;
+	enum exception_handler_type type;
 	struct exception_handler *next;
 } exception_handler_t;
 
