@@ -44,12 +44,12 @@ enum node_type {
 	N_PARAMETER
 };
 
-typedef struct node {
+struct node {
     struct node *left;
     struct node *middle;
     struct node *right;
     enum node_type type;
     enum token_type op;
-} node_t;
+};
 
-rt_value get_node_name(node_t *node);
+rt_value get_node_name(struct node *node);

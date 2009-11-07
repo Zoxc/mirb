@@ -10,16 +10,16 @@ bool scope_defined(struct block *block, rt_value name, bool recursive);
 struct variable *scope_declare_var(struct block *block, rt_value name, enum variable_type type);
 struct variable *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive);
 
-node_t *parse_factor(struct compiler *compiler);
-node_t *parse_expression(struct compiler *compiler);
-node_t *parse_argument(struct compiler *compiler);
-node_t *parse_arithmetic(struct compiler *compiler);
-node_t *parse_boolean_or(struct compiler *compiler);
-node_t *parse_low_boolean(struct compiler *compiler);
-node_t *parse_statement(struct compiler *compiler);
-node_t *parse_statements(struct compiler *compiler);
+struct node *parse_factor(struct compiler *compiler);
+struct node *parse_expression(struct compiler *compiler);
+struct node *parse_argument(struct compiler *compiler);
+struct node *parse_arithmetic(struct compiler *compiler);
+struct node *parse_boolean_or(struct compiler *compiler);
+struct node *parse_low_boolean(struct compiler *compiler);
+struct node *parse_statement(struct compiler *compiler);
+struct node *parse_statements(struct compiler *compiler);
 void parse_sep(struct compiler *compiler);
-node_t *parse_main(struct compiler *compiler);
+struct node *parse_main(struct compiler *compiler);
 
 static inline void skip_lines(struct compiler *compiler)
 {
@@ -66,11 +66,11 @@ static inline bool is_expression(struct compiler *compiler)
 	}
 }
 
-node_t *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type);
+struct node *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type);
 
-static inline node_t *alloc_node(struct compiler *compiler, node_type_t type)
+static inline struct node *alloc_node(struct compiler *compiler, enum node_type type)
 {
-	node_t *result = compiler_alloc(compiler, sizeof(node_t));
+	struct node *result = compiler_alloc(compiler, sizeof(struct node));
 	result->type = type;
 
 	return result;

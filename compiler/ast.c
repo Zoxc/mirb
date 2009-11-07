@@ -5,11 +5,11 @@
 #include "../runtime/classes/string.h"
 #include "../runtime/classes/symbol.h"
 
-typedef rt_value (*get_node_name_proc)(node_t *node);
+typedef rt_value (*get_node_name_proc)(struct node *node);
 
-rt_value get_node_name(node_t *node);
+rt_value get_node_name(struct node *node);
 
-rt_value name_unary_op(node_t *node)
+rt_value name_unary_op(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -20,7 +20,7 @@ rt_value name_unary_op(node_t *node)
 	return result;
 }
 
-rt_value name_binary_op(node_t *node)
+rt_value name_binary_op(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -34,17 +34,17 @@ rt_value name_binary_op(node_t *node)
 	return result;
 }
 
-rt_value name_num(node_t *node)
+rt_value name_num(struct node *node)
 {
 	return rt_string_from_int((rt_value)node->left);
 }
 
-rt_value name_var(node_t *node)
+rt_value name_var(struct node *node)
 {
 	return rt_string_from_cstr(variable_name((rt_value)node->left));
 }
 
-rt_value name_const(node_t *node)
+rt_value name_const(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -54,7 +54,7 @@ rt_value name_const(node_t *node)
 	return result;
 }
 
-rt_value name_assign(node_t *node)
+rt_value name_assign(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -66,7 +66,7 @@ rt_value name_assign(node_t *node)
 	return result;
 }
 
-rt_value name_assign_const(node_t *node)
+rt_value name_assign_const(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -79,7 +79,7 @@ rt_value name_assign_const(node_t *node)
 	return result;
 }
 
-rt_value name_if(node_t *node)
+rt_value name_if(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -96,7 +96,7 @@ rt_value name_if(node_t *node)
 	return result;
 }
 
-rt_value name_argument(node_t *node)
+rt_value name_argument(struct node *node)
 {
 	if(node->right)
 	{
@@ -111,7 +111,7 @@ rt_value name_argument(node_t *node)
 		return get_node_name(node->left);
 }
 
-rt_value name_call_tail(node_t *node)
+rt_value name_call_tail(struct node *node)
 {
 	rt_value result = rt_string_from_cstr(token_type_names[node->op]);
 
@@ -122,7 +122,7 @@ rt_value name_call_tail(node_t *node)
 	return result;
 }
 
-rt_value name_call_arguments(node_t *node)
+rt_value name_call_arguments(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -139,7 +139,7 @@ rt_value name_call_arguments(node_t *node)
 	return result;
 }
 
-rt_value name_call(node_t *node)
+rt_value name_call(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -150,7 +150,7 @@ rt_value name_call(node_t *node)
 	return result;
 }
 
-rt_value name_array_call(node_t *node)
+rt_value name_array_call(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -173,12 +173,12 @@ rt_value name_array_call(node_t *node)
 	return result;
 }
 
-rt_value name_lookup_tail(node_t *node)
+rt_value name_lookup_tail(struct node *node)
 {
 	return rt_string_from_cstr("(tail!");
 }
 
-rt_value name_expressions(node_t *node)
+rt_value name_expressions(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -191,7 +191,7 @@ rt_value name_expressions(node_t *node)
 	return result;
 }
 
-rt_value name_class(node_t *node)
+rt_value name_class(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("class ");
 
@@ -203,7 +203,7 @@ rt_value name_class(node_t *node)
 	return result;
 }
 
-rt_value name_module(node_t *node)
+rt_value name_module(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("module ");
 
@@ -215,7 +215,7 @@ rt_value name_module(node_t *node)
 	return result;
 }
 
-rt_value name_scope(node_t *node)
+rt_value name_scope(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("scope:(");
 
@@ -225,7 +225,7 @@ rt_value name_scope(node_t *node)
 	return result;
 }
 
-rt_value name_method(node_t *node)
+rt_value name_method(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("def ");
 
@@ -237,27 +237,27 @@ rt_value name_method(node_t *node)
 	return result;
 }
 
-rt_value name_self(node_t *node)
+rt_value name_self(struct node *node)
 {
 	return rt_string_from_cstr("self");
 }
 
-rt_value name_true(node_t *node)
+rt_value name_true(struct node *node)
 {
 	return rt_string_from_cstr("true");
 }
 
-rt_value name_false(node_t *node)
+rt_value name_false(struct node *node)
 {
 	return rt_string_from_cstr("false");
 }
 
-rt_value name_nil(node_t *node)
+rt_value name_nil(struct node *node)
 {
 	return rt_string_from_cstr("nil");
 }
 
-rt_value name_string(node_t *node)
+rt_value name_string(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("\"");
 
@@ -267,7 +267,7 @@ rt_value name_string(node_t *node)
 	return result;
 }
 
-rt_value name_string_continue(node_t *node)
+rt_value name_string_continue(struct node *node)
 {
 	rt_value result;
 
@@ -289,7 +289,7 @@ rt_value name_string_continue(node_t *node)
 	return result;
 }
 
-rt_value name_string_start(node_t *node)
+rt_value name_string_start(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -299,7 +299,7 @@ rt_value name_string_start(node_t *node)
 	return result;
 }
 
-rt_value name_array(node_t *node)
+rt_value name_array(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("[");
 	rt_concat_string(result, get_node_name(node->left));
@@ -308,7 +308,7 @@ rt_value name_array(node_t *node)
 	return result;
 }
 
-rt_value name_array_element(node_t *node)
+rt_value name_array_element(struct node *node)
 {
 	rt_value result = get_node_name(node->left);
 
@@ -321,7 +321,7 @@ rt_value name_array_element(node_t *node)
 	return result;
 }
 
-rt_value name_boolean(node_t *node)
+rt_value name_boolean(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 	rt_concat_string(result, get_node_name(node->left));
@@ -334,7 +334,7 @@ rt_value name_boolean(node_t *node)
 	return result;
 }
 
-rt_value name_not(node_t *node)
+rt_value name_not(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(not ");
 	rt_concat_string(result, get_node_name(node->left));
@@ -343,12 +343,12 @@ rt_value name_not(node_t *node)
 	return result;
 }
 
-rt_value name_ivar(node_t *node)
+rt_value name_ivar(struct node *node)
 {
 	return rt_symbol_to_s((rt_value)node->left, 0, 0, 0);
 }
 
-rt_value name_ivar_assign(node_t *node)
+rt_value name_ivar_assign(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -360,7 +360,7 @@ rt_value name_ivar_assign(node_t *node)
 	return result;
 }
 
-rt_value name_no_equality(node_t *node)
+rt_value name_no_equality(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
@@ -374,7 +374,7 @@ rt_value name_no_equality(node_t *node)
 	return result;
 }
 
-rt_value name_handler(node_t *node)
+rt_value name_handler(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(begin (");
 
@@ -402,7 +402,7 @@ rt_value name_handler(node_t *node)
 	return result;
 }
 
-rt_value name_break_handler(node_t *node)
+rt_value name_break_handler(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(begin (");
 
@@ -413,7 +413,7 @@ rt_value name_break_handler(node_t *node)
 	return result;
 }
 
-rt_value name_rescue(node_t *node)
+rt_value name_rescue(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("rescue (");
 
@@ -430,7 +430,7 @@ rt_value name_rescue(node_t *node)
 	return result;
 }
 
-rt_value name_return(node_t *node)
+rt_value name_return(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("return ");
 
@@ -439,7 +439,7 @@ rt_value name_return(node_t *node)
 	return result;
 }
 
-rt_value name_break(node_t *node)
+rt_value name_break(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("break ");
 
@@ -448,7 +448,7 @@ rt_value name_break(node_t *node)
 	return result;
 }
 
-rt_value name_next(node_t *node)
+rt_value name_next(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("next ");
 
@@ -457,7 +457,7 @@ rt_value name_next(node_t *node)
 	return result;
 }
 
-rt_value name_redo(node_t *node)
+rt_value name_redo(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("redo ");
 
@@ -508,7 +508,7 @@ get_node_name_proc get_node_name_procs[] = {
 	name_method
 };
 
-rt_value get_node_name(node_t *node)
+rt_value get_node_name(struct node *node)
 {
     if (node)
         return get_node_name_procs[node->type](node);

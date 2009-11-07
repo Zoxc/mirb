@@ -48,12 +48,12 @@ rt_value rt_eval(rt_value self, const char *input, const char *filename)
 {
 	struct compiler *compiler = compiler_create(input, filename);
 
-	node_t* expression = parse_main(compiler);
+	struct node* expression = parse_main(compiler);
 
 	if(compiler->err_count != 0)
 		return RT_NIL;
 
-	extern rt_value get_node_name(node_t *node);
+	extern rt_value get_node_name(struct node *node);
 
 	#ifdef DEBUG
 		printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));

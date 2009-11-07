@@ -1,11 +1,11 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
-node_t *parse_class(struct compiler *compiler)
+struct node *parse_class(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_CLASS);
+	struct node *result = alloc_node(compiler, N_CLASS);
 
 	if(lexer_require(compiler, T_IDENT))
 	{
@@ -30,11 +30,11 @@ node_t *parse_class(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_module(struct compiler *compiler)
+struct node *parse_module(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_MODULE);
+	struct node *result = alloc_node(compiler, N_MODULE);
 
 	if(lexer_require(compiler, T_IDENT))
 	{
@@ -106,7 +106,7 @@ void parse_parameter(struct compiler *compiler, struct block *block)
 		COMPILER_ERROR(compiler, "Expected paramater, but found %s.", token_type_names[lexer_current(compiler)]);
 }
 
-node_t *parse_method(struct compiler *compiler)
+struct node *parse_method(struct compiler *compiler)
 {
 	lexer_state(compiler, TS_NOKEYWORDS);
 
@@ -114,7 +114,7 @@ node_t *parse_method(struct compiler *compiler)
 
 	lexer_state(compiler, TS_DEFAULT);
 
-	node_t *result = alloc_node(compiler, N_METHOD);
+	struct node *result = alloc_node(compiler, N_METHOD);
 
 	switch(lexer_current(compiler))
 	{

@@ -1,10 +1,10 @@
 #include "control_flow.h"
 
-node_t *parse_return(struct compiler *compiler)
+struct node *parse_return(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_RETURN);
+	struct node *result = alloc_node(compiler, N_RETURN);
 
 	if(compiler->current_block->type == S_CLOSURE)
 		compiler->current_block->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
@@ -17,11 +17,11 @@ node_t *parse_return(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_next(struct compiler *compiler)
+struct node *parse_next(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_NEXT);
+	struct node *result = alloc_node(compiler, N_NEXT);
 
 	if(compiler->current_block->type != S_CLOSURE)
 		COMPILER_ERROR(compiler, "Next outside of block.");
@@ -34,11 +34,11 @@ node_t *parse_next(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_redo(struct compiler *compiler)
+struct node *parse_redo(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_REDO);
+	struct node *result = alloc_node(compiler, N_REDO);
 
 	if(compiler->current_block->type != S_CLOSURE)
 		COMPILER_ERROR(compiler, "Redo outside of block.");
@@ -46,11 +46,11 @@ node_t *parse_redo(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_break(struct compiler *compiler)
+struct node *parse_break(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_BREAK);
+	struct node *result = alloc_node(compiler, N_BREAK);
 
 	if(compiler->current_block->type == S_CLOSURE)
 	{
@@ -67,9 +67,9 @@ node_t *parse_break(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
+struct node *parse_exception_handlers(struct compiler *compiler, struct node *block)
 {
-	node_t *parent = alloc_node(compiler, N_HANDLER);
+	struct node *parent = alloc_node(compiler, N_HANDLER);
 
 	parent->left = block;
 
@@ -77,7 +77,7 @@ node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
 	{
 		lexer_next(compiler);
 
-		node_t *rescue = alloc_node(compiler, N_RESCUE);
+		struct node *rescue = alloc_node(compiler, N_RESCUE);
 		rescue->left = parse_statements(compiler);
 		rescue->right = 0;
 
@@ -87,7 +87,7 @@ node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
 		{
 			lexer_next(compiler);
 
-			node_t *node = alloc_node(compiler, N_RESCUE);
+			struct node *node = alloc_node(compiler, N_RESCUE);
 			node->left = parse_statements(compiler);
 			node->right = 0;
 
@@ -110,11 +110,11 @@ node_t *parse_exception_handlers(struct compiler *compiler, node_t *block)
 	return parent;
 }
 
-node_t *parse_begin(struct compiler *compiler)
+struct node *parse_begin(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = parse_statements(compiler);
+	struct node *result = parse_statements(compiler);
 
 	switch (lexer_current(compiler))
 	{
@@ -146,15 +146,15 @@ void parse_then_sep(struct compiler *compiler)
 	}
 }
 
-node_t *parse_ternary_if(struct compiler *compiler)
+struct node *parse_ternary_if(struct compiler *compiler)
 {
-	node_t *result = parse_boolean_or(compiler);
+	struct node *result = parse_boolean_or(compiler);
 
 	if(lexer_current(compiler) == T_QUESTION)
 	{
 		lexer_next(compiler);
 
-    	node_t *node = alloc_node(compiler, N_IF);
+    	struct node *node = alloc_node(compiler, N_IF);
 
 		node->left = result;
 		node->middle = parse_ternary_if(compiler);
@@ -169,13 +169,13 @@ node_t *parse_ternary_if(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_conditional(struct compiler *compiler)
+struct node *parse_conditional(struct compiler *compiler)
 {
-	node_t *result = parse_low_boolean(compiler);
+	struct node *result = parse_low_boolean(compiler);
 
     if (lexer_current(compiler) == T_IF || lexer_current(compiler) == T_UNLESS)
     {
-     	node_t *node = alloc_node(compiler, lexer_current(compiler) == T_IF ? N_IF : N_UNLESS);
+     	struct node *node = alloc_node(compiler, lexer_current(compiler) == T_IF ? N_IF : N_UNLESS);
 
 		lexer_next(compiler);
 
@@ -189,11 +189,11 @@ node_t *parse_conditional(struct compiler *compiler)
     return result;
 }
 
-node_t *parse_unless(struct compiler *compiler)
+struct node *parse_unless(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_UNLESS);
+	struct node *result = alloc_node(compiler, N_UNLESS);
 	result->left = parse_expression(compiler);
 
 	parse_then_sep(compiler);
@@ -206,7 +206,7 @@ node_t *parse_unless(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_if_tail(struct compiler *compiler)
+struct node *parse_if_tail(struct compiler *compiler)
 {
 	switch (lexer_current(compiler))
 	{
@@ -214,7 +214,7 @@ node_t *parse_if_tail(struct compiler *compiler)
 			{
 				lexer_next(compiler);
 
-				node_t *result = alloc_node(compiler, N_IF);
+				struct node *result = alloc_node(compiler, N_IF);
 				result->left = parse_expression(compiler);
 
 				parse_then_sep(compiler);
@@ -235,11 +235,11 @@ node_t *parse_if_tail(struct compiler *compiler)
 	}
 }
 
-node_t *parse_if(struct compiler *compiler)
+struct node *parse_if(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_IF);
+	struct node *result = alloc_node(compiler, N_IF);
 	result->left = parse_expression(compiler);
 
 	parse_then_sep(compiler);
@@ -252,7 +252,7 @@ node_t *parse_if(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_case_body(struct compiler *compiler)
+struct node *parse_case_body(struct compiler *compiler)
 {
 	switch (lexer_current(compiler))
 	{
@@ -260,7 +260,7 @@ node_t *parse_case_body(struct compiler *compiler)
 			{
 				lexer_next(compiler);
 
-				node_t *result = alloc_node(compiler, N_IF);
+				struct node *result = alloc_node(compiler, N_IF);
 				result->left = parse_expression(compiler);
 
 				parse_then_sep(compiler);
@@ -287,11 +287,11 @@ node_t *parse_case_body(struct compiler *compiler)
 	}
 }
 
-node_t *parse_case(struct compiler *compiler)
+struct node *parse_case(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = 0;
+	struct node *result = 0;
 
 	switch (lexer_current(compiler))
 	{

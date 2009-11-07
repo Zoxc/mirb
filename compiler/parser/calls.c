@@ -2,7 +2,7 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
-node_t *parse_block(struct compiler *compiler)
+struct node *parse_block(struct compiler *compiler)
 {
 	bool curly;
 
@@ -24,7 +24,7 @@ node_t *parse_block(struct compiler *compiler)
 
 	struct block *block;
 
-	node_t *result = alloc_scope(compiler, &block, S_CLOSURE);
+	struct node *result = alloc_scope(compiler, &block, S_CLOSURE);
 
 	skip_lines(compiler);
 
@@ -46,7 +46,7 @@ node_t *parse_block(struct compiler *compiler)
 	return result;
 }
 
-node_t *secure_block(struct compiler *compiler, node_t *result, node_t *parent)
+struct node *secure_block(struct compiler *compiler, struct node *result, struct node *parent)
 {
 	if(!result)
 		return parent;
@@ -55,7 +55,7 @@ node_t *secure_block(struct compiler *compiler, node_t *result, node_t *parent)
 
 	if(block->can_break)
 	{
-		node_t *handler = alloc_node(compiler, N_BREAK_HANDLER);
+		struct node *handler = alloc_node(compiler, N_BREAK_HANDLER);
 
 		block->break_id = compiler->current_block->break_targets++; // Assign a break id to the block and increase the break target count.
 
@@ -107,13 +107,13 @@ bool has_arguments(struct compiler *compiler)
 		return false;
 }
 
-node_t *parse_arguments(struct compiler *compiler, bool has_args)
+struct node *parse_arguments(struct compiler *compiler, bool has_args)
 {
 	if (has_args && lexer_current(compiler) != T_CURLY_OPEN)
 	{
 		if (lexer_current(compiler) == T_PARAM_OPEN && !lexer_token(compiler)->whitespace)
 		{
-		    node_t *result = 0;
+		    struct node *result = 0;
 
 			lexer_next(compiler);
 
@@ -131,11 +131,11 @@ node_t *parse_arguments(struct compiler *compiler, bool has_args)
 		return 0;
 }
 
-node_t *parse_yield(struct compiler *compiler)
+struct node *parse_yield(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	node_t *result = alloc_node(compiler, N_CALL);
+	struct node *result = alloc_node(compiler, N_CALL);
 
 	result->left = alloc_node(compiler, N_VAR);
 
@@ -153,7 +153,7 @@ node_t *parse_yield(struct compiler *compiler)
 	return result;
 }
 
-node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bool default_var)
+struct node *parse_call(struct compiler *compiler, rt_value symbol, struct node *child, bool default_var)
 {
 	if(!symbol)
 	{
@@ -184,7 +184,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 	{
 		if(local)
 		{
-			node_t *result = alloc_node(compiler, N_VAR);
+			struct node *result = alloc_node(compiler, N_VAR);
 
 			result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
 
@@ -192,7 +192,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 		}
 		else
 		{
-			node_t *result = alloc_node(compiler, N_CONST);
+			struct node *result = alloc_node(compiler, N_CONST);
 
 			result->left = child;
 			result->right = (void *)symbol;
@@ -202,7 +202,7 @@ node_t *parse_call(struct compiler *compiler, rt_value symbol, node_t *child, bo
 	}
 	else // Call
 	{
-		node_t *result = alloc_node(compiler, N_CALL);
+		struct node *result = alloc_node(compiler, N_CALL);
 
 		result->left = child;
 		result->middle = (void *)symbol;
@@ -220,7 +220,7 @@ static inline bool is_lookup(struct compiler *compiler)
 	return lexer_current(compiler) == T_DOT || lexer_current(compiler) == T_SQUARE_OPEN || lexer_current(compiler) == T_SCOPE;
 }
 
-node_t *parse_lookup(struct compiler *compiler, node_t *child)
+struct node *parse_lookup(struct compiler *compiler, struct node *child)
 {
 	switch(lexer_current(compiler))
 	{
@@ -235,7 +235,7 @@ node_t *parse_lookup(struct compiler *compiler, node_t *child)
 				if(lexer_require(compiler, T_IDENT))
 				{
 					rt_value symbol = rt_symbol_from_lexer(compiler);
-					node_t *result;
+					struct node *result;
 
 					if(rt_symbol_is_const(symbol))
 					{
@@ -274,7 +274,7 @@ node_t *parse_lookup(struct compiler *compiler, node_t *child)
 			{
 				lexer_next(compiler);
 
-				node_t *result = alloc_node(compiler, N_ARRAY_CALL);
+				struct node *result = alloc_node(compiler, N_ARRAY_CALL);
 
 				result->left = child;
 				result->middle = parse_argument(compiler);
@@ -290,7 +290,7 @@ node_t *parse_lookup(struct compiler *compiler, node_t *child)
 	}
 }
 
-node_t *parse_lookup_tail(struct compiler *compiler, node_t *tail)
+struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 {
 	if(tail && tail->type == N_CALL && tail->right)
 		return tail;
@@ -311,7 +311,7 @@ node_t *parse_lookup_tail(struct compiler *compiler, node_t *tail)
 				{
 					case N_CONST:
 						{
-							node_t *result = alloc_node(compiler, N_ASSIGN_CONST);
+							struct node *result = alloc_node(compiler, N_ASSIGN_CONST);
 
 							result->left = tail->left;
 							result->middle = tail->right;
@@ -352,8 +352,8 @@ node_t *parse_lookup_tail(struct compiler *compiler, node_t *tail)
 						{
 							tail->type = N_CALL;
 
-							node_t *block = tail->right;
-							node_t *argument = tail->middle;
+							struct node *block = tail->right;
+							struct node *argument = tail->middle;
 
 							tail->middle = (void *)rt_symbol_from_cstr("[]=");
 							tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
@@ -390,13 +390,13 @@ node_t *parse_lookup_tail(struct compiler *compiler, node_t *tail)
 	}
 }
 
-node_t *parse_lookup_chain(struct compiler *compiler)
+struct node *parse_lookup_chain(struct compiler *compiler)
 {
- 	node_t *result = parse_factor(compiler);
+ 	struct node *result = parse_factor(compiler);
 
     while(is_lookup(compiler))
     {
-    	node_t *node = parse_lookup(compiler, result);
+    	struct node *node = parse_lookup(compiler, result);
 
 		result = node;
     }

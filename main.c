@@ -28,7 +28,7 @@ int main()
 			break;
 		}
 
-		node_t* expression = parse_main(compiler);
+		struct node* expression = parse_main(compiler);
 
 		if(compiler->err_count == 0)
 		{
