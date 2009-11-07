@@ -1,7 +1,7 @@
 #pragma once
 #include "../runtime/runtime.h"
 
-typedef enum {
+enum opcode_type {
 	B_NOP,
 	B_ADD,
 	B_SUB,
@@ -57,7 +57,7 @@ typedef enum {
 	B_CLASS,
 	B_MODULE,
 	B_METHOD
-} opcode_type_t;
+};
 
 typedef enum {
 	L_DEFAULT,
@@ -65,7 +65,7 @@ typedef enum {
 } label_type_t;
 
 typedef struct opcode{
-	opcode_type_t type;
+	enum opcode_type type;
 	rt_value result;
 	rt_value left;
 	rt_value right;

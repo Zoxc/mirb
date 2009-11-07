@@ -162,7 +162,7 @@ static inline struct variable *block_get_var(struct block *block)
 	return temp;
 }
 
-static inline size_t block_push(struct block *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
+static inline size_t block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
 {
 	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
 	op->type = type;
