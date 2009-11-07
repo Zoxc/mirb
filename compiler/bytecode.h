@@ -64,11 +64,11 @@ enum label_type {
 	L_FLUSH
 };
 
-typedef struct opcode {
+struct opcode {
 	enum opcode_type type;
 	rt_value result;
 	rt_value left;
 	rt_value right;
-} opcode_t;
+};
 
-void opcode_print(opcode_t *op);
+void opcode_print(struct opcode *op);

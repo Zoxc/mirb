@@ -8,7 +8,7 @@
 
 static inline size_t label_target(void *target, rt_value label)
 {
-	opcode_t *op = (opcode_t *)label;
+	struct opcode *op = (struct opcode *)label;
 
 	return ((size_t)target + op->result);
 }
@@ -31,7 +31,7 @@ static inline void generate_dword(unsigned char **target, size_t dword)
 	*target += sizeof(dword);
 }
 
-static inline size_t instruction_size(struct block *block, opcode_t *op, size_t i, size_t current)
+static inline size_t instruction_size(struct block *block, struct opcode *op, size_t i, size_t current)
 {
 	switch(op->type)
 	{
@@ -239,7 +239,7 @@ static inline void generate_stack_pop(unsigned char **target, size_t bytes)
 	generate_dword(target, bytes);
 }
 
-static inline void generate_instruction(struct block *block, opcode_t *op, size_t i, unsigned char *start, unsigned char **target)
+static inline void generate_instruction(struct block *block, struct opcode *op, size_t i, unsigned char *start, unsigned char **target)
 {
 	switch(op->type)
 	{

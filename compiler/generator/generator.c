@@ -191,14 +191,14 @@ static void gen_const_assign(struct block *block, struct node *node, struct vari
 static void gen_if(struct block *block, struct node *node, struct variable *var)
 {
 	struct variable *temp = var ? var : block_get_var(block);
-	opcode_t *label_else = block_get_label(block);
+	struct opcode *label_else = block_get_label(block);
 
 	gen_node(block, node->left, temp);
 
 	block_push(block, B_TEST, (rt_value)temp, 0, 0);
 	block_push(block, node->type == N_IF ? B_JMPF : B_JMPT, (rt_value)label_else, 0, 0);
 
-	opcode_t *label_end = block_get_label(block);
+	struct opcode *label_end = block_get_label(block);
 
 	if(var)
 	{
@@ -398,7 +398,7 @@ static void gen_boolean(struct block *block, struct node *node, struct variable 
 
 	gen_node(block, node->left, temp);
 
-	opcode_t *label_end = block_get_label(block);
+	struct opcode *label_end = block_get_label(block);
 
 	block_push(block, B_TEST, (rt_value)temp, 0, 0);
 	block_push(block, (node->op == T_OR || node->op == T_OR_BOOLEAN) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
@@ -416,8 +416,8 @@ static void gen_not(struct block *block, struct node *node, struct variable *var
 
 		gen_node(block, node->left, temp);
 
-		opcode_t *label_true = block_get_label(block);
-		opcode_t *label_end = block_get_label(block);
+		struct opcode *label_true = block_get_label(block);
+		struct opcode *label_end = block_get_label(block);
 
 		block_push(block, B_TEST, (rt_value)temp, 0, 0);
 
@@ -470,8 +470,8 @@ static void gen_no_equality(struct block *block, struct node *node, struct varia
 		gen_node(block, node->left, temp1);
 		gen_node(block, node->right, temp2);
 
-		opcode_t *label_true = block_get_label(block);
-		opcode_t *label_end = block_get_label(block);
+		struct opcode *label_true = block_get_label(block);
+		struct opcode *label_end = block_get_label(block);
 
 		block_push(block, B_CMP, (rt_value)temp1, (rt_value)temp2, 0);
 
@@ -558,7 +558,7 @@ static void gen_break_handler(struct block *block, struct node *node, struct var
 
 	gen_node(block, node->left, var);
 
-	opcode_t *label = 0;
+	struct opcode *label = 0;
 
 	if(var)
 	{
@@ -626,7 +626,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 		/*
 		 * Skip the rescue block
 		 */
-		opcode_t *ok_label = block_get_label(block);
+		struct opcode *ok_label = block_get_label(block);
 		block_push(block, B_JMP, (rt_value)ok_label, 0, 0);
 
 		/*
@@ -735,7 +735,7 @@ struct block *gen_block(struct node *node)
 	for(int i = 0; i < kv_size(block->upvals); i++)
 		block_push(block, B_SEAL, (rt_value)kv_A(block->upvals, i), 0, 0);
 
-	opcode_t *last = kv_A(block->vector, kv_size(block->vector) - 1);
+	struct opcode *last = kv_A(block->vector, kv_size(block->vector) - 1);
 
 	if(last->type == B_RETURN && last->left == (rt_value)result)
 		last->type = B_LOAD;

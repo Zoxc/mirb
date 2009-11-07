@@ -55,7 +55,7 @@ void block_print(struct block *block)
 {
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 	{
-		opcode_t *op = kv_A(block->vector, i);
+		struct opcode *op = kv_A(block->vector, i);
 
 		if(op->type != B_NOP)
 		{

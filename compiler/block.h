@@ -110,7 +110,7 @@ struct block {
 		rt_value label_count; // Nicer label labeling...
 	#endif
 
-	kvec_t(opcode_t *) vector;
+	kvec_t(struct opcode *) vector;
 	kvec_t(struct variable *) upvals;
 	kvec_t(struct exception_block *) exception_blocks;
 	struct exception_block *current_exception_block;
@@ -120,7 +120,7 @@ struct block {
 	size_t self_ref;
 	bool require_exceptions;
 	void *prolog; // The point after the prolog of the block.
-	opcode_t *epilog; // The end of the block
+	struct opcode *epilog; // The end of the block
 };
 
 /*
@@ -129,9 +129,9 @@ struct block {
 
 struct block *block_create(struct compiler *compiler, enum block_type type);
 
-static inline opcode_t *block_get_label(struct block *block)
+static inline struct opcode *block_get_label(struct block *block)
 {
-	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
+	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
 	op->type = B_LABEL;
 	op->left = 0;
 
@@ -142,9 +142,9 @@ static inline opcode_t *block_get_label(struct block *block)
 	return op;
 }
 
-static inline opcode_t *block_get_flush_label(struct block *block)
+static inline struct opcode *block_get_flush_label(struct block *block)
 {
-	opcode_t *op = block_get_label(block);
+	struct opcode *op = block_get_label(block);
 	op->left = L_FLUSH;
 
 	return op;
@@ -164,12 +164,12 @@ static inline struct variable *block_get_var(struct block *block)
 
 static inline size_t block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
 {
-	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
+	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
 	op->type = type;
 	op->result = result;
 	op->left = left;
 	op->right = right;
-	kv_push(opcode_t *, block->vector, op);
+	kv_push(struct opcode *, block->vector, op);
 
 	return kv_size(block->vector) - 1;
 }
@@ -193,9 +193,9 @@ static inline void block_end_args(struct block *block, struct variable *var, siz
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
 }
 
-static inline opcode_t *block_emmit_label(struct block *block, opcode_t *label)
+static inline struct opcode *block_emmit_label(struct block *block, struct opcode *label)
 {
-	kv_push(opcode_t *, block->vector, label);
+	kv_push(struct opcode *, block->vector, label);
 
 	return label;
 }
@@ -203,7 +203,7 @@ static inline opcode_t *block_emmit_label(struct block *block, opcode_t *label)
 static inline void block_print_label(rt_value label)
 {
 	#ifdef DEBUG
-		printf("#%d", ((opcode_t *)label)->right);
+		printf("#%d", ((struct opcode *)label)->right);
 	#else
 		printf("#%x", label);
 	#endif

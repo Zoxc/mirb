@@ -4,7 +4,7 @@
 #include "../runtime/classes/fixnum.h"
 #include "../runtime/classes/symbol.h"
 
-void opcode_print(opcode_t *op)
+void opcode_print(struct opcode *op)
 {
 	switch(op->type)
 	{
