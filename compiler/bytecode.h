@@ -59,12 +59,12 @@ enum opcode_type {
 	B_METHOD
 };
 
-typedef enum {
+enum label_type {
 	L_DEFAULT,
 	L_FLUSH
-} label_type_t;
+};
 
-typedef struct opcode{
+typedef struct opcode {
 	enum opcode_type type;
 	rt_value result;
 	rt_value left;
