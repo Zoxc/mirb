@@ -145,7 +145,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 #ifdef WINDOWS
 	static bool rt_find_seh_target(void *target)
 	{
-		rt_seh_frame_t *frame;
+		struct rt_seh_frame *frame;
 
 		__asm__ __volatile__("movl %%fs:(0), %0\n" : "=r" (frame));
 
@@ -202,7 +202,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		PVOID ReturnValue
 	);
 
-	static void rt_seh_global_unwind(rt_seh_frame_t *target)
+	static void rt_seh_global_unwind(struct rt_seh_frame *target)
 	{
 		int dummy;
 
@@ -221,7 +221,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		: "esi", "edi", "edx", "ecx", "memory");
 	}
 
-	static void rt_seh_local_unwind(rt_seh_frame_t *frame_data, struct exception_block *block, struct exception_block *target)
+	static void rt_seh_local_unwind(struct rt_seh_frame *frame_data, struct exception_block *block, struct exception_block *target)
 	{
 		frame_data->handling = 1;
 
@@ -256,7 +256,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		frame_data->handling = 0;
 	}
 
-	static void __attribute__((noreturn)) rt_seh_return(rt_seh_frame_t *frame_data, struct exception_block *block, rt_value value)
+	static void __attribute__((noreturn)) rt_seh_return(struct rt_seh_frame *frame_data, struct exception_block *block, rt_value value)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -293,7 +293,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		__builtin_unreachable();
 	}
 
-	static void __attribute__((noreturn)) rt_seh_break(rt_seh_frame_t *frame_data, rt_value value, size_t id)
+	static void __attribute__((noreturn)) rt_seh_break(struct rt_seh_frame *frame_data, rt_value value, size_t id)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -324,7 +324,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		__builtin_unreachable();
 	}
 
-	static void __attribute__((noreturn)) rt_seh_rescue(rt_seh_frame_t *frame_data, struct exception_block *block, struct exception_block *current_block, void *rescue_label)
+	static void __attribute__((noreturn)) rt_seh_rescue(struct rt_seh_frame *frame_data, struct exception_block *block, struct exception_block *current_block, void *rescue_label)
 	{
 		rt_seh_global_unwind(frame_data);
 
@@ -366,7 +366,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 		__builtin_unreachable();
 	}
 
-	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, rt_seh_frame_t *frame_data, CONTEXT *context, void *dispatcher_context)
+	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, struct rt_seh_frame *frame_data, CONTEXT *context, void *dispatcher_context)
 	{
 		if(frame_data->block_index == -1)
 		{

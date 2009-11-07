@@ -818,17 +818,17 @@ rt_compiled_block_t compile_block(struct block *block)
 		data->local_storage = stack_vars * 4;
 
 		/*
-		 * Generate seh_frame_t struct
+		 * Generate seh_frame struct
 		 *
 
-        typedef struct seh_frame_t {
-            struct seh_frame_t *prev;
+        typedef struct struct seh_frame {
+            struct struct seh_frame *prev;
             void *handler;
             size_t handling;
             size_t handler_index;
             struct block_data *block;
             size_t old_ebp;
-        } rt_seh_frame_t;
+        } struct rt_seh_frame;
 
 		 */
 
