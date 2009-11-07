@@ -418,7 +418,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 						switch(handler->type)
 						{
 							case E_RUNTIME_EXCEPTION:
-								rt_seh_rescue(frame_data, block, current_block, ((runtime_exception_handler_t *)handler)->rescue_label);
+								rt_seh_rescue(frame_data, block, current_block, ((struct runtime_exception_handler *)handler)->rescue_label);
 
 							default:
 								break;

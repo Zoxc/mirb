@@ -632,7 +632,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 		/*
 		 * Output rescue node
 		 */
-		runtime_exception_handler_t *handler = malloc(sizeof(runtime_exception_handler_t));
+		struct runtime_exception_handler *handler = malloc(sizeof(struct runtime_exception_handler));
 		handler->common.type = E_RUNTIME_EXCEPTION;
 		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
 		kv_push(struct exception_handler *, exception_block->handlers, (struct exception_handler *)handler);

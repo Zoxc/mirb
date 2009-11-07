@@ -797,7 +797,7 @@ rt_compiled_block_t compile_block(block_t *block)
 					case E_CLASS_EXCEPTION:
 					case E_FILTER_EXCEPTION:
 						{
-							runtime_exception_handler_t *exception_handler = (runtime_exception_handler_t *)handler;
+							struct runtime_exception_handler *exception_handler = (struct runtime_exception_handler *)handler;
 							exception_handler->rescue_label = (void *)label_target(result, (rt_value)exception_handler->rescue_label);
 						}
 						break;

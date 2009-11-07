@@ -19,13 +19,13 @@ struct exception_handler {
 	struct exception_handler *next;
 };
 
-typedef struct {
+struct runtime_exception_handler {
 	struct exception_handler common;
 	void *rescue_label;
-} runtime_exception_handler_t;
+};
 
 typedef struct {
-	runtime_exception_handler_t common;
+	struct runtime_exception_handler common;
 } class_exception_handler_t;
 
 typedef struct exception_block {
