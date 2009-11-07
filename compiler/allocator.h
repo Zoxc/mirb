@@ -1,17 +1,17 @@
 #pragma once
 #include "../globals.h"
 
-typedef struct {
+struct allocator {
 	unsigned char *page;
 	unsigned char *next;
 	kvec_t(void *) pages;
-} allocator_t;
+};
 
-void allocator_init(allocator_t *allocator);
-void allocator_free(allocator_t *allocator);
-void *allocator_page_alloc(allocator_t *allocator, size_t length);
+void allocator_init(struct allocator *allocator);
+void allocator_free(struct allocator *allocator);
+void *allocator_page_alloc(struct allocator *allocator, size_t length);
 
-static inline void *allocator_alloc(allocator_t *allocator, size_t length)
+static inline void *allocator_alloc(struct allocator *allocator, size_t length)
 {
 	unsigned char* result = allocator->next;
 

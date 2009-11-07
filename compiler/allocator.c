@@ -28,7 +28,7 @@ static void free_page(void *page)
 	#endif
 }
 
-void allocator_init(allocator_t *allocator)
+void allocator_init(struct allocator *allocator)
 {
 	allocator->next = (unsigned char *)get_page();
 	allocator->page = allocator->next + ALLOCATOR_PAGE_SIZE;
@@ -36,7 +36,7 @@ void allocator_init(allocator_t *allocator)
 	kv_init(allocator->pages);
 }
 
-void allocator_free(allocator_t *allocator)
+void allocator_free(struct allocator *allocator)
 {
 	free_page(allocator->page - ALLOCATOR_PAGE_SIZE);
 
@@ -46,7 +46,7 @@ void allocator_free(allocator_t *allocator)
 	kv_destroy(allocator->pages);
 }
 
-void *allocator_page_alloc(allocator_t *allocator, size_t length)
+void *allocator_page_alloc(struct allocator *allocator, size_t length)
 {
 	kv_push(void *, allocator->pages, allocator->page);
 

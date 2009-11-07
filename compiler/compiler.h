@@ -23,7 +23,7 @@ struct compiler {
 	/*
 	 * Memory allocator
 	 */
-	allocator_t allocator;
+	struct allocator allocator;
 };
 
 #define COMPILER_ERROR(compiler, msg, ...) do \
