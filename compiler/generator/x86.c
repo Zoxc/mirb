@@ -789,7 +789,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 			for(size_t j = 0; j < kv_size(exception_block->handlers); j++)
 			{
-				exception_handler_t *handler = kv_A(exception_block->handlers, j);
+				struct exception_handler *handler = kv_A(exception_block->handlers, j);
 
 				switch(handler->type)
 				{

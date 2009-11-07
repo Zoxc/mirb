@@ -413,7 +413,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 				{
 					for(size_t i = 0; i < kv_size(current_block->handlers); i++)
 					{
-						exception_handler_t *handler = kv_A(current_block->handlers, i);
+						struct exception_handler *handler = kv_A(current_block->handlers, i);
 
 						switch(handler->type)
 						{

@@ -14,13 +14,13 @@ enum exception_handler_type {
 	E_FILTER_EXCEPTION,
 };
 
-typedef struct exception_handler {
+struct exception_handler {
 	enum exception_handler_type type;
 	struct exception_handler *next;
-} exception_handler_t;
+};
 
 typedef struct {
-	exception_handler_t common;
+	struct exception_handler common;
 	void *rescue_label;
 } runtime_exception_handler_t;
 
@@ -31,7 +31,7 @@ typedef struct {
 typedef struct exception_block {
 	size_t parent_index;
 	struct exception_block *parent;
-	kvec_t(exception_handler_t *) handlers;
+	kvec_t(struct exception_handler *) handlers;
 	void *block_label;
 	void *ensure_label;
 } exception_block_t;
