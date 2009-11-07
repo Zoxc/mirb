@@ -23,7 +23,7 @@ typedef rt_value (__stdcall *rt_compiled_block_t)(rt_value obj, rt_value block, 
 KHASH_MAP_INIT_INT(rt_hash, rt_value);
 KHASH_MAP_INIT_INT(rt_block, rt_compiled_block_t);
 
-typedef enum {
+enum rt_type {
 	C_FIXNUM,
 	C_TRUE,
 	C_FALSE,
@@ -38,7 +38,7 @@ typedef enum {
 	C_ARRAY,
 	C_PROC,
 	C_EXCEPTION
-} rt_type_t;
+};
 
 struct rt_common {
 	size_t flags;
@@ -52,7 +52,7 @@ struct rt_common {
 #define RT_FALSE 4
 #define RT_MAX RT_FALSE
 
-static inline rt_type_t rt_type(rt_value obj)
+static inline enum rt_type rt_type(rt_value obj)
 {
 	if (obj & RT_FLAG_FIXNUM)
 		return C_FIXNUM;
