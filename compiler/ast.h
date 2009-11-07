@@ -1,7 +1,7 @@
 #pragma once
 #include "lexer.h"
 
-typedef enum {
+enum node_type {
 	N_UNARY_OP,
 	N_BINARY_OP,
 	N_NUMBER,
@@ -42,13 +42,13 @@ typedef enum {
 	N_SCOPE,
 	N_METHOD,
 	N_PARAMETER
-} node_type_t;
+};
 
 typedef struct node {
     struct node *left;
     struct node *middle;
     struct node *right;
-    node_type_t type;
+    enum node_type type;
     enum token_type op;
 } node_t;
 
