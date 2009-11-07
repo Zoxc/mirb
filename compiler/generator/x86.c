@@ -971,9 +971,9 @@ rt_compiled_block_t compile_block(struct block *block)
 
 			if(data)
 			{
-				disassembly_symbol_t block_data = {data, "block_data"};
+				struct disassembly_symbol block_data = {data, "block_data"};
 
-				kv_push(disassembly_symbol_t *, symbols, &block_data);
+				kv_push(struct disassembly_symbol *, symbols, &block_data);
 			}
 
 			dump_code((void *)result, target - (unsigned char *)result, &symbols);

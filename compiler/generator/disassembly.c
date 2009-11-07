@@ -2,7 +2,7 @@
 #include "../../runtime/support.h"
 #include "../../runtime/x86.h"
 
-disassembly_symbol_t disassembly_symbols[] = {
+struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_closure),
 	DISASSEMBLY_SYMBOL(rt_support_define_class),
 	DISASSEMBLY_SYMBOL(rt_support_define_module),
@@ -26,7 +26,7 @@ disassembly_symbol_t disassembly_symbols[] = {
 
 char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 {
-	for(int i = 0; i < sizeof(disassembly_symbols) / sizeof(disassembly_symbol_t); i++)
+	for(int i = 0; i < sizeof(disassembly_symbols) / sizeof(struct disassembly_symbol); i++)
 	{
 		if(disassembly_symbols[i].address == address)
 			return disassembly_symbols[i].symbol;

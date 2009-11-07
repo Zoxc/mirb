@@ -1,13 +1,13 @@
 #include "../../globals.h"
 
-typedef struct {
+struct disassembly_symbol {
 	void *address;
 	char *symbol;
-} disassembly_symbol_t;
+};
 
 #define DISASSEMBLY_SYMBOL(name) {&name, #name}
 
-typedef kvec_t(disassembly_symbol_t *) disassembly_symbol_vector_t;
+typedef kvec_t(struct disassembly_symbol *) disassembly_symbol_vector_t;
 
 #ifdef WINDOWS
     void dump_hex(unsigned char* address, int length);
