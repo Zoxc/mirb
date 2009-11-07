@@ -44,7 +44,7 @@ bool scope_defined(struct block *block, rt_value name, bool recursive)
 	return false;
 }
 
-variable_t *scope_declare_var(struct block *block, rt_value name, variable_type type)
+variable_t *scope_declare_var(struct block *block, rt_value name, enum variable_type type)
 {
 	khiter_t k = kh_get(block, block->variables, name);
 
@@ -70,7 +70,7 @@ variable_t *scope_declare_var(struct block *block, rt_value name, variable_type 
 	return var;
 }
 
-variable_t *scope_define(struct block *block, rt_value name, variable_type type, bool recursive)
+variable_t *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive)
 {
 	if(scope_defined(block, name, false))
 	{

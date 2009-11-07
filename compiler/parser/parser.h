@@ -7,8 +7,8 @@
 #include "../block.h"
 
 bool scope_defined(struct block *block, rt_value name, bool recursive);
-variable_t *scope_declare_var(struct block *block, rt_value name, variable_type type);
-variable_t *scope_define(struct block *block, rt_value name, variable_type type, bool recursive);
+variable_t *scope_declare_var(struct block *block, rt_value name, enum variable_type type);
+variable_t *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive);
 
 node_t *parse_factor(struct compiler *compiler);
 node_t *parse_expression(struct compiler *compiler);

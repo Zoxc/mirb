@@ -51,14 +51,14 @@ struct block_data {
  * Variables
  */
 
-typedef enum {
+enum variable_type {
 	V_PARAMETER,
 	V_LOCAL,
 	V_UPVAL,
 	V_TEMP,
 	V_BLOCK,
 	V_ARGS
-} variable_type;
+};
 
 #define VARIABLE_TYPES 6
 
@@ -66,7 +66,7 @@ typedef struct variable_t {
 	struct variable_t *real;
 	rt_value index;
 	rt_value name;
-	variable_type type;
+	enum variable_type type;
 } variable_t;
 
 KHASH_MAP_INIT_INT(block, variable_t *);
