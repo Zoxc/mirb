@@ -24,9 +24,9 @@ struct runtime_exception_handler {
 	void *rescue_label;
 };
 
-typedef struct {
+struct class_exception_handler_t {
 	struct runtime_exception_handler common;
-} class_exception_handler_t;
+};
 
 typedef struct exception_block {
 	size_t parent_index;
