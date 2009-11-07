@@ -373,7 +373,14 @@ node_t *parse_lookup_tail(struct compiler *compiler, node_t *tail)
 						}
 
 					default:
-						RT_ASSERT(0);
+						{
+							COMPILER_ERROR(compiler, "Cannot assign a value to an expression.");
+
+							parse_expression(compiler);
+
+							return 0;
+
+						}
 				}
 			}
 			break;
