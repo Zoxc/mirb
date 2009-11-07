@@ -4,4 +4,4 @@
 #include "../block.h"
 #include "../parser/parser.h"
 
-block_t *gen_block(node_t* node);
+struct block *gen_block(node_t* node);

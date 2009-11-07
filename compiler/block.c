@@ -51,7 +51,7 @@ const char *variable_name(rt_value var)
 	return rt_string_to_cstr(string);
 }
 
-void block_print(block_t *block)
+void block_print(struct block *block)
 {
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 	{
@@ -68,9 +68,9 @@ void block_print(block_t *block)
 	}
 }
 
-block_t *block_create(struct compiler *compiler, enum block_type type)
+struct block *block_create(struct compiler *compiler, enum block_type type)
 {
-	block_t *result = compiler_alloc(compiler, sizeof(struct block));
+	struct block *result = compiler_alloc(compiler, sizeof(struct block));
 
 	result->data = malloc(sizeof(struct block_data));
 

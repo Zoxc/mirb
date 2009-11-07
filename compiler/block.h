@@ -83,7 +83,7 @@ enum block_type {
 	S_CLOSURE
 };
 
-typedef struct block {
+struct block {
 	enum block_type type;
 	struct compiler *compiler; // The compiler which owns this block
 
@@ -121,15 +121,15 @@ typedef struct block {
 	bool require_exceptions;
 	void *prolog; // The point after the prolog of the block.
 	opcode_t *epilog; // The end of the block
-} block_t;
+};
 
 /*
  * Block functions
  */
 
-block_t *block_create(struct compiler *compiler, enum block_type type);
+struct block *block_create(struct compiler *compiler, enum block_type type);
 
-static inline opcode_t *block_get_label(block_t *block)
+static inline opcode_t *block_get_label(struct block *block)
 {
 	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
 	op->type = B_LABEL;
@@ -142,7 +142,7 @@ static inline opcode_t *block_get_label(block_t *block)
 	return op;
 }
 
-static inline opcode_t *block_get_flush_label(block_t *block)
+static inline opcode_t *block_get_flush_label(struct block *block)
 {
 	opcode_t *op = block_get_label(block);
 	op->left = L_FLUSH;
@@ -150,7 +150,7 @@ static inline opcode_t *block_get_flush_label(block_t *block)
 	return op;
 }
 
-static inline struct variable *block_get_var(block_t *block)
+static inline struct variable *block_get_var(struct block *block)
 {
 	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct variable));
 
@@ -162,7 +162,7 @@ static inline struct variable *block_get_var(block_t *block)
 	return temp;
 }
 
-static inline size_t block_push(block_t *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
+static inline size_t block_push(struct block *block, opcode_type_t type, rt_value result, rt_value left, rt_value right)
 {
 	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
 	op->type = type;
@@ -174,7 +174,7 @@ static inline size_t block_push(block_t *block, opcode_type_t type, rt_value res
 	return kv_size(block->vector) - 1;
 }
 
-static inline struct variable *block_gen_args(block_t *block)
+static inline struct variable *block_gen_args(struct block *block)
 {
 	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
 
@@ -188,12 +188,12 @@ static inline struct variable *block_gen_args(block_t *block)
 	return var;
 }
 
-static inline void block_end_args(block_t *block, struct variable *var, size_t argc)
+static inline void block_end_args(struct block *block, struct variable *var, size_t argc)
 {
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
 }
 
-static inline opcode_t *block_emmit_label(block_t *block, opcode_t *label)
+static inline opcode_t *block_emmit_label(struct block *block, opcode_t *label)
 {
 	kv_push(opcode_t *, block->vector, label);
 
@@ -212,5 +212,5 @@ static inline void block_print_label(rt_value label)
 
 const char *variable_name(rt_value var);
 
-void block_print(block_t *block);
+void block_print(struct block *block);
 

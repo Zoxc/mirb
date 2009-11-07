@@ -31,7 +31,7 @@ static inline void generate_dword(unsigned char **target, size_t dword)
 	*target += sizeof(dword);
 }
 
-static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, size_t current)
+static inline size_t instruction_size(struct block *block, opcode_t *op, size_t i, size_t current)
 {
 	switch(op->type)
 	{
@@ -183,7 +183,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 	return 0;
 }
 
-static inline int get_stack_index(block_t *block, rt_value var)
+static inline int get_stack_index(struct block *block, rt_value var)
 {
 	struct variable *_var = (struct variable *)var;
 
@@ -225,7 +225,7 @@ static inline void generate_stack_push(unsigned char **target, size_t dword)
 	generate_dword(target, dword);
 }
 
-static inline void generate_stack_var_push(block_t *block, unsigned char **target, rt_value var)
+static inline void generate_stack_var_push(struct block *block, unsigned char **target, rt_value var)
 {
 	generate_byte(target, 0xFF);
 	generate_byte(target, 0x75);
@@ -239,7 +239,7 @@ static inline void generate_stack_pop(unsigned char **target, size_t bytes)
 	generate_dword(target, bytes);
 }
 
-static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, unsigned char *start, unsigned char **target)
+static inline void generate_instruction(struct block *block, opcode_t *op, size_t i, unsigned char *start, unsigned char **target)
 {
 	switch(op->type)
 	{
@@ -294,7 +294,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CLOSURE:
 			{
-				generate_stack_push(target, (size_t)compile_block((block_t *)op->left));
+				generate_stack_push(target, (size_t)compile_block((struct block *)op->left));
 
 				generate_call(target, rt_support_closure);
 
@@ -322,7 +322,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_CLASS:
 			{
-				block_t *class_block = (block_t *)op->left;
+				struct block *class_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
 
 				generate_stack_push(target, rt_Object);
@@ -340,7 +340,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_MODULE:
 			{
-				block_t *class_block = (block_t *)op->left;
+				struct block *class_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
 
 				generate_stack_push(target, op->result);
@@ -404,7 +404,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_METHOD:
 			{
-				block_t *method_block = (block_t *)op->left;
+				struct block *method_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(method_block);
 
 				generate_stack_push(target, (rt_value)compiled);
@@ -703,7 +703,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 	}
 }
 
-rt_compiled_block_t compile_block(block_t *block)
+rt_compiled_block_t compile_block(struct block *block)
 {
 	bool require_exceptions = block->require_exceptions;
 	size_t block_size = 3;

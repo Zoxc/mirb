@@ -59,7 +59,7 @@ rt_value rt_eval(rt_value self, const char *input, const char *filename)
 		printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
 	#endif
 
-	block_t *code_block = gen_block(expression);
+	struct block *code_block = gen_block(expression);
 
 	rt_compiled_block_t compiled_block = compile_block(code_block);
 
