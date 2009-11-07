@@ -6,7 +6,7 @@ struct rt_proc {
 	struct rt_common common;
 	rt_value self;
 	rt_compiled_block_t closure;
-	rt_upval_t **upvals;
+	struct rt_upval **upvals;
 	size_t upval_count;
 };
 

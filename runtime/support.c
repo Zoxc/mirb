@@ -35,7 +35,7 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 	rt_const_set(obj, name, value);
 }
 
-void __stdcall rt_support_seal_upval(rt_upval_t *upval)
+void __stdcall rt_support_seal_upval(struct rt_upval *upval)
 {
 	upval->val.local = *(upval->val.upval);
 	upval->sealed = true;

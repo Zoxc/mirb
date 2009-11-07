@@ -6,7 +6,7 @@
 #include "classes/string.h"
 #include "classes/proc.h"
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_upval_t *argv[])
+rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, struct rt_upval *argv[])
 {
 	rt_value self;
 
@@ -19,7 +19,7 @@ rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_u
 	RT_PROC(closure)->self = self;
 	RT_PROC(closure)->closure = block;
 	RT_PROC(closure)->upval_count = argc;
-	RT_PROC(closure)->upvals = malloc(sizeof(rt_upval_t *) * argc);
+	RT_PROC(closure)->upvals = malloc(sizeof(struct rt_upval *) * argc);
 
 	RT_ARG_EACH_RAW(i)
 	{
@@ -78,13 +78,13 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 	rt_define_method(obj, name, block);
 }
 
-rt_upval_t *rt_support_upval_create(void)
+struct rt_upval *rt_support_upval_create(void)
 {
 	rt_value *real;
 
 	__asm__("" : "=a" (real));
 
-	rt_upval_t *result = malloc(sizeof(rt_upval_t));
+	struct rt_upval *result = malloc(sizeof(struct rt_upval));
 
 	result->val.upval = real;
 	result->sealed = false;
@@ -115,11 +115,11 @@ void __stdcall rt_support_set_ivar(rt_value value)
 rt_value rt_support_get_upval(void)
 {
 	size_t index;
-	rt_upval_t **upvals;
+	struct rt_upval **upvals;
 
 	__asm__("" : "=a" (index), "=S" (upvals));
 
-	rt_upval_t *upval = upvals[index];
+	struct rt_upval *upval = upvals[index];
 
 	if(!upval->sealed)
 		return *(upval->val.upval);
@@ -130,11 +130,11 @@ rt_value rt_support_get_upval(void)
 void __stdcall rt_support_set_upval(rt_value value)
 {
 	size_t index;
-	rt_upval_t **upvals;
+	struct rt_upval **upvals;
 
 	__asm__("" : "=a" (index), "=S" (upvals));
 
-	rt_upval_t *upval = upvals[index];
+	struct rt_upval *upval = upvals[index];
 
 	if(!upval->sealed)
 		*(upval->val.upval) = value;

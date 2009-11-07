@@ -8,15 +8,15 @@ enum rt_exception_type {
 	E_THROW_EXCEPTION
 };
 
-typedef struct {
+struct rt_upval {
 	union {
 		rt_value *upval;
 		rt_value local;
 	} val;
 	bool sealed;
-} rt_upval_t;
+};
 
-void __stdcall rt_support_seal_upval(rt_upval_t *upval);
+void __stdcall rt_support_seal_upval(struct rt_upval *upval);
 
 rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[]);
 
