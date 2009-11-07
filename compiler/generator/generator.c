@@ -191,14 +191,14 @@ static void gen_const_assign(block_t *block, node_t *node, variable_t *var)
 static void gen_if(block_t *block, node_t *node, variable_t *var)
 {
 	variable_t *temp = var ? var : block_get_var(block);
-	rt_value label_else = block_get_label(block);
+	opcode_t *label_else = block_get_label(block);
 
 	gen_node(block, node->left, temp);
 
 	block_push(block, B_TEST, (rt_value)temp, 0, 0);
-	block_push(block, node->type == N_IF ? B_JMPF : B_JMPT, label_else, 0, 0);
+	block_push(block, node->type == N_IF ? B_JMPF : B_JMPT, (rt_value)label_else, 0, 0);
 
-	rt_value label_end = block_get_label(block);
+	opcode_t *label_end = block_get_label(block);
 
 	if(var)
 	{
@@ -207,7 +207,7 @@ static void gen_if(block_t *block, node_t *node, variable_t *var)
 
 		gen_node(block, node->middle, result_left);
 		block_push(block, B_MOV, (rt_value)var, (rt_value)result_left, 0);
-		block_push(block, B_JMP, label_end, 0, 0);
+		block_push(block, B_JMP, (rt_value)label_end, 0, 0);
 
 		block_emmit_label(block, label_else);
 
@@ -219,7 +219,7 @@ static void gen_if(block_t *block, node_t *node, variable_t *var)
 	else
 	{
 		gen_node(block, node->middle, 0);
-		block_push(block, B_JMP, label_end, 0, 0);
+		block_push(block, B_JMP, (rt_value)label_end, 0, 0);
 
 		block_emmit_label(block, label_else);
 
@@ -398,10 +398,10 @@ static void gen_boolean(block_t *block, node_t *node, variable_t *var)
 
 	gen_node(block, node->left, temp);
 
-	rt_value label_end = block_get_label(block);
+	opcode_t *label_end = block_get_label(block);
 
 	block_push(block, B_TEST, (rt_value)temp, 0, 0);
-	block_push(block, (node->op == T_OR || node->op == T_OR_BOOLEAN) ? B_JMPT : B_JMPF, label_end, 0, 0);
+	block_push(block, (node->op == T_OR || node->op == T_OR_BOOLEAN) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
 
 	gen_node(block, node->right, var);
 
@@ -416,12 +416,12 @@ static void gen_not(block_t *block, node_t *node, variable_t *var)
 
 		gen_node(block, node->left, temp);
 
-		rt_value label_true = block_get_label(block);
-		rt_value label_end = block_get_label(block);
+		opcode_t *label_true = block_get_label(block);
+		opcode_t *label_end = block_get_label(block);
 
 		block_push(block, B_TEST, (rt_value)temp, 0, 0);
 
-		block_push(block, B_JMPT, label_true, 0, 0);
+		block_push(block, B_JMPT, (rt_value)label_true, 0, 0);
 
 		block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
 		block_push(block, B_JMP, (rt_value)label_end, 0, 0);
@@ -470,12 +470,12 @@ static void gen_no_equality(block_t *block, node_t *node, variable_t *var)
 		gen_node(block, node->left, temp1);
 		gen_node(block, node->right, temp2);
 
-		rt_value label_true = block_get_label(block);
-		rt_value label_end = block_get_label(block);
+		opcode_t *label_true = block_get_label(block);
+		opcode_t *label_end = block_get_label(block);
 
 		block_push(block, B_CMP, (rt_value)temp1, (rt_value)temp2, 0);
 
-		block_push(block, B_JMPE, label_true, 0, 0);
+		block_push(block, B_JMPE, (rt_value)label_true, 0, 0);
 
 		block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
 		block_push(block, B_JMP, (rt_value)label_end, 0, 0);
@@ -558,23 +558,21 @@ static void gen_break_handler(block_t *block, node_t *node, variable_t *var)
 
 	gen_node(block, node->left, var);
 
-	rt_value label = 0;
+	opcode_t *label = 0;
 
 	if(var)
 	{
 		/*
 		 * Skip the break handler
 		 */
-
 		label = block_get_label(block);
-		block_push(block, B_JMP, label, 0, 0);
+		block_push(block, B_JMP, (rt_value)label, 0, 0);
 	}
 
 	/*
 	 * Output target label
 	 */
-
-	block->data->break_targets[child->break_id] = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+	block->data->break_targets[child->break_id] = (void *)block_emmit_label(block, block_get_flush_label(block));
 
 	if(var)
 	{
@@ -601,9 +599,9 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 	 * Check for ensure node
 	 */
 	if(node->right)
-		exception_block->ensure_label = (void *)block_get_label(block);
+		exception_block->ensure_label = block_get_flush_label(block);
 	else
-		exception_block->ensure_label = (void *)-1;
+		exception_block->ensure_label = 0;
 
 	kv_init(exception_block->handlers);
 
@@ -619,7 +617,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 	/*
 	 * Output the regular code
 	 */
-	exception_block->block_label = (void *)block_emmit_label(block, block_get_label(block));
+	exception_block->block_label = block_emmit_label(block, block_get_flush_label(block));
 
 	gen_node(block, node->left, var);
 
@@ -628,15 +626,15 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 		/*
 		 * Skip the rescue block
 		 */
-		rt_value ok_label = block_get_label(block);
-		block_push(block, B_JMP, ok_label, 0, 0);
+		opcode_t *ok_label = block_get_label(block);
+		block_push(block, B_JMP, (rt_value)ok_label, 0, 0);
 
 		/*
 		 * Output rescue node
 		 */
 		runtime_exception_handler_t *handler = malloc(sizeof(runtime_exception_handler_t));
 		handler->common.type = E_RUNTIME_EXCEPTION;
-		handler->rescue_label = (void *)block_emmit_label_type(block, block_get_label(block), L_FLUSH);
+		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
 		kv_push(exception_handler_t *, exception_block->handlers, (exception_handler_t *)handler);
 
 		gen_node(block, node->middle->left, var);
@@ -656,7 +654,7 @@ static void gen_handler(block_t *block, node_t *node, variable_t *var)
 	 */
 	if(node->right)
 	{
-		exception_block->ensure_label = (void *)block_emmit_label_type(block, (rt_value)exception_block->ensure_label, L_FLUSH);
+		exception_block->ensure_label = block_emmit_label(block, exception_block->ensure_label);
 
 		/*
 		 * Output ensure node

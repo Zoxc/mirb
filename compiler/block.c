@@ -75,8 +75,11 @@ block_t *block_create(struct compiler *compiler, enum block_type type)
 	result->data = malloc(sizeof(struct block_data));
 
 	result->compiler = compiler;
-	result->label_count = 0;
-	result->label_usage = kh_init(rt_hash);
+
+	#ifdef DEBUG
+		result->label_count = 0;
+	#endif
+
 	result->self_ref = 0;
 	result->require_exceptions = false;
 	result->current_exception_block = 0;

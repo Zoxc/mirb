@@ -105,7 +105,11 @@ typedef struct block {
 	/*
 	 * bytecode compiler stuff
 	 */
-	rt_value label_count;
+
+	#ifdef DEBUG
+		rt_value label_count; // Nicer label labeling...
+	#endif
+
 	kvec_t(opcode_t *) vector;
 	kvec_t(variable_t *) upvals;
 	kvec_t(exception_block_t *) exception_blocks;
@@ -115,8 +119,8 @@ typedef struct block {
 	khash_t(rt_hash) *label_usage;
 	size_t self_ref;
 	bool require_exceptions;
-	void *prolog; // The after the prolog of the block.
-	size_t epilog; // The end of the block
+	void *prolog; // The point after the prolog of the block.
+	opcode_t *epilog; // The end of the block
 } block_t;
 
 /*
@@ -125,9 +129,25 @@ typedef struct block {
 
 block_t *block_create(struct compiler *compiler, enum block_type type);
 
-static inline rt_value block_get_label(block_t *block)
+static inline opcode_t *block_get_label(block_t *block)
 {
-	return block->label_count++;
+	opcode_t *op = compiler_alloc(block->compiler, sizeof(opcode_t));
+	op->type = B_LABEL;
+	op->left = 0;
+
+	#ifdef DEBUG
+		op->right = block->label_count++;
+	#endif
+
+	return op;
+}
+
+static inline opcode_t *block_get_flush_label(block_t *block)
+{
+	opcode_t *op = block_get_label(block);
+	op->left = L_FLUSH;
+
+	return op;
 }
 
 static inline variable_t *block_get_var(block_t *block)
@@ -173,48 +193,21 @@ static inline void block_end_args(block_t *block, variable_t *var, size_t argc)
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
 }
 
-static inline size_t block_emmit_label_type(block_t *block, rt_value label, label_type_t label_type)
+static inline opcode_t *block_emmit_label(block_t *block, opcode_t *label)
 {
-	size_t index = block_push(block, B_LABEL, label, label_type, 0);
+	kv_push(opcode_t *, block->vector, label);
 
-	int ret;
-
-	khiter_t k = kh_put(rt_hash, block->label_usage, label, &ret);
-
-	RT_ASSERT(ret);
-
-	kh_value(block->label_usage, k) = index;
-
-	return index;
-}
-
-static inline size_t block_emmit_label(block_t *block, rt_value label)
-{
-	size_t index = block_push(block, B_LABEL, label, 0, 0);
-
-	int ret;
-
-	khiter_t k = kh_put(rt_hash, block->label_usage, label, &ret);
-
-	RT_ASSERT(ret);
-
-	kh_value(block->label_usage, k) = index;
-
-	return index;
-}
-
-static inline rt_value block_get_value(block_t *block, khash_t(rt_hash) *table, rt_value key)
-{
-	khiter_t k = kh_get(rt_hash, table, key);
-
-	RT_ASSERT(k != kh_end(table));
-
-	return kh_value(table, k);
+	return label;
 }
 
 static inline void block_print_label(rt_value label)
 {
-	printf("#%d", label);
+	#ifdef DEBUG
+		printf("#%d", ((opcode_t *)label)->right);
+	#else
+		printf("#%x", label);
+	#endif
+
 }
 
 const char *variable_name(rt_value var);

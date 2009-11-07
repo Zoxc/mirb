@@ -124,7 +124,7 @@ void opcode_print(opcode_t *op)
 			break;
 
 		case B_LABEL:
-			printf("#%d:", op->result);
+			block_print_label((rt_value)op);
 			break;
 
 		case B_STRING:

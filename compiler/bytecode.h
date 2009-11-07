@@ -27,7 +27,16 @@ typedef enum {
 	B_JMP,
 	B_RETURN,
 	B_REDO,
+
+	/*
+	 * B_LABEL
+	 * - result: The place in the generated native code the label have.
+	 * - left: The flags of this label.
+	 *   - L_FLUSH: This will make the label flush all variables stored in registers.
+	 * - right: An per block unique id. (Debug mode only)
+	 */
 	B_LABEL,
+
 	B_ENSURE_RET,
 	B_HANDLER,
 	B_RAISE_RETURN,
@@ -55,7 +64,7 @@ typedef enum {
 	L_FLUSH
 } label_type_t;
 
-typedef struct {
+typedef struct opcode{
 	opcode_type_t type;
 	rt_value result;
 	rt_value left;

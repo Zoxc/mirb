@@ -6,6 +6,13 @@
 #include "../../runtime/constant.h"
 #include "disassembly.h"
 
+static inline size_t label_target(void *target, rt_value label)
+{
+	opcode_t *op = (opcode_t *)label;
+
+	return ((size_t)target + op->result);
+}
+
 static inline void generate_byte(unsigned char **target, unsigned char byte)
 {
 	**target = byte;
@@ -30,7 +37,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 	{
 		case B_LABEL:
 			{
-				op->right = (rt_value)current;
+				op->result = (rt_value)current;
 
 				switch(op->left)
 				{
@@ -510,14 +517,8 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_JMP:
 			{
-				size_t label_index = block_get_value(block, block->label_usage, op->result);
-
-				opcode_t *label = kv_A(block->vector, label_index);
-
-				size_t label_address = (size_t)start + label->right;
-
 				generate_byte(target, 0xE9);
-				generate_dword(target, label_address - ((size_t)*target - 1) - 5);
+				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 1) - 5);
 			}
 			break;
 
@@ -540,12 +541,6 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_RETURN:
 			{
-				size_t label_index = block_get_value(block, block->label_usage, block->epilog);
-
-				opcode_t *label = kv_A(block->vector, label_index);
-
-				size_t label_address = (size_t)start + label->right;
-
 				// Load to eax
 				generate_byte(target, 0x8B);
 				generate_byte(target, 0x45);
@@ -553,37 +548,25 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 				// Jump to epilogue
 				generate_byte(target, 0xE9);
-				generate_dword(target, label_address - ((size_t)*target - 1) - 5);
+				generate_dword(target, label_target(start, (rt_value)block->epilog) - ((size_t)*target - 1) - 5);
 			}
 			break;
 
 		case B_JMPNE:
 		case B_JMPT:
 			{
-				size_t label_index = block_get_value(block, block->label_usage, op->result);
-
-				opcode_t *label = kv_A(block->vector, label_index);
-
-				size_t label_address = (size_t)start + label->right;
-
 				generate_byte(target, 0x0F);
 				generate_byte(target, 0x85);
-				generate_dword(target, label_address - ((size_t)*target - 2) - 6);
+				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 2) - 6);
 			}
 			break;
 
 		case B_JMPE:
 		case B_JMPF:
 			{
-				size_t label_index = block_get_value(block, block->label_usage, op->result);
-
-				opcode_t *label = kv_A(block->vector, label_index);
-
-				size_t label_address = (size_t)start + label->right;
-
 				generate_byte(target, 0x0F);
 				generate_byte(target, 0x84);
-				generate_dword(target, label_address - ((size_t)*target - 2) - 6);
+				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 2) - 6);
 			}
 			break;
 
@@ -802,7 +785,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		{
 		    exception_block_t *exception_block = kv_A(data->exception_blocks, i);
 
-			exception_block->ensure_label = exception_block->ensure_label == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)exception_block->ensure_label)->right);
+			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target(result, (rt_value)exception_block->ensure_label) : 0);
 
 			for(size_t j = 0; j < kv_size(exception_block->handlers); j++)
 			{
@@ -815,7 +798,7 @@ rt_compiled_block_t compile_block(block_t *block)
 					case E_FILTER_EXCEPTION:
 						{
 							runtime_exception_handler_t *exception_handler = (runtime_exception_handler_t *)handler;
-							exception_handler->rescue_label = exception_handler->rescue_label == (void *)-1 ? 0 : (void *)((size_t)result + kv_A(block->vector, (size_t)exception_handler->rescue_label)->right);
+							exception_handler->rescue_label = (void *)label_target(result, (rt_value)exception_handler->rescue_label);
 						}
 						break;
 
@@ -830,7 +813,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		 */
 
 		for(size_t i = 0; i < block->break_targets; i++)
-			data->break_targets[i] = (void *)((size_t)result + kv_A(block->vector, (size_t)data->break_targets[i])->right);
+			data->break_targets[i] = (void *)label_target(result, (rt_value)data->break_targets[i]);
 
 		data->local_storage = stack_vars * 4;
 
@@ -948,9 +931,7 @@ rt_compiled_block_t compile_block(block_t *block)
 
 	if(require_exceptions)
 	{
-		size_t epilog_index = block_get_value(block, block->label_usage, block->epilog);
-
-		data->epilog = (void *)((size_t)result + kv_A(block->vector, epilog_index)->right);
+		data->epilog = (void *)label_target(result, (rt_value)block->epilog);
 
 		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
 		generate_byte(&target, 0x4D);
