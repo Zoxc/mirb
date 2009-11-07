@@ -13,7 +13,7 @@
 		void *handler;
 		size_t handling;
 		size_t block_index;
-		block_data_t *block;
+		struct block_data *block;
 		size_t old_ebp;
 	} rt_seh_frame_t;
 #endif

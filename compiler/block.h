@@ -40,12 +40,12 @@ struct exception_block {
  * Block runtime data
  */
 
-typedef struct block_data {
+struct block_data {
 	kvec_t(struct exception_block *) exception_blocks;
 	void **break_targets;
 	size_t local_storage;
 	void *epilog;
-} block_data_t;
+};
 
 /*
  * Variables

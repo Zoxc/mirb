@@ -769,7 +769,7 @@ rt_compiled_block_t compile_block(block_t *block)
 	generate_byte(&target, 0x89); // mov esp, ebp
 	generate_byte(&target, 0xE5);
 
-	block_data_t *data = block->data;
+	struct block_data *data = block->data;
 
 	if(require_exceptions)
 	{
@@ -826,7 +826,7 @@ rt_compiled_block_t compile_block(block_t *block)
             void *handler;
             size_t handling;
             size_t handler_index;
-            block_data_t *block;
+            struct block_data *block;
             size_t old_ebp;
         } rt_seh_frame_t;
 
