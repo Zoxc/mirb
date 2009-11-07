@@ -9,7 +9,7 @@ const char *variable_name(rt_value var)
 
 	rt_value string = rt_string_from_cstr("");
 
-	variable_t *_var = (variable_t *)var;
+	struct variable *_var = (struct variable *)var;
 
 	switch(_var->type)
 	{

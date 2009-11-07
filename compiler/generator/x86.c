@@ -133,7 +133,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 				return 0;
 
 		case B_PUSH_UPVAL:
-			if(((variable_t *)op->result)->index)
+			if(((struct variable *)op->result)->index)
 				return 3;
 			else
 				return 2;
@@ -185,7 +185,7 @@ static inline size_t instruction_size(block_t *block, opcode_t *op, size_t i, si
 
 static inline int get_stack_index(block_t *block, rt_value var)
 {
-	variable_t *_var = (variable_t *)var;
+	struct variable *_var = (struct variable *)var;
 
 	int index;
 
@@ -253,7 +253,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 		case B_GET_UPVAL:
 			{
 				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, ((variable_t *)op->left)->index);
+				generate_dword(target, ((struct variable *)op->left)->index);
 
 				generate_call(target, rt_support_get_upval);
 
@@ -266,7 +266,7 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 		case B_SET_UPVAL:
 			{
 				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, ((variable_t *)op->result)->index);
+				generate_dword(target, ((struct variable *)op->result)->index);
 
 				generate_stack_var_push(block, target, op->left);
 
@@ -276,13 +276,13 @@ static inline void generate_instruction(block_t *block, opcode_t *op, size_t i, 
 
 		case B_PUSH_UPVAL:
 			{
-				size_t index = ((variable_t *)op->result)->index * 4;
+				size_t index = ((struct variable *)op->result)->index * 4;
 
 				if(index)
 				{
 					generate_byte(target, 0xFF); // push dword [esi + index]
 					generate_byte(target, 0x76);
-					generate_byte(target, ((variable_t *)op->result)->index * 4);
+					generate_byte(target, ((struct variable *)op->result)->index * 4);
 				}
 				else
 				{
@@ -908,7 +908,7 @@ rt_compiled_block_t compile_block(block_t *block)
 		{
 			if(kh_exist(variables, k))
 			{
-				variable_t *var = kh_value(variables, k);
+				struct variable *var = kh_value(variables, k);
 
 				if(var->type == V_PARAMETER)
 				{

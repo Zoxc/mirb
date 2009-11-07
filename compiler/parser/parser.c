@@ -44,7 +44,7 @@ bool scope_defined(struct block *block, rt_value name, bool recursive)
 	return false;
 }
 
-variable_t *scope_declare_var(struct block *block, rt_value name, enum variable_type type)
+struct variable *scope_declare_var(struct block *block, rt_value name, enum variable_type type)
 {
 	khiter_t k = kh_get(block, block->variables, name);
 
@@ -57,7 +57,7 @@ variable_t *scope_declare_var(struct block *block, rt_value name, enum variable_
 
 	RT_ASSERT(ret);
 
-	variable_t *var = compiler_alloc(block->compiler, sizeof(variable_t));
+	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
 	var->type = type;
 	var->name = name;
 	var->index = block->var_count[type];
@@ -70,7 +70,7 @@ variable_t *scope_declare_var(struct block *block, rt_value name, enum variable_
 	return var;
 }
 
-variable_t *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive)
+struct variable *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive)
 {
 	if(scope_defined(block, name, false))
 	{
@@ -78,12 +78,12 @@ variable_t *scope_define(struct block *block, rt_value name, enum variable_type 
 	}
 	else if(scope_defined(block, name, true) && recursive)
 	{
-		variable_t *result = scope_declare_var(block, name, V_UPVAL);
+		struct variable *result = scope_declare_var(block, name, V_UPVAL);
 
 		block = block->parent;
 
 		struct block *temp_block = block;
-		variable_t *real;
+		struct variable *real;
 
 		while(1)
 		{
@@ -102,7 +102,7 @@ variable_t *scope_define(struct block *block, rt_value name, enum variable_type 
 
 		while (block != temp_block)
 		{
-			variable_t *var = scope_declare_var(block, name, V_UPVAL);
+			struct variable *var = scope_declare_var(block, name, V_UPVAL);
 			var->real = real;
 
 			block = block->parent;

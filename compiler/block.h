@@ -62,14 +62,14 @@ enum variable_type {
 
 #define VARIABLE_TYPES 6
 
-typedef struct variable_t {
-	struct variable_t *real;
+struct variable {
+	struct variable *real;
 	rt_value index;
 	rt_value name;
 	enum variable_type type;
-} variable_t;
+};
 
-KHASH_MAP_INIT_INT(block, variable_t *);
+KHASH_MAP_INIT_INT(block, struct variable *);
 
 /*
  * Block definition
@@ -100,7 +100,7 @@ typedef struct block {
 	khash_t(block) *variables;
 	struct block *owner;
 	struct block *parent;
-	variable_t *block_var;
+	struct variable *block_var;
 
 	/*
 	 * bytecode compiler stuff
@@ -111,7 +111,7 @@ typedef struct block {
 	#endif
 
 	kvec_t(opcode_t *) vector;
-	kvec_t(variable_t *) upvals;
+	kvec_t(struct variable *) upvals;
 	kvec_t(struct exception_block *) exception_blocks;
 	struct exception_block *current_exception_block;
 	size_t local_offset;
@@ -150,9 +150,9 @@ static inline opcode_t *block_get_flush_label(block_t *block)
 	return op;
 }
 
-static inline variable_t *block_get_var(block_t *block)
+static inline struct variable *block_get_var(block_t *block)
 {
-	variable_t *temp = compiler_alloc(block->compiler, sizeof(variable_t));
+	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct variable));
 
 	temp->type = V_TEMP;
 	temp->index = block->var_count[V_TEMP];
@@ -174,9 +174,9 @@ static inline size_t block_push(block_t *block, opcode_type_t type, rt_value res
 	return kv_size(block->vector) - 1;
 }
 
-static inline variable_t *block_gen_args(block_t *block)
+static inline struct variable *block_gen_args(block_t *block)
 {
-	variable_t *var = compiler_alloc(block->compiler, sizeof(variable_t));
+	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
 
 	var->type = V_ARGS;
 	var->index = block->var_count[V_ARGS];
@@ -188,7 +188,7 @@ static inline variable_t *block_gen_args(block_t *block)
 	return var;
 }
 
-static inline void block_end_args(block_t *block, variable_t *var, size_t argc)
+static inline void block_end_args(block_t *block, struct variable *var, size_t argc)
 {
 	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
 }
