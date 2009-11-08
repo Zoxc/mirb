@@ -194,10 +194,6 @@ static inline int get_stack_index(struct block *block, rt_value var)
 		case V_BLOCK:
 			return 12;
 
-		case V_PARAMETER:
-			index = block->var_count[V_LOCAL] + block->var_count[V_TEMP] + _var->index;
-			break;
-
 		case V_TEMP:
 			index = block->local_offset + block->var_count[V_LOCAL] + _var->index;
 			break;
@@ -707,7 +703,7 @@ rt_compiled_block_t compile_block(struct block *block)
 {
 	bool require_exceptions = block->require_exceptions;
 	size_t block_size = 3;
-	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP] + block->var_count[V_PARAMETER];
+	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP];
 
 	if(require_exceptions)
 	{
@@ -732,18 +728,8 @@ rt_compiled_block_t compile_block(struct block *block)
 	if(block->self_ref > 0)
 		block_size += 3 + (require_exceptions ? 0 : 1);
 
-	if(block->var_count[V_PARAMETER])
-	{
-		khash_t(block) *variables = block->variables;
-
-		block_size += 3;
-
-		for(khiter_t k = kh_begin(variables); k != kh_end(variables); ++k)
-		{
-			if(kh_exist(variables, k) && kh_value(variables, k)->type == V_PARAMETER)
-				block_size += 6;
-		}
-	}
+	if(kv_size(block->parameters))
+		block_size += 3 + 6 * kv_size(block->parameters);
 
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
@@ -896,33 +882,25 @@ rt_compiled_block_t compile_block(struct block *block)
 
 	block->prolog = target;
 
-	if(block->var_count[V_PARAMETER])
+	if(kv_size(block->parameters))
 	{
-		khash_t(block) *variables = block->variables;
-
 		generate_byte(&target, 0x8B);
 		generate_byte(&target, 0x4D);
 		generate_byte(&target, (char)20);
 
-		for(khiter_t k = kh_begin(variables); k != kh_end(variables); ++k)
+		for(size_t i = 0; i < kv_size(block->parameters); i++)
 		{
-			if(kh_exist(variables, k))
-			{
-				struct variable *var = kh_value(variables, k);
+			struct variable *var = kv_A(block->parameters, i);
 
-				if(var->type == V_PARAMETER)
-				{
-					// Load to edx
-					generate_byte(&target, 0x8B);
-					generate_byte(&target, 0x51);
-					generate_byte(&target, (char)((block->var_count[V_PARAMETER] - var->index - 1) * 4));
+			// Load to edx
+			generate_byte(&target, 0x8B);
+			generate_byte(&target, 0x51);
+			generate_byte(&target, (char)((kv_size(block->parameters) - var->index - 1) * 4));
 
-					// Store from edx
-					generate_byte(&target, 0x89);
-					generate_byte(&target, 0x55);
-					generate_byte(&target, (char)get_stack_index(block, (rt_value)var));
-				}
-			}
+			// Store from edx
+			generate_byte(&target, 0x89);
+			generate_byte(&target, 0x55);
+			generate_byte(&target, (char)get_stack_index(block, (rt_value)var));
 		}
 	}
 

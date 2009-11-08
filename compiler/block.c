@@ -24,11 +24,6 @@ const char *variable_name(rt_value var)
 			rt_concat_string(string, rt_string_from_cstr(">"));
 			break;
 
-		case V_PARAMETER:
-			rt_concat_string(string, rt_string_from_cstr("*"));
-			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
-			break;
-
 		case V_LOCAL:
 			rt_concat_string(string, rt_string_from_cstr("#"));
 			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
@@ -86,6 +81,7 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 	result->current_exception_block_id = (size_t)-1;
 	result->break_targets = 0;
 
+	kv_init(result->parameters);
 	kv_init(result->vector);
 	kv_init(result->exception_blocks);
 	kv_init(result->upvals);
@@ -96,7 +92,7 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 		result->var_count[i] = 0;
 
 	result->type = type;
-	result->block_var = 0;
+	result->block_parameter = 0;
 
 	result->owner = 0;
 	result->parent = 0;

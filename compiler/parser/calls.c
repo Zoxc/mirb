@@ -139,10 +139,10 @@ struct node *parse_yield(struct compiler *compiler)
 
 	result->left = alloc_node(compiler, N_VAR);
 
-	if(!compiler->current_block->block_var)
-		compiler->current_block->block_var = scope_define(compiler->current_block, 0, V_BLOCK, false);
+	if(!compiler->current_block->block_parameter)
+		compiler->current_block->block_parameter = scope_define(compiler->current_block, 0, V_BLOCK, false);
 
-	result->left->left = (void *)compiler->current_block->block_var;
+	result->left->left = (void *)compiler->current_block->block_parameter;
 
 	result->middle = (void *)rt_symbol_from_cstr("call");
 

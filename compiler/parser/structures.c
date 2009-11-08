@@ -76,17 +76,17 @@ void parse_parameter(struct compiler *compiler, struct block *block)
 {
 	if(is_parameter(compiler))
 	{
-		bool block_var = lexer_matches(compiler, T_AMP);
+		bool block_parameter = lexer_matches(compiler, T_AMP);
 
 		rt_value symbol = rt_symbol_from_lexer(compiler);
 
-		if(block_var)
+		if(block_parameter)
 		{
-			if(block->block_var)
+			if(block->block_parameter)
 				COMPILER_ERROR(compiler, "You can only receive the block in one parameter.");
 			else
 			{
-				block->block_var = scope_define(block, symbol, V_BLOCK, false);
+				block->block_parameter = scope_define(block, symbol, V_BLOCK, false);
 			}
 		}
 		else
@@ -94,7 +94,7 @@ void parse_parameter(struct compiler *compiler, struct block *block)
 			if(scope_defined(block, symbol, false))
 				COMPILER_ERROR(compiler, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
 			else
-				scope_define(block, symbol, V_PARAMETER, false);
+				kv_push(struct variable *, block->parameters, scope_define(block, symbol, V_LOCAL, false));
 		}
 
 		lexer_next(compiler);

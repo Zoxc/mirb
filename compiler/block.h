@@ -52,7 +52,6 @@ struct block_data {
  */
 
 enum variable_type {
-	V_PARAMETER,
 	V_LOCAL,
 	V_UPVAL,
 	V_TEMP,
@@ -64,7 +63,7 @@ enum variable_type {
 
 struct variable {
 	struct variable *real;
-	rt_value index;
+	size_t index;
 	rt_value name;
 	enum variable_type type;
 };
@@ -87,40 +86,46 @@ struct block {
 	enum block_type type;
 	struct compiler *compiler; // The compiler which owns this block
 
+	struct block *parent; // The block enclosing this one
+	struct block *owner; // The first parent that isn't a closure. This field can point to itself.
+
+	/*
+	 * Break related fields
+	 */
 	bool can_break; // If this block can raise a exception because of a break.
 	size_t break_id; // Which of the parent break targets this block belongs to.
 	size_t break_targets; // Number of child blocks that can raise a break exception.
 
-	struct block_data *data; // Runtime data
+	/*
+	 * Exception related fields
+	 */
+	kvec_t(struct exception_block *) exception_blocks;
+	struct exception_block *current_exception_block;
+	size_t current_exception_block_id;
+	bool require_exceptions;
+
+	struct block_data *data; // Runtime data structure
 
 	/*
-	 * parser stuff
+	 * Variable related fields
 	 */
-	rt_value var_count[VARIABLE_TYPES];
-	khash_t(block) *variables;
-	struct block *owner;
-	struct block *parent;
-	struct variable *block_var;
-
-	/*
-	 * bytecode compiler stuff
-	 */
+	rt_value var_count[VARIABLE_TYPES]; // An array of counters of the different variable types.
+	khash_t(block) *variables; // A hash with all the variables declared or used
+	kvec_t(struct variable *) parameters; // A list of all parameters except the block parameter.
+	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
+	kvec_t(struct variable *) upvals;
 
 	#ifdef DEBUG
 		rt_value label_count; // Nicer label labeling...
 	#endif
 
-	kvec_t(struct opcode *) vector;
-	kvec_t(struct variable *) upvals;
-	kvec_t(struct exception_block *) exception_blocks;
-	struct exception_block *current_exception_block;
 	size_t local_offset;
-	size_t current_exception_block_id;
-	khash_t(rt_hash) *label_usage;
 	size_t self_ref;
-	bool require_exceptions;
+
 	void *prolog; // The point after the prolog of the block.
 	struct opcode *epilog; // The end of the block
+
+	kvec_t(struct opcode *) vector; // The bytecode output
 };
 
 /*
