@@ -107,42 +107,44 @@ rt_compiled_block(rt_kernel_print)
 	return RT_NIL;
 }
 
-rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
-{
-	rt_value exception = rt_alloc(sizeof(struct rt_exception));
-
-	RT_COMMON(exception)->flags = C_EXCEPTION;
-
-	size_t i = 0;
-
-	if(rt_type(RT_ARG(0)) == C_CLASS)
+#ifdef WINDOWS
+	rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 	{
-		RT_COMMON(exception)->class_of = RT_ARG(0);
-		i++;
+		rt_value exception = rt_alloc(sizeof(struct rt_exception));
+
+		RT_COMMON(exception)->flags = C_EXCEPTION;
+
+		size_t i = 0;
+
+		if(rt_type(RT_ARG(0)) == C_CLASS)
+		{
+			RT_COMMON(exception)->class_of = RT_ARG(0);
+			i++;
+		}
+		else
+			RT_COMMON(exception)->class_of = rt_Exception;
+
+		if(argc > i)
+		{
+			RT_EXCEPTION(exception)->message = RT_ARG(i);
+			i++;
+		}
+		else
+			RT_EXCEPTION(exception)->message = RT_NIL;
+
+		if(argc > i)
+		{
+			RT_EXCEPTION(exception)->backtrace = RT_ARG(i);
+			i++;
+		}
+		else
+			RT_EXCEPTION(exception)->backtrace = RT_NIL;
+
+		RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
+
+		__builtin_unreachable();
 	}
-	else
-		RT_COMMON(exception)->class_of = rt_Exception;
-
-	if(argc > i)
-	{
-		RT_EXCEPTION(exception)->message = RT_ARG(i);
-		i++;
-	}
-	else
-		RT_EXCEPTION(exception)->message = RT_NIL;
-
-	if(argc > i)
-	{
-		RT_EXCEPTION(exception)->backtrace = RT_ARG(i);
-		i++;
-	}
-	else
-		RT_EXCEPTION(exception)->backtrace = RT_NIL;
-
-	RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
-
-	__builtin_unreachable();
-}
+#endif
 
 void rt_kernel_init(void)
 {
@@ -150,10 +152,13 @@ void rt_kernel_init(void)
 
 	rt_include_module(rt_Object, rt_Kernel);
 
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("proc"), rt_kernel_proc);
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
-    rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
+  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("proc"), rt_kernel_proc);
+  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
+  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
+  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
+  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
+
+	#ifdef WINDOWS
+    		rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
+	#endif
 }
