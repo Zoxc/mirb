@@ -732,8 +732,6 @@ rt_compiled_block_t compile_block(struct block *block)
 	 */
 	generate_block(block, 0, &target, true);
 
-	printf("block size is %d\n", (size_t)target);
-
 	/*
 	 * Allocate the block
 	 */
