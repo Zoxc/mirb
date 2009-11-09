@@ -24,22 +24,24 @@ const char *variable_name(rt_value var)
 			rt_concat_string(string, rt_string_from_cstr(">"));
 			break;
 
-		case V_LOCAL:
-			rt_concat_string(string, rt_string_from_cstr("#"));
-			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
-			break;
-
-		case V_UPVAL:
-			rt_concat_string(string, rt_string_from_cstr("!"));
-			rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
-			break;
-
-		case V_BLOCK:
-			rt_concat_string(string, rt_string_from_cstr("&"));
+		case V_HEAP:
+			if(_var->owner->block_parameter == _var)
+				rt_concat_string(string, rt_string_from_cstr("!&"));
+			else
+				rt_concat_string(string, rt_string_from_cstr("!#"));
 
 			if(_var->name)
 				rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
+			break;
 
+		case V_LOCAL:
+			if(_var->owner->block_parameter == _var)
+				rt_concat_string(string, rt_string_from_cstr("&"));
+			else
+				rt_concat_string(string, rt_string_from_cstr("#"));
+
+			if(_var->name)
+				rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
 			break;
 	}
 
@@ -84,7 +86,7 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 	kv_init(result->parameters);
 	kv_init(result->vector);
 	kv_init(result->exception_blocks);
-	kv_init(result->upvals);
+	kv_init(result->scopes);
 
 	result->variables = kh_init(block);
 

@@ -85,16 +85,14 @@ void parse_parameter(struct compiler *compiler, struct block *block)
 			if(block->block_parameter)
 				COMPILER_ERROR(compiler, "You can only receive the block in one parameter.");
 			else
-			{
-				block->block_parameter = scope_define(block, symbol, V_BLOCK, false);
-			}
+				block->block_parameter = scope_define(block, symbol);
 		}
 		else
 		{
 			if(scope_defined(block, symbol, false))
-				COMPILER_ERROR(compiler, "Parameter %s already defined.", rt_symbol_to_cstr(symbol));
+				COMPILER_ERROR(compiler, "Variable %s already defined.", rt_symbol_to_cstr(symbol));
 			else
-				kv_push(struct variable *, block->parameters, scope_define(block, symbol, V_LOCAL, false));
+				kv_push(struct variable *, block->parameters, scope_define(block, symbol));
 		}
 
 		lexer_next(compiler);

@@ -4,6 +4,18 @@
 #include "../../runtime/classes/fixnum.h"
 #include "../../runtime/support.h"
 
+static size_t scope_index(struct block *block, struct variable *var)
+{
+	if(block == var->owner)
+		return -1;
+
+	for(size_t i = 0; i < kv_size(block->scopes); i++)
+		if (kv_A(block->scopes, i) == var->owner)
+			return i;
+
+	return -1;
+}
+
 typedef void(*generator)(struct block *block, struct node *node, struct variable *var);
 
 static inline void gen_node(struct block *block, struct node *node, struct variable *var);
@@ -54,8 +66,8 @@ static void gen_var(struct block *block, struct node *node, struct variable *var
 	{
 		struct variable *reading = (struct variable *)node->left;
 
-		if(reading->type == V_UPVAL)
-			block_push(block, B_GET_UPVAL, (rt_value)var, (rt_value)reading, 0);
+		if(reading->type == V_HEAP)
+			block_push(block, B_GET_HVAR, (rt_value)var, (rt_value)reading, scope_index(block, reading));
 		else
 			block_push(block, B_MOV, (rt_value)var, (rt_value)reading, 0);
 	}
@@ -153,13 +165,13 @@ static void gen_assign(struct block *block, struct node *node, struct variable *
 {
 	struct variable *reading = (struct variable *)node->left;
 
-	if(reading->type == V_UPVAL)
+	if(reading->type == V_HEAP)
 	{
 		struct variable *temp = block_get_var(block);
 
 		gen_node(block, node->right, temp);
 
-		block_push(block, B_SET_UPVAL, (rt_value)reading, (rt_value)temp, 0);
+		block_push(block, B_SET_HVAR, (rt_value)reading, (rt_value)temp, scope_index(block, reading));
 
 		if (var)
 			block_push(block, B_MOV, (rt_value)var, (rt_value)temp, 0);
@@ -278,29 +290,6 @@ static int gen_argument(struct block *block, struct node *node, struct variable 
 		return 1;
 }
 
-static struct variable *get_upval(struct block *block, struct variable *var)
-{
-	if(var->real)
-	{
-		return var->real;
-	}
-	else
-	{
-		struct variable *temp = block_get_var(block);
-
-		var->real = temp;
-		var->index = block->var_count[V_UPVAL];
-
-		block->var_count[V_UPVAL] += 1;
-
-		block_push(block, B_UPVAL, (rt_value)temp, (rt_value)var, 0);
-
-		kv_push(struct variable *, block->upvals, temp);
-
-		return temp;
-	}
-}
-
 static void generate_call(struct block *block, struct node *self, rt_value name, struct node *arguments, struct node *block_node, struct variable *var)
 {
 	struct variable *self_var = block_get_var(block);
@@ -316,44 +305,26 @@ static void generate_call(struct block *block, struct node *self, rt_value name,
 	if(arguments)
 		parameters = gen_argument(block, arguments, temp);
 
-	struct variable* block_var = 0;
+	struct variable* closure = 0;
 
 	if(block_node)
 	{
-		block_var = block_get_var(block);
+		closure = block_get_var(block);
 		struct block *block_attach = gen_block(block_node);
+		struct variable *scope_args = block_gen_args(block);
 
-		khiter_t k;
-		khash_t(block) *hash = block_attach->variables;
-		size_t upvals = 0;
-		struct variable *closure_args = block_gen_args(block);
+		for(size_t i = 0; i < kv_size(block_attach->scopes); i++)
+			block_push(block, B_PUSH_SCOPE, (rt_value)kv_A(block_attach->scopes, i), 0, 0);
 
-		for (k = kh_begin(hash); k != kh_end(hash); ++k)
-		{
-			if(kh_exist(hash, k))
-			{
-				struct variable *var = kh_value(hash, k);
-
-				if(var->type == V_UPVAL)
-				{
-					khiter_t k = kh_get(block, block->variables, var->name);
-
-					if(k != kh_end(block->variables) && kh_value(block->variables, k)->real == var->real)
-						block_push(block, B_PUSH_UPVAL, (rt_value)kh_value(block->variables, k), 0, 0);
-					else
-						block_push(block, B_PUSH, (rt_value)get_upval(block, var->real), 0, 0);
-
-					upvals++;
-				}
-			}
-		}
-
-		block_end_args(block, closure_args, upvals);
-		block_push(block, B_CLOSURE, (rt_value)block_var, (rt_value)block_attach, 0);
+		block_end_args(block, scope_args, kv_size(block_attach->scopes));
+		block_push(block, B_CLOSURE, (rt_value)closure, (rt_value)block_attach, 0);
 	}
 
 	block_end_args(block, args, parameters);
-	block_push(block, B_CALL, (rt_value)self_var, name, (rt_value)block_var);
+	block_push(block, B_CALL, (rt_value)self_var, name, (rt_value)closure);
+
+	if(block_node)
+		block_push(block, B_SEAL, (rt_value)closure, 0, 0);
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
@@ -732,9 +703,6 @@ struct block *gen_block(struct node *node)
 
 	gen_node(block, node->right, result);
 
-	for(int i = 0; i < kv_size(block->upvals); i++)
-		block_push(block, B_SEAL, (rt_value)kv_A(block->upvals, i), 0, 0);
-
 	struct opcode *last = kv_A(block->vector, kv_size(block->vector) - 1);
 
 	if(last->type == B_RETURN && last->left == (rt_value)result)
@@ -743,6 +711,32 @@ struct block *gen_block(struct node *node)
 		block_push(block, B_LOAD, (rt_value)result, 0, 0);
 
 	block_emmit_label(block, block->epilog);
+
+	/*
+	 * Assign an unique id to each variable of type V_HEAP and V_LOCAL
+	 */
+	rt_value var_count[V_LOCAL + 1];
+	var_count[V_HEAP] = 0;
+	var_count[V_LOCAL] = 0;
+
+	for(khiter_t k = kh_begin(block->variables); k != kh_end(block->variables); ++k)
+	{
+		if(kh_exist(block->variables, k))
+		{
+			struct variable *var = kh_value(block->variables, k);
+
+			switch(var->type)
+			{
+				case V_HEAP:
+				case V_LOCAL:
+					var->index = var_count[var->type]++;
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
 
 	#ifdef DEBUG
 		printf(";\n; block %x\n;\n", (rt_value)block);

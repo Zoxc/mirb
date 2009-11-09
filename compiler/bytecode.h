@@ -33,7 +33,7 @@ enum opcode_type {
 	 * - result: The place in the generated native code the label have.
 	 * - left: The flags of this label.
 	 *   - L_FLUSH: This will make the label flush all variables stored in registers.
-	 * - right: An per block unique id. (Debug mode only)
+	 * - right: A per block unique id. (Debug mode only)
 	 */
 	B_LABEL,
 
@@ -45,11 +45,11 @@ enum opcode_type {
 	B_STRING,
 	B_INTERPOLATE,
 	B_UPVAL,
-	B_PUSH_UPVAL,
+	B_PUSH_SCOPE,
 	B_SEAL,
 	B_CLOSURE,
-	B_GET_UPVAL,
-	B_SET_UPVAL,
+	B_GET_HVAR,
+	B_SET_HVAR,
 	B_GET_IVAR,
 	B_SET_IVAR,
 	B_GET_CONST,

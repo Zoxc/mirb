@@ -140,7 +140,7 @@ struct node *parse_yield(struct compiler *compiler)
 	result->left = alloc_node(compiler, N_VAR);
 
 	if(!compiler->current_block->block_parameter)
-		compiler->current_block->block_parameter = scope_define(compiler->current_block, 0, V_BLOCK, false);
+		compiler->current_block->block_parameter = scope_define(compiler->current_block, 0);
 
 	result->left->left = (void *)compiler->current_block->block_parameter;
 
@@ -186,7 +186,7 @@ struct node *parse_call(struct compiler *compiler, rt_value symbol, struct node 
 		{
 			struct node *result = alloc_node(compiler, N_VAR);
 
-			result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
+			result->left = (void *)scope_get(compiler->current_block, symbol);
 
 			return result;
 		}

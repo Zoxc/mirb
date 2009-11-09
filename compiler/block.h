@@ -52,20 +52,25 @@ struct block_data {
  */
 
 enum variable_type {
+	V_HEAP,
 	V_LOCAL,
-	V_UPVAL,
 	V_TEMP,
-	V_BLOCK,
 	V_ARGS
 };
 
 #define VARIABLE_TYPES 6
 
-struct variable {
-	struct variable *real;
-	size_t index;
-	rt_value name;
+struct temp_variable {
 	enum variable_type type;
+	size_t index;
+};
+
+struct variable {
+	enum variable_type type;
+	size_t index;
+	struct block *owner;
+	struct variable *real;
+	rt_value name;
 };
 
 KHASH_MAP_INIT_INT(block, struct variable *);
@@ -113,7 +118,8 @@ struct block {
 	khash_t(block) *variables; // A hash with all the variables declared or used
 	kvec_t(struct variable *) parameters; // A list of all parameters except the block parameter.
 	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
-	kvec_t(struct variable *) upvals;
+	kvec_t(struct block *) scopes; // A list of all the heap variable scopes this block requires.
+	bool heap_vars; // If any of the variables must be stored on a heap scope.
 
 	#ifdef DEBUG
 		rt_value label_count; // Nicer label labeling...
@@ -133,6 +139,15 @@ struct block {
  */
 
 struct block *block_create(struct compiler *compiler, enum block_type type);
+
+static inline void block_require_scope(struct block *block, struct block *scope)
+{
+	for(int i = 0; i < kv_size(block->scopes); i++)
+		if(kv_A(block->scopes, i) == scope)
+			return;
+
+	kv_push(struct block *, block->scopes, scope);
+}
 
 static inline struct opcode *block_get_label(struct block *block)
 {
@@ -157,7 +172,7 @@ static inline struct opcode *block_get_flush_label(struct block *block)
 
 static inline struct variable *block_get_var(struct block *block)
 {
-	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct variable));
+	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct temp_variable));
 
 	temp->type = V_TEMP;
 	temp->index = block->var_count[V_TEMP];
@@ -181,7 +196,7 @@ static inline size_t block_push(struct block *block, enum opcode_type type, rt_v
 
 static inline struct variable *block_gen_args(struct block *block)
 {
-	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
+	struct variable *var = compiler_alloc(block->compiler, sizeof(struct temp_variable));
 
 	var->type = V_ARGS;
 	var->index = block->var_count[V_ARGS];

@@ -24,12 +24,12 @@ void opcode_print(struct opcode *op)
 			printf("push %s", variable_name(op->result));
 			break;
 
-		case B_GET_UPVAL:
-			printf("get_upval %s, %s", variable_name(op->result), variable_name(op->left));
+		case B_GET_HVAR:
+			printf("get_hvar %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
-		case B_SET_UPVAL:
-			printf("set_upval %s, %s", variable_name(op->result), variable_name(op->left));
+		case B_SET_HVAR:
+			printf("set_hvar %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
 		case B_GET_IVAR:
@@ -40,8 +40,8 @@ void opcode_print(struct opcode *op)
 			printf("set_ivar %s, %s", rt_symbol_to_cstr(op->result), variable_name(op->left));
 			break;
 
-		case B_PUSH_UPVAL:
-			printf("push_upval %s", variable_name(op->result));
+		case B_PUSH_SCOPE:
+			printf("push_scope %s", variable_name(op->result));
 			break;
 
 		case B_PUSH_RAW:

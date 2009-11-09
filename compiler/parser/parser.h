@@ -6,9 +6,10 @@
 #include "../ast.h"
 #include "../block.h"
 
-bool scope_defined(struct block *block, rt_value name, bool recursive);
-struct variable *scope_declare_var(struct block *block, rt_value name, enum variable_type type);
-struct variable *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive);
+struct block *scope_defined(struct block *block, rt_value name, bool recursive);
+struct variable *scope_declare_var(struct block *block, rt_value name);
+struct variable *scope_define(struct block *block, rt_value name);
+struct variable *scope_get(struct block *block, rt_value name);
 
 struct node *parse_factor(struct compiler *compiler);
 struct node *parse_expression(struct compiler *compiler);

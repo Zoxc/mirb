@@ -25,10 +25,10 @@ struct node *alloc_scope(struct compiler *compiler, struct block **block_var, en
 	return result;
 }
 
-bool scope_defined(struct block *block, rt_value name, bool recursive)
+struct block *scope_defined(struct block *block, rt_value name, bool recursive)
 {
 	if(kh_get(block, block->variables, name) != kh_end(block->variables))
-		return true;
+		return block;
 
 	if(recursive)
 	{
@@ -37,14 +37,14 @@ bool scope_defined(struct block *block, rt_value name, bool recursive)
 			block = block->parent;
 
 			if(kh_get(block, block->variables, name) != kh_end(block->variables))
-				return true;
+				return block;
 		}
 	}
 
-	return false;
+	return 0;
 }
 
-struct variable *scope_declare_var(struct block *block, rt_value name, enum variable_type type)
+struct variable *scope_declare_var(struct block *block, rt_value name)
 {
 	khiter_t k = kh_get(block, block->variables, name);
 
@@ -58,62 +58,56 @@ struct variable *scope_declare_var(struct block *block, rt_value name, enum vari
 	RT_ASSERT(ret);
 
 	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
-	var->type = type;
+	var->owner = block;
+	var->type = V_LOCAL;
 	var->name = name;
-	var->index = block->var_count[type];
 	var->real = 0;
-
-	block->var_count[type] += 1;
 
 	kh_value(block->variables, k) = var;
 
 	return var;
 }
 
-struct variable *scope_define(struct block *block, rt_value name, enum variable_type type, bool recursive)
+struct variable *scope_define(struct block *block, rt_value name)
 {
 	if(scope_defined(block, name, false))
+		return kh_value(block->variables, kh_get(block, block->variables, name));
+	else
+		return scope_declare_var(block, name);
+}
+
+struct variable *scope_get(struct block *block, rt_value name)
+{
+	struct block *defined_block = scope_defined(block, name, true);
+
+	if(defined_block == block)
 	{
 		return kh_value(block->variables, kh_get(block, block->variables, name));
 	}
-	else if(scope_defined(block, name, true) && recursive)
+	else if(defined_block)
 	{
-		struct variable *result = scope_declare_var(block, name, V_UPVAL);
+		struct variable *var;
 
-		block = block->parent;
+		khiter_t k = kh_get(block, defined_block->variables, name);
 
-		struct block *temp_block = block;
-		struct variable *real;
+		var = kh_value(defined_block->variables, k);
+		var->type = V_HEAP;
+		var->owner->heap_vars = TRUE;
 
-		while(1)
+		/*
+		 * Make sure the defined block is required by the current block and parents.
+		 */
+		while(block != defined_block)
 		{
-			khiter_t k = kh_get(block, temp_block->variables, name);
-
-			if(k != kh_end(temp_block->variables) && kh_value(temp_block->variables, k)->type != V_UPVAL)
-			{
-				real = kh_value(temp_block->variables, k);
-				break;
-			}
-
-			temp_block = temp_block->parent;
-		}
-
-		result->real = real;
-
-		while (block != temp_block)
-		{
-			struct variable *var = scope_declare_var(block, name, V_UPVAL);
-			var->real = real;
+			block_require_scope(block, defined_block);
 
 			block = block->parent;
 		}
 
-		return result;
+		return var;
 	}
 	else
-	{
-		return scope_declare_var(block, name, type);
-	}
+		return scope_declare_var(block, name);
 }
 
 void parse_sep(struct compiler *compiler)
@@ -182,9 +176,9 @@ struct node *parse_identifier(struct compiler *compiler)
 			}
 			else
 			{
-				result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
+				result->left = (void *)scope_get(compiler->current_block, symbol);
 				result->right->left = alloc_node(compiler, N_VAR);
-				result->right->left->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
+				result->right->left->left = (void *)scope_get(compiler->current_block, symbol);
 			}
 
 			result->right->right = parse_expression(compiler);
@@ -207,7 +201,7 @@ struct node *parse_identifier(struct compiler *compiler)
 			else
 			{
 				result = alloc_node(compiler, N_ASSIGN);
-				result->left = (void *)scope_define(compiler->current_block, symbol, V_LOCAL, true);
+				result->left = (void *)scope_get(compiler->current_block, symbol);
 			}
 
 			result->right = parse_expression(compiler);

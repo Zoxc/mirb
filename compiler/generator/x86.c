@@ -117,10 +117,10 @@ static inline size_t instruction_size(struct block *block, struct opcode *op, si
 		case B_CLOSURE:
 			return 5 + 5 + 6 + 3;
 
-		case B_GET_UPVAL:
+		case B_GET_HVAR:
 			return 5 + 5 + 3;
 
-		case B_SET_UPVAL:
+		case B_SET_HVAR:
 			return 5 + 3 + 5;
 
 		case B_SEAL:
@@ -132,7 +132,7 @@ static inline size_t instruction_size(struct block *block, struct opcode *op, si
 			else
 				return 0;
 
-		case B_PUSH_UPVAL:
+		case B_PUSH_SCOPE:
 			if(((struct variable *)op->result)->index)
 				return 3;
 			else
@@ -191,9 +191,6 @@ static inline int get_stack_index(struct block *block, rt_value var)
 
 	switch(_var->type)
 	{
-		case V_BLOCK:
-			return 12;
-
 		case V_TEMP:
 			index = block->local_offset + block->var_count[V_LOCAL] + _var->index;
 			break;
@@ -246,7 +243,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			}
 			break;
 
-		case B_GET_UPVAL:
+		case B_GET_HVAR:
 			{
 				generate_byte(target, 0xB8); // mov eax,
 				generate_dword(target, ((struct variable *)op->left)->index);
@@ -259,7 +256,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			}
 			break;
 
-		case B_SET_UPVAL:
+		case B_SET_HVAR:
 			{
 				generate_byte(target, 0xB8); // mov eax,
 				generate_dword(target, ((struct variable *)op->result)->index);
@@ -270,7 +267,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			}
 			break;
 
-		case B_PUSH_UPVAL:
+		case B_PUSH_SCOPE:
 			{
 				size_t index = ((struct variable *)op->result)->index * 4;
 
@@ -728,6 +725,9 @@ rt_compiled_block_t compile_block(struct block *block)
 	if(block->self_ref > 0)
 		block_size += 3 + (require_exceptions ? 0 : 1);
 
+	if(block->block_parameter)
+		block_size += 6;
+
 	if(kv_size(block->parameters))
 		block_size += 3 + 6 * kv_size(block->parameters);
 
@@ -881,6 +881,19 @@ rt_compiled_block_t compile_block(struct block *block)
 	}
 
 	block->prolog = target;
+
+	if(block->block_parameter)
+	{
+		// Load to edx
+		generate_byte(&target, 0x8B);
+		generate_byte(&target, 0x51);
+		generate_byte(&target, (char)12);
+
+		// Store from edx
+		generate_byte(&target, 0x89);
+		generate_byte(&target, 0x55);
+		generate_byte(&target, (char)get_stack_index(block, (rt_value)block->block_parameter));
+	}
 
 	if(kv_size(block->parameters))
 	{
