@@ -13,175 +13,32 @@ static inline size_t label_target(void *target, rt_value label)
 	return ((size_t)target + op->result);
 }
 
-static inline void generate_byte(unsigned char **target, unsigned char byte)
-{
-	**target = byte;
-	(*target)++;
-}
+#define GEN_BYTE(output) do \
+	{ \
+		if(!measuring) \
+			**(uint8_t**)target = (uint8_t)(output); \
+		\
+		*target += sizeof(uint8_t);\
+	} \
+	while(0)
 
-static inline void generate_word(unsigned char **target, unsigned short word)
-{
-	**(unsigned short**)target = word;
-	*target += sizeof(word);
-}
+#define GEN_WORD(output) do \
+	{ \
+		if(!measuring) \
+			**(uint16_t**)target = (uint16_t)(output); \
+		\
+		*target += sizeof(uint16_t);\
+	} \
+	while(0)
 
-static inline void generate_dword(unsigned char **target, size_t dword)
-{
-	**(size_t**)target = dword;
-	*target += sizeof(dword);
-}
-
-static inline size_t instruction_size(struct block *block, struct opcode *op, size_t i, size_t current)
-{
-	switch(op->type)
-	{
-		case B_LABEL:
-			{
-				op->result = (rt_value)current;
-
-				switch(op->left)
-				{
-					case L_FLUSH:
-						return 3;
-
-					default:
-						return 0;
-				}
-			}
-
-		case B_NOP:
-			return 0;
-
-		case B_MOV_IMM:
-			return 7;
-
-		case B_MOV:
-			return 6;
-
-		case B_CALL:
-			return (op->right ? 3 : 5) + 3 + 5 + 5 + 2 + (kv_A(block->vector, i - 1)->right ? 6 : 0);
-
-		case B_PUSH:
-			return 3;
-
-		case B_PUSH_RAW:
-		case B_PUSH_IMM:
-			return 5;
-
-		case B_SELF:
-		case B_LOAD:
-		case B_STORE:
-			return 3;
-
-			return 3;
-
-		case B_TEST:
-			return 3 + 5;
-
-		case B_JMP:
-			return 5;
-
-		case B_JMPT:
-		case B_JMPF:
-		case B_JMPE:
-		case B_JMPNE:
-			return 6;
-
-		case B_MODULE:
-			return 5 + 5 + 5 + 1 + 5 + 6;
-
-		case B_CLASS:
-			return 5 + 5 + 5 + 5 + 1 + 5 + 6;
-
-		case B_METHOD:
-			return 5 + 5 + 5;
-
-		case B_GET_CONST:
-			return 5 + 3 + 5 + 3;
-
-		case B_SET_CONST:
-			return 3 + 5 + 3 + 5;
-
-		case B_STRING:
-			return 5 + 5 + 3;
-
-		case B_INTERPOLATE:
-			return 5 + 6 + 3;
-
-		case B_ARRAY:
-			return 5 + 6 + 3;
-
-		case B_UPVAL:
-			return 3 + 5 + 3;
-
-		case B_CLOSURE:
-			return 5 + 5 + 6 + 3;
-
-		case B_GET_HVAR:
-			return 5 + 5 + 3;
-
-		case B_SET_HVAR:
-			return 5 + 3 + 5;
-
-		case B_SEAL:
-			return 3 + 5;
-
-		case B_ARGS:
-			if(op->left)
-				return 1 + 5;
-			else
-				return 0;
-
-		case B_PUSH_SCOPE:
-			if(((struct variable *)op->result)->index)
-				return 3;
-			else
-				return 2;
-
-		case B_GET_IVAR:
-			return 5 + 5 + 3;
-
-		case B_SET_IVAR:
-			return 5 + 3 + 5;
-
-		case B_CMP:
-			return 6;
-
-        case B_ENSURE_RET:
-            return (3 + 4) + 2 + 1;
-
-		case B_HANDLER:
-			{
-				size_t current_id = block->current_exception_block_id;
-
-				block->current_exception_block_id = op->result;
-
-				if(op->result ==current_id - 1)
-					return 3;
-				else if(op->result ==current_id + 1)
-					return 3;
-				else
-					return 3 + 4;
-			}
-
-		case B_RETURN:
-			return 3 + 5;
-
-		case B_RAISE_RETURN:
-			return 5 + 3 + 5;
-
-		case B_RAISE_BREAK:
-			return 5 + 5 + 3 + 5;
-
-		case B_REDO:
-			return (block->require_exceptions ? 7 : 0) + 5;
-
-		default:
-			break;
-	}
-
-	return 0;
-}
+#define GEN_DWORD(output) do \
+	{ \
+		if(!measuring) \
+			**(uint32_t**)target = (uint32_t)(output); \
+		\
+		*target += sizeof(uint32_t);\
+	} \
+	while(0)
 
 static inline int get_stack_index(struct block *block, rt_value var)
 {
@@ -206,64 +63,64 @@ static inline int get_stack_index(struct block *block, rt_value var)
 	return -((index + 1) * 4);
 }
 
-static inline void generate_call(unsigned char **target, void *function)
+static inline void generate_call(uint8_t **target, void *function, bool measuring)
 {
-	generate_byte(target, 0xE8);
-	generate_dword(target, (size_t)function - ((size_t)*target - 1) - 5);
+	GEN_BYTE(0xE8);
+	GEN_DWORD((size_t)function - ((size_t)*target - 1) - 5);
 }
 
-static inline void generate_stack_push(unsigned char **target, size_t dword)
+static inline void generate_stack_push(uint8_t **target, size_t dword, bool measuring)
 {
-	generate_byte(target, 0x68);
-	generate_dword(target, dword);
+	GEN_BYTE(0x68);
+	GEN_DWORD(dword);
 }
 
-static inline void generate_stack_var_push(struct block *block, unsigned char **target, rt_value var)
+static inline void generate_stack_var_push(struct block *block, uint8_t **target, rt_value var, bool measuring)
 {
-	generate_byte(target, 0xFF);
-	generate_byte(target, 0x75);
-	generate_byte(target, (char)get_stack_index(block, var));
+	GEN_BYTE(0xFF);
+	GEN_BYTE(0x75);
+	GEN_BYTE(get_stack_index(block, var));
 }
 
-static inline void generate_stack_pop(unsigned char **target, size_t bytes)
+static inline void generate_stack_pop(uint8_t **target, size_t bytes, bool measuring)
 {
-	generate_byte(target, 0x81);
-	generate_byte(target, 0xC4);
-	generate_dword(target, bytes);
+	GEN_BYTE(0x81);
+	GEN_BYTE(0xC4);
+	GEN_DWORD(bytes);
 }
 
-static inline void generate_instruction(struct block *block, struct opcode *op, size_t i, unsigned char *start, unsigned char **target)
+static inline void generate_instruction(struct block *block, struct opcode *op, size_t i, uint8_t *start, uint8_t **target, bool measuring)
 {
 	switch(op->type)
 	{
 		case B_SEAL:
 			{
-				generate_stack_var_push(block, target, op->result);
-				generate_call(target, rt_support_seal_upval);
+				generate_stack_var_push(block, target, op->result, measuring);
+				generate_call(target, rt_support_seal_upval, measuring);
 			}
 			break;
 
 		case B_GET_HVAR:
 			{
-				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, ((struct variable *)op->left)->index);
+				GEN_BYTE(0xB8); // mov eax,
+				GEN_DWORD(((struct variable *)op->left)->index);
 
-				generate_call(target, rt_support_get_upval);
+				generate_call(target, rt_support_get_upval, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_SET_HVAR:
 			{
-				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, ((struct variable *)op->result)->index);
+				GEN_BYTE(0xB8); // mov eax,
+				GEN_DWORD(((struct variable *)op->result)->index);
 
-				generate_stack_var_push(block, target, op->left);
+				generate_stack_var_push(block, target, op->left, measuring);
 
-				generate_call(target, rt_support_set_upval);
+				generate_call(target, rt_support_set_upval, measuring);
 			}
 			break;
 
@@ -273,43 +130,43 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				if(index)
 				{
-					generate_byte(target, 0xFF); // push dword [esi + index]
-					generate_byte(target, 0x76);
-					generate_byte(target, ((struct variable *)op->result)->index * 4);
+					GEN_BYTE(0xFF); // push dword [esi + index]
+					GEN_BYTE(0x76);
+					GEN_BYTE(((struct variable *)op->result)->index * 4);
 				}
 				else
 				{
-					generate_byte(target, 0xFF); // push dword [esi]
-					generate_byte(target, 0x36);
+					GEN_BYTE(0xFF); // push dword [esi]
+					GEN_BYTE(0x36);
 				}
 			}
 			break;
 
 		case B_CLOSURE:
 			{
-				generate_stack_push(target, (size_t)compile_block((struct block *)op->left));
+				generate_stack_push(target, (size_t)compile_block((struct block *)op->left), measuring);
 
-				generate_call(target, rt_support_closure);
+				generate_call(target, rt_support_closure, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 3) * 4);
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 3) * 4, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_UPVAL:
 			{
-				generate_byte(target, 0x8D);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->left));
+				GEN_BYTE(0x8D);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->left));
 
-				generate_call(target, rt_support_upval_create);
+				generate_call(target, rt_support_upval_create, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
@@ -318,16 +175,16 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				struct block *class_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
 
-				generate_stack_push(target, rt_Object);
-				generate_stack_push(target, op->result);
-				generate_call(target, rt_support_define_class);
+				generate_stack_push(target, rt_Object, measuring);
+				generate_stack_push(target, op->result, measuring);
+				generate_call(target, rt_support_define_class, measuring);
 
-				generate_byte(target, 0x50); // push dummy argv
-				generate_stack_push(target, 0); // push argc
-				generate_stack_push(target, 0); // push block
-				generate_byte(target, 0x50); // push obj(eax)
+				GEN_BYTE(0x50); // push dummy argv
+				generate_stack_push(target, 0, measuring); // push argc
+				generate_stack_push(target, 0, measuring); // push block
+				GEN_BYTE(0x50); // push obj(eax)
 
-				generate_call(target, compiled);
+				generate_call(target, compiled, measuring);
 			}
 			break;
 
@@ -336,62 +193,62 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				struct block *class_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(class_block);
 
-				generate_stack_push(target, op->result);
-				generate_call(target, rt_support_define_module);
+				generate_stack_push(target, op->result, measuring);
+				generate_call(target, rt_support_define_module, measuring);
 
-				generate_byte(target, 0x50); // push dummy argv
-				generate_stack_push(target, 0); // push argc
-				generate_stack_push(target, 0); // push block
-				generate_byte(target, 0x50); // push obj(eax)
+				GEN_BYTE(0x50); // push dummy argv
+				generate_stack_push(target, 0, measuring); // push argc
+				generate_stack_push(target, 0, measuring); // push block
+				GEN_BYTE(0x50); // push obj(eax)
 
-				generate_call(target, compiled);
+				generate_call(target, compiled, measuring);
 			}
 			break;
 
 		case B_GET_IVAR:
 			{
-				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, op->left);
+				GEN_BYTE(0xB8); // mov eax,
+				GEN_DWORD(op->left);
 
-				generate_call(target, rt_support_get_ivar);
+				generate_call(target, rt_support_get_ivar, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_SET_IVAR:
 			{
-				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, op->result);
+				GEN_BYTE(0xB8); // mov eax,
+				GEN_DWORD(op->result);
 
-				generate_stack_var_push(block, target, op->left);
+				generate_stack_var_push(block, target, op->left, measuring);
 
-				generate_call(target, rt_support_set_ivar);
+				generate_call(target, rt_support_set_ivar, measuring);
 			}
 			break;
 
 		case B_GET_CONST:
 			{
-				generate_stack_push(target, op->right);
-				generate_stack_var_push(block, target, op->left);
+				generate_stack_push(target, op->right, measuring);
+				generate_stack_var_push(block, target, op->left, measuring);
 
-				generate_call(target, rt_support_get_const);
+				generate_call(target, rt_support_get_const, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_SET_CONST:
 			{
-				generate_stack_var_push(block, target, op->right);
-				generate_stack_push(target, op->left);
-				generate_stack_var_push(block, target, op->result);
+				generate_stack_var_push(block, target, op->right, measuring);
+				generate_stack_push(target, op->left, measuring);
+				generate_stack_var_push(block, target, op->result, measuring);
 
-				generate_call(target, rt_support_set_const);
+				generate_call(target, rt_support_set_const, measuring);
 			}
 			break;
 
@@ -400,33 +257,33 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				struct block *method_block = (struct block *)op->left;
 				rt_compiled_block_t compiled = compile_block(method_block);
 
-				generate_stack_push(target, (rt_value)compiled);
-				generate_stack_push(target, op->result);
-				//generate_byte(target, 0x57); // push edi
+				generate_stack_push(target, (rt_value)compiled, measuring);
+				generate_stack_push(target, op->result, measuring);
+				//GEN_BYTE(0x57); // push edi
 
-				generate_call(target, rt_support_define_method);
+				generate_call(target, rt_support_define_method, measuring);
 			}
 			break;
 
 		case B_CALL:
 			{
 				if(op->right)
-					generate_stack_var_push(block, target, op->right);
+					generate_stack_var_push(block, target, op->right, measuring);
 				else
-					generate_stack_push(target, 0);
+					generate_stack_push(target, 0, measuring);
 
-				generate_stack_var_push(block, target, op->result);
+				generate_stack_var_push(block, target, op->result, measuring);
 
-				generate_byte(target, 0xB8); // mov eax,
-				generate_dword(target, op->left);
+				GEN_BYTE(0xB8); // mov eax,
+				GEN_DWORD(op->left);
 
-				generate_call(target, rt_support_lookup_method);
+				generate_call(target, rt_support_lookup_method, measuring);
 
-				generate_byte(target, 0xFF); // call eax
-				generate_byte(target, 0xD0);
+				GEN_BYTE(0xFF); // call eax
+				GEN_BYTE(0xD0);
 
 				if(kv_A(block->vector, i - 1)->right)
-					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4);
+					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4, measuring);
 			}
 			break;
 
@@ -434,159 +291,159 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				if(op->left)
 				{
-					generate_byte(target, 0x54); // push esp
-					generate_stack_push(target, op->right);
+					GEN_BYTE(0x54); // push esp
+					generate_stack_push(target, op->right, measuring);
 				}
 			}
 			break;
 
 		case B_STRING:
 			{
-				generate_stack_push(target, op->left);
-				generate_call(target, rt_support_define_string);
+				generate_stack_push(target, op->left, measuring);
+				generate_call(target, rt_support_define_string, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_INTERPOLATE:
 			{
-				generate_call(target, rt_support_interpolate);
+				generate_call(target, rt_support_interpolate, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4);
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_ARRAY:
 			{
-				generate_call(target, rt_support_array);
+				generate_call(target, rt_support_array, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4);
+				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
 
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_PUSH:
-			generate_stack_var_push(block, target, op->result);
+			generate_stack_var_push(block, target, op->result, measuring);
 			break;
 
 		case B_PUSH_RAW:
 		case B_PUSH_IMM:
-			generate_stack_push(target, op->result);
+			generate_stack_push(target, op->result, measuring);
 			break;
 
 		case B_SELF:
 			{
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x7D);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x7D);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_LOAD:
 			{
-				generate_byte(target, 0x8B);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x8B);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_STORE:
 			{
-				generate_byte(target, 0x89);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x89);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 			}
 			break;
 
 		case B_JMP:
 			{
-				generate_byte(target, 0xE9);
-				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 1) - 5);
+				GEN_BYTE(0xE9);
+				GEN_DWORD(label_target(start, op->result) - ((size_t)*target - 1) - 5);
 			}
 			break;
 
 		case B_RAISE_RETURN:
 			{
-				generate_stack_push(target, op->left);
-				generate_stack_var_push(block, target, op->result);
-				generate_call(target, rt_support_return);
+				generate_stack_push(target, op->left, measuring);
+				generate_stack_var_push(block, target, op->result, measuring);
+				generate_call(target, rt_support_return, measuring);
 			}
 			break;
 
 		case B_RAISE_BREAK:
 			{
-				generate_stack_push(target, op->right);
-				generate_stack_push(target, op->left);
-				generate_stack_var_push(block, target, op->result);
-				generate_call(target, rt_support_break);
+				generate_stack_push(target, op->right, measuring);
+				generate_stack_push(target, op->left, measuring);
+				generate_stack_var_push(block, target, op->result, measuring);
+				generate_call(target, rt_support_break, measuring);
 			}
 			break;
 
 		case B_RETURN:
 			{
 				// Load to eax
-				generate_byte(target, 0x8B);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x8B);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 
 				// Jump to epilogue
-				generate_byte(target, 0xE9);
-				generate_dword(target, label_target(start, (rt_value)block->epilog) - ((size_t)*target - 1) - 5);
+				GEN_BYTE(0xE9);
+				GEN_DWORD(label_target(start, (rt_value)block->epilog) - ((size_t)*target - 1) - 5);
 			}
 			break;
 
 		case B_JMPNE:
 		case B_JMPT:
 			{
-				generate_byte(target, 0x0F);
-				generate_byte(target, 0x85);
-				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 2) - 6);
+				GEN_BYTE(0x0F);
+				GEN_BYTE(0x85);
+				GEN_DWORD(label_target(start, op->result) - ((size_t)*target - 2) - 6);
 			}
 			break;
 
 		case B_JMPE:
 		case B_JMPF:
 			{
-				generate_byte(target, 0x0F);
-				generate_byte(target, 0x84);
-				generate_dword(target, label_target(start, op->result) - ((size_t)*target - 2) - 6);
+				GEN_BYTE(0x0F);
+				GEN_BYTE(0x84);
+				GEN_DWORD(label_target(start, op->result) - ((size_t)*target - 2) - 6);
 			}
 			break;
 
 		case B_CMP:
 			{
 				// Load to eax
-				generate_byte(target, 0x8B);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x8B);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 
-				generate_byte(target, 0x3B); // cmp eax, [ebp + var]
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->left));
+				GEN_BYTE(0x3B); // cmp eax, [ebp + var]
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->left));
 			}
 			break;
 
 		case B_TEST:
 			{
 				// Load to eax
-				generate_byte(target, 0x8B);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0x8B);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 
 				// and eax, ~RT_FALSE
 
-				generate_byte(target, 0x25);
-				generate_dword(target, ~RT_FALSE);
+				GEN_BYTE(0x25);
+				GEN_DWORD(~RT_FALSE);
 			}
 			break;
 
@@ -594,41 +451,41 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				// Load to eax
 				{
-					generate_byte(target, 0x8B);
-					generate_byte(target, 0x45);
-					generate_byte(target, (char)get_stack_index(block, op->left));
+					GEN_BYTE(0x8B);
+					GEN_BYTE(0x45);
+					GEN_BYTE((char)get_stack_index(block, op->left));
 				}
 
 				// Store from eax
 				{
-					generate_byte(target, 0x89);
-					generate_byte(target, 0x45);
-					generate_byte(target, (char)get_stack_index(block, op->result));
+					GEN_BYTE(0x89);
+					GEN_BYTE(0x45);
+					GEN_BYTE((char)get_stack_index(block, op->result));
 				}
 			}
 			break;
 
 		case B_MOV_IMM:
 			{
-				generate_byte(target, 0xC7);
-				generate_byte(target, 0x45);
-				generate_byte(target, (char)get_stack_index(block, op->result));
+				GEN_BYTE(0xC7);
+				GEN_BYTE(0x45);
+				GEN_BYTE((char)get_stack_index(block, op->result));
 
-				generate_dword(target, op->left);
+				GEN_DWORD(op->left);
 			}
 			break;
 
 		case B_ENSURE_RET:
 			{
-			    generate_byte(target, 0x81); // cmp dword [ebp - 12], 0
-                generate_byte(target, 0x7D);
-                generate_byte(target, -12);
-                generate_dword(target, 0);
+			    GEN_BYTE(0x81); // cmp dword [ebp - 12], 0
+                GEN_BYTE(0x7D);
+                GEN_BYTE(-12);
+                GEN_DWORD(0);
 
-                generate_byte(target, 0x74); // jz +1
-                generate_byte(target, 1);
+                GEN_BYTE(0x74); // jz +1
+                GEN_BYTE(1);
 
-                generate_byte(target, 0xC3); // ret
+                GEN_BYTE(0xC3); // ret
 			}
 			break;
 
@@ -636,23 +493,23 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				if(op->result == block->current_exception_block_id - 1)
 				{
-					generate_byte(target, 0xFF);
-					generate_byte(target, 0x4D);
-					generate_byte(target, -8);
+					GEN_BYTE(0xFF);
+					GEN_BYTE(0x4D);
+					GEN_BYTE(-8);
 				}
 				else if(op->result == block->current_exception_block_id + 1)
 				{
-					generate_byte(target, 0xFF);
-					generate_byte(target, 0x45);
-					generate_byte(target, -8);
+					GEN_BYTE(0xFF);
+					GEN_BYTE(0x45);
+					GEN_BYTE(-8);
 				}
 				else
 				{
-					generate_byte(target, 0xC7);
-					generate_byte(target, 0x45);
-					generate_byte(target, -8);
+					GEN_BYTE(0xC7);
+					GEN_BYTE(0x45);
+					GEN_BYTE(-8);
 
-					generate_dword(target, op->result);
+					GEN_DWORD(op->result);
 				}
 
 				block->current_exception_block_id = op->result;
@@ -664,26 +521,29 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				if(block->require_exceptions)
 				{
 					// Restore exception handler index
-					generate_byte(target, 0xC7);
-					generate_byte(target, 0x45);
-					generate_byte(target, -8);
-					generate_dword(target, -1);
+					GEN_BYTE(0xC7);
+					GEN_BYTE(0x45);
+					GEN_BYTE(-8);
+					GEN_DWORD(-1);
 				}
 
 				// Jump to epilogue
-				generate_byte(target, 0xE9);
-				generate_dword(target, (size_t)block->prolog - ((size_t)*target - 1) - 5);
+				GEN_BYTE(0xE9);
+				GEN_DWORD((size_t)block->prolog - ((size_t)*target - 1) - 5);
 			}
 			break;
 
 		case B_LABEL:
 			{
+				if(measuring)
+					op->result = (rt_value)*target;
+
 				switch(op->left)
 				{
 					case L_FLUSH:
-						generate_byte(target, 0x8B); // mov edi, dword [ebp + 8]
-						generate_byte(target, 0x7D);
-						generate_byte(target, 8);
+						GEN_BYTE(0x8B); // mov edi, dword [ebp + 8]
+						GEN_BYTE(0x7D);
+						GEN_BYTE(8);
 						break;
 
 					default:
@@ -696,68 +556,194 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 	}
 }
 
-rt_compiled_block_t compile_block(struct block *block)
+static inline void generate_block(struct block *block, uint8_t *start, uint8_t **target, bool measuring)
 {
-	bool require_exceptions = block->require_exceptions;
-	size_t block_size = 3;
 	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP];
 
-	if(require_exceptions)
-	{
-		if(block->type == S_CLOSURE)
-			stack_vars += 1;
-
-		block->current_exception_block_id = -1;
-
-		block_size += 5 + 5 + 5 + 5 + (3 + 4) + (3 + 4) + 3;
-
-		block->local_offset = 5;
-	}
-	else
-		block->local_offset = 0;
-
-	if(stack_vars > 0)
-		block_size += 6;
-
-	if(block->type == S_CLOSURE)
-		block_size += 2 + (require_exceptions ? 0 : 1);
-
-	if(block->self_ref > 0)
-		block_size += 3 + (require_exceptions ? 0 : 1);
-
-	if(block->block_parameter)
-		block_size += 6;
-
-	if(kv_size(block->parameters))
-		block_size += 3 + 6 * kv_size(block->parameters);
-
-	for(size_t i = 0; i < kv_size(block->vector); i++)
-		block_size += instruction_size(block, kv_A(block->vector, i), i, block_size);
-
-	if(require_exceptions)
-		block_size += 3 + (3 + 4) + 3;
-	else
-	{
-		if(block->self_ref > 0)
-			block_size += 1;
-
-		if(block->type == S_CLOSURE)
-			block_size += 1;
-	}
-
-	block_size += 6;
-
-	rt_compiled_block_t result = rt_code_heap_alloc(block_size);
-
-	unsigned char *target = (unsigned char *)result;
-
-	generate_byte(&target, 0x55); // push ebp
-	generate_byte(&target, 0x89); // mov esp, ebp
-	generate_byte(&target, 0xE5);
+	GEN_BYTE(0x55); // push ebp
+	GEN_BYTE(0x89); // mov esp, ebp
+	GEN_BYTE(0xE5);
 
 	struct block_data *data = block->data;
 
-	if(require_exceptions)
+	if(block->require_exceptions)
+	{
+		block->current_exception_block_id = -1;
+
+		/*
+		 * Generate seh_frame struct
+		 *
+
+        typedef struct struct seh_frame {
+            struct struct seh_frame *prev;
+            void *handler;
+            size_t handling;
+            size_t handler_index;
+            struct block_data *block;
+            size_t old_ebp;
+        } struct rt_seh_frame;
+
+		 */
+
+		// old_ebp is already pushed
+
+		// block @ ebp - 4
+		generate_stack_push(target, (size_t)data, measuring);
+
+		// block_index @ ebp - 8
+		generate_stack_push(target, -1, measuring);
+
+		// handling @ ebp - 12
+		generate_stack_push(target, 0, measuring);
+
+		// handler @ ebp - 16
+		generate_stack_push(target, (size_t)&rt_support_seh_handler, measuring);
+
+		// prev @ ebp - 20
+		GEN_BYTE(0x64); // push dword [fs:0]
+		GEN_BYTE(0xFF);
+		GEN_BYTE(0x35);
+		GEN_DWORD(0);
+
+		/*
+		 * Append the struct to the linked list
+		 */
+		GEN_BYTE(0x64); // mov dword [fs:0], esp
+		GEN_BYTE(0x89);
+		GEN_BYTE(0x25);
+		GEN_DWORD(0);
+	}
+
+	if(stack_vars > 0)
+	{
+		GEN_BYTE(0x81); // add esp,
+		GEN_BYTE(0xEC);
+		GEN_DWORD(stack_vars * 4);
+	}
+
+	if(block->require_exceptions)
+	{
+		GEN_BYTE(0x56); // push esi
+		GEN_BYTE(0x57); // push edi
+		GEN_BYTE(0x53); // push ebx
+	}
+
+	if(block->type == S_CLOSURE)
+	{
+		if(!block->require_exceptions)
+			GEN_BYTE(0x56); // push esi
+
+		GEN_BYTE(0x89); // mov esi, eax
+		GEN_BYTE(0xC6);
+	}
+
+	if(block->self_ref > 0)
+	{
+		if(!block->require_exceptions)
+			GEN_BYTE(0x57); // push edi
+
+		GEN_BYTE(0x8B); // mov edi, dword [ebp + 8]
+		GEN_BYTE(0x7D);
+		GEN_BYTE(8);
+	}
+
+	block->prolog = target;
+
+	if(block->block_parameter)
+	{
+		// Load to edx
+		GEN_BYTE(0x8B);
+		GEN_BYTE(0x51);
+		GEN_BYTE((char)12);
+
+		// Store from edx
+		GEN_BYTE(0x89);
+		GEN_BYTE(0x55);
+		GEN_BYTE((char)get_stack_index(block, (rt_value)block->block_parameter));
+	}
+
+	if(kv_size(block->parameters))
+	{
+		GEN_BYTE(0x8B);
+		GEN_BYTE(0x4D);
+		GEN_BYTE((char)20);
+
+		for(size_t i = 0; i < kv_size(block->parameters); i++)
+		{
+			struct variable *var = kv_A(block->parameters, i);
+
+			// Load to edx
+			GEN_BYTE(0x8B);
+			GEN_BYTE(0x51);
+			GEN_BYTE((char)((kv_size(block->parameters) - var->index - 1) * 4));
+
+			// Store from edx
+			GEN_BYTE(0x89);
+			GEN_BYTE(0x55);
+			GEN_BYTE((char)get_stack_index(block, (rt_value)var));
+		}
+	}
+
+	for(size_t i = 0; i < kv_size(block->vector); i++)
+		generate_instruction(block, kv_A(block->vector, i), i, start, target, measuring);
+
+	if(block->require_exceptions)
+	{
+		data->epilog = (void *)label_target(start, (rt_value)block->epilog);
+
+		GEN_BYTE(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+		GEN_BYTE(0x4D);
+		GEN_BYTE(-20);
+
+		GEN_BYTE(0x64); // mov dword [fs:0], ecx
+		GEN_BYTE(0x89);
+		GEN_BYTE(0x0D);
+		GEN_DWORD(0);
+
+		GEN_BYTE(0x5B); // pop ebx
+		GEN_BYTE(0x5F); // pop edi
+		GEN_BYTE(0x5E); // pop esi
+	}
+	else
+	{
+		if(block->self_ref > 0)
+			GEN_BYTE(0x5F); // pop edi
+
+		if(block->type == S_CLOSURE)
+			GEN_BYTE(0x5E); // pop esi
+	}
+
+	GEN_BYTE(0x89);
+	GEN_BYTE(0xEC);
+	GEN_BYTE(0x5D);
+	GEN_BYTE(0xC2);
+
+	GEN_WORD(16);
+}
+
+rt_compiled_block_t compile_block(struct block *block)
+{
+	uint8_t *target = 0;
+	struct block_data *data = block->data;
+	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP];
+
+	/*
+	 * Calculate the size of the block
+	 */
+	generate_block(block, 0, &target, true);
+
+	printf("block size is %d\n", (size_t)target);
+
+	/*
+	 * Allocate the block
+	 */
+	rt_compiled_block_t result = rt_code_heap_alloc((size_t)target);
+
+
+	/*
+	 * Setup data structures
+	 */
+	if(block->require_exceptions)
 	{
 		block->current_exception_block_id = -1;
 
@@ -802,155 +788,15 @@ rt_compiled_block_t compile_block(struct block *block)
 			data->break_targets[i] = (void *)label_target(result, (rt_value)data->break_targets[i]);
 
 		data->local_storage = stack_vars * 4;
-
-		/*
-		 * Generate seh_frame struct
-		 *
-
-        typedef struct struct seh_frame {
-            struct struct seh_frame *prev;
-            void *handler;
-            size_t handling;
-            size_t handler_index;
-            struct block_data *block;
-            size_t old_ebp;
-        } struct rt_seh_frame;
-
-		 */
-
-		// old_ebp is already pushed
-
-		// block @ ebp - 4
-		generate_stack_push(&target, (size_t)data);
-
-		// block_index @ ebp - 8
-		generate_stack_push(&target, -1);
-
-		// handling @ ebp - 12
-		generate_stack_push(&target, 0);
-
-		// handler @ ebp - 16
-		generate_stack_push(&target, (size_t)&rt_support_seh_handler);
-
-		// prev @ ebp - 20
-		generate_byte(&target, 0x64); // push dword [fs:0]
-		generate_byte(&target, 0xFF);
-		generate_byte(&target, 0x35);
-		generate_dword(&target, 0);
-
-		/*
-		 * Append the struct to the linked list
-		 */
-		generate_byte(&target, 0x64); // mov dword [fs:0], esp
-		generate_byte(&target, 0x89);
-		generate_byte(&target, 0x25);
-		generate_dword(&target, 0);
 	}
 
-	if(stack_vars > 0)
-	{
-		generate_byte(&target, 0x81); // add esp,
-		generate_byte(&target, 0xEC);
-		generate_dword(&target, stack_vars * 4);
-	}
+	/*
+	 * Generate the code
+	 */
 
-	if(require_exceptions)
-	{
-		generate_byte(&target, 0x56); // push esi
-		generate_byte(&target, 0x57); // push edi
-		generate_byte(&target, 0x53); // push ebx
-	}
+	target = (uint8_t *)result;
 
-	if(block->type == S_CLOSURE)
-	{
-		if(!require_exceptions)
-			generate_byte(&target, 0x56); // push esi
-
-		generate_byte(&target, 0x89); // mov esi, eax
-		generate_byte(&target, 0xC6);
-	}
-
-	if(block->self_ref > 0)
-	{
-		if(!require_exceptions)
-			generate_byte(&target, 0x57); // push edi
-
-		generate_byte(&target, 0x8B); // mov edi, dword [ebp + 8]
-		generate_byte(&target, 0x7D);
-		generate_byte(&target, 8);
-	}
-
-	block->prolog = target;
-
-	if(block->block_parameter)
-	{
-		// Load to edx
-		generate_byte(&target, 0x8B);
-		generate_byte(&target, 0x51);
-		generate_byte(&target, (char)12);
-
-		// Store from edx
-		generate_byte(&target, 0x89);
-		generate_byte(&target, 0x55);
-		generate_byte(&target, (char)get_stack_index(block, (rt_value)block->block_parameter));
-	}
-
-	if(kv_size(block->parameters))
-	{
-		generate_byte(&target, 0x8B);
-		generate_byte(&target, 0x4D);
-		generate_byte(&target, (char)20);
-
-		for(size_t i = 0; i < kv_size(block->parameters); i++)
-		{
-			struct variable *var = kv_A(block->parameters, i);
-
-			// Load to edx
-			generate_byte(&target, 0x8B);
-			generate_byte(&target, 0x51);
-			generate_byte(&target, (char)((kv_size(block->parameters) - var->index - 1) * 4));
-
-			// Store from edx
-			generate_byte(&target, 0x89);
-			generate_byte(&target, 0x55);
-			generate_byte(&target, (char)get_stack_index(block, (rt_value)var));
-		}
-	}
-
-	for(size_t i = 0; i < kv_size(block->vector); i++)
-		generate_instruction(block, kv_A(block->vector, i), i, (unsigned char *)result, &target);
-
-	if(require_exceptions)
-	{
-		data->epilog = (void *)label_target(result, (rt_value)block->epilog);
-
-		generate_byte(&target, 0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
-		generate_byte(&target, 0x4D);
-		generate_byte(&target, -20);
-
-		generate_byte(&target, 0x64); // mov dword [fs:0], ecx
-		generate_byte(&target, 0x89);
-		generate_byte(&target, 0x0D);
-		generate_dword(&target, 0);
-
-		generate_byte(&target, 0x5B); // pop ebx
-		generate_byte(&target, 0x5F); // pop edi
-		generate_byte(&target, 0x5E); // pop esi
-	}
-	else
-	{
-		if(block->self_ref > 0)
-			generate_byte(&target, 0x5F); // pop edi
-
-		if(block->type == S_CLOSURE)
-			generate_byte(&target, 0x5E); // pop esi
-	}
-
-	generate_byte(&target, 0x89);
-	generate_byte(&target, 0xEC);
-	generate_byte(&target, 0x5D);
-	generate_byte(&target, 0xC2);
-	generate_word(&target, 16);
+	generate_block(block, (uint8_t *)result, &target, false);
 
 	#ifdef WINDOWS
 		#ifdef DEBUG
@@ -974,8 +820,6 @@ rt_compiled_block_t compile_block(struct block *block)
 			printf("\n\n");
 		#endif
 	#endif
-
-	RT_ASSERT((unsigned char *)result + block_size == target);
 
 	return result;
 }
