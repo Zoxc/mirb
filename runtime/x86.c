@@ -396,4 +396,19 @@ void __stdcall rt_support_set_ivar(rt_value value)
 
 		return ExceptionContinueSearch;
 	}
+#else
+	/*
+	 * Dummy functions
+	 */
+	void rt_support_return(void)
+	{
+	}
+
+	void rt_support_break(void)
+	{
+	}
+
+	void rt_support_seh_handler(void)
+	{
+	}
 #endif

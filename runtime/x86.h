@@ -35,4 +35,11 @@ void __stdcall rt_support_set_ivar(rt_value value);
 	void __stdcall rt_support_break(rt_value value, void *target, size_t id);
 
 	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, struct rt_seh_frame *frame_data, CONTEXT *context, void *dispatcher_context);
+#else
+	/*
+	 * Dummy functions
+	 */
+	void rt_support_return(void);
+	void rt_support_break(void);
+	void rt_support_seh_handler(void);
 #endif

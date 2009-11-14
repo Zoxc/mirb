@@ -10,12 +10,15 @@ struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_lookup_method),
 	DISASSEMBLY_SYMBOL(rt_support_get_ivar),
 	DISASSEMBLY_SYMBOL(rt_support_set_ivar),
-	DISASSEMBLY_SYMBOL(rt_support_seh_handler),
 	DISASSEMBLY_SYMBOL(rt_support_break),
 	DISASSEMBLY_SYMBOL(rt_support_return),
 	DISASSEMBLY_SYMBOL(rt_support_alloc_scope),
-	DISASSEMBLY_SYMBOL(rt_support_interpolate),
-	DISASSEMBLY_SYMBOL(rt_support_array),
+
+#ifdef WINDOWS
+	DISASSEMBLY_SYMBOL(rt_support_seh_handler),
+#endif
+
+	DISASSEMBLY_SYMBOL(rt_support_interpolate),	DISASSEMBLY_SYMBOL(rt_support_array),
 	DISASSEMBLY_SYMBOL(rt_support_get_const),
 	DISASSEMBLY_SYMBOL(rt_support_set_const),
 	DISASSEMBLY_SYMBOL(rt_support_define_string)
