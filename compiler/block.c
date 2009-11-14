@@ -95,6 +95,8 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 
 	result->type = type;
 	result->block_parameter = 0;
+	result->scope_var = 0;
+	result->closure_var = 0;
 
 	result->owner = 0;
 	result->parent = 0;

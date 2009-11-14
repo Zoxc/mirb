@@ -21,7 +21,7 @@ rt_compiled_block(rt_proc_call)
 			[block] "g" (block),
 			[argc] "g" (argc),
 			[argv] "g" (argv),
-			"a" (RT_PROC(obj)->upvals)
+			"a" (&RT_PROC(obj)->scopes)
 		: "%ecx", "%edx");
 
 	return result;

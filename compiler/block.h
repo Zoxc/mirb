@@ -58,7 +58,7 @@ enum variable_type {
 	V_ARGS
 };
 
-#define VARIABLE_TYPES 6
+#define VARIABLE_TYPES 4
 
 struct temp_variable {
 	enum variable_type type;
@@ -120,12 +120,13 @@ struct block {
 	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
 	kvec_t(struct block *) scopes; // A list of all the heap variable scopes this block requires.
 	bool heap_vars; // If any of the variables must be stored on a heap scope.
+	struct variable *scope_var; // A variable with the pointer to the heap scope
+	struct variable *closure_var; // A variable with the pointer to the closure information
 
 	#ifdef DEBUG
 		rt_value label_count; // Nicer label labeling...
 	#endif
 
-	size_t local_offset;
 	size_t self_ref;
 
 	void *prolog; // The point after the prolog of the block.

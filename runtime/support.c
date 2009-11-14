@@ -6,6 +6,11 @@
 #include "classes/proc.h"
 #include "classes/array.h"
 
+void *__stdcall rt_support_alloc_scope(size_t size)
+{
+	return (void *)rt_alloc(size);
+}
+
 rt_value __stdcall rt_support_define_string(const char* string)
 {
 	return rt_string_from_cstr(string);
@@ -33,12 +38,6 @@ void __stdcall rt_support_set_const(rt_value obj, rt_value name, rt_value value)
 	#endif
 
 	rt_const_set(obj, name, value);
-}
-
-void __stdcall rt_support_seal_upval(struct rt_upval *upval)
-{
-	upval->val.local = *(upval->val.upval);
-	upval->sealed = true;
 }
 
 rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[])

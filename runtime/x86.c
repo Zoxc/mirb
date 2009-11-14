@@ -6,24 +6,23 @@
 #include "classes/string.h"
 #include "classes/proc.h"
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, struct rt_upval *argv[])
+rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_value *argv[])
 {
 	rt_value self;
 
 	__asm__("" : "=D" (self));
 
-	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc));
+	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
 
 	RT_COMMON(closure)->flags = C_PROC;
 	RT_COMMON(closure)->class_of = rt_Proc;
 	RT_PROC(closure)->self = self;
 	RT_PROC(closure)->closure = block;
-	RT_PROC(closure)->upval_count = argc;
-	RT_PROC(closure)->upvals = malloc(sizeof(struct rt_upval *) * argc);
+	RT_PROC(closure)->scope_count = argc;
 
 	RT_ARG_EACH_RAW(i)
 	{
-		RT_PROC(closure)->upvals[i] = RT_ARG(i);
+		RT_PROC(closure)->scopes[i] = RT_ARG(i);
 	}
 
 	return closure;
@@ -78,26 +77,16 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 	rt_define_method(obj, name, block);
 }
 
-struct rt_upval *rt_support_upval_create(void)
-{
-	rt_value *real;
-
-	__asm__("" : "=a" (real));
-
-	struct rt_upval *result = malloc(sizeof(struct rt_upval));
-
-	result->val.upval = real;
-	result->sealed = false;
-
-	return result;
-}
-
 rt_value rt_support_get_ivar(void)
 {
 	rt_value obj;
 	rt_value name;
 
 	__asm__("" : "=D" (obj), "=a" (name));
+
+	#ifdef DEBUG
+		printf("Looking up instance variable %s in %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
+	#endif
 
 	return rt_object_get_var(obj, name);
 }
@@ -109,37 +98,11 @@ void __stdcall rt_support_set_ivar(rt_value value)
 
 	__asm__("" : "=D" (obj), "=a" (name));
 
+	#ifdef DEBUG
+		printf("Setting instance variable %s in %s to %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)), rt_string_to_cstr(rt_inspect(value)));
+	#endif
+
 	rt_object_set_var(obj, name, value);
-}
-
-rt_value rt_support_get_upval(void)
-{
-	size_t index;
-	struct rt_upval **upvals;
-
-	__asm__("" : "=a" (index), "=S" (upvals));
-
-	struct rt_upval *upval = upvals[index];
-
-	if(!upval->sealed)
-		return *(upval->val.upval);
-	else
-		return upval->val.local;
-}
-
-void __stdcall rt_support_set_upval(rt_value value)
-{
-	size_t index;
-	struct rt_upval **upvals;
-
-	__asm__("" : "=a" (index), "=S" (upvals));
-
-	struct rt_upval *upval = upvals[index];
-
-	if(!upval->sealed)
-		*(upval->val.upval) = value;
-	else
-		upval->val.local = value;
 }
 
 #ifdef WINDOWS
@@ -167,7 +130,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 	void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target)
 	{
 		if(!rt_find_seh_target(target))
-			assert(0);
+			RT_ASSERT(0);
 
 		rt_value data[2];
 
@@ -182,7 +145,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 	void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id)
 	{
 		if(!rt_find_seh_target(target))
-			assert(0);
+			RT_ASSERT(0);
 
 		rt_value data[3];
 
@@ -234,7 +197,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 				#ifdef DEBUG
 					printf("Ensure block found\n");
 					printf("Ebp: %x\n", ebp);
-					printf("Eip: %x\n", block->ensure_label);
+					printf("Eip: %x\n", (size_t)block->ensure_label);
 				#endif
 
 				int dummy1, dummy2;
@@ -276,7 +239,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			printf("Return target found\n");
 			printf("Ebp: %x\n", ebp);
 			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", frame_data->block->epilog);
+			printf("Eip: %x\n", (size_t)frame_data->block->epilog);
 		#endif
 
 		__asm__ __volatile__("mov %0, %%ecx\n"
@@ -307,7 +270,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			printf("Break target found\n");
 			printf("Ebp: %x\n", ebp);
 			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", frame_data->block->break_targets[id]);
+			printf("Eip: %x\n", (size_t)frame_data->block->break_targets[id]);
 		#endif
 
 		__asm__ __volatile__("mov %0, %%ecx\n"
@@ -350,7 +313,7 @@ void __stdcall rt_support_set_upval(rt_value value)
 			printf("Rescue block found\n");
 			printf("Ebp: %x\n", ebp);
 			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", rescue_label);
+			printf("Eip: %x\n", (size_t)rescue_label);
 		#endif
 
 		__asm__ __volatile__("mov %0, %%eax\n"

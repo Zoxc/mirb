@@ -27,24 +27,20 @@ test "Redo restarts block", 2 do
 	proc do
 		pass += 1
 		
-		if pass == 2
-			a = 2
-		end
-		
+		a = 2 if pass == 2
+
 		redo if pass != 2
 	end.call
 	a
 end
 
-test "Redo re-evalutes params", 1 do
+test "Redo don't re-evalute arguments", 3 do
 	pass = 0
-	block = proc do |x|
+	proc do |x|
 		pass += 1
 
-		if pass == 1
-			x = 3
-		end
-		
+		x = 3 if pass == 1
+
 		redo if pass != 2
 		
 		x

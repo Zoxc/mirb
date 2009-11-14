@@ -24,14 +24,6 @@ void opcode_print(struct opcode *op)
 			printf("push %s", variable_name(op->result));
 			break;
 
-		case B_GET_HVAR:
-			printf("get_hvar %s, %s", variable_name(op->result), variable_name(op->left));
-			break;
-
-		case B_SET_HVAR:
-			printf("set_hvar %s, %s", variable_name(op->result), variable_name(op->left));
-			break;
-
 		case B_GET_IVAR:
 			printf("get_ivar %s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left));
 			break;
@@ -41,7 +33,7 @@ void opcode_print(struct opcode *op)
 			break;
 
 		case B_PUSH_SCOPE:
-			printf("push_scope %s", variable_name(op->result));
+			printf("push_scope %x", op->result);
 			break;
 
 		case B_PUSH_RAW:
@@ -54,10 +46,6 @@ void opcode_print(struct opcode *op)
 
 		case B_SEAL:
 			printf("seal %s", variable_name(op->result));
-			break;
-
-		case B_UPVAL:
-			printf("upval %s, %s", variable_name(op->result), variable_name(op->left));
 			break;
 
 		case B_CLOSURE:
@@ -124,7 +112,7 @@ void opcode_print(struct opcode *op)
 			break;
 
 		case B_LABEL:
-			block_print_label((rt_value)op);
+			block_print_label((rt_value)op); printf(":");
 			break;
 
 		case B_STRING:

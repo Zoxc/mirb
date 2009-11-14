@@ -49,11 +49,11 @@ static inline int get_stack_index(struct block *block, rt_value var)
 	switch(_var->type)
 	{
 		case V_TEMP:
-			index = block->local_offset + block->var_count[V_LOCAL] + _var->index;
+			index = (block->require_exceptions ? 5 : 0) + block->var_count[V_LOCAL] + _var->index;
 			break;
 
 		case V_LOCAL:
-			index = block->local_offset + _var->index;
+			index = (block->require_exceptions ? 5 : 0) + _var->index;
 			break;
 
 		default:
@@ -75,12 +75,248 @@ static inline void generate_stack_push(uint8_t **target, size_t dword, bool meas
 	GEN_DWORD(dword);
 }
 
+static inline size_t get_scope_index(struct block *block, struct block *scope)
+{
+	for(size_t i = 0; i < kv_size(block->scopes); i++)
+		if(kv_A(block->scopes, i) == scope)
+			return i;
+
+	RT_ASSERT(0);
+}
+
 static inline void generate_stack_var_push(struct block *block, uint8_t **target, rt_value var, bool measuring)
 {
-	GEN_BYTE(0xFF);
-	GEN_BYTE(0x75);
-	GEN_BYTE(get_stack_index(block, var));
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0xFF);
+			GEN_BYTE(0x75);
+			GEN_BYTE((char)get_stack_index(block, var));
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Push the real variable from ebx
+				 */
+				GEN_BYTE(0xFF); // push dword [ebx + _var->index]
+				GEN_BYTE(0x73);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to ecx
+				 */
+				GEN_BYTE(0x8B); // mov ecx, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x4E);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Push the real variable from ecx
+				 */
+				GEN_BYTE(0xFF); // push dword [ecx + _var->index]
+				GEN_BYTE(0x71);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
 }
+
+static inline void generate_var_load(struct block *block, uint8_t **target, rt_value var, bool measuring)
+{
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0x8B);
+			GEN_BYTE(0x45);
+			GEN_BYTE((char)get_stack_index(block, var));
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Load the real variable to eax
+				 */
+				GEN_BYTE(0x8B); // mov eax, dword [ebx + _var->index]
+				GEN_BYTE(0x43);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to eax
+				 */
+				GEN_BYTE(0x8B); // mov eax, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x46);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Load the real variable to eax
+				 */
+				GEN_BYTE(0x8B); // mov eax, dword [eax + _var->index]
+				GEN_BYTE(0x40);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
+}
+
+static inline void generate_var_store(struct block *block, uint8_t **target, rt_value var, bool measuring)
+{
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0x89); // mov dword [ebp + get_stack_index(block, var)], eax
+			GEN_BYTE(0x45);
+			GEN_BYTE((char)get_stack_index(block, var));
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Store eax in the real variable
+				 */
+				GEN_BYTE(0x89); // mov dword [ebx + _var->index], eax
+				GEN_BYTE(0x43);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to ecx
+				 */
+				GEN_BYTE(0x8B); // mov ecx, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x4E);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Store eax in the real variable
+				 */
+				GEN_BYTE(0x89); // mov dword [ecx + _var->index], eax
+				GEN_BYTE(0x41);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
+}
+
+static inline void generate_var_store_imm(struct block *block, uint8_t **target, rt_value var, rt_value value, bool measuring)
+{
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0xC7); // mov dword [ebp + get_stack_index(block, var)], value
+			GEN_BYTE(0x45);
+			GEN_BYTE((char)get_stack_index(block, var));
+			GEN_DWORD(value);
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Store value in the real variable
+				 */
+				GEN_BYTE(0xC7); // mov dword [ebx + _var->index], value
+				GEN_BYTE(0x43);
+				GEN_BYTE((char)_var->index * 4);
+				GEN_DWORD(value);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to ecx
+				 */
+				GEN_BYTE(0x8B); // mov ecx, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x4E);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Store value in the real variable
+				 */
+				GEN_BYTE(0xC7); // mov dword [ecx + _var->index], value
+				GEN_BYTE(0x41);
+				GEN_BYTE((char)_var->index * 4);
+				GEN_DWORD(value);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
+}
+
+static inline void generate_var_store_self(struct block *block, uint8_t **target, rt_value var, bool measuring)
+{
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0x89); // mov dword [ebp + get_stack_index(block, var)], eax
+			GEN_BYTE(0x7D);
+			GEN_BYTE((char)get_stack_index(block, var));
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Store eax in the real variable
+				 */
+				GEN_BYTE(0x89); // mov dword [ebx + _var->index], eax
+				GEN_BYTE(0x7B);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to ecx
+				 */
+				GEN_BYTE(0x8B); // mov ecx, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x4E);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Store eax in the real variable
+				 */
+				GEN_BYTE(0x89); // mov dword [ecx + _var->index], eax
+				GEN_BYTE(0x79);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
+}
+
 
 static inline void generate_stack_pop(uint8_t **target, size_t bytes, bool measuring)
 {
@@ -95,85 +331,39 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 	{
 		case B_SEAL:
 			{
-				generate_stack_var_push(block, target, op->result, measuring);
-				generate_call(target, rt_support_seal_upval, measuring);
-			}
-			break;
-
-		case B_GET_HVAR:
-			{
-				GEN_BYTE(0xB8); // mov eax,
-				GEN_DWORD(((struct variable *)op->left)->index);
-
-				generate_call(target, rt_support_get_upval, measuring);
-
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-			}
-			break;
-
-		case B_SET_HVAR:
-			{
-				GEN_BYTE(0xB8); // mov eax,
-				GEN_DWORD(((struct variable *)op->result)->index);
-
-				generate_stack_var_push(block, target, op->left, measuring);
-
-				generate_call(target, rt_support_set_upval, measuring);
+				//TODO: Support for block sealing
 			}
 			break;
 
 		case B_PUSH_SCOPE:
 			{
-				size_t index = ((struct variable *)op->result)->index * 4;
-
-				if(index)
-				{
-					GEN_BYTE(0xFF); // push dword [esi + index]
-					GEN_BYTE(0x76);
-					GEN_BYTE(((struct variable *)op->result)->index * 4);
-				}
+				if((struct block *)op->result == block)
+					GEN_BYTE(0x53); // push ebx
 				else
 				{
-					GEN_BYTE(0xFF); // push dword [esi]
-					GEN_BYTE(0x36);
+					GEN_BYTE(0xFF); // push dword [esi + get_scope_index(block, (struct block *)op->result)]
+					GEN_BYTE(0x76);
+					GEN_BYTE((char)get_scope_index(block, (struct block *)op->result));
 				}
 			}
 			break;
 
 		case B_CLOSURE:
 			{
-				generate_stack_push(target, (size_t)compile_block((struct block *)op->left), measuring);
+				generate_stack_push(target, measuring ? 0 : (size_t)compile_block((struct block *)op->left), measuring);
 
 				generate_call(target, rt_support_closure, measuring);
 
 				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 3) * 4, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-			}
-			break;
-
-		case B_UPVAL:
-			{
-				GEN_BYTE(0x8D);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->left));
-
-				generate_call(target, rt_support_upval_create, measuring);
-
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
 		case B_CLASS:
 			{
 				struct block *class_block = (struct block *)op->left;
-				rt_compiled_block_t compiled = compile_block(class_block);
+				rt_compiled_block_t compiled = measuring ? 0 : compile_block(class_block);
 
 				generate_stack_push(target, rt_Object, measuring);
 				generate_stack_push(target, op->result, measuring);
@@ -190,8 +380,8 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_MODULE:
 			{
-				struct block *class_block = (struct block *)op->left;
-				rt_compiled_block_t compiled = compile_block(class_block);
+				struct block *module_block = (struct block *)op->left;
+				rt_compiled_block_t compiled = measuring ? 0 : compile_block(module_block);
 
 				generate_stack_push(target, op->result, measuring);
 				generate_call(target, rt_support_define_module, measuring);
@@ -212,9 +402,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_get_ivar, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
@@ -236,9 +424,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_get_const, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
@@ -255,7 +441,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_METHOD:
 			{
 				struct block *method_block = (struct block *)op->left;
-				rt_compiled_block_t compiled = compile_block(method_block);
+				rt_compiled_block_t compiled = measuring ? 0 : compile_block(method_block);
 
 				generate_stack_push(target, (rt_value)compiled, measuring);
 				generate_stack_push(target, op->result, measuring);
@@ -302,9 +488,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_push(target, op->left, measuring);
 				generate_call(target, rt_support_define_string, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
@@ -314,9 +498,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
@@ -326,9 +508,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
 
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
@@ -342,27 +522,15 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			break;
 
 		case B_SELF:
-			{
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x7D);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-			}
+			generate_var_store_self(block, target, op->result, measuring);
 			break;
 
 		case B_LOAD:
-			{
-				GEN_BYTE(0x8B);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-			}
+			generate_var_load(block, target, op->result, measuring);
 			break;
 
 		case B_STORE:
-			{
-				GEN_BYTE(0x89);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-			}
+			generate_var_store(block, target, op->result, measuring);
 			break;
 
 		case B_JMP:
@@ -391,10 +559,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_RETURN:
 			{
-				// Load to eax
-				GEN_BYTE(0x8B);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_load(block, target, op->result, measuring);
 
 				// Jump to epilogue
 				GEN_BYTE(0xE9);
@@ -422,23 +587,17 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_CMP:
 			{
-				// Load to eax
-				GEN_BYTE(0x8B);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_load(block, target, op->result, measuring);
 
 				GEN_BYTE(0x3B); // cmp eax, [ebp + var]
 				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->left));
+				GEN_BYTE((char)get_stack_index(block, op->left)); //TODO: Support for heap vars
 			}
 			break;
 
 		case B_TEST:
 			{
-				// Load to eax
-				GEN_BYTE(0x8B);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
+				generate_var_load(block, target, op->result, measuring);
 
 				// and eax, ~RT_FALSE
 
@@ -449,30 +608,13 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_MOV:
 			{
-				// Load to eax
-				{
-					GEN_BYTE(0x8B);
-					GEN_BYTE(0x45);
-					GEN_BYTE((char)get_stack_index(block, op->left));
-				}
-
-				// Store from eax
-				{
-					GEN_BYTE(0x89);
-					GEN_BYTE(0x45);
-					GEN_BYTE((char)get_stack_index(block, op->result));
-				}
+				generate_var_load(block, target, op->left, measuring);
+				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
 		case B_MOV_IMM:
-			{
-				GEN_BYTE(0xC7);
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->result));
-
-				GEN_DWORD(op->left);
-			}
+			generate_var_store_imm(block, target, op->result, op->left, measuring);
 			break;
 
 		case B_ENSURE_RET:
@@ -527,7 +669,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 					GEN_DWORD(-1);
 				}
 
-				// Jump to epilogue
+				// Jump to prolog
 				GEN_BYTE(0xE9);
 				GEN_DWORD((size_t)block->prolog - ((size_t)*target - 1) - 5);
 			}
@@ -541,9 +683,29 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				switch(op->left)
 				{
 					case L_FLUSH:
-						GEN_BYTE(0x8B); // mov edi, dword [ebp + 8]
-						GEN_BYTE(0x7D);
-						GEN_BYTE(8);
+						{
+							if(block->type == S_CLOSURE)
+							{
+								GEN_BYTE(0x8B); // mov esi, dword [ebp + get_stack_index(block->closure_var)]
+								GEN_BYTE(0x75);
+								GEN_BYTE((char)get_stack_index(block, (rt_value)block->closure_var));
+							}
+
+							if(block->self_ref > 0)
+							{
+								GEN_BYTE(0x8B); // mov edi, dword [ebp + 8]
+								GEN_BYTE(0x7D);
+								GEN_BYTE(8);
+							}
+
+							if(block->heap_vars)
+							{
+								GEN_BYTE(0x8B); // mov ebx, dword [ebp + get_stack_index(block->scope_var)]
+								GEN_BYTE(0x5D);
+								GEN_BYTE((char)get_stack_index(block, (rt_value)block->scope_var));
+							}
+
+						}
 						break;
 
 					default:
@@ -627,44 +789,58 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		GEN_BYTE(0x57); // push edi
 		GEN_BYTE(0x53); // push ebx
 	}
+	else
+	{
+		if(block->type == S_CLOSURE)
+			GEN_BYTE(0x56); // push esi
+
+		if(block->self_ref > 0)
+			GEN_BYTE(0x57); // push edi
+
+		if(block->heap_vars)
+			GEN_BYTE(0x53); // push ebx
+	}
 
 	if(block->type == S_CLOSURE)
 	{
-		if(!block->require_exceptions)
-			GEN_BYTE(0x56); // push esi
-
 		GEN_BYTE(0x89); // mov esi, eax
 		GEN_BYTE(0xC6);
+
+		if(block->require_exceptions)
+			generate_var_store(block, target, (rt_value)block->closure_var, measuring);
 	}
 
 	if(block->self_ref > 0)
 	{
-		if(!block->require_exceptions)
-			GEN_BYTE(0x57); // push edi
-
 		GEN_BYTE(0x8B); // mov edi, dword [ebp + 8]
 		GEN_BYTE(0x7D);
 		GEN_BYTE(8);
 	}
 
-	block->prolog = target;
+	if(block->heap_vars)
+	{
+		generate_stack_push(target, block->var_count[V_HEAP] * 4, measuring);
+		generate_call(target, rt_support_alloc_scope, measuring);
+
+		GEN_BYTE(0x89); // mov ebx, eax
+		GEN_BYTE(0xC3);
+
+		if(block->require_exceptions)
+			generate_var_store(block, target, (rt_value)block->scope_var, measuring);
+	}
 
 	if(block->block_parameter)
 	{
-		// Load to edx
-		GEN_BYTE(0x8B);
-		GEN_BYTE(0x51);
+		GEN_BYTE(0x8B); // mov eax, dword [ebp + 12]
+		GEN_BYTE(0x45);
 		GEN_BYTE((char)12);
 
-		// Store from edx
-		GEN_BYTE(0x89);
-		GEN_BYTE(0x55);
-		GEN_BYTE((char)get_stack_index(block, (rt_value)block->block_parameter));
+		generate_var_store(block, target, (rt_value)block->block_parameter, measuring);
 	}
 
 	if(kv_size(block->parameters))
 	{
-		GEN_BYTE(0x8B);
+		GEN_BYTE(0x8B); // mov ecx, dword [ebp + 20]
 		GEN_BYTE(0x4D);
 		GEN_BYTE((char)20);
 
@@ -672,17 +848,16 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		{
 			struct variable *var = kv_A(block->parameters, i);
 
-			// Load to edx
-			GEN_BYTE(0x8B);
-			GEN_BYTE(0x51);
-			GEN_BYTE((char)((kv_size(block->parameters) - var->index - 1) * 4));
+			// Load to eax
+			GEN_BYTE(0x8B); // mov eax, dword [ecx + 12]
+			GEN_BYTE(0x41);
+			GEN_BYTE((char)((kv_size(block->parameters) - i - 1) * 4));
 
-			// Store from edx
-			GEN_BYTE(0x89);
-			GEN_BYTE(0x55);
-			GEN_BYTE((char)get_stack_index(block, (rt_value)var));
+			generate_var_store(block, target, (rt_value)var, measuring);
 		}
 	}
+
+	block->prolog = *target;
 
 	for(size_t i = 0; i < kv_size(block->vector); i++)
 		generate_instruction(block, kv_A(block->vector, i), i, start, target, measuring);
@@ -706,6 +881,9 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	}
 	else
 	{
+		if(block->heap_vars)
+			GEN_BYTE(0x5F); // pop ebx
+
 		if(block->self_ref > 0)
 			GEN_BYTE(0x5F); // pop edi
 
@@ -718,11 +896,20 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	GEN_BYTE(0x5D);
 	GEN_BYTE(0xC2);
 
-	GEN_WORD(16);
+	GEN_WORD(16); // ret 16
 }
 
 rt_compiled_block_t compile_block(struct block *block)
 {
+	if(block->require_exceptions)
+	{
+		if(block->heap_vars)
+			block->scope_var = block_get_var(block);
+
+		if(block->type == S_CLOSURE)
+			block->closure_var = block_get_var(block);
+	}
+
 	uint8_t *target = 0;
 	struct block_data *data = block->data;
 	size_t stack_vars = block->var_count[V_LOCAL] + block->var_count[V_TEMP];
@@ -736,7 +923,6 @@ rt_compiled_block_t compile_block(struct block *block)
 	 * Allocate the block
 	 */
 	rt_compiled_block_t result = rt_code_heap_alloc((size_t)target);
-
 
 	/*
 	 * Setup data structures

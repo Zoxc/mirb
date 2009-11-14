@@ -7,11 +7,11 @@ test "Nested upval", 2 do
 end
 
 test "Closed upval", 6 do
-	def gen a; proc { a } end; a = gen 6; a.call
+	def closed_upval_gen a; proc { a } end; a = closed_upval_gen 6; a.call
 end
 
 test "Block callback", 3 do
-	def do a; yield a end; self.do { 1 + 2 }
+	def block_callback_do; yield end; block_callback_do { 1 + 2 }
 end
 
 test "Block callback with parameters", 2 do

@@ -6,8 +6,8 @@ struct rt_proc {
 	struct rt_common common;
 	rt_value self;
 	rt_compiled_block_t closure;
-	struct rt_upval **upvals;
-	size_t upval_count;
+	size_t scope_count;
+	rt_value *scopes[];
 };
 
 extern rt_value rt_Proc;

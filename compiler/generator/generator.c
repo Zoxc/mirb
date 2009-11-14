@@ -4,18 +4,6 @@
 #include "../../runtime/classes/fixnum.h"
 #include "../../runtime/support.h"
 
-static size_t scope_index(struct block *block, struct variable *var)
-{
-	if(block == var->owner)
-		return -1;
-
-	for(size_t i = 0; i < kv_size(block->scopes); i++)
-		if (kv_A(block->scopes, i) == var->owner)
-			return i;
-
-	return -1;
-}
-
 typedef void(*generator)(struct block *block, struct node *node, struct variable *var);
 
 static inline void gen_node(struct block *block, struct node *node, struct variable *var);
@@ -63,14 +51,7 @@ static void gen_num(struct block *block, struct node *node, struct variable *var
 static void gen_var(struct block *block, struct node *node, struct variable *var)
 {
 	if(var)
-	{
-		struct variable *reading = (struct variable *)node->left;
-
-		if(reading->type == V_HEAP)
-			block_push(block, B_GET_HVAR, (rt_value)var, (rt_value)reading, scope_index(block, reading));
-		else
-			block_push(block, B_MOV, (rt_value)var, (rt_value)reading, 0);
-	}
+		block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
 }
 
 static void gen_string(struct block *block, struct node *node, struct variable *var)
@@ -163,26 +144,10 @@ static void gen_nil(struct block *block, struct node *node, struct variable *var
 
 static void gen_assign(struct block *block, struct node *node, struct variable *var)
 {
-	struct variable *reading = (struct variable *)node->left;
+	gen_node(block, node->right, (struct variable *)node->left);
 
-	if(reading->type == V_HEAP)
-	{
-		struct variable *temp = block_get_var(block);
-
-		gen_node(block, node->right, temp);
-
-		block_push(block, B_SET_HVAR, (rt_value)reading, (rt_value)temp, scope_index(block, reading));
-
-		if (var)
-			block_push(block, B_MOV, (rt_value)var, (rt_value)temp, 0);
-	}
-	else
-	{
-		gen_node(block, node->right, (struct variable *)node->left);
-
-		if (var)
-			block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
-	}
+	if (var)
+		block_push(block, B_MOV, (rt_value)var, (rt_value)node->left, 0);
 }
 
 static void gen_const_assign(struct block *block, struct node *node, struct variable *var)
@@ -715,9 +680,6 @@ struct block *gen_block(struct node *node)
 	/*
 	 * Assign an unique id to each variable of type V_HEAP and V_LOCAL
 	 */
-	rt_value var_count[V_LOCAL + 1];
-	var_count[V_HEAP] = 0;
-	var_count[V_LOCAL] = 0;
 
 	for(khiter_t k = kh_begin(block->variables); k != kh_end(block->variables); ++k)
 	{
@@ -729,7 +691,7 @@ struct block *gen_block(struct node *node)
 			{
 				case V_HEAP:
 				case V_LOCAL:
-					var->index = var_count[var->type]++;
+					var->index = block->var_count[var->type]++;
 					break;
 
 				default:
