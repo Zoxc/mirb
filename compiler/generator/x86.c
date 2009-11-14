@@ -317,6 +317,51 @@ static inline void generate_var_store_self(struct block *block, uint8_t **target
 	}
 }
 
+static inline void generate_var_cmp(struct block *block, uint8_t **target, rt_value var, bool measuring)
+{
+	struct variable * _var = (struct variable *)var;
+
+	switch(_var->type)
+	{
+		case V_LOCAL:
+		case V_TEMP:
+			GEN_BYTE(0x3B); // cmp eax, dword [ebp + get_stack_index(block, var)]
+			GEN_BYTE(0x45);
+			GEN_BYTE((char)get_stack_index(block, var));
+			break;
+
+		case V_HEAP:
+			if(_var->owner == block)
+			{
+				/*
+				 * Compare eax with the real variable
+				 */
+				GEN_BYTE(0x3B); // cmp eax, dword [ebx + _var->index]
+				GEN_BYTE(0x43);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			else
+			{
+				/*
+				 * Load the scope pointer to ecx
+				 */
+				GEN_BYTE(0x8B); // mov ecx, dword [esi + get_scope_index(block, _var->owner)]
+				GEN_BYTE(0x4E);
+				GEN_BYTE((char)get_scope_index(block, _var->owner));
+
+				/*
+				 * Compare eax with the real variable
+				 */
+				GEN_BYTE(0x3B); // cmp eax, dword [ecx + _var->index]
+				GEN_BYTE(0x41);
+				GEN_BYTE((char)_var->index * 4);
+			}
+			break;
+
+		default:
+			RT_ASSERT(0);
+	}
+}
 
 static inline void generate_stack_pop(uint8_t **target, size_t bytes, bool measuring)
 {
@@ -588,10 +633,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_CMP:
 			{
 				generate_var_load(block, target, op->result, measuring);
-
-				GEN_BYTE(0x3B); // cmp eax, [ebp + var]
-				GEN_BYTE(0x45);
-				GEN_BYTE((char)get_stack_index(block, op->left)); //TODO: Support for heap vars
+				generate_var_cmp(block, target, op->left, measuring);
 			}
 			break;
 
