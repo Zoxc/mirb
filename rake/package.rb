@@ -99,8 +99,6 @@ module Builder
 			dependencies = args.split.map { |d| respace(d) }
 			file_tasks.strip.split.each do |file_task|
 				file_task = respace(file_task)
-				
-				raise "#{file_task} is not #{@output}" if file_task != @output
 
 				@dependencies ||= dependencies
 			end
