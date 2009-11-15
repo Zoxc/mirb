@@ -39,7 +39,7 @@ end
 sources = sources.map do |source| FileList[source] end.flatten
 objects = sources.map do |file| file.ext('.o') end
 
-CLEAN.include(app + if Rake::Win32.windows?; '.exe' end)
+CLEAN.include(app + if Rake::Win32.windows?; '.exe' end.to_s)
 CLEAN.include(depends)
 
 objects.each do |object|
