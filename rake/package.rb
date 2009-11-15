@@ -28,7 +28,7 @@ module Builder
 			self.execute(settings['CC'], '--version')
 			true
 		rescue
-			raise "Unable to find the C compiler: #{settings['CC']} #{$!}"
+			raise "Unable to find the C compiler: #{settings['CC']}"
 		end
 	end
 	
