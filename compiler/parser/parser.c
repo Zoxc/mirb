@@ -92,7 +92,7 @@ struct variable *scope_get(struct block *block, rt_value name)
 
 		var = kh_value(defined_block->variables, k);
 		var->type = V_HEAP;
-		var->owner->heap_vars = TRUE;
+		var->owner->heap_vars = true;
 
 		/*
 		 * Make sure the defined block is required by the current block and parents.
