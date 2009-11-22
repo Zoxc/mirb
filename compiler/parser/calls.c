@@ -292,101 +292,122 @@ struct node *parse_lookup(struct compiler *compiler, struct node *child)
 
 struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 {
-	if(tail && tail->type == N_CALL && tail->right)
-		return tail;
-
-	switch(lexer_current(compiler))
+	if(tail)
 	{
-		case T_ASSIGN_ADD:
-		case T_ASSIGN_SUB:
-		case T_ASSIGN_MUL:
-		case T_ASSIGN_DIV:
-			RT_ASSERT(0);
-
-		case T_ASSIGN:
-			{
-				lexer_next(compiler);
-
-				switch(tail->type)
-				{
-					case N_CONST:
-						{
-							struct node *result = alloc_node(compiler, N_ASSIGN_CONST);
-
-							result->left = tail->left;
-							result->middle = tail->right;
-							result->right = parse_expression(compiler);
-
-							free(tail);
-
-							return result;
-						}
-
-					case N_CALL:
-						{
-							if(tail->middle)
-							{
-								const char *name = rt_symbol_to_cstr((rt_value)tail->middle);
-
-								printf("original %s\n", name);
-
-								char *new_name = compiler_alloc(compiler, strlen(name) + 2);
-								strcpy(new_name, name);
-								strcat(new_name, "=");
-
-								printf("new %s\n", new_name);
-
-								tail->middle = (void *)rt_symbol_from_cstr(new_name);
-							}
-
-							tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-							tail->right->right = 0;
-							tail->right->left = alloc_node(compiler, N_ARGUMENT);
-							tail->right->left->left = parse_expression(compiler);
-							tail->right->left->right = 0;
-
-							return tail;
-						}
-
-					case N_ARRAY_CALL:
-						{
-							tail->type = N_CALL;
-
-							struct node *block = tail->right;
-							struct node *argument = tail->middle;
-
-							tail->middle = (void *)rt_symbol_from_cstr("[]=");
-							tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-							tail->right->right = block;
-							tail->right->left = argument;
-
-							while(argument->right)
-							{
-								argument = argument->right;
-							}
-
-							argument->right = alloc_node(compiler, N_ARGUMENT);
-							argument->right->left = parse_expression(compiler);
-							argument->right->right = 0;
-
-							return tail;
-						}
-
-					default:
-						{
-							COMPILER_ERROR(compiler, "Cannot assign a value to an expression.");
-
-							parse_expression(compiler);
-
-							return 0;
-
-						}
-				}
-			}
-			break;
-
-		default:
+		if(tail->type == N_CALL && tail->right)
 			return tail;
+
+		switch(lexer_current(compiler))
+		{
+			case T_ASSIGN_ADD:
+			case T_ASSIGN_SUB:
+			case T_ASSIGN_MUL:
+			case T_ASSIGN_DIV:
+				RT_ASSERT(0);
+
+			case T_ASSIGN:
+				{
+					lexer_next(compiler);
+
+					switch(tail->type)
+					{
+						case N_CONST:
+							{
+								struct node *result = alloc_node(compiler, N_ASSIGN_CONST);
+
+								result->left = tail->left;
+								result->middle = tail->right;
+								result->right = parse_expression(compiler);
+
+								free(tail);
+
+								return result;
+							}
+
+						case N_CALL:
+							{
+								if(tail->middle)
+								{
+									const char *name = rt_symbol_to_cstr((rt_value)tail->middle);
+
+									printf("original %s\n", name);
+
+									char *new_name = compiler_alloc(compiler, strlen(name) + 2);
+									strcpy(new_name, name);
+									strcat(new_name, "=");
+
+									printf("new %s\n", new_name);
+
+									tail->middle = (void *)rt_symbol_from_cstr(new_name);
+								}
+
+								tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
+								tail->right->right = 0;
+								tail->right->left = alloc_node(compiler, N_ARGUMENT);
+								tail->right->left->left = parse_expression(compiler);
+								tail->right->left->right = 0;
+
+								return tail;
+							}
+
+						case N_ARRAY_CALL:
+							{
+								tail->type = N_CALL;
+
+								struct node *block = tail->right;
+								struct node *argument = tail->middle;
+
+								tail->middle = (void *)rt_symbol_from_cstr("[]=");
+								tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
+								tail->right->right = block;
+								tail->right->left = argument;
+
+								while(argument->right)
+								{
+									argument = argument->right;
+								}
+
+								argument->right = alloc_node(compiler, N_ARGUMENT);
+								argument->right->left = parse_expression(compiler);
+								argument->right->right = 0;
+
+								return tail;
+							}
+
+						default:
+							{
+								COMPILER_ERROR(compiler, "Cannot assign a value to an expression.");
+
+								parse_expression(compiler);
+
+								return 0;
+
+							}
+					}
+				}
+				break;
+
+			default:
+				return tail;
+		}
+	}
+	else // The tail is unknown
+	{
+		switch(lexer_current(compiler))
+		{
+			case T_ASSIGN_ADD:
+			case T_ASSIGN_SUB:
+			case T_ASSIGN_MUL:
+			case T_ASSIGN_DIV:
+			case T_ASSIGN:
+				{
+					lexer_next(compiler);
+					parse_expression(compiler);
+				}
+
+			default:
+				return 0;
+		}
 	}
 }
 
