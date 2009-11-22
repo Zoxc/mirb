@@ -4,7 +4,11 @@
 #include "control_flow.h"
 #include "structures.h"
 
+/*
+ * These nodes uses no arguments and can be statically allocated.
+ */
 struct node nil_node = {0, 0, 0, N_NIL, 0};
+struct node self_node = {0, 0, 0, N_SELF, 0};
 
 struct node *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type)
 {
@@ -168,10 +172,10 @@ struct node *parse_identifier(struct compiler *compiler)
 
 			if (rt_symbol_is_const(symbol))
 			{
-				result->left = alloc_node(compiler, N_SELF);
+				result->left = &self_node;
 				result->middle = (void *)symbol;
 				result->right->left = alloc_node(compiler, N_CONST);
-				result->right->left->left = alloc_node(compiler, N_SELF);
+				result->right->left->left = &self_node;
 				result->right->left->right = (void *)symbol;
 			}
 			else
@@ -195,7 +199,7 @@ struct node *parse_identifier(struct compiler *compiler)
 			if (rt_symbol_is_const(symbol))
 			{
 				result = alloc_node(compiler, N_ASSIGN_CONST);
-				result->left = alloc_node(compiler, N_SELF);
+				result->left = &self_node;
 				result->middle = (void *)symbol;
 			}
 			else
@@ -212,7 +216,7 @@ struct node *parse_identifier(struct compiler *compiler)
 		// Function call or local variable
 
 		default:
-			return parse_call(compiler, symbol, alloc_node(compiler, N_SELF), true);
+			return parse_call(compiler, symbol, &self_node, true);
 	}
 }
 
@@ -345,7 +349,7 @@ struct node *parse_factor(struct compiler *compiler)
 			{
 				lexer_next(compiler);
 
-				return alloc_node(compiler, N_SELF);
+				return &self_node;
 			}
 
 		case T_TRUE:
@@ -442,7 +446,7 @@ struct node *parse_factor(struct compiler *compiler)
 			return parse_identifier(compiler);
 
 		case T_EXT_IDENT:
-			return parse_call(compiler, 0, alloc_node(compiler, N_SELF), false);
+			return parse_call(compiler, 0, &self_node, false);
 
 		case T_PARAM_OPEN:
 			{

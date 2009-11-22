@@ -77,4 +77,8 @@ static inline struct node *alloc_node(struct compiler *compiler, enum node_type 
 	return result;
 }
 
+/*
+ * These nodes uses no arguments and can be statically allocated.
+ */
 extern struct node nil_node;
+extern struct node self_node;
