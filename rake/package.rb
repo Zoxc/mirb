@@ -3,7 +3,7 @@ require 'rexml/document'
 
 module Builder	
 	def self.execute(command, *args)
-		#Kernel.puts [command, *args].inspect
+		#Kernel.puts [command, *args].join(' ')
 		IO.popen([command, *args]) do |f|
 			f.readlines.join('')
 		end
@@ -28,6 +28,7 @@ module Builder
 	end
 	
 	class Compiler
+		attr :command, true
 		def initialize(name, command, args = [], helparg = '--version')
 			@name = name
 			@command = command
@@ -61,14 +62,32 @@ module Builder
 		end
 		
 		def load_dependencies(source, node)
+			source.dependencies = node.elements.map { |dependency| dependency.attribute('name').value }
 		end
 		
 		def get_dependencies(source, node)	
+			doc = node.add_element 'source', {'name' => source.name, 'time' => File.stat(File.join(source.package.base, source.name)).mtime}
+			doc.add_element 'dependency', {'name' => source.name}
+			source.dependencies = []
 		end
 		
 		def compile(source)
+			if File.exists?(source.output)
+				mtime = File.stat(source.output).mtime
+				return false if source.dependencies.all? { |dependency| mtime >= File.stat(File.join(source.package.base, dependency)).mtime }
+			end
+			
 			Builder.puts source.settings, "Compiling #{source.name} for #{source.settings.name.downcase} using #{@name}..."
-			nil
+			
+			makedirs(File.dirname(source.output))
+			
+			do_compile(source)
+			
+			unless File.exist? source.output
+				raise "Failed to compile file #{source.name}."
+			end
+			
+			true
 		end
 	end
 	
@@ -84,17 +103,14 @@ module Builder
 			file_tasks.strip.split.each do |file_task|
 				file_task = respace(file_task)
 
-				source.dependencies ||= dependencies
+				source.dependencies += dependencies
 			end
-		end
-		
-		def load_dependencies(source, node)
-			super
-			source.dependencies = node.elements.map { |dependency| dependency.attribute('name').value }
 		end
 		
 		def get_dependencies(source, node)	
 			Builder.puts source.settings, "Getting dependencies for #{source.name}..."
+			
+			source.dependencies = []
 			
 			lines = Builder.execute(@command, *args(source.settings), '-MM', '-MT', source.output, File.join(source.package.base, source.name))
 			lines.gsub!(/\\ /, "__&NBSP;__")
@@ -111,21 +127,8 @@ module Builder
 			end
 		end
 		
-		def compile(source)
-			if File.exists?(source.output)
-				mtime = File.stat(source.output).mtime
-				return false if source.dependencies.all? { |dependency| mtime >= File.stat(File.join(source.package.base, dependency)).mtime }
-			end
-			
-			makedirs(File.dirname(source.output))
-			super
+		def do_compile(source)
 			Builder.execute @command, *args(source.settings), '-c', File.join(source.package.base, source.name), '-o', source.output
-			
-			unless File.exist? source.output
-				raise "Failed to compile file #{source.name}."
-			end
-			
-			true
 		end
 	end
 	
@@ -146,7 +149,7 @@ module Builder
 		
 		def [](name)
 			result = @settings[name]
-			parent = (@parent[name] if @parent)
+			parent = (@parent[name] if @parent) rescue nil
 			if result
 				if parent
 					case result
@@ -170,7 +173,7 @@ module Builder
 	end
 	
 	module Preset
-		BASE = Settings.new('Base', nil, {:OUTPUT => 'build/base', '*.c' => Builder::GCC, :CFLAGS => ['-Wall', '-std=gnu99', '-fstrict-aliasing'], :LIBS => [], :LD => ENV['CC'] || 'gcc', :LDFLAGS => []})
+		BASE = Settings.new('Base', nil, {:OUTPUT => 'build/base', '*.c' => Builder::GCC, :CFLAGS => ['-Wall', '-std=gnu99'], :LIBS => [], :LD => ENV['CC'] || 'gcc', :LDFLAGS => []})
 		RELEASE = Settings.new('Release', BASE, {:OUTPUT => 'build/release', :CFLAGS => ['-O3', '-funroll-loops', '-fomit-frame-pointer'], :LDFLAGS => ['-s']})
 		DEBUG = Settings.new('Debug', BASE, {:OUTPUT => 'build/debug', :CFLAGS => ['-g', '-DDEBUG']})
 	end
@@ -183,10 +186,13 @@ module Builder
 			@name = name
 			@package = package
 			@settings = @package.settings
-			@compiler = @settings['*' + File.extname(@name)]
-			unless @compiler
-				raise "Unable to find compiler for file #{@name}!"
+			
+			begin
+				@compiler = @settings['*' + File.extname(@name)]
+			rescue
+				raise "Unable to find compiler for file #{@name}."
 			end
+			
 			@compiler.require
 			@output = File.join(@package.base, @settings[:OUTPUT], @compiler.output(self))
 		end
@@ -199,11 +205,12 @@ module Builder
 	class Package
 		attr_reader :name, :base, :settings, :output
 
-		def initialize(name, base, *pattern_list)
+		def initialize(name, base, pattern_list, output = nil)
 			@name = name
 			@base = base
 			@pattern_list = pattern_list
 			@flags = {}
+			@target_output = output
 		end
 		
 		def load_dependencies(file)
@@ -280,7 +287,7 @@ module Builder
 		end
 		
 		def get_output
-			@output = File.join(@base, @settings[:OUTPUT], @name + if Rake::Win32.windows?; '.exe' end.to_s)
+			@output = @target_output or @output = File.join(@base, @settings[:OUTPUT], @name + if Rake::Win32.windows?; '.exe' end.to_s)
 		end
 		
 		def build(settings = Preset::RELEASE)
