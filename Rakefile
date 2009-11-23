@@ -8,10 +8,9 @@ MIRB = Builder::Package.new('mirb', '.', [
 
 def execute(target, settings)
 	if Rake::Win32.windows?
-		settings = Builder::Settings.new(settings.name, settings, {'CFLAGS' => ['-DWINDOWS', '-I','vendor/BeaEngine'], 'LDFLAGS' => ['-L', 'vendor/BeaEngine'], 'LIBS' => ['BeaEngine']})
+		settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-DWINDOWS', '-I','vendor/BeaEngine'], :LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
 	end
-	#puts "Linking #{app}..."
-  	#execute cc, *lflags, *objects, *(libs.map { |lib| ['-l', lib] }.flatten), '-o', t.name
+
 	unless MIRB.send target, settings
 		puts "Nothing to do!"
 	end
