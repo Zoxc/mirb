@@ -4,9 +4,12 @@ require 'rexml/document'
 module Builder	
 	def self.execute(command, *args)
 		#Kernel.puts [command, *args].join(' ')
+		result = nil
 		IO.popen([command, *args]) do |f|
-			f.readlines.join('')
+			result = f.readlines.join('')
 		end
+		raise "#{command} failed with error code #{$?.exitstatus}" if $?.exitstatus != 0
+		result
 	end
 	
 	def self.clean(filename)
