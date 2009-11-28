@@ -10,7 +10,7 @@ It's still very much work in process and the only useful thing it can run
 (that I know of) is the included testing framework. Todo.txt has a list of
 some essential missing features.
 
-If you want to know more you can visit http://mirb.heroku.com/ or join me in
+If you want to know more you can visit http://mirb.heroku.com or join me in
 #mirb on freenode.
 
 == Building
