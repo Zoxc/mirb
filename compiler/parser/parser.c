@@ -280,11 +280,11 @@ struct node *parse_factor(struct compiler *compiler)
 
 		case T_SQUARE_OPEN:
 			{
-			    struct node *result = alloc_node(compiler, N_ARRAY);
+				struct node *result = alloc_node(compiler, N_ARRAY);
 
-			    lexer_next(compiler);
+				lexer_next(compiler);
 
-			    if(lexer_current(compiler) == T_SQUARE_CLOSE)
+				if(lexer_current(compiler) == T_SQUARE_CLOSE)
 					result->left  = 0;
 				else
 					result->left = parse_array_element(compiler);
@@ -296,7 +296,7 @@ struct node *parse_factor(struct compiler *compiler)
 
 		case T_STRING:
 			{
-			    struct node *result = alloc_node(compiler, N_STRING);
+				struct node *result = alloc_node(compiler, N_STRING);
 
 				result->left = (void *)lexer_token(compiler)->start;
 
@@ -307,7 +307,7 @@ struct node *parse_factor(struct compiler *compiler)
 
 		case T_STRING_START:
 			{
-			    struct node *result = alloc_node(compiler, N_STRING_CONTINUE);
+				struct node *result = alloc_node(compiler, N_STRING_CONTINUE);
 
 				result->left = 0;
 				result->middle = (void *)lexer_token(compiler)->start;
@@ -375,13 +375,13 @@ struct node *parse_factor(struct compiler *compiler)
 
 		case T_NUMBER:
 			{
-			    struct node *result = alloc_node(compiler, N_NUMBER);
+				struct node *result = alloc_node(compiler, N_NUMBER);
 
-			    char *text = get_token_str(lexer_token(compiler));
+				char *text = get_token_str(lexer_token(compiler));
 
-			    result->left = (void* )atoi(text);
+				result->left = (void* )atoi(text);
 
-			    lexer_next(compiler);
+				lexer_next(compiler);
 
 				return result;
 			}
@@ -472,9 +472,9 @@ struct node *parse_factor(struct compiler *compiler)
 
 struct node *parse_unary(struct compiler *compiler)
 {
-    if(lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
-    {
-    	struct node *result = alloc_node(compiler, N_UNARY_OP);
+	if(lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
+	{
+		struct node *result = alloc_node(compiler, N_UNARY_OP);
 
 		result->op = lexer_current(compiler) + OP_TO_UNARY;
 
@@ -483,8 +483,8 @@ struct node *parse_unary(struct compiler *compiler)
 		result->left = parse_lookup_chain(compiler);;
 
 		return result;
-    }
-    else
+	}
+	else
 		return parse_lookup_chain(compiler);
 }
 
@@ -492,9 +492,9 @@ struct node *parse_term(struct compiler *compiler)
 {
 	struct node *result = parse_unary(compiler);
 
-    while(lexer_current(compiler) == T_MUL || lexer_current(compiler) == T_DIV)
-    {
-    	struct node *node = alloc_node(compiler, N_BINARY_OP);
+	while(lexer_current(compiler) == T_MUL || lexer_current(compiler) == T_DIV)
+	{
+		struct node *node = alloc_node(compiler, N_BINARY_OP);
 
 		node->op = lexer_current(compiler);
 		node->left = result;
@@ -503,7 +503,7 @@ struct node *parse_term(struct compiler *compiler)
 
 		node->right = parse_unary(compiler);
 		result = node;
-    }
+	}
 
 	return result;
 }
@@ -512,9 +512,9 @@ struct node *parse_arithmetic(struct compiler *compiler)
 {
 	struct node *result = parse_term(compiler);
 
-    while (lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
-    {
-    	struct node *node = alloc_node(compiler, N_BINARY_OP);
+	while (lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
+	{
+		struct node *node = alloc_node(compiler, N_BINARY_OP);
 
 		node->op = lexer_current(compiler);
 		node->left = result;
@@ -523,24 +523,24 @@ struct node *parse_arithmetic(struct compiler *compiler)
 
 		node->right = parse_term(compiler);
 		result = node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_boolean_unary(struct compiler *compiler)
 {
-    if(lexer_current(compiler) == T_NOT_SIGN)
-    {
-    	struct node *result = alloc_node(compiler, N_NOT);
+	if(lexer_current(compiler) == T_NOT_SIGN)
+	{
+		struct node *result = alloc_node(compiler, N_NOT);
 
 		lexer_next(compiler);
 
 		result->left = parse_arithmetic(compiler);
 
 		return result;
-    }
-    else
+	}
+	else
 		return parse_arithmetic(compiler);
 }
 
@@ -562,12 +562,12 @@ struct node *parse_equality(struct compiler *compiler)
 {
 	struct node *result = parse_boolean_unary(compiler);
 
-    while(is_equality_op(compiler))
-    {
-    	struct node *node;
+	while(is_equality_op(compiler))
+	{
+		struct node *node;
 
-    	if(lexer_current(compiler) == T_NO_EQUALITY)
-    		node = alloc_node(compiler,  N_NO_EQUALITY);
+		if(lexer_current(compiler) == T_NO_EQUALITY)
+			node = alloc_node(compiler,  N_NO_EQUALITY);
 		else
 		{
 			node = alloc_node(compiler,  N_BINARY_OP);
@@ -580,18 +580,18 @@ struct node *parse_equality(struct compiler *compiler)
 
 		node->right = parse_boolean_unary(compiler);
 		result = node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_boolean_and(struct compiler *compiler)
 {
 	struct node *result = parse_equality(compiler);
 
-    while(lexer_current(compiler) == T_AND_BOOLEAN)
-    {
-    	struct node *node = alloc_node(compiler, N_BOOLEAN);
+	while(lexer_current(compiler) == T_AND_BOOLEAN)
+	{
+		struct node *node = alloc_node(compiler, N_BOOLEAN);
 
 		node->op = lexer_current(compiler);
 		node->left = result;
@@ -600,18 +600,18 @@ struct node *parse_boolean_and(struct compiler *compiler)
 
 		node->right = parse_equality(compiler);
 		result = node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_boolean_or(struct compiler *compiler)
 {
 	struct node *result = parse_boolean_and(compiler);
 
-    while(lexer_current(compiler) == T_OR_BOOLEAN)
-    {
-    	struct node *node = alloc_node(compiler, N_BOOLEAN);
+	while(lexer_current(compiler) == T_OR_BOOLEAN)
+	{
+		struct node *node = alloc_node(compiler, N_BOOLEAN);
 
 		node->op = lexer_current(compiler);
 		node->left = result;
@@ -620,9 +620,9 @@ struct node *parse_boolean_or(struct compiler *compiler)
 
 		node->right = parse_boolean_and(compiler);
 		result = node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_expression(struct compiler *compiler)
@@ -632,17 +632,17 @@ struct node *parse_expression(struct compiler *compiler)
 
 struct node *parse_low_boolean_unary(struct compiler *compiler)
 {
-    if(lexer_current(compiler) == T_NOT)
-    {
-    	struct node *result = alloc_node(compiler, N_NOT);
+	if(lexer_current(compiler) == T_NOT)
+	{
+		struct node *result = alloc_node(compiler, N_NOT);
 
 		lexer_next(compiler);
 
 		result->left = parse_expression(compiler);
 
 		return result;
-    }
-    else
+	}
+	else
 		return parse_expression(compiler);
 }
 
@@ -650,9 +650,9 @@ struct node *parse_low_boolean(struct compiler *compiler)
 {
 	struct node *result = parse_low_boolean_unary(compiler);
 
-    while(lexer_current(compiler) == T_AND || lexer_current(compiler) == T_OR)
-    {
-    	struct node *node = alloc_node(compiler, N_BOOLEAN);
+	while(lexer_current(compiler) == T_AND || lexer_current(compiler) == T_OR)
+	{
+		struct node *node = alloc_node(compiler, N_BOOLEAN);
 
 		node->op = lexer_current(compiler);
 		node->left = result;
@@ -661,9 +661,9 @@ struct node *parse_low_boolean(struct compiler *compiler)
 
 		node->right = parse_low_boolean_unary(compiler);
 		result = node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_statement(struct compiler *compiler)

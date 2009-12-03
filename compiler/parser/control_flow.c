@@ -154,7 +154,7 @@ struct node *parse_ternary_if(struct compiler *compiler)
 	{
 		lexer_next(compiler);
 
-    	struct node *node = alloc_node(compiler, N_IF);
+		struct node *node = alloc_node(compiler, N_IF);
 
 		node->left = result;
 		node->middle = parse_ternary_if(compiler);
@@ -173,9 +173,9 @@ struct node *parse_conditional(struct compiler *compiler)
 {
 	struct node *result = parse_low_boolean(compiler);
 
-    if (lexer_current(compiler) == T_IF || lexer_current(compiler) == T_UNLESS)
-    {
-     	struct node *node = alloc_node(compiler, lexer_current(compiler) == T_IF ? N_IF : N_UNLESS);
+	if (lexer_current(compiler) == T_IF || lexer_current(compiler) == T_UNLESS)
+	{
+		struct node *node = alloc_node(compiler, lexer_current(compiler) == T_IF ? N_IF : N_UNLESS);
 
 		lexer_next(compiler);
 
@@ -184,9 +184,9 @@ struct node *parse_conditional(struct compiler *compiler)
 		node->right = &nil_node;
 
 		return node;
-    }
+	}
 
-    return result;
+	return result;
 }
 
 struct node *parse_unless(struct compiler *compiler)

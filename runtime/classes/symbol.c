@@ -25,7 +25,7 @@ rt_value rt_symbol_from_cstr(const char* name)
 	if (k == kh_end(symbols))
 	{
 		size_t name_length = strlen(name);
-		char* string =  malloc(name_length + 1);
+		char* string =	malloc(name_length + 1);
 
 		strcpy(string, name);
 

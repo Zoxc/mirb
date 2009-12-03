@@ -13,11 +13,11 @@ struct compiler *compiler_create(const char* input, const char *filename)
 	result->err_count = 0;
 	result->current_block = 0;
 
-    allocator_init(&result->allocator);
+	allocator_init(&result->allocator);
 
-    lexer_create(result, input);
+	lexer_create(result, input);
 
-    return result;
+	return result;
 }
 
 void compiler_destroy(struct compiler *compiler)

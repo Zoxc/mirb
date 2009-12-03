@@ -665,15 +665,15 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_ENSURE_RET:
 			{
-			    GEN_BYTE(0x81); // cmp dword [ebp - 12], 0
-                GEN_BYTE(0x7D);
-                GEN_BYTE(-12);
-                GEN_DWORD(0);
+				GEN_BYTE(0x81); // cmp dword [ebp - 12], 0
+				GEN_BYTE(0x7D);
+				GEN_BYTE(-12);
+				GEN_DWORD(0);
 
-                GEN_BYTE(0x74); // jz +1
-                GEN_BYTE(1);
+				GEN_BYTE(0x74); // jz +1
+				GEN_BYTE(1);
 
-                GEN_BYTE(0xC3); // ret
+				GEN_BYTE(0xC3); // ret
 			}
 			break;
 
@@ -782,14 +782,14 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		 * Generate seh_frame struct
 		 *
 
-        typedef struct struct seh_frame {
-            struct struct seh_frame *prev;
-            void *handler;
-            size_t handling;
-            size_t handler_index;
-            struct block_data *block;
-            size_t old_ebp;
-        } struct rt_seh_frame;
+		typedef struct struct seh_frame {
+			struct struct seh_frame *prev;
+			void *handler;
+			size_t handling;
+			size_t handler_index;
+			struct block_data *block;
+			size_t old_ebp;
+		} struct rt_seh_frame;
 
 		 */
 
@@ -985,7 +985,7 @@ rt_compiled_block_t compile_block(struct block *block)
 
 		for(size_t i = 0; i < kv_size(data->exception_blocks); i++)
 		{
-		    struct exception_block *exception_block = kv_A(data->exception_blocks, i);
+			struct exception_block *exception_block = kv_A(data->exception_blocks, i);
 
 			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target(result, (rt_value)exception_block->ensure_label) : 0);
 

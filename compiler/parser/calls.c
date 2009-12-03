@@ -113,7 +113,7 @@ struct node *parse_arguments(struct compiler *compiler, bool has_args)
 	{
 		if (lexer_current(compiler) == T_PARAM_OPEN && !lexer_token(compiler)->whitespace)
 		{
-		    struct node *result = 0;
+			struct node *result = 0;
 
 			lexer_next(compiler);
 
@@ -413,14 +413,14 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 
 struct node *parse_lookup_chain(struct compiler *compiler)
 {
- 	struct node *result = parse_factor(compiler);
+	struct node *result = parse_factor(compiler);
 
-    while(is_lookup(compiler))
-    {
-    	struct node *node = parse_lookup(compiler, result);
+	while(is_lookup(compiler))
+	{
+		struct node *node = parse_lookup(compiler, result);
 
 		result = node;
-    }
+	}
 
 	return parse_lookup_tail(compiler, result);
 }

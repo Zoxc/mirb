@@ -152,13 +152,13 @@ void rt_kernel_init(void)
 
 	rt_include_module(rt_Object, rt_Kernel);
 
-  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("proc"), rt_kernel_proc);
-  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
-  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
-  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
-  	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("proc"), rt_kernel_proc);
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
 
 	#ifdef WINDOWS
-    		rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
+			rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
 	#endif
 }

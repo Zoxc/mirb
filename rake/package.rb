@@ -6,7 +6,7 @@ module Builder
 		#Kernel.puts [command, *args].join(' ')
 		result = nil
 		IO.popen([command, *args]) do |f|
-			result = f.readlines.join('')
+			result = f.read
 		end
 		raise "#{command} failed with error code #{$?.exitstatus}" if $?.exitstatus != 0
 		result
@@ -206,7 +206,7 @@ module Builder
 	end
 	
 	class Package
-		attr_reader :name, :base, :settings, :output
+		attr_reader :name, :base, :settings, :output, :sources
 
 		def initialize(name, base, pattern_list, output = nil)
 			@name = name
@@ -214,6 +214,10 @@ module Builder
 			@pattern_list = pattern_list
 			@flags = {}
 			@target_output = output
+		end
+		
+		def sources
+			@pattern_list
 		end
 		
 		def load_dependencies(file)

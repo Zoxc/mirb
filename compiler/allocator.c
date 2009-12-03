@@ -21,7 +21,7 @@ static void *get_page(void)
 
 static void free_page(void *page)
 {
-    #ifdef WINDOWS
+	#ifdef WINDOWS
 		VirtualFree(page, 0, MEM_RELEASE);
 	#else
 		munmap(page, ALLOCATOR_PAGE_SIZE);

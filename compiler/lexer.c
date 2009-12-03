@@ -13,15 +13,15 @@ void lexer_create(struct compiler *compiler, const char* input)
 {
 	compiler->index = 0;
 	compiler->count = 0;
-    compiler->token.line = 0;
-    compiler->token.type = T_NONE;
-    compiler->token.input = input;
+	compiler->token.line = 0;
+	compiler->token.type = T_NONE;
+	compiler->token.input = input;
 	compiler->token.compiler = compiler;
 	compiler->token.state = TS_DEFAULT;
 
-    kv_init(compiler->token.curlys);
+	kv_init(compiler->token.curlys);
 
-    lexer_next(compiler);
+	lexer_next(compiler);
 }
 
 void lexer_destroy(struct compiler *compiler)
@@ -31,11 +31,11 @@ void lexer_destroy(struct compiler *compiler)
 
 char* get_token_str(struct token *token)
 {
-    size_t length = (size_t)(token->stop - token->start);
-    char* result = compiler_alloc(token->compiler, length + 1);
-    memcpy(result, token->start, length);
-    result[length] = 0;
-    return result;
+	size_t length = (size_t)(token->stop - token->start);
+	char* result = compiler_alloc(token->compiler, length + 1);
+	memcpy(result, token->start, length);
+	result[length] = 0;
+	return result;
 }
 
 static inline bool compare_token(struct token *token, const char *str)
@@ -61,15 +61,15 @@ static inline bool compare_token(struct token *token, const char *str)
 
 static inline bool is_whitespace(const char input)
 {
-    if(input == '\n' || input == '\r')
-    {
-        return false;
-    }
+	if(input == '\n' || input == '\r')
+	{
+		return false;
+	}
 
-    if(input <= 32 && input >= 1)
-        return true;
+	if(input <= 32 && input >= 1)
+		return true;
 
-    return false;
+	return false;
 }
 
 static inline bool skip_whitespace(const char **input)
@@ -90,10 +90,10 @@ static inline bool skip_whitespace(const char **input)
 
 static inline bool is_number(const char input)
 {
-    if(input >= '0' && input <= '9')
-        return true;
+	if(input >= '0' && input <= '9')
+		return true;
 
-    return false;
+	return false;
 }
 
 static enum token_type number_proc(struct token *token)
@@ -113,31 +113,31 @@ static enum token_type number_proc(struct token *token)
 static enum token_type unknown_proc(struct token *token)
 {
 	COMPILER_ERROR(token->compiler, "Unknown character: %c", *(token->input));
-    (token->input)++;
+	(token->input)++;
 
-    return lexer_next(token->compiler);
+	return lexer_next(token->compiler);
 }
 
 static enum token_type null_proc(struct token *token)
 {
-    return T_EOF;
+	return T_EOF;
 }
 
 static inline bool is_ident(char input)
 {
-    if(input >= 'a' && input <= 'z')
-        return true;
+	if(input >= 'a' && input <= 'z')
+		return true;
 
-    if(input >= '0' && input <= '9')
-        return true;
+	if(input >= '0' && input <= '9')
+		return true;
 
 	if(input == '_')
 		return true;
 
-    if(input >= 'A' && input <= 'Z')
-        return true;
+	if(input >= 'A' && input <= 'Z')
+		return true;
 
-    return false;
+	return false;
 }
 
 static enum token_type ivar_proc(struct token *token)
@@ -269,8 +269,8 @@ done:
 static enum token_type parse_double_quote_string(struct token *token, bool continues)
 {
 	const char *start = token->input;
-    size_t length = 0;
-    enum token_type result = T_STRING;
+	size_t length = 0;
+	enum token_type result = T_STRING;
 
 	while(1)
 		switch(*(token->input))
@@ -394,7 +394,7 @@ static enum token_type single_quote_proc(struct token *token)
 	token->input++;
 
 	const char *start = token->input;
-    size_t length = 0;
+	size_t length = 0;
 
 	while(1)
 		switch(*(token->input))
@@ -476,7 +476,7 @@ static enum token_type colon_proc(struct token *token)
 		return T_SCOPE;
 	}
 
-    return T_COLON;
+	return T_COLON;
 }
 
 static enum token_type or_sign_proc(struct token *token)
@@ -490,7 +490,7 @@ static enum token_type or_sign_proc(struct token *token)
 		return T_OR_BOOLEAN;
 	}
 
-    return T_OR_BINARY;
+	return T_OR_BINARY;
 }
 
 static enum token_type amp_proc(struct token *token)
@@ -504,7 +504,7 @@ static enum token_type amp_proc(struct token *token)
 		return T_AND_BOOLEAN;
 	}
 
-    return T_AMP;
+	return T_AMP;
 }
 
 static enum token_type assign_proc(struct token *token)
@@ -525,7 +525,7 @@ static enum token_type assign_proc(struct token *token)
 		return T_EQUALITY;
 	}
 
-    return T_ASSIGN;
+	return T_ASSIGN;
 }
 
 static enum token_type not_sign_proc(struct token *token)
@@ -539,7 +539,7 @@ static enum token_type not_sign_proc(struct token *token)
 		return T_NO_EQUALITY;
 	}
 
-    return T_NOT_SIGN;
+	return T_NOT_SIGN;
 }
 
 static enum token_type greater_proc(struct token *token)
@@ -553,7 +553,7 @@ static enum token_type greater_proc(struct token *token)
 		return T_GREATER_OR_EQUAL;
 	}
 
-    return T_GREATER;
+	return T_GREATER;
 }
 
 static enum token_type less_proc(struct token *token)
@@ -567,7 +567,7 @@ static enum token_type less_proc(struct token *token)
 		return T_LESS_OR_EQUAL;
 	}
 
-    return T_LESS;
+	return T_LESS;
 }
 
 static enum token_type newline_proc(struct token *token)
@@ -575,7 +575,7 @@ static enum token_type newline_proc(struct token *token)
 	token->input++;
 	token->line++;
 
-    return T_LINE;
+	return T_LINE;
 }
 
 static enum token_type carrige_return_proc(struct token *token)
@@ -586,7 +586,7 @@ static enum token_type carrige_return_proc(struct token *token)
 	if(*token->input == '\n')
 		token->input++;
 
-    return T_LINE;
+	return T_LINE;
 }
 
 static enum token_type comment_proc(struct token *token)
@@ -596,7 +596,7 @@ static enum token_type comment_proc(struct token *token)
 	while(*token->input != '\n' && *token->input != '\r' && *token->input != 0)
 		token->input++;
 
-    return lexer_next(token->compiler);
+	return lexer_next(token->compiler);
 }
 
 #define SINGLE_PROC(name, result) static enum token_type name##_proc(struct token *token)\
@@ -636,21 +636,21 @@ ASSIGN_PROC(div, T_DIV)
 
 void lexer_setup(void)
 {
-    for(int i = 0; i < 256; i++)
-        jump_table[i] = unknown_proc;
+	for(int i = 0; i < 256; i++)
+		jump_table[i] = unknown_proc;
 
 	// Numbers
 
-    for(int i = '0'; i <= '9'; i++)
-        jump_table[i] = number_proc;
+	for(int i = '0'; i <= '9'; i++)
+		jump_table[i] = number_proc;
 
 	// Identifiers
 
-    for(int i = 'a'; i < 'z'; i++)
-        jump_table[i] = ident_proc;
+	for(int i = 'a'; i < 'z'; i++)
+		jump_table[i] = ident_proc;
 
-    for(int i = 'A'; i < 'Z'; i++)
-        jump_table[i] = ident_proc;
+	for(int i = 'A'; i < 'Z'; i++)
+		jump_table[i] = ident_proc;
 
 	jump_table['_'] = ident_proc;
 
@@ -699,7 +699,7 @@ void lexer_setup(void)
 
 	// Null!
 
-    jump_table[0] = null_proc;
+	jump_table[0] = null_proc;
 }
 
 struct token *lexer_token(struct compiler *compiler)
@@ -735,47 +735,47 @@ inline enum token_type lexer_next(struct compiler *compiler)
 {
 	compiler->token.whitespace = skip_whitespace(&compiler->token.input);
 
-    compiler->token.type = jump_table[(unsigned char)*(compiler->token.input)](&compiler->token);
+	compiler->token.type = jump_table[(unsigned char)*(compiler->token.input)](&compiler->token);
 
-    return compiler->token.type;
+	return compiler->token.type;
 }
 
 bool lexer_match(struct compiler *compiler, enum token_type type)
 {
-    if (lexer_current(compiler) == type)
-    {
-        lexer_next(compiler);
+	if (lexer_current(compiler) == type)
+	{
+		lexer_next(compiler);
 
-        return true;
-    }
-    else
-    {
-        COMPILER_ERROR(compiler, "Expected token %s but found %s", token_type_names[type], token_type_names[lexer_current(compiler)]);
+		return true;
+	}
+	else
+	{
+		COMPILER_ERROR(compiler, "Expected token %s but found %s", token_type_names[type], token_type_names[lexer_current(compiler)]);
 
-        return false;
-    }
+		return false;
+	}
 }
 
 bool lexer_matches(struct compiler *compiler, enum token_type type)
 {
-    if (lexer_current(compiler) == type)
-    {
-        lexer_next(compiler);
+	if (lexer_current(compiler) == type)
+	{
+		lexer_next(compiler);
 
-        return true;
-    }
-    else
-        return false;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool lexer_require(struct compiler *compiler, enum token_type type)
 {
-    if (lexer_current(compiler) == type)
-        return true;
-    else
-    {
-        COMPILER_ERROR(compiler, "Expected token %s but found %s", token_type_names[type], token_type_names[lexer_current(compiler)]);
+	if (lexer_current(compiler) == type)
+		return true;
+	else
+	{
+		COMPILER_ERROR(compiler, "Expected token %s but found %s", token_type_names[type], token_type_names[lexer_current(compiler)]);
 
-        return false;
-    }
+		return false;
+	}
 }

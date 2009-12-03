@@ -1,5 +1,10 @@
 require 'rake/package'
 
+begin
+	require 'rake/env'
+rescue LoadError
+end
+
 MIRB = Builder::Package.new('mirb', '.', [
 	'main.c',
 	'compiler/**/*.c',
@@ -31,6 +36,14 @@ end
 desc "Build a debug version of #{MIRB.name}"
 task :debug do
 	execute(:build, Builder::Preset::DEBUG)
+end
+
+desc "Convert all spaces to tabs"
+task :tabs do
+	MIRB.sources.map { |source| FileList[source] }.flatten.each do |file|
+		output = Builder.execute('unexpand', '--tabs=4', file)
+		File.open(file, 'w') { |file| file.write(output) }
+	end
 end
 
 task :default => :release

@@ -510,8 +510,8 @@ get_node_name_proc get_node_name_procs[] = {
 
 rt_value get_node_name(struct node *node)
 {
-    if (node)
-        return get_node_name_procs[node->type](node);
-    else
-        return rt_string_from_cstr("");
+	if (node)
+		return get_node_name_procs[node->type](node);
+	else
+		return rt_string_from_cstr("");
 }
