@@ -407,10 +407,14 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_CLASS:
 			{
-				struct block *class_block = (struct block *)op->left;
+				struct block *class_block = (struct block *)op->right;
 				rt_compiled_block_t compiled = measuring ? 0 : compile_block(class_block);
 
-				generate_stack_push(target, rt_Object, measuring);
+				if(op->left)
+					generate_stack_var_push(block, target, op->left, measuring);
+				else
+					generate_stack_push(target, rt_Object, measuring);
+
 				generate_stack_push(target, op->result, measuring);
 				generate_call(target, rt_support_define_class, measuring);
 

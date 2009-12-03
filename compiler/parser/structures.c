@@ -16,6 +16,15 @@ struct node *parse_class(struct compiler *compiler)
 	else
 		result->left = 0;
 
+	if(lexer_current(compiler) == T_LESS)
+	{
+		lexer_next(compiler);
+
+		result->middle = parse_expression(compiler);
+	}
+	else
+		result->middle = 0;
+
 	parse_sep(compiler);
 
 	struct block *block;

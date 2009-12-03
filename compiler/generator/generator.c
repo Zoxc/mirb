@@ -217,7 +217,17 @@ static void gen_expressions(struct block *block, struct node *node, struct varia
 static void gen_class(struct block *block, struct node *node, struct variable *var)
 {
 	block->self_ref++;
-	block_push(block, B_CLASS, (rt_value)node->left, (rt_value)gen_block(node->right), 0);
+
+	if(node->middle)
+	{
+		struct variable *temp = var ? var : block_get_var(block);
+
+		gen_node(block, node->middle, temp);
+
+		block_push(block, B_CLASS, (rt_value)node->left, (rt_value)temp, (rt_value)gen_block(node->right));
+	}
+	else
+		block_push(block, B_CLASS, (rt_value)node->left, 0, (rt_value)gen_block(node->right));
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);

@@ -2,7 +2,7 @@
 #include "parser/parser.h"
 #include "compiler.h"
 
-char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "+@", "-@", "=", "==", "===", "!=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
+char *token_type_names[] = {"None", "+", "-", "*", "/", "+=", "-=", "*=", "/=", "+@", "-@", "=", "==", "===", "!=", ">", ">=", "<", "<=", "?", ".", ",", ":", "::", ";", "&", "(", ")", "[", "]", "{", "}", "|", "&&", "||", "!", "End of File", "String{","#String", "String", "}String", "Number", "Instance variable", "Identifier", "Extended identifier", "Newline",
 	"if", "unless", "else", "elsif", "then", "when", "case", "begin", "ensure", "rescue", "class", "module", "def", "self", "do", "yield", "return", "break", "next", "redo", "true", "false", "nil", "not", "and", "or", "end"};
 
 typedef enum token_type(*jump_table_entry)(struct token *token);
@@ -542,6 +542,34 @@ static enum token_type not_sign_proc(struct token *token)
     return T_NOT_SIGN;
 }
 
+static enum token_type greater_proc(struct token *token)
+{
+	token->input++;
+
+	if(*(token->input) == '=')
+	{
+		token->input++;
+
+		return T_GREATER_OR_EQUAL;
+	}
+
+    return T_GREATER;
+}
+
+static enum token_type less_proc(struct token *token)
+{
+	token->input++;
+
+	if(*(token->input) == '=')
+	{
+		token->input++;
+
+		return T_LESS_OR_EQUAL;
+	}
+
+    return T_LESS;
+}
+
 static enum token_type newline_proc(struct token *token)
 {
 	token->input++;
@@ -657,6 +685,8 @@ void lexer_setup(void)
 	jump_table['!'] = not_sign_proc;
 	jump_table['|'] = or_sign_proc;
 	jump_table['@'] = ivar_proc;
+	jump_table['>'] = greater_proc;
+	jump_table['<'] = less_proc;
 
 	// Comments
 

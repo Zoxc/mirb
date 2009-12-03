@@ -136,7 +136,10 @@ void opcode_print(struct opcode *op)
 			break;
 
 		case B_CLASS:
-			printf("class %s, %x", rt_symbol_to_cstr(op->result), op->left);
+			if(op->left)
+				printf("class %s < %s, %x", rt_symbol_to_cstr(op->result), variable_name(op->left), op->right);
+			else
+				printf("class %s, %x", rt_symbol_to_cstr(op->result), op->right);
 			break;
 
 		case B_MODULE:
