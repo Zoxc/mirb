@@ -15,6 +15,9 @@
 					<Add option="-g" />
 					<Add option="-DDEBUG" />
 				</Compiler>
+				<Linker>
+					<Add option="build/debug/runtime/x86.asm.o" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin\Release\mirb" prefix_auto="1" extension_auto="1" />
@@ -25,9 +28,11 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-funroll-loops -fomit-frame-pointer" />
+					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="build/release/runtime/x86.asm.o" />
 				</Linker>
 			</Target>
 		</Build>

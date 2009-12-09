@@ -25,6 +25,7 @@ enum node_type {
 	N_NO_EQUALITY,
 	N_IF,
 	N_UNLESS,
+	N_SUPER,
 	N_RETURN,
 	N_NEXT,
 	N_REDO,

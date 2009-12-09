@@ -265,12 +265,8 @@ static int gen_argument(struct block *block, struct node *node, struct variable 
 		return 1;
 }
 
-static void generate_call(struct block *block, struct node *self, rt_value name, struct node *arguments, struct node *block_node, struct variable *var)
+static struct variable* generate_call_args(struct block *block, struct node *arguments, struct node *block_node, struct variable *var)
 {
-	struct variable *self_var = block_get_var(block);
-
-	gen_node(block, self, self_var);
-
 	int parameters = 0;
 
 	struct variable *args = block_gen_args(block);
@@ -296,6 +292,18 @@ static void generate_call(struct block *block, struct node *self, rt_value name,
 	}
 
 	block_end_args(block, args, parameters);
+
+	return closure;
+}
+
+static void generate_call(struct block *block, struct node *self, rt_value name, struct node *arguments, struct node *block_node, struct variable *var)
+{
+	struct variable *self_var = block_get_var(block);
+
+	gen_node(block, self, self_var);
+
+	struct variable* closure = generate_call_args(block, arguments, block_node, var);
+
 	block_push(block, B_CALL, (rt_value)self_var, name, (rt_value)closure);
 
 	if(block_node)
@@ -611,6 +619,21 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	}
 }
 
+static void gen_super(struct block *block, struct node *node, struct variable *var)
+{
+    block->self_ref++;
+
+	struct variable* closure = generate_call_args(block, node->left, node->right, var);
+
+	block_push(block, B_SUPER, (rt_value)closure, 0, 0);
+
+	if(node->right)
+		block_push(block, B_SEAL, (rt_value)closure, 0, 0);
+
+	if (var)
+		block_push(block, B_STORE, (rt_value)var, 0, 0);
+}
+
 generator generators[] = {
 	gen_unary_op,
 	gen_binary_op,
@@ -635,6 +658,7 @@ generator generators[] = {
 	gen_no_equality,
 	gen_if,
 	gen_if,
+	gen_super,
 	gen_return,
 	gen_next,
 	gen_redo,

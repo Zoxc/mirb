@@ -10,9 +10,9 @@
 
 typedef size_t rt_value;
 
-typedef rt_value (__stdcall *rt_compiled_block_t)(rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+typedef rt_value (__stdcall __regparm(3) *rt_compiled_block_t)(rt_value **_scopes, rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 
-#define rt_compiled_block(name) rt_value __stdcall name(rt_value obj, rt_value block, size_t argc, rt_value argv[])
+#define rt_compiled_block(name) rt_value __stdcall __regparm(3) name(rt_value **_scopes, rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 
 #define RT_ARG_INDEX(index) (argc - 1 - (index))
 #define RT_ARG(index) (argv[RT_ARG_INDEX(index)])
@@ -102,16 +102,20 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 void rt_create(void);
 void rt_destroy(void);
 
-rt_value rt_eval(rt_value self, const char *input, const char *filename);
+rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename);
 void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 
-rt_compiled_block_t rt_lookup(rt_value obj, rt_value name);
-rt_compiled_block_t rt_lookup_nothrow(rt_value obj, rt_value name);
+rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module);
+rt_compiled_block_t rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
+rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module);
 
-#define RT_CALL_CSTR(obj, cstr, argc, argv) (rt_lookup((obj), rt_symbol_from_cstr(cstr))((obj), RT_NIL, argc, argv))
-#define RT_CALL(obj, symbol, block, argc, argv) (rt_lookup((obj), (cstr))((obj), block, argc, argv))
+rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[]);
 
-rt_value rt_dump_call(rt_value obj, size_t argc, ...);
+extern rt_value rt_symbol_from_cstr(const char *name);
 
+static inline rt_value rt_call(rt_value obj, char *name, size_t argc, rt_value argv[])
+{
+	return rt_call_block(obj, rt_symbol_from_cstr(name), RT_NIL, argc, argv);
+}
 

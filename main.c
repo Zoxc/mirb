@@ -47,7 +47,7 @@ int main()
 
 			//__asm__("int3\n"); // Make debugging life easier
 
-			rt_value result = compiled_block(rt_main, RT_NIL, 0, 0);
+			rt_value result = compiled_block(0, RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 
 			printf("=> "); rt_print(result); printf("\n");
 		}

@@ -49,7 +49,7 @@ rt_value name_const(struct node *node)
 	rt_value result = get_node_name(node->left);
 
 	rt_concat_string(result, rt_string_from_cstr("::"));
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->right, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->right));
 
 	return result;
 }
@@ -72,7 +72,7 @@ rt_value name_assign_const(struct node *node)
 
 	rt_concat_string(result, get_node_name(node->left));
 	rt_concat_string(result, rt_string_from_cstr("::"));
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->middle, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->middle));
 	rt_concat_string(result, get_node_name(node->right));
 	rt_concat_string(result, rt_string_from_cstr(")"));
 
@@ -144,7 +144,7 @@ rt_value name_call(struct node *node)
 	rt_value result = get_node_name(node->left);
 
 	rt_concat_string(result, rt_string_from_cstr("."));
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->middle, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->middle));
 	rt_concat_string(result, get_node_name(node->right));
 
 	return result;
@@ -195,7 +195,7 @@ rt_value name_class(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("class ");
 
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->left));
 	rt_concat_string(result, rt_string_from_cstr("("));
 	rt_concat_string(result, get_node_name(node->right));
 	rt_concat_string(result, rt_string_from_cstr(")"));
@@ -207,7 +207,7 @@ rt_value name_module(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("module ");
 
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->left));
 	rt_concat_string(result, rt_string_from_cstr("("));
 	rt_concat_string(result, get_node_name(node->right));
 	rt_concat_string(result, rt_string_from_cstr(")"));
@@ -229,7 +229,7 @@ rt_value name_method(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("def ");
 
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->left));
 	rt_concat_string(result, rt_string_from_cstr("("));
 	rt_concat_string(result, get_node_name(node->right));
 	rt_concat_string(result, rt_string_from_cstr(")"));
@@ -345,14 +345,14 @@ rt_value name_not(struct node *node)
 
 rt_value name_ivar(struct node *node)
 {
-	return rt_symbol_to_s((rt_value)node->left, 0, 0, 0);
+	return rt_string_from_symbol((rt_value)node->left);
 }
 
 rt_value name_ivar_assign(struct node *node)
 {
 	rt_value result = rt_string_from_cstr("(");
 
-	rt_concat_string(result, rt_symbol_to_s((rt_value)node->left, 0, 0, 0));
+	rt_concat_string(result, rt_string_from_symbol((rt_value)node->left));
 	rt_concat_string(result, rt_string_from_cstr(" = "));
 	rt_concat_string(result, get_node_name(node->right));
 	rt_concat_string(result, rt_string_from_cstr(")"));
@@ -466,6 +466,23 @@ rt_value name_redo(struct node *node)
 	return result;
 }
 
+rt_value name_super(struct node *node)
+{
+	rt_value result = rt_string_from_cstr("super(");
+
+	rt_concat_string(result, get_node_name(node->left));
+	rt_concat_string(result, rt_string_from_cstr(")"));
+
+	if(node->right)
+	{
+		rt_concat_string(result, rt_string_from_cstr("{"));
+		rt_concat_string(result, get_node_name(node->right));
+		rt_concat_string(result, rt_string_from_cstr("})"));
+	}
+
+	return result;
+}
+
 get_node_name_proc get_node_name_procs[] = {
 	name_unary_op,
 	name_binary_op,
@@ -490,6 +507,7 @@ get_node_name_proc get_node_name_procs[] = {
 	name_no_equality,
 	name_if,
 	name_if,
+	name_super,
 	name_return,
 	name_next,
 	name_redo,

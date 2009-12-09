@@ -13,7 +13,7 @@ rt_compiled_block(rt_module_to_s)
 	if(rt_test(name))
 		return name;
 
-	return rt_object_to_s(obj, 0, 0, 0);
+	return rt_object_to_s(0, RT_NIL, RT_NIL, obj, 0, 0, 0);
 }
 
 rt_compiled_block(rt_module_append_features)
@@ -32,8 +32,8 @@ rt_compiled_block(rt_module_include)
 {
 	RT_ARG_EACH(i)
 	{
-		RT_CALL_CSTR(argv[i], "append_features", 1, &obj);
-		RT_CALL_CSTR(argv[i], "included", 1, &obj);
+		rt_call(argv[i], "append_features", 1, &obj);
+		rt_call(argv[i], "included", 1, &obj);
 	}
 
 	return obj;

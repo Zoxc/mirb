@@ -56,6 +56,10 @@ void opcode_print(struct opcode *op)
 			printf("call %s, %s, %s", variable_name(op->result), rt_symbol_to_cstr(op->left), variable_name(op->right));
 			break;
 
+		case B_SUPER:
+			printf("super %s", variable_name(op->result));
+			break;
+
 		case B_STORE:
 			printf("store %s", variable_name(op->result));
 			break;

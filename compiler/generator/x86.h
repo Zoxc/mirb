@@ -14,7 +14,9 @@
  * The callee cleans up the stack.
  *
  * The following arguments are passed in registers:
- * struct rt_closure *closure - This is only used for closures. Passed in eax
+ * %eax: rt_value *scopes[] - This is only used for closures.
+ * %ecx: struct rt_class *module - The module where this methos was found.
+ * %edx: struct rt_symbol *name - The name of the called method.
  *
  */
 

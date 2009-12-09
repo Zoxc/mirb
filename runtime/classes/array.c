@@ -63,7 +63,7 @@ rt_compiled_block(rt_array_inspect)
 
 	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
 	{
-		rt_concat_string(result, RT_CALL_CSTR(kv_A(RT_ARRAY(obj)->data, i), "inspect", 0, 0));
+		rt_concat_string(result, rt_call(kv_A(RT_ARRAY(obj)->data, i), "inspect", 0, 0));
 
 		if(i != kv_size(RT_ARRAY(obj)->data) - 1)
 			rt_concat_string(result, rt_string_from_cstr(", "));
@@ -83,7 +83,7 @@ rt_compiled_block(rt_array_each)
 {
 	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
 	{
-		rt_proc_call(block, RT_NIL, 1, &kv_A(RT_ARRAY(obj)->data, i));
+		rt_call_proc(block, RT_NIL, 1, &kv_A(RT_ARRAY(obj)->data, i));
 	}
 
 	return obj;

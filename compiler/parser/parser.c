@@ -48,6 +48,17 @@ struct block *scope_defined(struct block *block, rt_value name, bool recursive)
 	return 0;
 }
 
+struct variable *scope_var(struct block *block)
+{
+	struct variable *var = compiler_alloc(block->compiler, sizeof(struct variable));
+	var->owner = block;
+	var->type = V_LOCAL;
+	var->name = 0;
+	var->real = 0;
+
+	return var;
+}
+
 struct variable *scope_declare_var(struct block *block, rt_value name)
 {
 	khiter_t k = kh_get(block, block->variables, name);
@@ -277,6 +288,9 @@ struct node *parse_factor(struct compiler *compiler)
 
 		case T_REDO:
 			return parse_redo(compiler);
+
+		case T_SUPER:
+			return parse_super(compiler);
 
 		case T_SQUARE_OPEN:
 			{

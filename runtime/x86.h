@@ -18,14 +18,15 @@
 	};
 #endif
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_value *argv[]);
+rt_value __cdecl rt_support_closure(rt_compiled_block_t block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
 
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super);
 rt_value __stdcall rt_support_define_module(rt_value name);
 
 void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block);
 
-rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj);
+extern void rt_support_call();
+extern void rt_support_super();
 
 rt_value rt_support_get_ivar(void);
 void __stdcall rt_support_set_ivar(rt_value value);

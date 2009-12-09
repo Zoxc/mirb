@@ -32,7 +32,7 @@ rt_compiled_block(rt_string_concat);
 
 static inline void rt_concat_string(rt_value string, rt_value add)
 {
-	rt_string_concat(string, 0, 1, &add);
+	rt_string_concat(0, RT_NIL, RT_NIL, string, 0, 1, &add);
 }
 
 void rt_string_init(void);

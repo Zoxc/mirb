@@ -8,24 +8,18 @@ rt_value rt_Object;
 
 rt_compiled_block(rt_object_tap)
 {
-	RT_CALL_CSTR(block, "call", 1, &obj);
+	rt_call(block, "call", 1, &obj);
 	return obj;
 }
 
 rt_compiled_block(rt_Object_allocate)
 {
-	rt_value result = rt_alloc(sizeof(struct rt_object));
-
-	RT_COMMON(result)->flags = C_OBJECT;
-	RT_COMMON(result)->class_of = obj;
-	RT_OBJECT(result)->vars = 0;
-
-	return result;
+	return rt_alloc_object(obj);
 }
 
 rt_compiled_block(rt_object_inspect)
 {
-	return RT_CALL_CSTR(obj, "to_s", 0, 0);
+	return rt_call(obj, "to_s", 0, 0);
 }
 
 rt_compiled_block(rt_object_to_s)

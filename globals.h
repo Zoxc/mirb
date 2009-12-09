@@ -18,6 +18,8 @@
 	#define RT_ASSERT(condition) assert(condition)
 #endif
 
+#define __regparm(n) __attribute__((__regparm__(n)))
+
 #ifdef WINDOWS
     #include <windows.h>
     #include <excpt.h>

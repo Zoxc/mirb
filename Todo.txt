@@ -7,13 +7,13 @@
 [X] Arrays
 [ ] Hashes
 [ ] Ranges
-[ ] Class inheritance
+[X] Class inheritance
 [X] Instance variables
 [ ] Singleton class of variable syntax
 [ ] Class variables
 [ ] Global variables
-[ ] Super
-[X] Exception handling
+[X] Super
+[X] Exception handling (Windows only)
 [ ] Garbage collection
 [ ] Splat operators
 [X] Modules

@@ -15,12 +15,12 @@ const char *variable_name(rt_value var)
 	{
 		case V_TEMP:
 			rt_concat_string(string, rt_string_from_cstr("%"));
-			rt_concat_string(string, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0, 0, 0));
+			rt_concat_string(string, rt_string_from_fixnum(RT_INT2FIX(_var->index)));
 			break;
 
 		case V_ARGS:
 			rt_concat_string(string, rt_string_from_cstr("<a:"));
-			rt_concat_string(string, rt_fixnum_to_s(RT_INT2FIX(_var->index), 0, 0, 0));
+			rt_concat_string(string, rt_string_from_fixnum(RT_INT2FIX(_var->index)));
 			rt_concat_string(string, rt_string_from_cstr(">"));
 			break;
 
@@ -31,7 +31,7 @@ const char *variable_name(rt_value var)
 				rt_concat_string(string, rt_string_from_cstr("!#"));
 
 			if(_var->name)
-				rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
+				rt_concat_string(string, rt_string_from_symbol(_var->name));
 			break;
 
 		case V_LOCAL:
@@ -41,7 +41,7 @@ const char *variable_name(rt_value var)
 				rt_concat_string(string, rt_string_from_cstr("#"));
 
 			if(_var->name)
-				rt_concat_string(string, rt_symbol_to_s(_var->name, 0, 0, 0));
+				rt_concat_string(string, rt_string_from_symbol(_var->name));
 			break;
 	}
 
@@ -95,6 +95,8 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 
 	result->type = type;
 	result->block_parameter = 0;
+	result->super_module_var = 0;
+	result->super_name_var = 0;
 	result->scope_var = 0;
 	result->closure_var = 0;
 

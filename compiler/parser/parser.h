@@ -8,6 +8,7 @@
 
 struct block *scope_defined(struct block *block, rt_value name, bool recursive);
 struct variable *scope_declare_var(struct block *block, rt_value name);
+struct variable *scope_var(struct block *block);
 struct variable *scope_define(struct block *block, rt_value name);
 struct variable *scope_get(struct block *block, rt_value name);
 
@@ -56,6 +57,7 @@ static inline bool is_expression(struct compiler *compiler)
 		case T_YIELD:
 		case T_RETURN:
 		case T_BREAK:
+		case T_SUPER:
 		case T_REDO:
 		case T_NEXT:
 		case T_PARAM_OPEN:

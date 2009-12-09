@@ -71,6 +71,7 @@ enum token_type {
 	T_BREAK,
 	T_NEXT,
 	T_REDO,
+	T_SUPER,
 	T_TRUE,
 	T_FALSE,
 	T_NIL,

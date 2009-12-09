@@ -109,9 +109,9 @@ bool has_arguments(struct compiler *compiler)
 
 struct node *parse_arguments(struct compiler *compiler, bool has_args)
 {
-	if (has_args && lexer_current(compiler) != T_CURLY_OPEN)
+	if(has_args && lexer_current(compiler) != T_CURLY_OPEN)
 	{
-		if (lexer_current(compiler) == T_PARAM_OPEN && !lexer_token(compiler)->whitespace)
+		if(lexer_current(compiler) == T_PARAM_OPEN && !lexer_token(compiler)->whitespace)
 		{
 			struct node *result = 0;
 
@@ -131,6 +131,35 @@ struct node *parse_arguments(struct compiler *compiler, bool has_args)
 		return 0;
 }
 
+struct node *parse_super(struct compiler *compiler)
+{
+	lexer_next(compiler);
+
+	struct node *result = alloc_node(compiler, N_SUPER);
+
+	struct block *owner = compiler->current_block->owner;
+	struct block *current = compiler->current_block;
+
+	while(true)
+	{
+		if(!current->super_module_var)
+		{
+			current->super_module_var = block_get_var(current);
+			current->super_name_var = block_get_var(current);
+		}
+
+		if(owner == current)
+			break;
+
+		current = current->parent;
+	}
+
+	result->left = parse_arguments(compiler, has_arguments(compiler));
+	result->right = parse_block(compiler);
+
+	return result;
+}
+
 struct node *parse_yield(struct compiler *compiler)
 {
 	lexer_next(compiler);
@@ -140,7 +169,7 @@ struct node *parse_yield(struct compiler *compiler)
 	result->left = alloc_node(compiler, N_VAR);
 
 	if(!compiler->current_block->block_parameter)
-		compiler->current_block->block_parameter = scope_define(compiler->current_block, 0);
+		compiler->current_block->block_parameter = scope_var(compiler->current_block);
 
 	result->left->left = (void *)compiler->current_block->block_parameter;
 
@@ -148,7 +177,7 @@ struct node *parse_yield(struct compiler *compiler)
 
 	result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
 	result->right->left = parse_arguments(compiler, has_arguments(compiler));
-	result->right->right = 0;
+	result->right->right = parse_block(compiler);
 
 	return result;
 }

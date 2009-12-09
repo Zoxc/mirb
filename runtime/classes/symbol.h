@@ -2,6 +2,7 @@
 #include "../classes.h"
 #include "../../compiler/lexer.h"
 #include "../../compiler/parser/parser.h"
+#include "string.h"
 
 struct rt_symbol {
 	struct rt_common common;
@@ -29,6 +30,11 @@ static inline rt_value rt_symbol_from_token(struct token *token)
 static inline const char *rt_symbol_to_cstr(rt_value value)
 {
 	return RT_SYMBOL(value)->string;
+}
+
+static inline rt_value rt_string_from_symbol(rt_value value)
+{
+	return rt_string_from_cstr(RT_SYMBOL(value)->string);
 }
 
 static inline bool rt_symbol_is_const(rt_value value)

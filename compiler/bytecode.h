@@ -15,6 +15,7 @@ enum opcode_type {
 	B_PUSH_RAW,
 	B_CALL,
 	B_ARGS,
+	B_SUPER,
 	B_LOAD,
 	B_STORE,
 	B_TEST,

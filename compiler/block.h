@@ -118,6 +118,8 @@ struct block {
 	khash_t(block) *variables; // A hash with all the variables declared or used
 	kvec_t(struct variable *) parameters; // A list of all parameters except the block parameter.
 	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
+	struct variable *super_module_var; // Pointer to a next module to search from if super is used.
+	struct variable *super_name_var; // Pointer to a symbol which contains the name of the called method.
 	kvec_t(struct block *) scopes; // A list of all the heap variable scopes this block requires.
 	bool heap_vars; // If any of the variables must be stored on a heap scope.
 	struct variable *scope_var; // A variable with the pointer to the heap scope
@@ -174,7 +176,7 @@ static inline struct opcode *block_get_flush_label(struct block *block)
 static inline struct variable *block_get_var(struct block *block)
 {
 	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct temp_variable));
-
+	temp->owner = block;
 	temp->type = V_TEMP;
 	temp->index = block->var_count[V_TEMP];
 

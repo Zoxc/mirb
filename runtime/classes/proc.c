@@ -8,23 +8,7 @@ rt_value rt_Proc;
 
 rt_compiled_block(rt_proc_call)
 {
-	rt_value result;
-
-	__asm__("push %[argv]\n"
-		"push %[argc]\n"
-		"push %[block]\n"
-		"push %[obj]\n"
-		"call *%[proc]\n"
-		: "=a" (result)
-		: [proc] "g" (RT_PROC(obj)->closure),
-			[obj] "g" (RT_PROC(obj)->self),
-			[block] "g" (block),
-			[argc] "g" (argc),
-			[argv] "g" (argv),
-			"a" (&RT_PROC(obj)->scopes)
-		: "%ecx", "%edx");
-
-	return result;
+	return RT_PROC(obj)->closure((rt_value **)&RT_PROC(obj)->scopes, RT_PROC(obj)->method_name, RT_PROC(obj)->method_module, RT_PROC(obj)->self, block, argc, argv);
 }
 
 void rt_proc_init(void)

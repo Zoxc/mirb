@@ -6,11 +6,11 @@
 #include "classes/string.h"
 #include "classes/proc.h"
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_value *argv[])
+rt_value __cdecl rt_support_closure(rt_compiled_block_t block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[])
 {
 	rt_value self;
 
-	__asm__("" : "=D" (self));
+	__asm__ __volatile__("" : "=D" (self));
 
 	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
 
@@ -18,6 +18,8 @@ rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_v
 	RT_COMMON(closure)->class_of = rt_Proc;
 	RT_PROC(closure)->self = self;
 	RT_PROC(closure)->closure = block;
+	RT_PROC(closure)->method_name = method_name;
+	RT_PROC(closure)->method_module = method_module;
 	RT_PROC(closure)->scope_count = argc;
 
 	RT_ARG_EACH_RAW(i)
@@ -28,24 +30,11 @@ rt_value __cdecl rt_support_closure(rt_compiled_block_t block, size_t argc, rt_v
 	return closure;
 }
 
-rt_compiled_block_t __cdecl rt_support_lookup_method(rt_value obj)
-{
-	rt_value method;
-
-	__asm__("" : "=a" (method));
-/*
-	rt_compiled_block_t result = rt_lookup(obj, method);
-
-	__asm__("jmp %0" : : "r" (result));
-*/
-	return rt_lookup(obj, method);
-}
-
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super)
 {
 	rt_value obj;
 
-	__asm__("" : "=D" (obj));
+	__asm__ __volatile__("" : "=D" (obj));
 
 	if(obj == rt_main)
 		obj = rt_Object;
@@ -57,7 +46,7 @@ rt_value __stdcall rt_support_define_module(rt_value name)
 {
 	rt_value obj;
 
-	__asm__("" : "=D" (obj));
+	__asm__ __volatile__("" : "=D" (obj));
 
 	if(obj == rt_main)
 		obj = rt_Object;
@@ -69,7 +58,7 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 {
 	rt_value obj;
 
-	__asm__("" : "=D" (obj));
+	__asm__ __volatile__("" : "=D" (obj));
 
 	if(obj == rt_main)
 		obj = rt_Object;
@@ -82,7 +71,7 @@ rt_value rt_support_get_ivar(void)
 	rt_value obj;
 	rt_value name;
 
-	__asm__("" : "=D" (obj), "=a" (name));
+	__asm__ __volatile__("" : "=D" (obj), "=a" (name));
 
 	#ifdef DEBUG
 		printf("Looking up instance variable %s in %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
@@ -96,7 +85,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 	rt_value obj;
 	rt_value name;
 
-	__asm__("" : "=D" (obj), "=a" (name));
+	__asm__ __volatile__("" : "=D" (obj), "=a" (name));
 
 	#ifdef DEBUG
 		printf("Setting instance variable %s in %s to %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)), rt_string_to_cstr(rt_inspect(value)));
@@ -137,7 +126,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 		data[0] = (rt_value)target;
 		data[1] = value;
 
-		RaiseException(RT_SEH_RUBY + E_RETURN_EXCEPTION, 0, 2, (const DWORD *)&data);
+		RaiseException(RT_SEH_RUBY + E_RETURN_EXCEPTION, 0, 2, (const DWORD *)data);
 
 		__builtin_unreachable();
 	}
@@ -153,7 +142,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 		data[1] = value;
 		data[2] = id;
 
-		RaiseException(RT_SEH_RUBY + E_BREAK_EXCEPTION, 0, 3, (const DWORD *)&data);
+		RaiseException(RT_SEH_RUBY + E_BREAK_EXCEPTION, 0, 3, (const DWORD *)data);
 
 		__builtin_unreachable();
 	}

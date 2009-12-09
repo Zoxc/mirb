@@ -1,4 +1,5 @@
 require 'rake/package'
+require 'rake/nasm'
 
 begin
 	require 'rake/env'
@@ -8,14 +9,17 @@ end
 MIRB = Builder::Package.new('mirb', '.', [
 	'main.c',
 	'compiler/**/*.c',
-	'runtime/**/*.c'
+	'runtime/**/*.c',
+	'runtime/**/*.asm'
 ])
 
 def execute(target, settings)
+	settings = Builder::Settings.new(settings.name, settings, {'*.asm' => Builder::NASM, :NASM_FLAGS => ['-f', Rake::Win32.windows? ? 'win32' : 'elf']})
+	
 	if Rake::Win32.windows?
 		settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-DWINDOWS', '-I','vendor/BeaEngine'], :LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
 	end
-
+	
 	unless MIRB.send target, settings
 		puts "Nothing to do!"
 	end

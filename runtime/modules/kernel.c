@@ -27,7 +27,7 @@ rt_compiled_block(rt_kernel_eval)
 	if(rt_type(arg) != C_STRING)
 		return RT_NIL;
 
-	return rt_eval(obj, rt_string_to_cstr(arg), 0);
+	return rt_eval(obj, _method_name, _method_module, rt_string_to_cstr(arg), 0);
 }
 
 static FILE *open_file(rt_value *filename)
@@ -78,7 +78,7 @@ static rt_value run_file(rt_value self, rt_value *filename)
 
 	data[length] = 0;
 
-	rt_value result = rt_eval(self, data, rt_string_to_cstr(*filename));
+	rt_value result = rt_eval(self, RT_NIL, rt_class_of(rt_main), data, rt_string_to_cstr(*filename));
 
 	free(data);
 	fclose(file);
@@ -98,7 +98,7 @@ rt_compiled_block(rt_kernel_print)
 	RT_ARG_EACH(i)
 	{
 		if(rt_type(argv[i]) != C_STRING)
-			argv[i] = RT_CALL_CSTR(argv[i], "to_s", 0, 0);
+			argv[i] = rt_call(argv[i], "to_s", 0, 0);
 
 		if(rt_type(argv[i]) == C_STRING)
 			printf("%s", rt_string_to_cstr(argv[i]));
@@ -140,7 +140,7 @@ rt_compiled_block(rt_kernel_print)
 		else
 			RT_EXCEPTION(exception)->backtrace = RT_NIL;
 
-		RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)&exception);
+		RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)exception);
 
 		__builtin_unreachable();
 	}

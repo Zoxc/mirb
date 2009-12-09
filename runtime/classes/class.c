@@ -16,7 +16,7 @@ rt_compiled_block(rt_class_to_s)
 	{
 		rt_value real = rt_object_get_var(obj, rt_symbol_from_cstr("__attached__"));
 
-		real = RT_CALL_CSTR(real, "inspect", 0, 0);
+		real = rt_call(real, "inspect", 0, 0);
 
 		rt_value result = rt_string_from_cstr("#<Class:");
 		rt_concat_string(result, real);
@@ -47,9 +47,9 @@ rt_compiled_block(rt_class_superclass)
 
 rt_compiled_block(rt_class_new)
 {
-	rt_value result = RT_CALL_CSTR(obj, "allocate", 0, 0);
+	rt_value result = rt_call(obj, "allocate", 0, 0);
 
-	RT_CALL_CSTR(result, "initialize", argc, argv);
+	rt_call(result, "initialize", argc, argv);
 
 	return result;
 }

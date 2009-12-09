@@ -395,6 +395,17 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_CLOSURE:
 			{
+				if(block->super_module_var)
+				{
+					generate_stack_var_push(block, target, (rt_value)block->super_module_var, measuring);
+					generate_stack_var_push(block, target, (rt_value)block->super_name_var, measuring);
+				}
+				else
+				{
+					generate_stack_push(target, RT_NIL, measuring);
+					generate_stack_push(target, RT_NIL, measuring);
+				}
+
 				generate_stack_push(target, measuring ? 0 : (size_t)compile_block((struct block *)op->left), measuring);
 
 				generate_call(target, rt_support_closure, measuring);
@@ -494,7 +505,6 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_push(target, (rt_value)compiled, measuring);
 				generate_stack_push(target, op->result, measuring);
-				//GEN_BYTE(0x57); // push edi
 
 				generate_call(target, rt_support_define_method, measuring);
 			}
@@ -509,13 +519,29 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_var_push(block, target, op->result, measuring);
 
-				GEN_BYTE(0xB8); // mov eax,
+				GEN_BYTE(0xBA); // mov edx,
 				GEN_DWORD(op->left);
 
-				generate_call(target, rt_support_lookup_method, measuring);
+				generate_call(target, rt_support_call, measuring);
 
-				GEN_BYTE(0xFF); // call eax
-				GEN_BYTE(0xD0);
+				if(kv_A(block->vector, i - 1)->right)
+					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4, measuring);
+			}
+			break;
+
+		case B_SUPER:
+			{
+				if(op->result)
+					generate_stack_var_push(block, target, op->result, measuring);
+				else
+					generate_stack_push(target, 0, measuring);
+
+				GEN_BYTE(0x57); // push edi (self)
+
+				generate_stack_var_push(block, target, (rt_value)block->super_module_var, measuring);
+                generate_stack_var_push(block, target, (rt_value)block->super_name_var, measuring);
+
+				generate_call(target, rt_support_super, measuring);
 
 				if(kv_A(block->vector, i - 1)->right)
 					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4, measuring);
@@ -873,6 +899,19 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 
 		if(block->require_exceptions)
 			generate_var_store(block, target, (rt_value)block->scope_var, measuring);
+	}
+
+	if(block->super_module_var)
+	{
+		GEN_BYTE(0x89); // mov eax, ecx
+		GEN_BYTE(0xC8);
+
+		generate_var_store(block, target, (rt_value)block->super_module_var, measuring);
+
+		GEN_BYTE(0x89); // mov eax, edx
+		GEN_BYTE(0xD0);
+
+		generate_var_store(block, target, (rt_value)block->super_name_var, measuring);
 	}
 
 	if(block->block_parameter)

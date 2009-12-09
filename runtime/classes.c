@@ -260,7 +260,7 @@ rt_compiled_block(rt_main_to_s)
 
 rt_compiled_block(rt_main_include)
 {
-	return rt_module_include(rt_Object, block, argc, argv);
+	return rt_module_include(0, RT_NIL, RT_NIL, rt_Object, block, argc, argv);
 }
 
 void rt_setup_classes(void)
@@ -286,7 +286,7 @@ void rt_setup_classes(void)
 	rt_class_name(rt_Symbol, rt_Object, rt_symbol_from_cstr("Symbol"));
 	rt_class_name(rt_String, rt_Object, rt_symbol_from_cstr("String"));
 
-	rt_main = rt_Object_allocate(rt_Object, 0, 0, 0);
+	rt_main = rt_alloc_object(rt_Object);
 
 	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_main_to_s);
 	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("include"), (rt_compiled_block_t)rt_main_include);
