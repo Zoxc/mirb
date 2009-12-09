@@ -84,11 +84,16 @@ static inline void rt_object_set_var(rt_value obj, rt_value name, rt_value value
 {
 	khash_t(rt_hash) *vars = rt_object_get_vars(obj);
 
-	int ret;
+    khiter_t k = kh_get(rt_hash, vars, name);
 
-	khiter_t k = kh_put(rt_hash, vars, name, &ret);
+    if (k == kh_end(vars))
+    {
+        int ret;
 
-	RT_ASSERT(ret);
+        k = kh_put(rt_hash, vars, name, &ret);
+
+        RT_ASSERT(ret);
+    }
 
 	kh_value(vars, k) = value;
 }
