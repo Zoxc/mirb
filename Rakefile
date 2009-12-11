@@ -8,11 +8,14 @@ end
 MIRB = Builder::Package.new('mirb', '.', [
 	'main.c',
 	'compiler/**/*.c',
-	'runtime/**/*.c',
-	'runtime/**/*.asm'
+	'runtime/**/*.c'
 ])
 
 def execute(target, settings)
+	if settings == Builder::Preset::RELEASE
+		MIRB.sources += ['runtime/**/*.asm']
+	end
+	
 	if Rake::Win32.windows?
 		settings = Builder::Settings.new(settings.name, settings, {:LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
 	end

@@ -223,6 +223,14 @@ module Builder
 			@target_output = output
 		end
 		
+		def sources
+			@pattern_list
+		end
+		
+		def sources=(value)
+			@pattern_list = value
+		end
+		
 		def load_dependencies(file)
 			raise unless File.exists?(file)
 

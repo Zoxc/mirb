@@ -25,8 +25,13 @@ rt_value __stdcall rt_support_define_module(rt_value name);
 
 void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block);
 
-extern void rt_support_call();
-extern void rt_support_super();
+#ifdef DEBUG
+	rt_value __stdcall __regparm(2) rt_support_call(rt_value dummy, rt_value method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+	rt_value __stdcall rt_support_super(rt_value method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+#else
+	extern void rt_support_call();
+	extern void rt_support_super();
+#endif
 
 rt_value rt_support_get_ivar(void);
 void __stdcall rt_support_set_ivar(rt_value value);
