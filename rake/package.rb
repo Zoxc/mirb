@@ -94,6 +94,12 @@ module Builder
 		end
 	end
 	
+	class As < Compiler
+		def do_compile(source)
+			Builder.execute @command, *args(source.settings), File.join(source.package.base, source.name), '-o', source.output
+		end
+	end
+	
 	class Gcc < Compiler
 		def respace(str)
 			str.gsub(/#{"__&NBSP;__"}/, ' ')
@@ -135,7 +141,8 @@ module Builder
 		end
 	end
 	
-	GCC = Gcc.new('gcc', ENV['CC'] || 'gcc', [:CFLAGS])
+	AS = As.new('gas', ENV['AS'] || 'as', [:FLAGS])
+	GCC = Gcc.new('gcc', ENV['CC'] || 'gcc', [:FLAGS, :CFLAGS])
 	
 	class Settings
 		attr_reader :name, :parent
@@ -176,9 +183,9 @@ module Builder
 	end
 	
 	module Preset
-		BASE = Settings.new('Base', nil, {:OUTPUT => 'build/base', '*.c' => Builder::GCC, :CFLAGS => ['-Wall', '-std=gnu99'], :LIBS => [], :LD => ENV['CC'] || 'gcc', :LDFLAGS => []})
+		BASE = Settings.new('Base', nil, {:OUTPUT => 'build/base', '*.c' => Builder::GCC, '*.asm' => Builder::AS, :FLAGS => [], :CFLAGS => ['-Wall', '-std=gnu99'], :LIBS => [], :LD => ENV['CC'] || 'gcc', :LDFLAGS => []})
 		RELEASE = Settings.new('Release', BASE, {:OUTPUT => 'build/release', :CFLAGS => ['-O3', '-funroll-loops', '-fomit-frame-pointer'], :LDFLAGS => ['-s']})
-		DEBUG = Settings.new('Debug', BASE, {:OUTPUT => 'build/debug', :CFLAGS => ['-g', '-DDEBUG']})
+		DEBUG = Settings.new('Debug', BASE, {:OUTPUT => 'build/debug', :FLAGS => ['-g'], :CFLAGS => ['-g', '-DDEBUG']})
 	end
 	
 	class Source

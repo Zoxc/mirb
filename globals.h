@@ -20,10 +20,10 @@
 
 #define __regparm(n) __attribute__((__regparm__(n)))
 
-#ifdef WINDOWS
+#ifdef WIN32
     #include <windows.h>
     #include <excpt.h>
-    #include "BeaEngine.h"
+    #include "vendor/BeaEngine/BeaEngine.h"
 #else
 	#define __stdcall __attribute__((__stdcall__))
 	#define __cdecl __attribute__((__cdecl__))

@@ -6,7 +6,7 @@ static void *get_page(void)
 {
 	void *result;
 
-	#ifdef WINDOWS
+	#ifdef WIN32
 		result = VirtualAlloc(0, ALLOCATOR_PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 		RT_ASSERT(result);
@@ -21,7 +21,7 @@ static void *get_page(void)
 
 static void free_page(void *page)
 {
-	#ifdef WINDOWS
+	#ifdef WIN32
 		VirtualFree(page, 0, MEM_RELEASE);
 	#else
 		munmap(page, ALLOCATOR_PAGE_SIZE);

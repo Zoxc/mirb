@@ -1067,7 +1067,7 @@ rt_compiled_block_t compile_block(struct block *block)
 
 	generate_block(block, (uint8_t *)result, &target, false);
 
-	#ifdef WINDOWS
+	#ifdef WIN32
 		#ifdef DEBUG
 			printf(";\n; compiled block %x\n;\n", (rt_value)block);
 

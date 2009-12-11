@@ -5,7 +5,7 @@
 #include "classes.h"
 #include "support.h"
 
-#ifdef WINDOWS
+#ifdef WIN32
 	#define RT_SEH_RUBY 0x4D520000
 
 	struct rt_seh_frame {
@@ -31,7 +31,7 @@ extern void rt_support_super();
 rt_value rt_support_get_ivar(void);
 void __stdcall rt_support_set_ivar(rt_value value);
 
-#ifdef WINDOWS
+#ifdef WIN32
 	void __stdcall rt_support_return(rt_value value, void *target);
 	void __stdcall rt_support_break(rt_value value, void *target, size_t id);
 

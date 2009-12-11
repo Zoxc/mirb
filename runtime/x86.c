@@ -94,7 +94,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 	rt_object_set_var(obj, name, value);
 }
 
-#ifdef WINDOWS
+#ifdef WIN32
 	static bool rt_find_seh_target(void *target)
 	{
 		struct rt_seh_frame *frame;

@@ -8,7 +8,7 @@ static unsigned char *end;
 
 void rt_code_heap_create(void)
 {
-	#ifdef WINDOWS
+	#ifdef WIN32
 		heap = (unsigned char *)VirtualAlloc(0, CODE_HEAP_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 		RT_ASSERT(heap);

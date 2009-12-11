@@ -107,7 +107,7 @@ rt_compiled_block(rt_kernel_print)
 	return RT_NIL;
 }
 
-#ifdef WINDOWS
+#ifdef WIN32
 	rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 	{
 		rt_value exception = rt_alloc(sizeof(struct rt_exception));
@@ -158,7 +158,7 @@ void rt_kernel_init(void)
 	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
 	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
 
-	#ifdef WINDOWS
+	#ifdef WIN32
 			rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
 	#endif
 }

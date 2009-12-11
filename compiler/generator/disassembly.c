@@ -15,7 +15,7 @@ struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_return),
 	DISASSEMBLY_SYMBOL(rt_support_alloc_scope),
 
-#ifdef WINDOWS
+#ifdef WIN32
 	DISASSEMBLY_SYMBOL(rt_support_seh_handler),
 #endif
 
@@ -45,7 +45,7 @@ char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 	return 0;
 }
 
-#ifdef WINDOWS
+#ifdef WIN32
 void dump_hex(unsigned char* address, int length)
 {
 	int MinLength = 7 - length;
