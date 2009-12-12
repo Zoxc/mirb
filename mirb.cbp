@@ -15,9 +15,6 @@
 					<Add option="-g" />
 					<Add option="-DDEBUG" />
 				</Compiler>
-				<Linker>
-					<Add option="build/debug/runtime/x86.asm.o" />
-				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin\Release\mirb" prefix_auto="1" extension_auto="1" />
