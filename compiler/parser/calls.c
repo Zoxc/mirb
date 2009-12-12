@@ -107,12 +107,15 @@ bool has_arguments(struct compiler *compiler)
 		return false;
 }
 
-struct node *parse_arguments(struct compiler *compiler, bool has_args)
+struct node *parse_arguments(struct compiler *compiler, bool has_args, bool *parenthesis)
 {
 	if(has_args && lexer_current(compiler) != T_CURLY_OPEN)
 	{
 		if(lexer_current(compiler) == T_PARAM_OPEN && !lexer_token(compiler)->whitespace)
 		{
+			if(parenthesis)
+				*parenthesis = true;
+
 			struct node *result = 0;
 
 			lexer_next(compiler);
@@ -125,7 +128,12 @@ struct node *parse_arguments(struct compiler *compiler, bool has_args)
 			return result;
 		}
 		else
+		{
+			if(parenthesis)
+				*parenthesis = false;
+
 			return parse_argument(compiler);
+		}
 	}
 	else
 		return 0;
@@ -154,8 +162,18 @@ struct node *parse_super(struct compiler *compiler)
 		current = current->parent;
 	}
 
-	result->left = parse_arguments(compiler, has_arguments(compiler));
+	bool parenthesis;
+
+	result->left = parse_arguments(compiler, has_arguments(compiler), &parenthesis);
 	result->right = parse_block(compiler);
+
+	if(result->left == 0 && !parenthesis)
+	{
+		if(current != owner)
+			kv_push(struct block *, owner->zsupers, current);
+
+		result->type = N_ZSUPER;
+	}
 
 	return result;
 }
@@ -176,7 +194,7 @@ struct node *parse_yield(struct compiler *compiler)
 	result->middle = (void *)rt_symbol_from_cstr("call");
 
 	result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-	result->right->left = parse_arguments(compiler, has_arguments(compiler));
+	result->right->left = parse_arguments(compiler, has_arguments(compiler), 0);
 	result->right->right = parse_block(compiler);
 
 	return result;
@@ -237,7 +255,7 @@ struct node *parse_call(struct compiler *compiler, rt_value symbol, struct node 
 		result->middle = (void *)symbol;
 
 		result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-		result->right->left = parse_arguments(compiler, has_args);
+		result->right->left = parse_arguments(compiler, has_args, 0);
 		result->right->right = parse_block(compiler);
 
 		return secure_block(compiler, result->right->right, result);

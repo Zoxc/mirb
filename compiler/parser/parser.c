@@ -54,7 +54,6 @@ struct variable *scope_var(struct block *block)
 	var->owner = block;
 	var->type = V_LOCAL;
 	var->name = 0;
-	var->real = 0;
 
 	return var;
 }
@@ -76,7 +75,6 @@ struct variable *scope_declare_var(struct block *block, rt_value name)
 	var->owner = block;
 	var->type = V_LOCAL;
 	var->name = name;
-	var->real = 0;
 
 	kh_value(block->variables, k) = var;
 
@@ -106,18 +104,8 @@ struct variable *scope_get(struct block *block, rt_value name)
 		khiter_t k = kh_get(block, defined_block->variables, name);
 
 		var = kh_value(defined_block->variables, k);
-		var->type = V_HEAP;
-		var->owner->heap_vars = true;
 
-		/*
-		 * Make sure the defined block is required by the current block and parents.
-		 */
-		while(block != defined_block)
-		{
-			block_require_scope(block, defined_block);
-
-			block = block->parent;
-		}
+		block_require_var(block, var);
 
 		return var;
 	}

@@ -69,7 +69,6 @@ struct variable {
 	enum variable_type type;
 	size_t index;
 	struct block *owner;
-	struct variable *real;
 	rt_value name;
 };
 
@@ -124,6 +123,7 @@ struct block {
 	bool heap_vars; // If any of the variables must be stored on a heap scope.
 	struct variable *scope_var; // A variable with the pointer to the heap scope
 	struct variable *closure_var; // A variable with the pointer to the closure information
+	kvec_t(struct block *) zsupers; // A list of all the blocks which requires access to all the parameters. Can only be used during parsing.
 
 	#ifdef DEBUG
 		rt_value label_count; // Nicer label labeling...
@@ -142,6 +142,9 @@ struct block {
  */
 
 struct block *block_create(struct compiler *compiler, enum block_type type);
+
+void block_require_var(struct block *current, struct variable *var);
+void block_require_args(struct block *current, struct block *owner);
 
 static inline void block_require_scope(struct block *block, struct block *scope)
 {

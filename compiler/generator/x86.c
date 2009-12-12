@@ -519,7 +519,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_var_push(block, target, op->result, measuring);
 
-				GEN_BYTE(0xBA); // mov edx,
+				GEN_BYTE(0xBA); // mov edx, op->left
 				GEN_DWORD(op->left);
 
 				generate_call(target, rt_support_call, measuring);

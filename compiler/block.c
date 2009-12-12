@@ -65,6 +65,35 @@ void block_print(struct block *block)
 	}
 }
 
+void block_require_var(struct block *current, struct variable *var)
+{
+	var->type = V_HEAP;
+	var->owner->heap_vars = true;
+
+	/*
+	 * Make sure the block owning the varaible is required by the current block and parents.
+	 */
+
+	while(current != var->owner)
+	{
+		block_require_scope(current, var->owner);
+
+		current = current->parent;
+	}
+}
+
+void block_require_args(struct block *current, struct block *owner)
+{
+	for(size_t i = 0; i < kv_size(owner->parameters); i++)
+	{
+		block_require_var(current, kv_A(owner->parameters, i));
+
+	}
+
+	if(owner->block_parameter)
+		block_require_var(current, owner->block_parameter);
+}
+
 struct block *block_create(struct compiler *compiler, enum block_type type)
 {
 	struct block *result = compiler_alloc(compiler, sizeof(struct block));
@@ -87,6 +116,7 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 	kv_init(result->vector);
 	kv_init(result->exception_blocks);
 	kv_init(result->scopes);
+	kv_init(result->zsupers);
 
 	result->variables = kh_init(block);
 

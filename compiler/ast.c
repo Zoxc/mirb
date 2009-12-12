@@ -483,6 +483,20 @@ rt_value name_super(struct node *node)
 	return result;
 }
 
+rt_value name_zsuper(struct node *node)
+{
+	rt_value result = rt_string_from_cstr("zsuper");
+
+	if(node->right)
+	{
+		rt_concat_string(result, rt_string_from_cstr(" {"));
+		rt_concat_string(result, get_node_name(node->right));
+		rt_concat_string(result, rt_string_from_cstr("})"));
+	}
+
+	return result;
+}
+
 get_node_name_proc get_node_name_procs[] = {
 	name_unary_op,
 	name_binary_op,
@@ -508,6 +522,7 @@ get_node_name_proc get_node_name_procs[] = {
 	name_if,
 	name_if,
 	name_super,
+	name_zsuper,
 	name_return,
 	name_next,
 	name_redo,
