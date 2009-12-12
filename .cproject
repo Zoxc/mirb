@@ -51,6 +51,12 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug.78911338" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug"/>
 </toolChain>
 </folderInfo>
+<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.622382148.318862851" name="x86.asm" rcbsApplicability="disable" resourcePath="runtime/x86.asm" toolsToInvoke="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.181647732.768192010">
+<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.181647732.768192010" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.181647732"/>
+</fileInfo>
+<sourceEntries>
+<entry excluding="runtime/x86.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="scannerConfiguration">
@@ -334,7 +340,7 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.release.1025522590" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.release">
 <option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.mingw.exe.release.option.optimization.level.1774398374" name="Optimization Level" superClass="gnu.c.compiler.mingw.exe.release.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.mingw.exe.release.option.debugging.level.1800060862" name="Debug Level" superClass="gnu.c.compiler.mingw.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-<option id="gnu.c.compiler.option.preprocessor.def.symbols.1867269294" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.1867269294" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
 <option id="gnu.c.compiler.option.misc.other.1669797579" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=gnu99" valueType="string"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1133374264" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
@@ -353,6 +359,9 @@
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release.1452697645" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release"/>
 </toolChain>
 </folderInfo>
+<fileInfo id="cdt.managedbuild.config.gnu.mingw.exe.release.635442527.870342821" name="x86.asm" rcbsApplicability="disable" resourcePath="runtime/x86.asm" toolsToInvoke="cdt.managedbuild.tool.gnu.assembler.mingw.exe.release.1053754204.915729288">
+<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.release.1053754204.915729288" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.release.1053754204"/>
+</fileInfo>
 <sourceEntries>
 <entry excluding="runtime/x86_.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
