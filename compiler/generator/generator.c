@@ -280,6 +280,8 @@ static struct variable* generate_call_args(struct block *block, struct node *arg
 
 	if(block_node)
 	{
+		block->self_ref++;
+
 		closure = block_get_var(block);
 		struct block *block_attach = gen_block(block_node);
 		struct variable *scope_args = block_gen_args(block);
