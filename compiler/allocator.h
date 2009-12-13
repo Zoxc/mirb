@@ -1,27 +1,28 @@
 #pragma once
 #include "../globals.h"
+#define ALLOCATOR_ALIGN sizeof(size_t)
 
 struct allocator {
-	unsigned char *page;
-	unsigned char *next;
-	kvec_t(void *) pages;
+	size_t page;
+	size_t next;
+	kvec_t(size_t) pages;
 };
 
 void allocator_init(struct allocator *allocator);
 void allocator_free(struct allocator *allocator);
-void *allocator_page_alloc(struct allocator *allocator, size_t length);
+size_t allocator_page_alloc(struct allocator *allocator, size_t length);
 
 static inline void *allocator_alloc(struct allocator *allocator, size_t length)
 {
-	unsigned char* result = allocator->next;
+	size_t result = allocator->next;
 
-	unsigned char* next = result + length;
+	size_t next = result + length;
 
 	if(next >= allocator->page)
-		return allocator_page_alloc(allocator, length);
+		return (void *)allocator_page_alloc(allocator, length);
 
 	allocator->next = next;
 
-	return result;
+	return (void *)result;
 }
 

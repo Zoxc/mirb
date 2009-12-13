@@ -7,6 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define RT_ALIGN(value, to) ((value + (to) - 1) & ~((to) - 1))
+
 #ifdef DEBUG
 	#define RT_ASSERT(condition) do { \
 		if(!(condition)) { \

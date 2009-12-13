@@ -5,6 +5,7 @@ static unsigned char *next;
 static unsigned char *end;
 
 #define CODE_HEAP_SIZE (1024 * 1024 * 16)
+#define CODE_HEAP_ALIGN 16
 
 void rt_code_heap_create(void)
 {
@@ -30,7 +31,7 @@ void* rt_code_heap_alloc(size_t size)
 {
 	unsigned char* result = next;
 
-	next = next + size;
+	next = (unsigned char *)RT_ALIGN((size_t)next + size, CODE_HEAP_ALIGN);
 
 	RT_ASSERT(next < end); // Heap is out of memory!
 

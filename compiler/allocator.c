@@ -2,7 +2,7 @@
 
 #define ALLOCATOR_PAGE_SIZE 0x1000
 
-static void *get_page(void)
+static size_t get_page(void)
 {
 	void *result;
 
@@ -16,13 +16,13 @@ static void *get_page(void)
 		RT_ASSERT(result != MAP_FAILED);
 	#endif
 
-	return result;
+	return (size_t)result;
 }
 
-static void free_page(void *page)
+static void free_page(size_t page)
 {
 	#ifdef WIN32
-		VirtualFree(page, 0, MEM_RELEASE);
+		VirtualFree((void *)page, 0, MEM_RELEASE);
 	#else
 		munmap(page, ALLOCATOR_PAGE_SIZE);
 	#endif
@@ -30,7 +30,7 @@ static void free_page(void *page)
 
 void allocator_init(struct allocator *allocator)
 {
-	allocator->next = (unsigned char *)get_page();
+	allocator->next = get_page();
 	allocator->page = allocator->next + ALLOCATOR_PAGE_SIZE;
 
 	kv_init(allocator->pages);
@@ -46,14 +46,14 @@ void allocator_free(struct allocator *allocator)
 	kv_destroy(allocator->pages);
 }
 
-void *allocator_page_alloc(struct allocator *allocator, size_t length)
+size_t allocator_page_alloc(struct allocator *allocator, size_t length)
 {
-	kv_push(void *, allocator->pages, allocator->page);
+	kv_push(size_t, allocator->pages, allocator->page);
 
-	unsigned char* result = (unsigned char *)get_page();
+	size_t result = get_page();
 
 	allocator->page = result + ALLOCATOR_PAGE_SIZE;
-	allocator->next = result + length;
+	allocator->next = RT_ALIGN(result + length, ALLOCATOR_ALIGN);
 
 	return result;
 }
