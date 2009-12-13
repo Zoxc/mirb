@@ -96,7 +96,7 @@ module Builder
 	
 	class As < Compiler
 		def do_compile(source)
-			Builder.execute @command, *args(source.settings), File.join(source.package.base, source.name), '-o', source.output
+			Builder.execute @command, *args(source.settings), '-x', 'assembler', '-c', File.join(source.package.base, source.name), '-o', source.output
 		end
 	end
 	
@@ -141,7 +141,7 @@ module Builder
 		end
 	end
 	
-	AS = As.new('gas', ENV['AS'] || 'as', [:FLAGS])
+	AS = As.new('gas', ENV['CC'] || 'gcc', [:FLAGS])
 	GCC = Gcc.new('gcc', ENV['CC'] || 'gcc', [:FLAGS, :CFLAGS])
 	
 	class Settings
