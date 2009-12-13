@@ -59,6 +59,7 @@ Factor <- Number
 	| Module
 	| Method
 	| Yield
+	| Super
 	| BeginBlock
 	| "(", Statements, ")"
 
@@ -101,6 +102,8 @@ AssignOp <- "="
 Call <- CallIdent, {Arguments | "(", Arguments, ")"}, {Block}
 
 Yield  <- {Arguments | "(", Arguments, ")"}
+
+Super <- {Arguments | "(", Arguments, ")"}
 
 Block <- "{", NewLine*, {BlockParameters}, Statements, "}"
 	| "do", NewLine*, {BlockParameters}, Statements, "end"
