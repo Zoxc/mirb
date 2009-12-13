@@ -24,7 +24,7 @@ static void free_page(size_t page)
 	#ifdef WIN32
 		VirtualFree((void *)page, 0, MEM_RELEASE);
 	#else
-		munmap(page, ALLOCATOR_PAGE_SIZE);
+		munmap((void *)page, ALLOCATOR_PAGE_SIZE);
 	#endif
 }
 
