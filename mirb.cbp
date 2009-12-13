@@ -25,7 +25,6 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-funroll-loops -fomit-frame-pointer" />
-					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -37,6 +36,10 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu99 -fstrict-aliasing" />
 		</Compiler>
+		<Linker>
+			<Add library="BeaEngine" />
+			<Add directory="vendor\BeaEngine" />
+		</Linker>
 		<Unit filename="compiler\allocator.c">
 			<Option compilerVar="CC" />
 		</Unit>
