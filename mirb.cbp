@@ -148,6 +148,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\constant.h" />
+		<Unit filename="runtime\exceptions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="runtime\exceptions.h" />
 		<Unit filename="runtime\method.c">
 			<Option compilerVar="CC" />
 		</Unit>
