@@ -107,44 +107,40 @@ rt_compiled_block(rt_kernel_print)
 	return RT_NIL;
 }
 
-#ifdef WIN32
-	rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
+rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
+{
+	rt_value exception = rt_alloc(sizeof(struct rt_exception));
+
+	RT_COMMON(exception)->flags = C_EXCEPTION;
+
+	size_t i = 0;
+
+	if(rt_type(RT_ARG(0)) == C_CLASS)
 	{
-		rt_value exception = rt_alloc(sizeof(struct rt_exception));
-
-		RT_COMMON(exception)->flags = C_EXCEPTION;
-
-		size_t i = 0;
-
-		if(rt_type(RT_ARG(0)) == C_CLASS)
-		{
-			RT_COMMON(exception)->class_of = RT_ARG(0);
-			i++;
-		}
-		else
-			RT_COMMON(exception)->class_of = rt_Exception;
-
-		if(argc > i)
-		{
-			RT_EXCEPTION(exception)->message = RT_ARG(i);
-			i++;
-		}
-		else
-			RT_EXCEPTION(exception)->message = RT_NIL;
-
-		if(argc > i)
-		{
-			RT_EXCEPTION(exception)->backtrace = RT_ARG(i);
-			i++;
-		}
-		else
-			RT_EXCEPTION(exception)->backtrace = RT_NIL;
-
-		RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)exception);
-
-		__builtin_unreachable();
+		RT_COMMON(exception)->class_of = RT_ARG(0);
+		i++;
 	}
-#endif
+	else
+		RT_COMMON(exception)->class_of = rt_Exception;
+
+	if(argc > i)
+	{
+		RT_EXCEPTION(exception)->message = RT_ARG(i);
+		i++;
+	}
+	else
+		RT_EXCEPTION(exception)->message = RT_NIL;
+
+	if(argc > i)
+	{
+		RT_EXCEPTION(exception)->backtrace = RT_ARG(i);
+		i++;
+	}
+	else
+		RT_EXCEPTION(exception)->backtrace = RT_NIL;
+
+	rt_exception_raise(exception);
+}
 
 void rt_kernel_init(void)
 {

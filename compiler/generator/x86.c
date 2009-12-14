@@ -805,18 +805,7 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		block->current_exception_block_id = -1;
 
 		/*
-		 * Generate seh_frame struct
-		 *
-
-		typedef struct struct seh_frame {
-			struct struct seh_frame *prev;
-			void *handler;
-			size_t handling;
-			size_t handler_index;
-			struct block_data *block;
-			size_t old_ebp;
-		} struct rt_seh_frame;
-
+		 * Generate rt_frame struct
 		 */
 
 		// old_ebp is already pushed

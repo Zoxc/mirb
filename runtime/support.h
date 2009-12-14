@@ -1,13 +1,6 @@
 #pragma once
 #include "runtime.h"
 
-enum rt_exception_type {
-	E_RUBY_EXCEPTION,
-	E_RETURN_EXCEPTION,
-	E_BREAK_EXCEPTION,
-	E_THROW_EXCEPTION
-};
-
 void *__stdcall rt_support_alloc_scope(size_t size);
 
 rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[]);

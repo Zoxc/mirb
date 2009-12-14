@@ -3,38 +3,7 @@
 #include "bytecode.h"
 #include "compiler.h"
 #include "../runtime/runtime.h"
-
-/*
- * Exception runtime data
- */
-
-enum exception_handler_type {
-	E_RUNTIME_EXCEPTION,
-	E_CLASS_EXCEPTION,
-	E_FILTER_EXCEPTION,
-};
-
-struct exception_handler {
-	enum exception_handler_type type;
-	struct exception_handler *next;
-};
-
-struct runtime_exception_handler {
-	struct exception_handler common;
-	void *rescue_label;
-};
-
-struct class_exception_handler {
-	struct runtime_exception_handler common;
-};
-
-struct exception_block {
-	size_t parent_index;
-	struct exception_block *parent;
-	kvec_t(struct exception_handler *) handlers;
-	void *block_label;
-	void *ensure_label;
-};
+#include "../runtime/exceptions.h"
 
 /*
  * Block runtime data
