@@ -31,6 +31,7 @@
 	#define __cdecl __attribute__((__cdecl__))
 
 	#include <sys/mman.h>
+	#include <sys/stat.h>
 #endif
 
 static inline void __attribute__((noreturn)) __builtin_unreachable(void)

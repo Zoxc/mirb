@@ -33,17 +33,33 @@ rt_compiled_block(rt_kernel_eval)
 
 static FILE *open_file(rt_value *filename)
 {
-	FILE* file = fopen(rt_string_to_cstr(*filename), "rb");
+	struct stat buf;
+	bool is_dir = false;
+	FILE* file = 0;
 
-	if(!file)
+	#ifndef WIN32
+		stat(rt_string_to_cstr(*filename), &buf);
+		is_dir = S_ISDIR(buf.st_mode);
+	#endif
+
+	if(!is_dir)
+		file = fopen(rt_string_to_cstr(*filename), "rb");
+
+	if(is_dir || !file)
 	{
 		rt_value append = rt_dup_string(*filename);
 
 		rt_concat_string(append, rt_string_from_cstr(".rb"));
 
-		file = fopen(rt_string_to_cstr(append), "rb");
+		#ifndef WIN32
+			stat(rt_string_to_cstr(append), &buf);
+			is_dir = S_ISDIR(buf.st_mode);
+		#endif
 
-		if(!file)
+		if(!is_dir)
+			file = fopen(rt_string_to_cstr(append), "rb");
+
+		if(is_dir || !file)
 			return 0;
 
 		*filename = append;
