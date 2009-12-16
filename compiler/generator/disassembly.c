@@ -16,7 +16,7 @@ struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_alloc_scope),
 
 #ifdef WIN32
-	DISASSEMBLY_SYMBOL(rt_support_seh_handler),
+	DISASSEMBLY_SYMBOL(rt_support_handler),
 #endif
 
 	DISASSEMBLY_SYMBOL(rt_support_interpolate),	DISASSEMBLY_SYMBOL(rt_support_array),

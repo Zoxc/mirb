@@ -1,6 +1,7 @@
 #include "../classes.h"
 #include "../runtime.h"
 #include "../constant.h"
+#include "../exceptions.h"
 #include "../classes/symbol.h"
 #include "../classes/string.h"
 #include "../classes/exception.h"
@@ -139,7 +140,12 @@ rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 	else
 		RT_EXCEPTION(exception)->backtrace = RT_NIL;
 
-	rt_exception_raise(exception);
+	struct rt_exception_data data;
+
+	data.type = E_RUBY_EXCEPTION;
+	data.payload[0] = (void *)exception;
+
+	rt_exception_raise(&data);
 }
 
 void rt_kernel_init(void)

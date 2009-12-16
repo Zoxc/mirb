@@ -17,7 +17,7 @@ def execute(target, settings)
 	end
 	
 	if Rake::Win32.windows?
-		settings = Builder::Settings.new(settings.name, settings, {:LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
+		settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-DWIN_SEH'], :LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
 	end
 	
 	unless MIRB.send target, settings

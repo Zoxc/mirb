@@ -1,13 +1,27 @@
 #include "../globals.h"
 #include "exceptions.h"
 
-#ifdef WIN32
-	void __attribute__((noreturn)) rt_exception_raise(rt_value exception)
-	{
-		RaiseException(RT_SEH_RUBY + E_RUBY_EXCEPTION, 0, 1, (const DWORD *)exception);
+#ifndef WIN_SEH
+	__thread struct rt_frame *rt_current_handler = 0;
+#endif
+
+void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data)
+{
+	#ifdef WIN_SEH
+		RaiseException(RT_SEH_RUBY, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);
 
 		__builtin_unreachable();
-	}
-#else
-	__thread struct rt_frame *rt_current_handler;
-#endif
+	#else
+		struct rt_frame *top = rt_current_handler;
+		struct rt_frame *frame = top;
+
+		while(frame)
+		{
+			frame->handler(frame, top, data, false);
+			frame = frame->prev;
+		}
+
+		RT_ASSERT(0);
+	#endif
+}
+

@@ -34,20 +34,35 @@ struct exception_block {
 	void *ensure_label;
 };
 
+struct rt_exception_data {
+	enum exception_handler_type type;
+	void *payload[3];
+};
+
+struct rt_frame;
+
+#ifdef WIN_SEH
+	typedef EXCEPTION_DISPOSITION( __cdecl *rt_exception_handler_t)(EXCEPTION_RECORD *exception, struct rt_frame *frame, CONTEXT *context, void *dispatcher_context);
+#else
+	typedef void (*rt_exception_handler_t)(struct rt_frame *frame, struct rt_frame *top, struct rt_exception_data *data, bool unwinding);
+#endif
+
 struct rt_frame {
 	struct rt_frame *prev;
-	void *handler;
+	rt_exception_handler_t handler;
 	size_t handling;
 	size_t block_index;
 	struct block_data *block;
 	size_t old_ebp;
 };
 
-#ifdef WIN32
+#ifdef WIN_SEH
 	#define RT_SEH_RUBY 0x4D520000
 #else
-	extern __thread struct rt_frame *rt_current_handler;
+	extern __thread struct rt_frame *rt_current_frame;
 #endif
+
+void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data);
 
 enum rt_exception_type {
 	E_RUBY_EXCEPTION,
@@ -56,4 +71,3 @@ enum rt_exception_type {
 	E_THROW_EXCEPTION
 };
 
-void __attribute__((noreturn)) rt_exception_raise(rt_value exception);

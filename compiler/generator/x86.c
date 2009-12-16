@@ -820,21 +820,35 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		generate_stack_push(target, 0, measuring);
 
 		// handler @ ebp - 16
-		generate_stack_push(target, (size_t)&rt_support_seh_handler, measuring);
+		generate_stack_push(target, (size_t)&rt_support_handler, measuring);
 
-		// prev @ ebp - 20
-		GEN_BYTE(0x64); // push dword [fs:0]
-		GEN_BYTE(0xFF);
-		GEN_BYTE(0x35);
-		GEN_DWORD(0);
+		#ifdef WIN_SEH
+			// prev @ ebp - 20
+			GEN_BYTE(0x64); // push dword [fs:0]
+			GEN_BYTE(0xFF);
+			GEN_BYTE(0x35);
+			GEN_DWORD(0);
 
-		/*
-		 * Append the struct to the linked list
-		 */
-		GEN_BYTE(0x64); // mov dword [fs:0], esp
-		GEN_BYTE(0x89);
-		GEN_BYTE(0x25);
-		GEN_DWORD(0);
+			/*
+			 * Append the struct to the linked list
+			 */
+			GEN_BYTE(0x64); // mov dword [fs:0], esp
+			GEN_BYTE(0x89);
+			GEN_BYTE(0x25);
+			GEN_DWORD(0);
+		#else
+			/*
+			 * Placeholder for prev - rt_support_push_frame will set the real value
+			 */
+			// prev @ ebp - 20
+			GEN_BYTE(0x54); // push esp
+
+			/*
+			 * Append the struct to the linked list
+			 */
+			GEN_BYTE(0x54); // push esp
+			generate_call(target, rt_support_push_frame, measuring);
+		#endif
 	}
 
 	if(stack_vars > 0)
@@ -940,14 +954,26 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	{
 		data->epilog = (void *)label_target(start, (rt_value)block->epilog);
 
-		GEN_BYTE(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
-		GEN_BYTE(0x4D);
-		GEN_BYTE(-20);
+		#ifdef WIN_SEH
+			GEN_BYTE(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+			GEN_BYTE(0x4D);
+			GEN_BYTE(-20);
 
-		GEN_BYTE(0x64); // mov dword [fs:0], ecx
-		GEN_BYTE(0x89);
-		GEN_BYTE(0x0D);
-		GEN_DWORD(0);
+			GEN_BYTE(0x64); // mov dword [fs:0], ecx
+			GEN_BYTE(0x89);
+			GEN_BYTE(0x0D);
+			GEN_DWORD(0);
+		#else
+			GEN_BYTE(0x50); // push eax
+
+			GEN_BYTE(0xFF); // push dword [ebp - 20] ; Load previous exception frame
+			GEN_BYTE(0x75);
+			GEN_BYTE(-20);
+
+			generate_call(target, rt_support_set_frame, measuring);
+
+			GEN_BYTE(0x58); // pop eax
+		#endif
 
 		GEN_BYTE(0x5B); // pop ebx
 		GEN_BYTE(0x5F); // pop edi
@@ -968,9 +994,9 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	GEN_BYTE(0x89);
 	GEN_BYTE(0xEC);
 	GEN_BYTE(0x5D);
-	GEN_BYTE(0xC2);
 
-	GEN_WORD(16); // ret 16
+	GEN_BYTE(0xC2); // ret 16
+	GEN_WORD(16);
 }
 
 rt_compiled_block_t compile_block(struct block *block)

@@ -1,6 +1,7 @@
 #include "support.h"
 #include "classes.h"
 #include "constant.h"
+#include "exceptions.h"
 #include "classes/string.h"
 #include "classes/symbol.h"
 #include "classes/proc.h"
@@ -15,6 +16,19 @@ rt_value __stdcall rt_support_define_string(const char* string)
 {
 	return rt_string_from_cstr(string);
 }
+
+#ifndef WIN_SEH
+	void __stdcall rt_support_push_frame(struct rt_frame* frame)
+	{
+		frame->prev = rt_current_frame;
+		rt_current_frame = frame;
+	}
+
+	void __stdcall rt_support_set_frame(struct rt_frame* frame)
+	{
+		rt_current_frame = frame;
+	}
+#endif
 
 rt_value __stdcall rt_support_get_const(rt_value obj, rt_value name)
 {

@@ -24,16 +24,11 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 rt_value rt_support_get_ivar(void);
 void __stdcall rt_support_set_ivar(rt_value value);
 
-#ifdef WIN32
-	void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target);
-	void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id);
+void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target);
+void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id);
 
-	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, struct rt_frame *frame_data, CONTEXT *context, void *dispatcher_context);
+#ifdef WIN_SEH
+	EXCEPTION_DISPOSITION __cdecl rt_support_handler(EXCEPTION_RECORD *exception, struct rt_frame *frame, CONTEXT *context, void *dispatcher_context);
 #else
-	/*
-	 * Dummy functions
-	 */
-	void rt_support_return(void);
-	void rt_support_break(void);
-	void rt_support_seh_handler(void);
+	void rt_support_handler(struct rt_frame *frame, struct rt_frame *top, struct rt_exception_data *data, bool unwinding);
 #endif

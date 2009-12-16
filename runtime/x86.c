@@ -115,7 +115,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 	rt_object_set_var(obj, name, value);
 }
 
-#ifdef WIN32
+#ifdef WIN_SEH
 	static bool rt_find_seh_target(void *target)
 	{
 		struct rt_frame *frame;
@@ -127,7 +127,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 			if(frame == (void *)-1)
 				return false;
 
-			if(frame->handler == rt_support_seh_handler)
+			if(frame->handler == rt_support_handler)
 			{
 				if(frame->block == target)
 					return true;
@@ -136,47 +136,51 @@ void __stdcall rt_support_set_ivar(rt_value value)
 			frame = frame->prev;
 		}
 	}
+#endif
 
-	void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target)
-	{
+void __stdcall __attribute__((noreturn)) rt_support_return(rt_value value, void *target)
+{
+	#ifdef WIN_SEH
 		if(!rt_find_seh_target(target))
 			RT_ASSERT(0);
+	#endif
 
-		rt_value data[2];
+	struct rt_exception_data data;
 
-		data[0] = (rt_value)target;
-		data[1] = value;
+	data.type = E_RETURN_EXCEPTION;
+	data.payload[0] = (void *)target;
+	data.payload[1] = (void *)value;
 
-		RaiseException(RT_SEH_RUBY + E_RETURN_EXCEPTION, 0, 2, (const DWORD *)data);
+	rt_exception_raise(&data);
+}
 
-		__builtin_unreachable();
-	}
-
-	void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id)
-	{
+void __stdcall __attribute__((noreturn)) rt_support_break(rt_value value, void *target, size_t id)
+{
+	#ifdef WIN_SEH
 		if(!rt_find_seh_target(target))
 			RT_ASSERT(0);
+	#endif
 
-		rt_value data[3];
+	struct rt_exception_data data;
 
-		data[0] = (rt_value)target;
-		data[1] = value;
-		data[2] = id;
+	data.type = E_BREAK_EXCEPTION;
+	data.payload[0] = (void *)target;
+	data.payload[1] = (void *)value;
+	data.payload[2] = (void *)id;
 
-		RaiseException(RT_SEH_RUBY + E_BREAK_EXCEPTION, 0, 3, (const DWORD *)data);
+	rt_exception_raise(&data);
+}
 
-		__builtin_unreachable();
-	}
+static void rt_global_unwind(struct rt_frame *target, struct rt_frame *top)
+{
+	#ifdef WIN_SEH
+		extern void __stdcall RtlUnwind(
+			PVOID TargetFrame,
+			PVOID TargetIp,
+			PEXCEPTION_RECORD ExceptionRecord,
+			PVOID ReturnValue
+		);
 
-	extern void __stdcall RtlUnwind(
-		PVOID TargetFrame,
-		PVOID TargetIp,
-		PEXCEPTION_RECORD ExceptionRecord,
-		PVOID ReturnValue
-	);
-
-	static void rt_seh_global_unwind(struct rt_frame *target)
-	{
 		int dummy;
 
 		__asm__ __volatile__("pushl %%ebp\n"
@@ -192,193 +196,205 @@ void __stdcall rt_support_set_ivar(rt_value value)
 		: "=a" (dummy)
 		: "0" (target)
 		: "esi", "edi", "edx", "ecx", "memory");
-	}
+	#else
+		struct rt_frame *frame = top;
 
-	static void rt_seh_local_unwind(struct rt_frame *frame_data, struct exception_block *block, struct exception_block *target)
-	{
-		frame_data->handling = 1;
-
-		size_t ebp = (size_t)&frame_data->old_ebp;
-
-		while(block != target)
+		while(frame != target)
 		{
-			if(block->ensure_label)
-			{
-				#ifdef DEBUG
-					printf("Ensure block found\n");
-					printf("Ebp: %x\n", ebp);
-					printf("Eip: %x\n", (size_t)block->ensure_label);
-				#endif
+			frame->handler(frame, 0, 0, true);
+			frame = frame->prev;
+		}
+	#endif
+}
 
-				int dummy1, dummy2;
+static void rt_local_unwind(struct rt_frame *frame, struct exception_block *block, struct exception_block *target)
+{
+	frame->handling = 1;
 
-				__asm__ __volatile__("pushl %%ebp\n"
-					"pushl %%ebx\n"
-					"mov %0, %%ebp\n"
-					"call *%1\n"
-					"popl %%ebx\n"
-					"popl %%ebp\n"
-				: "=a" (dummy1), "=c" (dummy2)
-				: "0" (ebp), "1" (block->ensure_label)
-				: "esi", "edi", "edx", "memory");
-			}
+	size_t ebp = (size_t)&frame->old_ebp;
 
-			block = block->parent;
+	while(block != target)
+	{
+		if(block->ensure_label)
+		{
+			#ifdef DEBUG
+				printf("Ensure block found\n");
+				printf("Ebp: %x\n", ebp);
+				printf("Eip: %x\n", (size_t)block->ensure_label);
+			#endif
+
+			int dummy1, dummy2;
+
+			__asm__ __volatile__("pushl %%ebp\n"
+				"pushl %%ebx\n"
+				"mov %0, %%ebp\n"
+				"call *%1\n"
+				"popl %%ebx\n"
+				"popl %%ebp\n"
+			: "=a" (dummy1), "=c" (dummy2)
+			: "0" (ebp), "1" (block->ensure_label)
+			: "esi", "edi", "edx", "memory");
 		}
 
-		frame_data->handling = 0;
+		block = block->parent;
 	}
 
-	static void __attribute__((noreturn)) rt_seh_return(struct rt_frame *frame_data, struct exception_block *block, rt_value value)
+	frame->handling = 0;
+}
+
+static void __attribute__((noreturn)) rt_handle_return(struct rt_frame *frame, struct rt_frame *top, struct exception_block *block, rt_value value)
+{
+	rt_global_unwind(frame, top);
+
+	/*
+	 * Execute frame local ensure handlers
+	 */
+
+	rt_local_unwind(frame, block, 0);
+
+	/*
+	 * Go to the handler and never return
+	 */
+
+	size_t ebp = (size_t)&frame->old_ebp;
+
+	#ifdef DEBUG
+		printf("Return target found\n");
+		printf("Ebp: %x\n", ebp);
+		printf("Esp: %x\n", ebp - 20 - 12 - frame->block->local_storage);
+		printf("Eip: %x\n", (size_t)frame->block->epilog);
+	#endif
+
+	__asm__ __volatile__("mov %0, %%ecx\n"
+		"mov %1, %%esp\n"
+		"mov %2, %%ebp\n"
+		"jmp *%%ecx\n"
+	:
+	: "r" (frame->block->epilog),
+		"r" (ebp - 20 - 12 - frame->block->local_storage),
+		"r" (ebp),
+		"a" (value)
+	: "%ecx");
+
+	__builtin_unreachable();
+}
+
+static void __attribute__((noreturn)) rt_handle_break(struct rt_frame *frame, struct rt_frame *top, rt_value value, size_t id)
+{
+	rt_global_unwind(frame, top);
+
+	/*
+	 * Go to the handler and never return
+	 */
+
+	size_t ebp = (size_t)&frame->old_ebp;
+
+	#ifdef DEBUG
+		printf("Break target found\n");
+		printf("Ebp: %x\n", ebp);
+		printf("Esp: %x\n", ebp - 20 - 12 - frame->block->local_storage);
+		printf("Eip: %x\n", (size_t)frame->block->break_targets[id]);
+	#endif
+
+	__asm__ __volatile__("mov %0, %%ecx\n"
+		"mov %1, %%esp\n"
+		"mov %2, %%ebp\n"
+		"jmp *%%ecx\n"
+	:
+	: "r" (frame->block->break_targets[id]),
+		"r" (ebp - 20 - 12 - frame->block->local_storage),
+		"r" (ebp),
+		"a" (value)
+	: "%ecx");
+
+	__builtin_unreachable();
+}
+
+static void __attribute__((noreturn)) rt_rescue(struct rt_frame *frame, struct rt_frame *top, struct exception_block *block, struct exception_block *current_block, void *rescue_label)
+{
+	rt_global_unwind(frame, top);
+
+	/*
+	 * Execute frame local ensure handlers
+	 */
+
+	rt_local_unwind(frame, block, current_block);
+
+	/*
+	 * Set to the current handler index to the parent
+	 */
+
+	frame->block_index = current_block->parent_index;
+
+	/*
+	 * Go to the handler and never return
+	 */
+
+	size_t ebp = (size_t)&frame->old_ebp;
+
+	#ifdef DEBUG
+		printf("Rescue block found\n");
+		printf("Ebp: %x\n", ebp);
+		printf("Esp: %x\n", ebp - 20 - 12 - frame->block->local_storage);
+		printf("Eip: %x\n", (size_t)rescue_label);
+	#endif
+
+	__asm__ __volatile__("mov %0, %%eax\n"
+		"mov %1, %%esp\n"
+		"mov %2, %%ebp\n"
+		"jmp *%%eax\n"
+	:
+	: "r" (rescue_label),
+		"r" (ebp - 20 - 12 - frame->block->local_storage),
+		"r" (ebp)
+	: "%eax");
+
+	__builtin_unreachable();
+}
+
+static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, struct rt_exception_data *data, bool unwinding)
+{
+	if(frame->block_index == -1) // Outside any exception block
 	{
-		rt_seh_global_unwind(frame_data);
-
-		/*
-		 * Execute frame local ensure handlers
-		 */
-
-		rt_seh_local_unwind(frame_data, block, 0);
-
-		/*
-		 * Go to the handler and never return
-		 */
-
-		size_t ebp = (size_t)&frame_data->old_ebp;
-
-		#ifdef DEBUG
-			printf("Return target found\n");
-			printf("Ebp: %x\n", ebp);
-			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", (size_t)frame_data->block->epilog);
-		#endif
-
-		__asm__ __volatile__("mov %0, %%ecx\n"
-			"mov %1, %%esp\n"
-			"mov %2, %%ebp\n"
-			"jmp *%%ecx\n"
-		:
-		: "r" (frame_data->block->epilog),
-			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
-			"r" (ebp),
-			"a" (value)
-		: "%ecx");
-
-		__builtin_unreachable();
-	}
-
-	static void __attribute__((noreturn)) rt_seh_break(struct rt_frame *frame_data, rt_value value, size_t id)
-	{
-		rt_seh_global_unwind(frame_data);
-
-		/*
-		 * Go to the handler and never return
-		 */
-
-		size_t ebp = (size_t)&frame_data->old_ebp;
-
-		#ifdef DEBUG
-			printf("Break target found\n");
-			printf("Ebp: %x\n", ebp);
-			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", (size_t)frame_data->block->break_targets[id]);
-		#endif
-
-		__asm__ __volatile__("mov %0, %%ecx\n"
-			"mov %1, %%esp\n"
-			"mov %2, %%ebp\n"
-			"jmp *%%ecx\n"
-		:
-		: "r" (frame_data->block->break_targets[id]),
-			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
-			"r" (ebp),
-			"a" (value)
-		: "%ecx");
-
-		__builtin_unreachable();
-	}
-
-	static void __attribute__((noreturn)) rt_seh_rescue(struct rt_frame *frame_data, struct exception_block *block, struct exception_block *current_block, void *rescue_label)
-	{
-		rt_seh_global_unwind(frame_data);
-
-		/*
-		 * Execute frame local ensure handlers
-		 */
-
-		rt_seh_local_unwind(frame_data, block, current_block);
-
-		/*
-		 * Set to the current handler index to the parent
-		 */
-
-		frame_data->block_index = current_block->parent_index;
-
-		/*
-		 * Go to the handler and never return
-		 */
-
-		size_t ebp = (size_t)&frame_data->old_ebp;
-
-		#ifdef DEBUG
-			printf("Rescue block found\n");
-			printf("Ebp: %x\n", ebp);
-			printf("Esp: %x\n", ebp - 20 - 12 - frame_data->block->local_storage);
-			printf("Eip: %x\n", (size_t)rescue_label);
-		#endif
-
-		__asm__ __volatile__("mov %0, %%eax\n"
-			"mov %1, %%esp\n"
-			"mov %2, %%ebp\n"
-			"jmp *%%eax\n"
-		:
-		: "r" (rescue_label),
-			"r" (ebp - 20 - 12 - frame_data->block->local_storage),
-			"r" (ebp)
-		: "%eax");
-
-		__builtin_unreachable();
-	}
-
-	EXCEPTION_DISPOSITION __cdecl rt_support_seh_handler(EXCEPTION_RECORD *exception, struct rt_frame *frame_data, CONTEXT *context, void *dispatcher_context)
-	{
-		if(frame_data->block_index == -1)
+		if(!unwinding && data && data->payload[0] == frame->block)
 		{
-			if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
-				return ExceptionContinueSearch;
-			else if(exception->ExceptionCode == RT_SEH_RUBY + E_RETURN_EXCEPTION && (void *)exception->ExceptionInformation[0] == frame_data->block)
+			switch(data->type)
 			{
-				rt_seh_return(frame_data, 0, exception->ExceptionInformation[1]);
-			}
-			else if(exception->ExceptionCode == RT_SEH_RUBY + E_BREAK_EXCEPTION && (void *)exception->ExceptionInformation[0] == frame_data->block)
-			{
-				rt_seh_break(frame_data, exception->ExceptionInformation[1], exception->ExceptionInformation[2]);
+				case E_RETURN_EXCEPTION:
+					rt_handle_return(frame, top, 0, (rt_value)data->payload[1]);
+					break;
+
+				case E_BREAK_EXCEPTION:
+					rt_handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+					break;
+
+				default:
+					break;
 			}
 		}
 
-		struct exception_block *block = kv_A(frame_data->block->exception_blocks, frame_data->block_index);
+		return;
+	}
 
-		if(exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
+	struct exception_block *block = kv_A(frame->block->exception_blocks, frame->block_index);
+
+	if(unwinding)
+	{
+		rt_local_unwind(frame, block, 0);
+	}
+	else if(data)
+	{
+		switch(data->type)
 		{
-			rt_seh_local_unwind(frame_data, block, 0);
+			case E_BREAK_EXCEPTION:
+				rt_handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+				break;
 
-			return ExceptionContinueSearch;
-		}
+			case E_RETURN_EXCEPTION:
+				rt_handle_return(frame, top, block, (rt_value)data->payload[1]);
+				break;
 
-		switch(exception->ExceptionCode)
-		{
-			case RT_SEH_RUBY + E_BREAK_EXCEPTION:
-			{
-				rt_seh_break(frame_data, exception->ExceptionInformation[1], exception->ExceptionInformation[2]);
-			}
-			break;
-
-			case RT_SEH_RUBY + E_RETURN_EXCEPTION:
-			{
-				rt_seh_return(frame_data, block, exception->ExceptionInformation[1]);
-			}
-			break;
-
-			case RT_SEH_RUBY + E_RUBY_EXCEPTION:
+			case E_RUBY_EXCEPTION:
 			{
 				struct exception_block *current_block = block;
 
@@ -391,7 +407,7 @@ void __stdcall rt_support_set_ivar(rt_value value)
 						switch(handler->type)
 						{
 							case E_RUNTIME_EXCEPTION:
-								rt_seh_rescue(frame_data, block, current_block, ((struct runtime_exception_handler *)handler)->rescue_label);
+								rt_rescue(frame, top, block, current_block, ((struct runtime_exception_handler *)handler)->rescue_label);
 
 							default:
 								break;
@@ -403,22 +419,24 @@ void __stdcall rt_support_set_ivar(rt_value value)
 			}
 			break;
 		}
+	}
+}
+
+#ifdef WIN_SEH
+	EXCEPTION_DISPOSITION __cdecl rt_support_handler(EXCEPTION_RECORD *exception, struct rt_frame *frame, CONTEXT *context, void *dispatcher_context)
+	{
+		struct rt_exception_data *data = 0;
+
+		if(exception->ExceptionCode == RT_SEH_RUBY)
+			data = (void *)exception->ExceptionInformation[0];
+
+		rt_handle_exception(frame, 0, data, exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND));
 
 		return ExceptionContinueSearch;
 	}
 #else
-	/*
-	 * Dummy functions
-	 */
-	void rt_support_return(void)
+	void rt_support_handler(struct rt_frame *frame, struct rt_frame *top, struct rt_exception_data *data, bool unwinding)
 	{
-	}
-
-	void rt_support_break(void)
-	{
-	}
-
-	void rt_support_seh_handler(void)
-	{
+		rt_handle_exception(frame, top, data, unwinding);
 	}
 #endif
