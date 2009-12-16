@@ -33,7 +33,10 @@ rt_compiled_block(rt_kernel_eval)
 
 static FILE *open_file(rt_value *filename)
 {
-	struct stat buf;
+	#ifndef WIN32
+		struct stat buf;
+	#endif
+	
 	bool is_dir = false;
 	FILE* file = 0;
 
