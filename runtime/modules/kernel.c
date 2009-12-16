@@ -159,8 +159,5 @@ void rt_kernel_init(void)
 	rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
 	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
 	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
-
-	#ifdef WIN32
-			rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
-	#endif
+	rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
 }

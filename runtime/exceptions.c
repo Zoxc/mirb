@@ -2,7 +2,7 @@
 #include "exceptions.h"
 
 #ifndef WIN_SEH
-	__thread struct rt_frame *rt_current_handler = 0;
+	__thread struct rt_frame *rt_current_frame = 0;
 #endif
 
 void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data)
@@ -12,7 +12,7 @@ void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data
 
 		__builtin_unreachable();
 	#else
-		struct rt_frame *top = rt_current_handler;
+		struct rt_frame *top = rt_current_frame;
 		struct rt_frame *frame = top;
 
 		while(frame)
