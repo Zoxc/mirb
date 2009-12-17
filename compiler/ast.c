@@ -459,9 +459,7 @@ rt_value name_next(struct node *node)
 
 rt_value name_redo(struct node *node)
 {
-	rt_value result = rt_string_from_cstr("redo ");
-
-	rt_concat_string(result, get_node_name(node->left));
+	rt_value result = rt_string_from_cstr("redo");
 
 	return result;
 }
@@ -543,7 +541,7 @@ get_node_name_proc get_node_name_procs[] = {
 
 rt_value get_node_name(struct node *node)
 {
-	if (node)
+	if(node)
 		return get_node_name_procs[node->type](node);
 	else
 		return rt_string_from_cstr("");

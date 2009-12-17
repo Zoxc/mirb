@@ -14,15 +14,19 @@ size_t allocator_page_alloc(struct allocator *allocator, size_t length);
 
 static inline void *allocator_alloc(struct allocator *allocator, size_t length)
 {
-	size_t result = allocator->next;
+	#ifdef VALGRIND
+		return malloc(length);
+	#else
+		size_t result = allocator->next;
 
-	size_t next = result + length;
+		size_t next = result + length;
 
-	if(next >= allocator->page)
-		return (void *)allocator_page_alloc(allocator, length);
+		if(next >= allocator->page)
+			return (void *)allocator_page_alloc(allocator, length);
 
-	allocator->next = next;
+		allocator->next = next;
 
-	return (void *)result;
+		return (void *)result;
+	#endif
 }
 

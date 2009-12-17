@@ -111,6 +111,8 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 	result->current_exception_block = 0;
 	result->current_exception_block_id = (size_t)-1;
 	result->break_targets = 0;
+	result->can_break = false;
+	result->heap_vars = 0;
 
 	kv_init(result->parameters);
 	kv_init(result->vector);
@@ -135,3 +137,4 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 
 	return result;
 }
+

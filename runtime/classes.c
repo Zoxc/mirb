@@ -275,7 +275,7 @@ void rt_setup_classes(void)
 
 	metaclass = rt_class_create_singleton(rt_Object, rt_Class);
 	metaclass = rt_class_create_singleton(rt_Module, metaclass);
-	metaclass = rt_class_create_singleton(rt_Class, metaclass);
+	rt_class_create_singleton(rt_Class, metaclass);
 
 	rt_Symbol = rt_class_create_unnamed(rt_Object);
 	rt_String = rt_class_create_unnamed(rt_Object);
