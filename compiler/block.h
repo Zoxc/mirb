@@ -148,7 +148,6 @@ static inline struct opcode *block_get_flush_label(struct block *block)
 static inline struct variable *block_get_var(struct block *block)
 {
 	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct temp_variable));
-	temp->owner = block;
 	temp->type = V_TEMP;
 	temp->index = block->var_count[V_TEMP];
 

@@ -124,23 +124,22 @@ void rt_class_name(rt_value obj, rt_value under, rt_value name)
 {
 	rt_value under_path = rt_object_get_var(under, rt_symbol_from_cstr("__classpath__"));
 
-	char *new_path = malloc(RT_STRING(under)->length + strlen(rt_symbol_to_cstr(name)) + 3);
+	rt_value new_path;
 
-	if (under == rt_Object)
+	if(under == rt_Object)
 	{
-		strcpy(new_path, rt_symbol_to_cstr(name));
+		new_path = rt_string_from_symbol(name);
 	}
 	else
 	{
-		strcpy(new_path, rt_string_to_cstr(under_path));
-		strcat(new_path, "::");
-		strcat(new_path, rt_symbol_to_cstr(name));
+ 		new_path = rt_dup_string(under_path);
+
+		rt_concat_string(new_path, rt_string_from_cstr("::"));
+		rt_concat_string(new_path, rt_string_from_symbol(name));
 	}
 
-	rt_object_set_var(obj, rt_symbol_from_cstr("__classname__"), rt_string_from_cstr(rt_symbol_to_cstr(name)));
-	rt_object_set_var(obj, rt_symbol_from_cstr("__classpath__"), rt_string_from_cstr(new_path));
-
-	free(new_path);
+	rt_object_set_var(obj, rt_symbol_from_cstr("__classname__"), rt_string_from_symbol(name));
+	rt_object_set_var(obj, rt_symbol_from_cstr("__classpath__"), new_path);
 
 	rt_const_set(under, name, obj);
 }
