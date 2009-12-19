@@ -37,12 +37,12 @@ rt_compiled_block(rt_exception_initialize)
 
 void rt_exception_init(void)
 {
-	rt_Exception = rt_define_class(rt_Object, rt_symbol_from_cstr("Exception"), rt_Object);
+	rt_Exception = rt_define_class(rt_Object, "Exception", rt_Object);
 
-	rt_define_singleton_method(rt_Exception, rt_symbol_from_cstr("allocate"), rt_Exception_allocate);
+	rt_define_singleton_method(rt_Exception, "allocate", rt_Exception_allocate);
 
-	rt_define_method(rt_Exception, rt_symbol_from_cstr("initialize"), rt_exception_initialize);
-	rt_define_method(rt_Exception, rt_symbol_from_cstr("message"), rt_exception_to_s);
-	rt_define_method(rt_Exception, rt_symbol_from_cstr("to_s"), rt_exception_to_s);
+	rt_define_method(rt_Exception, "initialize", rt_exception_initialize);
+	rt_define_method(rt_Exception, "message", rt_exception_to_s);
+	rt_define_method(rt_Exception, "to_s", rt_exception_to_s);
 }
 

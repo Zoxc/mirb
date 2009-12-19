@@ -6,12 +6,12 @@
 #include "support.h"
 #include "exceptions.h"
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
+rt_value __cdecl rt_support_closure(struct rt_block *block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
 
 rt_value __stdcall rt_support_define_class(rt_value name, rt_value super);
 rt_value __stdcall rt_support_define_module(rt_value name);
 
-void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block);
+void __stdcall rt_support_define_method(rt_value name, struct rt_block *block);
 
 #ifdef DEBUG
 	rt_value __stdcall __regparm(2) rt_support_call(rt_value dummy, rt_value method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[]);

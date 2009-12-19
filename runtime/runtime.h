@@ -20,8 +20,13 @@ typedef rt_value (__stdcall __regparm(3) *rt_compiled_block_t)(rt_value **_scope
 #define RT_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
 #define RT_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 
+struct rt_block {
+	rt_compiled_block_t compiled;
+	rt_value name;
+};
+
 KHASH_MAP_INIT_INT(rt_hash, rt_value);
-KHASH_MAP_INIT_INT(rt_block, rt_compiled_block_t);
+KHASH_MAP_INIT_INT(rt_methods, struct rt_block *);
 
 enum rt_type {
 	C_FIXNUM,
@@ -107,7 +112,7 @@ void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 
 rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module);
-rt_compiled_block_t rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
+struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
 rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module);
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[]);

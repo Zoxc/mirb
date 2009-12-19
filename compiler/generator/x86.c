@@ -419,7 +419,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_CLASS:
 			{
 				struct block *class_block = (struct block *)op->right;
-				rt_compiled_block_t compiled = measuring ? 0 : compile_block(class_block);
+				rt_compiled_block_t compiled = measuring ? 0 : compile_block(class_block)->compiled;
 
 				if(op->left)
 					generate_stack_var_push(block, target, op->left, measuring);
@@ -441,7 +441,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_MODULE:
 			{
 				struct block *module_block = (struct block *)op->left;
-				rt_compiled_block_t compiled = measuring ? 0 : compile_block(module_block);
+				rt_compiled_block_t compiled = measuring ? 0 : compile_block(module_block)->compiled;
 
 				generate_stack_push(target, op->result, measuring);
 				generate_call(target, rt_support_define_module, measuring);
@@ -501,9 +501,9 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_METHOD:
 			{
 				struct block *method_block = (struct block *)op->left;
-				rt_compiled_block_t compiled = measuring ? 0 : compile_block(method_block);
+				struct rt_block *runtime_block = measuring ? 0 : compile_block(method_block);
 
-				generate_stack_push(target, (rt_value)compiled, measuring);
+				generate_stack_push(target, (rt_value)runtime_block, measuring);
 				generate_stack_push(target, op->result, measuring);
 
 				generate_call(target, rt_support_define_method, measuring);
@@ -999,8 +999,11 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	GEN_WORD(16);
 }
 
-rt_compiled_block_t compile_block(struct block *block)
+struct rt_block *compile_block(struct block *block)
 {
+	struct rt_block *result_block = (struct rt_block *)rt_alloc(sizeof(struct rt_block));
+	result_block->name = rt_symbol_from_cstr("ruby code");
+
 	if(block->require_exceptions)
 	{
 		if(block->heap_vars)
@@ -1023,6 +1026,8 @@ rt_compiled_block_t compile_block(struct block *block)
 	 * Allocate the block
 	 */
 	rt_compiled_block_t result = rt_code_heap_alloc((size_t)target);
+
+	result_block->compiled = result;
 
 	/*
 	 * Setup data structures
@@ -1105,5 +1110,5 @@ rt_compiled_block_t compile_block(struct block *block)
 		#endif
 	#endif
 
-	return result;
+	return result_block;
 }

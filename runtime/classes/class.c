@@ -56,7 +56,7 @@ rt_compiled_block(rt_class_new)
 
 void rt_class_init(void)
 {
-	rt_define_method(rt_Class, rt_symbol_from_cstr("to_s"), rt_class_to_s);
-	rt_define_method(rt_Class, rt_symbol_from_cstr("superclass"), rt_class_superclass);
-	rt_define_method(rt_Class, rt_symbol_from_cstr("new"), rt_class_new);
+	rt_define_method(rt_Class, "to_s", rt_class_to_s);
+	rt_define_method(rt_Class, "superclass", rt_class_superclass);
+	rt_define_method(rt_Class, "new", rt_class_new);
 }

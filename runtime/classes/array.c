@@ -91,14 +91,14 @@ rt_compiled_block(rt_array_each)
 
 void rt_array_init(void)
 {
-	rt_Array = rt_define_class(rt_Object, rt_symbol_from_cstr("Array"), rt_Object);
+	rt_Array = rt_define_class(rt_Object, "Array", rt_Object);
 
-	rt_define_singleton_method(rt_Array, rt_symbol_from_cstr("allocate"), rt_Array_allocate);
+	rt_define_singleton_method(rt_Array, "allocate", rt_Array_allocate);
 
-	rt_define_method(rt_Array, rt_symbol_from_cstr("push"), rt_array_push);
-	rt_define_method(rt_Array, rt_symbol_from_cstr("pop"), rt_array_pop);
-	rt_define_method(rt_Array, rt_symbol_from_cstr("length"), rt_array_length);
-	rt_define_method(rt_Array, rt_symbol_from_cstr("inspect"), rt_array_inspect);
-	rt_define_method(rt_Array, rt_symbol_from_cstr("each"), rt_array_each);
+	rt_define_method(rt_Array, "push", rt_array_push);
+	rt_define_method(rt_Array, "pop", rt_array_pop);
+	rt_define_method(rt_Array, "length", rt_array_length);
+	rt_define_method(rt_Array, "inspect", rt_array_inspect);
+	rt_define_method(rt_Array, "each", rt_array_each);
 }
 

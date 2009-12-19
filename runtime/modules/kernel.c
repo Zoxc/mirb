@@ -36,7 +36,7 @@ static FILE *open_file(rt_value *filename)
 	#ifndef WIN32
 		struct stat buf;
 	#endif
-	
+
 	bool is_dir = false;
 	FILE* file = 0;
 
@@ -169,14 +169,14 @@ rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 
 void rt_kernel_init(void)
 {
-	rt_Kernel = rt_define_module(rt_Object, rt_symbol_from_cstr("Kernel"));
+	rt_Kernel = rt_define_module(rt_Object, "Kernel");
 
 	rt_include_module(rt_Object, rt_Kernel);
 
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("proc"), rt_kernel_proc);
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("eval"), rt_kernel_eval);
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("print"), rt_kernel_print);
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("load"), rt_kernel_load);
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("require"), rt_kernel_load);
-	rt_define_method(rt_Kernel, rt_symbol_from_cstr("raise"), rt_kernel_raise);
+	rt_define_method(rt_Kernel, "proc", rt_kernel_proc);
+	rt_define_method(rt_Kernel, "eval", rt_kernel_eval);
+	rt_define_method(rt_Kernel, "print", rt_kernel_print);
+	rt_define_method(rt_Kernel, "load", rt_kernel_load);
+	rt_define_method(rt_Kernel, "require", rt_kernel_load);
+	rt_define_method(rt_Kernel, "raise", rt_kernel_raise);
 }

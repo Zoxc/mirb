@@ -41,8 +41,8 @@ rt_compiled_block(rt_module_include)
 
 void rt_module_init(void)
 {
-	rt_define_method(rt_Module, rt_symbol_from_cstr("to_s"), rt_module_to_s);
-	rt_define_method(rt_Module, rt_symbol_from_cstr("append_features"), rt_module_append_features);
-	rt_define_method(rt_Module, rt_symbol_from_cstr("include"), rt_module_include);
-	rt_define_method(rt_Module, rt_symbol_from_cstr("included"), rt_module_included);
+	rt_define_method(rt_Module, "to_s", rt_module_to_s);
+	rt_define_method(rt_Module, "append_features", rt_module_append_features);
+	rt_define_method(rt_Module, "include", rt_module_include);
+	rt_define_method(rt_Module, "included", rt_module_included);
 }

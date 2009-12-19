@@ -13,9 +13,10 @@
 [ ] Class variables
 [ ] Global variables
 [X] Super
-[X] Exception handling (Windows only)
+[X] Exception handling
 [ ] Garbage collection
 [ ] Splat operators
 [X] Modules
 [ ] BasicObject
 [ ] Fix constant resolution path
+[ ] Fix up the parser

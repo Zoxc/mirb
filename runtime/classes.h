@@ -48,15 +48,15 @@ static inline rt_value rt_real_class_of(rt_value obj)
 	return rt_real_class(rt_class_of(obj));
 }
 
-static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_block_t block)
+static inline void rt_class_set_method(rt_value obj, rt_value name, struct rt_block *block)
 {
 	int ret;
 
-	khiter_t k = kh_put(rt_block, rt_get_methods(obj), name, &ret);
+	khiter_t k = kh_put(rt_methods, rt_get_methods(obj), name, &ret);
 
 	if(!ret)
 	{
-		khiter_t k = kh_get(rt_block, RT_CLASS(obj)->methods, name);
+		khiter_t k = kh_get(rt_methods, RT_CLASS(obj)->methods, name);
 
 		if (k == kh_end(RT_CLASS(obj)->methods))
 			RT_ASSERT(0);
@@ -65,12 +65,12 @@ static inline void rt_class_set_method(rt_value obj, rt_value name, rt_compiled_
 	kh_value(RT_CLASS(obj)->methods, k) = block;
 }
 
-static inline rt_compiled_block_t rt_class_get_method(rt_value obj, rt_value name)
+static inline struct rt_block *rt_class_get_method(rt_value obj, rt_value name)
 {
 	if(!RT_CLASS(obj)->methods)
 		return 0;
 
-	khiter_t k = kh_get(rt_block, RT_CLASS(obj)->methods, name);
+	khiter_t k = kh_get(rt_methods, RT_CLASS(obj)->methods, name);
 
 	if (k == kh_end(RT_CLASS(obj)->methods))
 		return 0;
@@ -112,13 +112,15 @@ static inline rt_value rt_object_get_var(rt_value obj, rt_value name)
 
 void rt_setup_classes(void);
 
-rt_value rt_define_class(rt_value obj, rt_value name, rt_value super);
-rt_value rt_define_module(rt_value obj, rt_value name);
+rt_value rt_define_class_symbol(rt_value obj, rt_value name, rt_value super);
+rt_value rt_define_class(rt_value under, const char *name, rt_value super);
+rt_value rt_define_module_symbol(rt_value obj, rt_value name);
+rt_value rt_define_module(rt_value under, const char *name);
 
 void rt_include_module(rt_value obj, rt_value module);
 
-void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block);
-void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block);
+void rt_define_method(rt_value obj, const char *name, rt_compiled_block_t block);
+void rt_define_singleton_method(rt_value obj, const char *name, rt_compiled_block_t block);
 
 void rt_class_name(rt_value obj, rt_value under, rt_value name);
 rt_value rt_class_create_unnamed(rt_value super);

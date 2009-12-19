@@ -8,17 +8,17 @@
 struct rt_class {
 	struct rt_object object;
 	rt_value super;
-	khash_t(rt_block) *methods;
+	khash_t(rt_methods) *methods;
 };
 
 #define RT_CLASS(value) ((struct rt_class *)(value))
 
 extern rt_value rt_Class;
 
-static inline khash_t(rt_block) *rt_get_methods(rt_value object)
+static inline khash_t(rt_methods) *rt_get_methods(rt_value object)
 {
 	if(!RT_CLASS(object)->methods)
-		RT_CLASS(object)->methods = kh_init(rt_block);
+		RT_CLASS(object)->methods = kh_init(rt_methods);
 
 	return RT_CLASS(object)->methods;
 }

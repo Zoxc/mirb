@@ -20,4 +20,4 @@
  *
  */
 
-rt_compiled_block_t compile_block(struct block *block);
+struct rt_block *compile_block(struct block *block);

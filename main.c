@@ -39,15 +39,15 @@ int main()
 
 			struct block *block = gen_block(expression);
 
-			rt_compiled_block_t compiled_block = compile_block(block);
+			struct rt_block *runtime_block = compile_block(block);
 
 			#ifdef DEBUG
-				printf("Running block %x: ", (rt_value)compiled_block);
+				printf("Running block %x: ", (rt_value)runtime_block);
 			#endif
 
 			//__asm__("int3\n"); // Make debugging life easier
 
-			rt_value result = compiled_block(0, RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
+			rt_value result = runtime_block->compiled(0, RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 
 			printf("=> "); rt_print(result); printf("\n");
 		}

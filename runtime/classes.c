@@ -144,7 +144,12 @@ void rt_class_name(rt_value obj, rt_value under, rt_value name)
 	rt_const_set(under, name, obj);
 }
 
-rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
+rt_value rt_define_class(rt_value under, const char *name, rt_value super)
+{
+	return rt_define_class_symbol(under, rt_symbol_from_cstr(name), super);
+}
+
+rt_value rt_define_class_symbol(rt_value under, rt_value name, rt_value super)
 {
 	if(rt_const_defined(under, name))
 		return rt_const_get(under, name);
@@ -160,7 +165,7 @@ rt_value rt_define_class(rt_value under, rt_value name, rt_value super)
 	return obj;
 }
 
-rt_value rt_define_module(rt_value under, rt_value name)
+rt_value rt_define_module_symbol(rt_value under, rt_value name)
 {
 	if(rt_const_defined(under, name))
 		return rt_const_get(under, name);
@@ -174,6 +179,11 @@ rt_value rt_define_module(rt_value under, rt_value name)
 	#endif
 
 	return obj;
+}
+
+rt_value rt_define_module(rt_value under, const char *name)
+{
+	return rt_define_module_symbol(under, rt_symbol_from_cstr(name));
 }
 
 rt_value rt_create_include_class(rt_value module, rt_value super)
@@ -234,16 +244,21 @@ void rt_include_module(rt_value obj, rt_value module)
 	}
 }
 
-void rt_define_method(rt_value obj, rt_value name, rt_compiled_block_t block)
+void rt_define_method(rt_value obj, const char *name, rt_compiled_block_t compiled_block)
 {
-	rt_class_set_method(obj, name, block);
+	struct rt_block *block = (struct rt_block *)rt_alloc(sizeof(struct rt_block));
+
+	block->compiled = compiled_block;
+	block->name = rt_symbol_from_cstr(name);
 
 	#ifdef DEBUG
-		printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+		printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), name);
 	#endif
+
+	rt_class_set_method(obj, block->name, block);
 }
 
-void rt_define_singleton_method(rt_value obj, rt_value name, rt_compiled_block_t block)
+void rt_define_singleton_method(rt_value obj, const char *name, rt_compiled_block_t block)
 {
 	rt_define_method(rt_singleton_class(obj), name, block);
 }
@@ -287,6 +302,6 @@ void rt_setup_classes(void)
 
 	rt_main = rt_alloc_object(rt_Object);
 
-	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("to_s"), (rt_compiled_block_t)rt_main_to_s);
-	rt_define_singleton_method(rt_main, rt_symbol_from_cstr("include"), (rt_compiled_block_t)rt_main_include);
+	rt_define_singleton_method(rt_main, "to_s", (rt_compiled_block_t)rt_main_to_s);
+	rt_define_singleton_method(rt_main, "include", (rt_compiled_block_t)rt_main_include);
 }

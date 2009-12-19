@@ -27,7 +27,7 @@
 	}
 #endif
 
-rt_value __cdecl rt_support_closure(rt_compiled_block_t block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[])
+rt_value __cdecl rt_support_closure(struct rt_block *block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[])
 {
 	rt_value self;
 
@@ -60,7 +60,7 @@ rt_value __stdcall rt_support_define_class(rt_value name, rt_value super)
 	if(obj == rt_main)
 		obj = rt_Object;
 
-	return rt_define_class(obj, name, super);
+	return rt_define_class_symbol(obj, name, super);
 }
 
 rt_value __stdcall rt_support_define_module(rt_value name)
@@ -72,10 +72,10 @@ rt_value __stdcall rt_support_define_module(rt_value name)
 	if(obj == rt_main)
 		obj = rt_Object;
 
-	return rt_define_module(obj, name);
+	return rt_define_module_symbol(obj, name);
 }
 
-void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block)
+void __stdcall rt_support_define_method(rt_value name, struct rt_block *block)
 {
 	rt_value obj;
 
@@ -84,7 +84,11 @@ void __stdcall rt_support_define_method(rt_value name, rt_compiled_block_t block
 	if(obj == rt_main)
 		obj = rt_Object;
 
-	rt_define_method(obj, name, block);
+	#ifdef DEBUG
+		printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+	#endif
+
+	rt_class_set_method(obj, name, block);
 }
 
 rt_value rt_support_get_ivar(void)

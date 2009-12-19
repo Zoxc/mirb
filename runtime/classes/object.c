@@ -61,14 +61,14 @@ rt_compiled_block(rt_object_equal)
 
 void rt_object_init(void)
 {
-	rt_define_method(rt_Object, rt_symbol_from_cstr("initialize"), rt_object_dummy);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("inspect"), rt_object_inspect);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("to_s"), rt_object_to_s);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("tap"), rt_object_tap);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("equal?"), rt_object_equal);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("eql?"), rt_object_equal);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("=="), rt_object_equal);
-	rt_define_method(rt_Object, rt_symbol_from_cstr("==="), rt_object_equal);
+	rt_define_method(rt_Object, "initialize", rt_object_dummy);
+	rt_define_method(rt_Object, "inspect", rt_object_inspect);
+	rt_define_method(rt_Object, "to_s", rt_object_to_s);
+	rt_define_method(rt_Object, "tap", rt_object_tap);
+	rt_define_method(rt_Object, "equal?", rt_object_equal);
+	rt_define_method(rt_Object, "eql?", rt_object_equal);
+	rt_define_method(rt_Object, "==", rt_object_equal);
+	rt_define_method(rt_Object, "===", rt_object_equal);
 
-	rt_define_singleton_method(rt_Object, rt_symbol_from_cstr("allocate"), rt_Object_allocate);
+	rt_define_singleton_method(rt_Object, "allocate", rt_Object_allocate);
 }

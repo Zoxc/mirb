@@ -39,12 +39,12 @@ rt_compiled_block(rt_fixnum_div)
 
 void rt_fixnum_init()
 {
-	rt_Fixnum = rt_define_class(rt_Object, rt_symbol_from_cstr("Fixnum"), rt_Object);
+	rt_Fixnum = rt_define_class(rt_Object, "Fixnum", rt_Object);
 
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("to_s"), rt_fixnum_to_s);
+	rt_define_method(rt_Fixnum, "to_s", rt_fixnum_to_s);
 
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("+"), rt_fixnum_add);
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("-"), rt_fixnum_sub);
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("*"), rt_fixnum_mul);
-	rt_define_method(rt_Fixnum, rt_symbol_from_cstr("/"), rt_fixnum_div);
+	rt_define_method(rt_Fixnum, "+", rt_fixnum_add);
+	rt_define_method(rt_Fixnum, "-", rt_fixnum_sub);
+	rt_define_method(rt_Fixnum, "*", rt_fixnum_mul);
+	rt_define_method(rt_Fixnum, "/", rt_fixnum_div);
 }

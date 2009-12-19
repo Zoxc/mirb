@@ -74,6 +74,6 @@ rt_compiled_block(rt_symbol_to_s)
 
 void rt_symbol_init(void)
 {
-	rt_define_method(rt_Symbol, rt_symbol_from_cstr("to_s"), rt_symbol_to_s);
-	rt_define_method(rt_Symbol, rt_symbol_from_cstr("inspect"), rt_symbol_inspect);
+	rt_define_method(rt_Symbol, "to_s", rt_symbol_to_s);
+	rt_define_method(rt_Symbol, "inspect", rt_symbol_inspect);
 }
