@@ -283,10 +283,10 @@ static struct variable* generate_block_arg(struct block *block, struct node *blo
 		struct block *block_attach = gen_block(block_node);
 		struct variable *scope_args = block_gen_args(block);
 
-		for(size_t i = 0; i < kv_size(block_attach->scopes); i++)
-			block_push(block, B_PUSH_SCOPE, (rt_value)kv_A(block_attach->scopes, i), 0, 0);
+		for(size_t i = 0; i < block_attach->scopes.size; i++)
+			block_push(block, B_PUSH_SCOPE, (rt_value)block_attach->scopes.array[i], 0, 0);
 
-		block_end_args(block, scope_args, kv_size(block_attach->scopes));
+		block_end_args(block, scope_args, block_attach->scopes.size);
 		block_push(block, B_CLOSURE, (rt_value)closure, (rt_value)block_attach, 0);
 	}
 
@@ -557,7 +557,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	 * Allocate and setup the new exception block
 	 */
 	struct exception_block *exception_block = malloc(sizeof(struct exception_block));
-	size_t index = kv_size(block->exception_blocks);
+	size_t index = block->exception_blocks.size;
 	size_t old_index = block->current_exception_block_id;
 
 	exception_block->parent_index = old_index;
@@ -571,9 +571,9 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	else
 		exception_block->ensure_label = 0;
 
-	kv_init(exception_block->handlers);
+	vec_init(exception_handlers, &exception_block->handlers);
 
-	kv_cp_push(struct exception_block *, block->exception_blocks, exception_block, block->compiler);
+	vec_push(exception_blocks, &block->exception_blocks, exception_block);
 
 	/*
 	 * Use the new exception block
@@ -603,7 +603,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 		struct runtime_exception_handler *handler = malloc(sizeof(struct runtime_exception_handler));
 		handler->common.type = E_RUNTIME_EXCEPTION;
 		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
-		kv_cp_push(struct exception_handler *, exception_block->handlers, (struct exception_handler *)handler, block->compiler);
+		vec_push(exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
 
 		gen_node(block, node->middle->left, var);
 
@@ -659,12 +659,12 @@ static void gen_zsuper(struct block *block, struct node *node, struct variable *
 
 	struct variable *args = block_gen_args(block);
 
-	for(size_t i = 0; i < kv_size(block->owner->parameters); i++)
+	for(size_t i = 0; i < block->owner->parameters.size; i++)
 	{
-		block_push(block, B_PUSH, (rt_value)kv_A(block->owner->parameters, i), 0, 0);
+		block_push(block, B_PUSH, (rt_value)block->owner->parameters.array[i], 0, 0);
 	}
 
-	block_end_args(block, args, kv_size(block->owner->parameters));
+	block_end_args(block, args, block->owner->parameters.size);
 
 	block_push(block, B_SUPER, (rt_value)closure, 0, 0);
 
@@ -731,9 +731,9 @@ struct block *gen_block(struct node *node)
 
 	struct variable *result = block_get_var(block);
 
-	for(size_t i = 0; i < kv_size(block->zsupers); i++)
+	for(size_t i = 0; i < block->zsupers.size; i++)
 	{
-		block_require_args(kv_A(block->zsupers, i), block);
+		block_require_args(block->zsupers.array[i], block);
 	}
 
 	block->epilog = block_get_label(block);
@@ -748,7 +748,7 @@ struct block *gen_block(struct node *node)
 
 	gen_node(block, node->right, result);
 
-	struct opcode *last = kv_A(block->vector, kv_size(block->vector) - 1);
+	struct opcode *last = block->opcodes.array[block->opcodes.size - 1];
 
 	if(last->type == B_RETURN && last->left == (rt_value)result)
 		last->type = B_LOAD;

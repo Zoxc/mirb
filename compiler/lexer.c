@@ -19,14 +19,9 @@ void lexer_create(struct compiler *compiler, const char* input)
 	compiler->token.compiler = compiler;
 	compiler->token.state = TS_DEFAULT;
 
-	kv_init(compiler->token.curlys);
+	vec_init(lexer_curlys, &compiler->token.curlys, &compiler->allocator);
 
 	lexer_next(compiler);
-}
-
-void lexer_destroy(struct compiler *compiler)
-{
-	kv_destroy(compiler->token.curlys);
 }
 
 char* get_token_str(struct token *token)
@@ -312,7 +307,7 @@ static enum token_type parse_double_quote_string(struct token *token, bool conti
 
 					if(*(token->input) == '{')
 					{
-						kv_cp_push(bool, token->curlys, true, token->compiler);
+						vec_push(lexer_curlys, &token->curlys, true);
 
 						result = T_STRING_START;
 						token->input++;
@@ -443,7 +438,7 @@ static enum token_type curly_open_proc(struct token *token)
 {
 	token->input++;
 
-	kv_cp_push(bool, token->curlys, false, token->compiler);
+	vec_push(lexer_curlys, &token->curlys, false);
 
 	return T_CURLY_OPEN;
 }
@@ -452,11 +447,11 @@ static enum token_type curly_close_proc(struct token *token)
 {
 	token->input++;
 
-	if(kv_size(token->curlys) == 0)
+	if(token->curlys.size == 0)
 		return T_CURLY_CLOSE;
 	else
 	{
-		bool string = kv_pop(token->curlys);
+		bool string = vec_pop(lexer_curlys, &token->curlys);
 
 		if(string)
 			return parse_double_quote_string(token, true);
@@ -716,13 +711,11 @@ void lexer_context(struct compiler *compiler, struct token *token)
 {
 	memcpy(token, &compiler->token, sizeof(struct token));
 
-	kv_cp_dup(bool, token->curlys, compiler->token.curlys, compiler);
+	vec_dup(lexer_curlys, &token->curlys, &compiler->token.curlys);
 }
 
 void lexer_restore(struct compiler *compiler, struct token *token)
 {
-	kv_destroy(compiler->token.curlys);
-
 	memcpy(&compiler->token, token, sizeof(struct token));
 }
 

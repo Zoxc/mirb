@@ -90,13 +90,13 @@ rt_value __cdecl rt_support_array(size_t argc, rt_value argv[])
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
 
-	RT_ARRAY(array)->data.n = argc;
-	RT_ARRAY(array)->data.m = argc;
-	RT_ARRAY(array)->data.a = (rt_value*)malloc(argc * sizeof(rt_value));
+	RT_ARRAY(array)->data.size = argc;
+	RT_ARRAY(array)->data.max = argc;
+	RT_ARRAY(array)->data.array = (rt_value *)rt_alloc(argc * sizeof(rt_value));
 
 	RT_ARG_EACH_RAW(i)
 	{
-		RT_ARRAY(array)->data.a[i] = RT_ARG(i);
+		RT_ARRAY(array)->data.array[i] = RT_ARG(i);
 	}
 
 	return array;

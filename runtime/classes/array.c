@@ -14,11 +14,11 @@ rt_value rt_array_from_raw(rt_value *data, size_t length)
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
 
-	RT_ARRAY(array)->data.n = length;
-	RT_ARRAY(array)->data.m = length;
-	RT_ARRAY(array)->data.a = (rt_value*)malloc(length * sizeof(rt_value));
+	RT_ARRAY(array)->data.size = length;
+	RT_ARRAY(array)->data.max = length;
+	RT_ARRAY(array)->data.array = (rt_value *)rt_alloc(length * sizeof(rt_value));
 
-	memcpy(RT_ARRAY(array)->data.a, data, length * sizeof(rt_value));
+	memcpy(RT_ARRAY(array)->data.array, data, length * sizeof(rt_value));
 
 	return array;
 }
@@ -34,7 +34,7 @@ rt_compiled_block(rt_Array_allocate)
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
 
-	kv_init(RT_ARRAY(array)->data);
+	vec_init(rt, &RT_ARRAY(array)->data);
 
 	return array;
 }
@@ -43,7 +43,7 @@ rt_compiled_block(rt_array_push)
 {
 	RT_ARG_EACH(i)
 	{
-		kv_rt_push(rt_value, RT_ARRAY(obj)->data, argv[i]);
+		vec_push(rt, &RT_ARRAY(obj)->data, argv[i]);
 	}
 
 	return obj;
@@ -51,8 +51,8 @@ rt_compiled_block(rt_array_push)
 
 rt_compiled_block(rt_array_pop)
 {
-	if(kv_size(RT_ARRAY(obj)->data))
-		return kv_pop(RT_ARRAY(obj)->data);
+	if(RT_ARRAY(obj)->data.size)
+		return vec_pop(rt, &RT_ARRAY(obj)->data);
 	else
 		return RT_NIL;
 }
@@ -61,11 +61,11 @@ rt_compiled_block(rt_array_inspect)
 {
 	rt_value result = rt_string_from_cstr("[");
 
-	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
+	for(size_t i = 0; i < RT_ARRAY(obj)->data.size; i++)
 	{
-		rt_concat_string(result, rt_call(kv_A(RT_ARRAY(obj)->data, i), "inspect", 0, 0));
+		rt_concat_string(result, rt_call(RT_ARRAY(obj)->data.array[i], "inspect", 0, 0));
 
-		if(i != kv_size(RT_ARRAY(obj)->data) - 1)
+		if(i != RT_ARRAY(obj)->data.size - 1)
 			rt_concat_string(result, rt_string_from_cstr(", "));
 	}
 
@@ -76,14 +76,14 @@ rt_compiled_block(rt_array_inspect)
 
 rt_compiled_block(rt_array_length)
 {
-	return RT_INT2FIX(kv_size(RT_ARRAY(obj)->data));
+	return RT_INT2FIX(RT_ARRAY(obj)->data.size);
 }
 
 rt_compiled_block(rt_array_each)
 {
-	for(size_t i = 0; i < kv_size(RT_ARRAY(obj)->data); i++)
+	for(size_t i = 0; i < RT_ARRAY(obj)->data.size; i++)
 	{
-		rt_call_proc(block, RT_NIL, 1, &kv_A(RT_ARRAY(obj)->data, i));
+		rt_call_proc(block, RT_NIL, 1, &RT_ARRAY(obj)->data.array[i]);
 	}
 
 	return obj;

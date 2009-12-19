@@ -35,10 +35,10 @@ char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 
 	if(vector)
 	{
-		for(int i = 0; i < kv_size(*vector); i++)
+		for(int i = 0; i < vector->size; i++)
 		{
-			if(kv_A(*vector, i)->address == address)
-				return kv_A(*vector, i)->symbol;
+			if(vector->array[i]->address == address)
+				return vector->array[i]->symbol;
 		}
 	}
 

@@ -50,16 +50,16 @@ const char *variable_name(rt_value var)
 
 void block_print(struct block *block)
 {
-	for(size_t i = 0; i < kv_size(block->vector); i++)
+	for(size_t i = 0; i < block->opcodes.size; i++)
 	{
-		struct opcode *op = kv_A(block->vector, i);
+		struct opcode *op = block->opcodes.array[i];
 
 		if(op->type != B_NOP)
 		{
 			if(op->type == B_LABEL)
 				printf("\n");
 
-			opcode_print(kv_A(block->vector, i));
+			opcode_print(block->opcodes.array[i]);
 			printf("\n");
 		}
 	}
@@ -84,10 +84,9 @@ void block_require_var(struct block *current, struct variable *var)
 
 void block_require_args(struct block *current, struct block *owner)
 {
-	for(size_t i = 0; i < kv_size(owner->parameters); i++)
+	for(size_t i = 0; i < owner->parameters.size; i++)
 	{
-		block_require_var(current, kv_A(owner->parameters, i));
-
+		block_require_var(current, owner->parameters.array[i]);
 	}
 
 	if(owner->block_parameter)
@@ -114,11 +113,11 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 	result->can_break = false;
 	result->heap_vars = 0;
 
-	kv_init(result->parameters);
-	kv_init(result->vector);
-	kv_init(result->exception_blocks);
-	kv_init(result->scopes);
-	kv_init(result->zsupers);
+	vec_init(variables, &result->parameters, &compiler->allocator);
+	vec_init(opcodes, &result->opcodes, &compiler->allocator);
+	vec_init(exception_blocks, &result->exception_blocks);
+	vec_init(blocks, &result->scopes, &compiler->allocator);
+	vec_init(blocks, &result->zsupers, &compiler->allocator);
 
 	result->variables = kh_init(block);
 

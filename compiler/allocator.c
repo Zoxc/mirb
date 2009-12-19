@@ -33,22 +33,22 @@ void allocator_init(struct allocator *allocator)
 	allocator->next = get_page();
 	allocator->page = allocator->next + ALLOCATOR_PAGE_SIZE;
 
-	kv_init(allocator->pages);
+	vec_init(allocator_pages, &allocator->pages);
 }
 
 void allocator_free(struct allocator *allocator)
 {
 	free_page(allocator->page - ALLOCATOR_PAGE_SIZE);
 
-	for(size_t i = 0; i < kv_size(allocator->pages); i++)
-		free_page(kv_A(allocator->pages, i) - ALLOCATOR_PAGE_SIZE);
+	for(size_t i = 0; i < allocator->pages.size; i++)
+		free_page(allocator->pages.array[i] - ALLOCATOR_PAGE_SIZE);
 
-	kv_destroy(allocator->pages);
+	vec_destroy(allocator_pages, &allocator->pages);
 }
 
 size_t allocator_page_alloc(struct allocator *allocator, size_t length)
 {
-	kv_cm_push(size_t, allocator->pages, allocator->page);
+	vec_push(allocator_pages, &allocator->pages, allocator->page);
 
 	size_t result = get_page();
 

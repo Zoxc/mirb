@@ -33,7 +33,7 @@ rt_value __cdecl rt_support_closure(struct rt_block *block, rt_value method_name
 
 	__asm__ __volatile__("" : "=D" (self));
 
-	rt_value closure = (rt_value)malloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
+	rt_value closure = (rt_value)rt_alloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
 
 	RT_COMMON(closure)->flags = C_PROC;
 	RT_COMMON(closure)->class_of = rt_Proc;
@@ -380,7 +380,7 @@ static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, st
 		return;
 	}
 
-	struct exception_block *block = kv_A(frame->block->exception_blocks, frame->block_index);
+	struct exception_block *block = frame->block->exception_blocks.array[frame->block_index];
 
 	if(unwinding)
 	{
@@ -404,9 +404,9 @@ static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, st
 
 				while(current_block)
 				{
-					for(size_t i = 0; i < kv_size(current_block->handlers); i++)
+					for(size_t i = 0; i < current_block->handlers.size; i++)
 					{
-						struct exception_handler *handler = kv_A(current_block->handlers, i);
+						struct exception_handler *handler = current_block->handlers.array[i];
 
 						switch(handler->type)
 						{

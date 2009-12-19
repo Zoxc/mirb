@@ -1,9 +1,12 @@
 #pragma once
 #include "../classes.h"
+#include "../vector.h"
+
+RT_VEC_INIT(rt_value, rt);
 
 struct rt_array {
 	struct rt_common common;
-	kvec_t(rt_value) data;
+	vec_t(rt) data;
 };
 
 #define RT_ARRAY(value) ((struct rt_array *)(value))

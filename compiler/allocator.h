@@ -2,10 +2,12 @@
 #include "../globals.h"
 #define ALLOCATOR_ALIGN sizeof(size_t)
 
+VEC_INIT(size_t, allocator_pages)
+
 struct allocator {
 	size_t page;
 	size_t next;
-	kvec_t(size_t) pages;
+	vec_t(allocator_pages) pages;
 };
 
 void allocator_init(struct allocator *allocator);

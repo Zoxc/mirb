@@ -1,6 +1,7 @@
 #pragma once
 #include "../globals.h"
 #include "../runtime/runtime.h"
+#include "vector.h"
 
 enum token_type {
 	T_NONE = 0,
@@ -93,12 +94,14 @@ enum token_state {
 
 extern char *token_type_names[];
 
+COMPILER_VEC_INIT(bool, lexer_curlys)
+
 struct token {
     const char *input;
     const char *start;
     const char *stop;
     struct compiler *compiler;
-    kvec_t(bool) curlys;
+    vec_t(lexer_curlys) curlys;
     size_t line;
 	enum token_type type;
     bool whitespace;
@@ -107,7 +110,6 @@ struct token {
 
 void lexer_setup(void);
 void lexer_create(struct compiler *compiler, const char *input);
-void lexer_destroy(struct compiler *compiler);
 
 enum token_type lexer_next(struct compiler *compiler);
 

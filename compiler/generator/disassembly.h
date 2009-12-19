@@ -7,7 +7,9 @@ struct disassembly_symbol {
 
 #define DISASSEMBLY_SYMBOL(name) {&name, #name}
 
-typedef kvec_t(struct disassembly_symbol *) disassembly_symbol_vector_t;
+VEC_INIT(struct disassembly_symbol *, disassembly_symbols)
+
+typedef vec_t(disassembly_symbols) disassembly_symbol_vector_t;
 
 #ifdef WIN32
     void dump_hex(unsigned char* address, int length);

@@ -5,12 +5,16 @@
 #include "../runtime/runtime.h"
 #include "../runtime/exceptions.h"
 
+struct block;
+
 /*
  * Block runtime data
  */
 
+VEC_INIT(struct exception_block *, exception_blocks)
+
 struct block_data {
-	kvec_t(struct exception_block *) exception_blocks;
+	vec_t(exception_blocks) exception_blocks;
 	void **break_targets;
 	size_t local_storage;
 	void *epilog;
@@ -42,6 +46,9 @@ struct variable {
 };
 
 KHASH_MAP_INIT_INT(block, struct variable *);
+COMPILER_VEC_INIT(struct variable *, variables)
+COMPILER_VEC_INIT(struct block *, blocks)
+COMPILER_VEC_INIT(struct opcode *, opcodes)
 
 /*
  * Block definition
@@ -72,7 +79,7 @@ struct block {
 	/*
 	 * Exception related fields
 	 */
-	kvec_t(struct exception_block *) exception_blocks;
+	vec_t(exception_blocks) exception_blocks;
 	struct exception_block *current_exception_block;
 	size_t current_exception_block_id;
 	bool require_exceptions;
@@ -84,15 +91,15 @@ struct block {
 	 */
 	rt_value var_count[VARIABLE_TYPES]; // An array of counters of the different variable types.
 	khash_t(block) *variables; // A hash with all the variables declared or used
-	kvec_t(struct variable *) parameters; // A list of all parameters except the block parameter.
+	vec_t(variables) parameters; // A list of all parameters except the block parameter.
 	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
 	struct variable *super_module_var; // Pointer to a next module to search from if super is used.
 	struct variable *super_name_var; // Pointer to a symbol which contains the name of the called method.
-	kvec_t(struct block *) scopes; // A list of all the heap variable scopes this block requires.
+	vec_t(blocks) scopes; // A list of all the heap variable scopes this block requires.
 	bool heap_vars; // If any of the variables must be stored on a heap scope.
 	struct variable *scope_var; // A variable with the pointer to the heap scope
 	struct variable *closure_var; // A variable with the pointer to the closure information
-	kvec_t(struct block *) zsupers; // A list of all the blocks which requires access to all the parameters. Can only be used during parsing.
+	vec_t(blocks) zsupers; // A list of all the blocks which requires access to all the parameters. Can only be used during parsing.
 
 	#ifdef DEBUG
 		rt_value label_count; // Nicer label labeling...
@@ -103,7 +110,7 @@ struct block {
 	void *prolog; // The point after the prolog of the block.
 	struct opcode *epilog; // The end of the block
 
-	kvec_t(struct opcode *) vector; // The bytecode output
+	vec_t(opcodes) opcodes; // The bytecode output
 };
 
 /*
@@ -117,11 +124,11 @@ void block_require_args(struct block *current, struct block *owner);
 
 static inline void block_require_scope(struct block *block, struct block *scope)
 {
-	for(int i = 0; i < kv_size(block->scopes); i++)
-		if(kv_A(block->scopes, i) == scope)
+	for(int i = 0; i < block->scopes.size; i++)
+		if(block->scopes.array[i] == scope)
 			return;
 
-	kv_cp_push(struct block *, block->scopes, scope, block->compiler);
+	vec_push(blocks, &block->scopes, scope);
 }
 
 static inline struct opcode *block_get_label(struct block *block)
@@ -159,13 +166,15 @@ static inline struct variable *block_get_var(struct block *block)
 static inline size_t block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
 {
 	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
+
 	op->type = type;
 	op->result = result;
 	op->left = left;
 	op->right = right;
-	kv_cp_push(struct opcode *, block->vector, op, block->compiler);
 
-	return kv_size(block->vector) - 1;
+	vec_push(opcodes, &block->opcodes, op);
+
+	return block->opcodes.size - 1;
 }
 
 static inline struct variable *block_gen_args(struct block *block)
@@ -189,7 +198,7 @@ static inline void block_end_args(struct block *block, struct variable *var, siz
 
 static inline struct opcode *block_emmit_label(struct block *block, struct opcode *label)
 {
-	kv_cp_push(struct opcode *, block->vector, label, block->compiler);
+	vec_push(opcodes, &block->opcodes, label);
 
 	return label;
 }

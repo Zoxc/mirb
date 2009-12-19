@@ -2,7 +2,6 @@
 #include "../../runtime/x86.h"
 #include "../../runtime/support.h"
 #include "../../runtime/code_heap.h"
-#include "../../runtime/method.h"
 #include "../../runtime/constant.h"
 #include "disassembly.h"
 
@@ -77,8 +76,8 @@ static inline void generate_stack_push(uint8_t **target, size_t dword, bool meas
 
 static inline size_t get_scope_index(struct block *block, struct block *scope)
 {
-	for(size_t i = 0; i < kv_size(block->scopes); i++)
-		if(kv_A(block->scopes, i) == scope)
+	for(size_t i = 0; i < block->scopes.size; i++)
+		if(block->scopes.array[i] == scope)
 			return i;
 
 	RT_ASSERT(0);
@@ -410,7 +409,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_closure, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 5) * 4, measuring);
+				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 5) * 4, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -524,8 +523,8 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_call, measuring);
 
-				if(kv_A(block->vector, i - 1)->right)
-					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4, measuring);
+				if(block->opcodes.array[i - 1]->right)
+					generate_stack_pop(target, block->opcodes.array[i - 1]->right * 4, measuring);
 			}
 			break;
 
@@ -543,8 +542,8 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_super, measuring);
 
-				if(kv_A(block->vector, i - 1)->right)
-					generate_stack_pop(target, kv_A(block->vector, i - 1)->right * 4, measuring);
+				if(block->opcodes.array[i - 1]->right)
+					generate_stack_pop(target, block->opcodes.array[i - 1]->right * 4, measuring);
 			}
 			break;
 
@@ -571,7 +570,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				generate_call(target, rt_support_interpolate, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
+				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 2) * 4, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -581,7 +580,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				generate_call(target, rt_support_array, measuring);
 
-				generate_stack_pop(target, (kv_A(block->vector, i - 1)->right + 2) * 4, measuring);
+				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 2) * 4, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -926,20 +925,20 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 		generate_var_store(block, target, (rt_value)block->block_parameter, measuring);
 	}
 
-	if(kv_size(block->parameters))
+	if(block->parameters.size)
 	{
 		GEN_BYTE(0x8B); // mov ecx, dword [ebp + 20]
 		GEN_BYTE(0x4D);
 		GEN_BYTE((char)20);
 
-		for(size_t i = 0; i < kv_size(block->parameters); i++)
+		for(size_t i = 0; i < block->parameters.size; i++)
 		{
-			struct variable *var = kv_A(block->parameters, i);
+			struct variable *var = block->parameters.array[i];
 
 			// Load to eax
 			GEN_BYTE(0x8B); // mov eax, dword [ecx + 12]
 			GEN_BYTE(0x41);
-			GEN_BYTE((char)((kv_size(block->parameters) - i - 1) * 4));
+			GEN_BYTE((char)((block->parameters.size - i - 1) * 4));
 
 			generate_var_store(block, target, (rt_value)var, measuring);
 		}
@@ -947,8 +946,8 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 
 	block->prolog = *target;
 
-	for(size_t i = 0; i < kv_size(block->vector); i++)
-		generate_instruction(block, kv_A(block->vector, i), i, start, target, measuring);
+	for(size_t i = 0; i < block->opcodes.size; i++)
+		generate_instruction(block, block->opcodes.array[i], i, start, target, measuring);
 
 	if(block->require_exceptions)
 	{
@@ -1040,17 +1039,17 @@ struct rt_block *compile_block(struct block *block)
 		 * Setup block data structure
 		 */
 
-		kv_mov(data->exception_blocks, block->exception_blocks);
+		vec_mov(exception_blocks, &data->exception_blocks, &block->exception_blocks);
 
-		for(size_t i = 0; i < kv_size(data->exception_blocks); i++)
+		for(size_t i = 0; i < data->exception_blocks.size; i++)
 		{
-			struct exception_block *exception_block = kv_A(data->exception_blocks, i);
+			struct exception_block *exception_block = data->exception_blocks.array[i];
 
 			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target(result, (rt_value)exception_block->ensure_label) : 0);
 
-			for(size_t j = 0; j < kv_size(exception_block->handlers); j++)
+			for(size_t j = 0; j < exception_block->handlers.size; j++)
 			{
-				struct exception_handler *handler = kv_A(exception_block->handlers, j);
+				struct exception_handler *handler = exception_block->handlers.array[j];
 
 				switch(handler->type)
 				{
@@ -1093,18 +1092,18 @@ struct rt_block *compile_block(struct block *block)
 
 			disassembly_symbol_vector_t symbols;
 
-			kv_init(symbols);
+			vec_init(disassembly_symbols, &symbols);
 
 			if(data)
 			{
 				struct disassembly_symbol block_data = {data, "block_data"};
 
-				kv_cm_push(struct disassembly_symbol *, symbols, &block_data);
+				vec_push(disassembly_symbols, &symbols, &block_data);
 			}
 
 			dump_code((void *)result, target - (unsigned char *)result, &symbols);
 
-			kv_destroy(symbols);
+			vec_destroy(disassembly_symbols, &symbols);
 
 			printf("\n\n");
 		#endif

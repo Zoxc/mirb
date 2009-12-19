@@ -36,6 +36,7 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu99 -fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
+			<Add directory="vendor" />
 		</Compiler>
 		<Linker>
 			<Add library="BeaEngine" />
@@ -95,6 +96,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\parser\structures.h" />
+		<Unit filename="compiler\vector.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
@@ -171,10 +173,12 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\support.h" />
+		<Unit filename="runtime\vector.h" />
 		<Unit filename="runtime\x86.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\x86.h" />
+		<Unit filename="vector.h" />
 		<Unit filename="vendor\khash.h" />
 		<Unit filename="vendor\kvec.h" />
 		<Unit filename="vendor\kvec_cm.h" />
