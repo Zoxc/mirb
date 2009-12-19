@@ -1,4 +1,5 @@
 #pragma once
+#include "../vendor/kvec_rt.h"
 #include "../globals.h"
 
 #define RT_TYPE_SIZE 16
@@ -96,12 +97,20 @@ static inline bool rt_bool(rt_value value)
 
 static inline rt_value rt_alloc(size_t size)
 {
-	return (rt_value)malloc(size);
+	#ifdef VALGRIND
+		return (rt_value)malloc(size);
+	#else
+		return (rt_value)GC_MALLOC(size);
+	#endif
 }
 
 static inline rt_value rt_realloc(rt_value old, size_t size)
 {
-	return (rt_value)realloc((void *)old, size);
+	#ifdef VALGRIND
+		return (rt_value)realloc((void *)old, size);
+	#else
+		return old ? (rt_value)GC_REALLOC((void *)old, size) : rt_alloc(size);
+	#endif
 }
 
 void rt_create(void);

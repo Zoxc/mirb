@@ -16,6 +16,8 @@ def execute(target, settings)
 		MIRB.sources += ['runtime/**/*.asm']
 	end
 	
+	settings = Builder::Settings.new(settings.name, settings, {:LDFLAGS => ['-L', 'vendor/gc/.libs'], :LIBS => ['gc']})
+	
 	if Rake::Win32.windows?
 		settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-DWIN_SEH'], :LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
 	end

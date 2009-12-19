@@ -39,7 +39,9 @@
 		</Compiler>
 		<Linker>
 			<Add library="BeaEngine" />
+			<Add library="gc" />
 			<Add directory="vendor\BeaEngine" />
+			<Add directory="vendor\gc\.libs" />
 		</Linker>
 		<Unit filename="compiler\allocator.c">
 			<Option compilerVar="CC" />
@@ -175,6 +177,9 @@
 		<Unit filename="runtime\x86.h" />
 		<Unit filename="vendor\khash.h" />
 		<Unit filename="vendor\kvec.h" />
+		<Unit filename="vendor\kvec_cm.h" />
+		<Unit filename="vendor\kvec_cp.h" />
+		<Unit filename="vendor\kvec_rt.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

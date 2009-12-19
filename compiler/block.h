@@ -121,7 +121,7 @@ static inline void block_require_scope(struct block *block, struct block *scope)
 		if(kv_A(block->scopes, i) == scope)
 			return;
 
-	kv_push(struct block *, block->scopes, scope);
+	kv_cp_push(struct block *, block->scopes, scope, block->compiler);
 }
 
 static inline struct opcode *block_get_label(struct block *block)
@@ -163,7 +163,7 @@ static inline size_t block_push(struct block *block, enum opcode_type type, rt_v
 	op->result = result;
 	op->left = left;
 	op->right = right;
-	kv_push(struct opcode *, block->vector, op);
+	kv_cp_push(struct opcode *, block->vector, op, block->compiler);
 
 	return kv_size(block->vector) - 1;
 }
@@ -189,7 +189,7 @@ static inline void block_end_args(struct block *block, struct variable *var, siz
 
 static inline struct opcode *block_emmit_label(struct block *block, struct opcode *label)
 {
-	kv_push(struct opcode *, block->vector, label);
+	kv_cp_push(struct opcode *, block->vector, label, block->compiler);
 
 	return label;
 }

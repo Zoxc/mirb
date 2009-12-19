@@ -170,7 +170,7 @@ struct node *parse_super(struct compiler *compiler)
 	if(result->left == 0 && !parenthesis)
 	{
 		if(current != owner)
-			kv_push(struct block *, owner->zsupers, current);
+			kv_cp_push(struct block *, owner->zsupers, current, compiler);
 
 		result->type = N_ZSUPER;
 	}

@@ -43,7 +43,7 @@ rt_compiled_block(rt_array_push)
 {
 	RT_ARG_EACH(i)
 	{
-		kv_push(rt_value, RT_ARRAY(obj)->data, argv[i]);
+		kv_rt_push(rt_value, RT_ARRAY(obj)->data, argv[i]);
 	}
 
 	return obj;

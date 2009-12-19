@@ -30,3 +30,16 @@ static inline void *allocator_alloc(struct allocator *allocator, size_t length)
 	#endif
 }
 
+static inline void *allocator_realloc(struct allocator *allocator, void *old, size_t old_length, size_t new_length)
+{
+	#ifdef VALGRIND
+		return realloc(old, newlength);
+	#else
+		void *result = allocator_alloc(allocator, new_length);
+
+		memcpy(result, old, old_length);
+
+		return result;
+	#endif
+}
+

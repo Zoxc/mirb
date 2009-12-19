@@ -11,6 +11,8 @@ int main()
 {
 	char buffer[800];
 
+	GC_INIT();
+
 	compiler_setup();
 
 	rt_create();

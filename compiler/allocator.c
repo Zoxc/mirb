@@ -48,7 +48,7 @@ void allocator_free(struct allocator *allocator)
 
 size_t allocator_page_alloc(struct allocator *allocator, size_t length)
 {
-	kv_push(size_t, allocator->pages, allocator->page);
+	kv_cm_push(size_t, allocator->pages, allocator->page);
 
 	size_t result = get_page();
 

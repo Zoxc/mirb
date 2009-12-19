@@ -312,7 +312,7 @@ static enum token_type parse_double_quote_string(struct token *token, bool conti
 
 					if(*(token->input) == '{')
 					{
-						kv_push(bool, token->curlys, true);
+						kv_cp_push(bool, token->curlys, true, token->compiler);
 
 						result = T_STRING_START;
 						token->input++;
@@ -443,7 +443,7 @@ static enum token_type curly_open_proc(struct token *token)
 {
 	token->input++;
 
-	kv_push(bool, token->curlys, false);
+	kv_cp_push(bool, token->curlys, false, token->compiler);
 
 	return T_CURLY_OPEN;
 }
@@ -716,7 +716,7 @@ void lexer_context(struct compiler *compiler, struct token *token)
 {
 	memcpy(token, &compiler->token, sizeof(struct token));
 
-	kv_dup(bool, token->curlys, compiler->token.curlys);
+	kv_cp_dup(bool, token->curlys, compiler->token.curlys, compiler);
 }
 
 void lexer_restore(struct compiler *compiler, struct token *token)

@@ -45,27 +45,43 @@ int main() {
 
 */
 
-#ifndef AC_KVEC_H
-#define AC_KVEC_H
+/*
+ * This file contains methods specific for use with the garbage collector.
+ * Modified by Zoxc
+ */
+
+#ifndef AC_RT_KVEC_H
+#define AC_RT_KVEC_H
 
 #include <stdlib.h>
 
-#define kv_roundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))
+#define KV_RT_MALLOC rt_alloc
+#define KV_RT_REALLOC rt_realloc
 
-#define kvec_t(type) struct { size_t n, m; type *a; }
-#define kv_init(v) ((v).n = (v).m = 0, (v).a = 0)
-#define kv_destroy(v) free((v).a)
-#define kv_A(v, i) ((v).a[(i)])
-#define kv_pop(v) ((v).a[--(v).n])
-#define kv_size(v) ((v).n)
-#define kv_max(v) ((v).m)
-
-#define kv_mov(new, old) do { \
-        (new).a = (old).a; \
-        (new).n = (old).n; \
-        (new).m = (old).m; \
-        kv_init(old);\
+#define kv_rt_dup(type, new, old) do { \
+        (new).a = (type*)KV_RT_MALLOC((old).n * sizeof(type)); \
+        (new).n = (new).m = (old).n; \
+        memcpy((new).a, (old).a, (old).n * sizeof(type)); \
     } while (0)
 
+#define kv_rt_resize(type, v, s)  ((v).m = (s), (v).a = (type*)KV_RT_REALLOC((rt_value)(v).a, sizeof(type) * (v).m))
 
+#define kv_rt_push(type, v, x) do {									\
+		if ((v).n == (v).m) {										\
+			(v).m = (v).m? (v).m<<1 : 2;							\
+			(v).a = (type*)KV_RT_REALLOC((rt_value)(v).a, sizeof(type) * (v).m);	\
+		}															\
+		(v).a[(v).n++] = (x);										\
+	} while (0)
+
+#define kv_rt_pushp(type, v) (((v).n == (v).m)?							\
+						   ((v).m = ((v).m? (v).m<<1 : 2),				\
+							(v).a = (type*)KV_RT_REALLOC((rt_value)(v).a, sizeof(type) * (v).m), 0)	\
+						   : 0), ((v).a + ((v).n++))
+
+#define kv_rt_a(type, v, i) ((v).m <= (size_t)(i)?						\
+						  ((v).m = (v).n = (i) + 1, kv_roundup32((v).m), \
+						   (v).a = (type*)KV_RT_REALLOC((rt_value)(v).a, sizeof(type) * (v).m), 0) \
+						  : (v).n <= (size_t)(i)? (v).n = (i)			\
+						  : 0), (v).a[(i)]
 #endif

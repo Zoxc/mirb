@@ -1099,7 +1099,7 @@ struct rt_block *compile_block(struct block *block)
 			{
 				struct disassembly_symbol block_data = {data, "block_data"};
 
-				kv_push(struct disassembly_symbol *, symbols, &block_data);
+				kv_cm_push(struct disassembly_symbol *, symbols, &block_data);
 			}
 
 			dump_code((void *)result, target - (unsigned char *)result, &symbols);

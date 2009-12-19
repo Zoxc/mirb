@@ -573,7 +573,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 
 	kv_init(exception_block->handlers);
 
-	kv_push(struct exception_block *, block->exception_blocks, exception_block);
+	kv_cp_push(struct exception_block *, block->exception_blocks, exception_block, block->compiler);
 
 	/*
 	 * Use the new exception block
@@ -603,7 +603,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 		struct runtime_exception_handler *handler = malloc(sizeof(struct runtime_exception_handler));
 		handler->common.type = E_RUNTIME_EXCEPTION;
 		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
-		kv_push(struct exception_handler *, exception_block->handlers, (struct exception_handler *)handler);
+		kv_cp_push(struct exception_handler *, exception_block->handlers, (struct exception_handler *)handler, block->compiler);
 
 		gen_node(block, node->middle->left, var);
 

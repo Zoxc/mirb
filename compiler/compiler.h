@@ -1,4 +1,5 @@
 #pragma once
+#include "../vendor/kvec_cp.h"
 #include "../globals.h"
 #include "allocator.h"
 #include "lexer.h"

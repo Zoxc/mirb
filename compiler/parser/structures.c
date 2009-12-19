@@ -101,7 +101,7 @@ void parse_parameter(struct compiler *compiler, struct block *block)
 			if(scope_defined(block, symbol, false))
 				COMPILER_ERROR(compiler, "Variable %s already defined.", rt_symbol_to_cstr(symbol));
 			else
-				kv_push(struct variable *, block->parameters, scope_define(block, symbol));
+				kv_cp_push(struct variable *, block->parameters, scope_define(block, symbol), compiler);
 		}
 
 		lexer_next(compiler);
