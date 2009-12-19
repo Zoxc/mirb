@@ -42,7 +42,7 @@ static inline void __attribute__((noreturn)) __builtin_unreachable(void)
 
 #define GC_THREADS
 
-#include "vendor/gc/include/gc.h"
-#include "vendor/kvec_cm.h"
-#include "vendor/kvec.h"
-#include "vendor/khash.h"
+#include "gc/gc.h"
+#include "kvec_cm.h"
+#include "kvec.h"
+#include "khash.h"

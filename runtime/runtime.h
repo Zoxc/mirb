@@ -1,6 +1,6 @@
 #pragma once
-#include "../vendor/kvec_rt.h"
 #include "../globals.h"
+#include "kvec_rt.h"
 
 #define RT_TYPE_SIZE 16
 #define RT_TYPE_MASK (RT_TYPE_SIZE - 1)
