@@ -41,7 +41,7 @@ void rt_destroy(void)
 	rt_symbols_destroy();
 	rt_code_heap_destroy();
 
-	kh_destroy(rt_hash, object_var_hashes);
+	hash_destroy(rt_hash, object_var_hashes);
 }
 
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)

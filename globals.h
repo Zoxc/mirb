@@ -40,4 +40,4 @@ static inline void __attribute__((noreturn)) __builtin_unreachable(void)
 }
 
 #include "vector.h"
-#include "khash.h"
+#include "hash.h"

@@ -26,12 +26,12 @@ struct class_exception_handler {
 	struct runtime_exception_handler common;
 };
 
-VEC_DEFAULT(struct exception_handler *, exception_handlers)
+VEC_DEFAULT(struct exception_handler *, rt_exception_handlers)
 
 struct exception_block {
 	size_t parent_index;
 	struct exception_block *parent;
-	vec_t(exception_handlers) handlers;
+	vec_t(rt_exception_handlers) handlers;
 	void *block_label;
 	void *ensure_label;
 };

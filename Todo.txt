@@ -14,7 +14,7 @@
 [ ] Global variables
 [X] Super
 [X] Exception handling
-[ ] Garbage collection
+[X] Garbage collection
 [ ] Splat operators
 [X] Modules
 [ ] BasicObject

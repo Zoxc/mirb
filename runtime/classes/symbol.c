@@ -2,27 +2,27 @@
 #include "symbol.h"
 #include "string.h"
 
-KHASH_MAP_INIT_STR(symbol, rt_value);
+HASH_RUNTIME_ROOT_STR(symbol, rt_value);
 
 rt_value rt_Symbol;
 
-static khash_t(symbol) *symbols;
+static hash_t(symbol) *symbols;
 
 void rt_symbols_create(void)
 {
-	symbols = kh_init(symbol);
+	symbols = hash_init(symbol);
 }
 
 void rt_symbols_destroy(void)
 {
-	kh_destroy(symbol, symbols);
+	hash_destroy(symbol, symbols);
 }
 
 rt_value rt_symbol_from_cstr(const char* name)
 {
-	khiter_t k = kh_get(symbol, symbols, name);
+	hash_iter_t i = hash_get(symbol, symbols, name);
 
-	if (k == kh_end(symbols))
+	if (i == hash_end(symbols))
 	{
 		size_t name_length = strlen(name);
 		char* string =	malloc(name_length + 1);
@@ -37,21 +37,21 @@ rt_value rt_symbol_from_cstr(const char* name)
 
 		int ret;
 
-		k = kh_put(symbol, symbols, string, &ret);
+		i = hash_put(symbol, symbols, string, &ret);
 
 		if(!ret)
 		{
-			kh_del(symbol, symbols, k);
+			hash_del(symbol, symbols, i);
 
 			printf("Unable to add symbol %s to the list\n", string);
 		}
 
-		kh_value(symbols, k) = symbol;
+		hash_value(symbols, i) = symbol;
 
 		return symbol;
 	}
 
-	return kh_value(symbols, k);
+	return hash_value(symbols, i);
 }
 
 

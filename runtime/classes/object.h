@@ -4,7 +4,7 @@
 
 struct rt_object {
 	struct rt_common common;
-	khash_t(rt_hash) *vars;
+	hash_t(rt_hash) *vars;
 };
 
 #define RT_OBJECT(value) ((struct rt_object *)(value))
@@ -22,10 +22,10 @@ static inline rt_value rt_alloc_object(rt_value obj)
 	return result;
 }
 
-static inline khash_t(rt_hash) *rt_get_vars(rt_value object)
+static inline hash_t(rt_hash) *rt_get_vars(rt_value object)
 {
 	if(!RT_OBJECT(object)->vars)
-		RT_OBJECT(object)->vars = kh_init(rt_hash);
+		RT_OBJECT(object)->vars = hash_init(rt_hash);
 
 	return RT_OBJECT(object)->vars;
 }

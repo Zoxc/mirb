@@ -115,11 +115,11 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 
 	vec_init(variables, &result->parameters, &compiler->allocator);
 	vec_init(opcodes, &result->opcodes, &compiler->allocator);
-	vec_init(exception_blocks, &result->exception_blocks);
+	vec_init(rt_exception_blocks, &result->exception_blocks);
 	vec_init(blocks, &result->scopes, &compiler->allocator);
 	vec_init(blocks, &result->zsupers, &compiler->allocator);
 
-	result->variables = kh_init(block);
+	result->variables = hash_init(block, &compiler->allocator);
 
 	for(int i = 0; i < VARIABLE_TYPES; i++)
 		result->var_count[i] = 0;

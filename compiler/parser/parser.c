@@ -31,7 +31,7 @@ struct node *alloc_scope(struct compiler *compiler, struct block **block_var, en
 
 struct block *scope_defined(struct block *block, rt_value name, bool recursive)
 {
-	if(kh_get(block, block->variables, name) != kh_end(block->variables))
+	if(hash_get(block, block->variables, name) != hash_end(block->variables))
 		return block;
 
 	if(recursive)
@@ -40,7 +40,7 @@ struct block *scope_defined(struct block *block, rt_value name, bool recursive)
 		{
 			block = block->parent;
 
-			if(kh_get(block, block->variables, name) != kh_end(block->variables))
+			if(hash_get(block, block->variables, name) != hash_end(block->variables))
 				return block;
 		}
 	}
@@ -60,14 +60,14 @@ struct variable *scope_var(struct block *block)
 
 struct variable *scope_declare_var(struct block *block, rt_value name)
 {
-	khiter_t k = kh_get(block, block->variables, name);
+	hash_iter_t i = hash_get(block, block->variables, name);
 
-	if (k != kh_end(block->variables))
-		return kh_value(block->variables, k);
+	if (i != hash_end(block->variables))
+		return hash_value(block->variables, i);
 
 	int ret;
 
-	k = kh_put(block, block->variables, name, &ret);
+	i = hash_put(block, block->variables, name, &ret);
 
 	RT_ASSERT(ret);
 
@@ -76,7 +76,7 @@ struct variable *scope_declare_var(struct block *block, rt_value name)
 	var->type = V_LOCAL;
 	var->name = name;
 
-	kh_value(block->variables, k) = var;
+	hash_value(block->variables, i) = var;
 
 	return var;
 }
@@ -84,7 +84,7 @@ struct variable *scope_declare_var(struct block *block, rt_value name)
 struct variable *scope_define(struct block *block, rt_value name)
 {
 	if(scope_defined(block, name, false))
-		return kh_value(block->variables, kh_get(block, block->variables, name));
+		return hash_value(block->variables, hash_get(block, block->variables, name));
 	else
 		return scope_declare_var(block, name);
 }
@@ -95,15 +95,15 @@ struct variable *scope_get(struct block *block, rt_value name)
 
 	if(defined_block == block)
 	{
-		return kh_value(block->variables, kh_get(block, block->variables, name));
+		return hash_value(block->variables, hash_get(block, block->variables, name));
 	}
 	else if(defined_block)
 	{
 		struct variable *var;
 
-		khiter_t k = kh_get(block, defined_block->variables, name);
+		hash_iter_t i = hash_get(block, defined_block->variables, name);
 
-		var = kh_value(defined_block->variables, k);
+		var = hash_value(defined_block->variables, i);
 
 		block_require_var(block, var);
 

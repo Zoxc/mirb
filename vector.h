@@ -89,7 +89,7 @@
 	} \
 	static inline void vec_##name##_resize(struct vec_##name *vec, size_t new_size) \
 	{ \
-		vec->array = (type *)(realloc(vec->array, vec->size, sizeof(type) * new_size)); \
+		vec->array = (type *)(realloc(vec->array, sizeof(type) * vec->size, sizeof(type) * new_size)); \
 		vec->max = new_size; \
 	} \
 	static inline void vec_##name##_push(struct vec_##name *vec, type value) \
@@ -97,7 +97,7 @@
 		if (vec->size == vec->max) \
 		{ \
 			vec->max = vec->max ? (vec->max << 1) : 2; \
-			vec->array = (type *)(realloc(vec->array, vec->size, sizeof(type) * vec->max)); \
+			vec->array = (type *)(realloc(vec->array, sizeof(type) * vec->size, sizeof(type) * vec->max)); \
 		} \
 		vec->array[vec->size++] = value; \
 	}

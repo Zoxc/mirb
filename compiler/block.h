@@ -11,10 +11,10 @@ struct block;
  * Block runtime data
  */
 
-VEC_DEFAULT(struct exception_block *, exception_blocks)
+VEC_DEFAULT(struct exception_block *, rt_exception_blocks)
 
 struct block_data {
-	vec_t(exception_blocks) exception_blocks;
+	vec_t(rt_exception_blocks) exception_blocks;
 	void **break_targets;
 	size_t local_storage;
 	void *epilog;
@@ -45,7 +45,7 @@ struct variable {
 	rt_value name;
 };
 
-KHASH_MAP_INIT_INT(block, struct variable *);
+HASH_COMPILER(block, size_t, struct variable *);
 VEC_COMPILER(struct variable *, variables)
 VEC_COMPILER(struct block *, blocks)
 VEC_COMPILER(struct opcode *, opcodes)
@@ -79,7 +79,7 @@ struct block {
 	/*
 	 * Exception related fields
 	 */
-	vec_t(exception_blocks) exception_blocks;
+	vec_t(rt_exception_blocks) exception_blocks;
 	struct exception_block *current_exception_block;
 	size_t current_exception_block_id;
 	bool require_exceptions;
@@ -90,7 +90,7 @@ struct block {
 	 * Variable related fields
 	 */
 	rt_value var_count[VARIABLE_TYPES]; // An array of counters of the different variable types.
-	khash_t(block) *variables; // A hash with all the variables declared or used
+	hash_t(block) *variables; // A hash with all the variables declared or used
 	vec_t(variables) parameters; // A list of all parameters except the block parameter.
 	struct variable *block_parameter; // Pointer to a named or unnamed block variable.
 	struct variable *super_module_var; // Pointer to a next module to search from if super is used.

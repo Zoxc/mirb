@@ -97,6 +97,7 @@
 		</Unit>
 		<Unit filename="compiler\parser\structures.h" />
 		<Unit filename="globals.h" />
+		<Unit filename="hash.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -174,7 +175,6 @@
 		</Unit>
 		<Unit filename="runtime\x86.h" />
 		<Unit filename="vector.h" />
-		<Unit filename="vendor\khash.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

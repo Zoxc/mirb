@@ -571,9 +571,9 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	else
 		exception_block->ensure_label = 0;
 
-	vec_init(exception_handlers, &exception_block->handlers);
+	vec_init(rt_exception_handlers, &exception_block->handlers);
 
-	vec_push(exception_blocks, &block->exception_blocks, exception_block);
+	vec_push(rt_exception_blocks, &block->exception_blocks, exception_block);
 
 	/*
 	 * Use the new exception block
@@ -603,7 +603,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 		struct runtime_exception_handler *handler = malloc(sizeof(struct runtime_exception_handler));
 		handler->common.type = E_RUNTIME_EXCEPTION;
 		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
-		vec_push(exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
+		vec_push(rt_exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
 
 		gen_node(block, node->middle->left, var);
 
@@ -761,11 +761,11 @@ struct block *gen_block(struct node *node)
 	 * Assign an unique id to each variable of type V_HEAP and V_LOCAL
 	 */
 
-	for(khiter_t k = kh_begin(block->variables); k != kh_end(block->variables); ++k)
+	for(hash_iter_t i = hash_begin(block->variables); i != hash_end(block->variables); i++)
 	{
-		if(kh_exist(block->variables, k))
+		if(hash_exist(block->variables, i))
 		{
-			struct variable *var = kh_value(block->variables, k);
+			struct variable *var = hash_value(block->variables, i);
 
 			switch(var->type)
 			{

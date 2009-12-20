@@ -6,14 +6,18 @@ static size_t get_page(void)
 {
 	void *result;
 
-	#ifdef WIN32
-		result = VirtualAlloc(0, ALLOCATOR_PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-
-		RT_ASSERT(result);
+	#if VALGRIND && ALLOCATOR_DEBUG
+		result = malloc(ALLOCATOR_PAGE_SIZE);
 	#else
-		result = mmap(0, ALLOCATOR_PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+		#ifdef WIN32
+			result = VirtualAlloc(0, ALLOCATOR_PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
-		RT_ASSERT(result != MAP_FAILED);
+			RT_ASSERT(result);
+		#else
+			result = mmap(0, ALLOCATOR_PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+			RT_ASSERT(result != MAP_FAILED);
+		#endif
 	#endif
 
 	return (size_t)result;
@@ -53,7 +57,7 @@ size_t allocator_page_alloc(struct allocator *allocator, size_t length)
 	size_t result = get_page();
 
 	allocator->page = result + ALLOCATOR_PAGE_SIZE;
-	allocator->next = RT_ALIGN(result + length, ALLOCATOR_ALIGN);
+	allocator->next = result + length, ALLOCATOR_ALIGN;
 
 	return result;
 }

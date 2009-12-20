@@ -7,7 +7,7 @@
 
 rt_value rt_main;
 
-khash_t(rt_hash) *object_var_hashes;
+hash_t(rt_hash) *object_var_hashes;
 
 static inline bool rt_object_has_vars(rt_value obj)
 {
@@ -29,7 +29,7 @@ static inline bool rt_object_has_vars(rt_value obj)
 		}
 }
 
-khash_t(rt_hash) *rt_object_get_vars(rt_value obj)
+hash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 {
 	if (rt_object_has_vars(obj))
 	{
@@ -37,28 +37,33 @@ khash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 	}
 	else
 	{
-		khiter_t k = kh_get(rt_hash, object_var_hashes, obj);
+		hash_iter_t i = hash_get(rt_hash, object_var_hashes, obj);
 
-		if (k != kh_end(object_var_hashes))
-			return (khash_t(rt_hash) *)kh_value(object_var_hashes, k);
+		if (i != hash_end(object_var_hashes))
+			return (hash_t(rt_hash) *)hash_value(object_var_hashes, i);
 
 		int ret;
 
-		k = kh_put(rt_hash, object_var_hashes, obj, &ret);
+		i = hash_put(rt_hash, object_var_hashes, obj, &ret);
 
 		RT_ASSERT(ret);
 
-		khash_t(rt_hash) *hash = kh_init(rt_hash);
+		hash_t(rt_hash) *hash = hash_init(rt_hash);
 
-		kh_value(object_var_hashes, k) = (rt_value)hash;
+		hash_value(object_var_hashes, i) = (rt_value)hash;
 
 		return hash;
 	}
 }
 
-rt_value rt_class_create_bare(rt_value super)
+rt_value rt_class_create_bare(rt_value super, bool root)
 {
-	rt_value c = rt_alloc(sizeof(struct rt_class));
+	rt_value c;
+
+	if(root)
+		c = rt_alloc_root(sizeof(struct rt_class));
+	else
+		c = rt_alloc(sizeof(struct rt_class));
 
 	RT_COMMON(c)->flags = C_CLASS;
 	RT_COMMON(c)->class_of = rt_Class;
@@ -84,7 +89,7 @@ rt_value rt_module_create_bare()
 
 rt_value rt_class_create_singleton(rt_value object, rt_value super)
 {
-	rt_value singleton = rt_class_create_bare(super);
+	rt_value singleton = rt_class_create_bare(super, false);
 
 	RT_COMMON(singleton)->flags |= RT_CLASS_SINGLETON;
 	RT_COMMON(object)->class_of = singleton;
@@ -114,7 +119,7 @@ rt_value rt_singleton_class(rt_value object)
 
 rt_value rt_class_create_unnamed(rt_value super)
 {
-	rt_value obj = rt_class_create_bare(super);
+	rt_value obj = rt_class_create_bare(super, false);
 	rt_class_create_singleton(obj, RT_COMMON(super)->class_of);
 
 	return obj;
@@ -279,11 +284,11 @@ rt_compiled_block(rt_main_include)
 
 void rt_setup_classes(void)
 {
-	object_var_hashes = kh_init(rt_hash);
+	object_var_hashes = hash_init(rt_hash);
 
-	rt_Object = rt_class_create_bare(0);
-	rt_Module = rt_class_create_bare(rt_Object);
-	rt_Class = rt_class_create_bare(rt_Module);
+	rt_Object = rt_class_create_bare(0, true);
+	rt_Module = rt_class_create_bare(rt_Object, false);
+	rt_Class = rt_class_create_bare(rt_Module, false);
 
 	rt_value metaclass;
 

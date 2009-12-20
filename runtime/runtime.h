@@ -26,9 +26,6 @@ struct rt_block {
 	rt_value name;
 };
 
-KHASH_MAP_INIT_INT(rt_hash, rt_value);
-KHASH_MAP_INIT_INT(rt_methods, struct rt_block *);
-
 enum rt_type {
 	C_FIXNUM,
 	C_TRUE,
@@ -104,6 +101,15 @@ static inline rt_value rt_alloc(size_t size)
 	#endif
 }
 
+static inline rt_value rt_alloc_root(size_t size)
+{
+	#ifdef VALGRIND
+		return (rt_value)malloc(size);
+	#else
+		return (rt_value)GC_MALLOC_UNCOLLECTABLE(size);
+	#endif
+}
+
 static inline rt_value rt_realloc(rt_value old, size_t size)
 {
 	#ifdef VALGRIND
@@ -113,11 +119,24 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 	#endif
 }
 
-#define vec_runtime_malloc(size) rt_alloc(size)
-#define vec_runtime_realloc(old, old_size, new_size) rt_realloc((rt_value)(old), new_size)
-#define vec_runtime_free(obj)
+#define rt_runtime_malloc(size) rt_alloc(size)
+#define rt_runtime_realloc(old, old_size, new_size) rt_realloc((rt_value)(old), new_size)
+#define rt_runtime_free(obj)
+
 #define VEC_RUNTIME(type, name) \
-	VEC_INIT(type, name, , , , , vec_runtime_malloc, vec_runtime_realloc, vec_runtime_free)
+	VEC_INIT(type, name, , , , , rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME(name, key_t, val_t)								\
+	HASH_INIT(name, key_t, val_t, 1, hash_int_hash_func, hash_int_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME_STR(name, val_t)								\
+	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME_ROOT_STR(name, val_t)								\
+	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_alloc_root, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+HASH_RUNTIME(rt_hash, rt_value, rt_value);
+HASH_RUNTIME(rt_methods, rt_value, struct rt_block *);
 
 void rt_create(void);
 void rt_destroy(void);

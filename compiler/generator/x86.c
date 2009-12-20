@@ -1039,7 +1039,7 @@ struct rt_block *compile_block(struct block *block)
 		 * Setup block data structure
 		 */
 
-		vec_mov(exception_blocks, &data->exception_blocks, &block->exception_blocks);
+		vec_mov(rt_exception_blocks, &data->exception_blocks, &block->exception_blocks);
 
 		for(size_t i = 0; i < data->exception_blocks.size; i++)
 		{
