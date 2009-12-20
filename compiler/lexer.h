@@ -1,7 +1,7 @@
 #pragma once
 #include "../globals.h"
 #include "../runtime/runtime.h"
-#include "vector.h"
+#include "allocator.h"
 
 enum token_type {
 	T_NONE = 0,
@@ -94,7 +94,7 @@ enum token_state {
 
 extern char *token_type_names[];
 
-COMPILER_VEC_INIT(bool, lexer_curlys)
+VEC_COMPILER(bool, lexer_curlys)
 
 struct token {
     const char *input;

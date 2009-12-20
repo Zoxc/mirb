@@ -1,5 +1,6 @@
 #pragma once
 #include "../globals.h"
+#include "gc.h"
 
 #define RT_TYPE_SIZE 16
 #define RT_TYPE_MASK (RT_TYPE_SIZE - 1)
@@ -111,6 +112,12 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 		return old ? (rt_value)GC_REALLOC((void *)old, size) : rt_alloc(size);
 	#endif
 }
+
+#define vec_runtime_malloc(size) rt_alloc(size)
+#define vec_runtime_realloc(old, old_size, new_size) rt_realloc((rt_value)(old), new_size)
+#define vec_runtime_free(obj)
+#define VEC_RUNTIME(type, name) \
+	VEC_INIT(type, name, , , , , vec_runtime_malloc, vec_runtime_realloc, vec_runtime_free)
 
 void rt_create(void);
 void rt_destroy(void);

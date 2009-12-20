@@ -26,7 +26,7 @@ struct class_exception_handler {
 	struct runtime_exception_handler common;
 };
 
-VEC_INIT(struct exception_handler *, exception_handlers)
+VEC_DEFAULT(struct exception_handler *, exception_handlers)
 
 struct exception_block {
 	size_t parent_index;

@@ -11,7 +11,7 @@ struct block;
  * Block runtime data
  */
 
-VEC_INIT(struct exception_block *, exception_blocks)
+VEC_DEFAULT(struct exception_block *, exception_blocks)
 
 struct block_data {
 	vec_t(exception_blocks) exception_blocks;
@@ -46,9 +46,9 @@ struct variable {
 };
 
 KHASH_MAP_INIT_INT(block, struct variable *);
-COMPILER_VEC_INIT(struct variable *, variables)
-COMPILER_VEC_INIT(struct block *, blocks)
-COMPILER_VEC_INIT(struct opcode *, opcodes)
+VEC_COMPILER(struct variable *, variables)
+VEC_COMPILER(struct block *, blocks)
+VEC_COMPILER(struct opcode *, opcodes)
 
 /*
  * Block definition

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../globals.h"
-#include "vector.h"
 #include "allocator.h"
 #include "lexer.h"
 

@@ -40,15 +40,23 @@
 #define vec_mov(name, ...) vec_##name##_mov(__VA_ARGS__)
 #define vec_dup(name, ...) vec_##name##_dup(__VA_ARGS__)
 
+#define vec_default_malloc(size) malloc(size)
+#define vec_default_realloc(old, old_size, new_size) realloc(old, new_size)
+#define vec_default_free(obj) free(obj)
+#define VEC_DEFAULT(type, name) \
+	VEC_INIT(type, name, , , , , vec_default_malloc, vec_default_realloc, vec_default_free)
+
 /*
  * Default malloc implementation
  */
-#define VEC_INIT(type, name) \
+
+#define VEC_INIT(type, name, fields, init_args, init_fields, mov_fields, malloc, realloc, free) \
 	struct vec_##name \
 	{ \
 		size_t size; \
 		size_t max; \
 		type *array; \
+		fields \
 	}; \
 	static inline type vec_##name##_pop(struct vec_##name *vec) \
 	{ \
@@ -58,29 +66,30 @@
 	{ \
 		free(vec->array); \
 	} \
-	static inline void vec_##name##_init(struct vec_##name *vec) \
+	static inline void vec_##name##_init(struct vec_##name *vec init_args) \
 	{ \
 		vec->size = 0; \
 		vec->max = 0; \
 		vec->array = 0; \
+		init_fields \
 	} \
-	static inline void vec_##name##_mov(struct vec_##name *new_vec, struct vec_##name *old_vec) \
+	static inline void vec_##name##_mov(struct vec_##name *new_vec, struct vec_##name *vec) \
 	{ \
-        new_vec->array = old_vec->array; \
-        new_vec->size = old_vec->size; \
-        new_vec->max = old_vec->max; \
-        vec_##name##_init(old_vec);\
+        new_vec->array = vec->array; \
+        new_vec->size = vec->size; \
+        new_vec->max = vec->max; \
+        vec_##name##_init(vec mov_fields);\
 	} \
-	static inline void vec_##name##_dup(struct vec_##name *new_vec, struct vec_##name *old_vec) \
+	static inline void vec_##name##_dup(struct vec_##name *vec, struct vec_##name *old_vec) \
 	{ \
 		size_t bytesize = old_vec->size * sizeof(type); \
-		new_vec->array = (type *)malloc(bytesize); \
-		new_vec->size = new_vec->max = old_vec->size; \
-		memcpy(new_vec->array, old_vec->array, bytesize); \
+		memcpy(vec, old_vec, sizeof(struct vec_##name)); \
+		vec->array = (type *)(malloc(bytesize)); \
+		memcpy(vec->array, old_vec->array, bytesize); \
 	} \
 	static inline void vec_##name##_resize(struct vec_##name *vec, size_t new_size) \
 	{ \
-		vec->array = (type *)realloc(vec->array, sizeof(type) * new_size); \
+		vec->array = (type *)(realloc(vec->array, vec->size, sizeof(type) * new_size)); \
 		vec->max = new_size; \
 	} \
 	static inline void vec_##name##_push(struct vec_##name *vec, type value) \
@@ -88,10 +97,10 @@
 		if (vec->size == vec->max) \
 		{ \
 			vec->max = vec->max ? (vec->max << 1) : 2; \
-			vec->array = (type *)realloc(vec->array, sizeof(type) * vec->max); \
+			vec->array = (type *)(realloc(vec->array, vec->size, sizeof(type) * vec->max)); \
 		} \
 		vec->array[vec->size++] = value; \
-	} \
+	}
 
 /*
 #define kv_roundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))

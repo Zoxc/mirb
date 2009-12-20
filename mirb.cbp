@@ -96,7 +96,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\parser\structures.h" />
-		<Unit filename="compiler\vector.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
@@ -157,10 +156,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\exceptions.h" />
-		<Unit filename="runtime\method.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\method.h" />
+		<Unit filename="runtime\gc.h" />
 		<Unit filename="runtime\modules\kernel.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -173,17 +169,12 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\support.h" />
-		<Unit filename="runtime\vector.h" />
 		<Unit filename="runtime\x86.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\x86.h" />
 		<Unit filename="vector.h" />
 		<Unit filename="vendor\khash.h" />
-		<Unit filename="vendor\kvec.h" />
-		<Unit filename="vendor\kvec_cm.h" />
-		<Unit filename="vendor\kvec_cp.h" />
-		<Unit filename="vendor\kvec_rt.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

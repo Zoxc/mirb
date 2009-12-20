@@ -10,7 +10,6 @@
 #define RT_ALIGN(value, to) ((value + (to) - 1) & ~((to) - 1))
 
 #ifdef DEBUG
-	#define GC_DEBUG
 	#define RT_ASSERT(condition) do { \
 		if(!(condition)) { \
 			__asm__("int3\n"); \
@@ -40,8 +39,5 @@ static inline void __attribute__((noreturn)) __builtin_unreachable(void)
 	while(1);
 }
 
-#define GC_THREADS
-
-#include "gc/include/gc.h"
 #include "vector.h"
 #include "khash.h"

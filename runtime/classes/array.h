@@ -1,8 +1,7 @@
 #pragma once
 #include "../classes.h"
-#include "../vector.h"
 
-RT_VEC_INIT(rt_value, rt);
+VEC_RUNTIME(rt_value, rt);
 
 struct rt_array {
 	struct rt_common common;
