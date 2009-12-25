@@ -67,8 +67,11 @@ static void gen_string_continue(struct block *block, struct node *node, struct v
 	if(node->left)
 		gen_node(block, node->left, temp);
 
-	block_push(block, B_STRING, (rt_value)temp, (rt_value)node->middle, 0);
-	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+	if(strlen((const char *)node->middle))
+	{
+		block_push(block, B_STRING, (rt_value)temp, (rt_value)node->middle, 0);
+		block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+	}
 
 	struct variable *interpolated = block_get_var(block);
 
@@ -79,10 +82,7 @@ static void gen_string_continue(struct block *block, struct node *node, struct v
 
 static size_t gen_string_arg_count(struct node *node)
 {
-	if(node->left)
-		return 2 + gen_string_arg_count(node->left);
-	else
-		return 2;
+	return 1 + (strlen((const char *)node->middle) > 0) + (node->left ? gen_string_arg_count(node->left) : 0);
 }
 
 static void gen_string_start(struct block *block, struct node *node, struct variable *var)
@@ -93,11 +93,15 @@ static void gen_string_start(struct block *block, struct node *node, struct vari
 
 	gen_node(block, node->left, temp);
 
-	block_push(block, B_STRING, (rt_value)temp, (rt_value)node->right, 0);
+	size_t present = strlen((const char *)node->right) > 0;
 
-	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+	if(present)
+	{
+		block_push(block, B_STRING, (rt_value)temp, (rt_value)node->right, 0);
+		block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+	}
 
-	block_end_args(block, args, gen_string_arg_count(node->left) + 1);
+	block_end_args(block, args, gen_string_arg_count(node->left) + present);
 
 	block_push(block, B_INTERPOLATE, (rt_value)var, 0, 0);
 }

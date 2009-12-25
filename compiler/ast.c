@@ -275,7 +275,7 @@ rt_value name_string_continue(struct node *node)
 	{
 		result = get_node_name(node->left);
 
-		rt_concat_string(result, rt_string_from_cstr("}"));
+		rt_concat_string(result, rt_string_from_cstr("}\""));
 	}
 	else
 	{
