@@ -1,9 +1,9 @@
 = mirb
 
-mirb is an small fast embedable Ruby VM. It is designed to be simple to use
+mirb is an small fast embeddable Ruby VM. It is designed to be simple to use
 and embed, while stil having a good performance due to a JIT-compiler and
 native C code. It may not end up featuring all of Ruby's core library
-because of the embedable nature, but what is added should remain somewhat
+because of the embeddable nature, but what is added should remain somewhat
 compitable.
 
 It's still very much work in process and the only useful thing it can run
@@ -15,15 +15,15 @@ If you want to know more you can visit http://mirb.heroku.com or join me in
 
 == Building
 
-You can either build it with rake (using Ruby 1.9) or with Code::Blocks. If
-you use Code::Blocks on Windows you must make sure than vendor/BeaEngine is
-in path and vender/BeaEngine/BeaEngine.lib get linked to the program.
+You can either build it with rake (using Ruby 1.9) or with Code::Blocks or
+Eclipse.
 
 == Credits
 
 Inspired by tinyrb, http://github.com/macournoyer/tinyrb
 
-* kvec.h and khash.h is under the following license:
+* vector.h and hash.h based on kvec.h and khash.h by Attractive Chaos is
+  under the following license:
     Copyright (c) 2008, by Attractive Chaos <attractivechaos@aol.co.uk>
 
     Permission is hereby granted, free of charge, to any person obtaining
