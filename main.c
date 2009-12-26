@@ -11,7 +11,9 @@ int main()
 {
 	char buffer[800];
 
-	GC_INIT();
+	#ifndef VALGRIND
+		GC_INIT();
+	#endif
 
 	compiler_setup();
 
