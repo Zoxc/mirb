@@ -27,11 +27,10 @@ struct block_data {
 enum variable_type {
 	V_HEAP,
 	V_LOCAL,
-	V_TEMP,
-	V_ARGS
+	V_TEMP
 };
 
-#define VARIABLE_TYPES 4
+#define VARIABLE_TYPES 3
 
 struct temp_variable {
 	enum variable_type type;
@@ -163,7 +162,7 @@ static inline struct variable *block_get_var(struct block *block)
 	return temp;
 }
 
-static inline size_t block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
+static inline struct opcode *block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
 {
 	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
 
@@ -174,26 +173,7 @@ static inline size_t block_push(struct block *block, enum opcode_type type, rt_v
 
 	vec_push(opcodes, &block->opcodes, op);
 
-	return block->opcodes.size - 1;
-}
-
-static inline struct variable *block_gen_args(struct block *block)
-{
-	struct variable *var = compiler_alloc(block->compiler, sizeof(struct temp_variable));
-
-	var->type = V_ARGS;
-	var->index = block->var_count[V_ARGS];
-
-	block->var_count[V_ARGS] += 1;
-
-	block_push(block, B_ARGS, (rt_value)var, (rt_value)false, 0);
-
-	return var;
-}
-
-static inline void block_end_args(struct block *block, struct variable *var, size_t argc)
-{
-	block_push(block, B_ARGS, (rt_value)var, (rt_value)true, argc);
+	return op;
 }
 
 static inline struct opcode *block_emmit_label(struct block *block, struct opcode *label)

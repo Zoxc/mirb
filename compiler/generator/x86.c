@@ -43,16 +43,16 @@ static inline int get_stack_index(struct block *block, rt_value var)
 {
 	struct variable *_var = (struct variable *)var;
 
-	int index;
+	int index = block->require_exceptions ? 5 : 0;
 
 	switch(_var->type)
 	{
 		case V_TEMP:
-			index = (block->require_exceptions ? 5 : 0) + block->var_count[V_LOCAL] + _var->index;
+			index += block->var_count[V_LOCAL] + _var->index;
 			break;
 
 		case V_LOCAL:
-			index = (block->require_exceptions ? 5 : 0) + _var->index;
+			index += _var->index;
 			break;
 
 		default:
@@ -409,8 +409,6 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_call(target, rt_support_closure, measuring);
 
-				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 5) * 4, measuring);
-
 				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
@@ -511,49 +509,52 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_CALL:
 			{
-				if(op->right)
-					generate_stack_var_push(block, target, op->right, measuring);
-				else
-					generate_stack_push(target, 0, measuring);
-
 				generate_stack_var_push(block, target, op->result, measuring);
 
 				GEN_BYTE(0xBA); // mov edx, op->left
 				GEN_DWORD(op->left);
 
 				generate_call(target, rt_support_call, measuring);
-
-				if(block->opcodes.array[i - 1]->right)
-					generate_stack_pop(target, block->opcodes.array[i - 1]->right * 4, measuring);
 			}
 			break;
 
 		case B_SUPER:
 			{
-				if(op->result)
-					generate_stack_var_push(block, target, op->result, measuring);
-				else
-					generate_stack_push(target, 0, measuring);
-
 				GEN_BYTE(0x57); // push edi (self)
 
 				generate_stack_var_push(block, target, (rt_value)block->super_module_var, measuring);
                 generate_stack_var_push(block, target, (rt_value)block->super_name_var, measuring);
 
 				generate_call(target, rt_support_super, measuring);
+			}
+			break;
 
-				if(block->opcodes.array[i - 1]->right)
-					generate_stack_pop(target, block->opcodes.array[i - 1]->right * 4, measuring);
+		case B_CALL_ARGS:
+			{
+				GEN_BYTE(0x54); // push esp
+				generate_stack_push(target, op->result, measuring);
+
+				if(op->left)
+					generate_stack_var_push(block, target, op->left, measuring);
+				else
+					generate_stack_push(target, 0, measuring);
 			}
 			break;
 
 		case B_ARGS:
 			{
-				if(op->left)
-				{
-					GEN_BYTE(0x54); // push esp
-					generate_stack_push(target, op->right, measuring);
-				}
+				GEN_BYTE(0x54); // push esp
+				generate_stack_push(target, op->result, measuring);
+			}
+			break;
+
+		case B_CALL_ARGS_POP:
+		case B_ARGS_POP:
+			{
+				size_t args = ((struct opcode *)op->result)->result + op->left;
+
+				if(args)
+					generate_stack_pop(target, args * 4, measuring);
 			}
 			break;
 
@@ -569,9 +570,6 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_INTERPOLATE:
 			{
 				generate_call(target, rt_support_interpolate, measuring);
-
-				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 2) * 4, measuring);
-
 				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
@@ -579,9 +577,6 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_ARRAY:
 			{
 				generate_call(target, rt_support_array, measuring);
-
-				generate_stack_pop(target, (block->opcodes.array[i - 1]->right + 2) * 4, measuring);
-
 				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
@@ -936,7 +931,7 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 			struct variable *var = block->parameters.array[i];
 
 			// Load to eax
-			GEN_BYTE(0x8B); // mov eax, dword [ecx + 12]
+			GEN_BYTE(0x8B); // mov eax, dword [ecx + (block->parameters.size - i - 1) * 4]
 			GEN_BYTE(0x41);
 			GEN_BYTE((char)((block->parameters.size - i - 1) * 4));
 

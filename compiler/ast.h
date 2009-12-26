@@ -54,4 +54,6 @@ struct node {
     enum token_type op;
 };
 
-rt_value get_node_name(struct node *node);
+#ifdef DEBUG
+	rt_value get_node_name(struct node *node);
+#endif

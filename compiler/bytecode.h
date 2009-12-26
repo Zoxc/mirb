@@ -14,7 +14,10 @@ enum opcode_type {
 	B_PUSH_IMM,
 	B_PUSH_RAW,
 	B_CALL,
+	B_CALL_ARGS,
+	B_CALL_ARGS_POP,
 	B_ARGS,
+	B_ARGS_POP,
 	B_SUPER,
 	B_LOAD,
 	B_STORE,
@@ -69,4 +72,6 @@ struct opcode {
 	rt_value right;
 };
 
-void opcode_print(struct opcode *op);
+#ifdef DEBUG
+	void opcode_print(struct opcode *op);
+#endif

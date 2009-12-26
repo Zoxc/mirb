@@ -8,16 +8,107 @@ typedef void(*generator)(struct block *block, struct node *node, struct variable
 
 static inline void gen_node(struct block *block, struct node *node, struct variable *var);
 
+
+static int gen_argument(struct block *block, struct node *node, struct variable *var)
+{
+	struct variable *temp = var ? var : block_get_var(block);
+
+	gen_node(block, node->left, temp);
+
+	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+
+	if(node->right)
+		return gen_argument(block, node->right, temp) + 1;
+	else
+		return 1;
+}
+
+static struct variable *generate_block_arg(struct block *block, struct node *block_node)
+{
+	struct variable* closure = 0;
+
+	if(block_node)
+	{
+		block->self_ref++;
+
+		closure = block_get_var(block);
+		struct block *block_attach = gen_block(block_node);
+
+		for(size_t i = 0; i < block_attach->scopes.size; i++)
+			block_push(block, B_PUSH_SCOPE, (rt_value)block_attach->scopes.array[i], 0, 0);
+
+		struct opcode *args = block_push(block, B_ARGS, block_attach->scopes.size, 0, 0);
+
+		block_push(block, B_CLOSURE, (rt_value)closure, (rt_value)block_attach, 0);
+
+		block_push(block, B_ARGS_POP, (rt_value)args, 5, 0);
+	}
+
+	return closure;
+}
+
+static void generate_block_arg_seal(struct block *block, struct variable *closure)
+{
+	if(closure)
+		block_push(block, B_SEAL, (rt_value)closure, 0, 0);
+}
+
+struct call_args_info
+{
+	struct variable *closure;
+	struct opcode *args;
+};
+
+static struct call_args_info generate_call_args(struct block *block, struct node *arguments, struct node *block_node, struct variable *var)
+{
+	struct call_args_info result;
+
+	int parameters = 0;
+
+	struct variable *temp = var ? var : block_get_var(block);
+
+	if(arguments)
+		parameters = gen_argument(block, arguments, temp);
+
+	result.closure = generate_block_arg(block, block_node);
+	result.args = block_push(block, B_CALL_ARGS, parameters, (rt_value)result.closure, 0);
+
+	return result;
+}
+
+static void generate_call_args_seal(struct block *block, struct call_args_info *info)
+{
+	block_push(block, B_CALL_ARGS_POP, (rt_value)info->args, 0, 0);
+
+	generate_block_arg_seal(block, info->closure);
+}
+
+static struct call_args_info generate_unary_call_args(struct block *block, struct variable *var)
+{
+	return generate_call_args(block, 0, 0, var);
+}
+
+static struct call_args_info generate_binary_call_args(struct block *block, struct node *arg, struct variable *var)
+{
+	struct node argument;
+
+	argument.left = arg;
+	argument.right = 0;
+
+	return generate_call_args(block, &argument, 0, var);
+}
+
 static void gen_unary_op(struct block *block, struct node *node, struct variable *var)
 {
 	struct variable *temp = var ? var : block_get_var(block);
 
 	gen_node(block, node->left, temp);
 
-	struct variable *args = block_gen_args(block);
-	block_end_args(block, args, 0);
+	struct call_args_info info = generate_unary_call_args(block, temp);
 
 	block_push(block, B_CALL, (rt_value)temp, rt_symbol_from_cstr(token_type_names[node->op]), 0);
+
+	generate_call_args_seal(block, &info);
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
@@ -25,18 +116,15 @@ static void gen_unary_op(struct block *block, struct node *node, struct variable
 
 static void gen_binary_op(struct block *block, struct node *node, struct variable *var)
 {
-	struct variable *temp1 = var ? var : block_get_var(block);
-	struct variable *temp2 = block_get_var(block);
+	struct variable *temp = var ? var : block_get_var(block);
 
-	gen_node(block, node->left, temp1);
+	gen_node(block, node->left, temp);
 
-	struct variable *args = block_gen_args(block);
+	struct call_args_info info = generate_binary_call_args(block, node->right, 0);
 
-	gen_node(block, node->right, temp2);
-	block_push(block, B_PUSH, (rt_value)temp2, 0, 0);
+	block_push(block, B_CALL, (rt_value)temp, rt_symbol_from_cstr(token_type_names[node->op]), 0);
 
-	block_end_args(block, args, 1);
-	block_push(block, B_CALL, (rt_value)temp1, rt_symbol_from_cstr(token_type_names[node->op]), 0);
+	generate_call_args_seal(block, &info);
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
@@ -87,8 +175,6 @@ static size_t gen_string_arg_count(struct node *node)
 
 static void gen_string_start(struct block *block, struct node *node, struct variable *var)
 {
-	struct variable *args = block_gen_args(block);
-
 	struct variable *temp = var ? var : block_get_var(block);
 
 	gen_node(block, node->left, temp);
@@ -101,9 +187,11 @@ static void gen_string_start(struct block *block, struct node *node, struct vari
 		block_push(block, B_PUSH, (rt_value)temp, 0, 0);
 	}
 
-	block_end_args(block, args, gen_string_arg_count(node->left) + present);
+	struct opcode *args = block_push(block, B_ARGS, gen_string_arg_count(node->left) + present, 0, 0);
 
 	block_push(block, B_INTERPOLATE, (rt_value)var, 0, 0);
+
+	block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);
 }
 
 
@@ -255,77 +343,17 @@ static void gen_method(struct block *block, struct node *node, struct variable *
 		block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
 }
 
-static int gen_argument(struct block *block, struct node *node, struct variable *var)
-{
-	struct variable *temp = var ? var : block_get_var(block);
-
-	gen_node(block, node->left, temp);
-
-	block_push(block, B_PUSH, (rt_value)temp, 0, 0);
-
-	if(node->right)
-		return gen_argument(block, node->right, temp) + 1;
-	else
-		return 1;
-}
-
-static void generate_block_arg_seal(struct block *block, struct variable *closure)
-{
-	if(closure)
-		block_push(block, B_SEAL, (rt_value)closure, 0, 0);
-}
-
-static struct variable* generate_block_arg(struct block *block, struct node *block_node)
-{
-	struct variable* closure = 0;
-
-	if(block_node)
-	{
-		block->self_ref++;
-
-		closure = block_get_var(block);
-		struct block *block_attach = gen_block(block_node);
-		struct variable *scope_args = block_gen_args(block);
-
-		for(size_t i = 0; i < block_attach->scopes.size; i++)
-			block_push(block, B_PUSH_SCOPE, (rt_value)block_attach->scopes.array[i], 0, 0);
-
-		block_end_args(block, scope_args, block_attach->scopes.size);
-		block_push(block, B_CLOSURE, (rt_value)closure, (rt_value)block_attach, 0);
-	}
-
-	return closure;
-}
-
-static struct variable* generate_call_args(struct block *block, struct node *arguments, struct node *block_node, struct variable *var)
-{
-	int parameters = 0;
-
-	struct variable *args = block_gen_args(block);
-
-	struct variable *temp = var ? var : block_get_var(block);
-
-	if(arguments)
-		parameters = gen_argument(block, arguments, temp);
-
-	struct variable* closure = generate_block_arg(block, block_node);
-
-	block_end_args(block, args, parameters);
-
-	return closure;
-}
-
 static void generate_call(struct block *block, struct node *self, rt_value name, struct node *arguments, struct node *block_node, struct variable *var)
 {
 	struct variable *self_var = block_get_var(block);
 
 	gen_node(block, self, self_var);
 
-	struct variable* closure = generate_call_args(block, arguments, block_node, var);
+	struct call_args_info info = generate_call_args(block, arguments, block_node, var);
 
-	block_push(block, B_CALL, (rt_value)self_var, name, (rt_value)closure);
+	block_push(block, B_CALL, (rt_value)self_var, name, (rt_value)info.closure);
 
-	generate_block_arg_seal(block, closure);
+	generate_call_args_seal(block, &info);
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
@@ -355,13 +383,13 @@ static size_t gen_array_element(struct block *block, struct node *node, struct v
 
 static void gen_array(struct block *block, struct node *node, struct variable *var)
 {
-	struct variable *args = block_gen_args(block);
-
 	size_t elements = node->left ? gen_array_element(block, node->left, var ? var : block_get_var(block)) : 0;
 
-	block_end_args(block, args, elements);
+	struct opcode *args = block_push(block, B_ARGS, (rt_value)elements, 0, 0);
 
 	block_push(block, B_ARRAY, (rt_value)var, 0, 0);
+
+	block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);
 }
 
 static void gen_boolean(struct block *block, struct node *node, struct variable *var)
@@ -641,11 +669,11 @@ static void gen_super(struct block *block, struct node *node, struct variable *v
 {
     block->self_ref++;
 
-	struct variable* closure = generate_call_args(block, node->left, node->right, var);
+	struct call_args_info info = generate_call_args(block, node->left, node->right, var);
 
-	block_push(block, B_SUPER, (rt_value)closure, 0, 0);
+	block_push(block, B_SUPER, (rt_value)info.closure, 0, 0);
 
-	generate_block_arg_seal(block, closure);
+	generate_call_args_seal(block, &info);
 
 	if (var)
 		block_push(block, B_STORE, (rt_value)var, 0, 0);
@@ -661,16 +689,16 @@ static void gen_zsuper(struct block *block, struct node *node, struct variable *
 	 * Push arguments
 	 */
 
-	struct variable *args = block_gen_args(block);
-
 	for(size_t i = 0; i < block->owner->parameters.size; i++)
 	{
 		block_push(block, B_PUSH, (rt_value)block->owner->parameters.array[i], 0, 0);
 	}
 
-	block_end_args(block, args, block->owner->parameters.size);
+	struct opcode *args = block_push(block, B_CALL_ARGS, (rt_value)block->owner->parameters.size, 0, 0);
 
 	block_push(block, B_SUPER, (rt_value)closure, 0, 0);
+
+	block_push(block, B_CALL_ARGS_POP, (rt_value)args, 0, 0);
 
 	generate_block_arg_seal(block, closure);
 

@@ -18,12 +18,6 @@ const char *variable_name(rt_value var)
 			rt_concat_string(string, rt_string_from_fixnum(RT_INT2FIX(_var->index)));
 			break;
 
-		case V_ARGS:
-			rt_concat_string(string, rt_string_from_cstr("<a:"));
-			rt_concat_string(string, rt_string_from_fixnum(RT_INT2FIX(_var->index)));
-			rt_concat_string(string, rt_string_from_cstr(">"));
-			break;
-
 		case V_HEAP:
 			if(_var->owner->block_parameter == _var)
 				rt_concat_string(string, rt_string_from_cstr("!&"));
