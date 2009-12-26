@@ -18,7 +18,7 @@
 <folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.622382148." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.720074219" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.771842605" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
-<builder buildPath="${workspace_loc:/mirb/Debug}" id="org.eclipse.cdt.build.core.internal.builder.449346749" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+<builder autoBuildTarget="" buildPath="${workspace_loc:/mirb/Debug}" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.cdt.build.core.internal.builder.449346749" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="false" parallelizationNumber="-4" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 <tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.181647732" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1636546593" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
@@ -35,14 +35,19 @@
 <listOptionValue builtIn="false" value="WIN_SEH"/>
 </option>
 <option id="gnu.c.compiler.option.misc.other.2030097685" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=gnu99" valueType="string"/>
+<option id="gnu.c.compiler.option.include.paths.335132835" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="../vendor"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.464008878" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug.976576832" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug">
 <option id="gnu.c.link.option.libs.2104507976" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="BeaEngine"/>
+<listOptionValue builtIn="false" value="gc"/>
 </option>
 <option id="gnu.c.link.option.paths.1889229796" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="../vendor/BeaEngine"/>
+<listOptionValue builtIn="false" value="../vendor/gc/.libs"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.685360535" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -53,7 +58,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="runtime/x86.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="vendor/gc|runtime/x86.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -326,7 +331,7 @@
 <folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.release.635442527." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.release.1893602159" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.release">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.release.2077477549" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.release"/>
-<builder buildPath="${workspace_loc:/mirb/Release}" id="cdt.managedbuild.tool.gnu.builder.mingw.base.1076945923" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
+<builder autoBuildTarget="" buildPath="${workspace_loc:/mirb/Release}" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.tool.gnu.builder.mingw.base.1076945923" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="false" parallelizationNumber="-1" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
 <tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.release.1053754204" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.release">
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1159960696" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
@@ -342,14 +347,19 @@
 <listOptionValue builtIn="false" value="WIN_SEH"/>
 </option>
 <option id="gnu.c.compiler.option.misc.other.1669797579" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=gnu99" valueType="string"/>
+<option id="gnu.c.compiler.option.include.paths.1520867681" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="../vendor"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1133374264" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release.1492704582" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release">
 <option id="gnu.c.link.option.paths.973561525" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="../vendor/BeaEngine"/>
+<listOptionValue builtIn="false" value="../vendor/gc/.libs"/>
 </option>
 <option id="gnu.c.link.option.libs.965684812" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="BeaEngine"/>
+<listOptionValue builtIn="false" value="gc"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.567785138" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -360,7 +370,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="runtime/x86_.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="vendor/gc|runtime/x86_.asm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
