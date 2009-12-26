@@ -195,5 +195,6 @@ static inline void block_print_label(rt_value label)
 
 const char *variable_name(rt_value var);
 
-void block_print(struct block *block);
-
+#ifdef DEBUG
+	void block_print(struct block *block);
+#endif

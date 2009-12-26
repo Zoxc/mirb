@@ -42,22 +42,24 @@ const char *variable_name(rt_value var)
 	return rt_string_to_cstr(string);
 }
 
-void block_print(struct block *block)
-{
-	for(size_t i = 0; i < block->opcodes.size; i++)
+#ifdef DEBUG
+	void block_print(struct block *block)
 	{
-		struct opcode *op = block->opcodes.array[i];
-
-		if(op->type != B_NOP)
+		for(size_t i = 0; i < block->opcodes.size; i++)
 		{
-			if(op->type == B_LABEL)
-				printf("\n");
+			struct opcode *op = block->opcodes.array[i];
 
-			opcode_print(block->opcodes.array[i]);
-			printf("\n");
+			if(op->type != B_NOP)
+			{
+				if(op->type == B_LABEL)
+					printf("\n");
+
+				opcode_print(block->opcodes.array[i]);
+				printf("\n");
+			}
 		}
 	}
-}
+#endif
 
 void block_require_var(struct block *current, struct variable *var)
 {
