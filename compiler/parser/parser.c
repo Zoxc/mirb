@@ -54,6 +54,7 @@ struct variable *scope_var(struct block *block)
 	var->owner = block;
 	var->type = V_LOCAL;
 	var->name = 0;
+	var->index = block->var_count[V_LOCAL]++;
 
 	return var;
 }
