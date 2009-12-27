@@ -54,6 +54,8 @@ int main()
 			rt_value result = runtime_block->compiled(0, RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 
 			printf("=> "); rt_print(result); printf("\n");
+
+			runtime_block = 0; // Make sure runtime_block stays on stack
 		}
 
 		compiler_destroy(compiler);

@@ -21,10 +21,72 @@ typedef rt_value (__stdcall __regparm(3) *rt_compiled_block_t)(rt_value **_scope
 #define RT_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
 #define RT_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 
+/*
+ * Memory allocator functions
+ */
+
+static inline rt_value rt_alloc(size_t size)
+{
+	#ifdef VALGRIND
+		return (rt_value)malloc(size);
+	#else
+		GC_gcollect();
+		return (rt_value)GC_MALLOC(size);
+	#endif
+}
+
+static inline rt_value rt_alloc_root(size_t size)
+{
+	#ifdef VALGRIND
+		return (rt_value)malloc(size);
+	#else
+		return (rt_value)GC_MALLOC_UNCOLLECTABLE(size);
+	#endif
+}
+
+static inline rt_value rt_realloc(rt_value old, size_t size)
+{
+	#ifdef VALGRIND
+		return (rt_value)realloc((void *)old, size);
+	#else
+		return old ? (rt_value)GC_REALLOC((void *)old, size) : rt_alloc(size);
+	#endif
+}
+
+/*
+ * Generic data structures
+ */
+
+#define rt_runtime_malloc(size) rt_alloc(size)
+#define rt_runtime_realloc(old, old_size, new_size) rt_realloc((rt_value)(old), new_size)
+#define rt_runtime_free(obj)
+
+#define VEC_RUNTIME(type, name) \
+	VEC_INIT(type, name, , , , , rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME(name, key_t, val_t)								\
+	HASH_INIT(name, key_t, val_t, 1, hash_int_hash_func, hash_int_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME_STR(name, val_t)								\
+	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+#define HASH_RUNTIME_ROOT_STR(name, val_t)								\
+	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_alloc_root, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
+
+/*
+ * Structure for code blocks
+ */
+
+struct rt_block;
+
+VEC_RUNTIME(struct rt_block *, rt_blocks);
+
 struct rt_block {
-	rt_compiled_block_t compiled;
-	rt_value name;
+	rt_compiled_block_t compiled; // A pointer to a compiled function.
+	rt_value name; // The name of this block.
+	vec_t(rt_blocks) blocks; // A list of child blocks so the GC won't free them.
 };
+
 
 enum rt_type {
 	C_FIXNUM,
@@ -91,49 +153,6 @@ static inline bool rt_bool(rt_value value)
 {
 	return value & ~RT_FALSE;
 }
-
-static inline rt_value rt_alloc(size_t size)
-{
-	#ifdef VALGRIND
-		return (rt_value)malloc(size);
-	#else
-		return (rt_value)GC_MALLOC(size);
-	#endif
-}
-
-static inline rt_value rt_alloc_root(size_t size)
-{
-	#ifdef VALGRIND
-		return (rt_value)malloc(size);
-	#else
-		return (rt_value)GC_MALLOC_UNCOLLECTABLE(size);
-	#endif
-}
-
-static inline rt_value rt_realloc(rt_value old, size_t size)
-{
-	#ifdef VALGRIND
-		return (rt_value)realloc((void *)old, size);
-	#else
-		return old ? (rt_value)GC_REALLOC((void *)old, size) : rt_alloc(size);
-	#endif
-}
-
-#define rt_runtime_malloc(size) rt_alloc(size)
-#define rt_runtime_realloc(old, old_size, new_size) rt_realloc((rt_value)(old), new_size)
-#define rt_runtime_free(obj)
-
-#define VEC_RUNTIME(type, name) \
-	VEC_INIT(type, name, , , , , rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
-
-#define HASH_RUNTIME(name, key_t, val_t)								\
-	HASH_INIT(name, key_t, val_t, 1, hash_int_hash_func, hash_int_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
-
-#define HASH_RUNTIME_STR(name, val_t)								\
-	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
-
-#define HASH_RUNTIME_ROOT_STR(name, val_t)								\
-	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_alloc_root, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
 
 HASH_RUNTIME(rt_hash, rt_value, rt_value);
 HASH_RUNTIME(rt_methods, rt_value, struct rt_block *);

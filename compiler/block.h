@@ -65,6 +65,8 @@ struct block {
 	enum block_type type;
 	struct compiler *compiler; // The compiler which owns this block
 
+	struct rt_block *output; // The runtime block structure this will all end in.
+
 	struct block *parent; // The block enclosing this one
 	struct block *owner; // The first parent that isn't a closure. This field can point to itself.
 

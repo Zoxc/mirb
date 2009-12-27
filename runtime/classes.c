@@ -253,6 +253,8 @@ void rt_define_method(rt_value obj, const char *name, rt_compiled_block_t compil
 {
 	struct rt_block *block = (struct rt_block *)rt_alloc(sizeof(struct rt_block));
 
+	vec_init(rt_blocks, &block->blocks);
+
 	block->compiled = compiled_block;
 	block->name = rt_symbol_from_cstr(name);
 

@@ -101,6 +101,7 @@ struct block *block_create(struct compiler *compiler, enum block_type type)
 		result->label_count = 0;
 	#endif
 
+	result->output = 0;
 	result->self_ref = 0;
 	result->require_exceptions = false;
 	result->current_exception_block = 0;

@@ -65,7 +65,11 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 
 	compiler_destroy(compiler);
 
-	return runtime_block->compiled(0, method_name, method_module, self, RT_NIL, 0, 0);
+	rt_value result = runtime_block->compiled(0, method_name, method_module, self, RT_NIL, 0, 0);
+
+	runtime_block = 0; // Make sure runtime_block stays on stack
+
+	return result;
 }
 
 struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module)
