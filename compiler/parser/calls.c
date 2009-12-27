@@ -346,10 +346,7 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 
 		switch(lexer_current(compiler))
 		{
-			case T_ASSIGN_ADD:
-			case T_ASSIGN_SUB:
-			case T_ASSIGN_MUL:
-			case T_ASSIGN_DIV:
+			T_ASSIGN_OPS
 				RT_ASSERT(0);
 
 			case T_ASSIGN:
@@ -442,10 +439,7 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 	{
 		switch(lexer_current(compiler))
 		{
-			case T_ASSIGN_ADD:
-			case T_ASSIGN_SUB:
-			case T_ASSIGN_MUL:
-			case T_ASSIGN_DIV:
+			T_ASSIGN_OPS
 			case T_ASSIGN:
 				{
 					lexer_next(compiler);

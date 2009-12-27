@@ -96,6 +96,7 @@ void rt_string_init(void)
 	rt_define_method(rt_String, "inspect", rt_string_inspect);
 	rt_define_method(rt_String, "to_s", rt_string_to_s);
 	rt_define_method(rt_String, "concat", rt_string_concat);
+	rt_define_method(rt_String, "<<", rt_string_concat);
 	rt_define_method(rt_String, "+", rt_string_concat);
 }
 

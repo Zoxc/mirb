@@ -19,11 +19,16 @@ BooleanOr <- BooleanAnd, ("||", NewLine*, BooleanAnd)*
 
 BooleanAnd <- Equality, ("&&", NewLine*, Equality)*
 
-Equality <- Arithmetic, (EqualityOp, NewLine*, Arithmetic)*
+Equality <- Shift, (EqualityOp, NewLine*, Shift)*
 
 EqualityOp <- "=="
 	| "==="
 	| "!="
+
+Shift <- Arithmetic, (ShiftOp, NewLine*, Arithmetic)*
+
+ShiftOp <- "<<"
+	| ">>"
 
 Arithmetic <- Term, (TermOp, NewLine*, Term)*
 
@@ -96,6 +101,8 @@ AssignOp <- "="
 	| "-="
 	| "*="
 	| "/="
+	| "<<="
+	| ">>="
 
 Call <- CallIdent, {Arguments | "(", Arguments, ")"}, {Block}
 

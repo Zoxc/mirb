@@ -69,6 +69,14 @@ static inline bool is_expression(struct compiler *compiler)
 	}
 }
 
+#define T_ASSIGN_OPS \
+		case T_ASSIGN_ADD: \
+		case T_ASSIGN_SUB: \
+		case T_ASSIGN_MUL: \
+		case T_ASSIGN_DIV: \
+		case T_ASSIGN_LEFT_SHIFT: \
+		case T_ASSIGN_RIGHT_SHIFT:
+
 struct node *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type);
 
 static inline struct node *alloc_node(struct compiler *compiler, enum node_type type)

@@ -151,10 +151,7 @@ struct node *parse_identifier(struct compiler *compiler)
 
 	switch (lexer_current(compiler))
 	{
-		case T_ASSIGN_ADD:
-		case T_ASSIGN_SUB:
-		case T_ASSIGN_MUL:
-		case T_ASSIGN_DIV:
+		T_ASSIGN_OPS
 		{
 			struct node *result;
 
@@ -397,10 +394,7 @@ struct node *parse_factor(struct compiler *compiler)
 
 				switch (lexer_current(compiler))
 				{
-					case T_ASSIGN_ADD:
-					case T_ASSIGN_SUB:
-					case T_ASSIGN_MUL:
-					case T_ASSIGN_DIV:
+					T_ASSIGN_OPS
 					{
 						struct node *result;
 
@@ -547,6 +541,26 @@ struct node *parse_arithmetic(struct compiler *compiler)
 	return result;
 }
 
+struct node *parse_shift(struct compiler *compiler)
+{
+	struct node *result = parse_arithmetic(compiler);
+
+	while (lexer_current(compiler) == T_LEFT_SHIFT || lexer_current(compiler) == T_RIGHT_SHIFT)
+	{
+		struct node *node = alloc_node(compiler, N_BINARY_OP);
+
+		node->op = lexer_current(compiler);
+		node->left = result;
+
+		lexer_next(compiler);
+
+		node->right = parse_arithmetic(compiler);
+		result = node;
+	}
+
+	return result;
+}
+
 static inline bool is_equality_op(struct compiler *compiler)
 {
 	switch(lexer_current(compiler))
@@ -563,7 +577,7 @@ static inline bool is_equality_op(struct compiler *compiler)
 
 struct node *parse_equality(struct compiler *compiler)
 {
-	struct node *result = parse_arithmetic(compiler);
+	struct node *result = parse_shift(compiler);
 
 	while(is_equality_op(compiler))
 	{
@@ -581,7 +595,7 @@ struct node *parse_equality(struct compiler *compiler)
 
 		lexer_next(compiler);
 
-		node->right = parse_arithmetic(compiler);
+		node->right = parse_shift(compiler);
 		result = node;
 	}
 
