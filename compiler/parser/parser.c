@@ -9,6 +9,8 @@
  */
 struct node nil_node = {0, 0, 0, 0, N_NIL, 0, false};
 struct node self_node = {0, 0, 0, 0, N_SELF, 0, false};
+struct node true_node = {0, 0, 0, 0, N_TRUE, 0, false};
+struct node false_node = {0, 0, 0, 0, N_FALSE, 0, false};
 
 struct node *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type)
 {
@@ -357,14 +359,14 @@ struct node *parse_factor(struct compiler *compiler)
 			{
 				lexer_next(compiler);
 
-				return alloc_node(compiler, N_TRUE);
+				return &true_node;
 			}
 
 		case T_FALSE:
 			{
 				lexer_next(compiler);
 
-				return alloc_node(compiler, N_FALSE);
+				return &false_node;
 			}
 
 		case T_NIL:
