@@ -30,7 +30,6 @@ static inline rt_value rt_alloc(size_t size)
 	#ifdef VALGRIND
 		return (rt_value)malloc(size);
 	#else
-		GC_gcollect();
 		return (rt_value)GC_MALLOC(size);
 	#endif
 }
