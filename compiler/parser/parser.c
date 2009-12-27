@@ -475,20 +475,36 @@ struct node *parse_factor(struct compiler *compiler)
 
 struct node *parse_unary(struct compiler *compiler)
 {
-	if(lexer_current(compiler) == T_ADD || lexer_current(compiler) == T_SUB)
+	switch(lexer_current(compiler))
 	{
-		struct node *result = alloc_node(compiler, N_UNARY_OP);
+		case T_NOT_SIGN:
+			{
+				struct node *result = alloc_node(compiler, N_NOT);
 
-		result->op = lexer_current(compiler) + OP_TO_UNARY;
+				lexer_next(compiler);
 
-		lexer_next(compiler);
+				result->left = parse_lookup_chain(compiler);
 
-		result->left = parse_lookup_chain(compiler);;
+				return result;
+			}
 
-		return result;
+		case T_ADD:
+		case T_SUB:
+		{
+			struct node *result = alloc_node(compiler, N_UNARY_OP);
+
+			result->op = lexer_current(compiler) + OP_TO_UNARY;
+
+			lexer_next(compiler);
+
+			result->left = parse_lookup_chain(compiler);;
+
+			return result;
+		}
+
+		default:
+			return parse_lookup_chain(compiler);
 	}
-	else
-		return parse_lookup_chain(compiler);
 }
 
 struct node *parse_term(struct compiler *compiler)
@@ -531,22 +547,6 @@ struct node *parse_arithmetic(struct compiler *compiler)
 	return result;
 }
 
-struct node *parse_boolean_unary(struct compiler *compiler)
-{
-	if(lexer_current(compiler) == T_NOT_SIGN)
-	{
-		struct node *result = alloc_node(compiler, N_NOT);
-
-		lexer_next(compiler);
-
-		result->left = parse_arithmetic(compiler);
-
-		return result;
-	}
-	else
-		return parse_arithmetic(compiler);
-}
-
 static inline bool is_equality_op(struct compiler *compiler)
 {
 	switch(lexer_current(compiler))
@@ -563,7 +563,7 @@ static inline bool is_equality_op(struct compiler *compiler)
 
 struct node *parse_equality(struct compiler *compiler)
 {
-	struct node *result = parse_boolean_unary(compiler);
+	struct node *result = parse_arithmetic(compiler);
 
 	while(is_equality_op(compiler))
 	{
@@ -581,7 +581,7 @@ struct node *parse_equality(struct compiler *compiler)
 
 		lexer_next(compiler);
 
-		node->right = parse_boolean_unary(compiler);
+		node->right = parse_arithmetic(compiler);
 		result = node;
 	}
 

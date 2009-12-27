@@ -19,13 +19,11 @@ BooleanOr <- BooleanAnd, ("||", NewLine*, BooleanAnd)*
 
 BooleanAnd <- Equality, ("&&", NewLine*, Equality)*
 
-Equality <- BooleanUnary, (EqualityOp, NewLine*, BooleanUnary)*
+Equality <- Arithmetic, (EqualityOp, NewLine*, Arithmetic)*
 
 EqualityOp <- "=="
 	| "==="
 	| "!="
-
-BooleanUnary <- {"!"}, Arithmetic
 
 Arithmetic <- Term, (TermOp, NewLine*, Term)*
 
@@ -37,7 +35,7 @@ Term <- Unary, (FactorOp, NewLine*, Unary)*
 FactorOp <- "*"
 	| "/"
 	
-Unary <- {("+" | "-"), NewLine*}, LookupChain
+Unary <- {("+" | "-" | "!"), NewLine*}, LookupChain
 
 LookupChain <- Factor, Lookup(Call)*, {Lookup(Identifier), AssignTail}
 
