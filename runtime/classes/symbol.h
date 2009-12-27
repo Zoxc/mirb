@@ -32,6 +32,11 @@ static inline const char *rt_symbol_to_cstr(rt_value value)
 	return RT_SYMBOL(value)->string;
 }
 
+static inline rt_value rt_symbol_from_string(rt_value value)
+{
+	return rt_string_from_cstr(rt_symbol_to_cstr(value));
+}
+
 static inline rt_value rt_string_from_symbol(rt_value value)
 {
 	return rt_string_from_cstr(RT_SYMBOL(value)->string);

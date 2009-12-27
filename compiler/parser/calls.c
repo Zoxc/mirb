@@ -2,6 +2,23 @@
 #include "structures.h"
 #include "../../runtime/classes/symbol.h"
 
+static bool require_ident(struct compiler *compiler)
+{
+	switch(lexer_current(compiler))
+	{
+		case T_IDENT:
+		case T_EXT_IDENT:
+			return true;
+
+		default:
+			{
+				COMPILER_ERROR(compiler, "Expected identifier but found %s", token_type_names[lexer_current(compiler)]);
+
+				return false;
+			}
+	}
+}
+
 struct node *parse_block(struct compiler *compiler)
 {
 	bool curly;
@@ -139,6 +156,20 @@ struct node *parse_arguments(struct compiler *compiler, bool has_args, bool *par
 		return 0;
 }
 
+struct node *alloc_call_node(struct compiler *compiler, struct node *child, rt_value symbol, bool has_args)
+{
+	struct node *result = alloc_node(compiler, N_CALL);
+
+	result->left = child;
+	result->middle = (void *)symbol;
+
+	result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
+	result->right->left = parse_arguments(compiler, has_args, 0);
+	result->right->right = parse_block(compiler);
+
+	return secure_block(compiler, result->right->right, result);
+}
+
 struct node *parse_super(struct compiler *compiler)
 {
 	lexer_next(compiler);
@@ -175,48 +206,32 @@ struct node *parse_super(struct compiler *compiler)
 		result->type = N_ZSUPER;
 	}
 
-	return result;
+	return secure_block(compiler, result->right, result);
 }
 
 struct node *parse_yield(struct compiler *compiler)
 {
 	lexer_next(compiler);
 
-	struct node *result = alloc_node(compiler, N_CALL);
-
-	result->left = alloc_node(compiler, N_VAR);
+	struct node *child = alloc_node(compiler, N_VAR);
 
 	if(!compiler->current_block->block_parameter)
 		compiler->current_block->block_parameter = scope_var(compiler->current_block);
 
-	result->left->left = (void *)compiler->current_block->block_parameter;
+	child->left = (void *)compiler->current_block->block_parameter;
 
-	result->middle = (void *)rt_symbol_from_cstr("call");
-
-	result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-	result->right->left = parse_arguments(compiler, has_arguments(compiler), 0);
-	result->right->right = parse_block(compiler);
-
-	return result;
+	return alloc_call_node(compiler, child, rt_symbol_from_cstr("call"), has_arguments(compiler));
 }
 
 struct node *parse_call(struct compiler *compiler, rt_value symbol, struct node *child, bool default_var)
 {
 	if(!symbol)
 	{
-		switch(lexer_current(compiler))
+		if(require_ident(compiler))
 		{
-			case T_IDENT:
-			case T_EXT_IDENT:
-				{
-					symbol = rt_symbol_from_lexer(compiler);
+			symbol = rt_symbol_from_lexer(compiler);
 
-					lexer_next(compiler);
-				}
-				break;
-
-			default:
-				COMPILER_ERROR(compiler, "Expected identifier but found %s", token_type_names[lexer_current(compiler)]);
+			lexer_next(compiler);
 		}
 	}
 
@@ -249,16 +264,7 @@ struct node *parse_call(struct compiler *compiler, rt_value symbol, struct node 
 	}
 	else // Call
 	{
-		struct node *result = alloc_node(compiler, N_CALL);
-
-		result->left = child;
-		result->middle = (void *)symbol;
-
-		result->right = alloc_node(compiler, N_CALL_ARGUMENTS);
-		result->right->left = parse_arguments(compiler, has_args, 0);
-		result->right->right = parse_block(compiler);
-
-		return secure_block(compiler, result->right->right, result);
+		return alloc_call_node(compiler, child, symbol, has_args);
 	}
 }
 
@@ -279,28 +285,29 @@ struct node *parse_lookup(struct compiler *compiler, struct node *child)
 
 				lexer_state(compiler, TS_DEFAULT);
 
-				if(lexer_require(compiler, T_IDENT))
+				if(require_ident(compiler))
 				{
 					rt_value symbol = rt_symbol_from_lexer(compiler);
-					struct node *result;
-
-					if(rt_symbol_is_const(symbol))
-					{
-						result = alloc_node(compiler, N_CONST);
-						result->left = child;
-						result->right = (void *)symbol;
-					}
-					else
-					{
-						result = alloc_node(compiler, N_CALL);
-						result->left = child;
-						result->middle = (void *)symbol;
-						result->right = 0;
-					}
 
 					lexer_next(compiler);
 
-					return result;
+					bool has_args = has_arguments(compiler);
+
+					if(has_args || !rt_symbol_is_const(symbol))
+					{
+						return alloc_call_node(compiler, child, symbol, has_arguments(compiler));
+					}
+					else
+					{
+						struct node *result;
+
+						result = alloc_node(compiler, N_CONST);
+
+						result->left = child;
+						result->right = (void *)symbol;
+
+						return result;
+					}
 				}
 				else
 					return child;
@@ -341,8 +348,12 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 {
 	if(tail)
 	{
-		if(tail->type == N_CALL && tail->right)
-			return tail;
+		struct node *handler = tail;
+
+		if(handler->type == N_BREAK_HANDLER)
+		{
+			tail = handler->left;
+		}
 
 		switch(lexer_current(compiler))
 		{
@@ -363,26 +374,24 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 								result->middle = tail->right;
 								result->right = parse_expression(compiler);
 
-								free(tail);
+								if(handler != tail)
+									handler->left = result;
 
-								return result;
+								return handler;
 							}
 
 						case N_CALL:
 							{
+								if(tail->right->left || tail->right->right)
+									break;
+
 								if(tail->middle)
 								{
-									const char *name = rt_symbol_to_cstr((rt_value)tail->middle);
+									rt_value name = rt_string_from_symbol((rt_value)tail->middle);
 
-									printf("original %s\n", name);
+									rt_concat_string(name, rt_string_from_cstr("="));
 
-									char *new_name = compiler_alloc(compiler, strlen(name) + 2);
-									strcpy(new_name, name);
-									strcat(new_name, "=");
-
-									printf("new %s\n", new_name);
-
-									tail->middle = (void *)rt_symbol_from_cstr(new_name);
+									tail->middle = (void *)rt_symbol_from_string(name);
 								}
 
 								tail->right = alloc_node(compiler, N_CALL_ARGUMENTS);
@@ -391,7 +400,7 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 								tail->right->left->left = parse_expression(compiler);
 								tail->right->left->right = 0;
 
-								return tail;
+								return handler;
 							}
 
 						case N_ARRAY_CALL:
@@ -415,24 +424,24 @@ struct node *parse_lookup_tail(struct compiler *compiler, struct node *tail)
 								argument->right->left = parse_expression(compiler);
 								argument->right->right = 0;
 
-								return tail;
+								return handler;
 							}
 
 						default:
-							{
-								COMPILER_ERROR(compiler, "Cannot assign a value to an expression.");
+							break;
 
-								parse_expression(compiler);
-
-								return 0;
-
-							}
 					}
+
+					COMPILER_ERROR(compiler, "Cannot assign a value to an expression.");
+
+					parse_expression(compiler);
+
+					return 0;
 				}
 				break;
 
 			default:
-				return tail;
+				return handler;
 		}
 	}
 	else // The tail is unknown
