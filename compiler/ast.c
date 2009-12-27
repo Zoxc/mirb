@@ -5,6 +5,284 @@
 #include "../runtime/classes/string.h"
 #include "../runtime/classes/symbol.h"
 
+typedef void (*parent_proc)(struct node *node, struct node *parent);
+
+void parent_unary_op(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_binary_op(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_num(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_var(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_const(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_assign(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_assign_const(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_if(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->middle, node);
+	parent_node(node->right, node);
+}
+
+void parent_argument(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_call_tail(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_call_arguments(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_call(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_array_call(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->middle, node);
+	parent_node(node->right, node);
+}
+
+void parent_expressions(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_class(struct node *node, struct node *parent)
+{
+	parent_node(node->right, node);
+}
+
+void parent_module(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_scope(struct node *node, struct node *parent)
+{
+	parent_node(node->right, node);
+}
+
+void parent_method(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_self(struct node *node, struct node *parent)
+{
+}
+
+void parent_true(struct node *node, struct node *parent)
+{
+}
+
+void parent_false(struct node *node, struct node *parent)
+{
+}
+
+void parent_nil(struct node *node, struct node *parent)
+{
+}
+
+void parent_string(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_string_continue(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_string_start(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_array(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_array_element(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_boolean(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_not(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_ivar(struct node *node, struct node *parent)
+{
+}
+
+void parent_ivar_assign(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_no_equality(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_handler(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->middle, node);
+	parent_node(node->right, node);
+}
+
+void parent_break_handler(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_rescue(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_return(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_break(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_next(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+}
+
+void parent_redo(struct node *node, struct node *parent)
+{
+}
+
+void parent_super(struct node *node, struct node *parent)
+{
+	parent_node(node->left, node);
+	parent_node(node->right, node);
+}
+
+void parent_zsuper(struct node *node, struct node *parent)
+{
+	parent_node(node->right, node);
+}
+
+parent_proc parent_node_procs[] = {
+	parent_unary_op,
+	parent_binary_op,
+	parent_num,
+	parent_var,
+	parent_ivar,
+	parent_ivar_assign,
+	parent_string,
+	parent_string_start,
+	parent_string_continue,
+	parent_array,
+	parent_array_element,
+	parent_const,
+	parent_self,
+	parent_true,
+	parent_false,
+	parent_nil,
+	parent_assign,
+	parent_assign_const,
+	parent_boolean,
+	parent_not,
+	parent_no_equality,
+	parent_if,
+	parent_if,
+	parent_super,
+	parent_zsuper,
+	parent_return,
+	parent_next,
+	parent_redo,
+	parent_break,
+	parent_break_handler,
+	parent_handler,
+	parent_rescue,
+	parent_argument,
+	parent_call_arguments,
+	parent_call,
+	parent_array_call,
+	parent_expressions,
+	parent_class,
+	parent_module,
+	parent_scope,
+	parent_method
+};
+
+void parent_node(struct node *node, struct node *parent)
+{
+	if(node)
+	{
+		node->parent = parent;
+
+		parent_node_procs[node->type](node, parent);
+	}
+}
+
 #ifdef DEBUG
 	typedef rt_value (*get_node_name_proc)(struct node *node);
 
@@ -172,11 +450,6 @@
 		}
 
 		return result;
-	}
-
-	rt_value name_lookup_tail(struct node *node)
-	{
-		return rt_string_from_cstr("(tail!");
 	}
 
 	rt_value name_expressions(struct node *node)

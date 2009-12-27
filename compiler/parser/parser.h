@@ -83,6 +83,7 @@ static inline struct node *alloc_node(struct compiler *compiler, enum node_type 
 {
 	struct node *result = compiler_alloc(compiler, sizeof(struct node));
 	result->type = type;
+	result->unbalanced = false;
 
 	return result;
 }

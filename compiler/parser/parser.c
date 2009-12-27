@@ -7,8 +7,8 @@
 /*
  * These nodes uses no arguments and can be statically allocated.
  */
-struct node nil_node = {0, 0, 0, N_NIL, 0};
-struct node self_node = {0, 0, 0, N_SELF, 0};
+struct node nil_node = {0, 0, 0, 0, N_NIL, 0, false};
+struct node self_node = {0, 0, 0, 0, N_SELF, 0, false};
 
 struct node *alloc_scope(struct compiler *compiler, struct block **block_var, enum block_type type)
 {
@@ -21,6 +21,7 @@ struct node *alloc_scope(struct compiler *compiler, struct block **block_var, en
 
 	result->left = (void *)block;
 	result->type = N_SCOPE;
+	result->unbalanced = false;
 
 	compiler->current_block = block;
 

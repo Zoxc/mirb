@@ -50,9 +50,13 @@ struct node {
     struct node *left;
     struct node *middle;
     struct node *right;
+    struct node *parent;
     enum node_type type;
     enum token_type op;
+    bool unbalanced;
 };
+
+void parent_node(struct node *node, struct node *parent);
 
 #ifdef DEBUG
 	rt_value get_node_name(struct node *node);
