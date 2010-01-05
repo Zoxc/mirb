@@ -8,8 +8,6 @@
 
 extern rt_value rt_main;
 
-extern hash_t(rt_hash) *object_var_hashes;
-
 static inline rt_value rt_class_of(rt_value obj)
 {
 	if(obj & RT_FLAG_FIXNUM)
@@ -111,6 +109,7 @@ static inline rt_value rt_object_get_var(rt_value obj, rt_value name)
 }
 
 void rt_setup_classes(void);
+void rt_destroy_classes(void);
 
 rt_value rt_define_class_symbol(rt_value obj, rt_value name, rt_value super);
 rt_value rt_define_class(rt_value under, const char *name, rt_value super);

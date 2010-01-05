@@ -7,7 +7,9 @@
 
 rt_value rt_main;
 
-hash_t(rt_hash) *object_var_hashes;
+HASH_RUNTIME_ROOT(rt_object_hashes, rt_value, hash_t(rt_hash) *);
+
+hash_t(rt_object_hashes) *object_var_hashes;
 
 static inline bool rt_object_has_vars(rt_value obj)
 {
@@ -37,20 +39,20 @@ hash_t(rt_hash) *rt_object_get_vars(rt_value obj)
 	}
 	else
 	{
-		hash_iter_t i = hash_get(rt_hash, object_var_hashes, obj);
+		hash_iter_t i = hash_get(rt_object_hashes, object_var_hashes, obj);
 
 		if (i != hash_end(object_var_hashes))
-			return (hash_t(rt_hash) *)hash_value(object_var_hashes, i);
+			return hash_value(object_var_hashes, i);
 
 		int ret;
 
-		i = hash_put(rt_hash, object_var_hashes, obj, &ret);
+		i = hash_put(rt_object_hashes, object_var_hashes, obj, &ret);
 
 		RT_ASSERT(ret);
 
 		hash_t(rt_hash) *hash = hash_init(rt_hash);
 
-		hash_value(object_var_hashes, i) = (rt_value)hash;
+		hash_value(object_var_hashes, i) = hash;
 
 		return hash;
 	}
@@ -286,7 +288,7 @@ rt_compiled_block(rt_main_include)
 
 void rt_setup_classes(void)
 {
-	object_var_hashes = hash_init(rt_hash);
+	object_var_hashes = hash_init(rt_object_hashes);
 
 	rt_Object = rt_class_create_bare(0, true);
 	rt_Module = rt_class_create_bare(rt_Object, false);
@@ -311,4 +313,9 @@ void rt_setup_classes(void)
 
 	rt_define_singleton_method(rt_main, "to_s", (rt_compiled_block_t)rt_main_to_s);
 	rt_define_singleton_method(rt_main, "include", (rt_compiled_block_t)rt_main_include);
+}
+
+void rt_destroy_classes(void)
+{
+    hash_destroy(rt_object_hashes, object_var_hashes);
 }
