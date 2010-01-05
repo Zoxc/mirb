@@ -19,7 +19,7 @@ rt_value rt_string_from_raw_str(char *str, size_t length)
 
 rt_value rt_string_from_str(const char *str, size_t length)
 {
-	char *new_str = malloc(length + 1);
+	char *new_str = (char *)rt_alloc_data(length + 1);
 
 	memcpy(new_str, str, length);
 
@@ -29,7 +29,7 @@ rt_value rt_string_from_str(const char *str, size_t length)
 rt_value rt_string_from_cstr(const char *str)
 {
 	size_t length = strlen(str);
-	char *new_str = malloc(length + 1);
+	char *new_str = (char *)rt_alloc_data(length + 1);
 
 	strcpy(new_str, str);
 
@@ -76,14 +76,12 @@ rt_compiled_block(rt_string_concat)
 {
 	rt_value str = RT_ARG(0);
 	size_t new_length = RT_STRING(obj)->length + RT_STRING(str)->length;
-	char *new_str = malloc(new_length + 1);
+	char *new_str = (char *)rt_alloc_data(new_length + 1);
 
 	memcpy(new_str, RT_STRING(obj)->string, RT_STRING(obj)->length);
 	memcpy(new_str + RT_STRING(obj)->length, RT_STRING(str)->string, RT_STRING(str)->length);
 
 	new_str[new_length] = 0;
-
-	free(RT_STRING(obj)->string);
 
 	RT_STRING(obj)->string = new_str;
 	RT_STRING(obj)->length = new_length;

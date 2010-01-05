@@ -66,7 +66,7 @@ rt_value __cdecl rt_support_interpolate(size_t argc, rt_value argv[])
 		length += RT_STRING(argv[i])->length;
 	}
 
-	char *new_str = malloc(length + 1);
+	char *new_str = (char *)rt_alloc_data(length + 1);
 	char *current = new_str;
 
 	RT_ARG_EACH(i)

@@ -43,6 +43,15 @@ static inline rt_value rt_alloc_root(size_t size)
 	#endif
 }
 
+static inline rt_value rt_alloc_data(size_t size)
+{
+	#ifdef VALGRIND
+		return (rt_value)malloc(size);
+	#else
+		return (rt_value)GC_MALLOC_ATOMIC(size);
+	#endif
+}
+
 static inline rt_value rt_realloc(rt_value old, size_t size)
 {
 	#ifdef VALGRIND
