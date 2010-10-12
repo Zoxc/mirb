@@ -12,10 +12,17 @@ static inline size_t label_target(void *target, rt_value label)
 	return ((size_t)target + op->result);
 }
 
+union access
+{
+	uint8_t byte;
+	uint16_t word;
+	uint32_t dword;
+};
+
 #define GEN_BYTE(output) do \
 	{ \
 		if(!measuring) \
-			**(uint8_t**)target = (uint8_t)(output); \
+			**target = (uint8_t)(output); \
 		\
 		*target += sizeof(uint8_t);\
 	} \
@@ -24,7 +31,7 @@ static inline size_t label_target(void *target, rt_value label)
 #define GEN_WORD(output) do \
 	{ \
 		if(!measuring) \
-			**(uint16_t**)target = (uint16_t)(output); \
+			((union access *)*target)->word = (uint16_t)(output); \
 		\
 		*target += sizeof(uint16_t);\
 	} \
@@ -33,7 +40,7 @@ static inline size_t label_target(void *target, rt_value label)
 #define GEN_DWORD(output) do \
 	{ \
 		if(!measuring) \
-			**(uint32_t**)target = (uint32_t)(output); \
+			((union access *)*target)->dword = (uint32_t)(output); \
 		\
 		*target += sizeof(uint32_t);\
 	} \
