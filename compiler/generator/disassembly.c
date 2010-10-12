@@ -66,15 +66,34 @@ void dump_instruction(unsigned char* address, ud_t* ud_obj, disassembly_symbol_v
 	dump_hex(ud_insn_ptr(ud_obj), ud_insn_len(ud_obj));
 
 	printf(" %s", ud_insn_asm(ud_obj));
-/*
-	char *symbol = find_symbol((void *)(size_t)instruction->Instruction.AddrValue, vector);
-
-	if(!symbol)
-		symbol = find_symbol((void *)(size_t)instruction->Instruction.Immediat, vector);
-
+	
+	char *symbol = 0;
+	
+	for(size_t i = 0; !symbol && i < 3; i++)
+	{
+		switch(ud_obj->operand[i].type)
+		{				
+			case UD_OP_IMM:
+			case UD_OP_MEM:
+				symbol = find_symbol((void *)ud_obj->operand[i].lval.udword, vector);
+				break;
+			
+			case UD_OP_PTR:
+				symbol = find_symbol((void *)ud_obj->operand[i].lval.ptr.off, vector);
+				break;
+			
+			case UD_OP_JIMM:
+				symbol = find_symbol((void *)((size_t)ud_insn_off(ud_obj) + ud_obj->operand[i].lval.udword + ud_insn_len(ud_obj)), vector);
+				break;
+			
+			default:
+				break;
+		}
+	}
+	
 	if(symbol)
 		printf(" ;%s", symbol);
-*/
+	
 	printf("\n");
 }
 
