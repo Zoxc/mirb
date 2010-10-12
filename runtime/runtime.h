@@ -175,9 +175,9 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 
-rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module);
+rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module) asm("rt_lookup");
 struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
-rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module);
+rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module) asm("rt_lookup_super");
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[]);
 

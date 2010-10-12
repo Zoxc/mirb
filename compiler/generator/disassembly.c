@@ -88,14 +88,18 @@ void dump_code(unsigned char* address, int length, disassembly_symbol_vector_t *
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, (size_t)address);
 
+#ifdef _WIN32
 	DWORD Flags;
 
 	RT_ASSERT(VirtualProtect(address, length, PAGE_EXECUTE_READWRITE, &Flags)); // Terminate("DumpCode: Unable to get read permissions from address 0x%08X (%u).\n", address, GetLastError());
-
+#endif
+	
 	while(ud_disassemble(&ud_obj))
 	{
 		dump_instruction(address, &ud_obj, vector);
 	}
-
+	
+#ifdef _WIN32
 	RT_ASSERT(VirtualProtect(address, length, Flags, &Flags)); // Terminate("DumpCode: Unable to restore address 0x%08X (%u).\n", address, GetLastError());
+#endif
 }

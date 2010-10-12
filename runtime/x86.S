@@ -1,5 +1,5 @@
 .intel_syntax noprefix
-.section .text
+.text
 
 /*
  * rt_support_call
@@ -8,15 +8,14 @@
  *   %edx: Method name as a symbol
  *   %esp + 4: The object to look up in
  */
-
-.global _rt_support_call
-_rt_support_call:
-.func _rt_support_call
+.global rt_support_call
+rt_support_call:
+.func rt_support_call
 	sub esp, 4
 	push esp
 	push edx
 	push dword ptr [esp + 16]
-	call _rt_lookup
+	call rt_lookup
 	pop edx
 	pop edx
 	pop ecx
@@ -32,15 +31,14 @@ _rt_support_call:
  *   rt_value method_module
  *   rt_value self: The object to look up
  */
-
-.global _rt_support_super
-_rt_support_super:
-.func _rt_support_super
+.global rt_support_super
+rt_support_super:
+.func rt_support_super
 	sub esp, 4
 	push esp
 	push dword ptr [esp + 12]
 	push dword ptr [esp + 20]
-	call _rt_lookup_super
+	call rt_lookup_super
 	add esp, 28
 	mov ecx, [esp - 4]
 	mov edx, [esp - 8]
