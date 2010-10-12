@@ -16,6 +16,7 @@ rt_compiled_block(rt_Exception_allocate)
 
 	RT_COMMON(exception)->flags = C_EXCEPTION;
 	RT_COMMON(exception)->class_of = rt_Exception;
+	RT_COMMON(exception)->vars = 0;
 
 	RT_EXCEPTION(exception)->message = RT_NIL;
 	RT_EXCEPTION(exception)->backtrace = RT_NIL;

@@ -132,6 +132,7 @@ rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
 	rt_value exception = rt_alloc(sizeof(struct rt_exception));
 
 	RT_COMMON(exception)->flags = C_EXCEPTION;
+	RT_COMMON(exception)->vars = 0;
 
 	size_t i = 0;
 

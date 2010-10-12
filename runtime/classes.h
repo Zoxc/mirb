@@ -76,7 +76,13 @@ static inline struct rt_block *rt_class_get_method(rt_value obj, rt_value name)
 	return hash_value(RT_CLASS(obj)->methods, k);
 }
 
-hash_t(rt_hash) *rt_object_get_vars(rt_value obj);
+static inline hash_t(rt_hash) *rt_object_get_vars(rt_value object)
+{
+	if(!RT_COMMON(object)->vars)
+		RT_COMMON(object)->vars = hash_init(rt_hash);
+
+	return RT_COMMON(object)->vars;
+}
 
 static inline void rt_object_set_var(rt_value obj, rt_value name, rt_value value)
 {

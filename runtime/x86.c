@@ -37,6 +37,7 @@ rt_value __cdecl rt_support_closure(struct rt_block *block, rt_value method_name
 
 	RT_COMMON(closure)->flags = C_PROC;
 	RT_COMMON(closure)->class_of = rt_Proc;
+	RT_COMMON(closure)->vars = 0;
 	RT_PROC(closure)->self = self;
 	RT_PROC(closure)->closure = block;
 	RT_PROC(closure)->method_name = method_name;

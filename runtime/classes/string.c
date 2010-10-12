@@ -11,6 +11,7 @@ rt_value rt_string_from_raw_str(char *str, size_t length)
 
 	RT_COMMON(string)->flags = C_STRING;
 	RT_COMMON(string)->class_of = rt_String;
+	RT_COMMON(string)->vars = 0;
 	RT_STRING(string)->length = length;
 	RT_STRING(string)->string = str;
 

@@ -116,9 +116,13 @@ enum rt_type {
 	C_EXCEPTION
 };
 
+HASH_RUNTIME(rt_hash, rt_value, rt_value);
+HASH_RUNTIME(rt_methods, rt_value, struct rt_block *);
+
 struct rt_common {
 	size_t flags;
 	rt_value class_of;
+	hash_t(rt_hash) *vars;
 };
 
 #define RT_COMMON(value) ((struct rt_common *)value)
@@ -164,9 +168,6 @@ static inline bool rt_bool(rt_value value)
 {
 	return value & ~RT_FALSE;
 }
-
-HASH_RUNTIME(rt_hash, rt_value, rt_value);
-HASH_RUNTIME(rt_methods, rt_value, struct rt_block *);
 
 void rt_create(void);
 void rt_destroy(void);

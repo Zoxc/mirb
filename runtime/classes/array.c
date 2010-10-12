@@ -13,6 +13,7 @@ rt_value rt_array_from_raw(rt_value *data, size_t length)
 
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
+	RT_COMMON(array)->vars = 0;
 
 	RT_ARRAY(array)->data.size = length;
 	RT_ARRAY(array)->data.max = length;
@@ -33,6 +34,7 @@ rt_compiled_block(rt_Array_allocate)
 
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
+	RT_COMMON(array)->vars = 0;
 
 	vec_init(rt, &RT_ARRAY(array)->data);
 

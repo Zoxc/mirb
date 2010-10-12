@@ -89,6 +89,7 @@ rt_value __cdecl rt_support_array(size_t argc, rt_value argv[])
 
 	RT_COMMON(array)->flags = C_ARRAY;
 	RT_COMMON(array)->class_of = rt_Array;
+	RT_COMMON(array)->vars = 0;
 
 	RT_ARRAY(array)->data.size = argc;
 	RT_ARRAY(array)->data.max = argc;

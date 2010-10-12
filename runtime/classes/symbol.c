@@ -33,6 +33,7 @@ rt_value rt_symbol_from_cstr(const char* name)
 
 		RT_COMMON(symbol)->flags = C_SYMBOL;
 		RT_COMMON(symbol)->class_of = rt_Symbol;
+		RT_COMMON(symbol)->vars = 0;
 		RT_SYMBOL(symbol)->string = string;
 
 		int ret;
