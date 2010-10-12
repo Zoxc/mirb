@@ -1122,27 +1122,25 @@ struct rt_block *compile_block(struct block *block)
 
 	generate_block(block, (uint8_t *)result, &target, false);
 
-	#ifdef BEAENGINE
-		#ifdef DEBUG
-			printf(";\n; compiled block %x\n;\n", (rt_value)block);
+	#ifdef DEBUG
+		printf(";\n; compiled block %x\n;\n", (rt_value)block);
 
-			disassembly_symbol_vector_t symbols;
+		disassembly_symbol_vector_t symbols;
 
-			vec_init(disassembly_symbols, &symbols);
+		vec_init(disassembly_symbols, &symbols);
 
-			if(data)
-			{
-				struct disassembly_symbol block_data = {data, "block_data"};
+		if(data)
+		{
+			struct disassembly_symbol block_data = {data, "block_data"};
 
-				vec_push(disassembly_symbols, &symbols, &block_data);
-			}
+			vec_push(disassembly_symbols, &symbols, &block_data);
+		}
 
-			dump_code((void *)result, target - (unsigned char *)result, &symbols);
+		dump_code((void *)result, target - (unsigned char *)result, &symbols);
 
-			vec_destroy(disassembly_symbols, &symbols);
+		vec_destroy(disassembly_symbols, &symbols);
 
-			printf("\n\n");
-		#endif
+		printf("\n\n");
 	#endif
 
 	return runtime_block;

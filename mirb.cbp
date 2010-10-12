@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin\Debug\mirb" prefix_auto="1" extension_auto="1" />
+				<Option output="mirb" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj\Debug\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -17,7 +17,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin\Release\mirb" prefix_auto="1" extension_auto="1" />
+				<Option output="mirb" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj\Release\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -37,12 +37,13 @@
 			<Add option="-std=gnu99 -fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
 			<Add directory="vendor" />
+			<Add directory="vendor\udis86" />
 		</Compiler>
 		<Linker>
-			<Add library="BeaEngine" />
 			<Add library="gc" />
-			<Add directory="vendor\BeaEngine" />
+			<Add library="udis86" />
 			<Add directory="vendor\gc\.libs" />
+			<Add directory="vendor\udis86\libudis86\.libs" />
 		</Linker>
 		<Unit filename="compiler\allocator.c">
 			<Option compilerVar="CC" />

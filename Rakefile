@@ -15,10 +15,9 @@ package = Package.new do
 	set Toolchain::Exceptions, :none
 	
 	set Toolchain::Libraries, 'vendor/gc/.libs/gc'
-	set Toolchain::Libraries, 'vendor/BeaEngine/BeaEngine'
-	set Toolchain::Libraries, 'msvcrt'
+	set Toolchain::Libraries, 'vendor/udis86/libudis86/.libs'
 	
-	set Languages::C::Includes, 'vendor'
+	set Languages::C::Includes, ['vendor', 'vendor/udis86']
 	
 	use Toolchain::GNU
 	
