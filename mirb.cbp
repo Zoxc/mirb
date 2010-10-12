@@ -28,7 +28,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="build/release/runtime/x86.asm.o" />
+					<Add option="build/runtime/x86.S.o" />
 				</Linker>
 			</Target>
 		</Build>

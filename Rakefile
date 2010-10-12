@@ -1,55 +1,47 @@
-require 'rake/package'
+require_relative '../reno-0.2/reno'
 
-begin
-	require 'rake/env'
-rescue LoadError
-end
+include Reno
 
-MIRB = Builder::Package.new('mirb', '.', [
-	'main.c',
-	'compiler/**/*.c',
-	'runtime/**/*.c'
-])
+output = 'mirb'
 
-def execute(target, settings)
-	if settings == Builder::Preset::RELEASE
-		MIRB.sources += ['runtime/**/*.asm']
-	end
+package = Package.new do
+	# name and version
+	name 'mirb'
+	version '0.1.0'
 	
-	settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-I', 'vendor'], :LDFLAGS => ['-L', 'vendor/gc/.libs'], :LIBS => ['gc']})
+	# setup toolchains
 	
-	if Rake::Win32.windows?
-		settings = Builder::Settings.new(settings.name, settings, {:CFLAGS => ['-DWIN_SEH'], :LDFLAGS => ['-L', 'vendor/BeaEngine'], :LIBS => ['BeaEngine']})
-	end
+	set Toolchain::Optimization, :balanced
+	set Toolchain::Exceptions, :none
 	
-	unless MIRB.send target, settings
-		puts "Nothing to do!"
-	end
+	set Toolchain::Libraries, 'vendor/gc/.libs/gc'
+	set Toolchain::Libraries, 'vendor/BeaEngine/BeaEngine'
+	set Toolchain::Libraries, 'msvcrt'
+	
+	set Languages::C::Includes, 'vendor'
+	
+	use Toolchain::GNU
+	
+	# languages
+	use Assembly::WithCPP
+	c = use Languages::C
+	c.std 'c99'
+	c.define 'WIN_SEH'
+	c.define 'DEBUG'
+	cxx = use Languages::CXX
+	cxx.std 'c++0x'
+	
+	# files
+	files = collect('main.c', 'compiler/**/*.c', 'runtime/**/*.c', 'runtime/**/*.S')
+	
+	# convert all files to assembly for debugging purposes
+	files = files.convert(Assembly)
+	
+	files.merge(Executable).name(output)
 end
 
-desc "Delete all the generated files"
-task :clean do
-	execute(:clean, Builder::Preset::RELEASE)
-	execute(:clean, Builder::Preset::DEBUG)
-	puts "It's nice and clean here."
+task :build do
+	package.run
 end
 
-desc "Build an optimized version of #{MIRB.name}"
-task :release do
-	execute(:build, Builder::Preset::RELEASE)
-end
-
-desc "Build a debug version of #{MIRB.name}"
-task :debug do
-	execute(:build, Builder::Preset::DEBUG)
-end
-
-desc "Convert all spaces to tabs"
-task :tabs do
-	MIRB.sources.map { |source| FileList[source] }.flatten.each do |file|
-		output = Builder.execute('unexpand', '--tabs=4', file)
-		File.open(file, 'w') { |file| file.write(output) }
-	end
-end
-
-task :default => :release
+task :default => :build

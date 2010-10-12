@@ -45,7 +45,7 @@ char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 	return 0;
 }
 
-#ifdef WIN32
+#ifdef BEAENGINE
 void dump_hex(unsigned char* address, int length)
 {
 	int MinLength = 7 - length;

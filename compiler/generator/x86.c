@@ -1122,7 +1122,7 @@ struct rt_block *compile_block(struct block *block)
 
 	generate_block(block, (uint8_t *)result, &target, false);
 
-	#ifdef WIN32
+	#ifdef BEAENGINE
 		#ifdef DEBUG
 			printf(";\n; compiled block %x\n;\n", (rt_value)block);
 
