@@ -154,7 +154,7 @@ static inline enum rt_type rt_type(rt_value obj)
 		}
 	}
 	else
-		return RT_COMMON(obj)->flags & RT_TYPE_MASK;
+		return (enum rt_type)(RT_COMMON(obj)->flags & RT_TYPE_MASK);
 }
 
 static inline bool rt_test(rt_value value)

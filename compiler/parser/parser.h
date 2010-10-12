@@ -81,7 +81,7 @@ struct node *alloc_scope(struct compiler *compiler, struct block **block_var, en
 
 static inline struct node *alloc_node(struct compiler *compiler, enum node_type type)
 {
-	struct node *result = compiler_alloc(compiler, sizeof(struct node));
+	struct node *result = (struct node *)compiler_alloc(compiler, sizeof(struct node));
 	result->type = type;
 	result->unbalanced = false;
 

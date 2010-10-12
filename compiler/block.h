@@ -125,7 +125,7 @@ void block_require_args(struct block *current, struct block *owner);
 
 static inline void block_require_scope(struct block *block, struct block *scope)
 {
-	for(int i = 0; i < block->scopes.size; i++)
+	for(size_t i = 0; i < block->scopes.size; i++)
 		if(block->scopes.array[i] == scope)
 			return;
 
@@ -134,7 +134,7 @@ static inline void block_require_scope(struct block *block, struct block *scope)
 
 static inline struct opcode *block_get_label(struct block *block)
 {
-	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
+	struct opcode *op = (struct opcode *)compiler_alloc(block->compiler, sizeof(struct opcode));
 	op->type = B_LABEL;
 	op->left = 0;
 
@@ -155,7 +155,7 @@ static inline struct opcode *block_get_flush_label(struct block *block)
 
 static inline struct variable *block_get_var(struct block *block)
 {
-	struct variable *temp = compiler_alloc(block->compiler, sizeof(struct temp_variable));
+	struct variable *temp = (struct variable *)compiler_alloc(block->compiler, sizeof(struct temp_variable));
 	temp->type = V_TEMP;
 	temp->index = block->var_count[V_TEMP];
 
@@ -166,7 +166,7 @@ static inline struct variable *block_get_var(struct block *block)
 
 static inline struct opcode *block_push(struct block *block, enum opcode_type type, rt_value result, rt_value left, rt_value right)
 {
-	struct opcode *op = compiler_alloc(block->compiler, sizeof(struct opcode));
+	struct opcode *op = (struct opcode *)compiler_alloc(block->compiler, sizeof(struct opcode));
 
 	op->type = type;
 	op->result = result;

@@ -232,7 +232,7 @@ static inline size_t __ac_X31_hash_string(const char *s)
 #define hash_del(name, ...) hash_del_##name(__VA_ARGS__)
 
 #define hash_exist(h, x) (!__ac_iseither((h)->flags, (x)))
-#define hash_key(h, x) ((h)->keys[x])
+#define _hash_key(h, x) ((h)->keys[x])
 #define hash_val(h, x) ((h)->vals[x])
 #define hash_value(h, x) ((h)->vals[x])
 #define hash_begin(h) (size_t)(0)

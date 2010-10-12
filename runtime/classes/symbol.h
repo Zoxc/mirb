@@ -6,7 +6,6 @@
 
 struct rt_symbol {
 	struct rt_common common;
-	const char* string;
 };
 
 #define RT_SYMBOL(value) ((struct rt_symbol *)(value))
@@ -15,6 +14,8 @@ extern rt_value rt_Symbol;
 
 void rt_symbols_create(void);
 void rt_symbols_destroy(void);
+
+void rt_symbol_setup(rt_value symbol);
 
 rt_value rt_symbol_from_cstr(const char *name);
 
@@ -27,10 +28,7 @@ static inline rt_value rt_symbol_from_token(struct token *token)
 	return result;
 }
 
-static inline const char *rt_symbol_to_cstr(rt_value value)
-{
-	return RT_SYMBOL(value)->string;
-}
+const char *rt_symbol_to_cstr(rt_value value);
 
 static inline rt_value rt_symbol_from_string(rt_value value)
 {
@@ -39,7 +37,7 @@ static inline rt_value rt_symbol_from_string(rt_value value)
 
 static inline rt_value rt_string_from_symbol(rt_value value)
 {
-	return rt_string_from_cstr(RT_SYMBOL(value)->string);
+	return rt_string_from_cstr(rt_symbol_to_cstr(value));
 }
 
 static inline bool rt_symbol_is_const(rt_value value)
