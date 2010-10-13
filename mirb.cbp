@@ -34,7 +34,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-std=gnu99 -fstrict-aliasing" />
+			<Add option="-std=gnu99 -std=gnu++0x -fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />
@@ -142,7 +142,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes\string.h" />
-		<Unit filename="runtime\classes\symbol.c">
+		<Unit filename="runtime\classes\symbol.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes\symbol.h" />
@@ -175,6 +175,28 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\x86.h" />
+		<Unit filename="src\common.hpp" />
+		<Unit filename="src\compiler.cpp" />
+		<Unit filename="src\compiler.hpp" />
+		<Unit filename="src\hash-table.hpp" />
+		<Unit filename="src\lexer\handlers.cpp" />
+		<Unit filename="src\lexer\input.hpp" />
+		<Unit filename="src\lexer\lexeme.cpp" />
+		<Unit filename="src\lexer\lexeme.hpp" />
+		<Unit filename="src\lexer\lexer.cpp" />
+		<Unit filename="src\lexer\lexer.hpp" />
+		<Unit filename="src\lexer\numbers.cpp" />
+		<Unit filename="src\lexer\strings.cpp" />
+		<Unit filename="src\list.hpp" />
+		<Unit filename="src\memory-pool.cpp" />
+		<Unit filename="src\memory-pool.hpp" />
+		<Unit filename="src\message.cpp" />
+		<Unit filename="src\message.hpp" />
+		<Unit filename="src\range.hpp" />
+		<Unit filename="src\simple-list.hpp" />
+		<Unit filename="src\symbol-pool.cpp" />
+		<Unit filename="src\symbol-pool.hpp" />
+		<Unit filename="src\tree\node.hpp" />
 		<Unit filename="vector.h" />
 		<Extensions>
 			<code_completion />

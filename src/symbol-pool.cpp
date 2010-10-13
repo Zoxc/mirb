@@ -1,5 +1,5 @@
 #include "range.hpp"
-#include "symbol_pool.hpp"
+#include "symbol-pool.hpp"
 
 namespace Mirb
 {

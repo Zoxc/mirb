@@ -44,7 +44,7 @@ namespace Mirb
 
 		class Iterator
 		{
-		private:
+		protected:
 			T *current;
 
 		public:
@@ -88,6 +88,60 @@ namespace Mirb
 		Iterator begin()
 		{
 			return Iterator(*this);
+		}
+
+		class MutableIterator:
+			public Iterator
+		{
+		private:
+			SimpleList &list;
+			T *prev;
+
+		public:
+			MutableIterator(SimpleList &list) : Iterator(list), list(list), prev(0) {}
+
+			void step()
+			{
+				prev = this->current;
+				Iterator::step();
+			}
+		
+			void replace(T *node)
+			{
+				if(prev)
+				{
+					prev->*field.next = static_cast<E *>(node); 
+				}
+				else
+				{
+					list.first = node;
+				}
+				
+				node->*field.next = this->current->*field.next; 
+				
+				if(node->*field.next == 0)
+					list.last = node;
+				
+				this->current = node;
+			}
+
+			void insert(T *node)
+			{
+				if(prev)
+					(prev->*field).next = static_cast<E *>(node); 
+				else
+					list.first = node;
+				
+				(node->*field).next = (this->current->*field).next; 
+				
+				if(this->current == 0)
+					list.last = node;
+			}
+		};
+
+		MutableIterator mutable_iterator()
+		{
+			return MutableIterator(*this);
 		}
 	};
 };
