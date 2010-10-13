@@ -75,14 +75,8 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 #define HASH_RUNTIME(name, key_t, val_t)								\
 	HASH_INIT(name, key_t, val_t, 1, hash_int_hash_func, hash_int_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
 
-#define HASH_RUNTIME_ROOT(name, key_t, val_t)								\
-	HASH_INIT(name, key_t, val_t, 1, hash_int_hash_func, hash_int_hash_equal, , , , rt_alloc_root, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
-
 #define HASH_RUNTIME_STR(name, val_t)								\
 	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
-
-#define HASH_RUNTIME_ROOT_STR(name, val_t)								\
-	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_alloc_root, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
 
 /*
  * Structure for code blocks

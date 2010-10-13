@@ -17,7 +17,6 @@
 void rt_create(void)
 {
 	rt_code_heap_create();
-	rt_symbols_create();
 
 	rt_setup_classes();
 
@@ -38,7 +37,6 @@ void rt_create(void)
 
 void rt_destroy(void)
 {
-	rt_symbols_destroy();
 	rt_code_heap_destroy();
 
 	rt_destroy_classes();

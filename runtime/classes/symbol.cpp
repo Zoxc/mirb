@@ -1,4 +1,4 @@
-#include "../../src/symbol_pool.hpp"
+#include "../../src/symbol-pool.hpp"
 
 extern "C"
 {
@@ -7,21 +7,7 @@ extern "C"
 #include "symbol.h"
 #include "string.h"
 
-HASH_RUNTIME_ROOT_STR(symbol, rt_value);
-
 rt_value rt_Symbol;
-
-static hash_t(symbol) *symbols;
-
-void rt_symbols_create(void)
-{
-	symbols = hash_init(symbol);
-}
-
-void rt_symbols_destroy(void)
-{
-	hash_destroy(symbol, symbols);
-}
 
 const char *rt_symbol_to_cstr(rt_value value)
 {

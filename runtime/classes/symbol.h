@@ -12,9 +12,6 @@ struct rt_symbol {
 
 extern rt_value rt_Symbol;
 
-void rt_symbols_create(void);
-void rt_symbols_destroy(void);
-
 void rt_symbol_setup(rt_value symbol);
 
 rt_value rt_symbol_from_cstr(const char *name);
