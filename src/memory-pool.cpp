@@ -1,7 +1,7 @@
 #include "memory-pool.hpp"
 
 #ifdef VALGRIND
-	#include <cmalloc.h>
+	#include <cstring>
 #endif
 
 namespace Mirb

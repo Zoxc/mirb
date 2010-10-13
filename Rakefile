@@ -11,6 +11,7 @@ package = Package.new do
 
 	windows = Rake::Win32.windows?
 	debug = true
+	valgrind = false
 	
 	# setup toolchain
 	
@@ -19,10 +20,10 @@ package = Package.new do
 	set Toolchain::Optimization, :balanced
 	set Toolchain::Exceptions, :none
 	set Toolchain::StaticLibraries, true
-
-	set Toolchain::Libraries, 'vendor/gc/.libs/gc'
+	
+	set Toolchain::Libraries, 'vendor/gc/.libs/gc' unless valgrind
 	set Toolchain::Libraries, 'vendor/udis86/libudis86/.libs/udis86'
-
+	
 	set Toolchain::Libraries, 'pthread' unless windows
 	
 	set Languages::C::Includes, ['vendor', 'vendor/udis86']
@@ -34,13 +35,14 @@ package = Package.new do
 	c = use Languages::C
 	c.std 'c99'
 	c.define('WIN_SEH') if windows
+	c.define('VALGRIND') if valgrind
 	c.define 'DEBUG' if debug
 	cxx = use Languages::CXX
 	cxx.std 'c++0x'
 	
 	# files
 	files = collect('main.c', 'compiler/**/*.c', 'runtime/**/*.c', 'runtime/**/*.cpp', 'src/**/*.cpp')
-
+	
 	files += collect('runtime/**/*.S') unless debug
 	
 	files.merge(Executable).name(output, windows)
