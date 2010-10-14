@@ -1,5 +1,5 @@
 #pragma once
-#include "../classes.h"
+#include "../classes.hpp"
 
 struct rt_string {
 	struct rt_common common;

@@ -1,9 +1,9 @@
-#include "compiler.h"
-#include "ast.h"
-#include "bytecode.h"
-#include "block.h"
-#include "../runtime/classes/string.h"
-#include "../runtime/classes/symbol.h"
+#include "compiler.hpp"
+#include "ast.hpp"
+#include "bytecode.hpp"
+#include "block.hpp"
+#include "../runtime/classes/string.hpp"
+#include "../runtime/classes/symbol.hpp"
 
 typedef void (*parent_proc)(struct node *node, struct node *parent);
 
@@ -285,8 +285,6 @@ void parent_node(struct node *node, struct node *parent)
 
 #ifdef DEBUG
 	typedef rt_value (*get_node_name_proc)(struct node *node);
-
-	rt_value get_node_name(struct node *node);
 
 	rt_value name_unary_op(struct node *node)
 	{

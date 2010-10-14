@@ -1,9 +1,9 @@
-#include "x86.h"
-#include "../../runtime/x86.h"
-#include "../../runtime/support.h"
-#include "../../runtime/code_heap.h"
-#include "../../runtime/constant.h"
-#include "disassembly.h"
+#include "x86.hpp"
+#include "../../runtime/x86.hpp"
+#include "../../runtime/support.hpp"
+#include "../../runtime/code_heap.hpp"
+#include "../../runtime/constant.hpp"
+#include "disassembly.hpp"
 
 static inline size_t label_target(void *target, rt_value label)
 {
@@ -423,7 +423,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_push(target, (size_t)runtime_block, measuring);
 
-				generate_call(target, rt_support_closure, measuring);
+				generate_call(target, (void *)rt_support_closure, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -449,14 +449,14 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 					generate_stack_push(target, rt_Object, measuring);
 
 				generate_stack_push(target, op->result, measuring);
-				generate_call(target, rt_support_define_class, measuring);
+				generate_call(target, (void *)rt_support_define_class, measuring);
 
 				GEN_BYTE(0x50); // push dummy argv
 				generate_stack_push(target, 0, measuring); // push argc
 				generate_stack_push(target, 0, measuring); // push block
 				GEN_BYTE(0x50); // push obj(eax)
 
-				generate_call(target, compiled, measuring);
+				generate_call(target, (void *)compiled, measuring);
 			}
 			break;
 
@@ -475,14 +475,14 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				}
 
 				generate_stack_push(target, op->result, measuring);
-				generate_call(target, rt_support_define_module, measuring);
+				generate_call(target, (void *)rt_support_define_module, measuring);
 
 				GEN_BYTE(0x50); // push dummy argv
 				generate_stack_push(target, 0, measuring); // push argc
 				generate_stack_push(target, 0, measuring); // push block
 				GEN_BYTE(0x50); // push obj(eax)
 
-				generate_call(target, compiled, measuring);
+				generate_call(target, (void *)compiled, measuring);
 			}
 			break;
 
@@ -491,7 +491,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				GEN_BYTE(0xB8); // mov eax,
 				GEN_DWORD(op->left);
 
-				generate_call(target, rt_support_get_ivar, measuring);
+				generate_call(target, (void *)rt_support_get_ivar, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -504,7 +504,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 				generate_stack_var_push(block, target, op->left, measuring);
 
-				generate_call(target, rt_support_set_ivar, measuring);
+				generate_call(target, (void *)rt_support_set_ivar, measuring);
 			}
 			break;
 
@@ -513,7 +513,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_push(target, op->right, measuring);
 				generate_stack_var_push(block, target, op->left, measuring);
 
-				generate_call(target, rt_support_get_const, measuring);
+				generate_call(target, (void *)rt_support_get_const, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -525,7 +525,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_push(target, op->left, measuring);
 				generate_stack_var_push(block, target, op->result, measuring);
 
-				generate_call(target, rt_support_set_const, measuring);
+				generate_call(target, (void *)rt_support_set_const, measuring);
 			}
 			break;
 
@@ -546,7 +546,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_push(target, (rt_value)runtime_block, measuring);
 				generate_stack_push(target, op->result, measuring);
 
-				generate_call(target, rt_support_define_method, measuring);
+				generate_call(target, (void *)rt_support_define_method, measuring);
 			}
 			break;
 
@@ -557,7 +557,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				GEN_BYTE(0xBA); // mov edx, op->left
 				GEN_DWORD(op->left);
 
-				generate_call(target, rt_support_call, measuring);
+				generate_call(target, (void *)rt_support_call, measuring);
 			}
 			break;
 
@@ -568,7 +568,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_var_push(block, target, (rt_value)block->super_module_var, measuring);
                 generate_stack_var_push(block, target, (rt_value)block->super_name_var, measuring);
 
-				generate_call(target, rt_support_super, measuring);
+				generate_call(target, (void *)rt_support_super, measuring);
 			}
 			break;
 
@@ -604,7 +604,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_STRING:
 			{
 				generate_stack_push(target, (rt_value)strdup((const char *)op->left), measuring); //TODO: Fix string leak
-				generate_call(target, rt_support_define_string, measuring);
+				generate_call(target, (void *)rt_support_define_string, measuring);
 
 				generate_var_store(block, target, op->result, measuring);
 			}
@@ -612,14 +612,14 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_INTERPOLATE:
 			{
-				generate_call(target, rt_support_interpolate, measuring);
+				generate_call(target, (void *)rt_support_interpolate, measuring);
 				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
 
 		case B_ARRAY:
 			{
-				generate_call(target, rt_support_array, measuring);
+				generate_call(target, (void *)rt_support_array, measuring);
 				generate_var_store(block, target, op->result, measuring);
 			}
 			break;
@@ -656,7 +656,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 			{
 				generate_stack_push(target, op->left, measuring);
 				generate_stack_var_push(block, target, op->result, measuring);
-				generate_call(target, rt_support_return, measuring);
+				generate_call(target, (void *)rt_support_return, measuring);
 			}
 			break;
 
@@ -665,7 +665,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 				generate_stack_push(target, op->right, measuring);
 				generate_stack_push(target, op->left, measuring);
 				generate_stack_var_push(block, target, op->result, measuring);
-				generate_call(target, rt_support_break, measuring);
+				generate_call(target, (void *)rt_support_break, measuring);
 			}
 			break;
 
@@ -884,7 +884,7 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 			 * Append the struct to the linked list
 			 */
 			GEN_BYTE(0x54); // push esp
-			generate_call(target, rt_support_push_frame, measuring);
+			generate_call(target, (void *)rt_support_push_frame, measuring);
 		#endif
 	}
 
@@ -932,7 +932,7 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 	if(block->heap_vars)
 	{
 		generate_stack_push(target, block->var_count[V_HEAP] * 4, measuring);
-		generate_call(target, rt_support_alloc_scope, measuring);
+		generate_call(target, (void *)rt_support_alloc_scope, measuring);
 
 		GEN_BYTE(0x89); // mov ebx, eax
 		GEN_BYTE(0xC3);
@@ -1007,7 +1007,7 @@ static inline void generate_block(struct block *block, uint8_t *start, uint8_t *
 			GEN_BYTE(0x75);
 			GEN_BYTE(-20);
 
-			generate_call(target, rt_support_set_frame, measuring);
+			generate_call(target, (void *)rt_support_set_frame, measuring);
 
 			GEN_BYTE(0x58); // pop eax
 		#endif
@@ -1067,7 +1067,7 @@ struct rt_block *compile_block(struct block *block)
 	/*
 	 * Allocate the block
 	 */
-	rt_compiled_block_t result = rt_code_heap_alloc((size_t)target);
+	rt_compiled_block_t result = (rt_compiled_block_t)rt_code_heap_alloc((size_t)target);
 
 	runtime_block->compiled = result;
 
@@ -1088,7 +1088,7 @@ struct rt_block *compile_block(struct block *block)
 		{
 			struct exception_block *exception_block = data->exception_blocks.array[i];
 
-			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target(result, (rt_value)exception_block->ensure_label) : 0);
+			exception_block->ensure_label = (void *)(exception_block->ensure_label ? label_target((void *)result, (rt_value)exception_block->ensure_label) : 0);
 
 			for(size_t j = 0; j < exception_block->handlers.size; j++)
 			{
@@ -1101,7 +1101,7 @@ struct rt_block *compile_block(struct block *block)
 					case E_FILTER_EXCEPTION:
 						{
 							struct runtime_exception_handler *exception_handler = (struct runtime_exception_handler *)handler;
-							exception_handler->rescue_label = (void *)label_target(result, (rt_value)exception_handler->rescue_label);
+							exception_handler->rescue_label = (void *)label_target((void *)result, (rt_value)exception_handler->rescue_label);
 						}
 						break;
 
@@ -1116,7 +1116,7 @@ struct rt_block *compile_block(struct block *block)
 		 */
 
 		for(size_t i = 0; i < block->break_targets; i++)
-			data->break_targets[i] = (void *)label_target(result, (rt_value)data->break_targets[i]);
+			data->break_targets[i] = (void *)label_target((void *)result, (rt_value)data->break_targets[i]);
 
 		data->local_storage = stack_vars * 4;
 	}
@@ -1143,7 +1143,7 @@ struct rt_block *compile_block(struct block *block)
 			vec_push(disassembly_symbols, &symbols, &block_data);
 		}
 
-		dump_code((void *)result, target - (unsigned char *)result, &symbols);
+		dump_code((unsigned char *)result, target - (unsigned char *)result, &symbols);
 
 		vec_destroy(disassembly_symbols, &symbols);
 

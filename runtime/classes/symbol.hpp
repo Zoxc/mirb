@@ -1,6 +1,6 @@
 #pragma once
-#include "../classes.h"
-#include "string.h"
+#include "../classes.hpp"
+#include "string.hpp"
 
 struct rt_symbol {
 	struct rt_common common;

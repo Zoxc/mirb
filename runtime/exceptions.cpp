@@ -1,5 +1,5 @@
-#include "../globals.h"
-#include "exceptions.h"
+#include "../globals.hpp"
+#include "exceptions.hpp"
 
 #ifndef WIN_SEH
 	__thread struct rt_frame *rt_current_frame = 0;

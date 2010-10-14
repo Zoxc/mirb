@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../bytecode.h"
-#include "../block.h"
+#include "../bytecode.hpp"
+#include "../block.hpp"
 
 struct block *gen_block(struct node* node);

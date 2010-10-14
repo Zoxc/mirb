@@ -1,8 +1,8 @@
 #pragma once
-#include "../../globals.h"
-#include "../runtime.h"
-#include "object.h"
-#include "class.h"
+#include "../../globals.hpp"
+#include "../runtime.hpp"
+#include "object.hpp"
+#include "class.hpp"
 
 extern rt_value rt_Module;
 

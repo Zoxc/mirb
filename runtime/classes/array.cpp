@@ -1,9 +1,9 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "symbol.h"
-#include "array.h"
-#include "string.h"
-#include "proc.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "symbol.hpp"
+#include "array.hpp"
+#include "string.hpp"
+#include "proc.hpp"
 
 rt_value rt_Array;
 

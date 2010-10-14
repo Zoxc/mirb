@@ -1,12 +1,10 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "fixnum.h"
-#include "symbol.h"
-#include "string.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "fixnum.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
 
 rt_value rt_Fixnum;
-rt_value rt_TrueClass;
-rt_value rt_FalseClass;
 
 rt_compiled_block(rt_fixnum_to_s)
 {

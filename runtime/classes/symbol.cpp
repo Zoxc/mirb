@@ -1,11 +1,8 @@
 #include "../../src/symbol-pool.hpp"
 
-extern "C"
-{
-
-#include "../../globals.h"
-#include "symbol.h"
-#include "string.h"
+#include "../../globals.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
 
 rt_value rt_Symbol;
 
@@ -49,5 +46,3 @@ void rt_symbol_init(void)
 	rt_define_method(rt_Symbol, "to_s", rt_symbol_to_s);
 	rt_define_method(rt_Symbol, "inspect", rt_symbol_inspect);
 }
-
-};

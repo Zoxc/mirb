@@ -1,8 +1,8 @@
-#include "bytecode.h"
-#include "block.h"
-#include "../runtime/classes/string.h"
-#include "../runtime/classes/fixnum.h"
-#include "../runtime/classes/symbol.h"
+#include "bytecode.hpp"
+#include "block.hpp"
+#include "../runtime/classes/string.hpp"
+#include "../runtime/classes/fixnum.hpp"
+#include "../runtime/classes/symbol.hpp"
 
 #ifdef DEBUG
 	void opcode_print(struct opcode *op)

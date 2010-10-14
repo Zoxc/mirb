@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../globals.h"
-#include "allocator.h"
-#include "lexer.h"
+#include "../globals.hpp"
+#include "allocator.hpp"
+#include "lexer.hpp"
 
 struct block;
 

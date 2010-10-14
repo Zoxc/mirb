@@ -1,8 +1,8 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "../constant.h"
-#include "symbol.h"
-#include "string.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "../constant.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
 
 rt_value rt_Class;
 

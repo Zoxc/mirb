@@ -1,7 +1,7 @@
 #pragma once
-#include "../../globals.h"
-#include "../runtime.h"
-#include "object.h"
+#include "../../globals.hpp"
+#include "../runtime.hpp"
+#include "object.hpp"
 
 #define RT_CLASS_SINGLETON RT_USER_FLAG(0)
 

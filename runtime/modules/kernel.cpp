@@ -1,11 +1,11 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "../constant.h"
-#include "../exceptions.h"
-#include "../classes/symbol.h"
-#include "../classes/string.h"
-#include "../classes/exception.h"
-#include "../x86.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "../constant.hpp"
+#include "../exceptions.hpp"
+#include "../classes/symbol.hpp"
+#include "../classes/string.hpp"
+#include "../classes/exception.hpp"
+#include "../x86.hpp"
 
 rt_value rt_Kernel;
 
@@ -86,7 +86,7 @@ static rt_value run_file(rt_value self, rt_value *filename)
 
 	fseek(file, 0, SEEK_SET);
 
-	char* data = malloc(length + 1);
+	char *data = (char *)malloc(length + 1);
 
 	if(fread(data, 1, length, file) != length)
 	{

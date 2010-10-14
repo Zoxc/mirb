@@ -1,14 +1,12 @@
 #pragma once
-extern "C"
-{
-	#include "../../globals.h"
-	#include "../../runtime/classes.h"
-	#include "../../runtime/runtime.h"
-	#include "../../compiler/lexer.h"
-	#include "../../compiler/ast.h"
-	#include "../../compiler/block.h"
-	#include "../../compiler/compiler.h"
-};
+
+#include "../../globals.hpp"
+#include "../../runtime/classes.hpp"
+#include "../../runtime/runtime.hpp"
+#include "../../compiler/lexer.hpp"
+#include "../../compiler/ast.hpp"
+#include "../../compiler/block.hpp"
+#include "../../compiler/compiler.hpp"
 
 #include "../lexer/lexer.hpp"
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "../globals.h"
-#include "classes.h"
-#include "classes/symbol.h"
-#include "classes/string.h"
+#include "../globals.hpp"
+#include "classes.hpp"
+#include "classes/symbol.hpp"
+#include "classes/string.hpp"
 
 static inline bool rt_const_defined(rt_value obj, rt_value name)
 {

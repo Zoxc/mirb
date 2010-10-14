@@ -1,8 +1,8 @@
-#include "compiler.h"
+#include "compiler.hpp"
 
 struct compiler *compiler_create()
 {
-	struct compiler* result = malloc(sizeof(struct compiler));
+	struct compiler *result = (struct compiler *)malloc(sizeof(struct compiler));
 
 	allocator_init(&result->allocator);
 

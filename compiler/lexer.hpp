@@ -1,7 +1,7 @@
 #pragma once
-#include "../globals.h"
-#include "../runtime/runtime.h"
-#include "allocator.h"
+#include "../globals.hpp"
+#include "../runtime/runtime.hpp"
+#include "allocator.hpp"
 
 enum token_type {
 	T_NONE,
@@ -70,7 +70,7 @@ enum token_type {
 	T_EXT_IDENT,
 	T_LINE,
 	T_EOF,
-	
+
 	// Keywords
 	T_IF,
 	T_UNLESS,
@@ -106,5 +106,5 @@ enum token_type {
 
 #define OP_TO_ASSIGN (T_ASSIGN_ADD - T_ADD)
 #define OP_TO_UNARY (T_UNARY_ADD - T_ADD)
-extern char *token_type_names[];
+extern const char *token_type_names[];
 

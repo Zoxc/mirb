@@ -1,6 +1,6 @@
 #pragma once
-#include "../globals.h"
-#include "gc.h"
+#include "../globals.hpp"
+#include "gc.hpp"
 
 #define RT_TYPE_SIZE 16
 #define RT_TYPE_MASK (RT_TYPE_SIZE - 1)
@@ -178,7 +178,7 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 
 extern rt_value rt_symbol_from_cstr(const char *name);
 
-static inline rt_value rt_call(rt_value obj, char *name, size_t argc, rt_value argv[])
+static inline rt_value rt_call(rt_value obj, const char *name, size_t argc, rt_value argv[])
 {
 	return rt_call_block(obj, rt_symbol_from_cstr(name), RT_NIL, argc, argv);
 }

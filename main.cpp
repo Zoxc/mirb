@@ -1,13 +1,10 @@
-extern "C"
-{
-	#include "globals.h"
-	#include "compiler/lexer.h"
-	#include "runtime/classes.h"
-	#include "runtime/classes/symbol.h"
-	#include "runtime/classes/string.h"
-	#include "compiler/generator/generator.h"
-	#include "compiler/generator/x86.h"
-}
+#include "globals.hpp"
+#include "compiler/lexer.hpp"
+#include "runtime/classes.hpp"
+#include "runtime/classes/symbol.hpp"
+#include "runtime/classes/string.hpp"
+#include "compiler/generator/generator.hpp"
+#include "compiler/generator/x86.hpp"
 
 #include <iostream>
 #include "src/compiler.hpp"
@@ -16,8 +13,6 @@ using namespace Mirb;
 
 int main()
 {
-	char buffer[800];
-
 	#ifndef VALGRIND
 		GC_INIT();
 	#endif
@@ -27,17 +22,17 @@ int main()
 	while(1)
 	{
 		std::string line;
-		
+
 		std::getline(std::cin, line);
-		
+
 		Compiler compiler;
-		
+
 		compiler.filename = "Input";
 		compiler.load((const char_t *)line.c_str(), line.length());
-		
+
 		if(compiler.parser.lexeme() == Lexeme::END)
 			break;
-		
+
 		struct node* expression = compiler.parser.parse_main();
 
 		if(compiler.messages.empty())

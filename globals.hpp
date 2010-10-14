@@ -1,11 +1,11 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdbool>
+#include <cstdio>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 
 #define RT_ALIGN(value, to) ((value + (to) - 1) & ~((to) - 1))
 
@@ -39,5 +39,5 @@ static inline void __attribute__((noreturn)) __builtin_unreachable(void)
 	while(1);
 }
 
-#include "vector.h"
-#include "hash.h"
+#include "vector.hpp"
+#include "hash.hpp"

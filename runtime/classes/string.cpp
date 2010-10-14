@@ -1,7 +1,7 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "symbol.h"
-#include "string.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
 
 rt_value rt_String;
 

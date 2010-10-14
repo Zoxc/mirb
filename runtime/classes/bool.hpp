@@ -1,6 +1,6 @@
 #pragma once
-#include "../../globals.h"
-#include "../classes.h"
+#include "../../globals.hpp"
+#include "../classes.hpp"
 
 extern rt_value rt_NilClass;
 extern rt_value rt_TrueClass;

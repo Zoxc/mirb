@@ -1,6 +1,6 @@
 #pragma once
-#include "runtime.h"
-#include "exceptions.h"
+#include "runtime.hpp"
+#include "exceptions.hpp"
 
 void *__stdcall rt_support_alloc_scope(size_t size);
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "../../globals.h"
-#include "../classes.h"
-#include "string.h"
+#include "../../globals.hpp"
+#include "../classes.hpp"
+#include "string.hpp"
 
 #define RT_INT2FIX(imm) ((rt_value)(((rt_value)(imm) << 1) | RT_FLAG_FIXNUM))
 #define RT_FIX2INT(imm) ((rt_value)((rt_value)(imm) >> 1))

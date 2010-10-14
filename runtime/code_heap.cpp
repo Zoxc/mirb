@@ -1,4 +1,4 @@
-#include "../globals.h"
+#include "../globals.hpp"
 
 static unsigned char *heap;
 static unsigned char *next;
@@ -14,7 +14,7 @@ void rt_code_heap_create(void)
 
 		RT_ASSERT(heap);
 	#else
-		heap = mmap(0, CODE_HEAP_SIZE, PROT_READ | PROT_EXEC | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+		heap = (unsigned char *)mmap(0, CODE_HEAP_SIZE, PROT_READ | PROT_EXEC | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
 		RT_ASSERT(heap != MAP_FAILED);
 	#endif

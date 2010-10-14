@@ -6,5 +6,7 @@
 
 #define GC_THREADS
 
-#include <gc/include/gc.h>
-
+extern "C"
+{
+    #include <gc/include/gc.h>
+};

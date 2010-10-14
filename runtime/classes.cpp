@@ -1,9 +1,9 @@
-#include "classes.h"
-#include "runtime.h"
-#include "constant.h"
-#include "classes/symbol.h"
-#include "classes/string.h"
-#include "classes/module.h"
+#include "classes.hpp"
+#include "runtime.hpp"
+#include "constant.hpp"
+#include "classes/symbol.hpp"
+#include "classes/string.hpp"
+#include "classes/module.hpp"
 
 rt_value rt_main;
 

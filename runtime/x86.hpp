@@ -1,10 +1,10 @@
 #pragma once
-#include "../globals.h"
-#include "../compiler/bytecode.h"
-#include "../compiler/block.h"
-#include "classes.h"
-#include "support.h"
-#include "exceptions.h"
+#include "../globals.hpp"
+#include "../compiler/bytecode.hpp"
+#include "../compiler/block.hpp"
+#include "classes.hpp"
+#include "support.hpp"
+#include "exceptions.hpp"
 
 rt_value __cdecl rt_support_closure(struct rt_block *block, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "lexer.h"
+#include "lexer.hpp"
 
 enum node_type {
 	N_UNARY_OP,

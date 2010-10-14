@@ -1,6 +1,6 @@
 #pragma once
-#include "../classes.h"
-#include "../support.h"
+#include "../classes.hpp"
+#include "../support.hpp"
 
 struct rt_proc {
 	struct rt_common common;

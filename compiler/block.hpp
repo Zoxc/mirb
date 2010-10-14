@@ -1,9 +1,9 @@
 #pragma once
-#include "ast.h"
-#include "bytecode.h"
-#include "compiler.h"
-#include "../runtime/runtime.h"
-#include "../runtime/exceptions.h"
+#include "ast.hpp"
+#include "bytecode.hpp"
+#include "compiler.hpp"
+#include "../runtime/runtime.hpp"
+#include "../runtime/exceptions.hpp"
 
 struct block;
 

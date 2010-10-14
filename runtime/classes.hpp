@@ -1,10 +1,10 @@
 #pragma once
-#include "../globals.h"
-#include "runtime.h"
-#include "classes/bool.h"
-#include "classes/fixnum.h"
-#include "classes/class.h"
-#include "classes/object.h"
+#include "../globals.hpp"
+#include "runtime.hpp"
+#include "classes/bool.hpp"
+#include "classes/fixnum.hpp"
+#include "classes/class.hpp"
+#include "classes/object.hpp"
 
 extern rt_value rt_main;
 

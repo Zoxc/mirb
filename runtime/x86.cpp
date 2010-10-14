@@ -1,11 +1,11 @@
-#include "classes.h"
-#include "runtime.h"
-#include "constant.h"
-#include "x86.h"
-#include "exceptions.h"
-#include "classes/symbol.h"
-#include "classes/string.h"
-#include "classes/proc.h"
+#include "classes.hpp"
+#include "runtime.hpp"
+#include "constant.hpp"
+#include "x86.hpp"
+#include "exceptions.hpp"
+#include "classes/symbol.hpp"
+#include "classes/string.hpp"
+#include "classes/proc.hpp"
 
 #ifdef DEBUG
 	rt_value __stdcall __regparm(2) rt_support_call(rt_value dummy, rt_value method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
@@ -359,7 +359,7 @@ static void __attribute__((noreturn)) rt_rescue(struct rt_frame *frame, struct r
 
 static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, struct rt_exception_data *data, bool unwinding)
 {
-	if(frame->block_index == -1) // Outside any exception block
+	if(frame->block_index == (size_t)-1) // Outside any exception block
 	{
 		if(!unwinding && data && data->payload[0] == frame->block)
 		{
@@ -423,6 +423,9 @@ static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, st
 				}
 			}
 			break;
+
+			default:
+                RT_ASSERT(0);
 		}
 	}
 }
@@ -433,7 +436,7 @@ static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, st
 		struct rt_exception_data *data = 0;
 
 		if(exception->ExceptionCode == RT_SEH_RUBY)
-			data = (void *)exception->ExceptionInformation[0];
+			data = (struct rt_exception_data *)exception->ExceptionInformation[0];
 
 		rt_handle_exception(frame, 0, data, exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND));
 

@@ -34,7 +34,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-std=gnu99 -std=gnu++0x -fstrict-aliasing" />
+			<Add option="-std=gnu++0x -fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />
@@ -45,156 +45,69 @@
 			<Add directory="vendor\gc\.libs" />
 			<Add directory="vendor\udis86\libudis86\.libs" />
 		</Linker>
-		<Unit filename="compiler\allocator.c">
-			<Option compilerVar="CC" />
+		<Unit filename="compiler\allocator.cpp" />
+		<Unit filename="compiler\allocator.hpp" />
+		<Unit filename="compiler\ast.cpp" />
+		<Unit filename="compiler\ast.hpp" />
+		<Unit filename="compiler\block.cpp" />
+		<Unit filename="compiler\block.hpp" />
+		<Unit filename="compiler\bytecode.cpp" />
+		<Unit filename="compiler\bytecode.hpp" />
+		<Unit filename="compiler\compiler.cpp" />
+		<Unit filename="compiler\compiler.hpp" />
+		<Unit filename="compiler\generator\disassembly.cpp" />
+		<Unit filename="compiler\generator\disassembly.hpp" />
+		<Unit filename="compiler\generator\generator.cpp" />
+		<Unit filename="compiler\generator\generator.hpp" />
+		<Unit filename="compiler\generator\x86.cpp" />
+		<Unit filename="compiler\generator\x86.hpp" />
+		<Unit filename="compiler\lexer.cpp" />
+		<Unit filename="compiler\lexer.hpp" />
+		<Unit filename="globals.hpp" />
+		<Unit filename="hash.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="runtime\classes.cpp" />
+		<Unit filename="runtime\classes.hpp" />
+		<Unit filename="runtime\classes\array.cpp" />
+		<Unit filename="runtime\classes\array.hpp" />
+		<Unit filename="runtime\classes\bool.cpp" />
+		<Unit filename="runtime\classes\bool.hpp" />
+		<Unit filename="runtime\classes\class.cpp" />
+		<Unit filename="runtime\classes\class.hpp" />
+		<Unit filename="runtime\classes\exception.cpp" />
+		<Unit filename="runtime\classes\exception.hpp" />
+		<Unit filename="runtime\classes\fixnum.cpp" />
+		<Unit filename="runtime\classes\fixnum.hpp" />
+		<Unit filename="runtime\classes\module.cpp" />
+		<Unit filename="runtime\classes\module.hpp" />
+		<Unit filename="runtime\classes\object.cpp" />
+		<Unit filename="runtime\classes\object.hpp" />
+		<Unit filename="runtime\classes\proc.cpp" />
+		<Unit filename="runtime\classes\proc.hpp" />
+		<Unit filename="runtime\classes\string.cpp" />
+		<Unit filename="runtime\classes\string.hpp" />
+		<Unit filename="runtime\classes\symbol.cpp" />
+		<Unit filename="runtime\classes\symbol.hpp" />
+		<Unit filename="runtime\code_heap.cpp" />
+		<Unit filename="runtime\code_heap.hpp" />
+		<Unit filename="runtime\constant.cpp" />
+		<Unit filename="runtime\constant.hpp" />
+		<Unit filename="runtime\exceptions.cpp" />
+		<Unit filename="runtime\exceptions.hpp" />
+		<Unit filename="runtime\gc.hpp" />
+		<Unit filename="runtime\modules\kernel.cpp" />
+		<Unit filename="runtime\modules\kernel.hpp" />
+		<Unit filename="runtime\runtime.cpp" />
+		<Unit filename="runtime\runtime.hpp" />
+		<Unit filename="runtime\support.cpp" />
+		<Unit filename="runtime\support.hpp" />
+		<Unit filename="runtime\x86.S">
+			<Option compiler="gcc" use="1" buildCommand="as $file -o $object" />
+			<Option target="Release" />
 		</Unit>
-		<Unit filename="compiler\allocator.h" />
-		<Unit filename="compiler\ast.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\ast.h" />
-		<Unit filename="compiler\block.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\block.h" />
-		<Unit filename="compiler\bytecode.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\bytecode.h" />
-		<Unit filename="compiler\compiler.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\compiler.h" />
-		<Unit filename="compiler\generator\disassembly.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\generator\disassembly.h" />
-		<Unit filename="compiler\generator\generator.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\generator\generator.h" />
-		<Unit filename="compiler\generator\x86.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\generator\x86.h" />
-		<Unit filename="compiler\lexer.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\lexer.h" />
-		<Unit filename="globals.h" />
-		<Unit filename="hash.h" />
-		<Unit filename="main.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes.h" />
-		<Unit filename="runtime\classes\array.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\array.h" />
-		<Unit filename="runtime\classes\bool.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\bool.h" />
-		<Unit filename="runtime\classes\class.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\class.h" />
-		<Unit filename="runtime\classes\exception.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\exception.h" />
-		<Unit filename="runtime\classes\fixnum.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\fixnum.h" />
-		<Unit filename="runtime\classes\module.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\module.h" />
-		<Unit filename="runtime\classes\object.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\object.h" />
-		<Unit filename="runtime\classes\proc.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\proc.h" />
-		<Unit filename="runtime\classes\string.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\string.h" />
-		<Unit filename="runtime\classes\symbol.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\classes\symbol.h" />
-		<Unit filename="runtime\code_heap.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\code_heap.h" />
-		<Unit filename="runtime\constant.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\constant.h" />
-		<Unit filename="runtime\exceptions.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\exceptions.h" />
-		<Unit filename="runtime\gc.h" />
-		<Unit filename="runtime\modules\kernel.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\modules\kernel.h" />
-		<Unit filename="runtime\runtime.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\runtime.h" />
-		<Unit filename="runtime\support.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\support.h" />
-		<Unit filename="runtime\x86.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="runtime\x86.h" />
-		<Unit filename="src\common.hpp" />
-		<Unit filename="src\compiler.cpp" />
-		<Unit filename="src\compiler.hpp" />
-		<Unit filename="src\hash-table.hpp" />
-		<Unit filename="src\lexer\handlers.cpp" />
-		<Unit filename="src\lexer\input.hpp" />
-		<Unit filename="src\lexer\lexeme.cpp" />
-		<Unit filename="src\lexer\lexeme.hpp" />
-		<Unit filename="src\lexer\lexer.cpp" />
-		<Unit filename="src\lexer\lexer.hpp" />
-		<Unit filename="src\lexer\numbers.cpp" />
-		<Unit filename="src\lexer\strings.cpp" />
-		<Unit filename="src\list.hpp" />
-		<Unit filename="src\memory-pool.cpp" />
-		<Unit filename="src\memory-pool.hpp" />
-		<Unit filename="src\message.cpp" />
-		<Unit filename="src\message.hpp" />
-		<Unit filename="src\parser\calls.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src\parser\control-flow.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src\parser\parser.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src\parser\parser.hpp" />
-		<Unit filename="src\parser\structures.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src\range.hpp" />
-		<Unit filename="src\simple-list.hpp" />
-		<Unit filename="src\symbol-pool.cpp" />
-		<Unit filename="src\symbol-pool.hpp" />
-		<Unit filename="src\tree\node.hpp" />
-		<Unit filename="vector.h" />
+		<Unit filename="runtime\x86.cpp" />
+		<Unit filename="runtime\x86.hpp" />
+		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

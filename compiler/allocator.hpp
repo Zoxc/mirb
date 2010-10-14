@@ -1,5 +1,5 @@
 #pragma once
-#include "../globals.h"
+#include "../globals.hpp"
 #define ALLOCATOR_ALIGN sizeof(size_t)
 
 VEC_DEFAULT(size_t, allocator_pages)

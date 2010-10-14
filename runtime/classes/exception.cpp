@@ -1,8 +1,8 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "exception.h"
-#include "string.h"
-#include "symbol.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "exception.hpp"
+#include "string.hpp"
+#include "symbol.hpp"
 
 rt_value rt_Exception;
 

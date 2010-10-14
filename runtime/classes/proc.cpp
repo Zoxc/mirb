@@ -1,8 +1,8 @@
-#include "../classes.h"
-#include "../runtime.h"
-#include "proc.h"
-#include "symbol.h"
-#include "string.h"
+#include "../classes.hpp"
+#include "../runtime.hpp"
+#include "proc.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
 
 rt_value rt_Proc;
 

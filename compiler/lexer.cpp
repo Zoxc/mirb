@@ -1,4 +1,4 @@
-char *token_type_names[] = {
+const char *token_type_names[] = {
 	"None",
 	"+",
 	"-",
@@ -65,7 +65,7 @@ char *token_type_names[] = {
 	"extended identifier",
 	"newline",
 	"end of file",
-	
+
 	// keywords
 	"if",
 	"unless",

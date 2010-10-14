@@ -1,11 +1,11 @@
-#include "support.h"
-#include "classes.h"
-#include "constant.h"
-#include "exceptions.h"
-#include "classes/string.h"
-#include "classes/symbol.h"
-#include "classes/proc.h"
-#include "classes/array.h"
+#include "support.hpp"
+#include "classes.hpp"
+#include "constant.hpp"
+#include "exceptions.hpp"
+#include "classes/string.hpp"
+#include "classes/symbol.hpp"
+#include "classes/proc.hpp"
+#include "classes/array.hpp"
 
 void *__stdcall rt_support_alloc_scope(size_t size)
 {

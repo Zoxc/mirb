@@ -2,10 +2,7 @@
 #include "common.hpp"
 #include "hash-table.hpp"
 
-extern "C"
-{
-	#include "../runtime/classes/symbol.h"
-}
+#include "../runtime/classes/symbol.hpp"
 
 namespace Mirb
 {

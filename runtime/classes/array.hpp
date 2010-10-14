@@ -1,5 +1,5 @@
 #pragma once
-#include "../classes.h"
+#include "../classes.hpp"
 
 VEC_RUNTIME(rt_value, rt);
 

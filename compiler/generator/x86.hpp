@@ -1,6 +1,6 @@
-#include "../../runtime/classes.h"
-#include "../bytecode.h"
-#include "../block.h"
+#include "../../runtime/classes.hpp"
+#include "../bytecode.hpp"
+#include "../block.hpp"
 
 /* Here is a description of the calling convention of the compiled blocks.
  *

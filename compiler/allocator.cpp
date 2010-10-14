@@ -1,4 +1,4 @@
-#include "allocator.h"
+#include "allocator.hpp"
 
 #define ALLOCATOR_PAGE_SIZE 0x1000
 
@@ -57,7 +57,7 @@ size_t allocator_page_alloc(struct allocator *allocator, size_t length)
 	size_t result = get_page();
 
 	allocator->page = result + ALLOCATOR_PAGE_SIZE;
-	allocator->next = result + length, ALLOCATOR_ALIGN;
+	allocator->next = RT_ALIGN(result + length, ALLOCATOR_ALIGN);
 
 	return result;
 }

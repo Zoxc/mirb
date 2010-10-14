@@ -1,6 +1,6 @@
 #pragma once
-#include "../globals.h"
-#include "runtime.h"
+#include "../globals.hpp"
+#include "runtime.hpp"
 
 /*
  * Exception runtime data
@@ -36,8 +36,15 @@ struct exception_block {
 	void *ensure_label;
 };
 
+enum rt_exception_type {
+	E_RUBY_EXCEPTION,
+	E_RETURN_EXCEPTION,
+	E_BREAK_EXCEPTION,
+	E_THROW_EXCEPTION
+};
+
 struct rt_exception_data {
-	enum exception_handler_type type;
+	enum rt_exception_type type;
 	void *payload[3];
 };
 
@@ -65,11 +72,3 @@ struct rt_frame {
 #endif
 
 void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data);
-
-enum rt_exception_type {
-	E_RUBY_EXCEPTION,
-	E_RETURN_EXCEPTION,
-	E_BREAK_EXCEPTION,
-	E_THROW_EXCEPTION
-};
-

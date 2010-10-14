@@ -2,23 +2,21 @@
 
 using namespace Mirb;
 
-extern "C"
-{
-#include "runtime.h"
-#include "code_heap.h"
-#include "classes/symbol.h"
-#include "classes/string.h"
-#include "classes/bool.h"
-#include "classes/fixnum.h"
-#include "classes/proc.h"
-#include "classes/module.h"
-#include "classes/array.h"
-#include "classes/exception.h"
-#include "modules/kernel.h"
-#include "../compiler/bytecode.h"
-#include "../compiler/block.h"
-#include "../compiler/generator/generator.h"
-#include "../compiler/generator/x86.h"
+#include "runtime.hpp"
+#include "code_heap.hpp"
+#include "classes/symbol.hpp"
+#include "classes/string.hpp"
+#include "classes/bool.hpp"
+#include "classes/fixnum.hpp"
+#include "classes/proc.hpp"
+#include "classes/module.hpp"
+#include "classes/array.hpp"
+#include "classes/exception.hpp"
+#include "modules/kernel.hpp"
+#include "../compiler/bytecode.hpp"
+#include "../compiler/block.hpp"
+#include "../compiler/generator/generator.hpp"
+#include "../compiler/generator/x86.hpp"
 
 void rt_create(void)
 {
@@ -51,17 +49,17 @@ void rt_destroy(void)
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
 	Compiler compiler;
-	
+
 	compiler.filename = filename;
 	compiler.load((const char_t *)input, strlen(input));
-	
+
 	struct node *expression = compiler.parser.parse_main();
-	
+
 	if(!compiler.messages.empty())
 	{
 		for(auto i = compiler.messages.begin(); i; ++i)
 			std::cout << i().format() << "\n";
-		
+
 		return RT_NIL;
 	}
 
@@ -74,7 +72,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	struct block *code_block = gen_block(expression);
 
 	struct rt_block *runtime_block = compile_block(code_block);
-	
+
 	compiler.filename = 0; // make sure compiler is on stack until blocks are generated... TODO: fix this
 
 	rt_value result = runtime_block->compiled(0, method_name, method_module, self, RT_NIL, 0, 0);
@@ -165,5 +163,3 @@ void rt_print(rt_value obj)
 
 	printf("%s", rt_string_to_cstr(string));
 }
-};
-

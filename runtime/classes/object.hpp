@@ -1,6 +1,6 @@
 #pragma once
-#include "../../globals.h"
-#include "../runtime.h"
+#include "../../globals.hpp"
+#include "../runtime.hpp"
 
 struct rt_object {
 	struct rt_common common;

@@ -1,5 +1,5 @@
 #pragma once
-#include "../runtime/runtime.h"
+#include "../runtime/runtime.hpp"
 
 enum opcode_type {
 	B_NOP,

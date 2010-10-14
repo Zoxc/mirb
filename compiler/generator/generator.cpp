@@ -1,8 +1,8 @@
-#include "generator.h"
-#include "../../runtime/classes.h"
-#include "../../runtime/classes/symbol.h"
-#include "../../runtime/classes/fixnum.h"
-#include "../../runtime/support.h"
+#include "generator.hpp"
+#include "../../runtime/classes.hpp"
+#include "../../runtime/classes/symbol.hpp"
+#include "../../runtime/classes/fixnum.hpp"
+#include "../../runtime/support.hpp"
 
 typedef void(*generator)(struct block *block, struct node *node, struct variable *var);
 
@@ -554,7 +554,7 @@ static void gen_redo(struct block *block, struct node *node, struct variable *va
 
 static void gen_break_handler(struct block *block, struct node *node, struct variable *var)
 {
-	struct block *child = (void *)node->right;
+	struct block *child = (struct block *)node->right;
 
 	gen_node(block, node->left, var);
 
@@ -588,7 +588,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	/*
 	 * Allocate and setup the new exception block
 	 */
-	struct exception_block *exception_block = malloc(sizeof(struct exception_block));
+	struct exception_block *exception_block = (struct exception_block *)malloc(sizeof(struct exception_block));
 	size_t index = block->exception_blocks.size;
 	size_t old_index = block->current_exception_block_id;
 
@@ -632,7 +632,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 		/*
 		 * Output rescue node
 		 */
-		struct runtime_exception_handler *handler = malloc(sizeof(struct runtime_exception_handler));
+		struct runtime_exception_handler *handler = (struct runtime_exception_handler *)malloc(sizeof(struct runtime_exception_handler));
 		handler->common.type = E_RUNTIME_EXCEPTION;
 		handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
 		vec_push(rt_exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
@@ -654,7 +654,7 @@ static void gen_handler(struct block *block, struct node *node, struct variable 
 	 */
 	if(node->right)
 	{
-		exception_block->ensure_label = block_emmit_label(block, exception_block->ensure_label);
+		exception_block->ensure_label = block_emmit_label(block, (struct opcode *)exception_block->ensure_label);
 
 		/*
 		 * Output ensure node
@@ -759,7 +759,7 @@ static inline void gen_node(struct block *block, struct node *node, struct varia
 
 struct block *gen_block(struct node *node)
 {
-	struct block *block = (void *)node->left;
+	struct block *block = (struct block *)node->left;
 
 	struct variable *result = block_get_var(block);
 
@@ -773,7 +773,7 @@ struct block *gen_block(struct node *node)
 	if(block->break_targets)
 	{
 		block->require_exceptions = true;
-		block->data->break_targets = malloc(block->break_targets * sizeof(void *));
+		block->data->break_targets = (void **)malloc(block->break_targets * sizeof(void *));
 	}
 	else
 		block->data->break_targets = 0;

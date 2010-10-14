@@ -1,7 +1,7 @@
 #pragma once
-#include "../../globals.h"
-#include "../runtime.h"
-#include "../classes/object.h"
+#include "../../globals.hpp"
+#include "../runtime.hpp"
+#include "../classes/object.hpp"
 
 extern rt_value rt_Kernel;
 

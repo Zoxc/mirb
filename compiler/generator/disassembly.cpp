@@ -1,7 +1,11 @@
-#include <udis86.h>
-#include "disassembly.h"
-#include "../../runtime/support.h"
-#include "../../runtime/x86.h"
+extern "C"
+{
+	#include <udis86.h>
+};
+
+#include "disassembly.hpp"
+#include "../../runtime/support.hpp"
+#include "../../runtime/x86.hpp"
 
 struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_closure),
@@ -26,9 +30,9 @@ struct disassembly_symbol disassembly_symbols[] = {
 	DISASSEMBLY_SYMBOL(rt_support_define_string)
 };
 
-char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
+const char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 {
-	for(int i = 0; i < sizeof(disassembly_symbols) / sizeof(struct disassembly_symbol); i++)
+	for(size_t i = 0; i < sizeof(disassembly_symbols) / sizeof(struct disassembly_symbol); i++)
 	{
 		if(disassembly_symbols[i].address == address)
 			return disassembly_symbols[i].symbol;
@@ -36,7 +40,7 @@ char *find_symbol(void *address, disassembly_symbol_vector_t *vector)
 
 	if(vector)
 	{
-		for(int i = 0; i < vector->size; i++)
+		for(size_t i = 0; i < vector->size; i++)
 		{
 			if(vector->array[i]->address == address)
 				return vector->array[i]->symbol;
@@ -67,12 +71,12 @@ void dump_instruction(unsigned char* address, ud_t* ud_obj, disassembly_symbol_v
 
 	printf(" %s", ud_insn_asm(ud_obj));
 	
-	char *symbol = 0;
+	const char *symbol = 0;
 	
 	for(size_t i = 0; !symbol && i < 3; i++)
 	{
 		switch(ud_obj->operand[i].type)
-		{				
+		{
 			case UD_OP_IMM:
 			case UD_OP_MEM:
 				symbol = find_symbol((void *)ud_obj->operand[i].lval.udword, vector);

@@ -1,11 +1,11 @@
-#include "../../globals.h"
+#include "../../globals.hpp"
 
 struct disassembly_symbol {
 	void *address;
-	char *symbol;
+	const char *symbol;
 };
 
-#define DISASSEMBLY_SYMBOL(name) {&name, #name}
+#define DISASSEMBLY_SYMBOL(name) {(void *)&name, #name}
 
 VEC_DEFAULT(struct disassembly_symbol *, disassembly_symbols)
 

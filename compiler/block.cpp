@@ -1,6 +1,6 @@
-#include "block.h"
-#include "../runtime/classes/string.h"
-#include "../runtime/classes/symbol.h"
+#include "block.hpp"
+#include "../runtime/classes/string.hpp"
+#include "../runtime/classes/symbol.hpp"
 
 const char *variable_name(rt_value var)
 {
@@ -91,9 +91,9 @@ void block_require_args(struct block *current, struct block *owner)
 
 struct block *block_create(struct compiler *compiler, enum block_type type)
 {
-	struct block *result = compiler_alloc(compiler, sizeof(struct block));
+	struct block *result = (struct block *)compiler_alloc(compiler, sizeof(struct block));
 
-	result->data = malloc(sizeof(struct block_data));
+	result->data = (struct block_data *)malloc(sizeof(struct block_data));
 
 	result->compiler = compiler;
 
