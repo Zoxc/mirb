@@ -99,13 +99,13 @@ namespace Mirb
 					{
 						if(lexer.lexeme.whitespace)
 						{
-							Lexeme lexeme(lexer.lexeme);
+							Lexer::Context context(lexer);
 							
 							lexer.step();
 							
 							bool result = !lexer.lexeme.whitespace;
 							
-							lexer.lexeme = lexeme;
+							lexer.restore(context);
 							
 							return result;
 						}

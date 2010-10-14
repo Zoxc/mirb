@@ -73,14 +73,29 @@ namespace Mirb
 			void string();
 			void simple_string();
 		public:
+			class Context
+			{
+				friend class Lexer;
+				
+				private:
+					Input input;
+				public:
+					Context(Lexer &lexer);
+					
+					Lexeme lexeme;
+			};
+			
 			Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler);
 			
 			MemoryPool &memory_pool;
-			Lexeme lexeme;
 			Keywords keywords;
+			
+			Lexeme lexeme;
 
 			const char_t *input_str;
 			size_t length;
+			
+			void restore(Context &context);
 			
 			void load(const char_t *input, size_t length);
 			void step();

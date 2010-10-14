@@ -102,6 +102,62 @@ namespace Mirb
 		"end",
 	};
 
+	Lexeme& Lexeme::operator=(const Lexeme& other)
+	{
+		if(this == &other)
+			return *this;
+		
+		Range::operator=(other);
+		
+		whitespace = other.whitespace;
+		allow_keywords = other.allow_keywords;
+		type = other.type;
+		prev = other.prev;
+		curlies = other.curlies;
+		
+		return *this;
+	}
+
+	void Lexeme::prev_set(Range &range)
+	{
+		range.stop = prev;
+	}
+	
+	std::string Lexeme::describe(Range *range, Type type)
+	{
+		std::string result;
+		
+		if((type >= NONE && type < keyword_start))
+			result = "'" + names[type] + "'";
+		else if(type >= keyword_start && type <= keyword_end)
+			result = "'" + names[type] + "' (keyword)";
+		else if(type == IDENT)
+			result = "'" + range->string() + "' (identifier)";
+		else
+			result = range->string() + " (" + names[type] + ")";
+		
+		return result;
+	}
+	
+	std::string Lexeme::describe()
+	{
+		return describe(this, this->type);
+	}
+
+	std::string Lexeme::describe_type(Type type)
+	{
+		std::string result;
+		
+		if((type >= NONE && type < keyword_start))
+			result = "'" + names[type] + "'";
+		else if(type >= keyword_start && type <= keyword_end)
+			result = "'" + names[type] + "' (keyword)";
+		else if(type == IDENT)
+			result = names[type];
+		
+		return result;
+	}
+	
 	Range &Lexeme::get_prev()
 	{
 		Range &result = *new (lexer.memory_pool) Range;

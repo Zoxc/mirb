@@ -13,6 +13,12 @@ namespace Mirb
 	bool Lexer::jump_table_ready = 0;
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
 	
+	Lexer::Context::Context(Lexer &lexer) : lexeme(lexer)
+	{
+		lexeme = lexer.lexeme;
+		input = lexer.input;
+	}
+	
 	template<Lexeme::Type type> void Lexer::single()
 	{
 		input++;
@@ -174,9 +180,15 @@ namespace Mirb
 		lexeme.start = start;
 	}
 
-	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : symbol_pool(symbol_pool), compiler(compiler), memory_pool(memory_pool), lexeme(*this), keywords(symbol_pool)
+	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : symbol_pool(symbol_pool), compiler(compiler), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this)
 	{
 		setup_jump_table();
+	}
+	
+	void Lexer::restore(Context &context)
+	{
+		input = context.input;
+		lexeme = context.lexeme;
 	}
 	
 	void Lexer::load(const char_t *input, size_t length)

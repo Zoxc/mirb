@@ -15,7 +15,14 @@ namespace Mirb
 				CarrigeReturn = 0x13,
 				NewLine = 0x10
 			};
-	
+			
+			Input& operator=(const Input& other)
+			{
+				input = other.input;
+				
+				return *this;
+			}
+			
 			void set(const char_t *input)
 			{
 				this->input = input;
