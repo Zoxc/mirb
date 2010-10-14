@@ -8,19 +8,23 @@ namespace Mirb
 {
 	MemoryPool::MemoryPool()
 	{
-		current = current_page = allocate_page();
+		#ifndef VALGRIND
+			current = current_page = allocate_page();
 
-		assert(current_page);
+			assert(current_page);
 
-		max = current + max_alloc;
+			max = current + max_alloc;
+		#endif
 	}
 	
 	MemoryPool::~MemoryPool()
 	{
 		for(std::vector<char_t *>::iterator page = pages.begin(); page != pages.end(); page++)
 			free_page(*page);
-
-		free_page(current_page);
+		
+		#ifndef VALGRIND
+			free_page(current_page);
+		#endif
 	}
 	
 	char_t *MemoryPool::allocate_page(size_t bytes)

@@ -11,15 +11,17 @@ package = Package.new do
 
 	windows = Rake::Win32.windows?
 	debug = true
-	valgrind = false
+	valgrind = true
 	
 	# setup toolchain
 	
 	set Toolchain::Architecture, Arch::X86
 
-	set Toolchain::Optimization, :balanced
+	set Toolchain::Optimization, debug ? :none : :balanced
 	set Toolchain::Exceptions, :none
 	set Toolchain::StaticLibraries, true
+	
+	set Toolchain::DebugInformation, debug
 	
 	set Toolchain::Libraries, 'vendor/gc/.libs/gc' unless valgrind
 	set Toolchain::Libraries, 'vendor/udis86/libudis86/.libs/udis86'

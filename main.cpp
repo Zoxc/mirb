@@ -26,12 +26,14 @@ int main()
 
 	while(1)
 	{
-		gets(buffer);
+		std::string line;
+		
+		std::getline(std::cin, line);
 		
 		Compiler compiler;
 		
 		compiler.filename = "Input";
-		compiler.load((const char_t *)buffer, strlen(buffer));
+		compiler.load((const char_t *)line.c_str(), line.length());
 		
 		if(compiler.parser.lexeme() == Lexeme::END)
 			break;

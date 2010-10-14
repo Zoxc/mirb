@@ -7,7 +7,7 @@ namespace Mirb
 	Keywords::Keywords(SymbolPool &pool)
 	{
 		for(size_t i = (size_t)Lexeme::keyword_start; i <= (size_t)Lexeme::keyword_end; i++)
-			mapping.insert(std::pair<Symbol *, Lexeme::Type>(pool.get(Lexeme::names[i].c_str()), (Lexeme::Type)i));
+			mapping.insert(std::pair<Symbol *, Lexeme::Type>(pool.get(Lexeme::names[i]), (Lexeme::Type)i));
 	}
 	
 	bool Lexer::jump_table_ready = 0;
