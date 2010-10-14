@@ -14,18 +14,23 @@ namespace Mirb
 			
 			Range() : start(0), stop(0), error(false) {}
 			
-			void capture(const Range &range)
+			Range& operator=(const Range& other)
 			{
-				start = range.start;
-				stop = range.stop;
-				line_start = range.line_start;
-				line = range.line;
-				error = range.error;
+				if(this == &other)
+					return *this;
+				
+				start = other.start;
+				stop = other.stop;
+				line_start = other.line_start;
+				line = other.line;
+				error = other.error;
+				
+				return *this;
 			}
 			
 			Range(const Range &range) : start(0), stop(0), error(false)
 			{
-				capture(range);
+				*this = range;
 			}
 			
 			void expand(Range &range)

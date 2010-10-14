@@ -117,12 +117,12 @@ namespace Mirb
 
 			Lexeme(Lexer &lexer) : lexer(lexer) {}
 			
-			Lexeme(const Lexeme &other) : lexer(other.lexer), curlies(other.curlies) {}
-			
 			Lexeme& operator=(const Lexeme& other)
 			{
 				if(this == &other)
 					return *this;
+				
+				Range::operator=(other);
 				
 				whitespace = other.whitespace;
 				allow_keywords = other.allow_keywords;

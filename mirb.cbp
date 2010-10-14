@@ -33,8 +33,9 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
-			<Add option="-std=gnu++0x -fstrict-aliasing" />
+			<Add option="-fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />
@@ -107,6 +108,33 @@
 		</Unit>
 		<Unit filename="runtime\x86.cpp" />
 		<Unit filename="runtime\x86.hpp" />
+		<Unit filename="src\common.hpp" />
+		<Unit filename="src\compiler.cpp" />
+		<Unit filename="src\compiler.hpp" />
+		<Unit filename="src\hash-table.hpp" />
+		<Unit filename="src\lexer\handlers.cpp" />
+		<Unit filename="src\lexer\input.hpp" />
+		<Unit filename="src\lexer\lexeme.cpp" />
+		<Unit filename="src\lexer\lexeme.hpp" />
+		<Unit filename="src\lexer\lexer.cpp" />
+		<Unit filename="src\lexer\lexer.hpp" />
+		<Unit filename="src\lexer\numbers.cpp" />
+		<Unit filename="src\lexer\strings.cpp" />
+		<Unit filename="src\list.hpp" />
+		<Unit filename="src\memory-pool.cpp" />
+		<Unit filename="src\memory-pool.hpp" />
+		<Unit filename="src\message.cpp" />
+		<Unit filename="src\message.hpp" />
+		<Unit filename="src\parser\calls.cpp" />
+		<Unit filename="src\parser\control-flow.cpp" />
+		<Unit filename="src\parser\parser.cpp" />
+		<Unit filename="src\parser\parser.hpp" />
+		<Unit filename="src\parser\structures.cpp" />
+		<Unit filename="src\range.hpp" />
+		<Unit filename="src\simple-list.hpp" />
+		<Unit filename="src\symbol-pool.cpp" />
+		<Unit filename="src\symbol-pool.hpp" />
+		<Unit filename="src\tree\node.hpp" />
 		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />
