@@ -13,6 +13,8 @@ namespace Mirb
 		"**",
 		"<<",
 		">>",
+		"&&",
+		"||",
 		"^",
 		"&",
 		"|",
@@ -27,6 +29,8 @@ namespace Mirb
 		"^=",
 		"&=",
 		"|=",
+		"&&=",
+		"||=",
 		"~",
 		"!",
 		"+@",
@@ -53,8 +57,10 @@ namespace Mirb
 		"]",
 		"{",
 		"}",
-		"String{","#String",
-		"String", "}String",
+		"opening-string",
+		"continuing-string",
+		"string",
+		"ending-string",
 		"integer",
 		"octal",
 		"real",
@@ -63,6 +69,7 @@ namespace Mirb
 		"identifier",
 		"extended identifier",
 		"newline",
+		"end of file",
 		
 		// keywords
 		"if",
@@ -93,7 +100,6 @@ namespace Mirb
 		"and",
 		"or",
 		"end",
-		"end of file",
 	};
 
 	Range &Lexeme::get_prev()

@@ -18,6 +18,11 @@ namespace Mirb
 		
 		T *first;
 		T *last;
+		
+		bool empty()
+		{
+			return first == 0;
+		}
 
 		void append(T *node)
 		{
@@ -132,10 +137,13 @@ namespace Mirb
 				else
 					list.first = node;
 				
-				(node->*field).next = (this->current->*field).next; 
-				
-				if(this->current == 0)
+				if(this->current)
+					(node->*field).next = (this->current->*field).next; 
+				else
+				{
 					list.last = node;
+					(node->*field).next = 0;
+				}
 			}
 		};
 

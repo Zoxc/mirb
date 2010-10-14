@@ -198,7 +198,7 @@ namespace Mirb
 			
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::IVAR;
-			lexeme.value = symbol_pool.get(&lexeme);
+			lexeme.symbol = symbol_pool.get(lexeme);
 		}
 		else
 			unknown();
@@ -230,10 +230,15 @@ namespace Mirb
 			}
 		}
 		
-		if(lexeme.allow_keywords)
-			identify_keywords();
-		
 		lexeme.stop = &input;
-		lexeme.value = symbol_pool.get(&lexeme);
+		lexeme.symbol = symbol_pool.get(lexeme);
+		
+		if(lexeme.allow_keywords)
+		{
+			auto value = keywords.mapping.find(lexeme.symbol);
+			
+			if(value != keywords.mapping.end())
+				lexeme.type = value->second;
+		}
 	}
 };

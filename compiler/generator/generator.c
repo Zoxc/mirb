@@ -401,7 +401,7 @@ static void gen_boolean(struct block *block, struct node *node, struct variable 
 	struct opcode *label_end = block_get_label(block);
 
 	block_push(block, B_TEST, (rt_value)temp, 0, 0);
-	block_push(block, (node->op == T_OR || node->op == T_OR_BOOLEAN) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
+	block_push(block, (node->op == T_OR || node->op == T_LOGICAL_OR) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
 
 	gen_node(block, node->right, var);
 

@@ -41,7 +41,7 @@ package = Package.new do
 	cxx.std 'c++0x'
 	
 	# files
-	files = collect('main.c', 'compiler/**/*.c', 'runtime/**/*.c', 'runtime/**/*.cpp', 'src/**/*.cpp')
+	files = collect('main.cpp', 'compiler/**/*.c', 'runtime/**/*.c', 'runtime/**/*.cpp', 'src/**/*.cpp')
 	
 	files += collect('runtime/**/*.S') unless debug
 	

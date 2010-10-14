@@ -1,3 +1,9 @@
+#include "../src/compiler.hpp"
+
+using namespace Mirb;
+
+extern "C"
+{
 #include "runtime.h"
 #include "code_heap.h"
 #include "classes/symbol.h"
@@ -44,12 +50,20 @@ void rt_destroy(void)
 
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
-	struct compiler *compiler = compiler_create(input, filename);
-
-	struct node* expression = parse_main(compiler);
-
-	if(compiler->err_count != 0)
+	Compiler compiler;
+	
+	compiler.filename = filename;
+	compiler.load((const char_t *)input, strlen(input));
+	
+	struct node *expression = compiler.parser.parse_main();
+	
+	if(!compiler.messages.empty())
+	{
+		for(auto i = compiler.messages.begin(); i; ++i)
+			std::cout << i().format() << "\n";
+		
 		return RT_NIL;
+	}
 
 	extern rt_value get_node_name(struct node *node);
 
@@ -60,8 +74,8 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	struct block *code_block = gen_block(expression);
 
 	struct rt_block *runtime_block = compile_block(code_block);
-
-	compiler_destroy(compiler);
+	
+	compiler.filename = 0; // make sure compiler is on stack until blocks are generated... TODO: fix this
 
 	rt_value result = runtime_block->compiled(0, method_name, method_module, self, RT_NIL, 0, 0);
 
@@ -78,7 +92,7 @@ struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *resu
 
 		if(result)
 		{
-            *result_module = module;
+			*result_module = module;
 			return result;
 		}
 
@@ -117,8 +131,8 @@ rt_compiled_block_t rt_lookup_super(rt_value module, rt_value name, rt_value *re
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[])
 {
-    rt_value module;
-    struct rt_block *method = rt_lookup_method(rt_class_of(obj), name, &module);
+	rt_value module;
+	struct rt_block *method = rt_lookup_method(rt_class_of(obj), name, &module);
 
 	if(!method)
 	{
@@ -131,7 +145,7 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 
 rt_value rt_inspect(rt_value obj)
 {
-    rt_value dummy;
+	rt_value dummy;
 	struct rt_block *inspect = rt_lookup_method(rt_class_of(obj), rt_symbol_from_cstr("inspect"), &dummy);
 
 	rt_value result = RT_NIL;
@@ -151,4 +165,5 @@ void rt_print(rt_value obj)
 
 	printf("%s", rt_string_to_cstr(string));
 }
+};
 

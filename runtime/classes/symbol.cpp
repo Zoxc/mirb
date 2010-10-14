@@ -50,4 +50,4 @@ void rt_symbol_init(void)
 	rt_define_method(rt_Symbol, "inspect", rt_symbol_inspect);
 }
 
-}
+};

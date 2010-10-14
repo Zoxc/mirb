@@ -9,20 +9,38 @@ enum token_type {
 	T_SUB,
 	T_MUL,
 	T_DIV,
+	T_MOD,
+	T_POWER,
 	T_LEFT_SHIFT,
 	T_RIGHT_SHIFT,
+	T_LOGICAL_AND,
+	T_LOGICAL_OR,
+	T_BITWISE_XOR,
+	T_AMPERSAND, // BITWISE_AND
+	T_BITWISE_OR,
 	T_ASSIGN_ADD,
 	T_ASSIGN_SUB,
 	T_ASSIGN_MUL,
 	T_ASSIGN_DIV,
+	T_ASSIGN_MOD,
+	T_ASSIGN_POWER,
 	T_ASSIGN_LEFT_SHIFT,
 	T_ASSIGN_RIGHT_SHIFT,
+	T_ASSIGN_BITWISE_XOR,
+	T_ASSIGN_BITWISE_AND,
+	T_ASSIGN_BITWISE_OR,
+	T_ASSIGN_LOGICAL_AND,
+	T_ASSIGN_LOGICAL_OR,
+	T_BITWISE_NOT,
+	T_LOGICAL_NOT,
 	T_UNARY_ADD,
 	T_UNARY_SUB,
 	T_ASSIGN,
 	T_EQUALITY,
 	T_CASE_EQUALITY,
 	T_NO_EQUALITY,
+	T_MATCHES,
+	T_NOT_MATCHES,
 	T_GREATER,
 	T_GREATER_OR_EQUAL,
 	T_LESS,
@@ -32,29 +50,27 @@ enum token_type {
 	T_COMMA,
 	T_COLON,
 	T_SCOPE,
-	T_SEP,
-	T_AMP,
-	T_PARAM_OPEN,
-	T_PARAM_CLOSE,
+	T_SEMICOLON,
+	T_PARENT_OPEN,
+	T_PARENT_CLOSE,
 	T_SQUARE_OPEN,
 	T_SQUARE_CLOSE,
 	T_CURLY_OPEN,
 	T_CURLY_CLOSE,
-	T_OR_BINARY,
-	T_AND_BOOLEAN,
-	T_OR_BOOLEAN,
-	T_NOT_SIGN,
-	T_EOF,
 	T_STRING_START,
 	T_STRING_CONTINUE,
 	T_STRING,
 	T_STRING_END,
-	T_NUMBER,
+	T_INTEGER,
+	T_OCTAL,
+	T_REAL,
+	T_HEX,
 	T_IVAR,
 	T_IDENT,
 	T_EXT_IDENT,
 	T_LINE,
-
+	T_EOF,
+	
 	// Keywords
 	T_IF,
 	T_UNLESS,
@@ -83,47 +99,12 @@ enum token_type {
 	T_NOT,
 	T_AND,
 	T_OR,
-	T_END
+	T_END,
+	T_TYPES
 };
 
-enum token_state {
-	TS_DEFAULT,
-	TS_NOKEYWORDS
-};
 
 #define OP_TO_ASSIGN (T_ASSIGN_ADD - T_ADD)
 #define OP_TO_UNARY (T_UNARY_ADD - T_ADD)
-#define T_KEYWORD_START T_IF
-#define T_KEYWORD_STOP T_END
-
 extern char *token_type_names[];
 
-VEC_COMPILER(bool, lexer_curlys)
-
-struct token {
-    const char *input;
-    const char *start;
-    const char *stop;
-    struct compiler *compiler;
-    vec_t(lexer_curlys) curlys;
-    size_t line;
-	enum token_type type;
-    bool whitespace;
-    enum token_state state;
-};
-
-void lexer_setup(void);
-void lexer_create(struct compiler *compiler, const char *input);
-
-enum token_type lexer_next(struct compiler *compiler);
-
-struct token *lexer_token(struct compiler *compiler);
-enum token_type lexer_current(struct compiler *compiler);
-void lexer_state(struct compiler *compiler, enum token_state state);
-void lexer_context(struct compiler *compiler, struct token *token);
-void lexer_restore(struct compiler *compiler, struct token *token);
-char *get_token_str(struct token *token);
-
-bool lexer_match(struct compiler *compiler, enum token_type type);
-bool lexer_matches(struct compiler *compiler, enum token_type type);
-bool lexer_require(struct compiler *compiler, enum token_type type);

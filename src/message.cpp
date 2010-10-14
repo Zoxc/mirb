@@ -19,7 +19,7 @@ namespace Mirb
 			if(i().range.start > range.start)
 				break;
 				
-			i++;
+			++i;
 		}
 		
 		i.insert(this);
@@ -31,7 +31,7 @@ namespace Mirb
 
 		result << compiler.filename << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
 		
-		for(const char_t *i = range.line_start; i < range.start; i++)
+		for(const char_t *i = range.line_start; i < range.start; ++i)
 		{
 			if(*i == '\t')
 				result << '\t';
@@ -43,7 +43,7 @@ namespace Mirb
 			result << "^";
 		else
 		{
-			for(const char_t *i = range.start; i < range.stop; i++)
+			for(const char_t *i = range.start; i < range.stop; ++i)
 			{
 				switch(*i)
 				{

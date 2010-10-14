@@ -43,7 +43,8 @@ namespace Mirb
 					*writer++ = *input++;
 			}
 			
-		done:;
+		done:
+		*writer = 0;
 	}
 
 	void Lexer::simple_string()
@@ -56,7 +57,7 @@ namespace Mirb
 		while(true)
 			switch(input)
 			{
-				case '"':
+				case '\'':
 					input++;
 					goto done;
 
@@ -124,19 +125,19 @@ namespace Mirb
 		done:
 		lexeme.stop = &input;
 		
-		size_t str_length = lexeme.length() - overhead;
+		size_t str_length = lexeme.length() - overhead + 1;
 		char_t *str = new (memory_pool) char_t[str_length];
 		
-		build_string(lexeme.start + 1, str);
+		build_simple_string(lexeme.start + 1, str);
 		
-		lexeme.value = symbol_pool.get(str, str_length);
+		lexeme.c_str = str;
 	}
 	
 	void Lexer::build_string(const char_t *start, char_t *str)
 	{
 		char_t *writer = str;
 		const char_t *input = start;
-	 
+		
 		while(true)
 			switch(*input)
 			{
@@ -226,7 +227,8 @@ namespace Mirb
 					*writer++ = *input++;
 			}
 			
-		done:;
+		done:
+		*writer = 0;
 	}
 
 	template<bool initial> void Lexer::parse_string()
@@ -337,12 +339,12 @@ namespace Mirb
 		if(!initial)
 			lexeme.type = (Lexeme::Type)((int)lexeme.type + 1);
 		
-		size_t str_length = lexeme.length() - overhead;
+		size_t str_length = lexeme.length() - overhead + 1;
 		char_t *str = new (memory_pool) char_t[str_length];
 		
 		build_string(lexeme.start + 1, str);
 		
-		lexeme.value = symbol_pool.get(str, str_length);
+		lexeme.c_str = str;
 	}
 	
 	void Lexer::curly_close()

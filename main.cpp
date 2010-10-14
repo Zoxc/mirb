@@ -1,11 +1,18 @@
-#include "globals.h"
-#include "compiler/lexer.h"
-#include "compiler/parser/parser.h"
-#include "runtime/classes.h"
-#include "runtime/classes/symbol.h"
-#include "runtime/classes/string.h"
-#include "compiler/generator/generator.h"
-#include "compiler/generator/x86.h"
+extern "C"
+{
+	#include "globals.h"
+	#include "compiler/lexer.h"
+	#include "runtime/classes.h"
+	#include "runtime/classes/symbol.h"
+	#include "runtime/classes/string.h"
+	#include "compiler/generator/generator.h"
+	#include "compiler/generator/x86.h"
+}
+
+#include <iostream>
+#include "src/compiler.hpp"
+
+using namespace Mirb;
 
 int main()
 {
@@ -15,26 +22,23 @@ int main()
 		GC_INIT();
 	#endif
 
-	compiler_setup();
-
 	rt_create();
 
 	while(1)
 	{
 		gets(buffer);
-
-		struct compiler *compiler = compiler_create(buffer, "Input");
-
-		if(lexer_current(compiler) == T_EOF)
-		{
-			compiler_destroy(compiler);
-
+		
+		Compiler compiler;
+		
+		compiler.filename = "Input";
+		compiler.load((const char_t *)buffer, strlen(buffer));
+		
+		if(compiler.parser.lexeme() == Lexeme::END)
 			break;
-		}
+		
+		struct node* expression = compiler.parser.parse_main();
 
-		struct node* expression = parse_main(compiler);
-
-		if(compiler->err_count == 0)
+		if(compiler.messages.empty())
 		{
 			#ifdef DEBUG
 				printf("Parsing done.\n");
@@ -57,8 +61,11 @@ int main()
 
 			runtime_block = 0; // Make sure runtime_block stays on stack
 		}
-
-		compiler_destroy(compiler);
+		else
+		{
+			for(auto i = compiler.messages.begin(); i; ++i)
+				std::cout << i().format() << "\n";
+		}
 	}
 
 	printf("Exiting gracefully...");

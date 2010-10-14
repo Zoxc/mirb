@@ -81,25 +81,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="compiler\lexer.h" />
-		<Unit filename="compiler\parser\calls.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\calls.h" />
-		<Unit filename="compiler\parser\control_flow.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\control_flow.h" />
-		<Unit filename="compiler\parser\parser.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\parser.h" />
-		<Unit filename="compiler\parser\structures.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="compiler\parser\structures.h" />
 		<Unit filename="globals.h" />
 		<Unit filename="hash.h" />
-		<Unit filename="main.c">
+		<Unit filename="main.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\classes.c">
@@ -163,7 +147,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\modules\kernel.h" />
-		<Unit filename="runtime\runtime.c">
+		<Unit filename="runtime\runtime.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="runtime\runtime.h" />
@@ -192,6 +176,19 @@
 		<Unit filename="src\memory-pool.hpp" />
 		<Unit filename="src\message.cpp" />
 		<Unit filename="src\message.hpp" />
+		<Unit filename="src\parser\calls.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src\parser\control-flow.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src\parser\parser.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src\parser\parser.hpp" />
+		<Unit filename="src\parser\structures.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src\range.hpp" />
 		<Unit filename="src\simple-list.hpp" />
 		<Unit filename="src\symbol-pool.cpp" />

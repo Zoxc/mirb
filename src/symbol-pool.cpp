@@ -25,12 +25,12 @@ namespace Mirb
 		return hash;
 	}
 			
-	Symbol *SymbolPool::get(Range *range)
+	Symbol *SymbolPool::get(Range &range)
 	{
 		StringKey key;
 
-		key.c_str = range->start;
-		key.length = range->stop - key.c_str;
+		key.c_str = range.start;
+		key.length = range.stop - key.c_str;
 
 		return SymbolPoolHashTable::get(key);
 	};

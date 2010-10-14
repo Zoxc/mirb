@@ -6,7 +6,7 @@ namespace Mirb
 {
 	Keywords::Keywords(SymbolPool &pool)
 	{
-		for(size_t i = Lexeme::keyword_start; i <= Lexeme::keyword_end; i++)
+		for(size_t i = (size_t)Lexeme::keyword_start; i <= (size_t)Lexeme::keyword_end; i++)
 			mapping.insert(std::pair<Symbol *, Lexeme::Type>(pool.get(Lexeme::names[i].c_str()), (Lexeme::Type)i));
 	}
 	
@@ -193,17 +193,6 @@ namespace Mirb
 		step();
 	}
 	
-	void Lexer::identify_keywords()
-	{
-		if(lexeme.type != Lexeme::IDENT)
-			return;
-
-		auto value = keywords.mapping.find(lexeme.value);
-		
-		if(value != keywords.mapping.end())
-			lexeme.type = value->second;
-	}
-	
 	void Lexer::step()
 	{
 		lexeme.prev = lexeme.stop;
@@ -215,11 +204,13 @@ namespace Mirb
 		lexeme.start = &input;
 		lexeme.error = false;
 		lexeme.whitespace = whitespace;
+		lexeme.type = (Lexeme::Type)0xBAD;
 
 		(this->*jump_table[input])();
 
 		#ifdef DEBUG
 			assert(lexeme.stop >= lexeme.start);
+			assert(lexeme.type != (Lexeme::Type)0xBAD);
 		#endif
 	}
 };

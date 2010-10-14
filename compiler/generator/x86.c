@@ -603,7 +603,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 
 		case B_STRING:
 			{
-				generate_stack_push(target, op->left, measuring);
+				generate_stack_push(target, (rt_value)strdup((const char *)op->left), measuring); //TODO: Fix string leak
 				generate_call(target, rt_support_define_string, measuring);
 
 				generate_var_store(block, target, op->result, measuring);

@@ -60,7 +60,6 @@ namespace Mirb
 				COLON,
 				SCOPE,
 				SEMICOLON,
-				AMP,
 				PARENT_OPEN,
 				PARENT_CLOSE,
 				SQUARE_OPEN,
@@ -114,7 +113,7 @@ namespace Mirb
 			};
 			
 			static const Type keyword_start = KW_IF;
-			static const Type keyword_end = END;
+			static const Type keyword_end = KW_END;
 
 			Lexeme(Lexer &lexer) : lexer(lexer) {}
 			
@@ -147,7 +146,8 @@ namespace Mirb
 			
 			union
 			{
-				Symbol *value;
+				Symbol *symbol;
+				const char_t *c_str;
 			};
 
 			Range &get_prev();
