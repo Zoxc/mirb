@@ -1,4 +1,17 @@
 const char *token_type_names[] = {
+	// values
+	"opening-string",
+	"continuing-string",
+	"string",
+	"ending-string",
+	"integer",
+	"octal",
+	"real",
+	"hex",
+	"Instance variable",
+	"identifier",
+	"extended identifier",
+	
 	"None",
 	"+",
 	"-",
@@ -52,20 +65,9 @@ const char *token_type_names[] = {
 	"]",
 	"{",
 	"}",
-	"opening-string",
-	"continuing-string",
-	"string",
-	"ending-string",
-	"integer",
-	"octal",
-	"real",
-	"hex",
-	"Instance variable",
-	"identifier",
-	"extended identifier",
 	"newline",
 	"end of file",
-
+	
 	// keywords
 	"if",
 	"unless",

@@ -4,6 +4,19 @@
 #include "allocator.hpp"
 
 enum token_type {
+	// values
+	T_STRING_START,
+	T_STRING_CONTINUE,
+	T_STRING,
+	T_STRING_END,
+	T_INTEGER,
+	T_OCTAL,
+	T_REAL,
+	T_HEX,
+	T_IVAR,
+	T_IDENT,
+	T_EXT_IDENT,
+	
 	T_NONE,
 	T_ADD,
 	T_SUB,
@@ -57,17 +70,6 @@ enum token_type {
 	T_SQUARE_CLOSE,
 	T_CURLY_OPEN,
 	T_CURLY_CLOSE,
-	T_STRING_START,
-	T_STRING_CONTINUE,
-	T_STRING,
-	T_STRING_END,
-	T_INTEGER,
-	T_OCTAL,
-	T_REAL,
-	T_HEX,
-	T_IVAR,
-	T_IDENT,
-	T_EXT_IDENT,
 	T_LINE,
 	T_EOF,
 

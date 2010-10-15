@@ -13,7 +13,21 @@ namespace Mirb
 		public:
 			enum Type
 			{
+				// values
+				STRING_START,
+				STRING_CONTINUE,
+				STRING,
+				STRING_END,
+				INTEGER,
+				OCTAL,
+				REAL,
+				HEX,
+				IVAR,
+				IDENT,
+				EXT_IDENT,				
+				
 				NONE,
+				
 				ADD,
 				SUB,
 				MUL,
@@ -66,17 +80,6 @@ namespace Mirb
 				SQUARE_CLOSE,
 				CURLY_OPEN,
 				CURLY_CLOSE,
-				STRING_START,
-				STRING_CONTINUE,
-				STRING,
-				STRING_END,
-				INTEGER,
-				OCTAL,
-				REAL,
-				HEX,
-				IVAR,
-				IDENT,
-				EXT_IDENT,
 				LINE,
 				END,
 				
@@ -114,6 +117,7 @@ namespace Mirb
 			
 			static const Type keyword_start = KW_IF;
 			static const Type keyword_end = KW_END;
+			static const Type values_end = NONE;
 
 			Lexeme(Lexer &lexer) : lexer(lexer) {}
 			

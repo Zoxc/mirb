@@ -4,6 +4,19 @@
 namespace Mirb
 {
 	std::string Lexeme::names[TYPES] = {
+		// values
+		"opening-string",
+		"continuing-string",
+		"string",
+		"ending-string",
+		"integer",
+		"octal",
+		"real",
+		"hex",
+		"Instance variable",
+		"identifier",
+		"extended identifier",
+		
 		"None",
 		"+",
 		"-",
@@ -57,17 +70,6 @@ namespace Mirb
 		"]",
 		"{",
 		"}",
-		"opening-string",
-		"continuing-string",
-		"string",
-		"ending-string",
-		"integer",
-		"octal",
-		"real",
-		"hex",
-		"Instance variable",
-		"identifier",
-		"extended identifier",
 		"newline",
 		"end of file",
 		
@@ -127,12 +129,12 @@ namespace Mirb
 	{
 		std::string result;
 		
-		if((type >= NONE && type < keyword_start))
+		if((type >= values_end && type < keyword_start))
 			result = "'" + names[type] + "'";
 		else if(type >= keyword_start && type <= keyword_end)
 			result = "'" + names[type] + "' (keyword)";
-		else if(type == IDENT)
-			result = "'" + range->string() + "' (identifier)";
+		else if(type == IDENT || type == EXT_IDENT)
+			result = "'" + range->string() + "' (" + names[type] + ")";
 		else
 			result = range->string() + " (" + names[type] + ")";
 		
@@ -148,11 +150,11 @@ namespace Mirb
 	{
 		std::string result;
 		
-		if((type >= NONE && type < keyword_start))
+		if((type >= values_end && type < keyword_start))
 			result = "'" + names[type] + "'";
 		else if(type >= keyword_start && type <= keyword_end)
 			result = "'" + names[type] + "' (keyword)";
-		else if(type == IDENT)
+		else
 			result = names[type];
 		
 		return result;
