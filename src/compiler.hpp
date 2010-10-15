@@ -12,7 +12,7 @@ namespace Mirb
 		private:
 		public:
 			MemoryPool memory_pool;
-			SimpleList<Message, Message, &Message::entry> messages;
+			SimpleList<Message> messages;
 			Parser parser;
 			const char *filename;
 			
