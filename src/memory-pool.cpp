@@ -11,8 +11,6 @@ namespace Mirb
 		#ifndef VALGRIND
 			current = current_page = allocate_page();
 
-			assert(current_page);
-
 			max = current + max_alloc;
 		#endif
 	}
@@ -29,11 +27,15 @@ namespace Mirb
 	
 	char_t *MemoryPool::allocate_page(size_t bytes)
 	{
+		char_t *result;
+		
 		#ifdef WIN32
-			return (char_t *)VirtualAlloc(0, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+			result = (char_t *)VirtualAlloc(0, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		#else	
-			return (char_t *)std::malloc(bytes);
+			result = (char_t *)std::malloc(bytes);
 		#endif
+		
+		assert(result);
 	}
 	
 	void MemoryPool::free_page(char_t *page)
@@ -51,8 +53,6 @@ namespace Mirb
 		{
 			char_t *result = allocate_page(bytes);
 
-			assert(result);
-
 			pages.push_back(result);
 
 			return result;
@@ -62,8 +62,6 @@ namespace Mirb
 		
 		char_t *result = allocate_page();
 
-		assert(result);
-		
 		current_page = result;
 		current = result + bytes;
 		max = result + max_alloc;
@@ -77,6 +75,8 @@ namespace Mirb
 
 		#ifdef VALGRIND
 			result = (char_t *)malloc(bytes);
+			
+			assert(result);
 
 			pages.push_back(result);
 		#else
