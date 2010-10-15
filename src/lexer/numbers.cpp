@@ -64,13 +64,25 @@ namespace Mirb
 		while(input >= '0' && input <= '9')
 			input++;
 
-		if(input == '.')
-			real();
-		else
+		lexeme.stop = &input;
+		lexeme.type = Lexeme::INTEGER;
+		
+		if(input != '.')
+			return;
+		
+		input++;
+		
+		if(!input.in('0', '9'))
 		{
-			lexeme.stop = &input;
-			lexeme.type = Lexeme::INTEGER;
+			input--;
+			return;
 		}
+		
+		while(input.in('0', '9'))
+			input++;
+		
+		lexeme.stop = &input;
+		lexeme.type = Lexeme::REAL;
 	}
 
 	void Lexer::real()
