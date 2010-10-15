@@ -39,7 +39,7 @@ namespace Mirb
 				result << " ";
 		}
 		
-		if(range.length() == 1)
+		if(range.length() <= 1)
 			result << "^";
 		else
 		{
