@@ -28,16 +28,12 @@ namespace Mirb
 		{
 			if(!node) 
 				assert(0);
-
-			SimpleEntry<T> &entry = node->*field;
-
-			entry.next = 0;
-
+			
+			( node->*field).next = 0;
+			
 			if(last)
 			{
-				SimpleEntry<T> &last_entry = last->*field;
-
-				last_entry.next = static_cast<E *>(node);
+				(last->*field).next = static_cast<E *>(node);
 				last = node;
 			}
 			else
@@ -49,7 +45,7 @@ namespace Mirb
 
 		class Iterator
 		{
-		protected:
+		private:
 			T *current;
 
 		public:
@@ -57,8 +53,7 @@ namespace Mirb
 
 			void step()
 			{
-				SimpleEntry<T> &entry = current->*field;
-				current = static_cast<T *>(entry.next);
+				current = static_cast<T *>((current->*field).next);
 			}
 
 			operator bool()
@@ -95,22 +90,50 @@ namespace Mirb
 			return Iterator(*this);
 		}
 
-		class MutableIterator:
-			public Iterator
+		class MutableIterator
 		{
 		private:
 			SimpleList &list;
+			T *current;
 			T *prev;
 
 		public:
-			MutableIterator(SimpleList &list) : Iterator(list), list(list), prev(0) {}
+			MutableIterator(SimpleList &list) : list(list), current(list.first), prev(0) {}
 
 			void step()
 			{
-				prev = this->current;
-				Iterator::step();
+				prev = current;
+				current = static_cast<T *>((current->*field).next);
 			}
-		
+
+			operator bool()
+			{
+				return current != 0;
+			}
+
+			T &operator ++()
+			{
+				step();
+				return *current;
+			}
+
+			T &operator ++(int)
+			{
+				T *result = current;
+				step();
+				return *result;
+			}
+
+			T *operator*()
+			{
+				return current;
+			}
+
+			T &operator ()()
+			{
+				return *current;
+			}
+			
 			void replace(T *node)
 			{
 				if(prev)
