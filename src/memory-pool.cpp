@@ -36,6 +36,8 @@ namespace Mirb
 		#endif
 		
 		assert(result);
+		
+		return result;
 	}
 	
 	void MemoryPool::free_page(char_t *page)
