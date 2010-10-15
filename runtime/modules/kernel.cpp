@@ -41,8 +41,8 @@ static FILE *open_file(rt_value *filename)
 	FILE* file = 0;
 
 	#ifndef WIN32
-		stat(rt_string_to_cstr(*filename), &buf);
-		is_dir = S_ISDIR(buf.st_mode);
+		if(stat(rt_string_to_cstr(*filename), &buf) != -1)
+			is_dir = S_ISDIR(buf.st_mode);
 	#endif
 
 	if(!is_dir)
@@ -50,13 +50,15 @@ static FILE *open_file(rt_value *filename)
 
 	if(is_dir || !file)
 	{
+		is_dir = false;
+		
 		rt_value append = rt_dup_string(*filename);
 
 		rt_concat_string(append, rt_string_from_cstr(".rb"));
 
 		#ifndef WIN32
-			stat(rt_string_to_cstr(append), &buf);
-			is_dir = S_ISDIR(buf.st_mode);
+			if(stat(rt_string_to_cstr(append), &buf) != -1)
+				is_dir = S_ISDIR(buf.st_mode);
 		#endif
 
 		if(!is_dir)
