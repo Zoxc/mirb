@@ -31,14 +31,14 @@ namespace Mirb
 			static void setup_jump_table();
 
 			bool process_null(const char_t *input, bool expected = false);
-			void build_string(const char_t *start, char_t *str);
-			void build_simple_string(const char_t *start, char_t *str);
+			void build_string(const char_t *start, char_t *str, size_t length);
+			void build_simple_string(const char_t *start, char_t *str, size_t length);
 
 			void restep(bool whitespace = false);
 			
 			void report_null();
 			
-			template<bool initial> void parse_string();
+			void parse_string(bool initial);
 			
 			template<Lexeme::Type type> void single();
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();

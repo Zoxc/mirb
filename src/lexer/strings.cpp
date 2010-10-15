@@ -4,7 +4,7 @@
 
 namespace Mirb
 {
-	void Lexer::build_simple_string(const char_t *start, char_t *str)
+	void Lexer::build_simple_string(const char_t *start, char_t *str, size_t length)
 	{
 		char_t *writer = str;
 		const char_t *input = start;
@@ -44,6 +44,7 @@ namespace Mirb
 			}
 			
 		done:
+		assert((size_t)(writer - str) == length);
 		*writer = 0;
 	}
 
@@ -125,15 +126,15 @@ namespace Mirb
 		done:
 		lexeme.stop = &input;
 		
-		size_t str_length = lexeme.length() - overhead + 1;
-		char_t *str = new (memory_pool) char_t[str_length];
+		size_t str_length = lexeme.length() - overhead;
+		char_t *str = new (memory_pool) char_t[str_length + 1];
 		
-		build_simple_string(lexeme.start + 1, str);
+		build_simple_string(lexeme.start + 1, str, str_length);
 		
 		lexeme.c_str = str;
 	}
 	
-	void Lexer::build_string(const char_t *start, char_t *str)
+	void Lexer::build_string(const char_t *start, char_t *str, size_t length)
 	{
 		char_t *writer = str;
 		const char_t *input = start;
@@ -228,10 +229,11 @@ namespace Mirb
 			}
 			
 		done:
+		assert((size_t)(writer - str) == length);
 		*writer = 0;
 	}
 
-	template<bool initial> void Lexer::parse_string()
+	void Lexer::parse_string(bool initial)
 	{
 		lexeme.type = Lexeme::STRING;
 		size_t overhead = 2;
@@ -251,7 +253,7 @@ namespace Mirb
 						
 						lexeme.type = Lexeme::STRING_START;
 						
-						overhead += 2;
+						overhead += 1;
 
 						goto done;
 					}
@@ -339,10 +341,10 @@ namespace Mirb
 		if(!initial)
 			lexeme.type = (Lexeme::Type)((int)lexeme.type + 1);
 		
-		size_t str_length = lexeme.length() - overhead + 1;
-		char_t *str = new (memory_pool) char_t[str_length];
+		size_t str_length = lexeme.length() - overhead;
+		char_t *str = new (memory_pool) char_t[str_length + 1];
 		
-		build_string(lexeme.start + 1, str);
+		build_string(lexeme.start + 1, str, str_length);
 		
 		lexeme.c_str = str;
 	}
@@ -363,13 +365,13 @@ namespace Mirb
 		if(!string)
 			return;
 		
-		parse_string<false>();
+		parse_string(false);
 	}
 
 	void Lexer::string()
 	{
 		input++;
 		
-		parse_string<true>();
+		parse_string(true);
 	}
 };
