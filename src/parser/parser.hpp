@@ -9,6 +9,7 @@
 #include "../../compiler/compiler.hpp"
 
 #include "../lexer/lexer.hpp"
+#include "../tree/nodes.hpp"
 
 namespace Mirb
 {

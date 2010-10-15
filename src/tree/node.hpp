@@ -3,34 +3,28 @@
 
 namespace Mirb
 {
-	struct Node
+	struct SimpleNode
 	{
 		enum NodeType
 		{
 			None,
-
+			
+			// Expressions
+			String,
+			InterpolatedString,
+			InterpolatedPair,
+			Integer,
+			Variable,
 			UnaryOp,
 			BinaryOp,
-			Number,
-			Var,
-			IVar,
-			IVarAssign,
-			String,
-			StringStart,
-			StringContinue,
-			
-			Array,
-			ArrayElement,
-			Const,
-			Self,
-			True,
-			False,
-			Nil,
 			Assignment,
-			ConstAssignment,
+			Self,
+			Nil,
 			Boolean,
-			Not,
-			NotEqual,
+			Array,
+			Block,
+			Call,
+			
 			If,
 			Unless,
 			Super,
@@ -42,11 +36,7 @@ namespace Mirb
 			BreakHandler,
 			Handler,
 			Rescue,
-			Argument,
-			CallArguments,
-			Call,
 			ArrayCall,
-			Statements,
 			Class,
 			Module,
 			Scope,
@@ -54,12 +44,19 @@ namespace Mirb
 			Parameter
 		};
 		
-		static const NodeType type = None;
+		virtual NodeType type() { return None; };
 	};
 	
 	struct ListNode:
-		public Node
+		public SimpleNode
 	{
 		SimpleEntry<ListNode> entry;
 	};
+	
+	struct Node:
+		public ListNode
+	{
+	};
+	
+	typedef SimpleList<Node, ListNode> NodeList;
 };
