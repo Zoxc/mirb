@@ -16,7 +16,9 @@ namespace Mirb
 			void convert_integer(Node *basic_node, struct variable *var);
 			void convert_variable(Node *basic_node, struct variable *var);
 			void convert_unary_op(Node *basic_node, struct variable *var);
+			void convert_boolean_not(Node *basic_node, struct variable *var);
 			void convert_binary_op(Node *basic_node, struct variable *var);
+			void convert_boolean_op(Node *basic_node, struct variable *var);
 			void convert_assignment(Node *basic_node, struct variable *var);
 			void convert_self(Node *basic_node, struct variable *var);
 			void convert_nil(Node *basic_node, struct variable *var);

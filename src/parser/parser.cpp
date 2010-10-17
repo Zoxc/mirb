@@ -548,7 +548,8 @@ namespace Mirb
 	{
 		if(lexeme() == Lexeme::KW_NOT)
 		{
-			return new (memory_pool) UnaryOpNode(Lexeme::LOGICAL_NOT, parse_expression());
+			lexer.step();
+			return new (memory_pool) BooleanNotNode(parse_expression());
 		}
 		else
 		{
@@ -562,7 +563,7 @@ namespace Mirb
 		
 		while(lexeme() == Lexeme::KW_AND || lexeme() == Lexeme::KW_OR)
 		{
-			auto node = new (memory_pool) BinaryOpNode;
+			auto node = new (memory_pool) BooleanOpNode;
 			
 			node->op = lexeme();
 			node->left = result;

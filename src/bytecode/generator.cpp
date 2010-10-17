@@ -17,7 +17,9 @@ namespace Mirb
 		&ByteCodeGenerator::convert_integer,
 		&ByteCodeGenerator::convert_variable,
 		&ByteCodeGenerator::convert_unary_op,
+		&ByteCodeGenerator::convert_boolean_not,
 		&ByteCodeGenerator::convert_binary_op,
+		&ByteCodeGenerator::convert_boolean_op,
 		&ByteCodeGenerator::convert_assignment,
 		&ByteCodeGenerator::convert_self,
 		&ByteCodeGenerator::convert_nil,
@@ -155,9 +157,44 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
+	void ByteCodeGenerator::convert_boolean_not(Node *basic_node, struct variable *var)
+	{
+		auto node = (BooleanNotNode *)basic_node;
+		
+		if(var)
+		{
+			struct variable *temp = var ? var : block_get_var(block);
+			
+			to_bytecode(node->value, temp);
+			
+			struct opcode *label_true = block_get_label(block);
+			struct opcode *label_end = block_get_label(block);
+			
+			block_push(block, B_TEST, (rt_value)temp, 0, 0);
+			
+			block_push(block, B_JMPT, (rt_value)label_true, 0, 0);
+			
+			block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
+			block_push(block, B_JMP, (rt_value)label_end, 0, 0);
+			
+			block_emmit_label(block, label_true);
+			block_push(block, B_MOV_IMM, (rt_value)var, RT_FALSE, 0);
+			
+			block_emmit_label(block, label_end);
+		}
+		else
+			to_bytecode(node->value, 0);
+	}
+	
 	void ByteCodeGenerator::convert_binary_op(Node *basic_node, struct variable *var)
 	{
 		auto node = (BinaryOpNode *)basic_node;
+		
+		if(node->op == Lexeme::LOGICAL_AND || node->op == Lexeme::LOGICAL_OR)
+		{
+			convert_boolean_op(basic_node, var);
+			return;
+		}
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		
@@ -171,6 +208,24 @@ namespace Mirb
 		
 		if (var)
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
+	}
+	
+	void ByteCodeGenerator::convert_boolean_op(Node *basic_node, struct variable *var)
+	{
+		auto node = (BinaryOpNode *)basic_node;
+		
+		struct variable *temp = var ? var : block_get_var(block);
+		
+		to_bytecode(node->left, temp);
+		
+		struct opcode *label_end = block_get_label(block);
+		
+		block_push(block, B_TEST, (rt_value)temp, 0, 0);
+		block_push(block, (node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
+		
+		to_bytecode(node->right, var);
+		
+		block_emmit_label(block, label_end);
 	}
 	
 	void ByteCodeGenerator::convert_assignment(Node *basic_node, struct variable *var)
@@ -252,13 +307,23 @@ namespace Mirb
 	{
 		auto node = (ArrayNode *)basic_node;
 		
+		struct variable *temp = var ? var : block_get_var(block);
+		
+		if(!var)
+		{
+			for(auto i = node->entries.begin(); i; i++)
+				to_bytecode(*i, 0);
+			
+			return;
+		}
+		
 		size_t entries = 0;
 		
 		for(auto i = node->entries.begin(); i; i++)
 		{
-			to_bytecode(*i, var);
+			to_bytecode(*i, temp);
 			
-			block_push(block, B_PUSH, (rt_value)var, 0, 0);
+			block_push(block, B_PUSH, (rt_value)temp, 0, 0);
 			
 			entries++;
 		}
@@ -267,7 +332,7 @@ namespace Mirb
 		
 		block_push(block, B_ARRAY, (rt_value)var, 0, 0);
 		
-		block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);
+		block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);		
 	}
 	
 	void ByteCodeGenerator::convert_call(Node *basic_node, struct variable *var)

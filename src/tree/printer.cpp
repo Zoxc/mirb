@@ -175,6 +175,13 @@ namespace Mirb
 				return result;
 			}
 			
+			case SimpleNode::Array:
+			{
+				ArrayNode *target = (ArrayNode *)node;
+				
+				return "[" + join(target->entries, ", ") + "]";
+			}
+			
 			case SimpleNode::Block:
 			{
 				BlockNode *target = (BlockNode *)node;
