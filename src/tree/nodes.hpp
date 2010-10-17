@@ -1,10 +1,13 @@
 #pragma once
 #include "../common.hpp"
+#include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
 #include "node.hpp"
 
 namespace Mirb
 {
+	class Parser;
+	
 	struct BinaryOpNode:
 		public Node
 	{
@@ -15,16 +18,24 @@ namespace Mirb
 		Lexeme::Type op;
 	};
 
+	struct VariableNode;
+	
 	struct AssignmentNode:
 		public BinaryOpNode
 	{
 		NodeType type() { return Assignment; }
+		
+		VariableNode *variable;
+		Node *value;
 	};
 	
 	struct UnaryOpNode:
 		public Node
 	{
 		NodeType type() { return UnaryOp; }
+		
+		UnaryOpNode() {};
+		UnaryOpNode(Lexeme::Type op, Node *value) : op(op), value(value) {}
 		
 		Lexeme::Type op;
 		Node *value;
@@ -44,17 +55,17 @@ namespace Mirb
 		NodeType type() { return InterpolatedPair; }
 		
 		const char_t *string;
-		Node *expression;
+		NodeList statements;
 	};
 	
-	typedef SimpleList<InterpolatedPairNode, ListNode>  InterpolatedPairNodeList;
+	typedef SimpleList<InterpolatedPairNode, ListNode>  InterpolatedPairList;
 	
 	struct InterpolatedStringNode:
 		public Node
 	{
 		NodeType type() { return InterpolatedString; }
 		
-		InterpolatedPairNodeList pairs;
+		InterpolatedPairList pairs;
 		
 		const char_t *tail;
 	};
@@ -74,14 +85,32 @@ namespace Mirb
 		
 		enum VariableType
 		{
+			Temporary,
 			Local,
 			Instance,
 			Constant,
 			Global
 		};
 		
+		VariableNode();
+		VariableNode(VariableType type, Symbol *symbol);
+		VariableNode(Parser &parser, Symbol *symbol, Node *left = 0);
+		
 		VariableType variable_type;
-		Symbol *name;
+		
+		union
+		{
+			struct
+			{
+				Symbol *name;
+			} ivar;
+			struct
+			{
+				Node *left;
+				Symbol *name;
+			} constant;
+			struct variable *var;			
+		};
 	};
 
 	struct SelfNode:
@@ -96,12 +125,16 @@ namespace Mirb
 		NodeType type() { return Nil; }
 	};
 
-	struct BooleanNode:
+	struct TrueNode:
 		public Node
 	{
-		NodeType type() { return Boolean; }
-		
-		bool value;
+		NodeType type() { return True; }
+	};
+	
+	struct FalseNode:
+		public Node
+	{
+		NodeType type() { return False; }
 	};
 	
 	struct ArrayNode:
@@ -112,22 +145,179 @@ namespace Mirb
 		NodeList entries;
 	};
 	
+	struct ParameterNode:
+		public ListNode
+	{
+		NodeType type() { return Parameter; }
+		
+		Symbol *name;
+	};
+	
+	typedef SimpleList<ParameterNode, ListNode>  ParameterList;
+	
+	struct Scope
+	{
+		struct block *block;
+		NodeList statements;
+	};
+	
 	struct BlockNode:
 		public SimpleNode
 	{
 		NodeType type() { return Block; }
 		
-		NodeList statements;
+		struct Scope scope; //TODO: wtf?
+		//TODO: unused ParameterList parameters; 
+	};
+	
+	struct InvokeNode:
+		public Node
+	{
+		NodeType type() { return Invoke; }
+		
+		NodeList arguments;
+		BlockNode *block; // can be zero
 	};
 	
 	struct CallNode:
-		public Node
+		public InvokeNode
 	{
 		NodeType type() { return Call; }
 		
 		Node *object;
 		Symbol *method;
-		NodeList arguments;
-		BlockNode *block;
 	};
+	
+	struct SuperNode:
+		public InvokeNode
+	{
+		NodeType type() { return Super; }
+		
+		bool pass_args;
+	};
+	
+	struct BreakHandlerNode:
+		public Node
+	{
+		NodeType type() { return BreakHandler; }
+		
+		Node *code;
+		struct block *block;
+	};
+	
+	struct IfNode:
+		public Node
+	{
+		NodeType type() { return If; }
+		
+		bool inverted;
+		
+		Node *left;
+		Node *middle;
+		Node *right;
+	};
+	
+	struct RescueNode:
+		public ListNode
+	{
+		NodeType type() { return Rescue; }
+		
+		NodeList statements;
+	};
+	
+	typedef SimpleList<RescueNode, ListNode>  RescueList;
+	
+	struct GroupNode:
+		public Node
+	{
+		NodeType type() { return Group; }
+		
+		NodeList statements;
+	};
+	
+	struct HandlerNode:
+		public Node
+	{
+		NodeType type() { return Handler; }
+		
+		Node *code;
+		RescueList rescues;
+		Node *group;
+	};
+	
+	struct VoidNode:
+		public Node
+	{
+		NodeType type() { return Void; }
+		
+		Range *range;
+		
+		VoidNode(Range *range) : range(range) {}
+	};
+	
+	struct ReturnNode:
+		public VoidNode
+	{
+		NodeType type() { return Return; }
+		
+		ReturnNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+		
+		Node *value;
+	};
+	
+	struct NextNode:
+		public VoidNode
+	{
+		NodeType type() { return Next; }
+		
+		NextNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+		
+		Node *value;
+	};
+	
+	struct BreakNode:
+		public VoidNode
+	{
+		NodeType type() { return Break; }
+		
+		BreakNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+		
+		Node *value;
+	};
+	
+	struct RedoNode:
+		public VoidNode
+	{
+		NodeType type() { return Redo; }
+		
+		RedoNode(Range *range) : VoidNode(range) {}
+	};
+	
+	struct ModuleNode:
+		public Node
+	{
+		NodeType type() { return Module; }
+		
+		Symbol *name;
+		struct Scope scope;
+	};
+	
+	struct ClassNode:
+		public ModuleNode
+	{
+		NodeType type() { return Class; }
+		
+		Node *super;
+	};
+	
+	struct MethodNode:
+		public Node
+	{
+		NodeType type() { return Method; }
+		
+		Symbol *name;
+		struct Scope scope;
+	};
+	
+	
 };

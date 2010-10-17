@@ -135,6 +135,7 @@
 		<Unit filename="src\symbol-pool.cpp" />
 		<Unit filename="src\symbol-pool.hpp" />
 		<Unit filename="src\tree\node.hpp" />
+		<Unit filename="src\tree\nodes.hpp" />
 		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />

@@ -10,9 +10,11 @@ package = Package.new do
 	version '0.1.0'
 
 	windows = Rake::Win32.windows?
+	vendor = 'vendor' + (windows ? '' : '_linux')
 	debug = true
 	debug_info = false
 	valgrind = true
+	clang = true
 	
 	# setup toolchain
 	
@@ -24,14 +26,20 @@ package = Package.new do
 	
 	set Toolchain::DebugInformation, debug
 	
-	set Toolchain::Libraries, 'vendor/gc/.libs/gc' unless valgrind
-	set Toolchain::Libraries, 'vendor/udis86/libudis86/.libs/udis86'
+	set Toolchain::Libraries, vendor + '/gc/.libs/gc' unless valgrind
+	set Toolchain::Libraries, vendor + '/udis86/libudis86/.libs/udis86'
 	
 	set Toolchain::Libraries, 'pthread' unless windows || valgrind
 	
-	set Languages::C::Includes, ['vendor', 'vendor/udis86']
+	set Languages::C::Includes, [vendor, vendor + '/udis86']
 	
-	use Toolchain::GNU
+	if clang
+		use Toolchain::LLVM
+		use Toolchain::GNU::Assembler
+		use Toolchain::GNU::Linker
+	else
+		use Toolchain::GNU
+	end
 	
 	# languages
 	use Assembly::WithCPP

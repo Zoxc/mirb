@@ -6,8 +6,8 @@ namespace Mirb
 	{
 		switch(lexeme())
 		{
-			case T_IDENT:
-			case T_EXT_IDENT:
+			case Lexeme::IDENT:
+			case Lexeme::EXT_IDENT:
 				return true;
 
 			default:
@@ -19,69 +19,69 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_block()
+	BlockNode *Parser::parse_block()
 	{
 		bool curly;
-
+		
 		switch(lexeme())
 		{
-			case T_CURLY_OPEN:
+			case Lexeme::CURLY_OPEN:
 				curly = true;
 				break;
-
-			case T_DO:
+			
+			case Lexeme::KW_DO:
 				curly = false;
 				break;
-
+			
 			default:
 				return 0;
 		}
-
+		
 		lexer.step();
-
-		struct block *block;
-
-		struct node *result = alloc_scope(&block, S_CLOSURE);
-
+		
+		auto result = new (memory_pool) BlockNode;
+		
+		struct block *block = alloc_scope(result->scope, S_CLOSURE);
+		
 		skip_lines();
-
+		
 		if(lexeme() == Lexeme::BITWISE_OR)
 		{
 			lexer.step();
-
-			parse_parameter(block);
-
+			
+			parse_parameters(block);
+			
 			match(Lexeme::BITWISE_OR);
 		}
-
-		result->right = parse_statements();
-
+		
+		parse_statements(result->scope.statements);
+		
 		current_block = block->parent;
-
+		
 		match(curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
-
+		
 		return result;
 	}
 
-	struct node *Parser::secure_block(struct node *result, struct node *parent)
+	Node *Parser::secure_block(BlockNode *result, Node *parent)
 	{
 		if(!result)
 			return parent;
-
-		struct block *block = (struct block *)result->left;
-
+		
+		struct block *block = result->scope.block;
+		
 		if(block->can_break)
 		{
-			struct node *handler = alloc_node(N_BREAK_HANDLER);
-
+			auto handler = new (memory_pool) BreakHandlerNode;
+			
 			block->break_id = current_block->break_targets++; // Assign a break id to the block and increase the break target count.
-
-			handler->left = parent;
-			handler->right = (struct node *)block;
-
+			
+			handler->code = parent;
+			handler->block = block;
+			
 			return handler;
 		}
-
+		
 		return parent;
 	}
 
@@ -122,61 +122,55 @@ namespace Mirb
 			return false;
 	}
 
-	struct node *Parser::parse_arguments(bool has_args, bool *parenthesis)
+	void Parser::parse_arguments(NodeList &arguments, bool has_args, bool *parenthesis)
 	{
-		if(has_args && lexeme() != Lexeme::CURLY_OPEN)
+		if(!has_args || lexeme() == Lexeme::CURLY_OPEN)
+			return;
+		
+		if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
 		{
-			if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
-			{
-				if(parenthesis)
-					*parenthesis = true;
+			if(parenthesis)
+				*parenthesis = true;
+			
+			lexer.step();
 
-				struct node *result = 0;
-
-				lexer.step();
-
-				if(lexeme() != Lexeme::PARENT_CLOSE)
-					result = parse_argument();
-
-				match(Lexeme::PARENT_CLOSE);
-
-				return result;
-			}
-			else
-			{
-				if(parenthesis)
-					*parenthesis = false;
-
-				return parse_argument();
-			}
+			if(lexeme() != Lexeme::PARENT_CLOSE)
+				parse_arguments(arguments);
+			
+			match(Lexeme::PARENT_CLOSE);
 		}
 		else
-			return 0;
+		{
+			if(parenthesis)
+				*parenthesis = false;
+			
+			parse_arguments(arguments);
+		}
 	}
 
-	struct node *Parser::alloc_call_node(struct node *child, rt_value symbol, bool has_args)
+	Node *Parser::alloc_call_node(Node *object, Symbol *symbol, bool has_args)
 	{
-		struct node *result = alloc_node(N_CALL);
-
-		result->left = child;
-		result->middle = (struct node *)symbol;
-
-		result->right = alloc_node(N_CALL_ARGUMENTS);
-		result->right->left = parse_arguments(has_args, 0);
-		result->right->right = parse_block();
-
-		return secure_block(result->right->right, result);
+		auto result = new (memory_pool) CallNode;
+		
+		result->object = object;
+		result->method = symbol;
+		
+		parse_arguments(result->arguments, has_args, 0);
+		
+		result->block = parse_block();
+		
+		return secure_block(result->block, result);
 	}
 
-	struct node *Parser::parse_super()
+	Node *Parser::parse_super()
 	{
 		lexer.step();
-
-		struct node *result = alloc_node(N_SUPER);
-
+		
+		auto result = new (memory_pool) SuperNode;
+		
 		struct block *owner = current_block->owner;
 		struct block *current = current_block;
-
+		
 		while(true)
 		{
 			if(!current->super_module_var)
@@ -184,81 +178,69 @@ namespace Mirb
 				current->super_module_var = block_get_var(current);
 				current->super_name_var = block_get_var(current);
 			}
-
+			
 			if(owner == current)
 				break;
-
+			
 			current = current->parent;
 		}
-
+		
 		bool parenthesis;
-
-		result->left = parse_arguments(has_arguments(), &parenthesis);
-		result->right = parse_block();
-
-		if(result->left == 0 && !parenthesis)
+		
+		parse_arguments(result->arguments, has_arguments(), &parenthesis);
+		
+		result->block= parse_block();
+		
+		if(result->arguments.empty() && !parenthesis)
 		{
 			if(current != owner)
 				vec_push(blocks, &owner->zsupers, current);
-
-			result->type = N_ZSUPER;
+			
+			result->pass_args = true;
 		}
-
-		return secure_block(result->right, result);
+		else
+			result->pass_args = false;
+		
+		return secure_block(result->block, result);
 	}
 
-	struct node *Parser::parse_yield()
+	Node *Parser::parse_yield()
 	{
 		lexer.step();
 
-		struct node *child = alloc_node(N_VAR);
-
+		auto child = new (memory_pool) VariableNode;
+		
 		if(!current_block->block_parameter)
 			current_block->block_parameter = scope_var(current_block);
-
-		child->left = (struct node *)current_block->block_parameter;
-
-		return alloc_call_node(child, rt_symbol_from_cstr("call"), has_arguments());
+		
+		child->variable_type = VariableNode::Temporary;
+		child->var = current_block->block_parameter;
+		
+		return alloc_call_node(child, (Symbol *)rt_symbol_from_cstr("call"), has_arguments());
 	}
 
-	struct node *Parser::parse_call(rt_value symbol, struct node *child, bool default_var)
+	Node *Parser::parse_call(Symbol *symbol, Node *child, bool default_var)
 	{
 		if(!symbol)
 		{
 			if(require_ident())
 			{
-				symbol = (rt_value)lexer.lexeme.symbol;
-
+				symbol = lexer.lexeme.symbol;
+				
 				lexer.step();
 			}
 		}
-
+		
 		bool local = false;
-
+		
 		if(symbol)
-			local = scope_defined(current_block, symbol, true);
-
+			local = scope_defined(current_block, (rt_value)symbol, true);
+		
 		bool has_args = has_arguments();
-
-		if(default_var && !has_args && (local || (symbol && rt_symbol_is_const(symbol)))) // Variable or constant
+		
+		if(default_var && !has_args && (local || (symbol && rt_symbol_is_const((rt_value)symbol)))) // Variable or constant
 		{
-			if(local)
-			{
-				struct node *result = alloc_node(N_VAR);
-
-				result->left = (struct node *)scope_get(current_block, symbol);
-
-				return result;
-			}
-			else
-			{
-				struct node *result = alloc_node(N_CONST);
-
-				result->left = child;
-				result->right = (struct node *)symbol;
-
-				return result;
-			}
+			return new (memory_pool) VariableNode(*this, symbol);
 		}
 		else // Call
 		{
@@ -280,7 +262,7 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_lookup(struct node *child)
+	Node *Parser::parse_lookup(Node *child)
 	{
 		switch(lexeme())
 		{
@@ -294,26 +276,19 @@ namespace Mirb
 
 					if(require_ident())
 					{
-						rt_value symbol = (rt_value)lexer.lexeme.symbol;
+						Symbol *symbol = lexer.lexeme.symbol;
 
 						lexer.step();
 
 						bool has_args = has_arguments();
 
-						if(has_args || !rt_symbol_is_const(symbol))
+						if(has_args || !rt_symbol_is_const((rt_value)symbol))
 						{
 							return alloc_call_node(child, symbol, has_arguments());
 						}
 						else
 						{
-							struct node *result;
-
-							result = alloc_node(N_CONST);
-
-							result->left = child;
-							result->right = (struct node *)symbol;
-
-							return result;
+							return new (memory_pool) VariableNode(*this, symbol);
 						}
 					}
 					else
@@ -334,16 +309,20 @@ namespace Mirb
 			case T_SQUARE_OPEN:
 				{
 					lexer.step();
-
-					struct node *result = alloc_node(N_ARRAY_CALL);
-
-					result->left = child;
-					result->middle = parse_argument();
-					result->right = parse_block();
+					
+					auto result = new (memory_pool) CallNode;
+					
+					result->method = (Symbol *)rt_symbol_from_cstr("[]");
+					
+					result->object = child;
+					
+					parse_arguments(result->arguments);
+					
+					result->block = parse_block();
 
 					match(Lexeme::SQUARE_CLOSE);
 
-					return secure_block(result->right, result);
+					return secure_block(result->block, result);
 				}
 
 			default:
@@ -351,130 +330,104 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_lookup_tail(struct node *tail)
+	Node *Parser::parse_lookup_tail(Node *tail)
 	{
-		if(tail)
+		if(!is_assignment_op())
+			return tail;
+		
+		if(!tail)
 		{
-			struct node *handler = tail;
-
-			if(handler->type == N_BREAK_HANDLER)
+			lexer.step();
+			parse_expression();
+			return 0;
+		}
+		
+		Node *handler = tail;
+		
+		if(tail->type() == Node::BreakHandler)
+		{
+			BreakHandlerNode *handler = (BreakHandlerNode *)tail;
+			tail = handler->code;
+		}
+		
+		switch(tail->type())
+		{
+			case Node::Variable:
 			{
-				tail = handler->left;
-			}
-
-			switch(lexeme())
-			{
-				ASSIGN_OPS
-					RT_ASSERT(0);
-
-				case T_ASSIGN:
-					{
-						lexer.step();
-
-						switch(tail->type)
-						{
-							case N_CONST:
-								{
-									struct node *result = alloc_node(N_ASSIGN_CONST);
-
-									result->left = tail->left;
-									result->middle = tail->right;
-									result->right = parse_expression();
-
-									if(handler != tail)
-										handler->left = result;
-
-									return handler;
-								}
-
-							case N_CALL:
-								{
-									if(tail->right->left || tail->right->right)
-										break;
-
-									if(tail->middle)
-									{
-										rt_value name = rt_string_from_symbol((rt_value)tail->middle);
-
-										rt_concat_string(name, rt_string_from_cstr("="));
-
-										tail->middle = (struct node *)rt_symbol_from_string(name);
-									}
-
-									tail->right = alloc_node(N_CALL_ARGUMENTS);
-									tail->right->right = 0;
-									tail->right->left = alloc_node(N_ARGUMENT);
-									tail->right->left->left = parse_expression();
-									tail->right->left->right = 0;
-
-									return handler;
-								}
-
-							case N_ARRAY_CALL:
-								{
-									tail->type = N_CALL;
-
-									struct node *block = tail->right;
-									struct node *argument = tail->middle;
-
-									tail->middle = (struct node *)rt_symbol_from_cstr("[]=");
-									tail->right = alloc_node(N_CALL_ARGUMENTS);
-									tail->right->right = block;
-									tail->right->left = argument;
-
-									while(argument->right)
-									{
-										argument = argument->right;
-									}
-
-									argument->right = alloc_node(N_ARGUMENT);
-									argument->right->left = parse_expression();
-									argument->right->right = 0;
-
-									return handler;
-								}
-
-							default:
-								break;
-
-						}
-
-						error("Cannot assign a value to an expression.");
-
-						parse_expression();
-
-						return 0;
-					}
-					break;
-
-				default:
+				VariableNode *node = (VariableNode *)tail;
+				
+				if(node->variable_type != VariableNode::Constant)
 					return handler;
+				
+				return parse_assignment(node);
 			}
-		}
-		else // The tail is unknown
-		{
-			switch(lexeme())
+			
+			case Node::Call:
 			{
-				ASSIGN_OPS
-				case T_ASSIGN:
-					{
-						lexer.step();
-						parse_expression();
-					}
+				CallNode *node = (CallNode *)tail;
+				
+				if(!node->arguments.empty() || node->block)
+					break;
+				
+				Symbol *mutated = node->method;
+				
+				if(mutated)
+				{
+					rt_value name = rt_string_from_symbol((rt_value)node->method);
+					
+					rt_concat_string(name, rt_string_from_cstr("="));
+					
+					mutated = (Symbol *)rt_symbol_from_string(name);
+				}
+				
+				if(lexeme() == Lexeme::ASSIGN)
+				{
+					node->method = mutated;
+					
+					Node *argument = parse_expression();
+					
+					if(argument)
+						node->arguments.append(argument);
 
-				default:
-					return 0;
+					return handler;
+				}
+				else
+				{
+					// TODO: Save node->object in a temporary variable
+					auto result = new (memory_pool) CallNode;
+					
+					result->object = node->object;
+					result->method = mutated;
+					result->block = 0;
+					
+					Node *argument = parse_expression();
+					
+					if(argument)
+						node->arguments.append(argument);
+					
+					return result;
+				}
+				
 			}
+			
+			default:
+				break;
 		}
+		
+		error("Cannot assign a value to an expression.");
+
+		parse_expression();
+
+		return 0;
 	}
 
-	struct node *Parser::parse_lookup_chain()
+	Node *Parser::parse_lookup_chain()
 	{
-		struct node *result = parse_factor();
+		Node *result = parse_factor();
 
 		while(is_lookup())
 		{
-			struct node *node = parse_lookup(result);
+			Node *node = parse_lookup(result);
 
 			result = node;
 		}

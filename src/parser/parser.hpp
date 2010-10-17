@@ -22,6 +22,13 @@ namespace Mirb
 			~Parser();
 			
 			Lexer lexer;
+			MemoryPool &memory_pool;
+			
+			struct block *scope_defined(struct block *block, rt_value name, bool recursive);
+			struct variable *scope_declare_var(struct block *block, rt_value name);
+			struct variable *scope_var(struct block *block);
+			struct variable *scope_define(struct block *block, rt_value name);
+			struct variable *scope_get(struct block *block, rt_value name);
 			
 			void unexpected(bool skip = true);
 			void expected(Lexeme::Type what, bool skip = false);
@@ -30,67 +37,80 @@ namespace Mirb
 			
 			struct compiler *old_compiler;
 			struct block *current_block;
+						
+			static size_t operator_precedences[];
+
+			bool is_precedence_operator(Lexeme::Type op);
+			Node *parse_precedence_operator();
+			Node *parse_precedence_operator(Node *left, size_t min_precedence);
 			
 			// expressions
+			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
-			struct node *parse_array_element();
-			struct node *parse_identifier();
-			struct node *parse_unary();
-			struct node *parse_term();
-			struct node *parse_boolean_and();
-			struct node *parse_low_boolean_unary();
-			struct node *parse_equality();
-			struct node *parse_shift();
-			struct node *parse_factor();
-			struct node *parse_expression();
-			struct node *parse_argument();
-			struct node *parse_arithmetic();
-			struct node *parse_boolean_or();
-			struct node *parse_low_boolean();
-			struct node *parse_statement();
-			struct node *parse_statements();
+			Node *parse_assignment(VariableNode *variable);
+			Node *parse_array();
+			Node *parse_identifier();
+			Node *parse_unary();
+			Node *parse_boolean_unary();
+			Node *parse_factor();
+			void parse_arguments(NodeList &arguments);
+			Node *parse_boolean();
+			
+			Node *parse_expression()
+			{
+				return parse_ternary_if();
+			}
+			
+			Node *parse_statement()
+			{
+				return parse_conditional();
+			}
+			
+			Node *parse_group();
+			
 			void parse_sep();
-			struct node *parse_main();
+			void parse_statements(NodeList &list);
+			
+			void parse_main(Scope &scope);
 			
 			// control flow
-			struct node *parse_if_tail();
+			Node *parse_if_tail();
 			void parse_then_sep();
-			struct node *parse_case_body();
-			struct node *parse_if();
-			struct node *parse_unless();
-			struct node *parse_ternary_if();
-			struct node *parse_conditional();
-			struct node *parse_case();
-			struct node *parse_begin();
-			struct node *parse_exception_handlers(struct node *block);
-			struct node *parse_return();
-			struct node *parse_break();
-			struct node *parse_next();
-			struct node *parse_redo();
+			Node *parse_if();
+			Node *parse_unless();
+			Node *parse_ternary_if();
+			Node *parse_conditional();
+			Node *parse_case();
+			Node *parse_begin();
+			Node *parse_exception_handlers(Node *block);
+			Node *parse_return();
+			Node *parse_break();
+			Node *parse_next();
+			Node *parse_redo();
 			
 			// calls
 			bool require_ident();
 			bool has_arguments();
 			bool is_lookup();
-			struct node *parse_lookup(struct node *child);
-			struct node *parse_lookup_tail(struct node *tail);
-			struct node *parse_block();
-			struct node *parse_arguments(bool has_args, bool *parenthesis);
-			struct node *alloc_call_node(struct node *child, rt_value symbol, bool has_args);
-			struct node *secure_block(struct node *result, struct node *parent);
-			struct node *parse_call(rt_value symbol, struct node *child, bool default_var);
-			struct node *parse_lookup_chain();
-			struct node *parse_yield();
-			struct node *parse_super();
+			Node *parse_lookup(Node *child);
+			Node *parse_lookup_tail(Node *tail);
+			BlockNode *parse_block();
+			void parse_arguments(NodeList &arguments, bool has_args, bool *parenthesis);
+			Node *alloc_call_node(Node *object, Symbol *symbol, bool has_args);
+			Node *secure_block(BlockNode *result, Node *parent);
+			Node *parse_call(Symbol *symbol, Node *child, bool default_var);
+			Node *parse_lookup_chain();
+			Node *parse_yield();
+			Node *parse_super();
 			
 			// structures
 			bool is_parameter();
-			void parse_parameter(struct block *block);
-			struct node *parse_class();
-			struct node *parse_module();
-			struct node *parse_method();
+			void parse_parameters(struct block *block);
+			Node *parse_class();
+			Node *parse_module();
+			Node *parse_method();
 			
 			
 			Lexeme::Type lexeme()
@@ -100,7 +120,6 @@ namespace Mirb
 			
 		private:
 			Compiler &compiler;
-			MemoryPool &memory_pool;
 			
 			bool match(Lexeme::Type what)
 			{
@@ -208,29 +227,7 @@ namespace Mirb
 				return result;
 			}
 			
-			struct node *alloc_scope(struct block **block_var, enum block_type type);
-			
-			struct block *scope_defined(struct block *block, rt_value name, bool recursive);
-			struct variable *scope_declare_var(struct block *block, rt_value name);
-			struct variable *scope_var(struct block *block);
-			struct variable *scope_define(struct block *block, rt_value name);
-			struct variable *scope_get(struct block *block, rt_value name);
-			
-			#define ASSIGN_OPS \
-					case Lexeme::ASSIGN_ADD: \
-					case Lexeme::ASSIGN_SUB: \
-					case Lexeme::ASSIGN_MUL: \
-					case Lexeme::ASSIGN_DIV: \
-					case Lexeme::ASSIGN_LEFT_SHIFT: \
-					case Lexeme::ASSIGN_RIGHT_SHIFT:
-			
-			/*
-			 * These nodes uses no arguments and can be statically allocated.
-			 */
-			static struct node nil_node;
-			static struct node self_node;
-			static struct node true_node;
-			static struct node false_node;
+			struct block *alloc_scope(Scope &scope, enum block_type type);
 	};
 	
 };

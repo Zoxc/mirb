@@ -53,7 +53,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	compiler.filename = filename;
 	compiler.load((const char_t *)input, strlen(input));
 
-	struct node *expression = compiler.parser.parse_main();
+	struct node *expression = 0;//TODO: update - compiler.parser.parse_main();
 
 	if(!compiler.messages.empty())
 	{

@@ -3,7 +3,7 @@
 
 namespace Mirb
 {
-	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : lexer(symbol_pool, memory_pool, compiler), current_block(0), compiler(compiler), memory_pool(memory_pool)
+	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : lexer(symbol_pool, memory_pool, compiler), memory_pool(memory_pool), current_block(0), compiler(compiler)
 	{
 		old_compiler = compiler_create();
 	}
@@ -34,32 +34,18 @@ namespace Mirb
 			lexer.step();
 	}
 	
-	/*
-	 * These nodes uses no arguments and can be statically allocated.
-	 */
-	struct node Parser::nil_node = {0, 0, 0, 0, N_NIL, T_NONE, false};
-	struct node Parser::self_node = {0, 0, 0, 0, N_SELF, T_NONE, false};
-	struct node Parser::true_node = {0, 0, 0, 0, N_TRUE, T_NONE, false};
-	struct node Parser::false_node = {0, 0, 0, 0, N_FALSE, T_NONE, false};
-
-	struct node *Parser::alloc_scope(struct block **block_var, enum block_type type)
+	struct block *Parser::alloc_scope(Scope &scope, enum block_type type)
 	{
 		struct block *block = block_create(old_compiler, type);
-
-		struct node *result = new (memory_pool) struct node;
-
+		
 		block->parent = current_block;
 		block->owner = current_block ? current_block->owner : 0;
-
-		result->left = (struct node *)block;
-		result->type = N_SCOPE;
-		result->unbalanced = false;
-
+		
+		scope.block = block;
+		
 		current_block = block;
-
-		*block_var = block;
-
-		return result;
+		
+		return block;
 	}
 
 	struct block *Parser::scope_defined(struct block *block, rt_value name, bool recursive)
@@ -161,332 +147,268 @@ namespace Mirb
 				break;
 		}
 	}
-
-	struct node *Parser::parse_argument()
+	
+	void Parser::parse_arguments(NodeList &arguments)
 	{
-		struct node *result = alloc_node(N_ARGUMENT);
-
-		result->left = parse_expression();
-		result->right = 0;
-
-		if(matches(Lexeme::COMMA))
-			result->right = parse_argument();
-		else
-			result->right = 0;
-
-		return result;
+		do
+		{
+			auto node = parse_expression();
+			
+			if(node)
+				arguments.append(node);
+		}
+		while(matches(Lexeme::COMMA));
 	}
-
-	struct node *Parser::parse_identifier()
+	
+	bool Parser::is_assignment_op()
 	{
-		rt_value symbol = (rt_value)lexer.lexeme.symbol;
+		switch (lexeme())
+		{
+			case Lexeme::ASSIGN_POWER:
+			case Lexeme::ASSIGN_ADD:
+			case Lexeme::ASSIGN_SUB:
+			case Lexeme::ASSIGN_MUL:
+			case Lexeme::ASSIGN_DIV:
+			case Lexeme::ASSIGN_MOD:
+			case Lexeme::ASSIGN_LEFT_SHIFT:
+			case Lexeme::ASSIGN_RIGHT_SHIFT:
+			case Lexeme::ASSIGN_BITWISE_AND:
+			case Lexeme::ASSIGN_BITWISE_XOR:
+			case Lexeme::ASSIGN_BITWISE_OR:
+			case Lexeme::ASSIGN_LOGICAL_AND:
+			case Lexeme::ASSIGN_LOGICAL_OR:
+			case Lexeme::ASSIGN:
+				return true;
+			
+			default:
+				return false;
+		}
+	}
+	
+	Node *Parser::parse_assignment(VariableNode *variable)
+	{
+		if(lexeme() == Lexeme::ASSIGN)
+		{
+			auto result = new (memory_pool) AssignmentNode();
+			
+			lexer.step();
+			
+			result->variable = variable;
+			
+			result->value = parse_expression();
+			
+			return result;
+		}
+		else
+		{
+			auto result = new (memory_pool) AssignmentNode();
+			auto binary_op = new (memory_pool) BinaryOpNode();
+			
+			result->variable = variable;
+			result->value = binary_op;
+			binary_op->left = variable;
+			binary_op->op = Lexeme::assign_to_operator(lexeme());
+			
+			lexer.step();
+			
+			binary_op->right = parse_expression();
+			
+			return result;
+		}
+	}
+	
+	Node *Parser::parse_identifier()
+	{
+		Symbol *symbol = lexer.lexeme.symbol;
 
 		lexer.step();
-
-		switch (lexeme())
+		
+		if(is_assignment_op())
 		{
-			ASSIGN_OPS
-			{
-				struct node *result;
-
-				enum token_type op_type = (enum token_type)((size_t)lexeme() - (size_t)OP_TO_ASSIGN);
-
-				lexer.step();
-
-				if (rt_symbol_is_const(symbol))
-					result = alloc_node(N_ASSIGN_CONST);
-				else
-					result = alloc_node(N_ASSIGN);
-
-				result->right = alloc_node(N_BINARY_OP);
-				result->right->op = op_type;
-
-				if (rt_symbol_is_const(symbol))
-				{
-					result->left = &self_node;
-					result->middle = (struct node *)symbol;
-					result->right->left = alloc_node(N_CONST);
-					result->right->left->left = &self_node;
-					result->right->left->right = (struct node *)symbol;
-				}
-				else
-				{
-					result->left = (struct node *)scope_get(current_block, symbol);
-					result->right->left = alloc_node(N_VAR);
-					result->right->left->left = (struct node *)scope_get(current_block, symbol);
-				}
-
-				result->right->right = parse_expression();
-
-				return result;
-			}
-
-			case T_ASSIGN:
-			{
-				struct node *result;
-
-				lexer.step();
-
-				if (rt_symbol_is_const(symbol))
-				{
-					result = alloc_node(N_ASSIGN_CONST);
-					result->left = &self_node;
-					result->middle = (struct node *)symbol;
-				}
-				else
-				{
-					result = alloc_node(N_ASSIGN);
-					result->left = (struct node *)scope_get(current_block, symbol);
-				}
-
-				result->right = parse_expression();
-
-				return result;
-			}
-
-			// Function call or local variable
-
-			default:
-				return parse_call(symbol, &self_node, true);
-		}
-	}
-
-	struct node *Parser::parse_array_element()
-	{
-		struct node *result = alloc_node(N_ARRAY_ELEMENT);
-
-		result->left = parse_expression();
-
-		if(lexeme() == Lexeme::COMMA)
-		{
-			lexer.step();
-
-			result->right  = parse_array_element();
+			auto variable = new (memory_pool) VariableNode(*this, symbol);
+			
+			return parse_assignment(variable);
 		}
 		else
-			result->right = 0;
+			return parse_call(symbol,  new (memory_pool) SelfNode, true); // Function call or local variable
+	}
 
+	Node *Parser::parse_array()
+	{
+		auto result = new (memory_pool) ArrayNode;
+		
+		lexer.step();
+		
+		if(lexeme() != Lexeme::SQUARE_CLOSE)
+		{
+			do
+			{
+				auto element = parse_expression();
+				
+				result->entries.append(element);
+			}
+			while(matches(Lexeme::COMMA));
+		}
+		
+		match(Lexeme::SQUARE_CLOSE);
+		
 		return result;
 	}
 
-	struct node *Parser::parse_factor()
+	Node *Parser::parse_factor()
 	{
 		switch (lexeme())
 		{
-			case T_BEGIN:
+			case Lexeme::KW_BEGIN:
 				return parse_begin();
 
-			case T_IF:
+			case Lexeme::KW_IF:
 				return parse_if();
 
-			case T_UNLESS:
+			case Lexeme::KW_UNLESS:
 				return parse_unless();
 
-			case T_CASE:
+			case Lexeme::KW_CASE:
 				return parse_case();
 
-			case T_CLASS:
+			case Lexeme::KW_CLASS:
 				return parse_class();
 
-			case T_MODULE:
+			case Lexeme::KW_MODULE:
 				return parse_module();
 
-			case T_DEF:
+			case Lexeme::KW_DEF:
 				return parse_method();
 
-			case T_YIELD:
+			case Lexeme::KW_YIELD:
 				return parse_yield();
 
-			case T_RETURN:
+			case Lexeme::KW_RETURN:
 				return parse_return();
 
-			case T_BREAK:
+			case Lexeme::KW_BREAK:
 				return parse_break();
 
-			case T_NEXT:
+			case Lexeme::KW_NEXT:
 				return parse_next();
 
-			case T_REDO:
+			case Lexeme::KW_REDO:
 				return parse_redo();
 
-			case T_SUPER:
+			case Lexeme::KW_SUPER:
 				return parse_super();
 
-			case T_SQUARE_OPEN:
+			case Lexeme::SQUARE_OPEN:
+				return parse_array();
+
+			case Lexeme::STRING:
 				{
-					struct node *result = alloc_node(N_ARRAY);
+					auto result = new (memory_pool) StringNode;
 
-					lexer.step();
-
-					if(lexeme() == Lexeme::SQUARE_CLOSE)
-						result->left  = 0;
-					else
-						result->left = parse_array_element();
-
-					match(Lexeme::SQUARE_CLOSE);
-
-					return result;
-				}
-
-			case T_STRING:
-				{
-					struct node *result = alloc_node(N_STRING);
-
-					result->left = (struct node *)lexer.lexeme.c_str;
+					result->string = lexer.lexeme.c_str;
 
 					lexer.step();
 
 					return result;
 				}
 
-			case T_STRING_START:
+			case Lexeme::STRING_START:
 				{
-					struct node *result = alloc_node(N_STRING_CONTINUE);
-
-					result->left = 0;
-					result->middle = (struct node *)lexer.lexeme.c_str;
-
-					lexer.step();
-
-					result->right = parse_statements();
-
-					while(lexeme() == Lexeme::STRING_CONTINUE)
+					auto result = new (memory_pool) InterpolatedStringNode;
+					
+					do
 					{
-						struct node *node = alloc_node(N_STRING_CONTINUE);
-
-						node->left = result;
-						node->middle = (struct node *)lexer.lexeme.c_str;
-
+						auto pair = new (memory_pool) InterpolatedPairNode;
+						
+						pair->string = lexer.lexeme.c_str;
+						
 						lexer.step();
-
-						node->right = parse_statements();
-
-						result = node;
+						
+						parse_statements(pair->statements);
 					}
-
+					while(lexeme() == Lexeme::STRING_CONTINUE);
+					
 					if(require(Lexeme::STRING_END))
 					{
-						struct node *node = alloc_node(N_STRING_START);
-
-						node->left = result;
-						node->right = (struct node *)lexer.lexeme.c_str;
+						result->tail = lexer.lexeme.c_str;
 
 						lexer.step();
-
-						return node;
 					}
+					else
+						result->tail = 0;
 
 					return result;
 				}
 
-			case T_SELF:
+			case Lexeme::KW_SELF:
 				{
 					lexer.step();
 
-					return &self_node;
+					return new (memory_pool) SelfNode;
 				}
 
-			case T_TRUE:
+			case Lexeme::KW_TRUE:
 				{
 					lexer.step();
 
-					return &true_node;
+					return new (memory_pool) TrueNode;
 				}
 
-			case T_FALSE:
+			case Lexeme::KW_FALSE:
 				{
 					lexer.step();
 
-					return &false_node;
+					return new (memory_pool) FalseNode;
 				}
 
-			case T_NIL:
+			case Lexeme::KW_NIL:
 				{
 					lexer.step();
 
-					return &nil_node;
+					return new (memory_pool) NilNode;
 				}
 
-			case T_INTEGER:
+			case Lexeme::INTEGER:
 				{
-					struct node *result = alloc_node(N_NUMBER);
+					auto result = new (memory_pool) IntegerNode;
 					
 					std::string str = lexer.lexeme.string();
 					
-					result->left = (struct node *)(size_t)atoi(str.c_str());
+					result->value = atoi(str.c_str());
 					
 					lexer.step();
 					
 					return result;
 				}
 
-			case T_IVAR:
+			case Lexeme::IVAR:
 				{
-					rt_value symbol = (rt_value)lexer.lexeme.symbol;
-
+					Symbol *symbol = lexer.lexeme.symbol;
+					
 					lexer.step();
-
-					switch (lexeme())
-					{
-						ASSIGN_OPS
-						{
-							struct node *result;
-
-							enum token_type op_type = (enum token_type)((size_t)lexeme() - (size_t)OP_TO_ASSIGN);
-
-							lexer.step();
-
-							result = alloc_node(N_IVAR_ASSIGN);
-
-							result->right = alloc_node(N_BINARY_OP);
-							result->right->op = op_type;
-							result->right->left = alloc_node(N_IVAR);
-							result->right->left->left = (struct node *)symbol;
-							result->right->right = parse_expression();
-
-							result->left = (struct node *)symbol;
-
-							return result;
-						}
-
-						case T_ASSIGN:
-						{
-							struct node *result;
-
-							lexer.step();
-
-							result = alloc_node(N_IVAR_ASSIGN);
-							result->left = (struct node *)symbol;
-							result->right = parse_expression();
-
-							return result;
-						}
-
-						default:
-						{
-							struct node *result = alloc_node(N_IVAR);
-
-							result->left = (struct node *)symbol;
-
-							return result;
-						}
-					}
+					
+					auto variable = new (memory_pool) VariableNode(VariableNode::Instance, symbol);
+					
+					if(is_assignment_op())
+						return parse_assignment(variable);
+					else
+						return variable;
 				}
 
-			case T_IDENT:
+			case Lexeme::IDENT:
 				return parse_identifier();
 
-			case T_EXT_IDENT:
-				return parse_call(0, &self_node, false);
+			case Lexeme::EXT_IDENT:
+				return parse_call(0, new (memory_pool) SelfNode, false);
 
 			case Lexeme::PARENT_OPEN:
 				{
 					lexer.step();
-
-					struct node *result = parse_statements();
-
+					
+					auto result = parse_group();
+					
 					match(Lexeme::PARENT_CLOSE);
-
+					
 					return result;
 				}
 
@@ -501,32 +423,28 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_unary()
+	Node *Parser::parse_unary()
 	{
 		switch(lexeme())
 		{
 			case Lexeme::LOGICAL_NOT:
-				{
-					struct node *result = alloc_node(N_NOT);
-
-					lexer.step();
-
-					result->left = parse_lookup_chain();
-
-					return result;
-				}
-
-			case T_ADD:
-			case T_SUB:
 			{
-				struct node *result = alloc_node(N_UNARY_OP);
-
-				result->op = (enum token_type)((size_t)lexeme() + (size_t)OP_TO_UNARY);
-
 				lexer.step();
-
-				result->left = parse_lookup_chain();
-
+				
+				return new (memory_pool) UnaryOpNode(Lexeme::LOGICAL_NOT, parse_lookup_chain());
+			}
+			
+			case Lexeme::ADD:
+			case Lexeme::SUB:
+			{
+				auto result = new (memory_pool) UnaryOpNode;
+				
+				result->op = Lexeme::operator_to_unary(lexeme());
+				
+				lexer.step();
+				
+				result->value = parse_lookup_chain();
+				
 				return result;
 			}
 
@@ -535,246 +453,172 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_term()
+	size_t Parser::operator_precedences[] = {
+		0, // MUL,
+		0, // DIV,
+		0, // MOD,
+		
+		1, // ADD,
+		1, // SUB,
+		
+		2, // LEFT_SHIFT,
+		2, // RIGHT_SHIFT,
+		
+		3, // AMPERSAND, // BITWISE_AND
+		
+		4, // BITWISE_XOR,
+		4, // BITWISE_OR,
+		
+		7, // LOGICAL_AND,
+		
+		8, // LOGICAL_OR,
+		
+		5, // GREATER,
+		5, // GREATER_OR_EQUAL,
+		5, // LESS,
+		5, // LESS_OR_EQUAL,
+		
+		6, // EQUALITY,
+		6, // CASE_EQUALITY,
+		6, // NO_EQUALITY,
+		6, // MATCHES,
+		6, // NOT_MATCHES,
+	};
+
+	bool Parser::is_precedence_operator(Lexeme::Type op)
 	{
-		struct node *result = parse_unary();
+		return op >= Lexeme::precedence_operators_start && op <= Lexeme::precedence_operators_end;
+	}
 
-		while(lexeme() == Lexeme::MUL || lexeme() == Lexeme::DIV)
+	Node *Parser::parse_precedence_operator()
+	{
+		return parse_precedence_operator(parse_unary(), 0);
+	}
+
+	Node *Parser::parse_precedence_operator(Node *left, size_t min_precedence)
+	{
+		while(true)
 		{
-			struct node *node = alloc_node(N_BINARY_OP);
-
-			node->op = (enum token_type)lexeme();
-			node->left = result;
-
+			Lexeme::Type op = lexeme();
+			
+			if(!is_precedence_operator(op))
+				break;
+			
+			size_t precedence = operator_precedences[op - Lexeme::precedence_operators_start];
+			
+			if(precedence < min_precedence)
+				break;
+			
 			lexer.step();
 
-			node->right = parse_unary();
-			result = node;
-		}
+			Node *right = parse_unary();
 
-		return result;
-	}
-
-	struct node *Parser::parse_arithmetic()
-	{
-		struct node *result = parse_term();
-
-		while (lexeme() == Lexeme::ADD || lexeme() == Lexeme::SUB)
-		{
-			struct node *node = alloc_node(N_BINARY_OP);
-
-			node->op = (enum token_type)lexeme();
-			node->left = result;
-
-			lexer.step();
-
-			node->right = parse_term();
-			result = node;
-		}
-
-		return result;
-	}
-
-	struct node *Parser::parse_shift()
-	{
-		struct node *result = parse_arithmetic();
-
-		while (lexeme() == Lexeme::LEFT_SHIFT || lexeme() == Lexeme::RIGHT_SHIFT)
-		{
-			struct node *node = alloc_node(N_BINARY_OP);
-
-			node->op = (enum token_type)lexeme();
-			node->left = result;
-
-			lexer.step();
-
-			node->right = parse_arithmetic();
-			result = node;
-		}
-
-		return result;
-	}
-
-	bool Parser::is_equality_op()
-	{
-		switch(lexeme())
-		{
-			case T_EQUALITY:
-			case T_CASE_EQUALITY:
-			case T_NO_EQUALITY:
-				return true;
-
-			default:
-				return false;
-		}
-	}
-
-	struct node *Parser::parse_equality()
-	{
-		struct node *result = parse_shift();
-
-		while(is_equality_op())
-		{
-			struct node *node;
-
-			if(lexeme() == Lexeme::NO_EQUALITY)
-				node = alloc_node( N_NO_EQUALITY);
-			else
+			while(true)
 			{
-				node = alloc_node( N_BINARY_OP);
-				node->op = (enum token_type)lexeme();
+				Lexeme::Type next_op = lexeme();
+
+				if(!is_precedence_operator(next_op))
+					break;
+
+				size_t next_precedence = operator_precedences[next_op - Lexeme::precedence_operators_start];
+
+				if(next_precedence <= precedence)
+					break;
+
+				right = parse_precedence_operator(right, next_precedence);
 			}
+			
+			BinaryOpNode *node = new (memory_pool) BinaryOpNode;
+			
+			node->op = op;
+			node->left = left;
+			node->right = right;
 
-			node->left = result;
-
-			lexer.step();
-
-			node->right = parse_shift();
-			result = node;
+			left = node;
 		}
 
-		return result;
+		return left;
 	}
 
-	struct node *Parser::parse_boolean_and()
-	{
-		struct node *result = parse_equality();
-
-		while(lexeme() == Lexeme::LOGICAL_AND)
-		{
-			struct node *node = alloc_node(N_BOOLEAN);
-
-			node->op = (enum token_type)lexeme();
-			node->left = result;
-
-			lexer.step();
-
-			node->right = parse_equality();
-			result = node;
-		}
-
-		return result;
-	}
-
-	struct node *Parser::parse_boolean_or()
-	{
-		struct node *result = parse_boolean_and();
-
-		while(lexeme() == Lexeme::LOGICAL_OR)
-		{
-			struct node *node = alloc_node(N_BOOLEAN);
-
-			node->op = (enum token_type)lexeme();
-			node->left = result;
-
-			lexer.step();
-
-			node->right = parse_boolean_and();
-			result = node;
-		}
-
-		return result;
-	}
-
-	struct node *Parser::parse_expression()
-	{
-		return parse_ternary_if();
-	}
-
-	struct node *Parser::parse_low_boolean_unary()
+	Node *Parser::parse_boolean_unary()
 	{
 		if(lexeme() == Lexeme::KW_NOT)
 		{
-			struct node *result = alloc_node(N_NOT);
-
-			lexer.step();
-
-			result->left = parse_expression();
-
-			return result;
+			return new (memory_pool) UnaryOpNode(Lexeme::LOGICAL_NOT, parse_expression());
 		}
 		else
+		{
 			return parse_expression();
+		}
 	}
 
-	struct node *Parser::parse_low_boolean()
+	Node *Parser::parse_boolean()
 	{
-		struct node *result = parse_low_boolean_unary();
-
+		Node *result = parse_boolean_unary();
+		
 		while(lexeme() == Lexeme::KW_AND || lexeme() == Lexeme::KW_OR)
 		{
-			struct node *node = alloc_node(N_BOOLEAN);
-
-			node->op = (enum token_type)lexeme();
+			auto node = new (memory_pool) BinaryOpNode;
+			
+			node->op = lexeme();
 			node->left = result;
-
+			
 			lexer.step();
-
-			node->right = parse_low_boolean_unary();
+			
+			node->right = parse_boolean_unary();
+			
 			result = node;
 		}
-
+		
 		return result;
 	}
-
-	struct node *Parser::parse_statement()
+	
+	Node *Parser::parse_group()
 	{
-		return parse_conditional();
+		auto node = new (memory_pool) GroupNode;
+		
+		parse_statements(node->statements);
+		
+		return node;
 	}
-
+	
 	bool Parser::is_sep()
 	{
 		return lexeme() == Lexeme::SEMICOLON || lexeme() == Lexeme::LINE;
 	}
-
+	
 	void Parser::skip_seps()
 	{
 		while (is_sep())
 			lexer.step();
 	}
-
-	struct node *Parser::parse_statements()
+	
+	void Parser::parse_statements(NodeList &list)
 	{
 		skip_seps();
-
-		if(is_expression())
+		
+		while(is_expression())
 		{
-			struct node *result = parse_statement();
-
-			if (is_sep())
-			{
-				skip_seps();
-
-				if(is_expression())
-				{
-					struct node *node = alloc_node(N_STATEMENTS);
-
-					node->left = result;
-					node->right = parse_statements();
-
-					return node;
-				}
-			}
-
-			return result;
-
+			Node *node = parse_statement();
+			
+			if(node)
+				list.append(node);
+			
+			if (!is_sep())
+				return;
+			
+			skip_seps();
 		}
-		else
-			return &nil_node;
 	}
 
-	struct node *Parser::parse_main()
+	void Parser::parse_main(Scope &scope)
 	{
-		struct block *block;
-
-		struct node *result = alloc_scope(&block, S_MAIN);
+		struct block *block = alloc_scope(scope, S_MAIN);
 
 		block->owner = block;
-
-		result->right = parse_statements();
-
+		
+		parse_statements(scope.statements);
+		
 		match(Lexeme::END);
-
-		return result;
 	}
 };

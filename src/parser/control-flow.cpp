@@ -2,135 +2,111 @@
 
 namespace Mirb
 {
-	struct node *Parser::parse_return()
+	Node *Parser::parse_return()
 	{
+		auto range = new (memory_pool) Range(lexer.lexeme);
+		
 		lexer.step();
-
-		struct node *result = alloc_node(N_RETURN);
-
+		
 		if(current_block->type == S_CLOSURE)
 			current_block->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
-
+		
 		if(is_expression())
-			result->left = parse_expression();
+			return new (memory_pool) ReturnNode(range, parse_expression());
 		else
-			result->left = &nil_node;
-
-		return result;
+			return new (memory_pool) ReturnNode(range, new (memory_pool) NilNode);
 	}
 
-	struct node *Parser::parse_next()
+	Node *Parser::parse_next()
 	{
+		auto range = new (memory_pool) Range(lexer.lexeme);
+		
 		lexer.step();
-
-		struct node *result = alloc_node(N_NEXT);
-
+		
 		if(current_block->type != S_CLOSURE)
 			error("Next outside of block.");
-
+		
 		if(is_expression())
-			result->left = parse_expression();
+			return new (memory_pool) NextNode(range, parse_expression());
 		else
-			result->left = &nil_node;
-
-		return result;
+			return new (memory_pool) NextNode(range, new (memory_pool) NilNode);
 	}
 
-	struct node *Parser::parse_redo()
+	Node *Parser::parse_redo()
 	{
+		auto range = new (memory_pool) Range(lexer.lexeme);
+		
 		lexer.step();
-
-		struct node *result = alloc_node(N_REDO);
-
+		
 		if(current_block->type != S_CLOSURE)
 			error("Redo outside of block.");
-
-		return result;
+		
+		return new (memory_pool) RedoNode(range);
 	}
 
-	struct node *Parser::parse_break()
+	Node *Parser::parse_break()
 	{
+		auto range = new (memory_pool) Range(lexer.lexeme);
+		
 		lexer.step();
-
-		struct node *result = alloc_node(N_BREAK);
-
+		
 		if(current_block->type == S_CLOSURE)
 		{
 			current_block->can_break = true; // Flag our parent should check
 		}
 		else
 			error("Break outside of block.");
-
+		
 		if(is_expression())
-			result->left = parse_expression();
+			return new (memory_pool) BreakNode(range, parse_expression());
 		else
-			result->left = &nil_node;
+			return new (memory_pool) BreakNode(range, new (memory_pool) NilNode);
+	}
 
+	Node *Parser::parse_exception_handlers(Node *block)
+	{
+		switch (lexeme())
+		{
+			case Lexeme::KW_ENSURE:
+			case Lexeme::KW_RESCUE:
+				break;
+			
+			default:
+				return block;
+				break;
+		}
+		
+		auto result = new (memory_pool) HandlerNode;
+		
+		result->code = block;
+		
+		while(lexeme() == Lexeme::KW_RESCUE);
+		{
+			lexer.step();
+			
+			auto rescue = new (memory_pool) RescueNode;
+			
+			parse_statements(rescue->statements);
+			
+			result->rescues.append(rescue);
+		}
+		
+		if(matches(Lexeme::KW_ENSURE))
+			result->group = parse_group();
+		else
+			result->group = 0;
+		
 		return result;
 	}
 
-	struct node *Parser::parse_exception_handlers(struct node *block)
-	{
-		struct node *parent = alloc_node(N_HANDLER);
-
-		parent->left = block;
-
-		if(lexeme() == Lexeme::KW_RESCUE)
-		{
-			lexer.step();
-
-			struct node *rescue = alloc_node(N_RESCUE);
-			rescue->left = parse_statements();
-			rescue->right = 0;
-
-			parent->middle = rescue;
-
-			while(lexeme() == Lexeme::KW_RESCUE)
-			{
-				lexer.step();
-
-				struct node *node = alloc_node(N_RESCUE);
-				node->left = parse_statements();
-				node->right = 0;
-
-				rescue->right = node;
-				rescue = node;
-			}
-		}
-		else
-			parent->middle = 0;
-
-		if(lexeme() == Lexeme::KW_ENSURE)
-		{
-			lexer.step();
-
-			parent->right = parse_statements();
-		}
-		else
-			parent->right = 0;
-
-		return parent;
-	}
-
-	struct node *Parser::parse_begin()
+	Node *Parser::parse_begin()
 	{
 		lexer.step();
-
-		struct node *result = parse_statements();
-
-		switch (lexeme())
-		{
-			case T_ENSURE:
-			case T_RESCUE:
-				result = parse_exception_handlers(result);
-				break;
-
-			default:
-				break;
-		}
-
+		
+		auto result = parse_exception_handlers(parse_group());
+		
 		match(Lexeme::KW_END);
-
+		
 		return result;
 	}
 
@@ -138,8 +114,8 @@ namespace Mirb
 	{
 		switch (lexeme())
 		{
-			case T_THEN:
-			case T_COLON:
+			case Lexeme::KW_THEN:
+			case Lexeme::COLON:
 				lexer.step();
 				break;
 
@@ -148,169 +124,160 @@ namespace Mirb
 		}
 	}
 
-	struct node *Parser::parse_ternary_if()
+	Node *Parser::parse_ternary_if()
 	{
-		struct node *result = parse_boolean_or();
-
+		Node *result = parse_precedence_operator();
+		
 		if(lexeme() == Lexeme::QUESTION)
 		{
 			lexer.step();
-
-			struct node *node = alloc_node(N_IF);
-
+			
+			auto node = new (memory_pool) IfNode;
+			
+			node->inverted = false;
+			
 			node->left = result;
 			node->middle = parse_ternary_if();
-
+			
 			match(Lexeme::COLON);
-
+			
 			node->right = parse_ternary_if();
-
+			
 			return node;
 		}
-
+		
 		return result;
 	}
 
-	struct node *Parser::parse_conditional()
+	Node *Parser::parse_conditional()
 	{
-		struct node *result = parse_low_boolean();
-
+		Node *result = parse_boolean();
+		
 		if (lexeme() == Lexeme::KW_IF || lexeme() == Lexeme::KW_UNLESS)
 		{
-			struct node *node = alloc_node(lexeme() == Lexeme::KW_IF ? N_IF : N_UNLESS);
-
+			auto node = new (memory_pool) IfNode;
+			
+			node->inverted = lexeme() == Lexeme::KW_UNLESS;
+			
 			lexer.step();
-
+			
 			node->middle = result;
 			node->left = parse_statement();
-			node->right = &nil_node;
-
+			node->right = new (memory_pool) NilNode;
+			
 			return node;
 		}
-
+		
 		return result;
 	}
 
-	struct node *Parser::parse_unless()
+	Node *Parser::parse_unless()
 	{
 		lexer.step();
 
-		struct node *result = alloc_node(N_UNLESS);
+		auto result = new (memory_pool) IfNode;
+		
+		result->inverted = true;
+		
 		result->left = parse_expression();
-
+		
 		parse_then_sep();
-
-		result->middle = parse_statements();
-		result->right = &nil_node;
-
+		
+		result->middle = parse_group();
+		result->right = new (memory_pool) NilNode;
+		
 		match(Lexeme::KW_END);
-
+		
 		return result;
 	}
 
-	struct node *Parser::parse_if_tail()
+	Node *Parser::parse_if_tail()
 	{
 		switch (lexeme())
 		{
 			case T_ELSIF:
 				{
 					lexer.step();
-
-					struct node *result = alloc_node(N_IF);
+					
+					auto result = new (memory_pool) IfNode;
+					
+					result->inverted = false;
+					
 					result->left = parse_expression();
-
+					
 					parse_then_sep();
-
-					result->middle = parse_statements();
+					
+					result->middle = parse_group();
 					result->right = parse_if_tail();
-
+					
 					return result;
 				}
 
 			case T_ELSE:
 				lexer.step();
 
-				return parse_statements();
+				return parse_group();
 
 			default:
-				return &nil_node;
+				return new (memory_pool) NilNode;
 		}
 	}
 
-	struct node *Parser::parse_if()
+	Node *Parser::parse_if()
 	{
 		lexer.step();
-
-		struct node *result = alloc_node(N_IF);
+		
+		auto result = new (memory_pool) IfNode;
+		
+		result->inverted = false;
+		
 		result->left = parse_expression();
-
+		
 		parse_then_sep();
-
-		result->middle = parse_statements();
+		
+		result->middle = parse_group();
 		result->right = parse_if_tail();
-
+		
 		match(Lexeme::KW_END);
-
+		
 		return result;
 	}
 
-	struct node *Parser::parse_case_body()
-	{
-		switch (lexeme())
-		{
-			case T_WHEN:
-				{
-					lexer.step();
-
-					struct node *result = alloc_node(N_IF);
-					result->left = parse_expression();
-
-					parse_then_sep();
-
-					result->middle = parse_statements();
-					result->right = parse_case_body();
-
-					return result;
-				}
-
-			case T_ELSE:
-				{
-					lexer.step();
-
-					return parse_statements();
-				}
-
-			default:
-				{
-					error("Expected else or when but found " + lexer.lexeme.describe());
-
-					return 0;
-				}
-		}
-	}
-
-	struct node *Parser::parse_case()
+	Node *Parser::parse_case()
 	{
 		lexer.step();
 
-		struct node *result = 0;
-
-		switch (lexeme())
+		IfNode *result = 0;
+		IfNode *first = 0;
+		
+		do
 		{
-			case T_ELSE:
-				lexer.step();
-
-				result = parse_statements();
-				break;
-
-			case T_WHEN:
-				result = parse_case_body();
-				break;
-
-			default:
-				error("Expected else or when but found " + lexer.lexeme.describe());
+			match(Lexeme::KW_WHEN);
+			lexer.step();
+			
+			auto node = new (memory_pool) IfNode;
+			
+			first = first ? first : node;
+			
+			node->inverted = false;
+			node->left = parse_expression();
+			
+			parse_then_sep();
+			
+			node->middle = parse_group();
+			node->right = result;
+			
+			result = node;
 		}
-
+		while(lexeme() == Lexeme::KW_WHEN);
+		
+		if(matches(Lexeme::KW_ELSE))
+		{
+			first->right = parse_group();
+		}
+		else
+			first->right = new (memory_pool) NilNode;
+		
 		match(Lexeme::KW_END);
 
 		return result;

@@ -28,46 +28,73 @@ namespace Mirb
 				
 				NONE,
 				
-				ADD,
-				SUB,
+				POWER,
+				
+				// order contiguous binary operators
+				
 				MUL,
 				DIV,
 				MOD,
-				POWER,
+				
+				ADD,
+				SUB,
+				
 				LEFT_SHIFT,
 				RIGHT_SHIFT,
-				LOGICAL_AND,
-				LOGICAL_OR,
-				BITWISE_XOR,
+				
 				AMPERSAND, // BITWISE_AND
-				BITWISE_OR,
-				ASSIGN_ADD,
-				ASSIGN_SUB,
-				ASSIGN_MUL,
-				ASSIGN_DIV,
-				ASSIGN_MOD,
-				ASSIGN_POWER,
-				ASSIGN_LEFT_SHIFT,
-				ASSIGN_RIGHT_SHIFT,
-				ASSIGN_BITWISE_XOR,
-				ASSIGN_BITWISE_AND,
-				ASSIGN_BITWISE_OR,
-				ASSIGN_LOGICAL_AND,
-				ASSIGN_LOGICAL_OR,
-				BITWISE_NOT,
-				LOGICAL_NOT,
-				UNARY_ADD,
-				UNARY_SUB,
-				ASSIGN,
+				
+				BITWISE_XOR,
+				BITWISE_OR, // block parameter start/end
+				
+				LOGICAL_AND,
+				
+				LOGICAL_OR,
+				
+				GREATER,
+				GREATER_OR_EQUAL,
+				LESS,
+				LESS_OR_EQUAL,
+				
 				EQUALITY,
 				CASE_EQUALITY,
 				NO_EQUALITY,
 				MATCHES,
 				NOT_MATCHES,
-				GREATER,
-				GREATER_OR_EQUAL,
-				LESS,
-				LESS_OR_EQUAL,
+				
+								
+				// keep the assigns in the same order as the operators
+				
+				ASSIGN_POWER,
+				
+				ASSIGN_MUL,
+				ASSIGN_DIV,
+				ASSIGN_MOD,
+				
+				ASSIGN_ADD,
+				ASSIGN_SUB,
+				
+				ASSIGN_LEFT_SHIFT,
+				ASSIGN_RIGHT_SHIFT,
+				
+				ASSIGN_BITWISE_AND,
+				
+				ASSIGN_BITWISE_XOR,
+				ASSIGN_BITWISE_OR,
+				
+				ASSIGN_LOGICAL_AND,
+				
+				ASSIGN_LOGICAL_OR,
+				
+				
+				BITWISE_NOT,
+				LOGICAL_NOT,
+				
+				// must be in the same order as ADD and SUB
+				UNARY_ADD,
+				UNARY_SUB,
+				
+				ASSIGN,
 				QUESTION,
 				DOT,
 				COMMA,
@@ -115,6 +142,23 @@ namespace Mirb
 				TYPES
 			};
 			
+			static inline Type operator_to_assign(Type op)
+			{
+				return (Type)((size_t)op + ((size_t)ASSIGN_POWER - (size_t)POWER));
+			}
+			
+			static inline Type assign_to_operator(Type op)
+			{
+				return (Type)((size_t)op - ((size_t)ASSIGN_POWER - (size_t)POWER));
+			}
+			
+			static inline Type operator_to_unary(Type op)
+			{
+				return (Type)((size_t)op + ((size_t)ASSIGN_ADD - (size_t)ADD));
+			}
+			
+			static const Type precedence_operators_start = MUL;
+			static const Type precedence_operators_end = NOT_MATCHES;
 			static const Type keyword_start = KW_IF;
 			static const Type keyword_end = KW_END;
 			static const Type values_end = NONE;

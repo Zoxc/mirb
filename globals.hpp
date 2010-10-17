@@ -25,7 +25,6 @@
 #ifdef WIN32
     #include <windows.h>
     #include <excpt.h>
-    #include "vendor/BeaEngine/BeaEngine.h"
 #else
 	#define __stdcall __attribute__((__stdcall__))
 	#define __cdecl __attribute__((__cdecl__))
@@ -34,10 +33,17 @@
 	#include <sys/stat.h>
 #endif
 
-static inline void __attribute__((noreturn)) __builtin_unreachable(void)
-{
-	while(1);
-}
+#ifndef __has_builtin
+  #define __has_builtin(x) 0
+#endif
+
+#if !__has_builtin(__builtin_unreachable)
+	static inline void __builtin_unreachable() __attribute((noreturn));
+	static inline void __builtin_unreachable()
+	{
+		RT_ASSERT(0);
+	}
+#endif
 
 #include "vector.hpp"
 #include "hash.hpp"

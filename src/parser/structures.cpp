@@ -2,66 +2,64 @@
 
 namespace Mirb
 {
-	struct node *Parser::parse_class()
+	Node *Parser::parse_class()
 	{
 		lexer.step();
 
-		struct node *result = alloc_node(N_CLASS);
-
+		auto result = new (memory_pool) ClassNode;
+		
 		if(require(Lexeme::IDENT))
 		{
-			result->left = (struct node *)(rt_value)lexer.lexeme.symbol;
-
+			result->name = lexer.lexeme.symbol;
+		
 			lexer.step();
 		}
 		else
-			result->left = 0;
-
+			result->name = 0;
+		
 		if(lexeme() == Lexeme::LESS)
 		{
 			lexer.step();
 
-			result->middle = parse_expression();
+			result->super = parse_expression();
 		}
 		else
-			result->middle = 0;
-
+			result->super = new (memory_pool) VariableNode(*this, (Symbol *)rt_symbol_from_cstr("Object"), 0);
+		
 		parse_sep();
-
-		struct block *block;
-
-		result->right = alloc_scope(&block, S_CLASS);
-		result->right->right = parse_statements();
-
+		
+		struct block *block = alloc_scope(result->scope, S_CLASS);
+		
+		parse_statements(result->scope.statements);
+		
 		current_block = block->parent;
-
+		
 		match(Lexeme::KW_END);
-
+		
 		return result;
 	}
 
-	struct node *Parser::parse_module()
+	Node *Parser::parse_module()
 	{
 		lexer.step();
 
-		struct node *result = alloc_node(N_MODULE);
-
+		auto result = new (memory_pool) ModuleNode;
+		
 		if(require(Lexeme::IDENT))
 		{
-			result->left = (struct node *)(rt_value)lexer.lexeme.symbol;
+			result->name = lexer.lexeme.symbol;
 
 			lexer.step();
 		}
 		else
-			result->left = 0;
+			result->name = 0;
 
 		parse_sep();
 
-		struct block *block;
-
-		result->right = alloc_scope(&block, S_MODULE);
-		result->right->right = parse_statements();
-
+		struct block *block = alloc_scope(result->scope, S_MODULE);
+		
+		parse_statements(result->scope.statements);
+		
 		current_block = block->parent;
 
 		match(Lexeme::KW_END);
@@ -82,14 +80,20 @@ namespace Mirb
 		}
 	}
 
-	void Parser::parse_parameter(struct block *block)
+	void Parser::parse_parameters(struct block *block)
 	{
-		if(is_parameter())
+		do
 		{
+			if(!is_parameter())
+			{
+				error("Expected paramater, but found " + lexer.lexeme.describe());
+				return;
+			}
+			
 			bool block_parameter = matches(Lexeme::AMPERSAND);
-
+			
 			rt_value symbol = (rt_value)lexer.lexeme.symbol;
-
+			
 			if(block_parameter)
 			{
 				if(block->block_parameter)
@@ -104,33 +108,29 @@ namespace Mirb
 				else
 					vec_push(variables, &block->parameters, scope_define(block, symbol));
 			}
-
+			
 			lexer.step();
-
-			if(matches(Lexeme::COMMA))
-				parse_parameter(block);
 		}
-		else
-			error("Expected paramater, but found " + lexer.lexeme.describe());
+		while(matches(Lexeme::COMMA));
 	}
 
-	struct node *Parser::parse_method()
+	Node *Parser::parse_method()
 	{
 		lexer.lexeme.allow_keywords = false;
-
+		
 		lexer.step();
-
+		
 		lexer.lexeme.allow_keywords = true;
-
-		struct node *result = alloc_node(N_METHOD);
-
+		
+		auto result = new (memory_pool) MethodNode;
+		
 		switch(lexeme())
 		{
-			case T_IDENT:
-			case T_EXT_IDENT:
+			case Lexeme::IDENT:
+			case Lexeme::EXT_IDENT:
 				{
-					result->left = (struct node *)(rt_value)lexer.lexeme.symbol;
-
+					result->name = lexer.lexeme.symbol;
+					
 					lexer.step();
 				}
 				break;
@@ -138,36 +138,34 @@ namespace Mirb
 			default:
 				{
 					expected(Lexeme::IDENT);
-					result->left = 0;
+					result->name = 0;
 				}
 		}
-
-		struct block *block;
-
-		result->right = alloc_scope(&block, S_METHOD);
-
+		
+		struct block *block = alloc_scope(result->scope, S_METHOD);
+		
 		block->owner = block;
 
 		if(matches(Lexeme::PARENT_OPEN))
 		{
-			parse_parameter(block);
-
+			parse_parameters(block);
+			
 			match(Lexeme::PARENT_CLOSE);
 		}
 		else
 		{
 			if(is_parameter())
-				parse_parameter(block);
-
+				parse_parameters(block);
+			
 			parse_sep();
 		}
-
-		result->right->right = parse_statements();
-
+		
+		parse_statements(result->scope.statements);
+		
 		current_block = block->parent;
-
+		
 		match(Lexeme::KW_END);
-
+		
 		return result;
 	}
 };

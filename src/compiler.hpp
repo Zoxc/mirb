@@ -14,6 +14,7 @@ namespace Mirb
 			MemoryPool memory_pool;
 			SimpleList<Message> messages;
 			Parser parser;
+			NodeList statements;
 			const char *filename;
 			
 			void load(const char_t *input, size_t length);
