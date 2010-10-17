@@ -11,10 +11,10 @@ package = Package.new do
 
 	windows = Rake::Win32.windows?
 	vendor = 'vendor' + (windows ? '' : '_linux')
-	debug = true
+	debug = false
 	debug_info = false
-	valgrind = true
-	clang = true
+	valgrind = false
+	clang = false
 	
 	# setup toolchain
 	

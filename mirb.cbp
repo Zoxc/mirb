@@ -24,7 +24,6 @@
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
-					<Add option="-funroll-loops -fomit-frame-pointer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />

@@ -185,7 +185,7 @@ namespace Mirb
 			current = current->parent;
 		}
 		
-		bool parenthesis;
+		bool parenthesis = false;
 		
 		parse_arguments(result->arguments, has_arguments(), &parenthesis);
 		

@@ -432,7 +432,7 @@ static inline void generate_instruction(struct block *block, struct opcode *op, 
 		case B_CLASS:
 			{
 				struct rt_block *runtime_block;
-				rt_compiled_block_t compiled;
+				rt_compiled_block_t compiled = 0;
 
 				if(!measuring)
 				{
