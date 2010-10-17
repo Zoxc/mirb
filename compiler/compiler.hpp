@@ -2,7 +2,6 @@
 
 #include "../globals.hpp"
 #include "allocator.hpp"
-#include "lexer.hpp"
 
 struct block;
 

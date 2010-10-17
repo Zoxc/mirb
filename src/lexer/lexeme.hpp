@@ -154,7 +154,7 @@ namespace Mirb
 			
 			static inline Type operator_to_unary(Type op)
 			{
-				return (Type)((size_t)op + ((size_t)ASSIGN_ADD - (size_t)ADD));
+				return (Type)((size_t)op + ((size_t)UNARY_ADD - (size_t)ADD));
 			}
 			
 			static const Type precedence_operators_start = MUL;

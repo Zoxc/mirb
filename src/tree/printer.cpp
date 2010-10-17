@@ -97,7 +97,7 @@ namespace Mirb
 			{
 				InterpolatedPairNode *target = (InterpolatedPairNode *)node;
 				
-				return std::string((const char *)target->string) + "#{" + join(target->statements, "; ");
+				return std::string((const char *)target->string) + "#{" + print_node(target->group);
 			}
 			
 			case SimpleNode::InterpolatedString:
@@ -238,8 +238,8 @@ namespace Mirb
 				
 				std::string result = "begin\n" + print_node(target->code) + join(target->rescues);
 				
-				if(target->group)
-					result += "ensure\n" + print_node(target->group);
+				if(target->ensure_group)
+					result += "ensure\n" + print_node(target->ensure_group);
 				
 				return result + "\nend\n";
 			}

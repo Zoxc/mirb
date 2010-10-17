@@ -2,12 +2,19 @@
 #include "../common.hpp"
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
-#include "../../compiler/block.hpp"
 #include "node.hpp"
 
 namespace Mirb
 {
 	class Parser;
+	
+	struct GroupNode:
+		public Node
+	{
+		NodeType type() { return Group; }
+		
+		NodeList statements;
+	};
 	
 	struct BinaryOpNode:
 		public Node
@@ -25,9 +32,6 @@ namespace Mirb
 		public BinaryOpNode
 	{
 		NodeType type() { return Assignment; }
-		
-		VariableNode *variable;
-		Node *value;
 	};
 	
 	struct UnaryOpNode:
@@ -56,7 +60,7 @@ namespace Mirb
 		NodeType type() { return InterpolatedPair; }
 		
 		const char_t *string;
-		NodeList statements;
+		Node *group;
 	};
 	
 	typedef SimpleList<InterpolatedPairNode, ListNode>  InterpolatedPairList;
@@ -146,24 +150,6 @@ namespace Mirb
 		NodeList entries;
 	};
 	
-	struct ParameterNode:
-		public ListNode
-	{
-		NodeType type() { return Parameter; }
-		
-		Symbol *name;
-	};
-	
-	typedef SimpleList<ParameterNode, ListNode>  ParameterList;
-	
-	struct GroupNode:
-		public Node
-	{
-		NodeType type() { return Group; }
-		
-		NodeList statements;
-	};
-	
 	struct Scope
 	{
 		struct block *block;
@@ -243,7 +229,7 @@ namespace Mirb
 		
 		Node *code;
 		RescueList rescues;
-		Node *group;
+		Node *ensure_group;
 	};
 	
 	struct VoidNode:

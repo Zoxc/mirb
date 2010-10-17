@@ -193,9 +193,11 @@ namespace Mirb
 			
 			lexer.step();
 			
-			result->variable = variable;
+			result->op = Lexeme::ASSIGN;
 			
-			result->value = parse_expression();
+			result->left = variable;
+			
+			result->right = parse_expression();
 			
 			return result;
 		}
@@ -204,8 +206,8 @@ namespace Mirb
 			auto result = new (memory_pool) AssignmentNode();
 			auto binary_op = new (memory_pool) BinaryOpNode();
 			
-			result->variable = variable;
-			result->value = binary_op;
+			result->left = variable;
+			result->right = binary_op;
 			binary_op->left = variable;
 			binary_op->op = Lexeme::assign_to_operator(lexeme());
 			
@@ -324,7 +326,9 @@ namespace Mirb
 						
 						lexer.step();
 						
-						parse_statements(pair->statements);
+						pair->group = parse_group();
+						
+						result->pairs.append(pair);
 					}
 					while(lexeme() == Lexeme::STRING_CONTINUE);
 					

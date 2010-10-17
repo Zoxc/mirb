@@ -59,6 +59,16 @@ rt_compiled_block(rt_object_equal)
 	return RT_BOOL(obj == RT_ARG(0));
 }
 
+rt_compiled_block(rt_object_not_equal)
+{
+	return RT_BOOL(obj != RT_ARG(0));
+}
+
+rt_compiled_block(rt_object_not)
+{
+	return RT_BOOL(!rt_test(obj));
+}
+
 void rt_object_init(void)
 {
 	rt_define_method(rt_Object, "initialize", rt_object_dummy);
@@ -69,6 +79,8 @@ void rt_object_init(void)
 	rt_define_method(rt_Object, "eql?", rt_object_equal);
 	rt_define_method(rt_Object, "==", rt_object_equal);
 	rt_define_method(rt_Object, "===", rt_object_equal);
+	rt_define_method(rt_Object, "!=", rt_object_not_equal);
+	rt_define_method(rt_Object, "!", rt_object_not);
 
 	rt_define_singleton_method(rt_Object, "allocate", rt_Object_allocate);
 }

@@ -1,4 +1,10 @@
 #include "../src/compiler.hpp"
+#include "../src/bytecode/generator.hpp"
+
+#ifdef DEBUG
+	#include "../src/tree/printer.hpp"
+#endif
+
 
 using namespace Mirb;
 
@@ -15,7 +21,6 @@ using namespace Mirb;
 #include "modules/kernel.hpp"
 #include "../compiler/bytecode.hpp"
 #include "../compiler/block.hpp"
-#include "../compiler/generator/generator.hpp"
 #include "../compiler/generator/x86.hpp"
 
 void rt_create(void)
@@ -49,12 +54,14 @@ void rt_destroy(void)
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
 	Compiler compiler;
-
+	
 	compiler.filename = filename;
 	compiler.load((const char_t *)input, strlen(input));
-
-	struct node *expression = 0;//TODO: update - compiler.parser.parse_main();
-
+	
+	Scope scope;
+	
+	compiler.parser.parse_main(scope);
+	
 	if(!compiler.messages.empty())
 	{
 		for(auto i = compiler.messages.begin(); i; ++i)
@@ -62,16 +69,28 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 
 		return RT_NIL;
 	}
-
-	extern rt_value get_node_name(struct node *node);
-
+	
 	#ifdef DEBUG
-		printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
+		DebugPrinter printer;
+		
+		std::cout << "Parsing done.\n-----\n";
+		std::cout << printer.print_node(scope.group);
+		std::cout << "\n-----\n";
 	#endif
-
-	struct block *code_block = gen_block(expression);
-
-	struct rt_block *runtime_block = compile_block(code_block);
+	
+	ByteCodeGenerator generator(compiler);
+	
+	struct block *block = generator.to_bytecode(scope);
+	
+	if(!compiler.messages.empty())
+	{
+		for(auto i = compiler.messages.begin(); i; ++i)
+			std::cout << i().format() << "\n";
+		
+		return RT_NIL;
+	}
+	
+	struct rt_block *runtime_block = compile_block(block);
 
 	compiler.filename = 0; // make sure compiler is on stack until blocks are generated... TODO: fix this
 

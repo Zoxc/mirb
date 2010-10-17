@@ -48,8 +48,6 @@
 		</Linker>
 		<Unit filename="compiler\allocator.cpp" />
 		<Unit filename="compiler\allocator.hpp" />
-		<Unit filename="compiler\ast.cpp" />
-		<Unit filename="compiler\ast.hpp" />
 		<Unit filename="compiler\block.cpp" />
 		<Unit filename="compiler\block.hpp" />
 		<Unit filename="compiler\bytecode.cpp" />
@@ -58,12 +56,8 @@
 		<Unit filename="compiler\compiler.hpp" />
 		<Unit filename="compiler\generator\disassembly.cpp" />
 		<Unit filename="compiler\generator\disassembly.hpp" />
-		<Unit filename="compiler\generator\generator.cpp" />
-		<Unit filename="compiler\generator\generator.hpp" />
 		<Unit filename="compiler\generator\x86.cpp" />
 		<Unit filename="compiler\generator\x86.hpp" />
-		<Unit filename="compiler\lexer.cpp" />
-		<Unit filename="compiler\lexer.hpp" />
 		<Unit filename="globals.hpp" />
 		<Unit filename="hash.hpp" />
 		<Unit filename="main.cpp" />
@@ -108,6 +102,8 @@
 		</Unit>
 		<Unit filename="runtime\x86.cpp" />
 		<Unit filename="runtime\x86.hpp" />
+		<Unit filename="src\bytecode\generator.cpp" />
+		<Unit filename="src\bytecode\generator.hpp" />
 		<Unit filename="src\common.hpp" />
 		<Unit filename="src\compiler.cpp" />
 		<Unit filename="src\compiler.hpp" />

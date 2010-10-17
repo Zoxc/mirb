@@ -80,7 +80,7 @@ namespace Mirb
 		
 		result->code = block;
 		
-		while(lexeme() == Lexeme::KW_RESCUE);
+		while(lexeme() == Lexeme::KW_RESCUE)
 		{
 			lexer.step();
 			
@@ -92,9 +92,9 @@ namespace Mirb
 		}
 		
 		if(matches(Lexeme::KW_ENSURE))
-			result->group = parse_group();
+			result->ensure_group = parse_group();
 		else
-			result->group = 0;
+			result->ensure_group = 0;
 		
 		return result;
 	}
@@ -195,7 +195,7 @@ namespace Mirb
 	{
 		switch (lexeme())
 		{
-			case T_ELSIF:
+			case Lexeme::KW_ELSIF:
 				{
 					lexer.step();
 					
@@ -213,7 +213,7 @@ namespace Mirb
 					return result;
 				}
 
-			case T_ELSE:
+			case Lexeme::KW_ELSE:
 				lexer.step();
 
 				return parse_group();

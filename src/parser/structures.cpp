@@ -24,7 +24,7 @@ namespace Mirb
 			result->super = parse_expression();
 		}
 		else
-			result->super = new (memory_pool) VariableNode(*this, (Symbol *)rt_symbol_from_cstr("Object"), 0);
+			result->super = 0;
 		
 		parse_sep();
 		

@@ -17,7 +17,6 @@ namespace Mirb
 		"True",
 		"False",
 		"Array",
-		"Parameter",
 		"Block",
 		"Invoke",
 		"Call",
@@ -32,8 +31,8 @@ namespace Mirb
 		"Redo",
 		"Class",
 		"Module",
+		"Method",
 		"Rescue",
-		"Handler",
-		"Method"
+		"Handler"
 	};
 };

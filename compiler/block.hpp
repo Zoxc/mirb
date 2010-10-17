@@ -1,5 +1,4 @@
 #pragma once
-#include "ast.hpp"
 #include "bytecode.hpp"
 #include "compiler.hpp"
 #include "../runtime/runtime.hpp"

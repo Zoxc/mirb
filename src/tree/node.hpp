@@ -1,9 +1,12 @@
 #pragma once
 #include "../common.hpp"
 #include "../simple-list.hpp"
+#include "../../compiler/block.hpp"
 
 namespace Mirb
 {
+	struct Node;
+	
 	struct SimpleNode
 	{
 		enum NodeType
@@ -22,7 +25,6 @@ namespace Mirb
 			True,
 			False,
 			Array,
-			Parameter,
 			Block,
 			Invoke,
 			Call,
@@ -37,14 +39,14 @@ namespace Mirb
 			Redo,
 			Class,
 			Module,
+			Method,
 			Rescue,
 			Handler,
-			Method,
 			Types
 		};
 		
 		static std::string names[Types];
-			
+		
 		virtual NodeType type() { return None; };
 	};
 	

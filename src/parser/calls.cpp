@@ -91,11 +91,11 @@ namespace Mirb
 		{
 			switch(lexeme())
 			{
-				case T_SQUARE_OPEN:
+				case Lexeme::SQUARE_OPEN:
 					return lexer.lexeme.whitespace;
 
-				case T_ADD:
-				case T_SUB:
+				case Lexeme::ADD:
+				case Lexeme::SUB:
 					{
 						if(lexer.lexeme.whitespace)
 						{
@@ -266,7 +266,7 @@ namespace Mirb
 	{
 		switch(lexeme())
 		{
-			case T_SCOPE:
+			case Lexeme::SCOPE:
 				{
 					lexer.lexeme.allow_keywords = false;
 					
@@ -295,7 +295,7 @@ namespace Mirb
 						return child;
 				}
 
-			case T_DOT:
+			case Lexeme::DOT:
 				{
 					lexer.lexeme.allow_keywords = false;
 
@@ -306,7 +306,7 @@ namespace Mirb
 					return parse_call(0, child, false);
 				}
 
-			case T_SQUARE_OPEN:
+			case Lexeme::SQUARE_OPEN:
 				{
 					lexer.step();
 					
@@ -382,6 +382,8 @@ namespace Mirb
 				
 				if(lexeme() == Lexeme::ASSIGN)
 				{
+					lexer.step();
+					
 					node->method = mutated;
 					
 					Node *argument = parse_expression();
@@ -400,10 +402,16 @@ namespace Mirb
 					result->method = mutated;
 					result->block = 0;
 					
-					Node *argument = parse_expression();
+					auto binary_op = new (memory_pool) BinaryOpNode;
 					
-					if(argument)
-						node->arguments.append(argument);
+					binary_op->left = node;
+					binary_op->op = Lexeme::assign_to_operator(lexeme());
+					
+					lexer.step();
+					
+					binary_op->right = parse_expression();
+					
+					result->arguments.append(binary_op);
 					
 					return result;
 				}
@@ -415,6 +423,8 @@ namespace Mirb
 		}
 		
 		error("Cannot assign a value to an expression.");
+		
+		lexer.step();
 
 		parse_expression();
 

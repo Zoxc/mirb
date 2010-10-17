@@ -3,8 +3,6 @@
 #include "../../globals.hpp"
 #include "../../runtime/classes.hpp"
 #include "../../runtime/runtime.hpp"
-#include "../../compiler/lexer.hpp"
-#include "../../compiler/ast.hpp"
 #include "../../compiler/block.hpp"
 #include "../../compiler/compiler.hpp"
 
@@ -215,16 +213,6 @@ namespace Mirb
 					default:
 						return false;
 				}
-			}
-			
-			struct node *alloc_node(enum node_type type)
-			{
-				struct node *result = new (memory_pool) struct node;
-				
-				result->type = type;
-				result->unbalanced = false;
-
-				return result;
 			}
 			
 			struct block *alloc_scope(Scope &scope, enum block_type type);
