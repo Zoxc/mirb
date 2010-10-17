@@ -134,8 +134,16 @@
 		<Unit filename="src\simple-list.hpp" />
 		<Unit filename="src\symbol-pool.cpp" />
 		<Unit filename="src\symbol-pool.hpp" />
+		<Unit filename="src\tree\node.cpp" />
 		<Unit filename="src\tree\node.hpp" />
+		<Unit filename="src\tree\nodes.cpp" />
 		<Unit filename="src\tree\nodes.hpp" />
+		<Unit filename="src\tree\printer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="src\tree\printer.hpp">
+			<Option target="Debug" />
+		</Unit>
 		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />

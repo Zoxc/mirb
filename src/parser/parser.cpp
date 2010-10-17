@@ -617,7 +617,7 @@ namespace Mirb
 
 		block->owner = block;
 		
-		parse_statements(scope.statements);
+		scope.group = parse_group();
 		
 		match(Lexeme::END);
 	}

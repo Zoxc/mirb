@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
+#include "../../compiler/block.hpp"
 #include "node.hpp"
 
 namespace Mirb
@@ -155,10 +156,18 @@ namespace Mirb
 	
 	typedef SimpleList<ParameterNode, ListNode>  ParameterList;
 	
+	struct GroupNode:
+		public Node
+	{
+		NodeType type() { return Group; }
+		
+		NodeList statements;
+	};
+	
 	struct Scope
 	{
 		struct block *block;
-		NodeList statements;
+		Node *group;
 	};
 	
 	struct BlockNode:
@@ -222,18 +231,10 @@ namespace Mirb
 	{
 		NodeType type() { return Rescue; }
 		
-		NodeList statements;
+		Node *group;
 	};
 	
 	typedef SimpleList<RescueNode, ListNode>  RescueList;
-	
-	struct GroupNode:
-		public Node
-	{
-		NodeType type() { return Group; }
-		
-		NodeList statements;
-	};
 	
 	struct HandlerNode:
 		public Node

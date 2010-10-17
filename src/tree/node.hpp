@@ -1,4 +1,5 @@
 #pragma once
+#include "../common.hpp"
 #include "../simple-list.hpp"
 
 namespace Mirb
@@ -8,8 +9,6 @@ namespace Mirb
 		enum NodeType
 		{
 			None,
-			
-			// Expressions
 			String,
 			InterpolatedString,
 			InterpolatedPair,
@@ -40,9 +39,12 @@ namespace Mirb
 			Module,
 			Rescue,
 			Handler,
-			Method
+			Method,
+			Types
 		};
 		
+		static std::string names[Types];
+			
 		virtual NodeType type() { return None; };
 	};
 	

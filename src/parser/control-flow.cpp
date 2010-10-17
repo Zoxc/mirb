@@ -86,7 +86,7 @@ namespace Mirb
 			
 			auto rescue = new (memory_pool) RescueNode;
 			
-			parse_statements(rescue->statements);
+			rescue->group = parse_group();
 			
 			result->rescues.append(rescue);
 		}

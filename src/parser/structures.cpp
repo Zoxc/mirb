@@ -30,7 +30,7 @@ namespace Mirb
 		
 		struct block *block = alloc_scope(result->scope, S_CLASS);
 		
-		parse_statements(result->scope.statements);
+		result->scope.group = parse_group();
 		
 		current_block = block->parent;
 		
@@ -58,7 +58,7 @@ namespace Mirb
 
 		struct block *block = alloc_scope(result->scope, S_MODULE);
 		
-		parse_statements(result->scope.statements);
+		result->scope.group = parse_group();
 		
 		current_block = block->parent;
 
@@ -160,7 +160,7 @@ namespace Mirb
 			parse_sep();
 		}
 		
-		parse_statements(result->scope.statements);
+		result->scope.group = parse_group();
 		
 		current_block = block->parent;
 		

@@ -9,6 +9,10 @@
 #include <iostream>
 #include "src/compiler.hpp"
 
+#ifdef DEBUG
+	#include "src/tree/printer.hpp"
+#endif
+
 using namespace Mirb;
 
 int main()
@@ -42,10 +46,13 @@ int main()
 		if(compiler.messages.empty())
 		{
 			#ifdef DEBUG
-				printf("Parsing done.\n");
-				printf("Tree: %s\n", rt_string_to_cstr(get_node_name(expression)));
+				DebugPrinter printer;
+				
+				std::cout << "Parsing done. Tree:\n";
+				std::cout << printer.print_node(scope.group);
+				std::cout << "End of tree.\n";
 			#endif
-			
+			/*
 			struct block *block = gen_block(expression);
 			
 			struct rt_block *runtime_block = compile_block(block);
@@ -60,7 +67,7 @@ int main()
 			
 			printf("=> "); rt_print(result); printf("\n");
 			
-			runtime_block = 0; // Make sure runtime_block stays on stack
+			runtime_block = 0; // Make sure runtime_block stays on stack*/
 		}
 		else
 		{
@@ -69,7 +76,7 @@ int main()
 		}
 	}
 	
-	printf("Exiting gracefully...");
+	std::cout << "Exiting gracefully...";
 	
 	rt_destroy();
 	

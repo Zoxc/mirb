@@ -54,7 +54,7 @@ namespace Mirb
 			match(Lexeme::BITWISE_OR);
 		}
 		
-		parse_statements(result->scope.statements);
+		result->scope.group = parse_group();
 		
 		current_block = block->parent;
 		
