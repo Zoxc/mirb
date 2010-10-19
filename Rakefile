@@ -59,6 +59,15 @@ package = Package.new do
 	files.merge(Executable).name(output, windows)
 end
 
+task :docs do
+	require 'redcloth'
+	files = Dir['docs/**/*.redcloth']
+	files.each do |file|
+		input = File.open(file, 'r') { |file| file.read }
+		File.open(file.ext('.html'), 'w') { |file| file.write RedCloth.new(input).to_html }
+	end
+end
+
 task :build do
 	package.run
 end
