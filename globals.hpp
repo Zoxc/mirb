@@ -23,8 +23,9 @@
 #define __regparm(n) __attribute__((__regparm__(n)))
 
 #ifdef WIN32
-    #include <windows.h>
-    #include <excpt.h>
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+	#include <excpt.h>
 #else
 	#define __stdcall __attribute__((__stdcall__))
 	#define __cdecl __attribute__((__cdecl__))
