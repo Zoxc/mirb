@@ -1,0 +1,161 @@
+This document is a description of Mirb's internal bytecode.
+
+h1. Operands
+
+h2. Variable
+
+Variable styles:
+
+* @%num@ -- Temporary variable.
+* @%var@ -- Local variable.
+* @!var@ -- Local variable referenced by a closure (and thus lives on the heap).
+
+Referenced as @V@ in this document.
+
+h2. Immediate
+
+Either a Fixnum literal, @nil@, @false@, @true@, an unsigned integer, or a pointer.
+
+Referenced as @I@ in this document.
+
+h2. Raw Immediate
+
+This is either a native pointer or simply an unsigned integer.
+
+Referenced as @R@ in this document.
+
+h2. Block
+
+This is a block of code. It can be either a toplevel block, a class, a module, a method, or a block.
+
+Referenced as @B@ in this document.
+
+h2. Heap Scope
+
+This is a reference to a block's heap scope. Heap scopes are a place for a block to store variables which are referenced by other blocks.
+
+Referenced as @S@ in this document.
+
+h2. Labels
+
+Labels are positions in code which can be referenced or jumped to by other operations.
+
+Referenced as @L@ in this document.
+
+h1. Operations
+
+* _Move_
+  @Vdest = Vsrc@
+  Moves the value of @Vsrc@ into @Vdest@.
+
+* _Load_
+  @V = I@
+  Loads the immediate @I@ into @V@.
+
+* _LoadRaw_
+  @V = R@
+  Loads the raw immediate @R@ into @V@.
+
+* _Push_
+  @push V@
+  Moves the value of @V@ onto the stack.
+
+* _PushImmediate_
+  @push I@
+  Moves the immediate @I@ onto the stack.
+
+* _PushRaw_
+  @push R@
+  Moves the raw immediate @R@ onto the stack.
+
+* _PushScope_
+  @push S@
+  Pushes a the heap scope @S@ the stack.
+
+* _Closure_
+  @V = closure B@
+  Creates an closures for block @B@ with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. The passed scopes will be popped off the stack.
+
+* _Class_
+  @V = class Vself, Iname, Vsuper, B@
+  Defines an class with the constant name @Iname@ on @Vself@ with the superclass @Vsuper@ (or @Object@ if not present). @B@ contains the block for the class. It is immediately executed and the result is stored in @V@.
+
+* _Module_
+  @V = module Vself, Iname, B@
+  Defines an module with the constant name @Iname@ on @Vself@. @B@ contains the block for the module. It is immediately executed and the result is stored in @V@.
+
+* _Method_
+  @V = module Vself, Iname, B@
+  Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method.
+
+* _Call_
+  @V = call Vobject, Imethod, Rparameters, Vblock@
+  Looks up the method with the symbol @Imethod@ in @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack.
+
+* _Super_
+  @V = super Vobject, Vmethod, Rparameters, Vblock@
+  Looks up the method with the symbol in @Vmethod@ in the parent of @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack.
+
+* _GetIVar_
+  @V = ivar Vself, Iname@
+  Stores the value of the instance variable @Iname@ for @Vself@ in @V@.
+
+* _SetIVar_
+  @ivar Vself, Iname, V@
+  Stores the value of @V@ in the instance variable @Iname@ for @Vself@.
+
+* _GetConst_
+  @V = const Vobj, Iname@
+  Stores the value of the constant variable @Iname@ for @Vobj@ in @V@.
+
+* _SetConst_
+  @const Vobj, Iname, V@
+  Stores the value of @V@ in the constant variable @Iname@ for @Vobj@.
+
+* _BranchIf_
+  @branch Ltrue if V@
+  Jumps to label @Ltrue@ if the variable @V@ is not @false@ or @nil@.
+
+* _BranchUnless_
+  @branch Lfalse unless V@
+  Jumps to label @Lfalse@ if the variable @V@ is @false@ or @nil@.
+
+* _Branch_
+  @branch L@
+  Jump to label @L@.
+
+* _Return_
+  @ret V@
+  Returns the value in the varaible @V@. This instruction is implict and is not generated.
+
+* _Label_
+  @L:@
+  Defines a label which branch instructions, break and exception handlers can jump to.
+
+* _Handler_
+  @handler R@
+  Sets the index of the exception handler which is to be used from this point.
+
+* _Unwind_
+  @unwind@
+  Continues with a stack unwind if an exception was raised.
+
+* _UnwindReturn_
+  @ret V, Icode@
+  Unwinds the stack until the method scope @Icode@ is found. @V@ will then be returned from that method scope.
+
+* _UnwindBreak_
+  @break V, Icode, Rid@
+  Unwinds the stack until the block scope @Icode@ is found. @Rid@ specifies which break label will be targeted. @V@ will then be passed to the break label and execution continues from there.
+
+* _Array_
+  @V = array Relements@
+  Creates an array from the last @Relements@ on the stack, stores it in @V@ and then pops the elements off the stack.
+
+* _String_
+  @V = string Rstr@
+  Creates an string off @Rstr@ and stores it in @V@.
+
+* _Interpolate_
+  @V = interpolate Rparams@
+  Creates an string from concatenating the last @Rparams@ on the stack then pops them off it. If any parameter is not already a string, it is converted to a string by calling @to_s@ on it.
