@@ -45,8 +45,8 @@ Referenced as @L@ in this document.
 h1. Operations
 
 * _Move_
-  @Vdest = Vsrc@
-  Moves the value of @Vsrc@ into @Vdest@.
+  @Vdst = Vsrc@
+  Moves the value of @Vsrc@ into @Vdst@.
 
 * _Load_
   @V = I@
@@ -69,8 +69,8 @@ h1. Operations
   Moves the raw immediate @R@ onto the stack.
 
 * _PushScope_
-  @push S@
-  Pushes a the heap scope @S@ the stack.
+  @push B@
+  Pushes a the heap scope for block @B@ onto the stack.
 
 * _Closure_
   @V = closure B@
@@ -85,7 +85,7 @@ h1. Operations
   Defines an module with the constant name @Iname@ on @Vself@. @B@ contains the block for the module. It is immediately executed and the result is stored in @V@.
 
 * _Method_
-  @V = module Vself, Iname, B@
+  @V = method Vself, Iname, B@
   Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method.
 
 * _Call_

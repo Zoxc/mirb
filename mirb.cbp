@@ -101,8 +101,11 @@
 		</Unit>
 		<Unit filename="runtime\x86.cpp" />
 		<Unit filename="runtime\x86.hpp" />
+		<Unit filename="src\bytecode\block.hpp" />
 		<Unit filename="src\bytecode\generator.cpp" />
 		<Unit filename="src\bytecode\generator.hpp" />
+		<Unit filename="src\bytecode\opcodes.cpp" />
+		<Unit filename="src\bytecode\opcodes.hpp" />
 		<Unit filename="src\common.hpp" />
 		<Unit filename="src\compiler.cpp" />
 		<Unit filename="src\compiler.hpp" />
