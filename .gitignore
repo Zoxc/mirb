@@ -2,6 +2,7 @@
 /vendor_linux
 mirb
 mirb.exe
+mirb.layout
 /cache
 cache/*
 /obj
