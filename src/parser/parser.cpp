@@ -34,7 +34,7 @@ namespace Mirb
 			lexer.step();
 	}
 	
-	struct block *Parser::alloc_scope(Scope &scope, enum block_type type)
+	struct block *Parser::alloc_scope(Tree::Scope &scope, enum block_type type)
 	{
 		struct block *block = block_create(old_compiler, type);
 		
@@ -148,7 +148,7 @@ namespace Mirb
 		}
 	}
 	
-	void Parser::parse_arguments(NodeList &arguments)
+	void Parser::parse_arguments(Tree::NodeList &arguments)
 	{
 		do
 		{
@@ -185,11 +185,11 @@ namespace Mirb
 		}
 	}
 	
-	Node *Parser::parse_assignment(VariableNode *variable)
+	Tree::Node *Parser::parse_assignment(Tree::VariableNode *variable)
 	{
 		if(lexeme() == Lexeme::ASSIGN)
 		{
-			auto result = new (memory_pool) AssignmentNode();
+			auto result = new (memory_pool) Tree::AssignmentNode;
 			
 			lexer.step();
 			
@@ -203,8 +203,8 @@ namespace Mirb
 		}
 		else
 		{
-			auto result = new (memory_pool) AssignmentNode();
-			auto binary_op = new (memory_pool) BinaryOpNode();
+			auto result = new (memory_pool) Tree::AssignmentNode;
+			auto binary_op = new (memory_pool) Tree::BinaryOpNode;
 			
 			result->left = variable;
 			result->right = binary_op;
@@ -219,7 +219,7 @@ namespace Mirb
 		}
 	}
 	
-	Node *Parser::parse_identifier()
+	Tree::Node *Parser::parse_identifier()
 	{
 		Symbol *symbol = lexer.lexeme.symbol;
 
@@ -227,17 +227,17 @@ namespace Mirb
 		
 		if(is_assignment_op())
 		{
-			auto variable = new (memory_pool) VariableNode(*this, symbol);
+			auto variable = new (memory_pool) Tree::VariableNode(*this, symbol);
 			
 			return parse_assignment(variable);
 		}
 		else
-			return parse_call(symbol,  new (memory_pool) SelfNode, true); // Function call or local variable
+			return parse_call(symbol,  new (memory_pool) Tree::SelfNode, true); // Function call or local variable
 	}
 
-	Node *Parser::parse_array()
+	Tree::Node *Parser::parse_array()
 	{
-		auto result = new (memory_pool) ArrayNode;
+		auto result = new (memory_pool) Tree::ArrayNode;
 		
 		lexer.step();
 		
@@ -257,7 +257,7 @@ namespace Mirb
 		return result;
 	}
 
-	Node *Parser::parse_factor()
+	Tree::Node *Parser::parse_factor()
 	{
 		switch (lexeme())
 		{
@@ -305,7 +305,7 @@ namespace Mirb
 
 			case Lexeme::STRING:
 				{
-					auto result = new (memory_pool) StringNode;
+					auto result = new (memory_pool) Tree::StringNode;
 
 					result->string = lexer.lexeme.c_str;
 
@@ -316,11 +316,11 @@ namespace Mirb
 
 			case Lexeme::STRING_START:
 				{
-					auto result = new (memory_pool) InterpolatedStringNode;
+					auto result = new (memory_pool) Tree::InterpolatedStringNode;
 					
 					do
 					{
-						auto pair = new (memory_pool) InterpolatedPairNode;
+						auto pair = new (memory_pool) Tree::InterpolatedPairNode;
 						
 						pair->string = lexer.lexeme.c_str;
 						
@@ -348,33 +348,33 @@ namespace Mirb
 				{
 					lexer.step();
 
-					return new (memory_pool) SelfNode;
+					return new (memory_pool) Tree::SelfNode;
 				}
 
 			case Lexeme::KW_TRUE:
 				{
 					lexer.step();
 
-					return new (memory_pool) TrueNode;
+					return new (memory_pool) Tree::TrueNode;
 				}
 
 			case Lexeme::KW_FALSE:
 				{
 					lexer.step();
 
-					return new (memory_pool) FalseNode;
+					return new (memory_pool) Tree::FalseNode;
 				}
 
 			case Lexeme::KW_NIL:
 				{
 					lexer.step();
 
-					return new (memory_pool) NilNode;
+					return new (memory_pool) Tree::NilNode;
 				}
 
 			case Lexeme::INTEGER:
 				{
-					auto result = new (memory_pool) IntegerNode;
+					auto result = new (memory_pool) Tree::IntegerNode;
 					
 					std::string str = lexer.lexeme.string();
 					
@@ -391,7 +391,7 @@ namespace Mirb
 					
 					lexer.step();
 					
-					auto variable = new (memory_pool) VariableNode(VariableNode::Instance, symbol);
+					auto variable = new (memory_pool) Tree::VariableNode(Tree::VariableNode::Instance, symbol);
 					
 					if(is_assignment_op())
 						return parse_assignment(variable);
@@ -403,7 +403,7 @@ namespace Mirb
 				return parse_identifier();
 
 			case Lexeme::EXT_IDENT:
-				return parse_call(0, new (memory_pool) SelfNode, false);
+				return parse_call(0, new (memory_pool) Tree::SelfNode, false);
 
 			case Lexeme::PARENT_OPEN:
 				{
@@ -427,7 +427,7 @@ namespace Mirb
 		}
 	}
 
-	Node *Parser::parse_unary()
+	Tree::Node *Parser::parse_unary()
 	{
 		switch(lexeme())
 		{
@@ -435,13 +435,13 @@ namespace Mirb
 			{
 				lexer.step();
 				
-				return new (memory_pool) UnaryOpNode(Lexeme::LOGICAL_NOT, parse_lookup_chain());
+				return new (memory_pool) Tree::UnaryOpNode(Lexeme::LOGICAL_NOT, parse_lookup_chain());
 			}
 			
 			case Lexeme::ADD:
 			case Lexeme::SUB:
 			{
-				auto result = new (memory_pool) UnaryOpNode;
+				auto result = new (memory_pool) Tree::UnaryOpNode;
 				
 				result->op = Lexeme::operator_to_unary(lexeme());
 				
@@ -494,12 +494,12 @@ namespace Mirb
 		return op >= Lexeme::precedence_operators_start && op <= Lexeme::precedence_operators_end;
 	}
 
-	Node *Parser::parse_precedence_operator()
+	Tree::Node *Parser::parse_precedence_operator()
 	{
 		return parse_precedence_operator(parse_unary(), 0);
 	}
 
-	Node *Parser::parse_precedence_operator(Node *left, size_t min_precedence)
+	Tree::Node *Parser::parse_precedence_operator(Tree::Node *left, size_t min_precedence)
 	{
 		while(true)
 		{
@@ -515,7 +515,7 @@ namespace Mirb
 			
 			lexer.step();
 
-			Node *right = parse_unary();
+			Tree::Node *right = parse_unary();
 
 			while(true)
 			{
@@ -532,7 +532,7 @@ namespace Mirb
 				right = parse_precedence_operator(right, next_precedence);
 			}
 			
-			BinaryOpNode *node = new (memory_pool) BinaryOpNode;
+			Tree::BinaryOpNode *node = new (memory_pool) Tree::BinaryOpNode;
 			
 			node->op = op;
 			node->left = left;
@@ -544,12 +544,12 @@ namespace Mirb
 		return left;
 	}
 
-	Node *Parser::parse_boolean_unary()
+	Tree::Node *Parser::parse_boolean_unary()
 	{
 		if(lexeme() == Lexeme::KW_NOT)
 		{
 			lexer.step();
-			return new (memory_pool) BooleanNotNode(parse_expression());
+			return new (memory_pool) Tree::BooleanNotNode(parse_expression());
 		}
 		else
 		{
@@ -557,13 +557,13 @@ namespace Mirb
 		}
 	}
 
-	Node *Parser::parse_boolean()
+	Tree::Node *Parser::parse_boolean()
 	{
-		Node *result = parse_boolean_unary();
+		Tree::Node *result = parse_boolean_unary();
 		
 		while(lexeme() == Lexeme::KW_AND || lexeme() == Lexeme::KW_OR)
 		{
-			auto node = new (memory_pool) BooleanOpNode;
+			auto node = new (memory_pool) Tree::BooleanOpNode;
 			
 			node->op = lexeme();
 			node->left = result;
@@ -578,9 +578,9 @@ namespace Mirb
 		return result;
 	}
 	
-	Node *Parser::parse_group()
+	Tree::Node *Parser::parse_group()
 	{
-		auto node = new (memory_pool) GroupNode;
+		auto node = new (memory_pool) Tree::GroupNode;
 		
 		parse_statements(node->statements);
 		
@@ -598,13 +598,13 @@ namespace Mirb
 			lexer.step();
 	}
 	
-	void Parser::parse_statements(NodeList &list)
+	void Parser::parse_statements(Tree::NodeList &list)
 	{
 		skip_seps();
 		
 		while(is_expression())
 		{
-			Node *node = parse_statement();
+			Tree::Node *node = parse_statement();
 			
 			if(node)
 				list.append(node);
@@ -616,7 +616,7 @@ namespace Mirb
 		}
 	}
 
-	void Parser::parse_main(Scope &scope)
+	void Parser::parse_main(Tree::Scope &scope)
 	{
 		struct block *block = alloc_scope(scope, S_MAIN);
 

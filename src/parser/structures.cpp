@@ -2,11 +2,11 @@
 
 namespace Mirb
 {
-	Node *Parser::parse_class()
+	Tree::Node *Parser::parse_class()
 	{
 		lexer.step();
 
-		auto result = new (memory_pool) ClassNode;
+		auto result = new (memory_pool) Tree::ClassNode;
 		
 		if(require(Lexeme::IDENT))
 		{
@@ -39,11 +39,11 @@ namespace Mirb
 		return result;
 	}
 
-	Node *Parser::parse_module()
+	Tree::Node *Parser::parse_module()
 	{
 		lexer.step();
 
-		auto result = new (memory_pool) ModuleNode;
+		auto result = new (memory_pool) Tree::ModuleNode;
 		
 		if(require(Lexeme::IDENT))
 		{
@@ -114,7 +114,7 @@ namespace Mirb
 		while(matches(Lexeme::COMMA));
 	}
 
-	Node *Parser::parse_method()
+	Tree::Node *Parser::parse_method()
 	{
 		lexer.lexeme.allow_keywords = false;
 		
@@ -122,7 +122,7 @@ namespace Mirb
 		
 		lexer.lexeme.allow_keywords = true;
 		
-		auto result = new (memory_pool) MethodNode;
+		auto result = new (memory_pool) Tree::MethodNode;
 		
 		switch(lexeme())
 		{

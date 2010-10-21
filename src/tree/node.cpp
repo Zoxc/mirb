@@ -2,7 +2,7 @@
 
 namespace Mirb
 {
-	std::string SimpleNode::names[] = {
+	std::string Tree::SimpleNode::names[] = {
 		"None",
 		"String",
 		"InterpolatedString",

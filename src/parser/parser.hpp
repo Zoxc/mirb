@@ -39,76 +39,76 @@ namespace Mirb
 			static size_t operator_precedences[];
 
 			bool is_precedence_operator(Lexeme::Type op);
-			Node *parse_precedence_operator();
-			Node *parse_precedence_operator(Node *left, size_t min_precedence);
+			Tree::Node *parse_precedence_operator();
+			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
 			// expressions
 			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
-			Node *parse_assignment(VariableNode *variable);
-			Node *parse_array();
-			Node *parse_identifier();
-			Node *parse_unary();
-			Node *parse_boolean_unary();
-			Node *parse_factor();
-			void parse_arguments(NodeList &arguments);
-			Node *parse_boolean();
+			Tree::Node *parse_assignment(Tree::VariableNode *variable);
+			Tree::Node *parse_array();
+			Tree::Node *parse_identifier();
+			Tree::Node *parse_unary();
+			Tree::Node *parse_boolean_unary();
+			Tree::Node *parse_factor();
+			void parse_arguments(Tree::NodeList &arguments);
+			Tree::Node *parse_boolean();
 			
-			Node *parse_expression()
+			Tree::Node *parse_expression()
 			{
 				return parse_ternary_if();
 			}
 			
-			Node *parse_statement()
+			Tree::Node *parse_statement()
 			{
 				return parse_conditional();
 			}
 			
-			Node *parse_group();
+			Tree::Node *parse_group();
 			
 			void parse_sep();
-			void parse_statements(NodeList &list);
+			void parse_statements(Tree::NodeList &list);
 			
-			void parse_main(Scope &scope);
+			void parse_main(Tree::Scope &scope);
 			
 			// control flow
-			Node *parse_if_tail();
+			Tree::Node *parse_if_tail();
 			void parse_then_sep();
-			Node *parse_if();
-			Node *parse_unless();
-			Node *parse_ternary_if();
-			Node *parse_conditional();
-			Node *parse_case();
-			Node *parse_begin();
-			Node *parse_exception_handlers(Node *block);
-			Node *parse_return();
-			Node *parse_break();
-			Node *parse_next();
-			Node *parse_redo();
+			Tree::Node *parse_if();
+			Tree::Node *parse_unless();
+			Tree::Node *parse_ternary_if();
+			Tree::Node *parse_conditional();
+			Tree::Node *parse_case();
+			Tree::Node *parse_begin();
+			Tree::Node *parse_exception_handlers(Tree::Node *block);
+			Tree::Node *parse_return();
+			Tree::Node *parse_break();
+			Tree::Node *parse_next();
+			Tree::Node *parse_redo();
 			
 			// calls
 			bool require_ident();
 			bool has_arguments();
 			bool is_lookup();
-			Node *parse_lookup(Node *child);
-			Node *parse_lookup_tail(Node *tail);
-			BlockNode *parse_block();
-			void parse_arguments(NodeList &arguments, bool has_args, bool *parenthesis);
-			Node *alloc_call_node(Node *object, Symbol *symbol, bool has_args);
-			Node *secure_block(BlockNode *result, Node *parent);
-			Node *parse_call(Symbol *symbol, Node *child, bool default_var);
-			Node *parse_lookup_chain();
-			Node *parse_yield();
-			Node *parse_super();
+			Tree::Node *parse_lookup(Tree::Node *child);
+			Tree::Node *parse_lookup_tail(Tree::Node *tail);
+			Tree::BlockNode *parse_block();
+			void parse_arguments(Tree::NodeList &arguments, bool has_args, bool *parenthesis);
+			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args);
+			Tree::Node *secure_block(Tree::BlockNode *result, Tree::Node *parent);
+			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, bool default_var);
+			Tree::Node *parse_lookup_chain();
+			Tree::Node *parse_yield();
+			Tree::Node *parse_super();
 			
 			// structures
 			bool is_parameter();
 			void parse_parameters(struct block *block);
-			Node *parse_class();
-			Node *parse_module();
-			Node *parse_method();
+			Tree::Node *parse_class();
+			Tree::Node *parse_module();
+			Tree::Node *parse_method();
 			
 			
 			Lexeme::Type lexeme()
@@ -215,7 +215,7 @@ namespace Mirb
 				}
 			}
 			
-			struct block *alloc_scope(Scope &scope, enum block_type type);
+			struct block *alloc_scope(Tree::Scope &scope, enum block_type type);
 	};
 	
 };

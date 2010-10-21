@@ -19,7 +19,7 @@ namespace Mirb
 		}
 	}
 
-	BlockNode *Parser::parse_block()
+	Tree::BlockNode *Parser::parse_block()
 	{
 		bool curly;
 		
@@ -39,7 +39,7 @@ namespace Mirb
 		
 		lexer.step();
 		
-		auto result = new (memory_pool) BlockNode;
+		auto result = new (memory_pool) Tree::BlockNode;
 		
 		struct block *block = alloc_scope(result->scope, S_CLOSURE);
 		
@@ -63,7 +63,7 @@ namespace Mirb
 		return result;
 	}
 
-	Node *Parser::secure_block(BlockNode *result, Node *parent)
+	Tree::Node *Parser::secure_block(Tree::BlockNode *result, Tree::Node *parent)
 	{
 		if(!result)
 			return parent;
@@ -72,7 +72,7 @@ namespace Mirb
 		
 		if(block->can_break)
 		{
-			auto handler = new (memory_pool) BreakHandlerNode;
+			auto handler = new (memory_pool) Tree::BreakHandlerNode;
 			
 			block->break_id = current_block->break_targets++; // Assign a break id to the block and increase the break target count.
 			
@@ -122,7 +122,7 @@ namespace Mirb
 			return false;
 	}
 
-	void Parser::parse_arguments(NodeList &arguments, bool has_args, bool *parenthesis)
+	void Parser::parse_arguments(Tree::NodeList &arguments, bool has_args, bool *parenthesis)
 	{
 		if(!has_args || lexeme() == Lexeme::CURLY_OPEN)
 			return;
@@ -148,9 +148,9 @@ namespace Mirb
 		}
 	}
 
-	Node *Parser::alloc_call_node(Node *object, Symbol *symbol, bool has_args)
+	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args)
 	{
-		auto result = new (memory_pool) CallNode;
+		auto result = new (memory_pool) Tree::CallNode;
 		
 		result->object = object;
 		result->method = symbol;
@@ -162,11 +162,11 @@ namespace Mirb
 		return secure_block(result->block, result);
 	}
 
-	Node *Parser::parse_super()
+	Tree::Node *Parser::parse_super()
 	{
 		lexer.step();
 		
-		auto result = new (memory_pool) SuperNode;
+		auto result = new (memory_pool) Tree::SuperNode;
 		
 		struct block *owner = current_block->owner;
 		struct block *current = current_block;
@@ -204,22 +204,22 @@ namespace Mirb
 		return secure_block(result->block, result);
 	}
 
-	Node *Parser::parse_yield()
+	Tree::Node *Parser::parse_yield()
 	{
 		lexer.step();
 
-		auto child = new (memory_pool) VariableNode;
+		auto child = new (memory_pool) Tree::VariableNode;
 		
 		if(!current_block->block_parameter)
 			current_block->block_parameter = scope_var(current_block);
 		
-		child->variable_type = VariableNode::Temporary;
+		child->variable_type = Tree::VariableNode::Temporary;
 		child->var = current_block->block_parameter;
 		
 		return alloc_call_node(child, (Symbol *)rt_symbol_from_cstr("call"), has_arguments());
 	}
 
-	Node *Parser::parse_call(Symbol *symbol, Node *child, bool default_var)
+	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, bool default_var)
 	{
 		if(!symbol)
 		{
@@ -240,7 +240,7 @@ namespace Mirb
 		
 		if(default_var && !has_args && (local || (symbol && rt_symbol_is_const((rt_value)symbol)))) // Variable or constant
 		{
-			return new (memory_pool) VariableNode(*this, symbol);
+			return new (memory_pool) Tree::VariableNode(*this, symbol);
 		}
 		else // Call
 		{
@@ -262,7 +262,7 @@ namespace Mirb
 		}
 	}
 
-	Node *Parser::parse_lookup(Node *child)
+	Tree::Node *Parser::parse_lookup(Tree::Node *child)
 	{
 		switch(lexeme())
 		{
@@ -288,7 +288,7 @@ namespace Mirb
 						}
 						else
 						{
-							return new (memory_pool) VariableNode(*this, symbol);
+							return new (memory_pool) Tree::VariableNode(*this, symbol);
 						}
 					}
 					else
@@ -310,7 +310,7 @@ namespace Mirb
 				{
 					lexer.step();
 					
-					auto result = new (memory_pool) CallNode;
+					auto result = new (memory_pool) Tree::CallNode;
 					
 					result->method = (Symbol *)rt_symbol_from_cstr("[]");
 					
@@ -330,7 +330,7 @@ namespace Mirb
 		}
 	}
 
-	Node *Parser::parse_lookup_tail(Node *tail)
+	Tree::Node *Parser::parse_lookup_tail(Tree::Node *tail)
 	{
 		if(!is_assignment_op())
 			return tail;
@@ -342,29 +342,29 @@ namespace Mirb
 			return 0;
 		}
 		
-		Node *handler = tail;
+		Tree::Node *handler = tail;
 		
-		if(tail->type() == Node::BreakHandler)
+		if(tail->type() == Tree::Node::BreakHandler)
 		{
-			BreakHandlerNode *handler = (BreakHandlerNode *)tail;
+			Tree::BreakHandlerNode *handler = (Tree::BreakHandlerNode *)tail;
 			tail = handler->code;
 		}
 		
 		switch(tail->type())
 		{
-			case Node::Variable:
+			case Tree::Node::Variable:
 			{
-				VariableNode *node = (VariableNode *)tail;
+				Tree::VariableNode *node = (Tree::VariableNode *)tail;
 				
-				if(node->variable_type != VariableNode::Constant)
+				if(node->variable_type != Tree::VariableNode::Constant)
 					return handler;
 				
 				return parse_assignment(node);
 			}
 			
-			case Node::Call:
+			case Tree::Node::Call:
 			{
-				CallNode *node = (CallNode *)tail;
+				Tree::CallNode *node = (Tree::CallNode *)tail;
 				
 				if(!node->arguments.empty() || node->block)
 					break;
@@ -386,7 +386,7 @@ namespace Mirb
 					
 					node->method = mutated;
 					
-					Node *argument = parse_expression();
+					Tree::Node *argument = parse_expression();
 					
 					if(argument)
 						node->arguments.append(argument);
@@ -396,13 +396,13 @@ namespace Mirb
 				else
 				{
 					// TODO: Save node->object in a temporary variable
-					auto result = new (memory_pool) CallNode;
+					auto result = new (memory_pool) Tree::CallNode;
 					
 					result->object = node->object;
 					result->method = mutated;
 					result->block = 0;
 					
-					auto binary_op = new (memory_pool) BinaryOpNode;
+					auto binary_op = new (memory_pool) Tree::BinaryOpNode;
 					
 					binary_op->left = node;
 					binary_op->op = Lexeme::assign_to_operator(lexeme());
@@ -431,13 +431,13 @@ namespace Mirb
 		return 0;
 	}
 
-	Node *Parser::parse_lookup_chain()
+	Tree::Node *Parser::parse_lookup_chain()
 	{
-		Node *result = parse_factor();
+		Tree::Node *result = parse_factor();
 
 		while(is_lookup())
 		{
-			Node *node = parse_lookup(result);
+			Tree::Node *node = parse_lookup(result);
 
 			result = node;
 		}

@@ -9,7 +9,7 @@
 
 namespace Mirb
 {
-	void (ByteCodeGenerator::*ByteCodeGenerator::jump_table[SimpleNode::Types])(Node *basic_node, struct variable *var) = {
+	void (ByteCodeGenerator::*ByteCodeGenerator::jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, struct variable *var) = {
 		0, // None
 		&ByteCodeGenerator::convert_string,
 		&ByteCodeGenerator::convert_interpolated_string,
@@ -45,19 +45,19 @@ namespace Mirb
 		&ByteCodeGenerator::convert_handler
 	};
 	
-	void ByteCodeGenerator::convert_string(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_string(Tree::Node *basic_node, struct variable *var)
 	{
 		if (var)
 		{
-			auto node = (StringNode *)basic_node;
+			auto node = (Tree::StringNode *)basic_node;
 			
 			block_push(block, B_STRING, (rt_value)var, (rt_value)node->string, 0);
 		}
 	}
 	
-	void ByteCodeGenerator::convert_interpolated_string(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_interpolated_string(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (InterpolatedStringNode *)basic_node;
+		auto node = (Tree::InterpolatedStringNode *)basic_node;
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		
@@ -94,40 +94,40 @@ namespace Mirb
 		block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);
 	}
 	
-	void ByteCodeGenerator::convert_integer(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_integer(Tree::Node *basic_node, struct variable *var)
 	{
 		if (var)
 		{
-			auto node = (IntegerNode *)basic_node;
+			auto node = (Tree::IntegerNode *)basic_node;
 			
 			block_push(block, B_MOV_IMM, (rt_value)var, RT_INT2FIX(node->value), 0);
 		}
 	}
 	
-	void ByteCodeGenerator::convert_variable(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_variable(Tree::Node *basic_node, struct variable *var)
 	{
 		if(!var)
 			return;
 		
-		auto node = (VariableNode *)basic_node;
+		auto node = (Tree::VariableNode *)basic_node;
 		
 		switch(node->variable_type)
 		{
-			case VariableNode::Temporary:
-			case VariableNode::Local:
+			case Tree::VariableNode::Temporary:
+			case Tree::VariableNode::Local:
 			{
 				block_push(block, B_MOV, (rt_value)var, (rt_value)node->var, 0);
 				return;
 			}
 			
-			case VariableNode::Instance:
+			case Tree::VariableNode::Instance:
 			{
 				block->self_ref++;
 				block_push(block, B_GET_IVAR, (rt_value)var, (rt_value)node->ivar.name, 0);
 				return;
 			}
 			
-			case VariableNode::Constant:
+			case Tree::VariableNode::Constant:
 			{
 				to_bytecode(node->constant.left, var);
 				block_push(block, B_GET_CONST, (rt_value)var, (rt_value)var, (rt_value)node->constant.name);
@@ -139,9 +139,9 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_unary_op(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_unary_op(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (UnaryOpNode *)basic_node;
+		auto node = (Tree::UnaryOpNode *)basic_node;
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		
@@ -157,9 +157,9 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_boolean_not(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (BooleanNotNode *)basic_node;
+		auto node = (Tree::BooleanNotNode *)basic_node;
 		
 		if(var)
 		{
@@ -186,9 +186,9 @@ namespace Mirb
 			to_bytecode(node->value, 0);
 	}
 	
-	void ByteCodeGenerator::convert_binary_op(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_binary_op(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (BinaryOpNode *)basic_node;
+		auto node = (Tree::BinaryOpNode *)basic_node;
 		
 		if(node->op == Lexeme::LOGICAL_AND || node->op == Lexeme::LOGICAL_OR)
 		{
@@ -210,9 +210,9 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_boolean_op(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (BinaryOpNode *)basic_node;
+		auto node = (Tree::BinaryOpNode *)basic_node;
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		
@@ -228,16 +228,16 @@ namespace Mirb
 		block_emmit_label(block, label_end);
 	}
 	
-	void ByteCodeGenerator::convert_assignment(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_assignment(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (AssignmentNode *)basic_node;
+		auto node = (Tree::AssignmentNode *)basic_node;
 		
-		auto variable = (VariableNode *)node->left;
+		auto variable = (Tree::VariableNode *)node->left;
 		
 		switch(variable->variable_type)
 		{
-			case VariableNode::Temporary:
-			case VariableNode::Local:
+			case Tree::VariableNode::Temporary:
+			case Tree::VariableNode::Local:
 			{
 				to_bytecode(node->right, variable->var);
 				
@@ -247,7 +247,7 @@ namespace Mirb
 				return;
 			}
 			
-			case VariableNode::Instance:
+			case Tree::VariableNode::Instance:
 			{
 				struct variable *temp = var ? var : block_get_var(block);
 				
@@ -258,7 +258,7 @@ namespace Mirb
 				return;
 			}
 			
-			case VariableNode::Constant:
+			case Tree::VariableNode::Constant:
 			{
 				struct variable *value = var ? var : block_get_var(block);
 				struct variable *self = block_get_var(block);
@@ -276,7 +276,7 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_self(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_self(Tree::Node *basic_node, struct variable *var)
 	{
 		if(var)
 		{
@@ -285,27 +285,27 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_nil(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, struct variable *var)
 	{
 		if (var)
 			block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
 	}
 	
-	void ByteCodeGenerator::convert_true(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_true(Tree::Node *basic_node, struct variable *var)
 	{
 		if (var)
 			block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
 	}
 	
-	void ByteCodeGenerator::convert_false(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_false(Tree::Node *basic_node, struct variable *var)
 	{
 		if (var)
 			block_push(block, B_MOV_IMM, (rt_value)var, RT_FALSE, 0);
 	}
 	
-	void ByteCodeGenerator::convert_array(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_array(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (ArrayNode *)basic_node;
+		auto node = (Tree::ArrayNode *)basic_node;
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		
@@ -335,16 +335,16 @@ namespace Mirb
 		block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);		
 	}
 	
-	void ByteCodeGenerator::convert_call(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_call(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (CallNode *)basic_node;
+		auto node = (Tree::CallNode *)basic_node;
 		
 		call(node->object, node->method, node->arguments, node->block ? &node->block->scope : 0, var);
 	}
 	
-	void ByteCodeGenerator::convert_super(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_super(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (SuperNode *)basic_node;
+		auto node = (Tree::SuperNode *)basic_node;
 		
 		block->self_ref++;
 		
@@ -382,9 +382,9 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_break_handler(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_break_handler(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (BreakHandlerNode *)basic_node;
+		auto node = (Tree::BreakHandlerNode *)basic_node;
 		
 		struct block *child = node->block;
 		
@@ -413,9 +413,9 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_if(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_if(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (IfNode *)basic_node;
+		auto node = (Tree::IfNode *)basic_node;
 		
 		struct variable *temp = var ? var : block_get_var(block);
 		struct opcode *label_else = block_get_label(block);
@@ -456,9 +456,9 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_group(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_group(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (GroupNode *)basic_node;
+		auto node = (Tree::GroupNode *)basic_node;
 		
 		if(node->statements.empty())
 		{
@@ -474,9 +474,9 @@ namespace Mirb
 		}
 	}
 	
-	void ByteCodeGenerator::convert_return(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_return(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (ReturnNode *)basic_node;
+		auto node = (Tree::ReturnNode *)basic_node;
 		
 		if(!check_void_node(node))
 			return;
@@ -503,9 +503,9 @@ namespace Mirb
 			block_push(block, B_RETURN, (rt_value)temp, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_break(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_break(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (BreakNode *)basic_node;
+		auto node = (Tree::BreakNode *)basic_node;
 		
 		if(!check_void_node(node))
 			return;
@@ -517,9 +517,9 @@ namespace Mirb
 		block_push(block, B_RAISE_BREAK, (rt_value)temp, (rt_value)block->parent->data, block->break_id);
 	}
 	
-	void ByteCodeGenerator::convert_next(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_next(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (NextNode *)basic_node;
+		auto node = (Tree::NextNode *)basic_node;
 		
 		if(!check_void_node(node))
 			return;
@@ -531,14 +531,14 @@ namespace Mirb
 		block_push(block, B_RETURN, (rt_value)temp, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_redo(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, struct variable *var)
 	{
 		block_push(block, B_REDO, 0, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_class(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_class(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (ClassNode *)basic_node;
+		auto node = (Tree::ClassNode *)basic_node;
 		
 		block->self_ref++;
 		
@@ -557,9 +557,9 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_module(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_module(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (ModuleNode *)basic_node;
+		auto node = (Tree::ModuleNode *)basic_node;
 		
 		block->self_ref++;
 		
@@ -569,9 +569,9 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	void ByteCodeGenerator::convert_method(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_method(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (MethodNode *)basic_node;
+		auto node = (Tree::MethodNode *)basic_node;
 		
 		block->self_ref++;
 		
@@ -581,9 +581,9 @@ namespace Mirb
 			block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
 	}
 	
-	void ByteCodeGenerator::convert_handler(Node *basic_node, struct variable *var)
+	void ByteCodeGenerator::convert_handler(Tree::Node *basic_node, struct variable *var)
 	{
-		auto node = (HandlerNode *)basic_node;
+		auto node = (Tree::HandlerNode *)basic_node;
 		
 		block->require_exceptions = true; // duh
 		
@@ -676,14 +676,14 @@ namespace Mirb
 	{
 	}
 	
-	void ByteCodeGenerator::to_bytecode(Node *node, struct variable *var, bool allow_void)
+	void ByteCodeGenerator::to_bytecode(Tree::Node *node, struct variable *var, bool allow_void)
 	{
 		this->allow_void = allow_void;
 		
 		(this->*jump_table[node->type()])(node, var);
 	}
 	
-	struct block *ByteCodeGenerator::to_bytecode(Scope &scope)
+	struct block *ByteCodeGenerator::to_bytecode(Tree::Scope &scope)
 	{
 		struct block *prev_block = block;
 		
@@ -768,7 +768,7 @@ namespace Mirb
 		return false;
 	}
 
-	bool ByteCodeGenerator::check_void_node(VoidNode *node)
+	bool ByteCodeGenerator::check_void_node(Tree::VoidNode *node)
 	{
 		if(!allow_void)
 		{
@@ -779,7 +779,7 @@ namespace Mirb
 			return true;
 	}
 	
-	void ByteCodeGenerator::call(Node *self, Symbol *name, NodeList &arguments, Scope *scope, struct variable *var)
+	void ByteCodeGenerator::call(Tree::Node *self, Symbol *name, Tree::NodeList &arguments, Tree::Scope *scope, struct variable *var)
 	{
 		struct variable *self_var = var ? var : block_get_var(block);
 		
@@ -795,7 +795,7 @@ namespace Mirb
 			block_push(block, B_STORE, (rt_value)var, 0, 0);
 	}
 	
-	struct variable *ByteCodeGenerator::block_arg(Scope *scope)
+	struct variable *ByteCodeGenerator::block_arg(Tree::Scope *scope)
 	{
 		struct variable* closure = 0;
 		
@@ -825,7 +825,7 @@ namespace Mirb
 			block_push(block, B_SEAL, (rt_value)closure, 0, 0);
 	}
 
-	ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::call_args(NodeList &arguments, Scope *scope, struct variable *var)
+	ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::call_args(Tree::NodeList &arguments, Tree::Scope *scope, struct variable *var)
 	{
 		CallArgsInfo result;
 		
@@ -857,14 +857,14 @@ namespace Mirb
 	
 	ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::unary_call_args(struct variable *var)
 	{
-		NodeList list;
+		Tree::NodeList list;
 		
 		return call_args(list, 0, var);
 	}
 	
-	ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::binary_call_args(Node *arg, struct variable *var)
+	ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::binary_call_args(Tree::Node *arg, struct variable *var)
 	{
-		NodeList list;
+		Tree::NodeList list;
 		
 		list.append(arg);
 		

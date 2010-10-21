@@ -58,7 +58,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	compiler.filename = filename;
 	compiler.load((const char_t *)input, strlen(input));
 	
-	Scope scope;
+	Tree::Scope scope;
 	
 	compiler.parser.parse_main(scope);
 	

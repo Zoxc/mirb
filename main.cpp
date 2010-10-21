@@ -36,7 +36,7 @@ int main()
 		if(compiler.parser.lexeme() == Lexeme::END)
 			break;
 		
-		Scope scope;
+		Tree::Scope scope;
 		
 		compiler.parser.parse_main(scope);
 		
