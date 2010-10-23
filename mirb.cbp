@@ -36,11 +36,11 @@
 			<Add option="-Wall" />
 			<Add option="-fstrict-aliasing" />
 			<Add option="-DWIN_SEH" />
+			<Add option="-DNO_GC" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />
 		</Compiler>
 		<Linker>
-			<Add library="gc" />
 			<Add library="udis86" />
 			<Add directory="vendor\gc\.libs" />
 			<Add directory="vendor\udis86\libudis86\.libs" />
@@ -88,7 +88,6 @@
 		<Unit filename="runtime\constant.hpp" />
 		<Unit filename="runtime\exceptions.cpp" />
 		<Unit filename="runtime\exceptions.hpp" />
-		<Unit filename="runtime\gc.hpp" />
 		<Unit filename="runtime\modules\kernel.cpp" />
 		<Unit filename="runtime\modules\kernel.hpp" />
 		<Unit filename="runtime\runtime.cpp" />
@@ -102,13 +101,13 @@
 		<Unit filename="runtime\x86.cpp" />
 		<Unit filename="runtime\x86.hpp" />
 		<Unit filename="src\bytecode\block.hpp" />
-		<Unit filename="src\bytecode\generator.cpp" />
-		<Unit filename="src\bytecode\generator.hpp" />
 		<Unit filename="src\bytecode\opcodes.cpp" />
 		<Unit filename="src\bytecode\opcodes.hpp" />
 		<Unit filename="src\common.hpp" />
 		<Unit filename="src\compiler.cpp" />
 		<Unit filename="src\compiler.hpp" />
+		<Unit filename="src\gc.cpp" />
+		<Unit filename="src\gc.hpp" />
 		<Unit filename="src\hash-table.hpp" />
 		<Unit filename="src\lexer\handlers.cpp" />
 		<Unit filename="src\lexer\input.hpp" />
@@ -130,6 +129,7 @@
 		<Unit filename="src\parser\structures.cpp" />
 		<Unit filename="src\range.hpp" />
 		<Unit filename="src\simple-list.hpp" />
+		<Unit filename="src\simpler-list.hpp" />
 		<Unit filename="src\symbol-pool.cpp" />
 		<Unit filename="src\symbol-pool.hpp" />
 		<Unit filename="src\tree\node.cpp" />
@@ -142,6 +142,9 @@
 		<Unit filename="src\tree\printer.hpp">
 			<Option target="Debug" />
 		</Unit>
+		<Unit filename="src\tree\tree.cpp" />
+		<Unit filename="src\tree\tree.hpp" />
+		<Unit filename="src\vector.hpp" />
 		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />

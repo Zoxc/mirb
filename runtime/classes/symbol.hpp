@@ -26,13 +26,6 @@ static inline rt_value rt_string_from_symbol(rt_value value)
 	return rt_string_from_cstr(rt_symbol_to_cstr(value));
 }
 
-static inline bool rt_symbol_is_const(rt_value value)
-{
-	const char c = *rt_symbol_to_cstr(value);
-
-	return c >= 'A' && c <= 'Z';
-}
-
 void rt_symbol_init(void);
 
 rt_compiled_block(rt_symbol_to_s);

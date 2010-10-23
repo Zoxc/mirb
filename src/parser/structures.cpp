@@ -6,7 +6,7 @@ namespace Mirb
 	{
 		lexer.step();
 
-		auto result = new (memory_pool) Tree::ClassNode;
+		auto result = new (fragment) Tree::ClassNode;
 		
 		if(require(Lexeme::IDENT))
 		{
@@ -28,11 +28,13 @@ namespace Mirb
 		
 		parse_sep();
 		
-		struct block *block = alloc_scope(result->scope, S_CLASS);
 		
-		result->scope.group = parse_group();
+		auto old_scope = scope;
 		
-		current_block = block->parent;
+		result->scope = allocate_scope(Tree::Scope::Class);		
+		result->scope->group = parse_group();
+		
+		scope = old_scope;
 		
 		match(Lexeme::KW_END);
 		
@@ -43,7 +45,7 @@ namespace Mirb
 	{
 		lexer.step();
 
-		auto result = new (memory_pool) Tree::ModuleNode;
+		auto result = new (fragment) Tree::ModuleNode;
 		
 		if(require(Lexeme::IDENT))
 		{
@@ -56,12 +58,13 @@ namespace Mirb
 
 		parse_sep();
 
-		struct block *block = alloc_scope(result->scope, S_MODULE);
+		auto old_scope = scope;
 		
-		result->scope.group = parse_group();
+		result->scope = allocate_scope(Tree::Scope::Module);		
+		result->scope->group = parse_group();
 		
-		current_block = block->parent;
-
+		scope = old_scope;
+		
 		match(Lexeme::KW_END);
 
 		return result;
@@ -80,7 +83,7 @@ namespace Mirb
 		}
 	}
 
-	void Parser::parse_parameters(struct block *block)
+	void Parser::parse_parameters()
 	{
 		do
 		{
@@ -92,21 +95,21 @@ namespace Mirb
 			
 			bool block_parameter = matches(Lexeme::AMPERSAND);
 			
-			rt_value symbol = (rt_value)lexer.lexeme.symbol;
+			Symbol *symbol = lexer.lexeme.symbol;
 			
 			if(block_parameter)
 			{
-				if(block->block_parameter)
+				if(scope->block_parameter)
 					error("You can only receive the block in one parameter.");
 				else
-					block->block_parameter = scope_define(block, symbol);
+					scope->block_parameter = scope->define<Tree::Parameter>(symbol);
 			}
 			else
 			{
-				if(scope_defined(block, symbol, false))
+				if(scope->defined(symbol, false))
 					error("Variable " + lexer.lexeme.string() + " already defined.");
 				else
-					vec_push(variables, &block->parameters, scope_define(block, symbol));
+					scope->parameters.append(scope->define<Tree::Parameter>(symbol));
 			}
 			
 			lexer.step();
@@ -122,7 +125,7 @@ namespace Mirb
 		
 		lexer.lexeme.allow_keywords = true;
 		
-		auto result = new (memory_pool) Tree::MethodNode;
+		auto result = new (fragment) Tree::MethodNode;
 		
 		switch(lexeme())
 		{
@@ -142,27 +145,29 @@ namespace Mirb
 				}
 		}
 		
-		struct block *block = alloc_scope(result->scope, S_METHOD);
+		auto old_scope = scope;
 		
-		block->owner = block;
-
+		result->scope = allocate_scope(Tree::Scope::Method);		
+		
+		scope->owner = scope;
+		
 		if(matches(Lexeme::PARENT_OPEN))
 		{
-			parse_parameters(block);
+			parse_parameters();
 			
 			match(Lexeme::PARENT_CLOSE);
 		}
 		else
 		{
 			if(is_parameter())
-				parse_parameters(block);
+				parse_parameters();
 			
 			parse_sep();
 		}
 		
-		result->scope.group = parse_group();
+		result->scope->group = parse_group();
 		
-		current_block = block->parent;
+		scope = old_scope;
 		
 		match(Lexeme::KW_END);
 		

@@ -27,7 +27,7 @@ typedef rt_value (__stdcall __regparm(3) *rt_compiled_block_t)(rt_value **_scope
 
 static inline rt_value rt_alloc(size_t size)
 {
-	#ifdef VALGRIND
+	#ifdef NO_GC
 		return (rt_value)malloc(size);
 	#else
 		return (rt_value)GC_MALLOC(size);
@@ -36,7 +36,7 @@ static inline rt_value rt_alloc(size_t size)
 
 static inline rt_value rt_alloc_root(size_t size)
 {
-	#ifdef VALGRIND
+	#ifdef NO_GC
 		return (rt_value)malloc(size);
 	#else
 		return (rt_value)GC_MALLOC_UNCOLLECTABLE(size);
@@ -45,7 +45,7 @@ static inline rt_value rt_alloc_root(size_t size)
 
 static inline rt_value rt_alloc_data(size_t size)
 {
-	#ifdef VALGRIND
+	#ifdef NO_GC
 		return (rt_value)malloc(size);
 	#else
 		return (rt_value)GC_MALLOC_ATOMIC(size);
@@ -54,7 +54,7 @@ static inline rt_value rt_alloc_data(size_t size)
 
 static inline rt_value rt_realloc(rt_value old, size_t size)
 {
-	#ifdef VALGRIND
+	#ifdef NO_GC
 		return (rt_value)realloc((void *)old, size);
 	#else
 		return old ? (rt_value)GC_REALLOC((void *)old, size) : rt_alloc(size);

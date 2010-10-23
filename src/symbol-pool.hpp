@@ -98,12 +98,12 @@ namespace Mirb
 				return result;
 			}
 
-			static Symbol **alloc(size_t entries)
+			static Symbol **alloc(bool, size_t entries)
 			{
 				return (Symbol **)rt_alloc(sizeof(Symbol *) * entries);
 			}
 
-			static void free(Symbol **table, size_t entries)
+			static void free(bool, Symbol **table, size_t entries)
 			{
 			}
 	};

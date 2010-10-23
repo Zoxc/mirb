@@ -3,11 +3,11 @@
 #include "../../globals.hpp"
 #include "../../runtime/classes.hpp"
 #include "../../runtime/runtime.hpp"
-#include "../../compiler/block.hpp"
-#include "../../compiler/compiler.hpp"
 
+#include "../gc.hpp"
 #include "../lexer/lexer.hpp"
 #include "../tree/nodes.hpp"
+#include "../tree/tree.hpp"
 
 namespace Mirb
 {
@@ -22,19 +22,17 @@ namespace Mirb
 			Lexer lexer;
 			MemoryPool &memory_pool;
 			
-			struct block *scope_defined(struct block *block, rt_value name, bool recursive);
-			struct variable *scope_declare_var(struct block *block, rt_value name);
-			struct variable *scope_var(struct block *block);
-			struct variable *scope_define(struct block *block, rt_value name);
-			struct variable *scope_get(struct block *block, rt_value name);
+			Tree::Fragment *fragment;
+			Tree::Scope *scope;
 			
 			void unexpected(bool skip = true);
 			void expected(Lexeme::Type what, bool skip = false);
 			
 			void error(std::string text);
 			
-			struct compiler *old_compiler;
-			struct block *current_block;
+			Tree::Scope *allocate_scope(Tree::Scope::Type type);
+			
+			static bool is_constant(Symbol *symbol);
 						
 			static size_t operator_precedences[];
 
@@ -43,11 +41,12 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
 			// expressions
+			Tree::Node *parse_variable(Symbol *symbol, Tree::Node *left = 0);
 			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
-			Tree::Node *parse_assignment(Tree::VariableNode *variable);
+			Tree::Node *parse_assignment(Tree::Node *variable);
 			Tree::Node *parse_array();
 			Tree::Node *parse_identifier();
 			Tree::Node *parse_unary();
@@ -71,7 +70,7 @@ namespace Mirb
 			void parse_sep();
 			void parse_statements(Tree::NodeList &list);
 			
-			void parse_main(Tree::Scope &scope);
+			Tree::Scope *parse_main(Tree::Fragment *fragment);
 			
 			// control flow
 			Tree::Node *parse_if_tail();
@@ -105,7 +104,7 @@ namespace Mirb
 			
 			// structures
 			bool is_parameter();
-			void parse_parameters(struct block *block);
+			void parse_parameters();
 			Tree::Node *parse_class();
 			Tree::Node *parse_module();
 			Tree::Node *parse_method();
@@ -214,8 +213,6 @@ namespace Mirb
 						return false;
 				}
 			}
-			
-			struct block *alloc_scope(Tree::Scope &scope, enum block_type type);
 	};
 	
 };

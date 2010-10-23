@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
+#include "../simpler-list.hpp"
 #include "node.hpp"
 
 namespace Mirb
@@ -10,6 +11,9 @@ namespace Mirb
 	
 	namespace Tree
 	{
+		class Scope;
+		class Variable;
+		
 		struct GroupNode:
 			public Node
 		{
@@ -104,34 +108,32 @@ namespace Mirb
 		{
 			NodeType type() { return Variable; }
 			
-			enum VariableType
-			{
-				Temporary,
-				Local,
-				Instance,
-				Constant,
-				Global
-			};
+			Tree::Variable *var;
 			
-			VariableNode();
-			VariableNode(VariableType type, Symbol *symbol);
-			VariableNode(Parser &parser, Symbol *symbol, Node *left = 0);
+			VariableNode() {}
+			VariableNode(Tree::Variable *var) : var(var) {}
+		};
+		
+		struct IVarNode:
+			public Node
+		{
+			NodeType type() { return IVar; }
 			
-			VariableType variable_type;
+			Symbol *name;
 			
-			union
-			{
-				struct
-				{
-					Symbol *name;
-				} ivar;
-				struct
-				{
-					Node *left;
-					Symbol *name;
-				} constant;
-				struct variable *var;			
-			};
+			IVarNode(Symbol *name) : name(name) {}
+		};
+		
+		struct ConstantNode:
+			public Node
+		{
+			NodeType type() { return Constant; }
+	
+			Node *obj;
+			Symbol *name;
+			
+			ConstantNode() {}
+			ConstantNode(Symbol *name) : obj(0), name(name)  {}
 		};
 
 		struct SelfNode:
@@ -166,19 +168,12 @@ namespace Mirb
 			NodeList entries;
 		};
 		
-		struct Scope
-		{
-			struct block *block;
-			Node *group;
-		};
-		
 		struct BlockNode:
 			public SimpleNode
 		{
 			NodeType type() { return Block; }
 			
-			struct Scope scope; //TODO: wtf?
-			//TODO: unused ParameterList parameters; 
+			Scope *scope;
 		};
 		
 		struct InvokeNode:
@@ -213,7 +208,7 @@ namespace Mirb
 			NodeType type() { return BreakHandler; }
 			
 			Node *code;
-			struct block *block;
+			Scope *scope;
 		};
 		
 		struct IfNode:
@@ -302,7 +297,7 @@ namespace Mirb
 			NodeType type() { return Module; }
 			
 			Symbol *name;
-			struct Scope scope;
+			Scope *scope;
 		};
 		
 		struct ClassNode:
@@ -319,7 +314,7 @@ namespace Mirb
 			NodeType type() { return Method; }
 			
 			Symbol *name;
-			struct Scope scope;
+			Scope *scope;
 		};
 	};
 };

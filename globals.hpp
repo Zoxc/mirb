@@ -9,6 +9,12 @@
 
 #define RT_ALIGN(value, to) ((value + (to) - 1) & ~((to) - 1))
 
+#ifdef VALGRIND
+	#ifndef NO_GC
+		#define NO_GC
+	#endif
+#endif
+
 #ifdef DEBUG
 	#define RT_ASSERT(condition) do { \
 		if(!(condition)) { \

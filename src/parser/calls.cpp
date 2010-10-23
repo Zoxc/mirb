@@ -39,9 +39,12 @@ namespace Mirb
 		
 		lexer.step();
 		
-		auto result = new (memory_pool) Tree::BlockNode;
+		auto old_fragment = fragment;
+		auto old_scope = scope;
 		
-		struct block *block = alloc_scope(result->scope, S_CLOSURE);
+		auto result = new (fragment) Tree::BlockNode;
+		
+		result->scope = allocate_scope(Tree::Scope::Closure);
 		
 		skip_lines();
 		
@@ -49,14 +52,15 @@ namespace Mirb
 		{
 			lexer.step();
 			
-			parse_parameters(block);
+			parse_parameters();
 			
 			match(Lexeme::BITWISE_OR);
 		}
 		
-		result->scope.group = parse_group();
+		result->scope->group = parse_group();
 		
-		current_block = block->parent;
+		fragment = old_fragment;
+		scope = old_scope;
 		
 		match(curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
 		
@@ -68,16 +72,16 @@ namespace Mirb
 		if(!result)
 			return parent;
 		
-		struct block *block = result->scope.block;
+		Tree::Scope *scope = result->scope;
 		
-		if(block->can_break)
+		if(scope->can_break)
 		{
-			auto handler = new (memory_pool) Tree::BreakHandlerNode;
+			auto handler = new (fragment) Tree::BreakHandlerNode;
 			
-			block->break_id = current_block->break_targets++; // Assign a break id to the block and increase the break target count.
+			scope->break_id = this->scope->break_targets++; // Assign a break id to the block and increase the break target count.
 			
 			handler->code = parent;
-			handler->block = block;
+			handler->scope = scope;
 			
 			return handler;
 		}
@@ -150,7 +154,7 @@ namespace Mirb
 
 	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args)
 	{
-		auto result = new (memory_pool) Tree::CallNode;
+		auto result = new (fragment) Tree::CallNode;
 		
 		result->object = object;
 		result->method = symbol;
@@ -166,17 +170,17 @@ namespace Mirb
 	{
 		lexer.step();
 		
-		auto result = new (memory_pool) Tree::SuperNode;
+		auto result = new (fragment) Tree::SuperNode;
 		
-		struct block *owner = current_block->owner;
-		struct block *current = current_block;
+		Tree::Scope *owner = scope->owner;
+		Tree::Scope *current = scope;
 		
 		while(true)
 		{
 			if(!current->super_module_var)
 			{
-				current->super_module_var = block_get_var(current);
-				current->super_name_var = block_get_var(current);
+				current->super_module_var = current->alloc_var<Tree::Variable>(Tree::Variable::Temporary);
+				current->super_name_var = current->alloc_var<Tree::Variable>(Tree::Variable::Temporary);
 			}
 			
 			if(owner == current)
@@ -194,7 +198,7 @@ namespace Mirb
 		if(result->arguments.empty() && !parenthesis)
 		{
 			if(current != owner)
-				vec_push(blocks, &owner->zsupers, current);
+				owner->zsupers.append(current);
 			
 			result->pass_args = true;
 		}
@@ -208,13 +212,12 @@ namespace Mirb
 	{
 		lexer.step();
 
-		auto child = new (memory_pool) Tree::VariableNode;
+		auto child = new (fragment) Tree::VariableNode;
 		
-		if(!current_block->block_parameter)
-			current_block->block_parameter = scope_var(current_block);
+		if(!scope->block_parameter)
+			scope->block_parameter = scope->alloc_var<Tree::Parameter>();
 		
-		child->variable_type = Tree::VariableNode::Temporary;
-		child->var = current_block->block_parameter;
+		child->var = scope->block_parameter;
 		
 		return alloc_call_node(child, (Symbol *)rt_symbol_from_cstr("call"), has_arguments());
 	}
@@ -234,13 +237,13 @@ namespace Mirb
 		bool local = false;
 		
 		if(symbol)
-			local = scope_defined(current_block, (rt_value)symbol, true);
+			local = scope->defined(symbol, true);
 		
 		bool has_args = has_arguments();
 		
-		if(default_var && !has_args && (local || (symbol && rt_symbol_is_const((rt_value)symbol)))) // Variable or constant
+		if(default_var && !has_args && (local || (symbol && is_constant(symbol)))) // Variable or constant
 		{
-			return new (memory_pool) Tree::VariableNode(*this, symbol);
+			return parse_variable(symbol);
 		}
 		else // Call
 		{
@@ -282,13 +285,13 @@ namespace Mirb
 
 						bool has_args = has_arguments();
 
-						if(has_args || !rt_symbol_is_const((rt_value)symbol))
+						if(has_args || !is_constant(symbol))
 						{
 							return alloc_call_node(child, symbol, has_arguments());
 						}
 						else
 						{
-							return new (memory_pool) Tree::VariableNode(*this, symbol);
+							return new (fragment) Tree::ConstantNode(symbol);
 						}
 					}
 					else
@@ -310,7 +313,7 @@ namespace Mirb
 				{
 					lexer.step();
 					
-					auto result = new (memory_pool) Tree::CallNode;
+					auto result = new (fragment) Tree::CallNode;
 					
 					result->method = (Symbol *)rt_symbol_from_cstr("[]");
 					
@@ -352,12 +355,9 @@ namespace Mirb
 		
 		switch(tail->type())
 		{
-			case Tree::Node::Variable:
+			case Tree::Node::Constant:
 			{
-				Tree::VariableNode *node = (Tree::VariableNode *)tail;
-				
-				if(node->variable_type != Tree::VariableNode::Constant)
-					return handler;
+				Tree::ConstantNode *node = (Tree::ConstantNode *)tail;
 				
 				return parse_assignment(node);
 			}
@@ -396,13 +396,13 @@ namespace Mirb
 				else
 				{
 					// TODO: Save node->object in a temporary variable
-					auto result = new (memory_pool) Tree::CallNode;
+					auto result = new (fragment) Tree::CallNode;
 					
 					result->object = node->object;
 					result->method = mutated;
 					result->block = 0;
 					
-					auto binary_op = new (memory_pool) Tree::BinaryOpNode;
+					auto binary_op = new (fragment) Tree::BinaryOpNode;
 					
 					binary_op->left = node;
 					binary_op->op = Lexeme::assign_to_operator(lexeme());

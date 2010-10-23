@@ -1,6 +1,7 @@
 #include "printer.hpp"
 #include "node.hpp"
 #include "nodes.hpp"
+#include "tree.hpp"
 #include "../symbol-pool.hpp"
 #include "../../compiler/block.hpp"
 
@@ -49,123 +50,129 @@ namespace Mirb
 			return "<null_symbol>";
 	}
 	
-	std::string Printer::wrap(SimpleNode *node, std::string result)
+	std::string Printer::wrap(Tree::SimpleNode *node, std::string result)
 	{
 		return result;
 	}
 	
-	std::string Printer::print_node(SimpleNode *node)
+	std::string Printer::print_node(Tree::SimpleNode *node)
 	{
 		return wrap(node, this->node(node, 0));
 	}
 	
-	std::string Printer::print_node(SimpleNode *node, size_t indent)
+	std::string Printer::print_node(Tree::SimpleNode *node, size_t indent)
 	{
 		return wrap(node, this->node(node, indent));
 	}
 	
-	std::string Printer::node(SimpleNode *node, size_t indent)
+	std::string Printer::node(Tree::SimpleNode *node, size_t indent)
 	{
 		if(!node)
 			return "<null_node>";
 
 		switch(node->type())
 		{
-			case SimpleNode::BinaryOp:
-			case SimpleNode::Assignment:
+			case Tree::SimpleNode::BinaryOp:
+			case Tree::SimpleNode::Assignment:
 			{
-				BinaryOpNode *target = (BinaryOpNode *)node;
+				auto target = (Tree::BinaryOpNode *)node;
 				
 				return print_node(target->left) + " " + Lexeme::names[target->op] + " " + print_node(target->right);
 			}
 			
-			case SimpleNode::UnaryOp:
+			case Tree::SimpleNode::UnaryOp:
 			{
-				UnaryOpNode *target = (UnaryOpNode *)node;
+				auto target = (Tree::UnaryOpNode *)node;
 				
 				return Lexeme::names[target->op] +  " " + print_node(target->value);
 			}
 			
-			case SimpleNode::String:
+			case Tree::SimpleNode::String:
 			{
-				StringNode *target = (StringNode *)node;
+				auto target = (Tree::StringNode *)node;
 
 				return std::string((const char *)target->string);
 			}
 			
-			case SimpleNode::InterpolatedPair:
+			case Tree::SimpleNode::InterpolatedPair:
 			{
-				InterpolatedPairNode *target = (InterpolatedPairNode *)node;
+				auto target = (Tree::InterpolatedPairNode *)node;
 				
 				return std::string((const char *)target->string) + "#{" + print_node(target->group);
 			}
 			
-			case SimpleNode::InterpolatedString:
+			case Tree::SimpleNode::InterpolatedString:
 			{
-				InterpolatedStringNode *target = (InterpolatedStringNode *)node;
+				auto target = (Tree::InterpolatedStringNode *)node;
 				
 				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->tail) + "\"";
 			}
 			
-			case SimpleNode::Integer:
+			case Tree::SimpleNode::Integer:
 			{
-				IntegerNode *target = (IntegerNode *)node;
+				auto target = (Tree::IntegerNode *)node;
 
 				std::stringstream out;
 				out << target->value;
 				return out.str();
 			}
 			
-			case SimpleNode::Variable:
+			case Tree::SimpleNode::Variable:
 			{
-				VariableNode *target = (VariableNode *)node;
+				auto target = (Tree::VariableNode *)node;
+				auto var = target->var;
 				
-				switch(target->variable_type)
+				switch(var->type)
 				{
-					case VariableNode::Temporary:
+					case Tree::Variable::Temporary:
 					{
 						std::stringstream out;
-						out << "__temp" << target->var->index << "__";
+						out << "__temp" << var->index << "__";
 						return out.str();
 					}
-						
-					case VariableNode::Local:
-						return print_symbol((Symbol *)target->var->name);
 					
-					case VariableNode::Instance:
-						return print_symbol(target->ivar.name);
-					
-					case VariableNode::Constant:
-						return print_node(target->constant.left) + "::" + print_symbol(target->constant.name);
-						
 					default:
-						return "<error>";
-				};
+						return print_symbol(((Tree::NamedVariable *)var)->name);
+				}
 			}
 			
-			case SimpleNode::Self:
+			case Tree::SimpleNode::IVar:
+			{
+				auto target = (Tree::IVarNode *)node;
+				
+				return print_symbol(target->name);
+			};
+				
+			case Tree::SimpleNode::Constant:
+			{
+				auto target = (Tree::ConstantNode *)node;
+				
+				return print_symbol(target->name);
+			};
+			
+			case Tree::SimpleNode::Self:
 			{
 				return "self";
 			}
 
-			case SimpleNode::Nil:
+			case Tree::SimpleNode::Nil:
 			{
 				return "nil";
 			}
 
-			case SimpleNode::True:
+			case Tree::SimpleNode::True:
 			{
 				return "true";
 			}
 
-			case SimpleNode::False:
+			case Tree::SimpleNode::False:
 			{
 				return "false";
 			}
 			
-			case SimpleNode::Group:
+			case Tree::SimpleNode::Group:
 			{
-				GroupNode *target = (GroupNode *)node;
+				auto target = (Tree::GroupNode *)node;
 				
 				std::string result;
 				
@@ -175,22 +182,22 @@ namespace Mirb
 				return result;
 			}
 			
-			case SimpleNode::Array:
+			case Tree::SimpleNode::Array:
 			{
-				ArrayNode *target = (ArrayNode *)node;
+				auto target = (Tree::ArrayNode *)node;
 				
 				return "[" + join(target->entries, ", ") + "]";
 			}
 			
-			case SimpleNode::Block:
+			case Tree::SimpleNode::Block:
 			{
-				BlockNode *target = (BlockNode *)node;
-				return "do\n" + print_node(target->scope.group) + "end\n";
+				auto target = (Tree::BlockNode *)node;
+				return "do\n" + print_node(target->scope->group) + "end\n";
 			}
 
-			case SimpleNode::Call:
+			case Tree::SimpleNode::Call:
 			{
-				CallNode *target = (CallNode *)node;
+				auto target = (Tree::CallNode *)node;
 				
 				std::string result = print_node(target->object) + "." + print_symbol(target->method);
 				
@@ -203,9 +210,9 @@ namespace Mirb
 				return result;
 			}
 
-			case SimpleNode::Super:
+			case Tree::SimpleNode::Super:
 			{
-				SuperNode *target = (SuperNode *)node;
+				auto target = (Tree::SuperNode *)node;
 				
 				std::string result = "super";
 				
@@ -218,30 +225,30 @@ namespace Mirb
 				return result;
 			}
 
-			case SimpleNode::BreakHandler:
+			case Tree::SimpleNode::BreakHandler:
 			{
-				BreakHandlerNode *target = (BreakHandlerNode *)node;
+				auto target = (Tree::BreakHandlerNode *)node;
 				
 				return print_node(target->code);
 			}
 			
-			case SimpleNode::If:
+			case Tree::SimpleNode::If:
 			{
-				IfNode *target = (IfNode *)node;
+				auto target = (Tree::IfNode *)node;
 				
 				return (target->inverted ? "unless " : "if ") + print_node(target->left) + "\n" + print_node(target->middle) + "\nelse\n" + print_node(target->right) + "\nend\n";
 			}
 			
-			case SimpleNode::Rescue:
+			case Tree::SimpleNode::Rescue:
 			{
-				RescueNode *target = (RescueNode *)node;
+				auto target = (Tree::RescueNode *)node;
 				
 				return "rescue\n" + print_node(target->group);
 			}
 			
-			case SimpleNode::Handler:
+			case Tree::SimpleNode::Handler:
 			{
-				HandlerNode *target = (HandlerNode *)node;
+				auto target = (Tree::HandlerNode *)node;
 				
 				std::string result = "begin\n" + print_node(target->code) + join(target->rescues);
 				
@@ -251,51 +258,51 @@ namespace Mirb
 				return result + "\nend\n";
 			}
 			
-			case SimpleNode::Return:
+			case Tree::SimpleNode::Return:
 			{
-				ReturnNode *target = (ReturnNode *)node;
+				auto target = (Tree::ReturnNode *)node;
 				
 				return "return " + print_node(target->value);
 			}
 			
-			case SimpleNode::Next:
+			case Tree::SimpleNode::Next:
 			{
-				NextNode *target = (NextNode *)node;
+				auto target = (Tree::NextNode *)node;
 				
 				return "return " + print_node(target->value);
 			}
 			
-			case SimpleNode::Break:
+			case Tree::SimpleNode::Break:
 			{
-				BreakNode *target = (BreakNode *)node;
+				auto target = (Tree::BreakNode *)node;
 				
 				return "return " + print_node(target->value);
 			}
 			
-			case SimpleNode::Redo:
+			case Tree::SimpleNode::Redo:
 			{
 				return "redo";
 			}
 			
-			case SimpleNode::Module:
+			case Tree::SimpleNode::Module:
 			{
-				ModuleNode *target = (ModuleNode *)node;
+				auto target = (Tree::ModuleNode *)node;
 				
-				return "module " + print_symbol(target->name) + "\n" + print_node(target->scope.group) + "end\n";
+				return "module " + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
-			case SimpleNode::Class:
+			case Tree::SimpleNode::Class:
 			{
-				ClassNode *target = (ClassNode *)node;
+				auto target = (Tree::ClassNode *)node;
 				
-				return "class " + print_symbol(target->name) + " < " + print_node(target->super) + "\n" + print_node(target->scope.group) + "end\n";
+				return "class " + print_symbol(target->name) + " < " + print_node(target->super) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
-			case SimpleNode::Method:
+			case Tree::SimpleNode::Method:
 			{
-				MethodNode *target = (MethodNode *)node;
+				auto target = (Tree::MethodNode *)node;
 				
-				return "def " + print_symbol(target->name) + "\n" + print_node(target->scope.group) + "end\n";
+				return "def " + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
 			default:
@@ -303,11 +310,11 @@ namespace Mirb
 		}
 	}
 	
-	std::string DebugPrinter::wrap(SimpleNode *node, std::string result)
+	std::string DebugPrinter::wrap(Tree::SimpleNode *node, std::string result)
 	{
 		if(node)
 		{
-			return "(" + SimpleNode::names[node->type()] + ": " +  result + ")";
+			return "(" + Tree::SimpleNode::names[node->type()] + ": " +  result + ")";
 		}
 		else
 			return result;

@@ -36,14 +36,14 @@ namespace Mirb
 				return 0;
 			}
 
-			static V *alloc(size_t entries)
+			static V *alloc(S storage, size_t entries)
 			{
 				return new V[entries];
 			}
 
-			static void free(V *table, size_t entries)
+			static void free(S storage, V *table, size_t entries)
 			{
-				return new V[entries];
+				return delete[] table;
 			}
 	};
 
@@ -87,7 +87,7 @@ namespace Mirb
 				size_t real_size = 1 << size;
 				size_t mask = real_size - 1;
 
-				V *table = T::alloc(real_size);
+				V *table = T::alloc(this->storage, real_size);
 				std::memset(table, 0, real_size * sizeof(V));
 
 				V *end = this->table + (1 << this->size);
@@ -106,7 +106,7 @@ namespace Mirb
 					}
 				}
 
-				T::free(this->table, 1 << this->size);
+				T::free(this->storage, this->table, 1 << this->size);
 
 				this->size = size;
 				this->mask = mask;
@@ -141,13 +141,13 @@ namespace Mirb
 				size_t real_size = 1 << size;
 				mask = real_size - 1;
 
-				table = new V[real_size];
+				table = T::alloc(this->storage, real_size);;
 				memset(table, 0, real_size * sizeof(V));
 			}
 
 			~HashTable()
 			{
-				delete[] table;
+				T::free(this->storage, this->table, 1 << this->size);
 			}
 
 			V get(K key)
@@ -184,7 +184,7 @@ namespace Mirb
 					return value;
 				}
 				else
-					return 0;
+					return T::invalid_value();
 			}
 
 			V set(K key, V value)

@@ -1,7 +1,6 @@
 #pragma once
 #include "../common.hpp"
 #include "../simple-list.hpp"
-#include "../../compiler/block.hpp"
 
 namespace Mirb
 {
@@ -19,6 +18,8 @@ namespace Mirb
 				InterpolatedPair,
 				Integer,
 				Variable,
+				IVar,
+				Constant,
 				UnaryOp,
 				BooleanNot,
 				BinaryOp,

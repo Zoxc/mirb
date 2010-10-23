@@ -2,11 +2,9 @@
 #include "runtime/classes.hpp"
 #include "runtime/classes/symbol.hpp"
 #include "runtime/classes/string.hpp"
-#include "compiler/generator/x86.hpp"
 
 #include <iostream>
 #include "src/compiler.hpp"
-#include "src/bytecode/generator.hpp"
 
 #ifdef DEBUG
 	#include "src/tree/printer.hpp"
@@ -16,7 +14,7 @@ using namespace Mirb;
 
 int main()
 {
-	#ifndef VALGRIND
+	#ifndef NO_GC
 		GC_INIT();
 	#endif
 	
@@ -33,12 +31,11 @@ int main()
 		compiler.filename = "Input";
 		compiler.load((const char_t *)line.c_str(), line.length());
 		
-		if(compiler.parser.lexeme() == Lexeme::END)
+		if(compiler.parser.lexeme() == Lexeme::END && compiler.messages.empty())
 			break;
 		
-		Tree::Scope scope;
-		
-		compiler.parser.parse_main(scope);
+		Tree::Fragment fragment(0, Tree::Chunk::main_size);
+		Tree::Scope *scope = compiler.parser.parse_main(&fragment);
 		
 		if(!compiler.messages.empty())
 		{
@@ -52,10 +49,10 @@ int main()
 			DebugPrinter printer;
 			
 			std::cout << "Parsing done.\n-----\n";
-			std::cout << printer.print_node(scope.group);
+			std::cout << printer.print_node(scope->group);
 			std::cout << "\n-----\n";
 		#endif
-		
+		/*
 		ByteCodeGenerator generator(compiler);
 		
 		struct block *block = generator.to_bytecode(scope);

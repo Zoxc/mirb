@@ -9,6 +9,8 @@ namespace Mirb
 		"InterpolatedPair",
 		"Integer",
 		"Variable",
+		"IVar",
+		"Constant",
 		"UnaryOp",
 		"BooleanNot",
 		"BinaryOp",

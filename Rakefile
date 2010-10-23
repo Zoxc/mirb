@@ -13,6 +13,7 @@ package = Package.new do
 	vendor = 'vendor' + (windows ? '' : '_linux')
 	debug = false
 	debug_info = false
+	no_gc = false
 	valgrind = false
 	clang = false
 	
@@ -22,11 +23,11 @@ package = Package.new do
 
 	set Toolchain::Optimization, debug ? :none : :balanced
 	set Toolchain::Exceptions, :none
-	set Toolchain::StaticLibraries, !valgrind
+	set Toolchain::StaticLibraries, false
 	
 	set Toolchain::DebugInformation, debug
 	
-	set Toolchain::Libraries, vendor + '/gc/.libs/gc' unless valgrind
+	set Toolchain::Libraries, vendor + '/gc/.libs/gc' unless valgrind || no_gc
 	set Toolchain::Libraries, vendor + '/udis86/libudis86/.libs/udis86'
 	
 	set Toolchain::Libraries, 'pthread' unless windows || valgrind
@@ -47,6 +48,7 @@ package = Package.new do
 	c.std 'c99'
 	c.define('WIN_SEH') if windows
 	c.define('VALGRIND') if valgrind
+	c.define('NO_GC') if no_gc
 	c.define 'DEBUG' if debug_info
 	cxx = use Languages::CXX
 	cxx.std 'c++0x'

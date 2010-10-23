@@ -4,63 +4,63 @@ namespace Mirb
 {
 	Tree::Node *Parser::parse_return()
 	{
-		auto range = new (memory_pool) Range(lexer.lexeme);
+		auto range = new (fragment) Range(lexer.lexeme);
 		
 		lexer.step();
 		
-		if(current_block->type == S_CLOSURE)
-			current_block->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
+		if(scope->type == Tree::Scope::Closure)
+			scope->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
 		
 		if(is_expression())
-			return new (memory_pool) Tree::ReturnNode(range, parse_expression());
+			return new (fragment) Tree::ReturnNode(range, parse_expression());
 		else
-			return new (memory_pool) Tree::ReturnNode(range, new (memory_pool) Tree::NilNode);
+			return new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode);
 	}
 
 	Tree::Node *Parser::parse_next()
 	{
-		auto range = new (memory_pool) Range(lexer.lexeme);
+		auto range = new (fragment) Range(lexer.lexeme);
 		
 		lexer.step();
 		
-		if(current_block->type != S_CLOSURE)
+		if(scope->type != Tree::Scope::Closure)
 			error("Next outside of block.");
 		
 		if(is_expression())
-			return new (memory_pool) Tree::NextNode(range, parse_expression());
+			return new (fragment) Tree::NextNode(range, parse_expression());
 		else
-			return new (memory_pool) Tree::NextNode(range, new (memory_pool) Tree::NilNode);
+			return new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode);
 	}
 
 	Tree::Node *Parser::parse_redo()
 	{
-		auto range = new (memory_pool) Range(lexer.lexeme);
+		auto range = new (fragment) Range(lexer.lexeme);
 		
 		lexer.step();
 		
-		if(current_block->type != S_CLOSURE)
+		if(scope->type != Tree::Scope::Closure)
 			error("Redo outside of block.");
 		
-		return new (memory_pool) Tree::RedoNode(range);
+		return new (fragment) Tree::RedoNode(range);
 	}
 
 	Tree::Node *Parser::parse_break()
 	{
-		auto range = new (memory_pool) Range(lexer.lexeme);
+		auto range = new (fragment) Range(lexer.lexeme);
 		
 		lexer.step();
 		
-		if(current_block->type == S_CLOSURE)
+		if(scope->type == Tree::Scope::Closure)
 		{
-			current_block->can_break = true; // Flag our parent should check
+			scope->can_break = true; // Flag our parent should check
 		}
 		else
 			error("Break outside of block.");
 		
 		if(is_expression())
-			return new (memory_pool) Tree::BreakNode(range, parse_expression());
+			return new (fragment) Tree::BreakNode(range, parse_expression());
 		else
-			return new (memory_pool) Tree::BreakNode(range, new (memory_pool) Tree::NilNode);
+			return new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode);
 	}
 
 	Tree::Node *Parser::parse_exception_handlers(Tree::Node *block)
@@ -76,7 +76,7 @@ namespace Mirb
 				break;
 		}
 		
-		auto result = new (memory_pool) Tree::HandlerNode;
+		auto result = new (fragment) Tree::HandlerNode;
 		
 		result->code = block;
 		
@@ -84,7 +84,7 @@ namespace Mirb
 		{
 			lexer.step();
 			
-			auto rescue = new (memory_pool) Tree::RescueNode;
+			auto rescue = new (fragment) Tree::RescueNode;
 			
 			rescue->group = parse_group();
 			
@@ -132,7 +132,7 @@ namespace Mirb
 		{
 			lexer.step();
 			
-			auto node = new (memory_pool) Tree::IfNode;
+			auto node = new (fragment) Tree::IfNode;
 			
 			node->inverted = false;
 			
@@ -155,7 +155,7 @@ namespace Mirb
 		
 		if (lexeme() == Lexeme::KW_IF || lexeme() == Lexeme::KW_UNLESS)
 		{
-			auto node = new (memory_pool) Tree::IfNode;
+			auto node = new (fragment) Tree::IfNode;
 			
 			node->inverted = lexeme() == Lexeme::KW_UNLESS;
 			
@@ -163,7 +163,7 @@ namespace Mirb
 			
 			node->middle = result;
 			node->left = parse_statement();
-			node->right = new (memory_pool) Tree::NilNode;
+			node->right = new (fragment) Tree::NilNode;
 			
 			return node;
 		}
@@ -175,7 +175,7 @@ namespace Mirb
 	{
 		lexer.step();
 
-		auto result = new (memory_pool) Tree::IfNode;
+		auto result = new (fragment) Tree::IfNode;
 		
 		result->inverted = true;
 		
@@ -184,7 +184,7 @@ namespace Mirb
 		parse_then_sep();
 		
 		result->middle = parse_group();
-		result->right = new (memory_pool) Tree::NilNode;
+		result->right = new (fragment) Tree::NilNode;
 		
 		match(Lexeme::KW_END);
 		
@@ -199,7 +199,7 @@ namespace Mirb
 				{
 					lexer.step();
 					
-					auto result = new (memory_pool) Tree::IfNode;
+					auto result = new (fragment) Tree::IfNode;
 					
 					result->inverted = false;
 					
@@ -219,7 +219,7 @@ namespace Mirb
 				return parse_group();
 
 			default:
-				return new (memory_pool) Tree::NilNode;
+				return new (fragment) Tree::NilNode;
 		}
 	}
 
@@ -227,7 +227,7 @@ namespace Mirb
 	{
 		lexer.step();
 		
-		auto result = new (memory_pool) Tree::IfNode;
+		auto result = new (fragment) Tree::IfNode;
 		
 		result->inverted = false;
 		
@@ -255,7 +255,7 @@ namespace Mirb
 			match(Lexeme::KW_WHEN);
 			lexer.step();
 			
-			auto node = new (memory_pool) Tree::IfNode;
+			auto node = new (fragment) Tree::IfNode;
 			
 			first = first ? first : node;
 			
@@ -276,7 +276,7 @@ namespace Mirb
 			first->right = parse_group();
 		}
 		else
-			first->right = new (memory_pool) Tree::NilNode;
+			first->right = new (fragment) Tree::NilNode;
 		
 		match(Lexeme::KW_END);
 
