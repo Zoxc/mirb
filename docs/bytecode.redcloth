@@ -73,8 +73,8 @@ h1. Operations
   Pushes a the heap scope for block @B@ onto the stack.
 
 * _Closure_
-  @V = closure B@
-  Creates an closures for block @B@ with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. The passed scopes will be popped off the stack.
+  @V = closure B, Rscopes@
+  Creates an closures for block @B@ with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. It then pops @Rscopes@ from the stack.
 
 * _Class_
   @V = class Vself, Iname, Vsuper, B@
@@ -141,12 +141,12 @@ h1. Operations
   Continues with a stack unwind if an exception was raised.
 
 * _UnwindReturn_
-  @ret V, Icode@
-  Unwinds the stack until the method scope @Icode@ is found. @V@ will then be returned from that method scope.
+  @ret V, Rcode@
+  Unwinds the stack until the method scope @Rcode@ is found. @V@ will then be returned from that method scope.
 
 * _UnwindBreak_
-  @break V, Icode, Rid@
-  Unwinds the stack until the block scope @Icode@ is found. @Rid@ specifies which break label will be targeted. @V@ will then be passed to the break label and execution continues from there.
+  @break V, Rcode, Rid@
+  Unwinds the stack until the block scope @Rcode@ is found. @Rid@ specifies which break label will be targeted. @V@ will then be passed to the break label and execution continues from there.
 
 * _Array_
   @V = array Relements@

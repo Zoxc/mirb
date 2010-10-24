@@ -26,8 +26,7 @@ namespace Mirb
 
 		void append(T *node)
 		{
-			if(!node) 
-				assert(0);
+			assert(node);
 			
 			( node->*field).next = 0;
 			

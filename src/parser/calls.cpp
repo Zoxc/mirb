@@ -172,6 +172,8 @@ namespace Mirb
 		
 		auto result = new (fragment) Tree::SuperNode;
 		
+		// TODO: Only create super variables in the owner and reference them on the heap
+		
 		Tree::Scope *owner = scope->owner;
 		Tree::Scope *current = scope;
 		
@@ -179,8 +181,11 @@ namespace Mirb
 		{
 			if(!current->super_module_var)
 			{
-				current->super_module_var = current->alloc_var<Tree::Variable>(Tree::Variable::Temporary);
-				current->super_name_var = current->alloc_var<Tree::Variable>(Tree::Variable::Temporary);
+				current->super_module_var = current->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
+				current->super_module_var->name = 0;
+				
+				current->super_name_var = current->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
+				current->super_name_var->name = 0;
 			}
 			
 			if(owner == current)

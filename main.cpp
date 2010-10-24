@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "src/compiler.hpp"
+#include "src/codegen/bytecode.hpp"
 
 #ifdef DEBUG
 	#include "src/tree/printer.hpp"
@@ -52,19 +53,12 @@ int main()
 			std::cout << printer.print_node(scope->group);
 			std::cout << "\n-----\n";
 		#endif
+		
+		CodeGen::ByteCodeGenerator generator(compiler.memory_pool);
+		
+		CodeGen::Block *block = generator.to_bytecode(scope);
+		
 		/*
-		ByteCodeGenerator generator(compiler);
-		
-		struct block *block = generator.to_bytecode(scope);
-		
-		if(!compiler.messages.empty())
-		{
-			for(auto i = compiler.messages.begin(); i; ++i)
-				std::cout << i().format() << "\n";
-			
-			continue;
-		}
-		
 		struct rt_block *runtime_block = compile_block(block);
 		
 		#ifdef DEBUG

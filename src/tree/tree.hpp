@@ -7,6 +7,11 @@
 
 namespace Mirb
 {
+	namespace CodeGen
+	{
+		class Block;
+	};
+	
 	namespace Tree
 	{
 		class Fragment;
@@ -28,6 +33,7 @@ namespace Mirb
 				};
 				
 				Type type;
+				Scope *owner; // Only valid for heap variables
 				
 				Variable(Type type) : type(type) {}
 				
@@ -97,7 +103,7 @@ namespace Mirb
 		typedef HashTable<Symbol *, NamedVariable *, Fragment *, VariableMapFunctions> VariableMap;
 		
 		class FragmentVector:
-			public VectorFunctions<Fragment *>
+			public StorageVectorFunctions<Fragment *>
 		{
 			public:
 				typedef Fragment *Storage;
@@ -120,6 +126,7 @@ namespace Mirb
 				
 				Scope(Fragment *fragment, Scope *parent, Type type);
 				
+				CodeGen::Block *block;
 				Fragment *fragment;
 				Type type;
 				Scope *parent; // The scope enclosing this one
@@ -146,17 +153,15 @@ namespace Mirb
 					size_t var_count[Variable::Types]; // An array of counters of the different variable types.
 				#endif
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
-				Variable *super_module_var; // Pointer to a next module to search from if super is used.
-				Variable *super_name_var; // Pointer to a symbol which contains the name of the called method.
+				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.
+				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
 				bool heap_vars; // If any of the variables must be stored on a heap scope.
-				Vector<Scope *, FragmentVector> referenced_scopes; // A list of all the scopes this scope requires.
+				StorageVector<Scope *, FragmentVector> referenced_scopes; // A list of all the scopes this scope requires.
 				
 				SimplerList<Parameter> parameters;
 				
 				SimplerEntry<Scope> zsuper_entry;
 				SimplerList<Scope, Scope, &Scope::zsuper_entry> zsupers;
-				
-				void require_scope(Scope *scope);
 				
 				template<class T> T *alloc_var(Variable::Type type = Variable::Type::Local)
 				{
@@ -207,6 +212,8 @@ namespace Mirb
 						return define<T>(name);
 				}
 				
+				void require_args(Scope *owner);
+				void require_scope(Scope *scope);
 				void require_var(Scope *owner, Variable *var);
 				
 				Scope *defined(Symbol *name, bool recursive);
@@ -223,10 +230,6 @@ namespace Mirb
 				
 				uint8_t *current;
 				uint8_t *end;
-				
-				#ifdef VALGRIND
-					std::vector<void *> allocations;
-				#endif
 				
 				SimplerEntry<Chunk> entry;
 				

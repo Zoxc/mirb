@@ -24,8 +24,7 @@ namespace Mirb
 
 		void append(T *node)
 		{
-			if(!node) 
-				assert(0);
+			assert(node);
 
 			Entry<E> &entry = node->*field;
 

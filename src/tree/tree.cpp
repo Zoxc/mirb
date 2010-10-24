@@ -34,12 +34,29 @@ namespace Mirb
 			
 			referenced_scopes.push(scope);
 		}
+		
+
+		void Scope::require_args(Scope *owner)
+		{
+			for(auto i = owner->parameters.begin(); i; ++i)
+			{
+				require_var(owner, *i);
+			}
+			
+			if(owner->block_parameter)
+				require_var(owner, owner->block_parameter);
+		}
 
 		void Scope::require_var(Scope *owner, Variable *var)
 		{
-			var->type = Variable::Heap;
-			
-			owner->heap_vars = true;
+			if(var->type != Variable::Heap)
+			{
+				var->type = Variable::Heap;
+				var->index = owner->var_count[Variable::Heap]++;
+				var->owner = owner;
+				
+				owner->heap_vars = true;
+			}
 			
 			/*
 			 * Make sure the block owning the varaible is required by the current block and parents.
@@ -86,9 +103,8 @@ namespace Mirb
 			if(parent)
 				parent->fragments.append(this);
 			
-			Chunk *first = Chunk::create(chunk_size);
-			current = first;
-			chunks.append(first);
+			current = Chunk::create(chunk_size);
+			chunks.append(current);
 		}
 		
 		void *Fragment::allocate(size_t bytes)
@@ -141,8 +157,6 @@ namespace Mirb
 				result = (uint8_t *)malloc(bytes);
 				
 				assert(result);
-				
-				allocations.push_back(result);
 			#else
 				result = current;
 				
