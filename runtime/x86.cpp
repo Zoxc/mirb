@@ -381,7 +381,7 @@ static void rt_handle_exception(struct rt_frame *frame, struct rt_frame *top, st
 		return;
 	}
 
-	struct exception_block *block = frame->block->exception_blocks.array[frame->block_index];
+	struct exception_block *block = frame->block->exception_blocks[frame->block_index];
 
 	if(unwinding)
 	{

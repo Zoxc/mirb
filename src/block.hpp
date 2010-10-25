@@ -5,6 +5,8 @@
 #include "simple-list.hpp"
 #include "parser/parser.hpp"
 
+struct exception_block;
+
 namespace Mirb
 {
 	class Block

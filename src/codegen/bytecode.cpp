@@ -288,19 +288,19 @@ namespace Mirb
 		
 		void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			if (var)
+			if(var)
 				gen<LoadOp>(var, RT_NIL);
 		}
 		
 		void ByteCodeGenerator::convert_true(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			if (var)
+			if(var)
 				gen<LoadOp>(var, RT_TRUE);
 		}
 		
 		void ByteCodeGenerator::convert_false(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			if (var)
+			if(var)
 				gen<LoadOp>(var, RT_FALSE);
 		}
 		

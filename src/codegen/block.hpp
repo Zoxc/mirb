@@ -3,6 +3,8 @@
 #include "../simple-list.hpp"
 #include "opcodes.hpp"
 
+struct exception_block;
+
 namespace Mirb
 {
 	class Block;

@@ -45,18 +45,6 @@
 			<Add directory="vendor\gc\.libs" />
 			<Add directory="vendor\udis86\libudis86\.libs" />
 		</Linker>
-		<Unit filename="compiler\allocator.cpp" />
-		<Unit filename="compiler\allocator.hpp" />
-		<Unit filename="compiler\block.cpp" />
-		<Unit filename="compiler\block.hpp" />
-		<Unit filename="compiler\bytecode.cpp" />
-		<Unit filename="compiler\bytecode.hpp" />
-		<Unit filename="compiler\compiler.cpp" />
-		<Unit filename="compiler\compiler.hpp" />
-		<Unit filename="compiler\generator\disassembly.cpp" />
-		<Unit filename="compiler\generator\disassembly.hpp" />
-		<Unit filename="compiler\generator\x86.cpp" />
-		<Unit filename="compiler\generator\x86.hpp" />
 		<Unit filename="globals.hpp" />
 		<Unit filename="hash.hpp" />
 		<Unit filename="main.cpp" />

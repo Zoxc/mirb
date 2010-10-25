@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../../compiler/bytecode.hpp"
-#include "../../compiler/block.hpp"
 #include "../tree/nodes.hpp"
 #include "block.hpp"
 

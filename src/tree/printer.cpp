@@ -3,7 +3,6 @@
 #include "nodes.hpp"
 #include "tree.hpp"
 #include "../symbol-pool.hpp"
-#include "../../compiler/block.hpp"
 
 namespace Mirb
 {

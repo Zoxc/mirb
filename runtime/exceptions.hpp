@@ -1,6 +1,7 @@
 #pragma once
 #include "../globals.hpp"
 #include "runtime.hpp"
+#include "../src/block.hpp"
 
 /*
  * Exception runtime data
@@ -61,7 +62,7 @@ struct rt_frame {
 	rt_exception_handler_t handler;
 	size_t handling;
 	size_t block_index;
-	struct block_data *block;
+	Mirb::Block *block;
 	size_t old_ebp;
 };
 

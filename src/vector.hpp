@@ -65,6 +65,12 @@ namespace Mirb
 				return &table[_size];
 			}
 			
+			T operator [](size_t index)
+			{
+				assert(index < _size);
+				return table[index];
+			}
+			
 			void push(T entry)
 			{
 				if(_size + 1 > _capacity)
