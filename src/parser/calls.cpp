@@ -67,23 +67,15 @@ namespace Mirb
 		return result;
 	}
 
-	Tree::Node *Parser::secure_block(Tree::BlockNode *result, Tree::Node *parent)
+	Tree::Node *Parser::secure_block(Tree::BlockNode *result, Tree::InvokeNode *parent)
 	{
 		if(!result)
 			return parent;
 		
-		Tree::Scope *scope = result->scope;
-		
-		if(scope->can_break)
+		if(result->scope->can_break)
 		{
-			auto handler = new (fragment) Tree::BreakHandlerNode;
-			
-			scope->break_id = this->scope->break_targets++; // Assign a break id to the block and increase the break target count.
-			
-			handler->code = parent;
-			handler->scope = scope;
-			
-			return handler;
+			parent->break_id = scope->break_targets++;
+			result->scope->break_id = parent->break_id;
 		}
 		
 		return parent;
@@ -220,7 +212,10 @@ namespace Mirb
 		auto child = new (fragment) Tree::VariableNode;
 		
 		if(!scope->block_parameter)
+		{
 			scope->block_parameter = scope->alloc_var<Tree::Parameter>();
+			scope->block_parameter->name = 0;
+		}
 		
 		child->var = scope->block_parameter;
 		
@@ -351,12 +346,6 @@ namespace Mirb
 		}
 		
 		Tree::Node *handler = tail;
-		
-		if(tail->type() == Tree::Node::BreakHandler)
-		{
-			Tree::BreakHandlerNode *handler = (Tree::BreakHandlerNode *)tail;
-			tail = handler->code;
-		}
 		
 		switch(tail->type())
 		{

@@ -132,7 +132,14 @@ namespace Mirb
 					}
 					
 					default:
-						return print_symbol(((Tree::NamedVariable *)var)->name);
+						if(((Tree::NamedVariable *)var)->name)
+							return print_symbol(((Tree::NamedVariable *)var)->name);
+						else
+						{
+							std::stringstream out;
+							out << "__temp" << var->index << "__";
+							return out.str();
+						}
 				}
 			}
 			
@@ -223,13 +230,6 @@ namespace Mirb
 					result += " " + print_node(target->block);
 				
 				return result;
-			}
-
-			case Tree::SimpleNode::BreakHandler:
-			{
-				auto target = (Tree::BreakHandlerNode *)node;
-				
-				return print_node(target->code);
 			}
 			
 			case Tree::SimpleNode::If:

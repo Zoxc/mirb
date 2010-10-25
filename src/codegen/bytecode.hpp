@@ -37,7 +37,6 @@ namespace Mirb
 				void convert_array(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_call(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_super(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_break_handler(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_if(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_group(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_return(Tree::Node *basic_node, Tree::Variable *var);
@@ -49,21 +48,14 @@ namespace Mirb
 				void convert_method(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_handler(Tree::Node *basic_node, Tree::Variable *var);
 				
-				struct CallArgsInfo
-				{
-					Tree::Variable *closure;
-					struct opcode *args;
-				};
-				
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var);
 				
-				struct block *block;
-				Block *_block;
+				Block *block;
 				
 				Tree::Scope *scope;
 				
-				bool has_ensure_block(struct block *block);
-						
+				bool has_ensure_block(Block *block);
+				
 				void to_bytecode(Tree::Node *node, Tree::Variable *var)
 				{
 					(this->*jump_table[node->type()])(node, var);
@@ -76,27 +68,34 @@ namespace Mirb
 				
 				Tree::Variable *create_var();
 				
+				Tree::Variable *self_var();
+				
 				Label *create_label();
+				
+				// TODO: Fix this silly C++ workaround
+				Tree::Variable *null_var()
+				{
+					return 0;
+				}
 				
 				template<class T, typename ...Args> T *gen(Args&&... params)
 				{
 					T *result = new (memory_pool) T(std::forward<Args>(params)...);
-					_block->opcodes.append(result);
+					
+					block->opcodes.append(result);
+					
 					return result;
 				}
 				
-				void gen(Label *label)
+				Label *gen(Label *label)
 				{
-					_block->opcodes.append(label);
+					block->opcodes.append(label);
+					
+					return label;
 				}
 				
-				void call(Tree::Node *self, Symbol *name, Tree::NodeList &arguments, Tree::Scope *scope, Tree::Variable *var);
 				Tree::Variable *block_arg(Tree::Scope *scope);
-				void block_arg_seal(Tree::Variable *closure);
-				CallArgsInfo call_args(Tree::NodeList &arguments, Tree::Scope *scope, Tree::Variable *var);
-				void call_args_seal(CallArgsInfo &info);
-				CallArgsInfo unary_call_args(Tree::Variable *var);
-				CallArgsInfo binary_call_args(Tree::Node *arg, Tree::Variable *var);
+				Tree::Variable *call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var);
 				
 				MemoryPool &memory_pool;
 			public:

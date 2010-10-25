@@ -152,10 +152,10 @@ namespace Mirb
 				#ifdef DEBUG
 					size_t var_count[Variable::Types]; // An array of counters of the different variable types.
 				#endif
+				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.
 				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
-				bool heap_vars; // If any of the variables must be stored on a heap scope.
 				StorageVector<Scope *, FragmentVector> referenced_scopes; // A list of all the scopes this scope requires.
 				
 				SimplerList<Parameter> parameters;

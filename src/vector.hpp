@@ -26,28 +26,33 @@ namespace Mirb
 	{
 		protected:
 			T *table;
-			size_t entries;
-			size_t size;
+			size_t _size;
+			size_t _capacity;
 		
 		public:
 			Vector(size_t initial)
 			{
-				entries = 0;
-				size = 1 << initial;
+				_size = 0;
+				_capacity = 1 << initial;
 				
-				table = (T *)F::alloc(sizeof(T) * size);
+				table = (T *)F::alloc(sizeof(T) * _capacity);
 			}
 			
 			Vector()
 			{
-				entries = 0;
-				size = 0;
+				_size = 0;
+				_capacity = 0;
 				table = 0;
 			}
 			
 			~Vector()
 			{
 				F::free((void *)table);
+			}
+			
+			size_t size()
+			{
+				return _size;
 			}
 			
 			T *first()
@@ -57,26 +62,27 @@ namespace Mirb
 			
 			T *last()
 			{
-				return &table[entries];
+				return &table[_size];
 			}
 			
 			void push(T entry)
 			{
-				if(entries + 1 > size)
+				if(_size + 1 > _capacity)
 				{
 					if(table)
 					{
-						size <<= 1;
-						table = (T *)F::realloc((void *)table, sizeof(T) * (size >> 1), sizeof(T) * size);
+						size_t old_capacity = _capacity;
+						_capacity <<= 1;
+						table = (T *)F::realloc((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
 					}
 					else
 					{
-						size = 1;
-						table = (T *)F::alloc(sizeof(T) * size);
+						_capacity = 1;
+						table = (T *)F::alloc(sizeof(T) * _capacity);
 					}
 				}
 				
-				table[entries++] = entry;
+				table[_size++] = entry;
 			}
 			
 			T *find(T entry)
@@ -164,10 +170,10 @@ namespace Mirb
 		public:
 			StorageVector(size_t initial, typename F::Storage storage) : storage(storage)
 			{
-				this->entries = 0;
-				this->size = 1 << initial;
+				this->_size = 0;
+				this->_capacity = 1 << initial;
 				
-				this->table = (T *)F::alloc(storage, sizeof(T) * this->size);
+				this->table = (T *)F::alloc(storage, sizeof(T) * this->_capacity);
 			}
 			
 			StorageVector(typename F::Storage storage) : storage(storage)
@@ -181,21 +187,22 @@ namespace Mirb
 			
 			void push(T entry)
 			{
-				if(this->entries + 1 > this->size)
+				if(this->_size + 1 > this->_capacity)
 				{
 					if(this->table)
 					{
-						this->size <<= 1;
-						this->table = (T *)F::realloc(storage, (void *)this->table, sizeof(T) * (this->size >> 1), sizeof(T) * this->size);
+						size_t old_capacity = this->_capacity;
+						this->_capacity <<= 1;
+						this->table = (T *)F::realloc(storage, (void *)this->table, sizeof(T) * old_capacity, sizeof(T) * this->_capacity);
 					}
 					else
 					{
-						this->size = 1;
-						this->table = (T *)F::alloc(storage, sizeof(T) * this->size);
+						this->_capacity = 1;
+						this->table = (T *)F::alloc(storage, sizeof(T) * this->_capacity);
 					}
 				}
 				
-				this->table[this->entries++] = entry;
+				this->table[this->_size++] = entry;
 			}
 	};
 };

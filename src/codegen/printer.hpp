@@ -20,6 +20,12 @@ namespace Mirb
 			private:
 				std::string var(Tree::Variable *var);
 				std::string imm(rt_value imm);
+				
+				std::string imm(Symbol *imm)
+				{
+					return this->imm((rt_value)imm);
+				};
+				
 				std::string label(Label *label);
 				std::string raw(size_t imm);
 				std::string block(Block *block);

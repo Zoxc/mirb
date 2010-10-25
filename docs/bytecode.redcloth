@@ -73,28 +73,28 @@ h1. Operations
   Pushes a the heap scope for block @B@ onto the stack.
 
 * _Closure_
-  @V = closure B, Rscopes@
-  Creates an closures for block @B@ with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. It then pops @Rscopes@ from the stack.
+  @V = closure Vself, B, Rscopes@
+  Creates an closures for block @B@ with @Vself@ as self with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. It then pops @Rscopes@ from the stack.
 
 * _Class_
-  @V = class Vself, Iname, Vsuper, B@
-  Defines an class with the constant name @Iname@ on @Vself@ with the superclass @Vsuper@ (or @Object@ if not present). @B@ contains the block for the class. It is immediately executed and the result is stored in @V@.
+  @[V] = class Vself, Iname, Vsuper, B@
+  Defines an class with the constant name @Iname@ on @Vself@ with the superclass @Vsuper@ (or @Object@ if not present). @B@ contains the block for the class. It is immediately executed and the result is stored in @V@ if present.
 
 * _Module_
-  @V = module Vself, Iname, B@
-  Defines an module with the constant name @Iname@ on @Vself@. @B@ contains the block for the module. It is immediately executed and the result is stored in @V@.
+  @[V] = module Vself, Iname, B@
+  Defines an module with the constant name @Iname@ on @Vself@. @B@ contains the block for the module. It is immediately executed and the result is stored in @V@ if present.
 
 * _Method_
-  @V = method Vself, Iname, B@
-  Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method.
+  @method Vself, Iname, B@
+  Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method. The result is stored in @V@ if present.
 
 * _Call_
-  @V = call Vobject, Imethod, Rparameters, Vblock@
-  Looks up the method with the symbol @Imethod@ in @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack.
+  @[V] = call Vobject, Imethod, Rparameters, [Vblock], Rbreak@
+  Looks up the method with the symbol @Imethod@ in @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
 
 * _Super_
-  @V = super Vobject, Vmethod, Rparameters, Vblock@
-  Looks up the method with the symbol in @Vmethod@ in the parent of @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack.
+  @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], Rbreak@
+  Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
 
 * _GetIVar_
   @V = ivar Vself, Iname@
@@ -134,7 +134,7 @@ h1. Operations
 
 * _Handler_
   @handler R@
-  Sets the index of the exception handler which is to be used from this point.
+  Sets the index of the exception handler which is to be used from this point. If @R@ is -1, no handler is used.
 
 * _Unwind_
   @unwind@

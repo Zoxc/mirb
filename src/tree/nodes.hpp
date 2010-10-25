@@ -183,6 +183,11 @@ namespace Mirb
 			
 			NodeList arguments;
 			BlockNode *block; // can be zero
+			size_t break_id;
+			
+			static const size_t no_break_id = -1;
+			
+			InvokeNode() : break_id(no_break_id) {}
 		};
 		
 		struct CallNode:
@@ -200,15 +205,6 @@ namespace Mirb
 			NodeType type() { return Super; }
 			
 			bool pass_args;
-		};
-		
-		struct BreakHandlerNode:
-			public Node
-		{
-			NodeType type() { return BreakHandler; }
-			
-			Node *code;
-			Scope *scope;
 		};
 		
 		struct IfNode:

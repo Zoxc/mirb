@@ -5,5 +5,6 @@ namespace Mirb
 {
 	namespace Tree
 	{
+		const size_t InvokeNode::no_break_id;
 	};
 };

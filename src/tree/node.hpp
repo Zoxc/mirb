@@ -34,7 +34,6 @@ namespace Mirb
 				Invoke,
 				Call,
 				Super,
-				BreakHandler,
 				If,
 				Group,
 				Void,

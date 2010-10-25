@@ -96,7 +96,7 @@ namespace Mirb
 			Tree::BlockNode *parse_block();
 			void parse_arguments(Tree::NodeList &arguments, bool has_args, bool *parenthesis);
 			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args);
-			Tree::Node *secure_block(Tree::BlockNode *result, Tree::Node *parent);
+			Tree::Node *secure_block(Tree::BlockNode *result, Tree::InvokeNode *parent);
 			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, bool default_var);
 			Tree::Node *parse_lookup_chain();
 			Tree::Node *parse_yield();

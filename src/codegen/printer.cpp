@@ -10,7 +10,7 @@ namespace Mirb
 		std::string ByteCodePrinter::var(Tree::Variable *var)
 		{
 			if(!var)
-				return "%";
+				return "nil";
 			
 			std::stringstream result;
 			
@@ -144,7 +144,7 @@ namespace Mirb
 				{
 					auto op = (ClosureOp *)opcode;
 					
-					return var(op->var) + " = closure " + block(op->block) + ", " + raw(op->scope_count);
+					return var(op->var) + " = closure " + var(op->self) + ", " + block(op->block) + ", " + raw(op->scope_count);
 				}
 				
 				case Opcode::Class:
@@ -165,21 +165,21 @@ namespace Mirb
 				{
 					auto op = (MethodOp *)opcode;
 					
-					return var(op->var) + " = method " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
+					return "method " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
 				}
 				
 				case Opcode::Call:
 				{
 					auto op = (CallOp *)opcode;
 					
-					return var(op->var) + " = call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block);
+					return var(op->var) + " = call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
 				}
 				
 				case Opcode::Super:
 				{
 					auto op = (SuperOp *)opcode;
 					
-					return var(op->var) + " = super " + var(op->obj) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block);
+					return var(op->var) + " = super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
 				}
 				
 				case Opcode::GetIVar:
@@ -245,6 +245,13 @@ namespace Mirb
 					return label(op) + ":";
 				}
 				
+				case Opcode::Handler:
+				{
+					auto op = (HandlerOp *)opcode;
+					
+					return "handler " + raw(op->id);
+				}
+				
 				case Opcode::Unwind:
 				{
 					return "unwind";
@@ -275,7 +282,7 @@ namespace Mirb
 				{
 					auto op = (StringOp *)opcode;
 					
-					return var(op->var) + " = string '" + op->str + "'";
+					return var(op->var) + " = string '" + (const char *)op->str + "'";
 				}
 				
 				case Opcode::Interpolate:

@@ -6,6 +6,7 @@
 namespace Mirb
 {
 	class MemoryPool;
+	class Symbol;
 	
 	namespace Tree
 	{
@@ -121,10 +122,11 @@ namespace Mirb
 			public Opcode
 		{
 			Tree::Variable *var;
+			Tree::Variable *self;
 			Block *block;
 			size_t scope_count;
 			
-			ClosureOp(Tree::Variable *var, Block *block, size_t scope_count) : Opcode(Closure), var(var), block(block), scope_count(scope_count) {}
+			ClosureOp(Tree::Variable *var, Tree::Variable *self, Block *block, size_t scope_count) : Opcode(Closure), var(var), self(self), block(block), scope_count(scope_count) {}
 		};
 		
 		struct ClassOp:
@@ -132,11 +134,11 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *self;
-			rt_value name;
+			Symbol *name;
 			Tree::Variable *super;
 			Block *block;
 			
-			ClassOp(Tree::Variable *var, Tree::Variable *self, rt_value name, Tree::Variable *super, Block *block) : Opcode(Class), var(var), self(self), name(name), super(super), block(block) {}
+			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Block *block) : Opcode(Class), var(var), self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
@@ -144,21 +146,20 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *self;
-			rt_value name;
+			Symbol *name;
 			Block *block;
 			
-			ModuleOp(Tree::Variable *var, Tree::Variable *self, rt_value name, Block *block) : Opcode(Module), var(var), self(self), name(name), block(block) {}
+			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Block *block) : Opcode(Module), var(var), self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
 			public Opcode
 		{
-			Tree::Variable *var;
 			Tree::Variable *self;
-			rt_value name;
+			Symbol *name;
 			Block *block;
 			
-			MethodOp(Tree::Variable *var, Tree::Variable *self, rt_value name, Block *block) : Opcode(Method), var(var), self(self), name(name), block(block) {}
+			MethodOp(Tree::Variable *self, Symbol *name, Block *block) : Opcode(Method), self(self), name(name), block(block) {}
 		};
 		
 		struct CallOp:
@@ -166,23 +167,26 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *obj;
-			rt_value method;
+			Symbol *method;
 			size_t param_count;
 			Tree::Variable *block;
+			size_t break_id;
 			
-			CallOp(Tree::Variable *var, Tree::Variable *obj, rt_value method, size_t param_count, Tree::Variable *block) : Opcode(Call), var(var), obj(obj), method(method), param_count(param_count), block(block) {}
+			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block, size_t break_id) : Opcode(Call), var(var), obj(obj), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct SuperOp:
 			public Opcode
 		{
 			Tree::Variable *var;
-			Tree::Variable *obj;
+			Tree::Variable *self;
+			Tree::Variable *module;
 			Tree::Variable *method;
 			size_t param_count;
 			Tree::Variable *block;
+			size_t break_id;
 			
-			SuperOp(Tree::Variable *var, Tree::Variable *obj, Tree::Variable *method, size_t param_count, Tree::Variable *block) : Opcode(Super), var(var), obj(obj), method(method), param_count(param_count), block(block) {}
+			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : Opcode(Super), var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct GetIVarOp:
@@ -190,19 +194,19 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *self;
-			rt_value name;
+			Symbol *name;
 			
-			GetIVarOp(Tree::Variable *var, Tree::Variable *self, rt_value name) : Opcode(GetIVar), var(var), self(self), name(name) {}
+			GetIVarOp(Tree::Variable *var, Tree::Variable *self, Symbol *name) : Opcode(GetIVar), var(var), self(self), name(name) {}
 		};
 		
 		struct SetIVarOp:
 			public Opcode
 		{
 			Tree::Variable *self;
-			rt_value name;
+			Symbol *name;
 			Tree::Variable *var;
 			
-			SetIVarOp(Tree::Variable *self, rt_value name, Tree::Variable *var) : Opcode(SetIVar), self(self), name(name), var(var) {}
+			SetIVarOp(Tree::Variable *self, Symbol *name, Tree::Variable *var) : Opcode(SetIVar), self(self), name(name), var(var) {}
 		};
 		
 		struct GetConstOp:
@@ -210,19 +214,19 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *obj;
-			rt_value name;
+			Symbol *name;
 			
-			GetConstOp(Tree::Variable *var, Tree::Variable *obj, rt_value name) : Opcode(GetConst), var(var), obj(obj), name(name) {}
+			GetConstOp(Tree::Variable *var, Tree::Variable *obj, Symbol *name) : Opcode(GetConst), var(var), obj(obj), name(name) {}
 		};
 		
 		struct SetConstOp:
 			public Opcode
 		{
 			Tree::Variable *obj;
-			rt_value name;
+			Symbol *name;
 			Tree::Variable *var;
 			
-			SetConstOp(Tree::Variable *obj, rt_value name, Tree::Variable *var) : Opcode(SetConst), obj(obj), name(name), var(var) {}
+			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : Opcode(SetConst), obj(obj), name(name), var(var) {}
 		};
 		
 		struct BranchIfOp:
@@ -269,6 +273,14 @@ namespace Mirb
 			Label() : Opcode(Opcode::Label) {}
 		};
 		
+		struct HandlerOp:
+			public Opcode
+		{
+			size_t id;
+			
+			HandlerOp(size_t id) : Opcode(Handler), id(id) {}
+		};
+		
 		struct UnwindOp:
 			public Opcode
 		{
@@ -307,9 +319,9 @@ namespace Mirb
 			public Opcode
 		{
 			Tree::Variable *var;
-			const char *str;
+			const char_t *str;
 			
-			StringOp(Tree::Variable *var, const char *str) : Opcode(String), var(var), str(str) {}
+			StringOp(Tree::Variable *var, const char_t *str) : Opcode(String), var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:

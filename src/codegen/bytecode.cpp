@@ -40,7 +40,6 @@ namespace Mirb
 			0, // Invoke
 			&ByteCodeGenerator::convert_call,
 			&ByteCodeGenerator::convert_super,
-			&ByteCodeGenerator::convert_break_handler,
 			&ByteCodeGenerator::convert_if,
 			&ByteCodeGenerator::convert_group,
 			0, // Void
@@ -61,7 +60,7 @@ namespace Mirb
 			{
 				auto node = (Tree::StringNode *)basic_node;
 				
-				block_push(block, B_STRING, (rt_value)var, (rt_value)node->string, 0);
+				gen<StringOp>(var, node->string);
 			}
 		}
 		
@@ -79,29 +78,25 @@ namespace Mirb
 				{
 					parameters++;
 					
-					block_push(block, B_STRING, (rt_value)temp, (rt_value)i().string, 0);
-					block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+					gen<StringOp>(temp, i().string);
+					gen<PushOp>(temp);
 				}
 				
 				parameters++;
 				
 				to_bytecode(i().group, temp);
-				block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+				gen<PushOp>(temp);
 			}
 		
 			if(strlen((const char *)node->tail))
 			{
 				parameters++;
 				
-				block_push(block, B_STRING, (rt_value)temp, (rt_value)node->tail, 0);
-				block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+				gen<StringOp>(temp, node->tail);
+				gen<PushOp>(temp);
 			}
 			
-			struct opcode *args = block_push(block, B_ARGS, parameters, 0, 0);
-			
-			block_push(block, B_INTERPOLATE, (rt_value)var, 0, 0);
-			
-			block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);
+			gen<InterpolateOp>(var, parameters);
 		}
 		
 		void ByteCodeGenerator::convert_integer(Tree::Node *basic_node, Tree::Variable *var)
@@ -131,20 +126,22 @@ namespace Mirb
 			
 			auto node = (Tree::IVarNode *)basic_node;
 			
-			block->self_ref++;
-			block_push(block, B_GET_IVAR, (rt_value)var, (rt_value)node->name, 0);
+			gen<GetIVarOp>(var, self_var(), node->name);
 		}
 		
 		void ByteCodeGenerator::convert_constant(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::ConstantNode *)basic_node;
 			
-			to_bytecode(node->obj, var);
+			if(node->obj)
+				to_bytecode(node->obj, var);
+			else if(var)
+				gen<LoadOp>(var, rt_Object);
 			
 			if(!var)
 				return;
-			
-			block_push(block, B_GET_CONST, (rt_value)var, (rt_value)var, (rt_value)node->name);
+				
+			gen<GetConstOp>(var, var, node->name);
 		}
 		
 		void ByteCodeGenerator::convert_unary_op(Tree::Node *basic_node, Tree::Variable *var)
@@ -155,14 +152,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			CallArgsInfo info = unary_call_args(0);
-			
-			block_push(block, B_CALL, (rt_value)temp, rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 0);
-			
-			call_args_seal(info);
-			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
+			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 0, null_var(), Tree::InvokeNode::no_break_id);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var)
@@ -178,16 +168,13 @@ namespace Mirb
 				Label *label_true = create_label();
 				Label *label_end = create_label();
 				
-				block_push(block, B_TEST, (rt_value)temp, 0, 0);
+				gen<BranchIfOp>(label_true, temp);
 				
-				block_push(block, B_JMPT, (rt_value)label_true, 0, 0);
-				
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
-				block_push(block, B_JMP, (rt_value)label_end, 0, 0);
+				gen<LoadOp>(var, RT_TRUE);
+				gen<BranchOp>(label_end);
 				
 				gen(label_true);
-				
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_FALSE, 0);
+				gen<LoadOp>(var, RT_FALSE);
 				
 				gen(label_end);
 			}
@@ -205,18 +192,17 @@ namespace Mirb
 				return;
 			}
 			
-			Tree::Variable *temp = reuse(var);
+			Tree::Variable *left = reuse(var);
 			
-			to_bytecode(node->left, temp);
+			to_bytecode(node->left, left);
 			
-			CallArgsInfo info = binary_call_args(node->right, 0);
+			Tree::Variable *right = create_var();
 			
-			block_push(block, B_CALL, (rt_value)temp, rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 0);
+			to_bytecode(node->right, right);
 			
-			call_args_seal(info);
+			gen<PushOp>(right);
 			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
+			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 1, null_var(), Tree::InvokeNode::no_break_id);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var)
@@ -229,8 +215,10 @@ namespace Mirb
 			
 			Label *label_end = create_label();
 			
-			block_push(block, B_TEST, (rt_value)temp, 0, 0);
-			block_push(block, (node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR) ? B_JMPT : B_JMPF, (rt_value)label_end, 0, 0);
+			if(node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR)
+				gen<BranchIfOp>(label_end, temp);
+			else
+				gen<BranchUnlessOp>(label_end, temp);
 			
 			to_bytecode(node->right, var);
 			
@@ -263,8 +251,8 @@ namespace Mirb
 					
 					to_bytecode(node->right, temp);
 						
-					block->self_ref++;
-					block_push(block, B_SET_IVAR, (rt_value)variable->name, (rt_value)temp, 0);
+					gen<SetIVarOp>(self_var(), variable->name, temp);
+					
 					return;
 				}
 				
@@ -273,13 +261,17 @@ namespace Mirb
 					auto variable = (Tree::ConstantNode *)node->left;
 					
 					Tree::Variable *value = reuse(var);
-					Tree::Variable *self = create_var();
+					Tree::Variable *obj = create_var();
 					
-					to_bytecode(variable->obj, self);
+					if(variable->obj)
+						to_bytecode(variable->obj, obj);
+					else
+						gen<LoadOp>(obj, rt_Object);
 					
 					to_bytecode(node->right, value);
 					
-					block_push(block, B_SET_CONST, (rt_value)self, (rt_value)variable->name, (rt_value)value);
+					gen<SetConstOp>(obj, variable->name, value);
+					
 					return;	
 				}	
 				
@@ -291,28 +283,25 @@ namespace Mirb
 		void ByteCodeGenerator::convert_self(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if(var)
-			{
-				block->self_ref++;
-				block_push(block, B_SELF, (rt_value)var, 0, 0);
-			}
+				gen<MoveOp>(var, self_var());
 		}
 		
 		void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if (var)
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
+				gen<LoadOp>(var, RT_NIL);
 		}
 		
 		void ByteCodeGenerator::convert_true(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if (var)
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_TRUE, 0);
+				gen<LoadOp>(var, RT_TRUE);
 		}
 		
 		void ByteCodeGenerator::convert_false(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if (var)
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_FALSE, 0);
+				gen<LoadOp>(var, RT_FALSE);
 		}
 		
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, Tree::Variable *var)
@@ -335,94 +324,62 @@ namespace Mirb
 			{
 				to_bytecode(*i, temp);
 				
-				block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+				gen<PushOp>(temp);
 				
 				entries++;
 			}
 			
-			struct opcode *args = block_push(block, B_ARGS, (rt_value)entries, 0, 0);
-			
-			block_push(block, B_ARRAY, (rt_value)var, 0, 0);
-			
-			block_push(block, B_ARGS_POP, (rt_value)args, 2, 0);		
+			gen<ArrayOp>(var, entries);	
 		}
 		
 		void ByteCodeGenerator::convert_call(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::CallNode *)basic_node;
 			
-			call(node->object, node->method, node->arguments, node->block ? node->block->scope : 0, var);
+			Tree::Variable *obj = reuse(var);
+			
+			to_bytecode(node->object, obj);
+			
+			size_t param_count;
+			
+			Tree::Variable *closure = call_args(node->arguments, param_count, node->block ? node->block->scope : 0, 0);
+			
+			gen<CallOp>(var, obj, node->method, param_count, closure, node->break_id);
+			
+			if(node->break_id != Tree::InvokeNode::no_break_id)
+				block->final->break_targets[node->break_id] = (void *)gen(create_label());
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::SuperNode *)basic_node;
 			
-			block->self_ref++;
-			
 			if(node->pass_args)
 			{
 				Tree::Variable *closure = scope->owner->block_parameter;
 				
-				/*
-				 * Push arguments
-				 */
+				// push arguments
 				
-				for(auto i = scope->owner->parameters.begin(); i; ++i)
+				size_t param_count = 0;
+				
+				for(auto i = scope->owner->parameters.begin(); i; ++i, ++param_count)
 				{
-					block_push(block, B_PUSH, (rt_value)*i, 0, 0);
+					gen<PushOp>(*i);
 				}
 				
-				struct opcode *args = block_push(block, B_CALL_ARGS, (rt_value)block->owner->parameters.size, 0, 0);
-				
-				block_push(block, B_SUPER, (rt_value)closure, 0, 0);
-				
-				block_push(block, B_CALL_ARGS_POP, (rt_value)args, 0, 0);
-				
-				block_arg_seal(closure);
+				gen<SuperOp>(var, self_var(), scope->super_module_var, scope->super_name_var, param_count, closure, node->break_id);
 			}
 			else
 			{
-				CallArgsInfo info = call_args(node->arguments, node->block ? node->block->scope : 0, var);
+				size_t param_count;
 				
-				block_push(block, B_SUPER, (rt_value)info.closure, 0, 0);
+				Tree::Variable *closure = call_args(node->arguments, param_count, scope, 0);
 				
-				call_args_seal(info);
+				gen<SuperOp>(var, self_var(), scope->super_module_var, scope->super_name_var, param_count, closure, node->break_id);
 			}
 			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
-		}
-		
-		void ByteCodeGenerator::convert_break_handler(Tree::Node *basic_node, Tree::Variable *var)
-		{
-			auto node = (Tree::BreakHandlerNode *)basic_node;
-			
-			Tree::Scope *child = node->scope;
-			
-			to_bytecode(node->code, var);
-			
-			Label *label = 0;
-			
-			if(var)
-			{
-				/*
-				 * Skip the break handler
-				 */
-				label = create_label();
-				block_push(block, B_JMP, (rt_value)label, 0, 0);
-			}
-			
-			/*
-			 * Output target label
-			 */
-			block->data->break_targets[child->break_id] = (void *)block_emmit_label(block, block_get_flush_label(block));
-			
-			if(var)
-			{
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
-				gen(label);
-			}
+			if(node->break_id != Tree::InvokeNode::no_break_id)
+				block->final->break_targets[node->break_id] = (void *)gen(create_label());
 		}
 		
 		void ByteCodeGenerator::convert_if(Tree::Node *basic_node, Tree::Variable *var)
@@ -434,8 +391,10 @@ namespace Mirb
 			
 			to_bytecode(node->left, temp);
 			
-			block_push(block, B_TEST, (rt_value)temp, 0, 0);
-			block_push(block, node->inverted ? B_JMPT : B_JMPF, (rt_value)label_else, 0, 0);
+			if(node->inverted)
+				gen<BranchIfOp>(label_else, temp);
+			else
+				gen<BranchUnlessOp>(label_else, temp);
 			
 			Label *label_end = create_label();
 			
@@ -445,20 +404,22 @@ namespace Mirb
 				Tree::Variable *result_right = create_var();
 
 				to_bytecode(node->middle, result_left);
-				block_push(block, B_MOV, (rt_value)var, (rt_value)result_left, 0);
-				block_push(block, B_JMP, (rt_value)label_end, 0, 0);
+				
+				gen<MoveOp>(var, result_left);
+				gen<BranchOp>(label_end);
 
 				gen(label_else);
 
 				to_bytecode(node->right, result_right);
-				block_push(block, B_MOV, (rt_value)var, (rt_value)result_right, 0);
-
+				
+				gen<MoveOp>(var, result_right);
 				gen(label_end);
 			}
 			else
 			{
 				to_bytecode(node->middle, 0);
-				block_push(block, B_JMP, (rt_value)label_end, 0, 0);
+				
+				gen<BranchOp>(label_end);
 
 				gen(label_else);
 
@@ -475,8 +436,8 @@ namespace Mirb
 			if(node->statements.empty())
 			{
 				if (var)
-					block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
-					
+					gen<LoadOp>(var, RT_NIL);
+				
 				return;
 			}
 			
@@ -494,7 +455,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			if(block->type == S_CLOSURE)
+			if(scope->type == Tree::Scope::Closure)
 			{
 				// TODO: only raise if this is a proc, not lambda
 				
@@ -502,14 +463,17 @@ namespace Mirb
 
 				//block_push(block, B_TEST_PROC, 0, 0, 0);
 				//block_push(block, B_JMPNE, label, 0, 0);
-				block_push(block, B_RAISE_RETURN, (rt_value)temp, (rt_value)block->owner->data, 0);
+				gen<UnwindReturnOp>(temp, scope->owner->block->final);
 
 				//block_emmit_label(block, label);
 			}
 			else if(has_ensure_block(block))
-				block_push(block, B_RAISE_RETURN, (rt_value)temp, (rt_value)block->data, 0);
+				gen<UnwindReturnOp>(temp, block->final);
 			else
-				block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+			{
+				gen<MoveOp>(block->return_var, temp);
+				gen<BranchOp>(block->epilog);
+			}
 		}
 		
 		void ByteCodeGenerator::convert_break(Tree::Node *basic_node, Tree::Variable *var)
@@ -520,7 +484,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			block_push(block, B_RAISE_BREAK, (rt_value)temp, (rt_value)block->parent->data, block->break_id);
+			gen<UnwindBreakOp>(temp, scope->parent->block->final, scope->break_id);
 		}
 		
 		void ByteCodeGenerator::convert_next(Tree::Node *basic_node, Tree::Variable *var)
@@ -531,70 +495,61 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			block_push(block, B_RETURN, (rt_value)temp, 0, 0);
+			gen<MoveOp>(block->return_var, temp);
+			gen<BranchOp>(block->epilog);
 		}
 		
 		void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			block_push(block, B_REDO, 0, 0, 0);
+			gen<BranchOp>(block->prolog);
 		}
 		
 		void ByteCodeGenerator::convert_class(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::ClassNode *)basic_node;
 			
-			block->self_ref++;
+			Tree::Variable *super;
 			
 			if(node->super)
 			{
-				Tree::Variable *temp = reuse(var);
+				super = reuse(var);
 				
-				to_bytecode(node->super, temp);
-				
-				block_push(block, B_CLASS, (rt_value)node->name, (rt_value)temp, (rt_value)to_bytecode(node->scope));
+				to_bytecode(node->super, super);
 			}
 			else
-				block_push(block, B_CLASS, (rt_value)node->name, 0, (rt_value)to_bytecode(node->scope));
+				super = 0;
 			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
+			gen<ClassOp>(var, self_var(), node->name, super, to_bytecode(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::ModuleNode *)basic_node;
 			
-			block->self_ref++;
-			
-			block_push(block, B_MODULE, (rt_value)node->name, (rt_value)to_bytecode(node->scope), 0);
-			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
+			gen<ModuleOp>(var, self_var(), node->name, to_bytecode(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::MethodNode *)basic_node;
 			
-			block->self_ref++;
+			gen<MethodOp>(self_var(), node->name, to_bytecode(node->scope));
 			
-			block_push(block, B_METHOD, (rt_value)node->name, (rt_value)to_bytecode(node->scope), 0);
-
-			if (var)
-				block_push(block, B_MOV_IMM, (rt_value)var, RT_NIL, 0);
+			if(var)
+				gen<LoadOp>(var, RT_NIL);
 		}
 		
 		void ByteCodeGenerator::convert_handler(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::HandlerNode *)basic_node;
 			
-			block->require_exceptions = true; // duh
+			scope->require_exceptions = true; // duh
 			
 			/*
 			 * Allocate and setup the new exception block
 			 */
 			struct exception_block *exception_block = (struct exception_block *)malloc(sizeof(struct exception_block));
-			size_t index = block->exception_blocks.size;
+			size_t index = block->final->exception_blocks.size();
 			size_t old_index = block->current_exception_block_id;
 			
 			exception_block->parent_index = old_index;
@@ -604,25 +559,25 @@ namespace Mirb
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
-				exception_block->ensure_label = block_get_flush_label(block);
+				exception_block->ensure_label = (void *)create_label();
 			else
 				exception_block->ensure_label = 0;
 			
 			vec_init(rt_exception_handlers, &exception_block->handlers);
 
-			vec_push(rt_exception_blocks, &block->exception_blocks, exception_block);
+			block->final->exception_blocks.push(exception_block);
 			
 			/*
 			 * Use the new exception block
 			 */
 			block->current_exception_block = exception_block;
 			block->current_exception_block_id = index;
-			block_push(block, B_HANDLER, index, 0, 0);
+			gen<HandlerOp>(index);
 			
 			/*
 			 * Output the regular code
 			 */
-			exception_block->block_label = block_emmit_label(block, block_get_flush_label(block));
+			exception_block->block_label = (void *)gen(create_label());
 			
 			to_bytecode(node->code, var);
 			
@@ -632,7 +587,7 @@ namespace Mirb
 				 * Skip the rescue block
 				 */
 				Label *ok_label = create_label();
-				block_push(block, B_JMP, (rt_value)ok_label, 0, 0);
+				gen<BranchOp>(ok_label);
 				
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
@@ -641,12 +596,12 @@ namespace Mirb
 				{
 					struct runtime_exception_handler *handler = (struct runtime_exception_handler *)malloc(sizeof(struct runtime_exception_handler));
 					handler->common.type = E_RUNTIME_EXCEPTION;
-					handler->rescue_label = block_emmit_label(block, block_get_flush_label(block));
+					handler->rescue_label = (void *)gen(create_label());
 					vec_push(rt_exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
 					
 					to_bytecode(i().group, var);
 					
-					block_push(block, B_JMP, (rt_value)ok_label, 0, 0);
+					gen<BranchOp>(ok_label);
 				}
 				
 				gen(ok_label);
@@ -657,21 +612,21 @@ namespace Mirb
 			 */
 			block->current_exception_block_id = old_index;
 			block->current_exception_block = exception_block->parent;
-			block_push(block, B_HANDLER, old_index, 0, 0);
+			gen<HandlerOp>(old_index);
 			
 			/*
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
 			{
-				exception_block->ensure_label = block_emmit_label(block, (struct opcode *)exception_block->ensure_label);
+				gen((Label *)exception_block->ensure_label);
 				
 				/*
 				 * Output ensure node
 				 */
 				to_bytecode(node->ensure_group, 0);
 				
-				block_push(block, B_ENSURE_RET, index, 0, 0);
+				gen<UnwindOp>();
 			}
 		}
 		
@@ -687,18 +642,19 @@ namespace Mirb
 			scope->block = block;
 			
 			Tree::Scope *prev_scope = this->scope;
-			Block *prev_block = this->_block;
+			Block *prev_block = this->block;
 			
 			this->scope = scope;
-			this->_block = block;
+			this->block = block;
 			
-			Tree::Variable *result = create_var();
+			block->return_var = create_var();
 			
 			for(auto i = scope->zsupers.begin(); i; ++i)
 			{
 				scope->require_args(*i);
 			}
 			
+			block->prolog = create_label();
 			block->epilog = create_label();
 			
 			if(scope->break_targets)
@@ -708,8 +664,11 @@ namespace Mirb
 			}
 			else
 				block->final->break_targets = 0;
+				
 			
-			to_bytecode(scope->group, result);
+			gen(block->prolog);
+			
+			to_bytecode(scope->group, block->return_var);
 			
 			gen(block->epilog);
 			
@@ -719,16 +678,16 @@ namespace Mirb
 				std::cout << printer.print_block(block);
 			#endif
 			
-			this->_block = prev_block;
+			this->block = prev_block;
 			this->scope = prev_scope;
 			
 			return block;
 		}
 		
-		bool ByteCodeGenerator::has_ensure_block(struct block *block)
+		bool ByteCodeGenerator::has_ensure_block(Block *block)
 		{
 			struct exception_block *exception_block = block->current_exception_block;
-
+			
 			while(exception_block)
 			{
 				if(exception_block->ensure_label != (void *)-1)
@@ -736,7 +695,7 @@ namespace Mirb
 
 				exception_block = exception_block->parent;
 			}
-
+			
 			return false;
 		}
 		
@@ -745,31 +704,29 @@ namespace Mirb
 			Label *result = new (memory_pool) Label;
 			
 			#ifdef DEBUG
-				result->id = _block->label_count++;
+				result->id = block->label_count++;
 			#endif
 			
 			return result;
 		}
 		
-		Tree::Variable *ByteCodeGenerator::create_var()
+		Tree::Variable *ByteCodeGenerator::self_var()
 		{
-			return new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
+			if(!block->self_var)
+				block->self_var = create_var();
+			
+			return block->self_var;
 		}
 		
-		void ByteCodeGenerator::call(Tree::Node *self, Symbol *name, Tree::NodeList &arguments, Tree::Scope *scope, Tree::Variable *var)
+		Tree::Variable *ByteCodeGenerator::create_var()
 		{
-			Tree::Variable *self_var = reuse(var);
+			auto var = new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
 			
-			to_bytecode(self, self_var);
+			#ifdef DEBUG
+				var->index = scope->var_count[Tree::Variable::Temporary]++;
+			#endif
 			
-			CallArgsInfo info = call_args(arguments, scope, 0);
-			
-			block_push(block, B_CALL, (rt_value)self_var, (rt_value)name, (rt_value)info.closure);
-			
-			call_args_seal(info);
-			
-			if (var)
-				block_push(block, B_STORE, (rt_value)var, 0, 0);
+			return var;
 		}
 		
 		Tree::Variable *ByteCodeGenerator::block_arg(Tree::Scope *scope)
@@ -778,36 +735,22 @@ namespace Mirb
 			
 			if(scope)
 			{
-				block->self_ref++;
-				
 				closure = create_var();
 				Block *block_attach = to_bytecode(scope);
 				
 				size_t scopes = 0;
 				
 				for(auto i = scope->referenced_scopes.begin(); i; ++i, ++scopes)
-					block_push(block, B_PUSH_SCOPE, (rt_value)i()->block, 0, 0);
+					gen<PushScopeOp>(i()->block);
 				
-				struct opcode *args = block_push(block, B_ARGS, scopes, 0, 0);
-				
-				block_push(block, B_CLOSURE, (rt_value)closure, (rt_value)block_attach, 0);
-				
-				block_push(block, B_ARGS_POP, (rt_value)args, 5, 0);
+				gen<ClosureOp>(closure, self_var(), block_attach, scopes);
 			}
 			
 			return closure;
 		}
-
-		void ByteCodeGenerator::block_arg_seal(Tree::Variable *closure)
+		
+		Tree::Variable *ByteCodeGenerator::call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var)
 		{
-			if(closure)
-				block_push(block, B_SEAL, (rt_value)closure, 0, 0);
-		}
-
-		ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::call_args(Tree::NodeList &arguments, Tree::Scope *scope, Tree::Variable *var)
-		{
-			CallArgsInfo result;
-			
 			size_t parameters = 0;
 			
 			Tree::Variable *temp = reuse(var);
@@ -818,36 +761,12 @@ namespace Mirb
 				
 				to_bytecode(*i, temp);
 				
-				block_push(block, B_PUSH, (rt_value)temp, 0, 0);
+				gen<PushOp>(temp);
 			}
 			
-			result.closure = block_arg(scope);
-			result.args = block_push(block, B_CALL_ARGS, parameters, (rt_value)result.closure, 0);
+			param_count = parameters;
 			
-			return result;
-		}
-		
-		void ByteCodeGenerator::call_args_seal(CallArgsInfo & info)
-		{
-			block_push(block, B_CALL_ARGS_POP, (rt_value)info.args, 0, 0);
-			
-			block_arg_seal(info.closure);
-		}
-		
-		ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::unary_call_args(Tree::Variable *var)
-		{
-			Tree::NodeList list;
-			
-			return call_args(list, 0, var);
-		}
-		
-		ByteCodeGenerator::CallArgsInfo ByteCodeGenerator::binary_call_args(Tree::Node *arg, Tree::Variable *var)
-		{
-			Tree::NodeList list;
-			
-			list.append(arg);
-			
-			return call_args(list, 0, var);
+			return block_arg(scope);
 		}
 	};
 };

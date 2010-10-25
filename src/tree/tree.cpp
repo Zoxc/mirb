@@ -24,6 +24,20 @@ namespace Mirb
 		
 		Scope::Scope(Fragment *fragment, Scope *parent, Type type) : fragment(fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment)
 		{
+			require_exceptions = false;
+			break_targets = 0;
+			can_break = false;
+			heap_vars = 0;
+			
+			#ifdef DEBUG
+				for(size_t i = 0; i < (size_t)Variable::Types; i++)
+					var_count[i] = 0;
+			#endif
+			
+			block_parameter = 0;
+			super_module_var = 0;
+			super_name_var = 0;
+			
 			owner = parent ? parent->owner : 0;
 		}
 	
@@ -52,7 +66,7 @@ namespace Mirb
 			if(var->type != Variable::Heap)
 			{
 				var->type = Variable::Heap;
-				var->index = owner->var_count[Variable::Heap]++;
+				var->index = owner->heap_vars++;
 				var->owner = owner;
 				
 				owner->heap_vars = true;
