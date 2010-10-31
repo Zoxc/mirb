@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\globals.hpp" />
+    <ClInclude Include="..\..\hash.hpp" />
+    <ClInclude Include="..\..\runtime\classes.hpp" />
+    <ClInclude Include="..\..\runtime\classes\array.hpp" />
+    <ClInclude Include="..\..\runtime\classes\bool.hpp" />
+    <ClInclude Include="..\..\runtime\classes\class.hpp" />
+    <ClInclude Include="..\..\runtime\classes\exception.hpp" />
+    <ClInclude Include="..\..\runtime\classes\fixnum.hpp" />
+    <ClInclude Include="..\..\runtime\classes\module.hpp" />
+    <ClInclude Include="..\..\runtime\classes\object.hpp" />
+    <ClInclude Include="..\..\runtime\classes\proc.hpp" />
+    <ClInclude Include="..\..\runtime\classes\string.hpp" />
+    <ClInclude Include="..\..\runtime\classes\symbol.hpp" />
+    <ClInclude Include="..\..\runtime\code_heap.hpp" />
+    <ClInclude Include="..\..\runtime\constant.hpp" />
+    <ClInclude Include="..\..\runtime\exceptions.hpp" />
+    <ClInclude Include="..\..\runtime\gc.hpp" />
+    <ClInclude Include="..\..\runtime\modules\kernel.hpp" />
+    <ClInclude Include="..\..\runtime\runtime.hpp" />
+    <ClInclude Include="..\..\runtime\x86.hpp" />
+    <ClInclude Include="..\..\src\block.hpp" />
+    <ClInclude Include="..\..\src\codegen\block.hpp" />
+    <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
+    <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
+    <ClInclude Include="..\..\src\codegen\printer.hpp" />
+    <ClInclude Include="..\..\src\common.hpp" />
+    <ClInclude Include="..\..\src\compiler.hpp" />
+    <ClInclude Include="..\..\src\gc.hpp" />
+    <ClInclude Include="..\..\src\hash-table.hpp" />
+    <ClInclude Include="..\..\src\lexer\input.hpp" />
+    <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
+    <ClInclude Include="..\..\src\lexer\lexer.hpp" />
+    <ClInclude Include="..\..\src\list.hpp" />
+    <ClInclude Include="..\..\src\memory-pool.hpp" />
+    <ClInclude Include="..\..\src\message.hpp" />
+    <ClInclude Include="..\..\src\parser\parser.hpp" />
+    <ClInclude Include="..\..\src\range.hpp" />
+    <ClInclude Include="..\..\src\simple-list.hpp" />
+    <ClInclude Include="..\..\src\simpler-list.hpp" />
+    <ClInclude Include="..\..\src\symbol-pool.hpp" />
+    <ClInclude Include="..\..\src\tree\node.hpp" />
+    <ClInclude Include="..\..\src\tree\nodes.hpp" />
+    <ClInclude Include="..\..\src\tree\printer.hpp" />
+    <ClInclude Include="..\..\src\tree\tree.hpp" />
+    <ClInclude Include="..\..\src\vector.hpp" />
+    <ClInclude Include="..\..\vector.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\main.cpp" />
+    <ClCompile Include="..\..\runtime\classes.cpp" />
+    <ClCompile Include="..\..\runtime\classes\array.cpp" />
+    <ClCompile Include="..\..\runtime\classes\bool.cpp" />
+    <ClCompile Include="..\..\runtime\classes\class.cpp" />
+    <ClCompile Include="..\..\runtime\classes\exception.cpp" />
+    <ClCompile Include="..\..\runtime\classes\fixnum.cpp" />
+    <ClCompile Include="..\..\runtime\classes\module.cpp" />
+    <ClCompile Include="..\..\runtime\classes\object.cpp" />
+    <ClCompile Include="..\..\runtime\classes\proc.cpp" />
+    <ClCompile Include="..\..\runtime\classes\string.cpp" />
+    <ClCompile Include="..\..\runtime\classes\symbol.cpp" />
+    <ClCompile Include="..\..\runtime\code_heap.cpp" />
+    <ClCompile Include="..\..\runtime\constant.cpp" />
+    <ClCompile Include="..\..\runtime\exceptions.cpp" />
+    <ClCompile Include="..\..\runtime\modules\kernel.cpp" />
+    <ClCompile Include="..\..\runtime\runtime.cpp" />
+    <ClCompile Include="..\..\src\codegen\block.cpp" />
+    <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
+    <ClCompile Include="..\..\src\codegen\printer.cpp" />
+    <ClCompile Include="..\..\src\compiler.cpp" />
+    <ClCompile Include="..\..\src\gc.cpp" />
+    <ClCompile Include="..\..\src\lexer\handlers.cpp" />
+    <ClCompile Include="..\..\src\lexer\lexeme.cpp" />
+    <ClCompile Include="..\..\src\lexer\lexer.cpp" />
+    <ClCompile Include="..\..\src\lexer\numbers.cpp" />
+    <ClCompile Include="..\..\src\lexer\strings.cpp" />
+    <ClCompile Include="..\..\src\memory-pool.cpp" />
+    <ClCompile Include="..\..\src\message.cpp" />
+    <ClCompile Include="..\..\src\parser\calls.cpp" />
+    <ClCompile Include="..\..\src\parser\control-flow.cpp" />
+    <ClCompile Include="..\..\src\parser\parser.cpp" />
+    <ClCompile Include="..\..\src\parser\structures.cpp" />
+    <ClCompile Include="..\..\src\symbol-pool.cpp" />
+    <ClCompile Include="..\..\src\tree\node.cpp" />
+    <ClCompile Include="..\..\src\tree\nodes.cpp" />
+    <ClCompile Include="..\..\src\tree\printer.cpp" />
+    <ClCompile Include="..\..\src\tree\tree.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}</ProjectGuid>
+    <RootNamespace>mirb</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;NO_GC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
+      <UseFullPaths>true</UseFullPaths>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;NO_GC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
+      <UseFullPaths>true</UseFullPaths>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
