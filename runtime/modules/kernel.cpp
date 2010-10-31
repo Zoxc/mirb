@@ -129,7 +129,7 @@ rt_compiled_block(rt_kernel_print)
 	return RT_NIL;
 }
 
-rt_compiled_block(__attribute__((noreturn)) rt_kernel_raise)
+rt_compiled_block(rt_kernel_raise)
 {
 	rt_value exception = rt_alloc(sizeof(struct rt_exception));
 

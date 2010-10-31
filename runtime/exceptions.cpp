@@ -5,7 +5,7 @@
 	__thread struct rt_frame *rt_current_frame = 0;
 #endif
 
-void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data)
+void __noreturn rt_exception_raise(struct rt_exception_data *data)
 {
 	#ifdef WIN_SEH
 		RaiseException(RT_SEH_RUBY, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);

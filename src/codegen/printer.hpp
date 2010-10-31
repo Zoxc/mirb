@@ -11,9 +11,9 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
-		class Opcode;
+		struct Opcode;
 		class Block;
-		class Label;
+		struct Label;
 		
 		class ByteCodePrinter
 		{

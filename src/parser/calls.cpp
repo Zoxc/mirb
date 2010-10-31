@@ -195,7 +195,7 @@ namespace Mirb
 		if(result->arguments.empty() && !parenthesis)
 		{
 			if(current != owner)
-				owner->zsupers.append(current);
+				owner->zsupers.push(current);
 			
 			result->pass_args = true;
 		}
@@ -237,7 +237,7 @@ namespace Mirb
 		bool local = false;
 		
 		if(symbol)
-			local = scope->defined(symbol, true);
+			local = scope->defined(symbol, true) != 0;
 		
 		bool has_args = has_arguments();
 		

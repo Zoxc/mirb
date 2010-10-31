@@ -20,7 +20,6 @@ namespace Mirb
 			size_t local_storage;
 			void *epilog;
 			
-			SimplerEntry<Block> entry;
-			SimplerList<Block> blocks; // A list of child blocks so the GC won't free them.
+			Vector<Block *> blocks; // A list of child blocks so the GC won't free them.
 	};
 };

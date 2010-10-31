@@ -22,7 +22,7 @@ namespace Mirb
 		{
 		}
 		
-		Scope::Scope(Fragment *fragment, Scope *parent, Type type) : fragment(fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment)
+		Scope::Scope(Fragment *fragment, Scope *parent, Type type) : fragment(fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment), zsupers(fragment)
 		{
 			require_exceptions = false;
 			break_targets = 0;
@@ -112,10 +112,10 @@ namespace Mirb
 			return (NamedVariable **)fragment->allocate(sizeof(NamedVariable *) * entries);
 		}
 
-		Fragment::Fragment(Fragment *parent, size_t chunk_size) : chunk_size(chunk_size)
+		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(this), chunk_size(chunk_size)
 		{
 			if(parent)
-				parent->fragments.append(this);
+				parent->fragments.push(this);
 			
 			current = Chunk::create(chunk_size);
 			chunks.append(current);

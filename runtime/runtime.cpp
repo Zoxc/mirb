@@ -151,8 +151,8 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 		printf("Undefined method %s on %s\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
 		RT_ASSERT(0);
 	}
-
-	return method->compiled(0, name, module, obj, block, argc, argv);
+	
+	return method->compiled(name, module, obj, block, argc, argv);
 }
 
 rt_value rt_inspect(rt_value obj)
@@ -168,7 +168,7 @@ rt_value rt_inspect(rt_value obj)
 	if(rt_type(result) == C_STRING)
 		return result;
 	else
-		return rt_object_to_s(0, RT_NIL, RT_NIL, obj, 0, 0, 0);
+		return rt_object_to_s(RT_NIL, RT_NIL, obj, 0, 0, 0);
 }
 
 void rt_print(rt_value obj)

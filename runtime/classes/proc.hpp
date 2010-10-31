@@ -18,7 +18,7 @@ extern rt_value rt_Proc;
 
 static inline rt_value rt_call_proc(rt_value obj, rt_value block, size_t argc, rt_value argv[])
 {
-	return RT_PROC(obj)->closure->compiled((rt_value **)&RT_PROC(obj)->scopes, RT_PROC(obj)->method_name, RT_PROC(obj)->method_module, RT_PROC(obj)->self, block, argc, argv);
+	return rt_call_block(obj, rt_symbol_from_cstr("call"), block, argc, argv);
 }
 
 void rt_proc_init(void);

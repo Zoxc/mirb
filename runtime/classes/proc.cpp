@@ -8,7 +8,9 @@ rt_value rt_Proc;
 
 rt_compiled_block(rt_proc_call)
 {
-	return rt_call_proc(obj, block, argc, argv);
+	return RT_NIL;
+	// TODO: Fix this
+	//return RT_PROC(obj)->closure->compiled((rt_value **)&RT_PROC(obj)->scopes, RT_PROC(obj)->method_name, RT_PROC(obj)->method_module, RT_PROC(obj)->self, block, argc, argv);
 }
 
 void rt_proc_init(void)

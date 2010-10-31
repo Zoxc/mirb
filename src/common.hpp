@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 
 #ifdef WIN32
 	#include <windows.h>

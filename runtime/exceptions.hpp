@@ -72,4 +72,4 @@ struct rt_frame {
 	extern __thread struct rt_frame *rt_current_frame;
 #endif
 
-void __attribute__((noreturn)) rt_exception_raise(struct rt_exception_data *data);
+void __noreturn rt_exception_raise(struct rt_exception_data *data);

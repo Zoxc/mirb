@@ -1,6 +1,18 @@
 #pragma once
 
-#include <cstdbool>
+#ifdef _MSC_VER
+	#define WIN32 1
+	#define MSVC 1
+	#pragma warning(disable:4355)
+	#pragma warning(disable:4996)
+	#define mirb_external(name)
+	#define __thread __declspec(thread)
+	#define __noreturn __declspec(noreturn)
+#else
+	#define __noreturn __attribute__((noreturn)) 
+	#define mirb_external(name) __asm__(name)
+#endif
+
 #include <cstdio>
 #include <cstdarg>
 #include <cstdlib>
@@ -15,7 +27,7 @@
 	#endif
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(MSVC)
 	#define RT_ASSERT(condition) do { \
 		if(!(condition)) { \
 			__asm__("int3\n"); \
@@ -45,7 +57,7 @@
 #endif
 
 #if !__has_builtin(__builtin_unreachable)
-	static inline void __builtin_unreachable() __attribute((noreturn));
+	static inline void __noreturn __builtin_unreachable();
 	static inline void __builtin_unreachable()
 	{
 		RT_ASSERT(0);

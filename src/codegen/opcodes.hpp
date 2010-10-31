@@ -232,27 +232,27 @@ namespace Mirb
 		struct BranchIfOp:
 			public Opcode
 		{
-			class Label *ltrue; // TODO: more WTF
+			struct Label *ltrue;
 			Tree::Variable *var;
 			
-			BranchIfOp(class Label *ltrue, Tree::Variable *var) : Opcode(BranchIf), ltrue(ltrue), var(var) {}
+			BranchIfOp(struct Label *ltrue, Tree::Variable *var) : Opcode(BranchIf), ltrue(ltrue), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
 			public Opcode
 		{
-			class Label *lfalse;
+			struct Label *lfalse;
 			Tree::Variable *var;
 			
-			BranchUnlessOp(class Label *lfalse, Tree::Variable *var) : Opcode(BranchUnless), lfalse(lfalse), var(var) {}
+			BranchUnlessOp(struct Label *lfalse, Tree::Variable *var) : Opcode(BranchUnless), lfalse(lfalse), var(var) {}
 		};
 		
 		struct BranchOp:
 			public Opcode
 		{
-			class Label *label;
+			struct Label *label;
 			
-			BranchOp(class Label *label) : Opcode(Branch), label(label) {}
+			BranchOp(struct Label *label) : Opcode(Branch), label(label) {}
 		};
 		
 		struct ReturnOp:

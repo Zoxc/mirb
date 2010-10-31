@@ -185,7 +185,7 @@ namespace Mirb
 			BlockNode *block; // can be zero
 			size_t break_id;
 			
-			static const size_t no_break_id = -1;
+			static const size_t no_break_id;
 			
 			InvokeNode() : break_id(no_break_id) {}
 		};

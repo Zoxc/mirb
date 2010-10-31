@@ -252,7 +252,7 @@ rt_compiled_block(rt_main_to_s)
 
 rt_compiled_block(rt_main_include)
 {
-	return rt_module_include(0, RT_NIL, RT_NIL, rt_Object, block, argc, argv);
+	return rt_module_include(RT_NIL, RT_NIL, rt_Object, block, argc, argv);
 }
 
 void rt_setup_classes(void)

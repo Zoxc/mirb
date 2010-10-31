@@ -11,9 +11,9 @@
 
 typedef size_t rt_value;
 
-typedef rt_value (__stdcall __regparm(3) *rt_compiled_block_t)(rt_value **_scopes, rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+typedef rt_value (__fastcall *rt_compiled_block_t)(rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 
-#define rt_compiled_block(name) rt_value __stdcall __regparm(3) name(rt_value **_scopes, rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+#define rt_compiled_block(name) rt_value __fastcall name(rt_value _method_name, rt_value _method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 
 #define RT_ARG_INDEX(index) (argc - 1 - (index))
 #define RT_ARG(index) (argv[RT_ARG_INDEX(index)])
@@ -153,14 +153,14 @@ static inline enum rt_type rt_type(rt_value obj)
 
 static inline bool rt_test(rt_value value)
 {
-	return value & ~RT_FALSE;
+	return (value & ~RT_FALSE) != 0;
 }
 
 #define RT_BOOL(value) ((value)? RT_TRUE : RT_FALSE)
 
 static inline bool rt_bool(rt_value value)
 {
-	return value & ~RT_FALSE;
+	return (value & ~RT_FALSE) != 0;
 }
 
 void rt_create(void);
@@ -170,9 +170,9 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 
-rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module) asm("rt_lookup");
+rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module) mirb_external("rt_lookup");
 struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
-rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module) asm("rt_lookup_super");
+rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module) mirb_external("rt_lookup_super");
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[]);
 

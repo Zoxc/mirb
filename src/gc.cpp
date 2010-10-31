@@ -1,5 +1,5 @@
 #include "gc.hpp"
-#include "../../runtime/runtime.hpp"
+#include "../runtime/runtime.hpp"
 
 Mirb::GC Mirb::gc;
 

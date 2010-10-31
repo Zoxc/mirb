@@ -13,7 +13,7 @@ rt_compiled_block(rt_module_to_s)
 	if(rt_test(name))
 		return name;
 
-	return rt_object_to_s(0, RT_NIL, RT_NIL, obj, 0, 0, 0);
+	return rt_object_to_s(RT_NIL, RT_NIL, obj, 0, 0, 0);
 }
 
 rt_compiled_block(rt_module_append_features)

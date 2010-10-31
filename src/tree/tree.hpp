@@ -16,7 +16,7 @@ namespace Mirb
 	{
 		class Fragment;
 		
-		class Node;
+		struct Node;
 		
 		struct SuperNode;
 		
@@ -160,10 +160,9 @@ namespace Mirb
 				
 				SimplerList<Parameter> parameters;
 				
-				SimplerEntry<Scope> zsuper_entry;
-				SimplerList<Scope, Scope, &Scope::zsuper_entry> zsupers;
+				StorageVector<Scope *, FragmentVector> zsupers;
 				
-				template<class T> T *alloc_var(Variable::Type type = Variable::Type::Local)
+				template<class T> T *alloc_var(Variable::Type type = Variable::Local)
 				{
 					T *result = new (fragment) T(type);
 					
@@ -241,8 +240,7 @@ namespace Mirb
 			public:
 				Fragment(Fragment *parent, size_t chunk_size);
 				
-				SimplerEntry<Fragment> entry;
-				SimplerList<Fragment> fragments;
+				StorageVector<Fragment *, FragmentVector> fragments;
 				
 				void *allocate(size_t bytes);
 				
