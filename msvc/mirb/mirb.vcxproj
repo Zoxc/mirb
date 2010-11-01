@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\runtime\modules\kernel.hpp" />
     <ClInclude Include="..\..\runtime\runtime.hpp" />
     <ClInclude Include="..\..\runtime\x86.hpp" />
+    <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />

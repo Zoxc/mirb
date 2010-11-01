@@ -14,7 +14,50 @@ namespace Mirb
 	
 	namespace Tree
 	{
-		class Fragment;
+		class Chunk
+		{
+			public:
+				static const size_t main_size = 512;
+				static const size_t block_size = 256;
+				static const size_t allocation_limit = 128;
+				
+				static Chunk *create(size_t bytes);
+				
+				uint8_t *current;
+				uint8_t *end;
+				
+				SimplerEntry<Chunk> entry;
+				
+				void *allocate(size_t bytes);
+		};
+		
+		class Fragment:
+			public Allocator
+		{
+			public:
+				typedef Fragment &Ref;
+				typedef Allocator::Wrap<Fragment &> Storage;
+				
+				static Fragment &def_ref();
+				Fragment(Fragment &ref);
+
+				Fragment(Fragment *parent, size_t chunk_size);
+				
+				Vector<Fragment *, Fragment> fragments;
+				
+				void *alloc(size_t bytes);
+				void *realloc(void *mem, size_t old_size, size_t new_size);
+				void free(void *mem)
+				{
+				}
+				
+			private:
+				size_t chunk_size;
+				
+				Chunk *current;
+				
+				SimplerList<Chunk> chunks;
+		};
 		
 		struct Node;
 		
@@ -102,16 +145,6 @@ namespace Mirb
 		
 		typedef HashTable<Symbol *, NamedVariable *, Fragment *, VariableMapFunctions> VariableMap;
 		
-		class FragmentVector:
-			public StorageVectorFunctions<Fragment *>
-		{
-			public:
-				typedef Fragment *Storage;
-				static void *alloc(Fragment *storage, size_t bytes);
-				static void *realloc(Fragment *storage, void *table, size_t old, size_t bytes);
-				static void free(Fragment *storage, void *table);
-		};
-		
 		class Scope
 		{
 			public:
@@ -124,7 +157,7 @@ namespace Mirb
 					Closure
 				};
 				
-				Scope(Fragment *fragment, Scope *parent, Type type);
+				Scope(Fragment &fragment, Scope *parent, Type type);
 				
 				CodeGen::Block *block;
 				Fragment *fragment;
@@ -156,11 +189,11 @@ namespace Mirb
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.
 				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
-				StorageVector<Scope *, FragmentVector> referenced_scopes; // A list of all the scopes this scope requires.
+				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 				
 				SimplerList<Parameter> parameters;
 				
-				StorageVector<Scope *, FragmentVector> zsupers;
+				Vector<Scope *, Fragment> zsupers;
 				
 				template<class T> T *alloc_var(Variable::Type type = Variable::Local)
 				{
@@ -216,40 +249,6 @@ namespace Mirb
 				void require_var(Scope *owner, Variable *var);
 				
 				Scope *defined(Symbol *name, bool recursive);
-		};
-		
-		class Chunk
-		{
-			public:
-				static const size_t main_size = 512;
-				static const size_t block_size = 256;
-				static const size_t allocation_limit = 128;
-				
-				static Chunk *create(size_t bytes);
-				
-				uint8_t *current;
-				uint8_t *end;
-				
-				SimplerEntry<Chunk> entry;
-				
-				void *allocate(size_t bytes);
-		};
-		
-		class Fragment
-		{
-			public:
-				Fragment(Fragment *parent, size_t chunk_size);
-				
-				StorageVector<Fragment *, FragmentVector> fragments;
-				
-				void *allocate(size_t bytes);
-				
-			private:
-				size_t chunk_size;
-				
-				Chunk *current;
-				
-				SimplerList<Chunk> chunks;
 		};
 	};
 };

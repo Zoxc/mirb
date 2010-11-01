@@ -28,7 +28,7 @@ namespace Mirb
 		{
 			assert(node);
 			
-			( node->*field).next = 0;
+			(node->*field).next = 0;
 			
 			if(last)
 			{

@@ -4,25 +4,7 @@ namespace Mirb
 {
 	namespace Tree
 	{
-		void *FragmentVector::alloc(Fragment *storage, size_t bytes)
-		{
-			return storage->allocate(bytes);
-		}
-		
-		void *FragmentVector::realloc(Fragment *storage, void *table, size_t old, size_t bytes)
-		{
-			void *result = storage->allocate(bytes);
-			
-			memcpy(result, table, old);
-			
-			return result;
-		}
-		
-		void FragmentVector::free(Fragment *storage, void *table)
-		{
-		}
-		
-		Scope::Scope(Fragment *fragment, Scope *parent, Type type) : fragment(fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment), zsupers(fragment)
+		Scope::Scope(Fragment &fragment, Scope *parent, Type type) : fragment(&fragment), type(type), parent(parent), variables(2, &fragment), referenced_scopes(fragment), zsupers(fragment)
 		{
 			require_exceptions = false;
 			break_targets = 0;
@@ -109,10 +91,21 @@ namespace Mirb
 		
 		NamedVariable **VariableMapFunctions::alloc(Fragment *fragment, size_t entries)
 		{
-			return (NamedVariable **)fragment->allocate(sizeof(NamedVariable *) * entries);
+			return (NamedVariable **)fragment->alloc(sizeof(NamedVariable *) * entries);
+		}
+		
+		Fragment &Fragment::def_ref()
+		{
+			assert(0); // This should never be called!
+			return *(Fragment *)0;
 		}
 
-		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(this), chunk_size(chunk_size)
+		Fragment::Fragment(Fragment &ref)
+		{
+			assert(0); // This should never be called!
+		}
+
+		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(*this), chunk_size(chunk_size)
 		{
 			if(parent)
 				parent->fragments.push(this);
@@ -121,7 +114,16 @@ namespace Mirb
 			chunks.append(current);
 		}
 		
-		void *Fragment::allocate(size_t bytes)
+		void *Fragment::realloc(void *mem, size_t old_size, size_t new_size)
+		{
+			void *result = alloc(new_size);
+			
+			memcpy(result, mem, old_size);
+			
+			return result;
+		}
+		
+		void *Fragment::alloc(size_t bytes)
 		{
 			void *result = current->allocate(bytes);
 			
@@ -189,7 +191,7 @@ namespace Mirb
 
 void *operator new(size_t bytes, Mirb::Tree::Fragment *fragment) throw()
 {
-	return fragment->allocate(bytes);
+	return fragment->alloc(bytes);
 }
 
 void operator delete(void *, Mirb::Tree::Fragment *fragment) throw()
@@ -198,7 +200,7 @@ void operator delete(void *, Mirb::Tree::Fragment *fragment) throw()
 
 void *operator new[](size_t bytes, Mirb::Tree::Fragment *fragment) throw()
 {
-	return fragment->allocate(bytes);
+	return fragment->alloc(bytes);
 }
 
 void operator delete[](void *, Mirb::Tree::Fragment *fragment) throw()

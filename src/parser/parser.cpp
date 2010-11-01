@@ -23,7 +23,7 @@ namespace Mirb
 		if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
 			fragment = new (gc) Tree::Fragment(fragment, Tree::Chunk::block_size);
 		
-		return scope = new (fragment) Tree::Scope(fragment, scope, type);
+		return scope = new (fragment) Tree::Scope(*fragment, scope, type);
 	}
 	
 	void Parser::error(std::string text)
