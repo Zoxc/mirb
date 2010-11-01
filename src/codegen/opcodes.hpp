@@ -2,6 +2,7 @@
 #include "../../runtime/runtime.hpp"
 #include "../common.hpp"
 #include "../simple-list.hpp"
+#include "../list.hpp"
 
 namespace Mirb
 {
@@ -16,7 +17,9 @@ namespace Mirb
 	namespace CodeGen
 	{
 		class Block;
-		
+
+		class BasicBlock;
+
 		struct Opcode
 		{
 			enum Type
@@ -38,15 +41,14 @@ namespace Mirb
 				SetIVar,
 				GetConst,
 				SetConst,
+				Branch,
 				BranchIf,
 				BranchUnless,
-				Branch,
-				Return,
-				Label,
 				Handler,
 				Unwind,
 				UnwindReturn,
 				UnwindBreak,
+				BreakTarget,
 				Array,
 				String,
 				Interpolate,
@@ -232,45 +234,27 @@ namespace Mirb
 		struct BranchIfOp:
 			public Opcode
 		{
-			struct Label *ltrue;
+			BasicBlock *ltrue;
 			Tree::Variable *var;
 			
-			BranchIfOp(struct Label *ltrue, Tree::Variable *var) : Opcode(BranchIf), ltrue(ltrue), var(var) {}
+			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : Opcode(BranchIf), ltrue(ltrue), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
 			public Opcode
 		{
-			struct Label *lfalse;
+			BasicBlock *lfalse;
 			Tree::Variable *var;
 			
-			BranchUnlessOp(struct Label *lfalse, Tree::Variable *var) : Opcode(BranchUnless), lfalse(lfalse), var(var) {}
+			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : Opcode(BranchUnless), lfalse(lfalse), var(var) {}
 		};
 		
 		struct BranchOp:
 			public Opcode
 		{
-			struct Label *label;
+			BasicBlock *label;
 			
-			BranchOp(struct Label *label) : Opcode(Branch), label(label) {}
-		};
-		
-		struct ReturnOp:
-			public Opcode
-		{
-			Tree::Variable *var;
-			
-			ReturnOp(Tree::Variable *var) : Opcode(Return), var(var) {}
-		};
-		
-		struct Label:
-			public Opcode
-		{
-			#ifdef DEBUG
-				size_t id;
-			#endif
-			
-			Label() : Opcode(Opcode::Label) {}
+			BranchOp(BasicBlock *label) : Opcode(Branch), label(label) {}
 		};
 		
 		struct HandlerOp:
@@ -304,6 +288,12 @@ namespace Mirb
 			size_t index;
 			
 			UnwindBreakOp(Tree::Variable *var, void *code, size_t index) : Opcode(UnwindBreak), var(var), code(code), index(index) {}
+		};
+		
+		struct BreakTargetOp:
+			public Opcode
+		{
+			BreakTargetOp() : Opcode(BreakTarget) {}
 		};
 		
 		struct ArrayOp:

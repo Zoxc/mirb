@@ -11,6 +11,7 @@
 
 #ifdef DEBUG
 	#include "printer.hpp"
+	#include "dot-printer.hpp"
 #endif
 
 namespace Mirb
@@ -165,16 +166,20 @@ namespace Mirb
 				
 				to_bytecode(node->value, temp);
 				
-				Label *label_true = create_label();
-				Label *label_end = create_label();
+				BasicBlock *label_true = create_block();
+				BasicBlock *label_end = create_block();
+				BasicBlock *label_false = create_block();
 				
-				gen<BranchIfOp>(label_true, temp);
-				
+				gen_if(label_true, temp);
+
+				split(label_false);
 				gen<LoadOp>(var, RT_TRUE);
 				gen<BranchOp>(label_end);
-				
+				label_false->next = label_end;
+
 				gen(label_true);
 				gen<LoadOp>(var, RT_FALSE);
+				label_true->next = label_end;
 				
 				gen(label_end);
 			}
@@ -213,12 +218,15 @@ namespace Mirb
 			
 			to_bytecode(node->left, temp);
 			
-			Label *label_end = create_label();
+			BasicBlock *label_end = create_block();
+			BasicBlock *body = create_block();
 			
 			if(node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR)
-				gen<BranchIfOp>(label_end, temp);
+				gen_if(label_end, temp);
 			else
-				gen<BranchUnlessOp>(label_end, temp);
+				gen_unless(label_end, temp);
+
+			split(body);
 			
 			to_bytecode(node->right, var);
 			
@@ -347,7 +355,7 @@ namespace Mirb
 			gen<CallOp>(var, obj, node->method, param_count, closure, node->break_id);
 			
 			if(node->break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[node->break_id] = (void *)gen(create_label());
+				block->final->break_targets[node->break_id] = (void *)gen<BreakTargetOp>();
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, Tree::Variable *var)
@@ -379,7 +387,7 @@ namespace Mirb
 			}
 			
 			if(node->break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[node->break_id] = (void *)gen(create_label());
+				block->final->break_targets[node->break_id] = (void *)gen<BreakTargetOp>();
 		}
 		
 		void ByteCodeGenerator::convert_if(Tree::Node *basic_node, Tree::Variable *var)
@@ -387,16 +395,22 @@ namespace Mirb
 			auto node = (Tree::IfNode *)basic_node;
 			
 			Tree::Variable *temp = reuse(var);
-			Label *label_else = create_label();
+
+			BasicBlock *label_else = create_block();
+			BasicBlock *label_end = create_block();
+			BasicBlock *body = create_block();
 			
+			body->next = label_end;
+			label_else->next = label_end;
+
 			to_bytecode(node->left, temp);
 			
 			if(node->inverted)
-				gen<BranchIfOp>(label_else, temp);
+				gen_if(label_else, temp);
 			else
-				gen<BranchUnlessOp>(label_else, temp);
+				gen_unless(label_else, temp);
 			
-			Label *label_end = create_label();
+			split(body);
 			
 			if(var)
 			{
@@ -472,7 +486,7 @@ namespace Mirb
 			else
 			{
 				gen<MoveOp>(block->return_var, temp);
-				gen<BranchOp>(block->epilog);
+				branch(block->epilog);
 			}
 		}
 		
@@ -496,12 +510,12 @@ namespace Mirb
 			to_bytecode(node->value, temp);
 			
 			gen<MoveOp>(block->return_var, temp);
-			gen<BranchOp>(block->epilog);
+			branch(block->epilog);
 		}
 		
 		void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			gen<BranchOp>(block->prolog);
+			branch(block->prolog);
 		}
 		
 		void ByteCodeGenerator::convert_class(Tree::Node *basic_node, Tree::Variable *var)
@@ -559,7 +573,7 @@ namespace Mirb
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
-				exception_block->ensure_label = (void *)create_label();
+				exception_block->ensure_label = (void *)create_block();
 			else
 				exception_block->ensure_label = 0;
 			
@@ -577,7 +591,9 @@ namespace Mirb
 			/*
 			 * Output the regular code
 			 */
-			exception_block->block_label = (void *)gen(create_label());
+			BasicBlock *body = split(create_block());
+
+			exception_block->block_label = (void *)body;
 			
 			to_bytecode(node->code, var);
 			
@@ -586,8 +602,9 @@ namespace Mirb
 				/*
 				 * Skip the rescue block
 				 */
-				Label *ok_label = create_label();
+				BasicBlock *ok_label = create_block();
 				gen<BranchOp>(ok_label);
+				body->next = ok_label;
 				
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
@@ -596,12 +613,16 @@ namespace Mirb
 				{
 					struct runtime_exception_handler *handler = (struct runtime_exception_handler *)malloc(sizeof(struct runtime_exception_handler));
 					handler->common.type = E_RUNTIME_EXCEPTION;
-					handler->rescue_label = (void *)gen(create_label());
+
+					BasicBlock *handler_body = gen(create_block());
+
+					handler->rescue_label = (void *)handler_body;
 					vec_push(rt_exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
 					
 					to_bytecode(i().group, var);
 					
 					gen<BranchOp>(ok_label);
+					handler_body->next = ok_label;
 				}
 				
 				gen(ok_label);
@@ -619,7 +640,7 @@ namespace Mirb
 			 */
 			if(node->ensure_group)
 			{
-				gen((Label *)exception_block->ensure_label);
+				split((BasicBlock *)exception_block->ensure_label);
 				
 				/*
 				 * Output ensure node
@@ -643,6 +664,7 @@ namespace Mirb
 			
 			Tree::Scope *prev_scope = this->scope;
 			Block *prev_block = this->block;
+			BasicBlock *prev_basic = this->basic;
 			
 			this->scope = scope;
 			this->block = block;
@@ -653,9 +675,9 @@ namespace Mirb
 			{
 				scope->require_args(*i);
 			}
-			
-			block->prolog = create_label();
-			block->epilog = create_label();
+
+			block->prolog = create_block();
+			block->epilog = create_block();
 			
 			if(scope->break_targets)
 			{
@@ -664,21 +686,27 @@ namespace Mirb
 			}
 			else
 				block->final->break_targets = 0;
-				
 			
 			gen(block->prolog);
-			
+
 			to_bytecode(scope->group, block->return_var);
 			
-			gen(block->epilog);
+			split(block->epilog);
+			block->epilog->next = 0;
 			
 			#ifdef DEBUG
+				DotPrinter dot_printer;
 				ByteCodePrinter printer;
-				
+
 				std::cout << printer.print_block(block);
+				
+				dot_printer.print_block(block, "bytecode.dot");
+
+				std::system("dot -Tpng bytecode.dot -o bytecode.png");
 			#endif
 			
 			this->block = prev_block;
+			this->basic = prev_basic;
 			this->scope = prev_scope;
 			
 			return block;
@@ -699,15 +727,9 @@ namespace Mirb
 			return false;
 		}
 		
-		Label *ByteCodeGenerator::create_label()
+		BasicBlock *ByteCodeGenerator::create_block()
 		{
-			Label *result = new (memory_pool) Label;
-			
-			#ifdef DEBUG
-				result->id = block->label_count++;
-			#endif
-			
-			return result;
+			return new (memory_pool) BasicBlock(*block);
 		}
 		
 		Tree::Variable *ByteCodeGenerator::self_var()

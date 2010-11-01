@@ -35,6 +35,7 @@
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
+    <ClInclude Include="..\..\src\codegen\dot-printer.hpp" />
     <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
     <ClInclude Include="..\..\src\codegen\printer.hpp" />
     <ClInclude Include="..\..\src\common.hpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="..\..\runtime\runtime.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
+    <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />

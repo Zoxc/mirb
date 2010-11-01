@@ -49,6 +49,8 @@ namespace Mirb
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var);
 				
 				Block *block;
+
+				BasicBlock *basic;
 				
 				Tree::Scope *scope;
 				
@@ -68,7 +70,7 @@ namespace Mirb
 				
 				Tree::Variable *self_var();
 				
-				Label *create_label();
+				BasicBlock *create_block();
 				
 				// TODO: Fix this silly C++ workaround
 				Tree::Variable *null_var()
@@ -82,7 +84,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T;
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -91,7 +93,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -100,7 +102,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -109,7 +111,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -118,7 +120,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -127,7 +129,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -136,7 +138,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -145,7 +147,7 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
 						
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 						
 						return result;
 					}
@@ -154,19 +156,62 @@ namespace Mirb
 					{
 						T *result = new (memory_pool) T(std::forward<Args>(params)...);
 					
-						block->opcodes.append(result);
+						basic->opcodes.append(result);
 					
 						return result;
 					}
 				#endif
-				
-				Label *gen(Label *label)
+
+				BranchIfOp *gen_if(BasicBlock *ltrue, Tree::Variable *var)
 				{
-					block->opcodes.append(label);
+					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
 					
-					return label;
+					basic->branch = result->ltrue;
+
+					return result;
 				}
 				
+				BranchUnlessOp *gen_unless(BasicBlock *lfalse, Tree::Variable *var)
+				{
+					BranchUnlessOp *result = gen<BranchUnlessOp>(lfalse, var);
+					
+					basic->branch = result->lfalse;
+
+					return result;
+				}
+				
+				BasicBlock *list(BasicBlock *block)
+				{
+					this->block->basic_blocks.append(block);
+
+					return block;
+				}
+				
+				BasicBlock *gen(BasicBlock *block)
+				{
+					basic = block;
+					list(block);
+
+					return block;
+				}
+				
+				BasicBlock *split(BasicBlock *block)
+				{
+					basic->next = block;
+					gen(block);
+
+					return block;
+				}
+				
+				void branch(BasicBlock *block)
+				{
+					gen<BranchOp>(block);
+					basic->next = block;
+					basic = create_block();
+					list(basic); // TODO: Don't list or even generate anything on this since it's useless
+					basic->next = 0; // Nothing may set this. Remove when the list call is removed.
+				}
+
 				Tree::Variable *block_arg(Tree::Scope *scope);
 				Tree::Variable *call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var);
 				

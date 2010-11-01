@@ -63,7 +63,7 @@ namespace Mirb
 			return std::string(rt_string_to_cstr(rt_inspect(imm)));
 		}
 		
-		std::string ByteCodePrinter::label(Label *label)
+		std::string ByteCodePrinter::label(BasicBlock *label)
 		{
 			std::stringstream result;
 			
@@ -231,20 +231,6 @@ namespace Mirb
 					return "branch " + label(op->label);
 				}
 				
-				case Opcode::Return:
-				{
-					auto op = (ReturnOp *)opcode;
-					
-					return "ret " + var(op->var);
-				}
-				
-				case Opcode::Label:
-				{
-					auto op = (Label *)opcode;
-					
-					return label(op) + ":";
-				}
-				
 				case Opcode::Handler:
 				{
 					auto op = (HandlerOp *)opcode;
@@ -297,13 +283,24 @@ namespace Mirb
 			}
 		}
 		
+		std::string ByteCodePrinter::print_basic_block(BasicBlock *block)
+		{
+			std::stringstream result;
+			result << label(block) << ":\n";
+			
+			for(auto i = block->opcodes.begin(); i; ++i)
+				result << opcode(*i) << "\n";
+			
+			return result.str();
+		}
+
 		std::string ByteCodePrinter::print_block(Block *block)
 		{
 			std::stringstream result;
 			result << ";\n; " << this->block(block) << "\n;\n";
 			
-			for(auto i = block->opcodes.begin(); i; ++i)
-				result << opcode(*i) << "\n";
+			for(auto i = block->basic_blocks.begin(); i; ++i)
+				result << print_basic_block(*i) << "\n";
 			
 			return result.str();
 		}

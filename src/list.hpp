@@ -14,7 +14,7 @@ namespace Mirb
 		T* prev;
 	};
 
-	template<class T, class E = T, SimpleEntry<E> E::*field = &E::entry> class List
+	template<class T, class E = T, Entry<E> E::*field = &E::entry> class List
 	{
 	public:
 		List() : first(0), last(0) {}

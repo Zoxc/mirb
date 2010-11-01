@@ -4,6 +4,8 @@
 
 namespace Mirb
 {
+	class Symbol;
+
 	namespace Tree
 	{
 		class Variable;
@@ -13,7 +15,7 @@ namespace Mirb
 	{
 		struct Opcode;
 		class Block;
-		struct Label;
+		class BasicBlock;
 		
 		class ByteCodePrinter
 		{
@@ -26,11 +28,12 @@ namespace Mirb
 					return this->imm((rt_value)imm);
 				};
 				
-				std::string label(Label *label);
+				std::string label(BasicBlock *label);
 				std::string raw(size_t imm);
 				std::string block(Block *block);
-				std::string opcode(Opcode *opcode);
 			public:
+				std::string opcode(Opcode *opcode);
+				std::string print_basic_block(BasicBlock *block);
 				std::string print_block(Block *block);
 		};
 	};

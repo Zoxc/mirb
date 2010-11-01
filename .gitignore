@@ -2,6 +2,7 @@
 /vendor_linux
 /mirb
 /mirb.depend
+/bytecode.*
 /bin
 /build
 /msvc/mirb/*

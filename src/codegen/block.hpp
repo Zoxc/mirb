@@ -1,6 +1,6 @@
 #pragma once
 #include "../common.hpp"
-#include "../simple-list.hpp"
+#include "../list.hpp"
 #include "opcodes.hpp"
 
 struct exception_block;
@@ -16,12 +16,31 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
+		class BasicBlock;
+		
+		class BasicBlock
+		{
+			public:
+				BasicBlock(Block &block);
+
+				#ifdef DEBUG
+					size_t id;
+				#endif
+
+				Entry<BasicBlock> entry;
+
+				SimpleList<Opcode> opcodes; // A linked list of opcodes
+				
+				BasicBlock *next;
+				BasicBlock *branch;
+		};
+
 		class Block
 		{
 			public:
 				Mirb::Block *final;
-				Label *prolog; // The point after the prolog of the block.
-				Label *epilog; // The end of the block
+				BasicBlock *prolog; // The point after the prolog of the block.
+				BasicBlock *epilog; // The end of the block
 				
 				/*
 				 * Exception related fields
@@ -33,12 +52,12 @@ namespace Mirb
 				Tree::Variable *return_var;
 				
 				#ifdef DEBUG
-					size_t label_count; // Nicer label labeling...
+					size_t basic_block_count; // Nicer basic block labeling...
 				#endif
 				
 				Block();
 				
-				SimpleList<Opcode> opcodes; // A linked list of opcodes
+				List<BasicBlock> basic_blocks; // A linked list of basic blocks
 		};
 	};
 };
