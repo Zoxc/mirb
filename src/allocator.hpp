@@ -13,6 +13,12 @@ namespace Mirb
 				public:
 					Wrap(T ref) : ref(ref) {}
 
+					
+					static Wrap &def_ref()
+					{
+						assert(0); // This should never be called!
+					}
+
 					void *alloc(size_t bytes)
 					{
 						return ref.alloc(bytes);

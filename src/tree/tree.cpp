@@ -94,17 +94,6 @@ namespace Mirb
 			return (NamedVariable **)fragment->alloc(sizeof(NamedVariable *) * entries);
 		}
 		
-		Fragment &Fragment::def_ref()
-		{
-			assert(0); // This should never be called!
-			return *(Fragment *)0;
-		}
-
-		Fragment::Fragment(Fragment &ref)
-		{
-			assert(0); // This should never be called!
-		}
-
 		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(*this), chunk_size(chunk_size)
 		{
 			if(parent)

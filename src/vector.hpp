@@ -12,7 +12,7 @@ namespace Mirb
 			size_t _capacity;
 		
 		public:
-			Vector(size_t initial) : alloc_ref(A::def_ref())
+			Vector(size_t initial) : alloc_ref(A::Storage::def_ref())
 			{
 				_size = 0;
 				_capacity = 1 << initial;
@@ -28,7 +28,7 @@ namespace Mirb
 				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
 			}
 			
-			Vector() : alloc_ref(A::def_ref())
+			Vector() : alloc_ref(A::Storage::def_ref())
 			{
 				_size = 0;
 				_capacity = 0;

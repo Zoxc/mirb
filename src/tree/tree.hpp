@@ -38,9 +38,6 @@ namespace Mirb
 				typedef Fragment &Ref;
 				typedef Allocator::Wrap<Fragment &> Storage;
 				
-				static Fragment &def_ref();
-				Fragment(Fragment &ref);
-
 				Fragment(Fragment *parent, size_t chunk_size);
 				
 				Vector<Fragment *, Fragment> fragments;
