@@ -48,6 +48,7 @@
 	#include <excpt.h>
 #else
 	#define __stdcall __attribute__((__stdcall__))
+	#define __fastcall __attribute__((__fastcall__))
 	#define __cdecl __attribute__((__cdecl__))
 
 	#include <sys/mman.h>

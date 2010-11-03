@@ -16,5 +16,18 @@
 
 namespace Mirb
 {
-		typedef uint8_t char_t;
+	typedef uint8_t char_t;
+
+	static const size_t memory_align = 8;
+
+	static inline size_t align(size_t value, size_t alignment)
+	{
+		alignment -= 1;
+		return (value + alignment) & ~alignment;
+	};
+
+	static inline size_t align_down(size_t value, size_t alignment)
+	{
+		return value & ~(alignment - 1);
+	};
 };

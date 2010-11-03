@@ -9,12 +9,9 @@ namespace Mirb
 			require_exceptions = false;
 			break_targets = 0;
 			can_break = false;
-			heap_vars = 0;
 			
-			#ifdef DEBUG
-				for(size_t i = 0; i < (size_t)Variable::Types; i++)
-					var_count[i] = 0;
-			#endif
+			local_vars = 0;
+			heap_vars = 0;
 			
 			block_parameter = 0;
 			super_module_var = 0;
@@ -50,8 +47,6 @@ namespace Mirb
 				var->type = Variable::Heap;
 				var->index = owner->heap_vars++;
 				var->owner = owner;
-				
-				owner->heap_vars = true;
 			}
 			
 			/*
@@ -142,7 +137,7 @@ namespace Mirb
 		
 		Chunk *Chunk::create(size_t size)
 		{
-			uint8_t *memory = (unsigned char *)malloc(sizeof(Chunk) + size);
+			uint8_t *memory = (uint8_t *)malloc(sizeof(Chunk) + size);
 			
 			assert(memory);
 			

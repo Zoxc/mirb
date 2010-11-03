@@ -3,6 +3,7 @@
 /mirb
 /mirb.depend
 /bytecode.*
+/bytecode
 /bin
 /build
 /msvc/mirb/*

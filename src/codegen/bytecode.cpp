@@ -175,11 +175,11 @@ namespace Mirb
 				split(label_false);
 				gen<LoadOp>(var, RT_TRUE);
 				gen<BranchOp>(label_end);
-				label_false->next = label_end;
+				label_false->next(label_end);
 
 				gen(label_true);
 				gen<LoadOp>(var, RT_FALSE);
-				label_true->next = label_end;
+				label_true->next(label_end);
 				
 				gen(label_end);
 			}
@@ -400,8 +400,8 @@ namespace Mirb
 			BasicBlock *label_end = create_block();
 			BasicBlock *body = create_block();
 			
-			body->next = label_end;
-			label_else->next = label_end;
+			body->next(label_end);
+			label_else->next(label_end);
 
 			to_bytecode(node->left, temp);
 			
@@ -604,7 +604,7 @@ namespace Mirb
 				 */
 				BasicBlock *ok_label = create_block();
 				gen<BranchOp>(ok_label);
-				body->next = ok_label;
+				body->next(ok_label);
 				
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
@@ -622,7 +622,7 @@ namespace Mirb
 					to_bytecode(i().group, var);
 					
 					gen<BranchOp>(ok_label);
-					handler_body->next = ok_label;
+					handler_body->next(ok_label);
 				}
 				
 				gen(ok_label);
@@ -692,19 +692,39 @@ namespace Mirb
 			to_bytecode(scope->group, block->return_var);
 			
 			split(block->epilog);
-			block->epilog->next = 0;
-			
+
+			gen<ReturnOp>(block->return_var);
+
+			block->epilog->next_block = 0;
+
 			#ifdef DEBUG
 				DotPrinter dot_printer;
 				ByteCodePrinter printer;
 
 				std::cout << printer.print_block(block);
 				
+				block->analyse_liveness(memory_pool, scope);
+
 				dot_printer.print_block(block, "bytecode.dot");
 
 				std::system("dot -Tpng bytecode.dot -o bytecode.png");
+
+				for(auto i = scope->variable_list.begin(); i; ++i)
+				{
+					dot_printer.highlight = *i;
+
+					dot_printer.print_block(block, "bytecode.dot");
+					
+					std::stringstream result;
+
+					result << "dot -Tpng bytecode.dot -o bytecode/var" << i().index << ".png";
+
+					std::system(result.str().c_str());
+				}
+			#else
+				block->analyse_liveness(memory_pool, scope);
 			#endif
-			
+
 			this->block = prev_block;
 			this->basic = prev_basic;
 			this->scope = prev_scope;
@@ -729,7 +749,7 @@ namespace Mirb
 		
 		BasicBlock *ByteCodeGenerator::create_block()
 		{
-			return new (memory_pool) BasicBlock(*block);
+			return new (memory_pool) BasicBlock(memory_pool, *block);
 		}
 		
 		Tree::Variable *ByteCodeGenerator::self_var()
@@ -743,10 +763,12 @@ namespace Mirb
 		Tree::Variable *ByteCodeGenerator::create_var()
 		{
 			auto var = new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
-			
+
 			#ifdef DEBUG
-				var->index = scope->var_count[Tree::Variable::Temporary]++;
+				scope->variable_list.append(var);
 			#endif
+
+			var->index = scope->local_vars++;
 			
 			return var;
 		}

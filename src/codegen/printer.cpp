@@ -24,7 +24,6 @@ namespace Mirb
 				}
 				
 				case Tree::Variable::Local:
-				case Tree::Variable::Stack:
 				{
 					auto named_var = (Tree::NamedVariable *)var;
 					
@@ -45,8 +44,11 @@ namespace Mirb
 				default:
 					assert(0);
 			}
-			
-			return result.str();
+
+			if(highlight == var)
+				return "<font color='dodgerblue2'>" + result.str() + "</font>";
+			else
+				return result.str();
 		}
 		
 		std::string ByteCodePrinter::raw(size_t imm)
@@ -89,7 +91,7 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::opcode(Opcode *opcode)
 		{
-			switch(opcode->op)
+			switch(opcode->op())
 			{
 				case Opcode::Move:
 				{
@@ -229,6 +231,13 @@ namespace Mirb
 					auto op = (BranchOp *)opcode;
 					
 					return "branch " + label(op->label);
+				}
+				
+				case Opcode::Return:
+				{
+					auto op = (ReturnOp *)opcode;
+					
+					return "ret " + var(op->var);
 				}
 				
 				case Opcode::Handler:

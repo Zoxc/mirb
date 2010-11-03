@@ -1,9 +1,11 @@
 #pragma once
 #include "common.hpp"
+#include "allocator.hpp"
 
 namespace Mirb
 {
-	class MemoryPool
+	class MemoryPool:
+			public Allocator
 	{
 		static const unsigned int max_alloc = 0x1000 * 4;
 
@@ -20,10 +22,17 @@ namespace Mirb
 			void *get_page(size_t bytes);
 
 		public:
+			typedef MemoryPool &Ref;
+			typedef Allocator::Wrap<MemoryPool &> Storage;
+
 			MemoryPool();
 			~MemoryPool();
-
-			void *allocate(size_t bytes);
+			
+			void *alloc(size_t bytes);
+			void *realloc(void *mem, size_t old_size, size_t new_size);
+			void free(void *mem)
+			{
+			}
 	};
 };
 

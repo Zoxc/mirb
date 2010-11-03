@@ -32,6 +32,7 @@
     <ClInclude Include="..\..\runtime\runtime.hpp" />
     <ClInclude Include="..\..\runtime\x86.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
+    <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
+    <ClCompile Include="..\..\src\codegen\opcodes.cpp" />
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />

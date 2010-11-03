@@ -166,7 +166,7 @@ namespace Mirb
 				{
 					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
 					
-					basic->branch = result->ltrue;
+					basic->branch(result->ltrue);
 
 					return result;
 				}
@@ -175,7 +175,7 @@ namespace Mirb
 				{
 					BranchUnlessOp *result = gen<BranchUnlessOp>(lfalse, var);
 					
-					basic->branch = result->lfalse;
+					basic->branch(result->lfalse);
 
 					return result;
 				}
@@ -197,7 +197,7 @@ namespace Mirb
 				
 				BasicBlock *split(BasicBlock *block)
 				{
-					basic->next = block;
+					basic->next(block);
 					gen(block);
 
 					return block;
@@ -206,10 +206,8 @@ namespace Mirb
 				void branch(BasicBlock *block)
 				{
 					gen<BranchOp>(block);
-					basic->next = block;
+					basic->next(block);
 					basic = create_block();
-					list(basic); // TODO: Don't list or even generate anything on this since it's useless
-					basic->next = 0; // Nothing may set this. Remove when the list call is removed.
 				}
 
 				Tree::Variable *block_arg(Tree::Scope *scope);

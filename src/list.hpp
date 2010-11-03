@@ -21,6 +21,28 @@ namespace Mirb
 		
 		T *first;
 		T *last;
+		
+		bool empty()
+		{
+			return first == 0;
+		}
+		
+		void remove(T *node)
+		{
+			assert(node);
+
+			Entry<E> &entry = node->*field;
+			
+			if(entry.prev)
+				(entry.prev->*field).next = entry.next;
+			else
+				first = static_cast<T *>(entry.next);
+
+			if(entry.next)
+				(entry.next->*field).prev = entry.prev;
+			else
+				last = static_cast<T *>(entry.prev);
+		}
 
 		void append(T *node)
 		{
@@ -32,10 +54,8 @@ namespace Mirb
 
 			if(last)
 			{
-				Entry<E> &last_entry = last->*field;
-
 				entry.prev = static_cast<E *>(last);
-				last_entry.next = static_cast<E *>(node);
+				(last->*field).next = static_cast<E *>(node);
 				last = node;
 			}
 			else

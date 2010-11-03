@@ -44,7 +44,8 @@ namespace Mirb
 			
 			~Vector()
 			{
-				alloc_ref.free((void *)table);
+				if(table)
+					alloc_ref.free((void *)table);
 			}
 			
 			size_t size()

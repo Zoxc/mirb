@@ -89,6 +89,7 @@
 		<Unit filename="runtime\x86.cpp" />
 		<Unit filename="runtime\x86.hpp" />
 		<Unit filename="src\allocator.hpp" />
+		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
 		<Unit filename="src\codegen\block.cpp" />
 		<Unit filename="src\codegen\block.hpp" />
@@ -96,6 +97,7 @@
 		<Unit filename="src\codegen\bytecode.hpp" />
 		<Unit filename="src\codegen\dot-printer.cpp" />
 		<Unit filename="src\codegen\dot-printer.hpp" />
+		<Unit filename="src\codegen\opcodes.cpp" />
 		<Unit filename="src\codegen\opcodes.hpp" />
 		<Unit filename="src\codegen\printer.cpp" />
 		<Unit filename="src\codegen\printer.hpp" />

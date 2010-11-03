@@ -67,7 +67,6 @@ namespace Mirb
 				{
 					Temporary,
 					Local,
-					Stack,
 					Heap,
 					Types
 				};
@@ -76,7 +75,11 @@ namespace Mirb
 				Scope *owner; // Only valid for heap variables
 				
 				Variable(Type type) : type(type) {}
-				
+
+				#ifdef DEBUG
+					SimplerEntry<Variable> entry;
+				#endif
+
 				size_t index;
 		};
 
@@ -96,7 +99,7 @@ namespace Mirb
 			public:
 				Parameter(Type type) : NamedVariable(type) {}
 				
-				SimplerEntry<Parameter> entry;
+				SimplerEntry<Parameter> parameter_entry;
 		};
 
 		class VariableMapFunctions:
@@ -179,16 +182,18 @@ namespace Mirb
 				 * Variable related fields
 				 */
 				VariableMap variables;
-				#ifdef DEBUG
-					size_t var_count[Variable::Types]; // An array of counters of the different variable types.
-				#endif
+				size_t local_vars; // The number of the local and temporary variables that is not stored on the heap.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.
 				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 				
-				SimplerList<Parameter> parameters;
+				#ifdef DEBUG
+					SimplerList<Variable> variable_list;
+				#endif
+
+				SimplerList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
 				
 				Vector<Scope *, Fragment> zsupers;
 				
@@ -196,11 +201,11 @@ namespace Mirb
 				{
 					T *result = new (fragment) T(type);
 					
-					#ifdef DEBUG
-						result->index = var_count[type]++;
-					#endif
+					result->index = local_vars++;
 					
 					result->type = type;
+
+					variable_list.append(result);
 					
 					return result;
 				}
@@ -215,9 +220,11 @@ namespace Mirb
 					result = alloc_var<T>();
 					
 					result->name = name;
-					
-					variables.set(name, result);
-					
+
+					#ifdef DEBUG
+						variables.set(name, result);
+					#endif
+
 					return result;
 				}
 				

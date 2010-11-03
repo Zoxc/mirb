@@ -24,6 +24,7 @@ namespace Mirb
 		{
 			enum Type
 			{
+				None,
 				Move,
 				Load,
 				LoadRaw,
@@ -41,9 +42,10 @@ namespace Mirb
 				SetIVar,
 				GetConst,
 				SetConst,
-				Branch,
 				BranchIf,
 				BranchUnless,
+				Branch,
+				Return,
 				Handler,
 				Unwind,
 				UnwindReturn,
@@ -54,119 +56,159 @@ namespace Mirb
 				Interpolate,
 			};
 			
-			Type op;
+			virtual Type op() { return None; }
 			
 			SimpleEntry<Opcode> entry;
-			
-			Opcode(Type op) : op(op) {}
+
+			virtual void def_use(BasicBlock &block) {}
 		};
 		
 		struct MoveOp:
 			public Opcode
 		{
+			Type op() { return Move; }
+
 			Tree::Variable *dst;
 			Tree::Variable *src;
+
+			void def_use(BasicBlock &block);
 			
-			MoveOp(Tree::Variable *dst, Tree::Variable *src) : Opcode(Move), dst(dst), src(src) {}
+			MoveOp(Tree::Variable *dst, Tree::Variable *src) : dst(dst), src(src) {}
 		};
 		
 		struct LoadOp:
 			public Opcode
 		{
+			Type op() { return Load; }
+
 			Tree::Variable *var;
 			rt_value imm;
 			
-			LoadOp(Tree::Variable *var, rt_value imm) : Opcode(Load), var(var), imm(imm) {}
+			void def_use(BasicBlock &block);
+			
+			LoadOp(Tree::Variable *var, rt_value imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadRawOp:
 			public Opcode
 		{
+			Type op() { return LoadRaw; }
+
 			Tree::Variable *var;
 			size_t imm;
 			
-			LoadRawOp(Tree::Variable *var, size_t imm) : Opcode(LoadRaw), var(var), imm(imm) {}
+			void def_use(BasicBlock &block);
+			
+			LoadRawOp(Tree::Variable *var, size_t imm) : var(var), imm(imm) {}
 		};
 		
 		struct PushOp:
 			public Opcode
 		{
+			Type op() { return Push; }
+
 			Tree::Variable *var;
 			
-			PushOp(Tree::Variable *var) : Opcode(Push), var(var) {}
+			void def_use(BasicBlock &block);
+			
+			PushOp(Tree::Variable *var) : var(var) {}
 		};
 		
 		struct PushImmediateOp:
 			public Opcode
 		{
+			Type op() { return PushImmediate; }
+
 			rt_value imm;
 			
-			PushImmediateOp(rt_value imm) : Opcode(PushImmediate), imm(imm) {}
+			PushImmediateOp(rt_value imm) : imm(imm) {}
 		};
 		
 		struct PushRawOp:
 			public Opcode
 		{
+			Type op() { return PushRaw; }
+
 			size_t imm;
 			
-			PushRawOp(size_t imm) : Opcode(PushRaw), imm(imm) {}
+			PushRawOp(size_t imm) : imm(imm) {}
 		};
 		
 		struct PushScopeOp:
 			public Opcode
 		{
+			Type op() { return PushScope; }
+
 			Block *block;
 			
-			PushScopeOp(Block *block) : Opcode(PushScope), block(block) {}
+			PushScopeOp(Block *block) : block(block) {}
 		};
 		
 		struct ClosureOp:
 			public Opcode
 		{
+			Type op() { return Closure; }
+
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Block *block;
 			size_t scope_count;
 			
-			ClosureOp(Tree::Variable *var, Tree::Variable *self, Block *block, size_t scope_count) : Opcode(Closure), var(var), self(self), block(block), scope_count(scope_count) {}
+			void def_use(BasicBlock &block);
+			
+			ClosureOp(Tree::Variable *var, Tree::Variable *self, Block *block, size_t scope_count) : var(var), self(self), block(block), scope_count(scope_count) {}
 		};
 		
 		struct ClassOp:
 			public Opcode
 		{
+			Type op() { return Class; }
+
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			Tree::Variable *super;
 			Block *block;
 			
-			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Block *block) : Opcode(Class), var(var), self(self), name(name), super(super), block(block) {}
+			void def_use(BasicBlock &block);
+			
+			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Block *block) : var(var), self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
 			public Opcode
 		{
+			Type op() { return Module; }
+
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			Block *block;
 			
-			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Block *block) : Opcode(Module), var(var), self(self), name(name), block(block) {}
+			void def_use(BasicBlock &block);
+			
+			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Block *block) : var(var), self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
 			public Opcode
 		{
+			Type op() { return Method; }
+
 			Tree::Variable *self;
 			Symbol *name;
 			Block *block;
 			
-			MethodOp(Tree::Variable *self, Symbol *name, Block *block) : Opcode(Method), self(self), name(name), block(block) {}
+			void def_use(BasicBlock &block);
+			
+			MethodOp(Tree::Variable *self, Symbol *name, Block *block) : self(self), name(name), block(block) {}
 		};
 		
 		struct CallOp:
 			public Opcode
 		{
+			Type op() { return Call; }
+
 			Tree::Variable *var;
 			Tree::Variable *obj;
 			Symbol *method;
@@ -174,12 +216,16 @@ namespace Mirb
 			Tree::Variable *block;
 			size_t break_id;
 			
-			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block, size_t break_id) : Opcode(Call), var(var), obj(obj), method(method), param_count(param_count), block(block), break_id(break_id) {}
+			void def_use(BasicBlock &block);
+			
+			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), obj(obj), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct SuperOp:
 			public Opcode
 		{
+			Type op() { return Super; }
+
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Tree::Variable *module;
@@ -188,139 +234,201 @@ namespace Mirb
 			Tree::Variable *block;
 			size_t break_id;
 			
-			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : Opcode(Super), var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
+			void def_use(BasicBlock &block);
+			
+			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct GetIVarOp:
 			public Opcode
 		{
+			Type op() { return GetIVar; }
+
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			
-			GetIVarOp(Tree::Variable *var, Tree::Variable *self, Symbol *name) : Opcode(GetIVar), var(var), self(self), name(name) {}
+			void def_use(BasicBlock &block);
+			
+			GetIVarOp(Tree::Variable *var, Tree::Variable *self, Symbol *name) : var(var), self(self), name(name) {}
 		};
 		
 		struct SetIVarOp:
 			public Opcode
 		{
+			Type op() { return SetIVar; }
+
 			Tree::Variable *self;
 			Symbol *name;
 			Tree::Variable *var;
 			
-			SetIVarOp(Tree::Variable *self, Symbol *name, Tree::Variable *var) : Opcode(SetIVar), self(self), name(name), var(var) {}
+			void def_use(BasicBlock &block);
+			
+			SetIVarOp(Tree::Variable *self, Symbol *name, Tree::Variable *var) : self(self), name(name), var(var) {}
 		};
 		
 		struct GetConstOp:
 			public Opcode
 		{
+			Type op() { return GetConst; }
+
 			Tree::Variable *var;
 			Tree::Variable *obj;
 			Symbol *name;
 			
-			GetConstOp(Tree::Variable *var, Tree::Variable *obj, Symbol *name) : Opcode(GetConst), var(var), obj(obj), name(name) {}
+			void def_use(BasicBlock &block);
+			
+			GetConstOp(Tree::Variable *var, Tree::Variable *obj, Symbol *name) : var(var), obj(obj), name(name) {}
 		};
 		
 		struct SetConstOp:
 			public Opcode
 		{
+			Type op() { return SetConst; }
+
 			Tree::Variable *obj;
 			Symbol *name;
 			Tree::Variable *var;
 			
-			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : Opcode(SetConst), obj(obj), name(name), var(var) {}
+			void def_use(BasicBlock &block);
+			
+			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : obj(obj), name(name), var(var) {}
 		};
 		
 		struct BranchIfOp:
 			public Opcode
 		{
+			Type op() { return BranchIf; }
+
 			BasicBlock *ltrue;
 			Tree::Variable *var;
 			
-			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : Opcode(BranchIf), ltrue(ltrue), var(var) {}
+			void def_use(BasicBlock &block);
+			
+			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : ltrue(ltrue), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
 			public Opcode
 		{
+			Type op() { return BranchUnless; }
+
 			BasicBlock *lfalse;
 			Tree::Variable *var;
 			
-			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : Opcode(BranchUnless), lfalse(lfalse), var(var) {}
+			void def_use(BasicBlock &block);
+			
+			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : lfalse(lfalse), var(var) {}
 		};
 		
 		struct BranchOp:
 			public Opcode
 		{
+			Type op() { return Branch; }
+
 			BasicBlock *label;
 			
-			BranchOp(BasicBlock *label) : Opcode(Branch), label(label) {}
+			BranchOp(BasicBlock *label) : label(label) {}
+		};
+		
+		struct ReturnOp:
+			public Opcode
+		{
+			Type op() { return Return; }
+
+			Tree::Variable *var;
+			
+			void def_use(BasicBlock &block);
+			
+			ReturnOp(Tree::Variable *var) : var(var) {}
 		};
 		
 		struct HandlerOp:
 			public Opcode
 		{
+			Type op() { return Handler; }
+
 			size_t id;
 			
-			HandlerOp(size_t id) : Opcode(Handler), id(id) {}
+			HandlerOp(size_t id) : id(id) {}
 		};
 		
 		struct UnwindOp:
 			public Opcode
 		{
-			UnwindOp() : Opcode(Unwind) {}
+			Type op() { return Unwind; }
 		};
 		
 		struct UnwindReturnOp:
 			public Opcode
 		{
+			Type op() { return UnwindReturn; }
+
 			Tree::Variable *var;
 			void *code;
 			
-			UnwindReturnOp(Tree::Variable *var, void *code) : Opcode(UnwindReturn), var(var), code(code) {}
+			void def_use(BasicBlock &block);
+			
+			UnwindReturnOp(Tree::Variable *var, void *code) : var(var), code(code) {}
 		};
 		
 		struct UnwindBreakOp:
 			public Opcode
 		{
+			Type op() { return UnwindBreak; }
+
 			Tree::Variable *var;
 			void *code;
 			size_t index;
 			
-			UnwindBreakOp(Tree::Variable *var, void *code, size_t index) : Opcode(UnwindBreak), var(var), code(code), index(index) {}
+			void def_use(BasicBlock &block);
+			
+			UnwindBreakOp(Tree::Variable *var, void *code, size_t index) : var(var), code(code), index(index) {}
 		};
 		
 		struct BreakTargetOp:
 			public Opcode
 		{
-			BreakTargetOp() : Opcode(BreakTarget) {}
+			Type op() { return BreakTarget; }
 		};
 		
 		struct ArrayOp:
 			public Opcode
 		{
+			Type op() { return Array; }
+
 			Tree::Variable *var;
 			size_t element_count;
 			
-			ArrayOp(Tree::Variable *var, size_t element_count) : Opcode(Array), var(var), element_count(element_count) {}
+			void def_use(BasicBlock &block);
+			
+			ArrayOp(Tree::Variable *var, size_t element_count) : var(var), element_count(element_count) {}
 		};
 		
 		struct StringOp:
 			public Opcode
 		{
+			Type op() { return String; }
+
 			Tree::Variable *var;
 			const char_t *str;
 			
-			StringOp(Tree::Variable *var, const char_t *str) : Opcode(String), var(var), str(str) {}
+			void def_use(BasicBlock &block);
+			
+			StringOp(Tree::Variable *var, const char_t *str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:
 			public Opcode
 		{
+			Type op() { return Interpolate; }
+
 			Tree::Variable *var;
 			size_t param_count;
 			
-			InterpolateOp(Tree::Variable *var, size_t param_count) : Opcode(Interpolate), var(var), param_count(param_count) {}
+			void def_use(BasicBlock &block);
+			
+			InterpolateOp(Tree::Variable *var, size_t param_count) : var(var), param_count(param_count) {}
 		};
 	};
 };

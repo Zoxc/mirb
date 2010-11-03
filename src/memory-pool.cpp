@@ -65,13 +65,25 @@ namespace Mirb
 		char_t *result = allocate_page();
 
 		current_page = result;
+
+		result = (char_t *)align((size_t)result, memory_align);
+
 		current = result + bytes;
 		max = result + max_alloc;
 		
 		return result;
 	}
 	
-	void *MemoryPool::allocate(size_t bytes)
+	void *MemoryPool::realloc(void *mem, size_t old_size, size_t new_size)
+	{
+		void *result = alloc(new_size);
+			
+		memcpy(result, mem, old_size);
+			
+		return result;
+	}
+	
+	void *MemoryPool::alloc(size_t bytes)
 	{
 		char_t *result;
 
@@ -82,7 +94,7 @@ namespace Mirb
 
 			pages.push_back(result);
 		#else
-			result = current;
+			result = (char_t *)align((size_t)current, memory_align);
 
 			char_t *next = result + bytes;
 		
@@ -98,7 +110,7 @@ namespace Mirb
 
 void *operator new(size_t bytes, Mirb::MemoryPool &memory_pool) throw()
 {
-	return memory_pool.allocate(bytes);
+	return memory_pool.alloc(bytes);
 }
 
 void operator delete(void *, Mirb::MemoryPool &memory_pool) throw()
@@ -107,7 +119,7 @@ void operator delete(void *, Mirb::MemoryPool &memory_pool) throw()
 
 void *operator new[](size_t bytes, Mirb::MemoryPool &memory_pool) throw()
 {
-	return memory_pool.allocate(bytes);
+	return memory_pool.alloc(bytes);
 }
 
 void operator delete[](void *, Mirb::MemoryPool &memory_pool) throw()
