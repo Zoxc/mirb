@@ -768,6 +768,7 @@ namespace Mirb
 				scope->variable_list.append(var);
 			#endif
 
+			var->owner = scope;
 			var->index = scope->local_vars++;
 			
 			return var;

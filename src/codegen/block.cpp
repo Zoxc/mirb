@@ -20,7 +20,8 @@ namespace Mirb
 
 		void BasicBlock::use(Tree::Variable *var)
 		{
-			BitSetWrapper<MemoryPool>::set(use_bits, var->index);
+			if(!BitSetWrapper<MemoryPool>::get(def_bits, var->index))
+				BitSetWrapper<MemoryPool>::set(use_bits, var->index);
 		}
 
 		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count)
@@ -52,11 +53,13 @@ namespace Mirb
 			while(!work_list.empty())
 			{
 				BasicBlock &block = *work_list.first;
-
+				work_list.remove(&block);
+				block.in_work_list = false;
+				
 				bit_set_t in_ = block.in;
 				bit_set_t out_ = block.out;
 
-				block.in = w.set_union(block.use_bits, w.set_difference(out_, block.def_bits));
+				// block.out is set to the union of all sucessor blocks' in sets
 
 				if(block.next_block)
 				{
@@ -70,6 +73,12 @@ namespace Mirb
 				else
 					block.out = w.create_clean();
 				
+				// calculate the new in state
+				
+				block.in = w.set_union(block.use_bits, w.set_difference(block.out, block.def_bits));
+
+				// add predecessor blocks to the work list if the state has mutated
+
 				if(!w.equal(in_, block.in) || !w.equal(out_, block.out))
 				{
 					for(auto i = block.pred_blocks.begin(); i; ++i)
@@ -82,8 +91,6 @@ namespace Mirb
 					}
 				}
 
-				work_list.remove(&block);
-				block.in_work_list = false;
 			}
 		}
 
@@ -95,6 +102,6 @@ namespace Mirb
 			#ifdef DEBUG
 				basic_block_count = 0;
 			#endif
-		}	
+		}
 	};
 };

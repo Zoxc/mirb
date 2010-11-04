@@ -7,8 +7,8 @@ namespace Mirb
 	{
 		void MoveOp::def_use(BasicBlock &block)
 		{
-			block.def(dst);
 			block.use(src);
+			block.def(dst);
 		}
 		
 		void LoadOp::def_use(BasicBlock &block)
@@ -28,21 +28,21 @@ namespace Mirb
 		
 		void ClosureOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(self);
+			block.def(var);
 		}
 		
 		void ClassOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(self);
 			block.use(super);
+			block.def(var);
 		}
 		
 		void ModuleOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(self);
+			block.def(var);
 		}
 		
 		void MethodOp::def_use(BasicBlock &block)
@@ -52,28 +52,30 @@ namespace Mirb
 		
 		void CallOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(obj);
 
 			if(this->block)
 				block.use(this->block);
+
+			block.def(var);
 		}
 		
 		void SuperOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(self);
 			block.use(module);
 			block.use(method);
 
 			if(this->block)
 				block.use(this->block);
+
+			block.def(var);
 		}
 		
 		void GetIVarOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(self);
+			block.def(var);
 		}
 		
 		void SetIVarOp::def_use(BasicBlock &block)
@@ -84,8 +86,8 @@ namespace Mirb
 		
 		void GetConstOp::def_use(BasicBlock &block)
 		{
-			block.def(var);
 			block.use(obj);
+			block.def(var);
 		}
 		
 		void SetConstOp::def_use(BasicBlock &block)

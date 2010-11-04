@@ -31,7 +31,7 @@ namespace Mirb
 			return result.str();
 		}
 
-		std::string DotPrinter::print_basic_block(Block *main_block, BasicBlock *block)
+		std::string DotPrinter::print_basic_block(Block *main_block, BasicBlock *block, size_t &loc)
 		{
 			ByteCodePrinter printer;
 
@@ -54,10 +54,15 @@ namespace Mirb
 			for(size_t i = 0; i < block->var_count; ++i)
 				result << (BitSetWrapper<MemoryPool>::get(block->in, i) ? "1" : "0");
 			
+			result << ")(";
+			
+			for(size_t i = 0; i < block->var_count; ++i)
+				result << (BitSetWrapper<MemoryPool>::get(block->out, i) ? "1" : "0");
+			
 			result << ")</font></td></tr>";
 			
 			for(auto i = block->opcodes.begin(); i; ++i)
-				result << "<tr><td align='left' bgcolor='gray95' port='C" << *i << "'><font color='gray22'>" << printer.opcode(*i) << "</font></td></tr>";
+				result << "<tr><td align='left' bgcolor='gray95' port='C" << *i << "'><font color='gray52'>" << loc++ << ":</font> <font color='gray22'>" << printer.opcode(*i) << "</font></td></tr>";
 
 			result << "</table>" << ">] [shape=plaintext];\n";
 
@@ -75,10 +80,12 @@ namespace Mirb
 			std::fstream file(filename, std::ios_base::out);
 
 			file << "digraph bytecode { \n";
+
+			size_t loc = 0;
 			
 			for(auto i = block->basic_blocks.begin(); i; ++i)
 			{
-				file << print_basic_block(block, *i) << "\n";
+				file << print_basic_block(block, *i, loc) << "\n";
 			}
 
 			file << "\n}";
