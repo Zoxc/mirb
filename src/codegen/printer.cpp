@@ -153,14 +153,14 @@ namespace Mirb
 				{
 					auto op = (ClassOp *)opcode;
 					
-					return var(op->var) + " = class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + block(op->block);
 				}
 				
 				case Opcode::Module:
 				{
 					auto op = (ModuleOp *)opcode;
 					
-					return var(op->var) + " = module " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "module " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
 				}
 				
 				case Opcode::Method:
@@ -174,14 +174,14 @@ namespace Mirb
 				{
 					auto op = (CallOp *)opcode;
 					
-					return var(op->var) + " = call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
 				}
 				
 				case Opcode::Super:
 				{
 					auto op = (SuperOp *)opcode;
 					
-					return var(op->var) + " = super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
 				}
 				
 				case Opcode::GetIVar:
@@ -195,7 +195,7 @@ namespace Mirb
 				{
 					auto op = (SetIVarOp *)opcode;
 					
-					return "ivar " + var(op->self) + ", " + imm(op->name) + ", " + var(op->var);
+					return "ivar " + var(op->self) + ", " + imm(op->name) + " = " + var(op->var);
 				}
 				
 				case Opcode::GetConst:
@@ -209,7 +209,7 @@ namespace Mirb
 				{
 					auto op = (SetConstOp *)opcode;
 					
-					return "const " + var(op->obj) + ", " + imm(op->name) + ", " + var(op->var);
+					return "const " + var(op->obj) + ", " + imm(op->name) + " = " + var(op->var);
 				}
 				
 				case Opcode::BranchIf:

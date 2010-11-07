@@ -86,7 +86,7 @@ h1. Operations
 
 * _Method_
   @method Vself, Iname, B@
-  Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method. The result is stored in @V@ if present.
+  Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method.
 
 * _Call_
   @[V] = call Vobject, Imethod, Rparameters, [Vblock], Rbreak@
@@ -101,7 +101,7 @@ h1. Operations
   Stores the value of the instance variable @Iname@ for @Vself@ in @V@.
 
 * _SetIVar_
-  @ivar Vself, Iname, V@
+  @ivar Vself, Iname = V@
   Stores the value of @V@ in the instance variable @Iname@ for @Vself@.
 
 * _GetConst_
@@ -109,7 +109,7 @@ h1. Operations
   Stores the value of the constant variable @Iname@ for @Vobj@ in @V@.
 
 * _SetConst_
-  @const Vobj, Iname, V@
+  @const Vobj, Iname = V@
   Stores the value of @V@ in the constant variable @Iname@ for @Vobj@.
 
 * _BranchIf_
