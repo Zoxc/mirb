@@ -91,7 +91,7 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::opcode(Opcode *opcode)
 		{
-			switch(opcode->op())
+			switch(opcode->op)
 			{
 				case Opcode::Move:
 				{

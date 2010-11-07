@@ -97,7 +97,6 @@
 		<Unit filename="src\codegen\bytecode.hpp" />
 		<Unit filename="src\codegen\dot-printer.cpp" />
 		<Unit filename="src\codegen\dot-printer.hpp" />
-		<Unit filename="src\codegen\opcodes.cpp" />
 		<Unit filename="src\codegen\opcodes.hpp" />
 		<Unit filename="src\codegen\printer.cpp" />
 		<Unit filename="src\codegen\printer.hpp" />

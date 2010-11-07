@@ -1,5 +1,4 @@
 #include "../memory-pool.hpp"
-#include "../tree/tree.hpp"
 #include "block.hpp"
 
 namespace Mirb
@@ -13,17 +12,6 @@ namespace Mirb
 			#endif
 		}
 		
-		void BasicBlock::def(Tree::Variable *var)
-		{
-			BitSetWrapper<MemoryPool>::set(def_bits, var->index);
-		}
-
-		void BasicBlock::use(Tree::Variable *var)
-		{
-			if(!BitSetWrapper<MemoryPool>::get(def_bits, var->index))
-				BitSetWrapper<MemoryPool>::set(use_bits, var->index);
-		}
-
 		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count)
 		{
 			this->var_count = var_count;
@@ -35,7 +23,10 @@ namespace Mirb
 			use_bits = w.create_clean();
 
 			for(auto i = opcodes.begin(); i; ++i)
-				i().def_use(*this);
+			{
+				i().virtual_do<Def>(*this, 0);
+				i().virtual_do<Use>(*this, 0);
+			}
 		}
 
 		void Block::analyse_liveness(MemoryPool &memory_pool, Tree::Scope *scope)

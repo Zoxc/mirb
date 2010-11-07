@@ -5,6 +5,7 @@
 #include "../vector.hpp"
 #include "../bit-set-wrapper.hpp"
 #include "opcodes.hpp"
+#include "../tree/tree.hpp"
 
 struct exception_block;
 
@@ -53,8 +54,26 @@ namespace Mirb
 
 				void prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count);
 				
-				void def(Tree::Variable *var);
-				void use(Tree::Variable *var);
+				template<typename T> struct Use
+				{
+					static void func(BasicBlock &block, T &opcode)
+					{
+						opcode.use([&](Tree::Variable *var) {
+							if(!BitSetWrapper<MemoryPool>::get(block.def_bits, var->index))
+								BitSetWrapper<MemoryPool>::set(block.use_bits, var->index);
+						});
+					}
+				};
+
+				template<typename T> struct Def
+				{
+					static void func(BasicBlock &block, T &opcode)
+					{
+						opcode.def([&](Tree::Variable *var) {
+							BitSetWrapper<MemoryPool>::set(block.def_bits, var->index);
+						});
+					}
+				};
 
 				void next(BasicBlock *block)
 				{

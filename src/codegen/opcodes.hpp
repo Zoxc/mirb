@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "../../runtime/runtime.hpp"
 #include "../common.hpp"
 #include "../simple-list.hpp"
@@ -19,12 +20,41 @@ namespace Mirb
 		class Block;
 
 		class BasicBlock;
-
+		
+		struct MoveOp;
+		struct LoadOp;
+		struct LoadRawOp;
+		struct PushOp;
+		struct PushImmediateOp;
+		struct PushRawOp;
+		struct PushScopeOp;
+		struct ClosureOp;
+		struct ClassOp;
+		struct ModuleOp;
+		struct MethodOp;
+		struct CallOp;
+		struct SuperOp;
+		struct GetIVarOp;
+		struct SetIVarOp;
+		struct GetConstOp;
+		struct SetConstOp;
+		struct BranchIfOp;
+		struct BranchUnlessOp;
+		struct BranchOp;
+		struct ReturnOp;
+		struct HandlerOp;
+		struct UnwindOp;
+		struct UnwindReturnOp;
+		struct UnwindBreakOp;
+		struct BreakTargetOp;
+		struct ArrayOp;
+		struct StringOp;
+		struct InterpolateOp;
+		
 		struct Opcode
 		{
 			enum Type
 			{
-				None,
 				Move,
 				Load,
 				LoadRaw,
@@ -56,159 +86,249 @@ namespace Mirb
 				Interpolate,
 			};
 			
-			virtual Type op() { return None; }
+			Type op;
+
+			Opcode(Type op) : op(op) {}
 			
 			SimpleEntry<Opcode> entry;
 
-			virtual void def_use(BasicBlock &block) {}
+			template<template<typename> class T, typename Arg> auto virtual_do(Arg arg, T<Opcode> *a) -> decltype(T<Opcode>::func(arg, *(Opcode *)0))
+			{
+				switch(op)
+				{
+					case Move:
+						return T<MoveOp>::func(arg, (MoveOp &)*this);
+						
+					case Load:
+						return T<LoadOp>::func(arg, (LoadOp &)*this);
+
+					case LoadRaw:
+						return T<LoadRawOp>::func(arg, (LoadRawOp &)*this);
+
+					case Push:
+						return T<PushOp>::func(arg, (PushOp &)*this);
+
+					case PushImmediate:
+						return T<PushImmediateOp>::func(arg, (PushImmediateOp &)*this);
+
+					case PushRaw:
+						return T<PushRawOp>::func(arg, (PushRawOp &)*this);
+
+					case PushScope:
+						return T<PushScopeOp>::func(arg, (PushScopeOp &)*this);
+
+					case Closure:
+						return T<ClosureOp>::func(arg, (ClosureOp &)*this);
+
+					case Class:
+						return T<ClassOp>::func(arg, (ClassOp &)*this);
+
+					case Module:
+						return T<ModuleOp>::func(arg, (ModuleOp &)*this);
+
+					case Method:
+						return T<MethodOp>::func(arg, (MethodOp &)*this);
+
+					case Call:
+						return T<CallOp>::func(arg, (CallOp &)*this);
+
+					case Super:
+						return T<SuperOp>::func(arg, (SuperOp &)*this);
+
+					case GetIVar:
+						return T<GetIVarOp>::func(arg, (GetIVarOp &)*this);
+
+					case SetIVar:
+						return T<SetIVarOp>::func(arg, (SetIVarOp &)*this);
+
+					case GetConst:
+						return T<GetConstOp>::func(arg, (GetConstOp &)*this);
+
+					case SetConst:
+						return T<SetConstOp>::func(arg, (SetConstOp &)*this);
+						
+					case BranchIf:
+						return T<BranchIfOp>::func(arg, (BranchIfOp &)*this);
+
+					case BranchUnless:
+						return T<BranchUnlessOp>::func(arg, (BranchUnlessOp &)*this);
+
+					case Branch:
+						return T<BranchOp>::func(arg, (BranchOp &)*this);
+
+					case Return:
+						return T<ReturnOp>::func(arg, (ReturnOp &)*this);
+
+					case Handler:
+						return T<HandlerOp>::func(arg, (HandlerOp &)*this);
+						
+					case Unwind:
+						return T<UnwindOp>::func(arg, (UnwindOp &)*this);
+
+					case UnwindReturn:
+						return T<UnwindReturnOp>::func(arg, (UnwindReturnOp &)*this);
+
+					case UnwindBreak:
+						return T<UnwindBreakOp>::func(arg, (UnwindBreakOp &)*this);
+
+					case BreakTarget:
+						return T<BreakTargetOp>::func(arg, (BreakTargetOp &)*this);
+						
+					case Array:
+						return T<ArrayOp>::func(arg, (ArrayOp &)*this);
+
+					case String:
+						return T<StringOp>::func(arg, (StringOp &)*this);
+
+					case Interpolate:
+						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
+
+					default:
+						assert(0);
+				};
+			}
+
+			template<typename T> void def(T def) { };
+			template<typename T> void use(T use) { };
+		};
+
+		template<Opcode::Type type> struct OpcodeWrapper:
+			public Opcode
+		{
+			OpcodeWrapper() : Opcode(type) {}
 		};
 		
 		struct MoveOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Move>
 		{
-			Type op() { return Move; }
-
 			Tree::Variable *dst;
 			Tree::Variable *src;
 
-			void def_use(BasicBlock &block);
+			template<typename T> void def(T def) { def(dst); };
+			template<typename T> void use(T use) { use(src); };
 			
 			MoveOp(Tree::Variable *dst, Tree::Variable *src) : dst(dst), src(src) {}
 		};
 		
 		struct LoadOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Load>
 		{
-			Type op() { return Load; }
-
 			Tree::Variable *var;
 			rt_value imm;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+
 			LoadOp(Tree::Variable *var, rt_value imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadRawOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::LoadRaw>
 		{
-			Type op() { return LoadRaw; }
-
 			Tree::Variable *var;
 			size_t imm;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+
 			LoadRawOp(Tree::Variable *var, size_t imm) : var(var), imm(imm) {}
 		};
 		
 		struct PushOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Push>
 		{
-			Type op() { return Push; }
-
 			Tree::Variable *var;
-			
-			void def_use(BasicBlock &block);
-			
+
+			template<typename T> void use(T use) { use(var); };
+
 			PushOp(Tree::Variable *var) : var(var) {}
 		};
 		
 		struct PushImmediateOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::PushImmediate>
 		{
-			Type op() { return PushImmediate; }
-
 			rt_value imm;
 			
 			PushImmediateOp(rt_value imm) : imm(imm) {}
 		};
 		
 		struct PushRawOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::PushRaw>
 		{
-			Type op() { return PushRaw; }
-
 			size_t imm;
 			
 			PushRawOp(size_t imm) : imm(imm) {}
 		};
 		
 		struct PushScopeOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::PushScope>
 		{
-			Type op() { return PushScope; }
-
 			Block *block;
 			
 			PushScopeOp(Block *block) : block(block) {}
 		};
 		
 		struct ClosureOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Closure>
 		{
-			Type op() { return Closure; }
-
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Block *block;
 			size_t scope_count;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(self); };
+
 			ClosureOp(Tree::Variable *var, Tree::Variable *self, Block *block, size_t scope_count) : var(var), self(self), block(block), scope_count(scope_count) {}
 		};
 		
 		struct ClassOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Class>
 		{
-			Type op() { return Class; }
-
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			Tree::Variable *super;
 			Block *block;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { if(var) def(var); };
+
+			template<typename T> void use(T use)
+			{
+				use(self);
+				use(super);
+			};
+
 			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Block *block) : var(var), self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Module>
 		{
-			Type op() { return Module; }
-
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			Block *block;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { if(var) def(var); };
+			template<typename T> void use(T use) { use(self); };
+
 			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Block *block) : var(var), self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Method>
 		{
-			Type op() { return Method; }
-
 			Tree::Variable *self;
 			Symbol *name;
 			Block *block;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(self); };
 			
 			MethodOp(Tree::Variable *self, Symbol *name, Block *block) : self(self), name(name), block(block) {}
 		};
 		
 		struct CallOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Call>
 		{
-			Type op() { return Call; }
-
 			Tree::Variable *var;
 			Tree::Variable *obj;
 			Symbol *method;
@@ -216,16 +336,22 @@ namespace Mirb
 			Tree::Variable *block;
 			size_t break_id;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void def(T def) { if(var) def(var); };
 			
+			template<typename T> void use(T use)
+			{
+				use(obj);
+
+				if(block)
+					use(block);
+			};
+
 			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), obj(obj), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct SuperOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Super>
 		{
-			Type op() { return Super; }
-
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Tree::Variable *module;
@@ -234,200 +360,190 @@ namespace Mirb
 			Tree::Variable *block;
 			size_t break_id;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void def(T def) { if(var) def(var); };
 			
+			template<typename T> void use(T use)
+			{
+				use(self);
+				use(module);
+				use(method);
+
+				if(block)
+					use(block);
+			};
+
 			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
 		struct GetIVarOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::GetIVar>
 		{
-			Type op() { return GetIVar; }
-
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(self); };
+
 			GetIVarOp(Tree::Variable *var, Tree::Variable *self, Symbol *name) : var(var), self(self), name(name) {}
 		};
 		
 		struct SetIVarOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::SetIVar>
 		{
-			Type op() { return SetIVar; }
-
 			Tree::Variable *self;
 			Symbol *name;
 			Tree::Variable *var;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use)
+			{
+				use(self);
+				use(var);
+			};
 			
 			SetIVarOp(Tree::Variable *self, Symbol *name, Tree::Variable *var) : self(self), name(name), var(var) {}
 		};
 		
 		struct GetConstOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::GetConst>
 		{
-			Type op() { return GetConst; }
-
 			Tree::Variable *var;
 			Tree::Variable *obj;
 			Symbol *name;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(obj); };
+
 			GetConstOp(Tree::Variable *var, Tree::Variable *obj, Symbol *name) : var(var), obj(obj), name(name) {}
 		};
 		
 		struct SetConstOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::SetConst>
 		{
-			Type op() { return SetConst; }
-
 			Tree::Variable *obj;
 			Symbol *name;
 			Tree::Variable *var;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use)
+			{
+				use(obj);
+				use(var);
+			};
 			
 			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : obj(obj), name(name), var(var) {}
 		};
 		
 		struct BranchIfOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::BranchIf>
 		{
-			Type op() { return BranchIf; }
-
 			BasicBlock *ltrue;
 			Tree::Variable *var;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(var); };
 			
 			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : ltrue(ltrue), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::BranchUnless>
 		{
-			Type op() { return BranchUnless; }
-
 			BasicBlock *lfalse;
 			Tree::Variable *var;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(var); };
 			
 			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : lfalse(lfalse), var(var) {}
 		};
 		
 		struct BranchOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Branch>
 		{
-			Type op() { return Branch; }
-
 			BasicBlock *label;
 			
 			BranchOp(BasicBlock *label) : label(label) {}
 		};
 		
 		struct ReturnOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Return>
 		{
-			Type op() { return Return; }
-
 			Tree::Variable *var;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(var); };
 			
 			ReturnOp(Tree::Variable *var) : var(var) {}
 		};
 		
 		struct HandlerOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Handler>
 		{
-			Type op() { return Handler; }
-
 			size_t id;
 			
 			HandlerOp(size_t id) : id(id) {}
 		};
 		
 		struct UnwindOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Unwind>
 		{
-			Type op() { return Unwind; }
 		};
 		
 		struct UnwindReturnOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::UnwindReturn>
 		{
-			Type op() { return UnwindReturn; }
-
 			Tree::Variable *var;
 			void *code;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(var); };
 			
 			UnwindReturnOp(Tree::Variable *var, void *code) : var(var), code(code) {}
 		};
 		
 		struct UnwindBreakOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::UnwindBreak>
 		{
-			Type op() { return UnwindBreak; }
-
 			Tree::Variable *var;
 			void *code;
 			size_t index;
 			
-			void def_use(BasicBlock &block);
+			template<typename T> void use(T use) { use(var); };
 			
 			UnwindBreakOp(Tree::Variable *var, void *code, size_t index) : var(var), code(code), index(index) {}
 		};
 		
 		struct BreakTargetOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::BreakTarget>
 		{
-			Type op() { return BreakTarget; }
 		};
 		
 		struct ArrayOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Array>
 		{
-			Type op() { return Array; }
-
 			Tree::Variable *var;
 			size_t element_count;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+
 			ArrayOp(Tree::Variable *var, size_t element_count) : var(var), element_count(element_count) {}
 		};
 		
 		struct StringOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::String>
 		{
-			Type op() { return String; }
-
 			Tree::Variable *var;
 			const char_t *str;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+
 			StringOp(Tree::Variable *var, const char_t *str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:
-			public Opcode
+			public OpcodeWrapper<Opcode::Interpolate>
 		{
-			Type op() { return Interpolate; }
-
 			Tree::Variable *var;
 			size_t param_count;
 			
-			void def_use(BasicBlock &block);
-			
+			template<typename T> void def(T def) { def(var); };
+
 			InterpolateOp(Tree::Variable *var, size_t param_count) : var(var), param_count(param_count) {}
 		};
 	};
