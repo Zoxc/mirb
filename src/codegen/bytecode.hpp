@@ -45,7 +45,7 @@ namespace Mirb
 				void convert_module(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_method(Tree::Node *basic_node, Tree::Variable *var);
 				void convert_handler(Tree::Node *basic_node, Tree::Variable *var);
-				
+
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var);
 				
 				Block *block;

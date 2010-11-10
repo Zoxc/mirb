@@ -33,7 +33,7 @@ namespace Mirb
 				std::string raw(size_t imm);
 				std::string print_block(Block *block);
 			public:
-				ByteCodePrinter(Block *block) : highlight(0), block(block) {}
+				ByteCodePrinter(Block *block) : block(block), highlight(0) {}
 
 				Tree::Variable *highlight;
 				

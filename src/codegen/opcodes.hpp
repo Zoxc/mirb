@@ -27,13 +27,15 @@ namespace Mirb
 		struct PushOp;
 		struct PushImmediateOp;
 		struct PushRawOp;
-		struct PushScopeOp;
 		struct ClosureOp;
 		struct ClassOp;
 		struct ModuleOp;
 		struct MethodOp;
 		struct CallOp;
 		struct SuperOp;
+		struct GetHeapOp;
+		struct GetHeapVarOp;
+		struct SetHeapVarOp;
 		struct GetIVarOp;
 		struct SetIVarOp;
 		struct GetConstOp;
@@ -61,13 +63,15 @@ namespace Mirb
 				Push,
 				PushImmediate,
 				PushRaw,
-				PushScope,
 				Closure,
 				Class,
 				Module,
 				Method,
 				Call,
 				Super,
+				GetHeap,
+				GetHeapVar,
+				SetHeapVar,
 				GetIVar,
 				SetIVar,
 				GetConst,
@@ -114,9 +118,6 @@ namespace Mirb
 					case PushRaw:
 						return T<PushRawOp>::func(arg, (PushRawOp &)*this);
 
-					case PushScope:
-						return T<PushScopeOp>::func(arg, (PushScopeOp &)*this);
-
 					case Closure:
 						return T<ClosureOp>::func(arg, (ClosureOp &)*this);
 
@@ -131,9 +132,18 @@ namespace Mirb
 
 					case Call:
 						return T<CallOp>::func(arg, (CallOp &)*this);
-
+						
 					case Super:
 						return T<SuperOp>::func(arg, (SuperOp &)*this);
+
+					case GetHeap:
+						return T<GetHeapOp>::func(arg, (GetHeapOp &)*this);
+						
+					case GetHeapVar:
+						return T<GetHeapVarOp>::func(arg, (GetHeapVarOp &)*this);
+
+					case SetHeapVar:
+						return T<SetHeapVarOp>::func(arg, (SetHeapVarOp &)*this);
 
 					case GetIVar:
 						return T<GetIVarOp>::func(arg, (GetIVarOp &)*this);
@@ -258,14 +268,6 @@ namespace Mirb
 			PushRawOp(size_t imm) : imm(imm) {}
 		};
 		
-		struct PushScopeOp:
-			public OpcodeWrapper<Opcode::PushScope>
-		{
-			Block *block;
-			
-			PushScopeOp(Block *block) : block(block) {}
-		};
-		
 		struct ClosureOp:
 			public OpcodeWrapper<Opcode::Closure>
 		{
@@ -373,6 +375,48 @@ namespace Mirb
 			};
 
 			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
+		};
+		
+		struct GetHeapOp:
+			public OpcodeWrapper<Opcode::GetHeap>
+		{
+			Tree::Variable *var;
+			Tree::Variable *heaps;
+			size_t index;
+			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(heaps); };
+
+			GetHeapOp(Tree::Variable *var, Tree::Variable *heaps, size_t index) : var(var), heaps(heaps), index(index) {}
+		};
+		
+		struct GetHeapVarOp:
+			public OpcodeWrapper<Opcode::GetHeapVar>
+		{
+			Tree::Variable *var;
+			Tree::Variable *heap;
+			Tree::Variable *index;
+			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(heap); };
+
+			GetHeapVarOp(Tree::Variable *var, Tree::Variable *heap, Tree::Variable *index) : var(var), heap(heap), index(index) {}
+		};
+		
+		struct SetHeapVarOp:
+			public OpcodeWrapper<Opcode::SetHeapVar>
+		{
+			Tree::Variable *heap;
+			Tree::Variable *index;
+			Tree::Variable *var;
+			
+			template<typename T> void use(T use)
+			{
+				use(heap);
+				use(var);
+			};
+			
+			SetHeapVarOp(Tree::Variable *heap, Tree::Variable *index, Tree::Variable *var) : heap(heap), index(index), var(var) {}
 		};
 		
 		struct GetIVarOp:

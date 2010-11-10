@@ -88,7 +88,7 @@ namespace Mirb
 
 				size_t var_count;
 				
-				Tree::Variable *scopes_var;
+				Tree::Variable *heap_array_var;
 				Tree::Variable *heap_var;
 				Tree::Variable *self_var;
 				Tree::Variable *return_var;

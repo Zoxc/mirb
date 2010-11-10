@@ -68,10 +68,6 @@ h1. Operations
   @push R@
   Moves the raw immediate @R@ onto the stack.
 
-* _PushScope_
-  @push B@
-  Pushes a the heap scope for block @B@ onto the stack.
-
 * _Closure_
   @V = closure Vself, B, Rscopes@
   Creates an closures for block @B@ with @Vself@ as self with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. It then pops @Rscopes@ from the stack.
@@ -95,6 +91,18 @@ h1. Operations
 * _Super_
   @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], Rbreak@
   Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
+
+* _GetHeap_
+  @V = heap Vheaps, Rindex@
+  Stores the heap with the index @Rindex@ in heap array @Vheaps@ in @V@.
+
+* _GetHeapVar_
+  @V = heap_var Vheap, Vindex@
+  Stores the value of the heap variable @Vindex@ in @Vheap@ in @V@.
+
+* _SetHeapVar_
+  @heap_var Vheap, Vindex = V@
+  Stores the value of @V@ in the heap variable @Vindex@ in @Vheap@.
 
 * _GetIVar_
   @V = ivar Vself, Iname@

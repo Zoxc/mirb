@@ -40,39 +40,19 @@ namespace Mirb
 			def_bits = w.create_clean();
 			use_bits = w.create_clean();
 
-			// TODO: Remove the heap variable checks
-
 			for(auto i = opcodes.begin(); i != opcodes.end(); ++i)
 			{
 				i().virtual_do<Use>([&](Tree::Variable *var) {
-					if(var->type != Tree::Variable::Heap)
-					{
-						var->range.stop = loc;
+					var->range.stop = loc;
 					
-						if(!w.get(def_bits, var->index))
-							w.set(use_bits, var->index);
-					}
-					else
-					{
-						var = var->owner == block->scope ? block->heap_var : block->scopes_var;
-						var->range.stop = loc;
+					if(!w.get(def_bits, var->index))
 						w.set(use_bits, var->index);
-					}
 				});
 
 				i().virtual_do<Def>([&](Tree::Variable *var) {
-					if(var->type != Tree::Variable::Heap)
-					{
-						var->range.update_start(loc);
+					var->range.update_start(loc);
 					
-						w.set(def_bits, var->index);
-					}
-					else
-					{
-						var = var->owner == block->scope ? block->heap_var : block->scopes_var;
-						var->range.stop = loc;
-						w.set(use_bits, var->index);
-					}
+					w.set(def_bits, var->index);
 				});
 
 				++loc;

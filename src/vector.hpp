@@ -89,6 +89,16 @@ namespace Mirb
 				table[_size++] = entry;
 			}
 			
+			size_t index_of(T entry)
+			{
+				auto result = find(entry);
+
+				if(!result)
+					return (size_t)-1;
+
+				return (size_t)(result - table) / sizeof(T);
+			}
+			
 			T *find(T entry)
 			{
 				for(auto i = begin(); i != end(); ++i)
@@ -152,6 +162,11 @@ namespace Mirb
 			Iterator end()
 			{
 				return Iterator(&table[_size]);
+			}
+
+			size_t index_of(Iterator &iter)
+			{
+				return (size_t)(iter.position() - table) / sizeof(T);
 			}
 	};
 };

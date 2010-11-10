@@ -114,10 +114,26 @@ namespace Mirb
 		{
 			if(!var)
 				return;
-			
+
 			auto node = (Tree::VariableNode *)basic_node;
-			
-			gen<MoveOp>(var, node->var);
+
+			if(node->var->type == Tree::Variable::Heap)
+			{
+				Tree::Variable *heap;
+
+				if(node->var->owner != scope)
+				{
+					heap = reuse(var);
+
+					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(node->var->owner));
+				}
+				else
+					heap = block->heap_var;
+
+				gen<GetHeapVarOp>(var, heap, node->var);
+			}
+			else
+				gen<MoveOp>(var, node->var);
 		}
 		
 		void ByteCodeGenerator::convert_ivar(Tree::Node *basic_node, Tree::Variable *var)
@@ -242,11 +258,36 @@ namespace Mirb
 				case Tree::SimpleNode::Variable:
 				{
 					auto variable = (Tree::VariableNode *)node->left;
+
+					if(variable->var->type == Tree::Variable::Heap)
+					{
+						Tree::Variable *temp = reuse(var);
+
+						to_bytecode(node->right, temp);
+
+						Tree::Variable *heap;
+
+						if(variable->var->owner != scope)
+						{
+							heap = create_var();
+
+							gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(variable->var->owner));
+						}
+						else
+							heap = block->heap_var;
+
+						gen<SetHeapVarOp>(heap, variable->var, temp);
+
+						if(var)
+							gen<MoveOp>(var, temp);
+					}
+					else
+					{
+						to_bytecode(node->right, variable->var);
 					
-					to_bytecode(node->right, variable->var);
-					
-					if (var)
-						gen<MoveOp>(var, variable->var);
+						if(var)
+							gen<MoveOp>(var, variable->var);
+					}
 					
 					return;
 				}
@@ -675,7 +716,7 @@ namespace Mirb
 				block->heap_var = create_var();
 
 			if(scope->referenced_scopes.size() > 0)
-				block->scopes_var = create_var();
+				block->heap_array_var = create_var();
 			
 			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
@@ -783,25 +824,33 @@ namespace Mirb
 			
 			return var;
 		}
-		
+
 		Tree::Variable *ByteCodeGenerator::block_arg(Tree::Scope *scope)
 		{
-			Tree::Variable *closure = 0;
+			Tree::Variable *var = 0;
 			
 			if(scope)
 			{
-				closure = create_var();
+				var = create_var();
 				Block *block_attach = to_bytecode(scope);
 				
 				size_t scopes = 0;
-				
+
 				for(auto i = scope->referenced_scopes.begin(); i != scope->referenced_scopes.end(); ++i, ++scopes)
-					gen<PushScopeOp>(i()->block);
+				{
+					if(*i == this->scope)
+						gen<PushOp>(block->heap_var);
+					else
+					{
+						gen<GetHeapOp>(var, block->heap_array_var, scope->referenced_scopes.index_of(i));
+						gen<PushOp>(var);
+					}
+				}
 				
-				gen<ClosureOp>(closure, self_var(), block_attach, scopes);
+				gen<ClosureOp>(var, self_var(), block_attach, scopes);
 			}
 			
-			return closure;
+			return var;
 		}
 		
 		Tree::Variable *ByteCodeGenerator::call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var)

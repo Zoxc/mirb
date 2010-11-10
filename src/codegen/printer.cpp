@@ -14,8 +14,8 @@ namespace Mirb
 			
 			std::stringstream result;
 			
-			if(var == block->scopes_var)
-				result << "@scopes";
+			if(var == block->heap_array_var)
+				result << "@heap_array";
 			else if(var == block->heap_var)
 				result << "@heap";
 			else if(var == block->self_var)
@@ -142,13 +142,6 @@ namespace Mirb
 					return "push " + raw(op->imm);
 				}
 				
-				case Opcode::PushScope:
-				{
-					auto op = (PushScopeOp *)opcode;
-					
-					return "push " + print_block(op->block);
-				}
-				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
@@ -189,6 +182,27 @@ namespace Mirb
 					auto op = (SuperOp *)opcode;
 					
 					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+				}
+				
+				case Opcode::GetHeap:
+				{
+					auto op = (GetHeapOp *)opcode;
+					
+					return var(op->var) + " = heap " + var(op->heaps) + ", " + raw(op->index);
+				}
+				
+				case Opcode::GetHeapVar:
+				{
+					auto op = (GetHeapVarOp *)opcode;
+					
+					return var(op->var) + " = heap_var " + var(op->heap) + ", " + var(op->index);
+				}
+				
+				case Opcode::SetHeapVar:
+				{
+					auto op = (SetHeapVarOp *)opcode;
+					
+					return "heap_var " + var(op->heap) + ", " + var(op->index) + " = " + var(op->var);
 				}
 				
 				case Opcode::GetIVar:
