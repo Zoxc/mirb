@@ -795,16 +795,19 @@ namespace Mirb
 		Tree::Variable *ByteCodeGenerator::call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var)
 		{
 			size_t parameters = 0;
-			
-			Tree::Variable *temp = reuse(var);
-			
-			for(auto i = arguments.begin(); i; i++)
+
+			if(!arguments.empty())
 			{
-				parameters++;
+				Tree::Variable *temp = reuse(var);
+			
+				for(auto i = arguments.begin(); i; i++)
+				{
+					parameters++;
 				
-				to_bytecode(*i, temp);
+					to_bytecode(*i, temp);
 				
-				gen<PushOp>(temp);
+					gen<PushOp>(temp);
+				}
 			}
 			
 			param_count = parameters;

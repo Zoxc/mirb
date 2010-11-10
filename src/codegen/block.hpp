@@ -51,30 +51,13 @@ namespace Mirb
 				
 				BasicBlock *next_block;
 				BasicBlock *branch_block;
-
-				void prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count);
 				
-				template<typename T> struct Use
-				{
-					static void func(BasicBlock &block, T &opcode)
-					{
-						opcode.use([&](Tree::Variable *var) {
-							if(!BitSetWrapper<MemoryPool>::get(block.def_bits, var->index))
-								BitSetWrapper<MemoryPool>::set(block.use_bits, var->index);
-						});
-					}
-				};
-
-				template<typename T> struct Def
-				{
-					static void func(BasicBlock &block, T &opcode)
-					{
-						opcode.def([&](Tree::Variable *var) {
-							BitSetWrapper<MemoryPool>::set(block.def_bits, var->index);
-						});
-					}
-				};
-
+				size_t loc_start;
+				size_t loc_stop;
+				
+				void prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count, size_t &loc);
+				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope);
+				
 				void next(BasicBlock *block)
 				{
 					next_block = block;

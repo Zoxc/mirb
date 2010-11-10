@@ -67,6 +67,21 @@ namespace Mirb
 				size_t stop;
 
 				LiveRange() : start((size_t)-1), stop(0) {}
+
+				bool contains(size_t loc)
+				{
+					return (start <= loc && stop >= loc);
+				}
+
+				void update_start(size_t loc)
+				{
+					start = std::min(start, loc);
+				}
+
+				void update_stop(size_t loc)
+				{
+					stop = std::max(stop, loc);
+				}
 		};
 		
 		class Variable
@@ -189,7 +204,6 @@ namespace Mirb
 				 * Variable related fields
 				 */
 				VariableMap variables; // A hash of the variables in this scope.
-				size_t local_vars; // The number of the local and temporary variables that is not stored on the heap.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.

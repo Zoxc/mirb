@@ -62,7 +62,16 @@ namespace Mirb
 			result << ")</font></td></tr>";
 			
 			for(auto i = block->opcodes.begin(); i; ++i)
-				result << "<tr><td align='left' bgcolor='gray95' port='C" << *i << "'><font color='gray52'>" << loc++ << ":</font> <font color='gray22'>" << printer.opcode(*i) << "</font></td></tr>";
+			{
+				result << "<tr><td align='left' bgcolor='";
+
+				if(highlight && highlight->range.contains(loc))
+					result << "#D9E2E8";
+				else
+					result << "gray95";
+
+				result << "' port='C" << *i << "'><font color='gray52'>" << loc++ << ":</font> <font color='gray22'>" << printer.opcode(*i) << "</font></td></tr>";
+			}
 
 			result << "</table>" << ">] [shape=plaintext];\n";
 
@@ -81,7 +90,7 @@ namespace Mirb
 
 			file << "digraph bytecode { \n";
 
-			size_t loc = 0;
+			size_t loc = 1;
 			
 			for(auto i = block->basic_blocks.begin(); i; ++i)
 			{

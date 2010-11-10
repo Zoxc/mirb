@@ -10,7 +10,6 @@ namespace Mirb
 			break_targets = 0;
 			can_break = false;
 			
-			local_vars = 0;
 			heap_vars = 0;
 			
 			block_parameter = 0;

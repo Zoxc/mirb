@@ -14,6 +14,22 @@
 	#define mirb_external(name) __asm__(name)
 #endif
 
+#ifdef WIN32
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+	#include <excpt.h>
+#else
+	#define __stdcall __attribute__((__stdcall__))
+	#define __fastcall __attribute__((__fastcall__))
+	#define __cdecl __attribute__((__cdecl__))
+
+	#include <sys/mman.h>
+	#include <sys/stat.h>
+#endif
+
 #include <cstdio>
 #include <cstdarg>
 #include <cstdlib>
@@ -40,19 +56,6 @@
 #endif
 
 #define __regparm(n) __attribute__((__regparm__(n)))
-
-#ifdef WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-	#include <excpt.h>
-#else
-	#define __stdcall __attribute__((__stdcall__))
-	#define __fastcall __attribute__((__fastcall__))
-	#define __cdecl __attribute__((__cdecl__))
-
-	#include <sys/mman.h>
-	#include <sys/stat.h>
-#endif
 
 #ifndef __has_builtin
   #define __has_builtin(x) 0

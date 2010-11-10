@@ -92,7 +92,7 @@ namespace Mirb
 			
 			SimpleEntry<Opcode> entry;
 
-			template<template<typename> class T, typename Arg> auto virtual_do(Arg arg, T<Opcode> *a) -> decltype(T<Opcode>::func(arg, *(Opcode *)0))
+			template<template<typename> class T, typename Arg> auto virtual_do(Arg arg) -> decltype(T<Opcode>::func(arg, *(Opcode *)0))
 			{
 				switch(op)
 				{
@@ -184,7 +184,7 @@ namespace Mirb
 						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
 
 					default:
-						assert(0);
+						debug_fail("Unknown opcode type");
 				};
 			}
 

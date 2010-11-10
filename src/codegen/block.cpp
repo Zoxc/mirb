@@ -12,10 +12,27 @@ namespace Mirb
 			#endif
 		}
 		
-		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count)
+		template<typename T> struct Use
+		{
+			template<typename lambda> static void func(lambda func, T &opcode)
+			{
+				opcode.use([&](Tree::Variable *var) { func(var); });
+			}
+		};
+
+		template<typename T> struct Def
+		{
+			template<typename lambda> static void func(lambda func, T &opcode)
+			{
+				opcode.def([&](Tree::Variable *var) { func(var); });
+			}
+		};
+		
+		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count, size_t &loc)
 		{
 			this->var_count = var_count;
 			in_work_list = false;
+			loc_start = loc;
 
 			in = w.create_clean();
 			out = w.create_clean();
@@ -24,17 +41,47 @@ namespace Mirb
 
 			for(auto i = opcodes.begin(); i; ++i)
 			{
-				i().virtual_do<Def>(*this, 0);
-				i().virtual_do<Use>(*this, 0);
+				i().virtual_do<Def>([&](Tree::Variable *var) {
+					var->range.update_start(loc);
+					
+					w.set(def_bits, var->index);
+				});
+
+				i().virtual_do<Use>([&](Tree::Variable *var) {
+					var->range.stop = loc - 1;
+					
+					if(!w.get(def_bits, var->index))
+						w.set(use_bits, var->index);
+				});
+
+				++loc;
+			}
+
+			loc_stop = loc - 1;
+		}
+		
+		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope)
+		{
+			size_t var_count = scope->variable_list.size();
+
+			for(size_t i = 0; i < var_count; ++i)
+			{
+				if(w.get(in, i))
+					scope->variable_list[i]->range.update_start(loc_start);
+					
+				if(w.get(out, i))
+					scope->variable_list[i]->range.update_stop(loc_stop);
 			}
 		}
 
 		void Block::analyse_liveness(MemoryPool &memory_pool, Tree::Scope *scope)
 		{
-			BitSetWrapper<MemoryPool> w(memory_pool, scope->local_vars);
+			BitSetWrapper<MemoryPool> w(memory_pool, scope->variable_list.size());
+
+			size_t loc = 1;
 
 			for(auto i = basic_blocks.begin(); i; ++i)
-				i().prepare_liveness(w, scope->local_vars);
+				i().prepare_liveness(w, scope->variable_list.size(), loc);
 
 			List<BasicBlock, BasicBlock, &BasicBlock::work_list_entry> work_list;
 
@@ -83,6 +130,9 @@ namespace Mirb
 				}
 
 			}
+
+			for(auto i = basic_blocks.begin(); i; ++i)
+				i().update_ranges(w, scope);
 		}
 
 		Block::Block() :
