@@ -1,4 +1,5 @@
 #pragma once
+#include "../globals.hpp"
 #include <iostream>
 #include <map>
 #include <vector>
@@ -30,4 +31,16 @@ namespace Mirb
 	{
 		return value & ~(alignment - 1);
 	};
+	
+	static inline void __noreturn debug_fail(std::string message = "");
+
+	static inline void debug_assert(bool expr, std::string message)
+	{
+		assert(expr);
+	}
+
+	static inline void debug_fail(std::string message)
+	{
+		assert(0);
+	}
 };

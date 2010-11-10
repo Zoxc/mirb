@@ -1,4 +1,5 @@
 #pragma once
+#include "../src/common.hpp"
 #include "../globals.hpp"
 #include "gc.hpp"
 
@@ -144,7 +145,7 @@ static inline enum rt_type rt_type(rt_value obj)
 				return C_NIL;
 
 			default:
-				RT_ASSERT(0);
+				Mirb::debug_fail("Unknown literal type");
 		}
 	}
 	else

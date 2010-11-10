@@ -19,8 +19,6 @@ package = Package.new do
 	
 	# setup toolchain
 	
-	set Toolchain::Architecture, Arch::X86
-
 	set Toolchain::Optimization, debug ? :none : :balanced
 	set Toolchain::Exceptions, :none
 	set Toolchain::StaticLibraries, false

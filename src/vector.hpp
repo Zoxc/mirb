@@ -91,7 +91,7 @@ namespace Mirb
 			
 			T *find(T entry)
 			{
-				for(auto i = begin(); i; i++)
+				for(auto i = begin(); i != end(); ++i)
 				{
 					if(*i == entry)
 						return i.position();
@@ -104,17 +104,21 @@ namespace Mirb
 			{
 			private:
 				T *current;
-				T *end;
 
 			public:
-				Iterator(Vector &vector, T *start, T *end) : current(start), end(end) {}
+				Iterator(T *start) : current(start) {}
 				
-				operator bool()
+				bool operator ==(const Iterator &other) const 
 				{
-					return current != end;
+					return current == other.current;
+				}
+				
+				bool operator !=(const Iterator &other) const 
+				{
+					return current != other.current;
 				}
 			
-				T *position()
+				T *position() const 
 				{
 					return current;
 				}
@@ -123,18 +127,18 @@ namespace Mirb
 				{
 					return *++current;
 				}
-				
+				/*
 				T &operator ++(int)
 				{
 					return *current++;
 				}
-				
-				T operator*()
+				*/
+				T operator*() const 
 				{
 					return *current;
 				}
 				
-				T operator ()()
+				T operator ()() const 
 				{
 					return *current;
 				}
@@ -142,7 +146,12 @@ namespace Mirb
 			
 			Iterator begin()
 			{
-				return Iterator(*this, first(), last());
+				return Iterator(first());
+			}
+
+			Iterator end()
+			{
+				return Iterator(last());
 			}
 	};
 };

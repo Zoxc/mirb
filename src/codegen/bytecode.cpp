@@ -284,7 +284,7 @@ namespace Mirb
 				}	
 				
 				default:
-					RT_ASSERT(0);
+					debug_fail("Unknown left hand expression");
 			}
 		}
 		
@@ -671,7 +671,7 @@ namespace Mirb
 			
 			block->return_var = create_var();
 			
-			for(auto i = scope->zsupers.begin(); i; ++i)
+			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
 				scope->require_args(*i);
 			}
@@ -709,7 +709,7 @@ namespace Mirb
 
 				std::system("dot -Tpng bytecode.dot -o bytecode.png");
 
-				for(auto i = scope->variable_list.begin(); i; ++i)
+				for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
 				{
 					dot_printer.highlight = *i;
 
@@ -717,7 +717,7 @@ namespace Mirb
 					
 					std::stringstream result;
 
-					result << "dot -Tpng bytecode.dot -o bytecode/var" << i().index << ".png";
+					result << "dot -Tpng bytecode.dot -o bytecode/var" << i()->index << ".png";
 
 					std::system(result.str().c_str());
 				}
@@ -764,12 +764,10 @@ namespace Mirb
 		{
 			auto var = new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
 
-			#ifdef DEBUG
-				scope->variable_list.append(var);
-			#endif
-
 			var->owner = scope;
-			var->index = scope->local_vars++;
+			var->index = scope->variable_list.size();
+
+			scope->variable_list.push(var);
 			
 			return var;
 		}
@@ -785,7 +783,7 @@ namespace Mirb
 				
 				size_t scopes = 0;
 				
-				for(auto i = scope->referenced_scopes.begin(); i; ++i, ++scopes)
+				for(auto i = scope->referenced_scopes.begin(); i != scope->referenced_scopes.end(); ++i, ++scopes)
 					gen<PushScopeOp>(i()->block);
 				
 				gen<ClosureOp>(closure, self_var(), block_attach, scopes);

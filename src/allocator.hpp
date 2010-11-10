@@ -17,6 +17,8 @@ namespace Mirb
 					static Wrap &def_ref()
 					{
 						assert(0); // This should never be called!
+
+						return *(Wrap *)0;
 					}
 
 					void *alloc(size_t bytes)

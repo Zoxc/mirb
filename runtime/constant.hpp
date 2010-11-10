@@ -33,7 +33,7 @@ static inline rt_value rt_const_get(rt_value obj, rt_value name)
 				break;
 
 			default:
-				RT_ASSERT(0);
+				Mirb::debug_fail("Wrong object type");
 		}
 	}
 
@@ -57,12 +57,12 @@ static inline rt_value rt_const_get(rt_value obj, rt_value name)
 				break;
 
 			default:
-				RT_ASSERT(0);
+				Mirb::debug_fail("Wrong object type");
 		}
 	}
 
 	printf("Unable to find constant %s on %s.\n", rt_symbol_to_cstr(name), rt_string_to_cstr(rt_inspect(obj)));
-	RT_ASSERT(0);
+	Mirb::debug_fail("Unable to find constant");
 }
 
 static inline void rt_const_set(rt_value obj, rt_value name, rt_value value)

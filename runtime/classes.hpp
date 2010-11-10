@@ -26,7 +26,7 @@ static inline rt_value rt_class_of(rt_value obj)
 				return rt_NilClass;
 
 			default:
-				RT_ASSERT(0);
+				Mirb::debug_fail("Unknown literal type");
 		}
 	}
 	else

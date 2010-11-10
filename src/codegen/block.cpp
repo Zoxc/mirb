@@ -72,7 +72,7 @@ namespace Mirb
 
 				if(!w.equal(in_, block.in) || !w.equal(out_, block.out))
 				{
-					for(auto i = block.pred_blocks.begin(); i; ++i)
+					for(auto i = block.pred_blocks.begin(); i != block.pred_blocks.end(); ++i)
 					{
 						if(!i()->in_work_list)
 						{

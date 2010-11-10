@@ -59,6 +59,15 @@ namespace Mirb
 		struct Node;
 		
 		struct SuperNode;
+
+		class LiveRange
+		{
+			public:
+				size_t start;
+				size_t stop;
+
+				LiveRange() : start((size_t)-1), stop(0) {}
+		};
 		
 		class Variable
 		{
@@ -76,9 +85,7 @@ namespace Mirb
 				
 				Variable(Type type) : type(type) {}
 
-				#ifdef DEBUG
-					SimplerEntry<Variable> entry;
-				#endif
+				LiveRange range;
 
 				size_t index;
 		};
@@ -181,7 +188,7 @@ namespace Mirb
 				/*
 				 * Variable related fields
 				 */
-				VariableMap variables;
+				VariableMap variables; // A hash of the variables in this scope.
 				size_t local_vars; // The number of the local and temporary variables that is not stored on the heap.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
@@ -189,9 +196,7 @@ namespace Mirb
 				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 				
-				#ifdef DEBUG
-					SimplerList<Variable> variable_list;
-				#endif
+				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
 
 				SimplerList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
 				
@@ -201,11 +206,11 @@ namespace Mirb
 				{
 					T *result = new (fragment) T(type);
 					
-					result->index = local_vars++;
+					result->index = variable_list.size();
 					
 					result->type = type;
 
-					variable_list.append(result);
+					variable_list.push(result);
 					
 					return result;
 				}
@@ -221,9 +226,7 @@ namespace Mirb
 					
 					result->name = name;
 
-					#ifdef DEBUG
-						variables.set(name, result);
-					#endif
+					variables.set(name, result);
 
 					return result;
 				}

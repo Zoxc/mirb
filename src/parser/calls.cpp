@@ -329,7 +329,7 @@ namespace Mirb
 				}
 
 			default:
-				RT_ASSERT(0);
+				debug_fail("Invalid lookup lexeme");
 		}
 	}
 
