@@ -59,7 +59,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	
 	if(!compiler.messages.empty())
 	{
-		for(auto i = compiler.messages.begin(); i; ++i)
+		for(auto i = compiler.messages.begin(); i != compiler.messages.end(); ++i)
 			std::cout << i().format() << "\n";
 
 		return RT_NIL;

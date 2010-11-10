@@ -10,7 +10,7 @@ namespace Mirb
 	{
 		std::string result;
 
-		for(auto i = list.begin(); i; i++)
+		for(auto i = list.begin(); i != list.end(); ++i)
 		{
 			result += print_node(*i);
 
@@ -25,7 +25,7 @@ namespace Mirb
 	{
 		std::string result;
 
-		for(auto i = list.begin(); i; i++)
+		for(auto i = list.begin(); i != list.end(); ++i)
 			result += pre + print_node(*i) + post;
 
 		return result;
@@ -184,7 +184,7 @@ namespace Mirb
 				
 				std::string result;
 				
-				for(auto i = target->statements.begin(); i; i++)
+				for(auto i = target->statements.begin(); i != target->statements.end(); i++)
 					result += get_indent(indent) + print_node(*i, indent + 1) + "\n";
 
 				return result;

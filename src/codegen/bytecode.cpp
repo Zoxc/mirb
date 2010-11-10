@@ -73,7 +73,7 @@ namespace Mirb
 			
 			size_t parameters = 0;
 			
-			for(auto i = node->pairs.begin(); i; i++)
+			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
 			{
 				if(strlen((const char *)i().string))
 				{
@@ -320,7 +320,7 @@ namespace Mirb
 			
 			if(!var)
 			{
-				for(auto i = node->entries.begin(); i; i++)
+				for(auto i = node->entries.begin(); i != node->entries.end(); ++i)
 					to_bytecode(*i, 0);
 				
 				return;
@@ -328,7 +328,7 @@ namespace Mirb
 			
 			size_t entries = 0;
 			
-			for(auto i = node->entries.begin(); i; i++)
+			for(auto i = node->entries.begin(); i != node->entries.end(); ++i)
 			{
 				to_bytecode(*i, temp);
 				
@@ -370,7 +370,7 @@ namespace Mirb
 				
 				size_t param_count = 0;
 				
-				for(auto i = scope->owner->parameters.begin(); i; ++i, ++param_count)
+				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i, ++param_count)
 				{
 					gen<PushOp>(*i);
 				}
@@ -455,7 +455,7 @@ namespace Mirb
 				return;
 			}
 			
-			for(auto i = node->statements.begin(); i; i++)
+			for(auto i = node->statements.begin(); i != node->statements.end(); ++i)
 			{
 				to_bytecode(*i, i().entry.next ? 0 : var);
 			}
@@ -609,7 +609,7 @@ namespace Mirb
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
 				 */
-				for(auto i = node->rescues.begin(); i; ++i)
+				for(auto i = node->rescues.begin(); i != node->rescues.end(); ++i)
 				{
 					struct runtime_exception_handler *handler = (struct runtime_exception_handler *)malloc(sizeof(struct runtime_exception_handler));
 					handler->common.type = E_RUNTIME_EXCEPTION;
@@ -800,7 +800,7 @@ namespace Mirb
 			{
 				Tree::Variable *temp = reuse(var);
 			
-				for(auto i = arguments.begin(); i; i++)
+				for(auto i = arguments.begin(); i != arguments.end(); ++i)
 				{
 					parameters++;
 				

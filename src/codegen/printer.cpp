@@ -297,7 +297,7 @@ namespace Mirb
 			std::stringstream result;
 			result << label(block) << ":\n";
 			
-			for(auto i = block->opcodes.begin(); i; ++i)
+			for(auto i = block->opcodes.begin(); i != block->opcodes.end(); ++i)
 				result << opcode(*i) << "\n";
 			
 			return result.str();
@@ -308,7 +308,7 @@ namespace Mirb
 			std::stringstream result;
 			result << ";\n; " << this->block(block) << "\n;\n";
 			
-			for(auto i = block->basic_blocks.begin(); i; ++i)
+			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 				result << print_basic_block(*i) << "\n";
 			
 			return result.str();

@@ -27,10 +27,9 @@ namespace Mirb
 			referenced_scopes.push(scope);
 		}
 		
-
 		void Scope::require_args(Scope *owner)
 		{
-			for(auto i = owner->parameters.begin(); i; ++i)
+			for(auto i = owner->parameters.begin(); i != owner->parameters.end(); ++i)
 			{
 				require_var(owner, *i);
 			}

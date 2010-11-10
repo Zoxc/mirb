@@ -40,7 +40,7 @@ int main()
 		
 		if(!compiler.messages.empty())
 		{
-			for(auto i = compiler.messages.begin(); i; ++i)
+			for(auto i = compiler.messages.begin(); i != compiler.messages.end(); ++i)
 				std::cout << i().format() << "\n";
 				
 			continue;

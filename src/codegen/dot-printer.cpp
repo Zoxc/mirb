@@ -61,7 +61,7 @@ namespace Mirb
 			
 			result << ")</font></td></tr>";
 			
-			for(auto i = block->opcodes.begin(); i; ++i)
+			for(auto i = block->opcodes.begin(); i != block->opcodes.end(); ++i)
 			{
 				result << "<tr><td align='left' bgcolor='";
 
@@ -92,7 +92,7 @@ namespace Mirb
 
 			size_t loc = 1;
 			
-			for(auto i = block->basic_blocks.begin(); i; ++i)
+			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 			{
 				file << print_basic_block(block, *i, loc) << "\n";
 			}

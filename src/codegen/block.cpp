@@ -39,7 +39,7 @@ namespace Mirb
 			def_bits = w.create_clean();
 			use_bits = w.create_clean();
 
-			for(auto i = opcodes.begin(); i; ++i)
+			for(auto i = opcodes.begin(); i != opcodes.end(); ++i)
 			{
 				i().virtual_do<Def>([&](Tree::Variable *var) {
 					var->range.update_start(loc);
@@ -80,7 +80,7 @@ namespace Mirb
 
 			size_t loc = 1;
 
-			for(auto i = basic_blocks.begin(); i; ++i)
+			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 				i().prepare_liveness(w, scope->variable_list.size(), loc);
 
 			List<BasicBlock, BasicBlock, &BasicBlock::work_list_entry> work_list;
@@ -131,7 +131,7 @@ namespace Mirb
 
 			}
 
-			for(auto i = basic_blocks.begin(); i; ++i)
+			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 				i().update_ranges(w, scope);
 		}
 

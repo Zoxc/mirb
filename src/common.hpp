@@ -34,7 +34,7 @@ namespace Mirb
 	
 	static inline void __noreturn debug_fail(std::string message = "");
 
-	static inline void debug_assert(bool expr, std::string message)
+	template<typename T> static inline void debug_assert(T expr, std::string message = "")
 	{
 		assert(expr);
 	}

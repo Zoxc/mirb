@@ -26,7 +26,7 @@ namespace Mirb
 
 		void append(T *node)
 		{
-			assert(node);
+			debug_assert(node);
 			
 			(node->*field).next = 0;
 			
@@ -48,45 +48,55 @@ namespace Mirb
 			T *current;
 
 		public:
-			Iterator(SimpleList &list) : current(list.first) {}
+			Iterator(T *start) : current(start) {}
 
 			void step()
 			{
 				current = static_cast<T *>((current->*field).next);
 			}
-
-			operator bool()
+			
+			bool operator ==(const Iterator &other) const
 			{
-				return current != 0;
+				return current == other.current;
 			}
-
+			
+			bool operator !=(const Iterator &other) const
+			{
+				return current != other.current;
+			}
+			
 			T &operator ++()
 			{
 				step();
 				return *current;
 			}
-
+			
 			T &operator ++(int)
 			{
 				T *result = current;
 				step();
 				return *result;
 			}
-
-			T *operator*()
+			
+			T *operator*() const
 			{
 				return current;
 			}
 
-			T &operator ()()
+			T &operator ()() const
 			{
 				return *current;
 			}
 		};
-
+		
 		Iterator begin()
 		{
-			return Iterator(*this);
+			return Iterator(first);
+		}
+
+		Iterator end()
+		{
+			return Iterator(0);
 		}
 
 		class MutableIterator
