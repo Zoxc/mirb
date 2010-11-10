@@ -127,12 +127,12 @@ namespace Mirb
 				{
 					return *++current;
 				}
-				/*
+				
 				T &operator ++(int)
 				{
 					return *current++;
 				}
-				*/
+				
 				T operator*() const 
 				{
 					return *current;
