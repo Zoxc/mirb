@@ -21,6 +21,7 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
+		class Block;
 		class BasicBlock;
 		
 		class BasicBlock
@@ -34,8 +35,6 @@ namespace Mirb
 
 				Entry<BasicBlock> entry;
 				Entry<BasicBlock> work_list_entry;
-
-				size_t var_count; //TODO: Remove this
 
 				bool in_work_list;
 				
@@ -55,7 +54,7 @@ namespace Mirb
 				size_t loc_start;
 				size_t loc_stop;
 				
-				void prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count, size_t &loc);
+				void prepare_liveness(BitSetWrapper<MemoryPool> &w, Block *block, size_t &loc);
 				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope);
 				
 				void next(BasicBlock *block)
@@ -75,8 +74,11 @@ namespace Mirb
 		{
 			public:
 				Mirb::Block *final;
+				Tree::Scope *scope;
 				BasicBlock *prolog; // The point after the prolog of the block.
 				BasicBlock *epilog; // The end of the block
+
+				MemoryPool &memory_pool;
 				
 				/*
 				 * Exception related fields
@@ -86,6 +88,8 @@ namespace Mirb
 
 				size_t var_count;
 				
+				Tree::Variable *scopes_var;
+				Tree::Variable *heap_var;
 				Tree::Variable *self_var;
 				Tree::Variable *return_var;
 				
@@ -93,9 +97,10 @@ namespace Mirb
 					size_t basic_block_count; // Nicer basic block labeling...
 				#endif
 
-				void analyse_liveness(MemoryPool &memory_pool, Tree::Scope *scope);
+				void analyse_liveness();
+				void allocate_registers();
 				
-				Block();
+				Block(MemoryPool &memory_pool, Tree::Scope *scope);
 				
 				List<BasicBlock> basic_blocks; // A linked list of basic blocks
 		};

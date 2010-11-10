@@ -53,14 +53,14 @@ namespace Mirb
 				return _size;
 			}
 			
-			T *first()
+			T &first()
 			{
-				return table;
+				return *table;
 			}
 			
-			T *last()
+			T &last()
 			{
-				return &table[_size];
+				return &table[_size - 1];
 			}
 			
 			T operator [](size_t index)
@@ -146,12 +146,12 @@ namespace Mirb
 			
 			Iterator begin()
 			{
-				return Iterator(first());
+				return Iterator(&first());
 			}
 
 			Iterator end()
 			{
-				return Iterator(last());
+				return Iterator(&table[_size]);
 			}
 	};
 };

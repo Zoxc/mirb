@@ -657,7 +657,7 @@ namespace Mirb
 		
 		Block *ByteCodeGenerator::to_bytecode(Tree::Scope *scope)
 		{
-			Block *block = new (memory_pool) Block;
+			Block *block = new (memory_pool) Block(memory_pool, scope);
 			block->final = new (gc) Mirb::Block;
 			
 			scope->block = block;
@@ -670,6 +670,12 @@ namespace Mirb
 			this->block = block;
 			
 			block->return_var = create_var();
+
+			if(scope->heap_vars)
+				block->heap_var = create_var();
+
+			if(scope->referenced_scopes.size() > 0)
+				block->scopes_var = create_var();
 			
 			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
@@ -697,32 +703,38 @@ namespace Mirb
 
 			block->epilog->next_block = 0;
 
+			block->analyse_liveness();
+			block->allocate_registers();
+
 			#ifdef DEBUG
 				DotPrinter dot_printer;
-				ByteCodePrinter printer;
+				ByteCodePrinter printer(block);
 
-				std::cout << printer.print_block(block);
+				std::cout << printer.print();
+
+				std::system("mkdir bytecode");
 				
-				block->analyse_liveness(memory_pool, scope);
+				dot_printer.print_block(block, "bytecode/bytecode.dot");
 
-				dot_printer.print_block(block, "bytecode.dot");
-
-				std::system("dot -Tpng bytecode.dot -o bytecode.png");
-
+				std::stringstream path;
+				
+				path << "bytecode/block-" << block;
+				
+				std::system(("mkdir \"" + path.str() + "\"").c_str());
+				std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
+				
 				for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
 				{
 					dot_printer.highlight = *i;
 
-					dot_printer.print_block(block, "bytecode.dot");
+					dot_printer.print_block(block, "bytecode/bytecode.dot");
 					
 					std::stringstream result;
 
-					result << "dot -Tpng bytecode.dot -o bytecode/var" << i()->index << ".png";
+					result << "dot -Tpng bytecode/bytecode.dot -o " << path.str() << "/var" << i()->index << ".png";
 
 					std::system(result.str().c_str());
 				}
-			#else
-				block->analyse_liveness(memory_pool, scope);
 			#endif
 
 			this->block = prev_block;

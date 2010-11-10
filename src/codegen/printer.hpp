@@ -20,6 +20,8 @@ namespace Mirb
 		class ByteCodePrinter
 		{
 			private:
+				Block *block;
+
 				std::string imm(rt_value imm);
 				
 				std::string imm(Symbol *imm)
@@ -29,16 +31,16 @@ namespace Mirb
 				
 				std::string label(BasicBlock *label);
 				std::string raw(size_t imm);
-				std::string block(Block *block);
+				std::string print_block(Block *block);
 			public:
-				ByteCodePrinter() : highlight(0) {}
+				ByteCodePrinter(Block *block) : highlight(0), block(block) {}
 
 				Tree::Variable *highlight;
 				
 				std::string var(Tree::Variable *var);
 				std::string opcode(Opcode *opcode);
 				std::string print_basic_block(BasicBlock *block);
-				std::string print_block(Block *block);
+				std::string print();
 		};
 	};
 };

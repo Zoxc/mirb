@@ -14,36 +14,43 @@ namespace Mirb
 			
 			std::stringstream result;
 			
-			switch(var->type)
-			{
-				case Tree::Variable::Temporary:
+			if(var == block->scopes_var)
+				result << "@scopes";
+			else if(var == block->heap_var)
+				result << "@heap";
+			else if(var == block->self_var)
+				result << "@self";
+			else
+				switch(var->type)
 				{
-					result << "%" << var->index;
+					case Tree::Variable::Temporary:
+					{
+						result << "%" << var->index;
 					
-					break;
-				}
+						break;
+					}
 				
-				case Tree::Variable::Local:
-				{
-					auto named_var = (Tree::NamedVariable *)var;
+					case Tree::Variable::Local:
+					{
+						auto named_var = (Tree::NamedVariable *)var;
 					
-					result << "%" << named_var->name->get_string();
+						result << "%" << named_var->name->get_string();
 					
-					break;
-				}
+						break;
+					}
 				
-				case Tree::Variable::Heap:
-				{
-					auto named_var = (Tree::NamedVariable *)var;
+					case Tree::Variable::Heap:
+					{
+						auto named_var = (Tree::NamedVariable *)var;
 					
-					result << "!" << named_var->name->get_string();
+						result << "!" << named_var->name->get_string();
 					
-					break;
-				}
+						break;
+					}
 				
-				default:
-					assert(0);
-			}
+					default:
+						assert(0);
+				}
 
 			if(highlight == var)
 				return "<font color='dodgerblue2'>" + result.str() + "</font>";
@@ -80,7 +87,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::block(Block *block)
+		std::string ByteCodePrinter::print_block(Block *block)
 		{
 			std::stringstream result;
 			
@@ -139,35 +146,35 @@ namespace Mirb
 				{
 					auto op = (PushScopeOp *)opcode;
 					
-					return "push " + block(op->block);
+					return "push " + print_block(op->block);
 				}
 				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
 					
-					return var(op->var) + " = closure " + var(op->self) + ", " + block(op->block) + ", " + raw(op->scope_count);
+					return var(op->var) + " = closure " + var(op->self) + ", " + print_block(op->block) + ", " + raw(op->scope_count);
 				}
 				
 				case Opcode::Class:
 				{
 					auto op = (ClassOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Module:
 				{
 					auto op = (ModuleOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "module " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "module " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Method:
 				{
 					auto op = (MethodOp *)opcode;
 					
-					return "method " + var(op->self) + ", " + imm(op->name) + ", " + block(op->block);
+					return "method " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Call:
@@ -303,10 +310,10 @@ namespace Mirb
 			return result.str();
 		}
 
-		std::string ByteCodePrinter::print_block(Block *block)
+		std::string ByteCodePrinter::print()
 		{
 			std::stringstream result;
-			result << ";\n; " << this->block(block) << "\n;\n";
+			result << ";\n; " << print_block(block) << "\n;\n";
 			
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 				result << print_basic_block(*i) << "\n";

@@ -31,12 +31,8 @@ namespace Mirb
 			return result.str();
 		}
 
-		std::string DotPrinter::print_basic_block(Block *main_block, BasicBlock *block, size_t &loc)
+		std::string DotPrinter::print_basic_block(ByteCodePrinter &printer, Block *main_block, BasicBlock *block, size_t &loc)
 		{
-			ByteCodePrinter printer;
-
-			printer.highlight = highlight;
-			
 			std::stringstream result;
 
 			result << "B" << block << " [fontname=Courier New] [fontsize=9] [label=<" << "<table border='1' cellborder='0' cellspacing='0'>";
@@ -51,12 +47,12 @@ namespace Mirb
 
 			result << " (";
 			
-			for(size_t i = 0; i < block->var_count; ++i)
+			for(size_t i = 0; i < main_block->scope->variable_list.size(); ++i)
 				result << (BitSetWrapper<MemoryPool>::get(block->in, i) ? "1" : "0");
 			
 			result << ")(";
 			
-			for(size_t i = 0; i < block->var_count; ++i)
+			for(size_t i = 0; i < main_block->scope->variable_list.size(); ++i)
 				result << (BitSetWrapper<MemoryPool>::get(block->out, i) ? "1" : "0");
 			
 			result << ")</font></td></tr>";
@@ -88,13 +84,29 @@ namespace Mirb
 		{
 			std::fstream file(filename, std::ios_base::out);
 
-			file << "digraph bytecode { \n";
+			ByteCodePrinter printer(block);
 
-			size_t loc = 1;
+			printer.highlight = highlight;
+			
+			file << "digraph bytecode { \n";
+			
+			file << "vars [fontname=Courier New] [fontsize=9] [label=<" << "<table border='1' cellborder='0' cellspacing='0'>";
+
+			file << "<tr><td bgcolor='gray22'><font color='gray81'>var</font></td><td bgcolor='gray22'><font color='gray81'>reg</font></td></tr>";
+
+			for(auto i = block->scope->variable_list.begin(); i != block->scope->variable_list.end(); ++i)
+			{
+				if(i()->reg && i()->type != Tree::Variable::Heap)
+					file << "<tr><td align='left' bgcolor='gray95'><font color='gray52'>" << printer.var(*i) << "</font></td><td align='left' bgcolor='grey90'><font color='gray30'>" << i()->loc << "</font></td></tr>";
+			}
+
+			file << "</table>" << ">] [shape=plaintext];\n";
+
+			size_t loc = 0;
 			
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 			{
-				file << print_basic_block(block, *i, loc) << "\n";
+				file << print_basic_block(printer, block, *i, loc) << "\n";
 			}
 
 			file << "\n}";

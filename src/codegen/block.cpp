@@ -1,4 +1,6 @@
+#include <algorithm>
 #include "../memory-pool.hpp"
+#include "../arch/arch.hpp"
 #include "block.hpp"
 
 namespace Mirb
@@ -28,9 +30,8 @@ namespace Mirb
 			}
 		};
 		
-		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t var_count, size_t &loc)
+		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, Block *block, size_t &loc)
 		{
-			this->var_count = var_count;
 			in_work_list = false;
 			loc_start = loc;
 
@@ -39,19 +40,39 @@ namespace Mirb
 			def_bits = w.create_clean();
 			use_bits = w.create_clean();
 
+			// TODO: Remove the heap variable checks
+
 			for(auto i = opcodes.begin(); i != opcodes.end(); ++i)
 			{
-				i().virtual_do<Def>([&](Tree::Variable *var) {
-					var->range.update_start(loc);
+				i().virtual_do<Use>([&](Tree::Variable *var) {
+					if(var->type != Tree::Variable::Heap)
+					{
+						var->range.stop = loc;
 					
-					w.set(def_bits, var->index);
+						if(!w.get(def_bits, var->index))
+							w.set(use_bits, var->index);
+					}
+					else
+					{
+						var = var->owner == block->scope ? block->heap_var : block->scopes_var;
+						var->range.stop = loc;
+						w.set(use_bits, var->index);
+					}
 				});
 
-				i().virtual_do<Use>([&](Tree::Variable *var) {
-					var->range.stop = loc - 1;
+				i().virtual_do<Def>([&](Tree::Variable *var) {
+					if(var->type != Tree::Variable::Heap)
+					{
+						var->range.update_start(loc);
 					
-					if(!w.get(def_bits, var->index))
+						w.set(def_bits, var->index);
+					}
+					else
+					{
+						var = var->owner == block->scope ? block->heap_var : block->scopes_var;
+						var->range.stop = loc;
 						w.set(use_bits, var->index);
+					}
 				});
 
 				++loc;
@@ -74,14 +95,14 @@ namespace Mirb
 			}
 		}
 
-		void Block::analyse_liveness(MemoryPool &memory_pool, Tree::Scope *scope)
+		void Block::analyse_liveness()
 		{
 			BitSetWrapper<MemoryPool> w(memory_pool, scope->variable_list.size());
 
-			size_t loc = 1;
+			size_t loc = 0;
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
-				i().prepare_liveness(w, scope->variable_list.size(), loc);
+				i().prepare_liveness(w, this, loc);
 
 			List<BasicBlock, BasicBlock, &BasicBlock::work_list_entry> work_list;
 
@@ -135,7 +156,96 @@ namespace Mirb
 				i().update_ranges(w, scope);
 		}
 
-		Block::Block() :
+		void Block::allocate_registers()
+		{
+			std::vector<Tree::Variable *> variables;
+
+			for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
+				if(i()->type != Tree::Variable::Heap)
+					variables.push_back(*i);
+
+			// TODO: Sort directly on scope->variable_list
+
+			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) { return a->range.start < b->range.start; });
+
+			bool used_reg[Arch::registers] = {0};
+
+			auto get_reg = [&]() -> size_t {
+				for(size_t i = 0; i < Arch::registers; ++i)
+					if(!used_reg[i])
+					{
+						used_reg[i] = true;
+						return i;
+					}
+
+				debug_fail("No more registers!");
+			};
+
+			// TODO: Don't use std::vector
+			
+			std::vector<Tree::Variable *> active;
+
+			auto add_active = [&](Tree::Variable *var) -> void {
+				auto i = active.begin();
+				
+				while(i != active.end())
+				{
+					if((*i)->range.stop < var->range.stop)
+						break;
+
+					++i;
+				}
+
+				active.insert(i, var);
+			};
+
+			size_t stack_loc = 0;
+
+			for(auto i = variables.begin(); i != variables.end(); ++i)
+			{
+				// Expire old intervals
+
+				auto j = active.rbegin();
+				
+				for(; j != active.rend() && (*j)->range.stop <= (*i)->range.start; ++j)
+					used_reg[(*j)->loc] = false;
+				
+				active.resize(active.size() - (j - active.rbegin()));
+
+				// Assign a location to this interval
+
+				if(active.size() == Arch::registers)
+				{
+					// Figure out which interval to spill 
+
+					Tree::Variable *spill = active.front();
+
+					if(spill->range.stop > (*i)->range.stop)
+					{
+						(*i)->reg = true;
+						(*i)->reg = spill->reg;
+						spill->loc = stack_loc++;
+						active.erase(active.begin());
+						add_active(*i);
+					}
+					else
+					{
+						(*i)->reg = false;
+						(*i)->loc = stack_loc++;
+					}
+				}
+				else
+				{
+					(*i)->reg = true;
+					(*i)->loc = get_reg();
+					add_active(*i);
+				}
+			}
+		}
+
+		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
+			scope(scope),
+			memory_pool(memory_pool),
 			current_exception_block(0),
 			current_exception_block_id(-1),
 			self_var(0)

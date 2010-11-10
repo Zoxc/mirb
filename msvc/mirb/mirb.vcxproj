@@ -32,6 +32,8 @@
     <ClInclude Include="..\..\runtime\runtime.hpp" />
     <ClInclude Include="..\..\runtime\x86.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
+    <ClInclude Include="..\..\src\arch\arch.hpp" />
+    <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />

@@ -102,6 +102,10 @@ namespace Mirb
 
 				LiveRange range;
 
+				bool reg;
+
+				size_t loc;
+
 				size_t index;
 		};
 
