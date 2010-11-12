@@ -78,90 +78,91 @@ namespace Mirb
 					return 0;
 				}
 				
+				void append(Opcode *op)
+				{
+					basic->opcodes.append(op);
+				}
+
+				Tree::Variable *lock(Tree::Variable *var, size_t reg)
+				{
+					var->reg = true;
+					var->loc = reg;
+
+					return var;
+				}
+
+				template<class T> T *gen()
+				{
+					T *result = new (memory_pool) T;
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1> T *gen(Arg1&& arg1)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2> T *gen(Arg1&& arg1, Arg2&& arg2)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2, typename Arg3> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> T *gen(Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
+						
+					append(result);
+						
+					return result;
+				}
+
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
+				{
+					T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
+						
+					append(result);
+						
+					return result;
+				}
 				
-				#ifdef _MSC_VER
-					template<class T> T *gen()
-					{
-						T *result = new (memory_pool) T;
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1> T *gen(Arg1&& arg1)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2> T *gen(Arg1&& arg1, Arg2&& arg2)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2, typename Arg3> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-
-					template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
-					{
-						T *result = new (memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
-						
-						basic->opcodes.append(result);
-						
-						return result;
-					}
-				#else
-					template<class T, typename ...Args> T *gen(Args&&... params)
-					{
-						T *result = new (memory_pool) T(std::forward<Args>(params)...);
-					
-						basic->opcodes.append(result);
-					
-						return result;
-					}
-				#endif
-
 				BranchIfOp *gen_if(BasicBlock *ltrue, Tree::Variable *var)
 				{
 					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);

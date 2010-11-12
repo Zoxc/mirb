@@ -1,4 +1,5 @@
 #include "bytecode.hpp"
+#include "../arch/bytecode.hpp"
 #include "../tree/nodes.hpp"
 #include "../../runtime/classes.hpp"
 #include "../../runtime/classes/symbol.hpp"
@@ -847,7 +848,7 @@ namespace Mirb
 					}
 				}
 				
-				gen<ClosureOp>(var, self_var(), block_attach, scopes);
+				gen<ClosureOp, Tree::Variable *, Tree::Variable *, Block *, size_t>(var, self_var(), block_attach, scopes);
 			}
 			
 			return var;
