@@ -216,13 +216,16 @@ namespace Mirb
 		lexeme.start = &input;
 		lexeme.error = false;
 		lexeme.whitespace = whitespace;
-		lexeme.type = (Lexeme::Type)0xBAD;
+
+		#ifdef DEBUG
+			lexeme.type = (Lexeme::Type)0xBAD;
+		#endif
 
 		(this->*jump_table[input])();
 
 		#ifdef DEBUG
-			assert(lexeme.stop >= lexeme.start);
-			assert(lexeme.type != (Lexeme::Type)0xBAD);
+			debug_assert(lexeme.stop >= lexeme.start);
+			debug_assert(lexeme.type != (Lexeme::Type)0xBAD);
 		#endif
 	}
 };
