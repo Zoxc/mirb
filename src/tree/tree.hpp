@@ -98,7 +98,7 @@ namespace Mirb
 				Type type;
 				Scope *owner; // Only valid for heap variables
 				
-				Variable(Type type) : type(type) {}
+				Variable(Type type) : type(type), reg(false) {}
 
 				LiveRange range;
 

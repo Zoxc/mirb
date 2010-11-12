@@ -148,13 +148,13 @@ namespace Mirb
 
 			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) { return a->range.start < b->range.start; });
 
-			bool used_reg[Arch::registers] = {0};
+			Tree::Variable *used_reg[Arch::registers] = {0};
 
-			auto get_reg = [&]() -> size_t {
+			auto get_reg = [&](Tree::Variable *var) -> size_t {
 				for(size_t i = 0; i < Arch::registers; ++i)
 					if(!used_reg[i])
 					{
-						used_reg[i] = true;
+						used_reg[i] = var;
 						return i;
 					}
 
@@ -166,17 +166,9 @@ namespace Mirb
 			std::vector<Tree::Variable *> active;
 
 			auto add_active = [&](Tree::Variable *var) -> void {
-				auto i = active.begin();
-				
-				while(i != active.end())
-				{
-					if((*i)->range.stop < var->range.stop)
-						break;
+				auto pos = std::lower_bound(active.begin(), active.end(), var, [](Tree::Variable *a, Tree::Variable *b) { return a->range.stop > b->range.stop; });
 
-					++i;
-				}
-
-				active.insert(i, var);
+				active.insert(pos, var);
 			};
 
 			size_t stack_loc = 0;
@@ -194,7 +186,22 @@ namespace Mirb
 
 				// Assign a location to this interval
 
-				if(active.size() == Arch::registers)
+				if((*i)->reg)
+				{
+					// This interval already has a register, make sure it is free
+
+					Tree::Variable *used = used_reg[(*i)->loc];
+
+					if(used)
+					{
+						std::remove(active.begin(), active.end(), used);
+						used->loc = stack_loc++;
+						used->reg = false;
+					}
+
+					add_active(*i);
+				}
+				else if(active.size() == Arch::registers)
 				{
 					// Figure out which interval to spill 
 
@@ -205,19 +212,17 @@ namespace Mirb
 						(*i)->reg = true;
 						(*i)->reg = spill->reg;
 						spill->loc = stack_loc++;
+						spill->reg = false;
 						active.erase(active.begin());
 						add_active(*i);
 					}
 					else
-					{
-						(*i)->reg = false;
 						(*i)->loc = stack_loc++;
-					}
 				}
 				else
 				{
 					(*i)->reg = true;
-					(*i)->loc = get_reg();
+					(*i)->loc = get_reg(*i);
 					add_active(*i);
 				}
 			}
