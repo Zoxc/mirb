@@ -33,6 +33,7 @@
     <ClInclude Include="..\..\runtime\x86.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\arch\arch.hpp" />
+    <ClInclude Include="..\..\src\arch\bytecode.hpp" />
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="..\..\runtime\exceptions.cpp" />
     <ClCompile Include="..\..\runtime\modules\kernel.cpp" />
     <ClCompile Include="..\..\runtime\runtime.cpp" />
+    <ClCompile Include="..\..\src\arch\x86\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
@@ -103,6 +105,9 @@
     <ClCompile Include="..\..\src\tree\nodes.cpp" />
     <ClCompile Include="..\..\src\tree\printer.cpp" />
     <ClCompile Include="..\..\src\tree\tree.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\arch\x86\bytecode.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}</ProjectGuid>

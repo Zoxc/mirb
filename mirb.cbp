@@ -90,6 +90,9 @@
 		<Unit filename="runtime\x86.hpp" />
 		<Unit filename="src\allocator.hpp" />
 		<Unit filename="src\arch\arch.hpp" />
+		<Unit filename="src\arch\bytecode.hpp" />
+		<Unit filename="src\arch\x86\bytecode.cpp" />
+		<Unit filename="src\arch\x86\bytecode.hpp" />
 		<Unit filename="src\arch\x86\x86.hpp" />
 		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
