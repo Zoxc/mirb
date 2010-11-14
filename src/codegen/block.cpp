@@ -155,7 +155,7 @@ namespace Mirb
 					if(!used_reg[i])
 					{
 						used_reg[i] = var;
-						return i;
+						return Arch::Register::to_real(i);
 					}
 
 				debug_fail("No more registers!");
@@ -180,7 +180,7 @@ namespace Mirb
 				auto j = active.rbegin();
 				
 				for(; j != active.rend() && (*j)->range.stop <= (*i)->range.start; ++j)
-					used_reg[(*j)->loc] = false;
+					used_reg[Arch::Register::to_virtual((*j)->loc)] = false;
 				
 				active.resize(active.size() - (j - active.rbegin()));
 
@@ -188,18 +188,27 @@ namespace Mirb
 
 				if((*i)->reg)
 				{
-					// This interval already has a register, make sure it is free
+					// Check if this register can be assigned by other variables
 
-					Tree::Variable *used = used_reg[(*i)->loc];
+					size_t loc = Arch::Register::to_virtual((*i)->loc);
 
-					if(used)
+					if(loc != (size_t)Arch::Register::None) 
 					{
-						std::remove(active.begin(), active.end(), used);
-						used->loc = stack_loc++;
-						used->reg = false;
-					}
+						// This register can be used by other variables, make sure it is free
 
-					add_active(*i);
+						Tree::Variable *used = used_reg[loc];
+
+						if(used)
+						{
+							std::remove(active.begin(), active.end(), used);
+							used->loc = stack_loc++;
+							used->reg = false;
+						}
+
+						used_reg[loc] = *i;
+
+						add_active(*i);
+					}
 				}
 				else if(active.size() == Arch::registers)
 				{
@@ -215,6 +224,7 @@ namespace Mirb
 						spill->reg = false;
 						active.erase(active.begin());
 						add_active(*i);
+						used_reg[Arch::Register::to_virtual((*i)->loc)] = *i;
 					}
 					else
 						(*i)->loc = stack_loc++;

@@ -34,6 +34,9 @@
     <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\arch\arch.hpp" />
     <ClInclude Include="..\..\src\arch\bytecode.hpp" />
+    <ClInclude Include="..\..\src\arch\codegen.hpp" />
+    <ClInclude Include="..\..\src\arch\x86\codegen.hpp" />
+    <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
@@ -51,6 +54,7 @@
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
     <ClInclude Include="..\..\src\list.hpp" />
     <ClInclude Include="..\..\src\memory-pool.hpp" />
+    <ClInclude Include="..\..\src\mem_stream.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\range.hpp" />
@@ -83,6 +87,9 @@
     <ClCompile Include="..\..\runtime\modules\kernel.cpp" />
     <ClCompile Include="..\..\runtime\runtime.cpp" />
     <ClCompile Include="..\..\src\arch\x86\bytecode.cpp" />
+    <ClCompile Include="..\..\src\arch\x86\codegen.cpp" />
+    <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
+    <ClCompile Include="..\..\src\arch\x86\x86.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
@@ -135,18 +142,24 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\vendor\udis86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;NO_GC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libudis86.a;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,6 +177,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libudis86.a;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

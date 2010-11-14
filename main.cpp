@@ -1,10 +1,13 @@
 #include "globals.hpp"
+#include "runtime/code_heap.hpp"
 #include "runtime/classes.hpp"
 #include "runtime/classes/symbol.hpp"
 #include "runtime/classes/string.hpp"
 
 #include <iostream>
 #include "src/compiler.hpp"
+#include "src/mem_stream.hpp"
+#include "src/arch/codegen.hpp"
 #include "src/codegen/bytecode.hpp"
 
 #ifdef DEBUG
@@ -57,6 +60,16 @@ int main()
 		CodeGen::ByteCodeGenerator generator(compiler.memory_pool);
 		
 		CodeGen::Block *block = generator.to_bytecode(scope);
+
+		size_t block_size = CodeGen::NativeMeasurer::measure(block);
+
+		void *block_code = rt_code_heap_alloc(block_size);
+
+		MemStream stream(block_code, block_size);
+
+		CodeGen::NativeGenerator native_generator(stream, compiler.memory_pool);
+
+		native_generator.generate(block);
 		
 		/*
 		struct rt_block *runtime_block = compile_block(block);

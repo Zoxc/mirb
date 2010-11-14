@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include "../../runtime/runtime.hpp"
 #include "../common.hpp"
 #include "../simple-list.hpp"

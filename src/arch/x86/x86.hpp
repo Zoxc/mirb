@@ -12,15 +12,32 @@ namespace Mirb
 			public:
 				enum Reg
 				{
-					eax,
-					ebx,
-					ecx,
-					edx,
-					esi,
-					edi,
-					esp,
-					ebp
+					AX,
+					CX,
+					DX,
+					BX,
+					SP,
+					BP,
+					SI,
+					DI,
+
+					Count,
+					None = -1
 				};
+				
+				static const size_t to_real_table[registers];
+				static const size_t to_virtual_table[Count];
+
+				static size_t to_real(size_t loc)
+				{
+					return to_real_table[loc];
+				}
+				
+				static size_t to_virtual(size_t reg)
+				{
+					return to_virtual_table[reg];
+				}
+				
 		};
 	};
 };

@@ -100,7 +100,7 @@ namespace Mirb
 					return result;
 				}
 
-				template<class T, typename Arg1> T *gen(Arg1&& arg1)
+				template<class T, typename Arg1> T *gen(Arg1 arg1)
 				{
 					T *result = new (memory_pool) T(std::forward<Arg1>(arg1));
 						

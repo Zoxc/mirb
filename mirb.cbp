@@ -91,8 +91,14 @@
 		<Unit filename="src\allocator.hpp" />
 		<Unit filename="src\arch\arch.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />
+		<Unit filename="src\arch\codegen.hpp" />
 		<Unit filename="src\arch\x86\bytecode.cpp" />
 		<Unit filename="src\arch\x86\bytecode.hpp" />
+		<Unit filename="src\arch\x86\codegen.cpp" />
+		<Unit filename="src\arch\x86\codegen.hpp" />
+		<Unit filename="src\arch\x86\disassembly.cpp" />
+		<Unit filename="src\arch\x86\disassembly.hpp" />
+		<Unit filename="src\arch\x86\x86.cpp" />
 		<Unit filename="src\arch\x86\x86.hpp" />
 		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />

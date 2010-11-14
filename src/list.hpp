@@ -1,7 +1,5 @@
 #pragma once
-#include <assert.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include "common.hpp"
 
 namespace Mirb
 {
