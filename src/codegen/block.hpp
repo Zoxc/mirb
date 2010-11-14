@@ -53,6 +53,8 @@ namespace Mirb
 				
 				size_t loc_start;
 				size_t loc_stop;
+
+				void *final;
 				
 				void prepare_liveness(BitSetWrapper<MemoryPool> &w, Block *block, size_t &loc);
 				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope);

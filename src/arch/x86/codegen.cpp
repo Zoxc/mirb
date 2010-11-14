@@ -22,11 +22,16 @@ namespace Mirb
 
 		void NativeGenerator::generate(Block *block)
 		{
+			index = 0;
+
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 			{
+				i().final = stream.position();
+
 				for(auto o = i().opcodes.begin(); o != i().opcodes.end(); ++o)
 				{
 					o().virtual_do<Generate>(*this);
+					index++;
 				}
 			}
 
@@ -54,6 +59,12 @@ namespace Mirb
 		void NativeGenerator::modrm(size_t mod, size_t reg, size_t rm)
 		{
 			stream.b(mod << 6 | reg << 3 | rm);
+		}
+
+		void NativeGenerator::stack_modrm(size_t reg, Tree::Variable *var)
+		{
+			modrm(1, reg, Arch::Register::BP);
+			stream.b((int8_t)stack_offset(var));
 		}
 
 		void NativeGenerator::mov_imm_to_reg(size_t imm, size_t reg)
@@ -86,8 +97,7 @@ namespace Mirb
 				else
 				{
 					stream.b(0xC7);
-					modrm(1, 0, Arch::Register::BP);
-					stream.b((int8_t)stack_offset(var));
+					stack_modrm(0, var);
 					stream.s(imm);
 				}
 			}
@@ -116,8 +126,7 @@ namespace Mirb
 			{
 				rex(reg_high(reg), 0, 0);
 				stream.b(0x89);
-				modrm(1, reg_low(reg), Arch::Register::BP);
-				stream.b((int8_t)stack_offset(var));
+				stack_modrm(reg_low(reg), var);
 			}
 		}
 		
@@ -129,8 +138,27 @@ namespace Mirb
 			{
 				rex(reg_high(reg), 0, 0);
 				stream.b(0x8B);
-				modrm(1, reg_low(reg), Arch::Register::BP);
-				stream.b((int8_t)stack_offset(var));
+				stack_modrm(reg_low(reg), var);
+			}
+		}
+
+		void NativeGenerator::push_reg(size_t reg)
+		{
+			rex(0, 0, reg_high(reg));
+			stream.b(0x50 + reg_low(reg));
+		}
+
+		void NativeGenerator::push_imm(size_t imm)
+		{
+			if(long_mode)
+			{
+				mov_imm_to_reg(imm, spare);
+				push_reg(spare);
+			}
+			else
+			{
+				stream.b(0x68);
+				stream.s(imm);
 			}
 		}
 		
@@ -162,6 +190,33 @@ namespace Mirb
 			mov_imm_to_var(op.imm, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(PushOp &op)
+		{
+			if(op.var->reg)
+				push_reg(op.var->loc);
+			else
+			{
+				rex(0, 0, 0);
+				stream.b(0x8B);
+				stack_modrm(6, op.var);
+			}
+		}
+		
+		template<> void NativeGenerator::generate(PushImmediateOp &op)
+		{
+			push_imm(op.imm);
+		}
+		
+		template<> void NativeGenerator::generate(PushRawOp &op)
+		{
+			push_imm(op.imm);
+		}
+
+		template<> void NativeGenerator::generate(BranchOp &op)
+		{
+			push_imm(op.imm);
+		}
+
 		template<> void NativeGenerator::generate(ReturnOp &op)
 		{
 		}
