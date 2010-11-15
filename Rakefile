@@ -12,12 +12,13 @@ package = Package.new do
 	windows = Rake::Win32.windows?
 	vendor = 'vendor' + (windows ? '' : '_linux')
 	debug = false
-	debug_info = false
-	no_gc = false
-	valgrind = false
+	debug_info = true
+	no_gc = true
+	valgrind = true
 	clang = false
 	
 	# setup toolchain
+	set Toolchain::Architecture, Arch::X86
 	
 	set Toolchain::Optimization, debug ? :none : :balanced
 	set Toolchain::Exceptions, :none

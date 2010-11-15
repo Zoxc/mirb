@@ -1,2 +1,2 @@
 #pragma once
-#include "x86\x86.hpp"
+#include "x86/x86.hpp"

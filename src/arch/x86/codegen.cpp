@@ -214,7 +214,6 @@ namespace Mirb
 
 		template<> void NativeGenerator::generate(BranchOp &op)
 		{
-			push_imm(op.imm);
 		}
 
 		template<> void NativeGenerator::generate(ReturnOp &op)
