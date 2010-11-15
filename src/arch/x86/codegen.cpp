@@ -36,7 +36,7 @@ namespace Mirb
 				}
 			}
 
-			// Fix the jumps
+			// Update the branch targets
 			
 			for(auto o = branch_list.begin(); o != branch_list.end(); ++o)
 			{
