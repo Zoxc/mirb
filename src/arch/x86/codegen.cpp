@@ -174,9 +174,13 @@ namespace Mirb
 		void NativeGenerator::test_var(Tree::Variable *var)
 		{
 			mov_var_to_reg(var, spare);
+
 			debug_assert(spare == Arch::Register::AX);
-			stream.b(0x25); // and eax, ~(RT_FALSE | RT_NIL)
-			stream.s(~(RT_FALSE | RT_NIL));
+
+			rex(0, 0, 0);
+			stream.b(0x83); // and eax, ~(RT_FALSE | RT_NIL)
+			modrm(3, 4, Arch::Register::AX);
+			stream.b((int8_t)(~(RT_FALSE | RT_NIL)));
 		}
 		
 		template<> void NativeGenerator::generate(MoveOp &op)
