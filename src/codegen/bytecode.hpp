@@ -167,7 +167,7 @@ namespace Mirb
 				{
 					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
 					
-					basic->branch(result->ltrue);
+					basic->branch(result->label);
 
 					return result;
 				}
@@ -176,7 +176,7 @@ namespace Mirb
 				{
 					BranchUnlessOp *result = gen<BranchUnlessOp>(lfalse, var);
 					
-					basic->branch(result->lfalse);
+					basic->branch(result->label);
 
 					return result;
 				}

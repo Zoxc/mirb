@@ -42,11 +42,14 @@ namespace Mirb
 				void mov_var_to_reg(Tree::Variable *var, size_t reg);
 				void push_reg(size_t reg);
 				void push_imm(size_t imm);
+				void test_var(Tree::Variable *var);
+				
+				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;
 			public:
 				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream) {}
 
 				static const size_t long_mode = false;
-				static const size_t spare = Arch::Register::DI;
+				static const size_t spare = Arch::Register::AX;
 
 				template<typename T> void generate(T &op)
 				{
@@ -62,6 +65,8 @@ namespace Mirb
 		template<> void NativeGenerator::generate(PushOp &op);
 		template<> void NativeGenerator::generate(PushImmediateOp &op);
 		template<> void NativeGenerator::generate(PushRawOp &op);
+		template<> void NativeGenerator::generate(BranchIfOp &op);
+		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
 	};

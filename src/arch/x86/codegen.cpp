@@ -14,9 +14,10 @@ namespace Mirb
 
 		template<typename T> struct Generate
 		{
-			static void func(NativeGenerator &generator, T &opcode)
+			// TODO: Figure out why things break when generator is a reference
+			static void func(NativeGenerator *generator, T &opcode)
 			{
-				generator.generate<T>(opcode);
+				generator->generate<T>(opcode);
 			}
 		};
 
@@ -26,13 +27,21 @@ namespace Mirb
 
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 			{
-				i().final = stream.position();
+				i().final = stream.position;
 
 				for(auto o = i().opcodes.begin(); o != i().opcodes.end(); ++o)
 				{
-					o().virtual_do<Generate>(*this);
+					o().virtual_do<Generate>(this);
 					index++;
 				}
+			}
+
+			// Fix the jumps
+			
+			for(auto o = branch_list.begin(); o != branch_list.end(); ++o)
+			{
+				size_t *addr = (size_t *)o().code;
+				*addr = (size_t)o().label->final - ((size_t)addr + 4);
 			}
 
 			#ifdef DEBUG
@@ -161,6 +170,14 @@ namespace Mirb
 				stream.s(imm);
 			}
 		}
+
+		void NativeGenerator::test_var(Tree::Variable *var)
+		{
+			mov_var_to_reg(var, spare);
+			debug_assert(spare == Arch::Register::AX);
+			stream.b(0x25); // and eax, ~(RT_FALSE | RT_NIL)
+			stream.s(~(RT_FALSE | RT_NIL));
+		}
 		
 		template<> void NativeGenerator::generate(MoveOp &op)
 		{
@@ -211,11 +228,32 @@ namespace Mirb
 		{
 			push_imm(op.imm);
 		}
-
+		
+		template<> void NativeGenerator::generate(BranchIfOp &op)
+		{
+			test_var(op.var);
+			stream.b(0x0F);
+			stream.b(0x85);
+			op.code = stream.reserve(4);
+			branch_list.append(&op);
+		}
+		
+		template<> void NativeGenerator::generate(BranchUnlessOp &op)
+		{
+			test_var(op.var);
+			stream.b(0x0F);
+			stream.b(0x84);
+			op.code = stream.reserve(4);
+			branch_list.append(&op);
+		}
+		
 		template<> void NativeGenerator::generate(BranchOp &op)
 		{
+			stream.b(0xE9);
+			op.code = stream.reserve(4);
+			branch_list.append(&op);
 		}
-
+		
 		template<> void NativeGenerator::generate(ReturnOp &op)
 		{
 		}

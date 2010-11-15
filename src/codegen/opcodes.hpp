@@ -2,6 +2,7 @@
 #include "../../runtime/runtime.hpp"
 #include "../common.hpp"
 #include "../simple-list.hpp"
+#include "../simpler-list.hpp"
 #include "../list.hpp"
 
 namespace Mirb
@@ -476,34 +477,40 @@ namespace Mirb
 			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : obj(obj), name(name), var(var) {}
 		};
 		
-		struct BranchIfOp:
-			public OpcodeWrapper<Opcode::BranchIf>
+		struct BranchOpcode:
+			public Opcode
 		{
-			BasicBlock *ltrue;
+			BasicBlock *label;
+			void *code;
+			SimplerEntry<BranchOpcode> branch_entry;
+
+			BranchOpcode(Opcode::Type type, BasicBlock *label) : Opcode(type), label(label) {}
+		};
+		
+		struct BranchIfOp:
+			public BranchOpcode
+		{
 			Tree::Variable *var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : ltrue(ltrue), var(var) {}
+			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : BranchOpcode(BranchIf, ltrue), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
-			public OpcodeWrapper<Opcode::BranchUnless>
+			public BranchOpcode
 		{
-			BasicBlock *lfalse;
 			Tree::Variable *var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : lfalse(lfalse), var(var) {}
+			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : BranchOpcode(BranchUnless, lfalse), var(var) {}
 		};
 		
 		struct BranchOp:
-			public OpcodeWrapper<Opcode::Branch>
+			public BranchOpcode
 		{
-			BasicBlock *label;
-			
-			BranchOp(BasicBlock *label) : label(label) {}
+			BranchOp(BasicBlock *label) : BranchOpcode(Branch, label) {}
 		};
 		
 		struct ReturnOp:

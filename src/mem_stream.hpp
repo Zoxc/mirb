@@ -7,7 +7,6 @@ namespace Mirb
 	{
 		private:
 			void *memory;
-			void *current;
 			size_t _capacity;
 
 			void check_size()
@@ -15,16 +14,13 @@ namespace Mirb
 				debug_assert(size() <= _capacity, "Too much has been written");
 			}
 		public:
-			MemStream(void *memory, size_t capacity) : memory(memory), current(memory), _capacity(capacity) {}
+			MemStream(void *memory, size_t capacity) : memory(memory), position(memory), _capacity(capacity) {}
+
+			void *position;
 		
 			void *pointer()
 			{
 				return memory;
-			}
-
-			void *position()
-			{
-				return current;
 			}
 
 			size_t capacity()
@@ -34,16 +30,16 @@ namespace Mirb
 
 			size_t size()
 			{
-				return (uint8_t *)current - (uint8_t *)memory;
+				return (uint8_t *)position - (uint8_t *)memory;
 			}
 
 			template<typename T> void write(T var)
 			{
-				*(T *)current = var;
-				current = (void *)((uint8_t *)current + sizeof(T));
+				*(T *)position = var;
+				position = (void *)((uint8_t *)position + sizeof(T));
 				check_size();
 			}
-		
+			
 			void b(uint8_t var)
 			{
 				write(var);
@@ -71,8 +67,12 @@ namespace Mirb
 
 			void *reserve(size_t bytes)
 			{
-				current = (void *)((uint8_t *)current + bytes);
+				void *result = position;
+
+				position = (void *)((uint8_t *)position + bytes);
 				check_size();
+				
+				return result;
 			}
 	};
 };
