@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "src/compiler.hpp"
+#include "src/block.hpp"
 #include "src/mem_stream.hpp"
 #include "src/arch/codegen.hpp"
 #include "src/codegen/bytecode.hpp"
@@ -71,20 +72,13 @@ int main()
 
 		native_generator.generate(block);
 		
-		/*
-		struct rt_block *runtime_block = compile_block(block);
-		
-		#ifdef DEBUG
-			printf("Running block %x: ", (rt_value)runtime_block);
-		#endif
-		
 		//__asm__("int3\n"); // Make debugging life easier
 		
-		rt_value result = runtime_block->compiled(0, RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
+		rt_value result = block->final->compiled(RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 		
 		printf("=> "); rt_print(result); printf("\n");
 		
-		runtime_block = 0; // Make sure runtime_block stays on stack*/
+		block = 0; // Make sure block stays on stack */
 	}
 	
 	std::cout << "Exiting gracefully...";
