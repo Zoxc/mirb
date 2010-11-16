@@ -5,6 +5,7 @@ extern "C"
 
 #include "../../mem_stream.hpp"
 #include "disassembly.hpp"
+#include "support.hpp"
 
 namespace Mirb
 {
@@ -15,14 +16,13 @@ namespace Mirb
 			#define MIRB_SYMBOL(name) {(void *)&name, #name}
 
 			static Symbol symbols[] = {
-				MIRB_SYMBOL(dump_code)
 				/*MIRB_SYMBOL(rt_support_closure),
 				MIRB_SYMBOL(rt_support_define_class),
 				MIRB_SYMBOL(rt_support_define_module),
-				MIRB_SYMBOL(rt_support_define_method),
+				MIRB_SYMBOL(rt_support_define_method),*/
 				MIRB_SYMBOL(rt_support_call),
 				MIRB_SYMBOL(rt_support_super),
-				MIRB_SYMBOL(rt_support_get_ivar),
+				/*MIRB_SYMBOL(rt_support_get_ivar),
 				MIRB_SYMBOL(rt_support_set_ivar),
 				MIRB_SYMBOL(rt_support_break),
 				MIRB_SYMBOL(rt_support_return),

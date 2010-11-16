@@ -170,7 +170,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 0, null_var(), Tree::InvokeNode::no_break_id);
+			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), Tree::InvokeNode::no_break_id);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var)
@@ -224,7 +224,7 @@ namespace Mirb
 			
 			gen<PushOp>(right);
 			
-			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), 1, null_var(), Tree::InvokeNode::no_break_id);
+			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), Tree::InvokeNode::no_break_id);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var)

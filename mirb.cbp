@@ -98,6 +98,8 @@
 		<Unit filename="src\arch\x86\codegen.hpp" />
 		<Unit filename="src\arch\x86\disassembly.cpp" />
 		<Unit filename="src\arch\x86\disassembly.hpp" />
+		<Unit filename="src\arch\x86\support.cpp" />
+		<Unit filename="src\arch\x86\support.hpp" />
 		<Unit filename="src\arch\x86\x86.cpp" />
 		<Unit filename="src\arch\x86\x86.hpp" />
 		<Unit filename="src\bit-set-wrapper.hpp" />

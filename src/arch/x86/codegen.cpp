@@ -1,7 +1,9 @@
 #include "codegen.hpp"
 #include "disassembly.hpp"
+#include "support.hpp"
 #include "../../tree/tree.hpp"
 #include "../../mem_stream.hpp"
+#include "../../block.hpp"
 
 namespace Mirb
 {
@@ -23,23 +25,25 @@ namespace Mirb
 
 		void NativeGenerator::generate(Block *block)
 		{
+			this->block = block;
+
+			block->final->compiled = (rt_compiled_block_t)stream.pointer();
+
 			stream.b(0x55); // push ebp
 			stream.b(0x89); stream.b(0xE5); // mov esp, ebp
 			
-			if(block->stack_vars > 0)
-			{
-				stream.b(0x81); stream.b(0xEC); // add esp,
-				stream.d(block->stack_vars * sizeof(size_t));
-			}
-
+			// TODO: Only emmit when needed
+			stream.b(0x81); stream.b(0xEC); // add esp,
+			stream.d((block->stack_vars + Arch::registers - Arch::caller_save_start) * sizeof(size_t));
+			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-				stream.b(0x53); // push ebx
+				push_reg(Arch::Register::BX);
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-				stream.b(0x56); // push esi
+				push_reg(Arch::Register::SI);
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-				stream.b(0x57); // push edi
+				push_reg(Arch::Register::DI);
 			
 			index = 0;
 
@@ -81,6 +85,18 @@ namespace Mirb
 			#ifdef DEBUG
 				Arch::Disassembly::dump_code(stream, 0);
 			#endif
+		}
+
+		void NativeGenerator::preserve()
+		{
+			preserve_reg<Arch::Register::CX>();
+			preserve_reg<Arch::Register::DX>();
+		}
+
+		void NativeGenerator::restore()
+		{
+			restore_reg<Arch::Register::CX>();
+			restore_reg<Arch::Register::DX>();
 		}
 
 		size_t NativeGenerator::reg_low(size_t reg)
@@ -145,10 +161,22 @@ namespace Mirb
 				}
 			}
 		}
+		
+		int NativeGenerator::stack_offset(size_t loc)
+		{
+			return -(int)((1 + loc) * sizeof(size_t));
+		}
 
 		int NativeGenerator::stack_offset(Tree::Variable *var)
 		{
-			return -(int)((1 + var->loc) * sizeof(size_t));
+			return stack_offset( var->loc);
+		}
+
+		void NativeGenerator::stack_pop(size_t count)
+		{
+			stream.b(0x81);
+			stream.b(0xC4);
+			stream.d(sizeof(size_t) * count);
 		}
 
 		void NativeGenerator::mov_reg_to_reg(size_t src, size_t dst)
@@ -202,6 +230,18 @@ namespace Mirb
 			{
 				stream.b(0x68);
 				stream.s(imm);
+			}
+		}
+		
+		void NativeGenerator::push_var(Tree::Variable *var)
+		{
+			if(var->reg)
+				push_reg(var->loc);
+			else
+			{
+				rex(0, 0, 0);
+				stream.b(0xFF);
+				stack_modrm(6, var);
 			}
 		}
 
@@ -265,6 +305,29 @@ namespace Mirb
 		template<> void NativeGenerator::generate(PushRawOp &op)
 		{
 			push_imm(op.imm);
+		}
+		
+		template<> void NativeGenerator::generate(CallOp &op)
+		{
+			push_reg(Arch::Register::SP);
+			push_imm(op.param_count);
+
+			if(op.block)
+				push_var(op.block);
+			else
+				push_imm(RT_NIL);
+			
+			push_var(op.obj);
+
+			preserve();
+
+			mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
+
+			call(&rt_support_call);
+
+			stack_pop(op.param_count);
+
+			restore();
 		}
 		
 		template<> void NativeGenerator::generate(BranchIfOp &op)

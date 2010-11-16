@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\src\arch\codegen.hpp" />
     <ClInclude Include="..\..\src\arch\x86\codegen.hpp" />
     <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
+    <ClInclude Include="..\..\src\arch\x86\support.hpp" />
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="..\..\src\arch\x86\bytecode.cpp" />
     <ClCompile Include="..\..\src\arch\x86\codegen.cpp" />
     <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
+    <ClCompile Include="..\..\src\arch\x86\support.cpp" />
     <ClCompile Include="..\..\src\arch\x86\x86.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />

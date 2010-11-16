@@ -6,6 +6,7 @@ namespace Mirb
 	namespace Arch
 	{
 		static const size_t registers = 5;
+		static const size_t caller_save_start = 3;
 		
 		class Register
 		{
