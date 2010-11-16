@@ -147,15 +147,20 @@ namespace Mirb
 			// TODO: Sort directly on scope->variable_list
 
 			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) { return a->range.start < b->range.start; });
-
+			
+			BitSetWrapper<MemoryPool> w(memory_pool, Arch::registers);
 			Tree::Variable *used_reg[Arch::registers] = {0};
+
+			used_registers = w.create_clean();
 
 			auto get_reg = [&](Tree::Variable *var) -> size_t {
 				for(size_t i = 0; i < Arch::registers; ++i)
 					if(!used_reg[i])
 					{
 						used_reg[i] = var;
-						return Arch::Register::to_real(i);
+						size_t real = Arch::Register::to_real(i);
+						w.set(used_registers, real);
+						return real;
 					}
 
 				debug_fail("No more registers!");
@@ -236,6 +241,8 @@ namespace Mirb
 					add_active(*i);
 				}
 			}
+
+			stack_vars = stack_loc;
 		}
 
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :

@@ -23,6 +23,24 @@ namespace Mirb
 
 		void NativeGenerator::generate(Block *block)
 		{
+			stream.b(0x55); // push ebp
+			stream.b(0x89); stream.b(0xE5); // mov esp, ebp
+			
+			if(block->stack_vars > 0)
+			{
+				stream.b(0x81); stream.b(0xEC); // add esp,
+				stream.d(block->stack_vars * sizeof(size_t));
+			}
+
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
+				stream.b(0x53); // push ebx
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
+				stream.b(0x56); // push esi
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
+				stream.b(0x57); // push edi
+			
 			index = 0;
 
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
@@ -35,6 +53,22 @@ namespace Mirb
 					index++;
 				}
 			}
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
+				stream.b(0x5F); // pop edi
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
+				stream.b(0x5E); // pop esi
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
+				stream.b(0x5B); // pop ebx
+
+			stream.b(0x89); stream.b(0xEC); // mov esp, ebp
+			stream.b(0x5D); // pop ebp
+
+			stream.b(0xC2); // ret 16
+			stream.w(16);
+			
 
 			// Update the branch targets
 			

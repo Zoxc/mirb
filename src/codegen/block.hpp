@@ -89,6 +89,10 @@ namespace Mirb
 				size_t current_exception_block_id;
 
 				size_t var_count;
+
+				size_t stack_vars;
+				
+				bit_set_t used_registers;
 				
 				Tree::Variable *heap_array_var;
 				Tree::Variable *heap_var;
