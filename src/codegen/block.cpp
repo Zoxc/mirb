@@ -33,7 +33,7 @@ namespace Mirb
 			}
 		};
 		
-		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, Block *block, size_t &loc)
+		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t &loc)
 		{
 			in_work_list = false;
 			loc_start = loc;
@@ -76,7 +76,7 @@ namespace Mirb
 			size_t loc = 0;
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
-				i().prepare_liveness(w, this, loc);
+				i().prepare_liveness(w, loc);
 
 			List<BasicBlock, BasicBlock, &BasicBlock::work_list_entry> work_list;
 
