@@ -45,6 +45,13 @@ namespace Mirb
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
 				push_reg(Arch::Register::DI);
 			
+			if(block->self_var)
+				mov_arg_to_var(0, block->self_var);
+
+			// TODO: Fix the case when block_parameter is on the heap
+			if(block->scope->block_parameter)
+				mov_arg_to_var(0, block->scope->block_parameter);
+			
 			index = 0;
 
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
@@ -213,6 +220,25 @@ namespace Mirb
 			}
 		}
 
+		void NativeGenerator::mov_arg_to_reg(size_t arg, size_t reg)
+		{
+			rex(reg_high(reg), 0, 0);
+			stream.b(0x8B);
+			modrm(1, reg, Arch::Register::BP);
+			stream.b((int8_t)arg * sizeof(size_t) + 2 * sizeof(size_t));
+		}
+
+		void NativeGenerator::mov_arg_to_var(size_t arg, Tree::Variable *var)
+		{
+			if(var->reg)
+				mov_arg_to_reg(arg, var->loc);
+			else
+			{
+				mov_arg_to_reg(arg, spare);
+				mov_reg_to_var(spare, var);
+			}
+		}
+
 		void NativeGenerator::push_reg(size_t reg)
 		{
 			rex(0, 0, reg_high(reg));
@@ -307,6 +333,26 @@ namespace Mirb
 			push_imm(op.imm);
 		}
 		
+		template<> void NativeGenerator::generate(ClosureOp &op)
+		{
+			push_reg(Arch::Register::SP);
+			push_imm(op.scope_count);
+			
+			// TODO: Push the real variables
+			push_imm(RT_NIL);
+			push_imm(RT_NIL);
+			
+			push_var(op.self);
+			
+			push_imm((size_t)op.block);
+
+			preserve_regs([&] {
+				call(&Arch::Support::create_closure);
+
+				stack_pop(op.scope_count + 6);
+			});
+		}
+		
 		template<> void NativeGenerator::generate(CallOp &op)
 		{
 			push_reg(Arch::Register::SP);
@@ -319,15 +365,13 @@ namespace Mirb
 			
 			push_var(op.obj);
 
-			preserve();
+			preserve_regs([&] {
+				mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
 
-			mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
+				call(&Arch::Support::call);
 
-			call(&rt_support_call);
-
-			stack_pop(op.param_count);
-
-			restore();
+				stack_pop(op.param_count);
+			});
 		}
 		
 		template<> void NativeGenerator::generate(BranchIfOp &op)

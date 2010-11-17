@@ -7,13 +7,9 @@ namespace Mirb
 	{
 		template<> ClosureOp *ByteCodeGenerator::gen<>(Tree::Variable *arg1, Tree::Variable *arg2, Block *arg3, size_t arg4)
 		{
-			Tree::Variable *self = lock(create_var(), Arch::Register::CX);
-
-			gen<MoveOp>(self, arg2);
-			
 			Tree::Variable *result_var = lock(create_var(), Arch::Register::AX);
 
-			ClosureOp *result = new (memory_pool) ClosureOp(result_var, self, arg3, arg4);
+			ClosureOp *result = new (memory_pool) ClosureOp(result_var, arg2, arg3, arg4);
 			
 			append(result);
 

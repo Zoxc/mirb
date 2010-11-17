@@ -47,6 +47,8 @@ namespace Mirb
 				void push_var(Tree::Variable *var);
 				void push_imm(size_t imm);
 				void test_var(Tree::Variable *var);
+				void mov_arg_to_reg(size_t arg, size_t reg);
+				void mov_arg_to_var(size_t arg, Tree::Variable *var);
 				
 				template<typename T> void call(T *func)
 				{
@@ -90,7 +92,14 @@ namespace Mirb
 				void restore_reg(size_t reg);
 				void preserve();
 				void restore();
-				
+
+				template<typename T> void preserve_regs(T code)
+				{
+					preserve();
+					code();
+					restore();
+				}
+
 				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;
 			public:
 				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream) {}
@@ -112,6 +121,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(PushOp &op);
 		template<> void NativeGenerator::generate(PushImmediateOp &op);
 		template<> void NativeGenerator::generate(PushRawOp &op);
+		template<> void NativeGenerator::generate(ClosureOp &op);
 		template<> void NativeGenerator::generate(CallOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
