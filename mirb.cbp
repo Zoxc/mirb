@@ -139,7 +139,10 @@
 		<Unit filename="src\parser\structures.cpp" />
 		<Unit filename="src\range.hpp" />
 		<Unit filename="src\simple-list.hpp" />
+		<Unit filename="src\simple-set.hpp" />
 		<Unit filename="src\simpler-list.hpp" />
+		<Unit filename="src\support.cpp" />
+		<Unit filename="src\support.hpp" />
 		<Unit filename="src\symbol-pool.cpp" />
 		<Unit filename="src\symbol-pool.hpp" />
 		<Unit filename="src\tree\node.cpp" />

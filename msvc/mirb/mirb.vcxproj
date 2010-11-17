@@ -60,7 +60,9 @@
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\range.hpp" />
     <ClInclude Include="..\..\src\simple-list.hpp" />
+    <ClInclude Include="..\..\src\simple-set.hpp" />
     <ClInclude Include="..\..\src\simpler-list.hpp" />
+    <ClInclude Include="..\..\src\support.hpp" />
     <ClInclude Include="..\..\src\symbol-pool.hpp" />
     <ClInclude Include="..\..\src\tree\node.hpp" />
     <ClInclude Include="..\..\src\tree\nodes.hpp" />
@@ -109,6 +111,7 @@
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
     <ClCompile Include="..\..\src\parser\parser.cpp" />
     <ClCompile Include="..\..\src\parser\structures.cpp" />
+    <ClCompile Include="..\..\src\support.cpp" />
     <ClCompile Include="..\..\src\symbol-pool.cpp" />
     <ClCompile Include="..\..\src\tree\node.cpp" />
     <ClCompile Include="..\..\src\tree\nodes.cpp" />
