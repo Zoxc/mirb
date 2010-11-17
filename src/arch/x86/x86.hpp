@@ -3,10 +3,13 @@
 
 namespace Mirb
 {
+	namespace CodeGen
+	{
+		class Block;
+	};
+
 	namespace Arch
 	{
-		const size_t registers  = 5;
-		
 		class Register
 		{
 			public:
@@ -24,9 +27,15 @@ namespace Mirb
 					Count,
 					None = -1
 				};
-				
-				static const size_t to_real_table[registers];
-				static const size_t to_virtual_table[Count];
+		};
+		
+		class Registers
+		{
+			public:
+				static const size_t max = 5;
+				static const size_t count = max;
+
+				Registers(CodeGen::Block &block) {}
 
 				static size_t to_real(size_t loc)
 				{
@@ -37,7 +46,10 @@ namespace Mirb
 				{
 					return to_virtual_table[reg];
 				}
-				
+
+			private:
+				static const size_t to_real_table[max];
+				static const size_t to_virtual_table[Register::Count];
 		};
 		
 		const size_t caller_saved[2] = {

@@ -160,17 +160,19 @@ namespace Mirb
 					return false; 
 			});
 			
-			BitSetWrapper<MemoryPool> w(memory_pool, Arch::registers);
-			Tree::Variable *used_reg[Arch::registers] = {0};
+			Arch::Registers registers(*this);
+
+			BitSetWrapper<MemoryPool> w(memory_pool, registers.count);
+			Tree::Variable *used_reg[Arch::Registers::max] = {0};
 
 			used_registers = w.create_clean();
 
 			auto get_reg = [&](Tree::Variable *var) -> size_t {
-				for(size_t i = 0; i < Arch::registers; ++i)
+				for(size_t i = 0; i < registers.count; ++i)
 					if(!used_reg[i])
 					{
 						used_reg[i] = var;
-						size_t real = Arch::Register::to_real(i);
+						size_t real = registers.to_real(i);
 						w.set(used_registers, real);
 						return real;
 					}
@@ -200,7 +202,7 @@ namespace Mirb
 					if(spill != used)
 					{
 						used->loc = spill->loc;
-						used_reg[Arch::Register::to_virtual(used->loc)] = used;
+						used_reg[registers.to_virtual(used->loc)] = used;
 					}
 					
 					spill->loc = stack_loc++;
@@ -219,7 +221,7 @@ namespace Mirb
 				auto j = active.rbegin();
 				
 				for(; j != active.rend() && (*j)->range.stop <= (*i)->range.start; ++j)
-					used_reg[Arch::Register::to_virtual((*j)->loc)] = 0;
+					used_reg[registers.to_virtual((*j)->loc)] = 0;
 				
 				active.resize(active.size() - (j - active.rbegin()));
 
@@ -230,14 +232,14 @@ namespace Mirb
 					// Flush all caller saved registers
 
 					std::for_each(Arch::caller_saved, Arch::caller_saved + (sizeof(Arch::caller_saved) / sizeof(size_t)), [&] (size_t reg) {
-						flush_reg(Arch::Register::to_virtual(reg), 0);
+						flush_reg(registers.to_virtual(reg), 0);
 					});
 				}
 				else if((*i)->flags.get<Tree::Variable::Register>())
 				{
 					// Check if this register can be assigned by other variables
 
-					size_t loc = Arch::Register::to_virtual((*i)->loc);
+					size_t loc = registers.to_virtual((*i)->loc);
 
 					if(loc != (size_t)Arch::Register::None) 
 					{
@@ -248,7 +250,7 @@ namespace Mirb
 						add_active(*i);
 					}
 				}
-				else if(active.size() == Arch::registers)
+				else if(active.size() == registers.count)
 				{
 					// Figure out which interval to spill 
 
@@ -262,7 +264,7 @@ namespace Mirb
 						spill->flags.clear<Tree::Variable::Register>();
 						active.erase(active.begin());
 						add_active(*i);
-						used_reg[Arch::Register::to_virtual((*i)->loc)] = *i;
+						used_reg[registers.to_virtual((*i)->loc)] = *i;
 					}
 					else
 						(*i)->loc = stack_loc++;
