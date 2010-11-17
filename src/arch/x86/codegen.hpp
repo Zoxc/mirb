@@ -83,7 +83,7 @@ namespace Mirb
 						return;
 
 					rex(reg_high(reg), 0, 0);
-					stream.b(0x89);
+					stream.b(0x8B);
 					modrm(1, reg, Arch::Register::BP);
 					stream.b((int8_t)stack_offset(block->stack_vars + (index - 3)));
 				}
