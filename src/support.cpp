@@ -26,22 +26,22 @@ namespace Mirb
 			return closure;
 		}
 
-		rt_value call(rt_value method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+		rt_value call(Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 		{
 			rt_value method_module;
 
-			rt_compiled_block_t method = rt_lookup(obj, method_name, &method_module);
+			rt_compiled_block_t method = rt_lookup(obj, (rt_value)method_name, &method_module);
 
-			return method(method_name, method_module, obj, block, argc, argv);
+			return method((rt_value)method_name, method_module, obj, block, argc, argv);
 		}
 
-		rt_value super(rt_value method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+		rt_value super(Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 		{
 			rt_value result_module;
 
-			rt_compiled_block_t method = rt_lookup_super(method_module, method_name, &result_module);
+			rt_compiled_block_t method = rt_lookup_super(method_module, (rt_value)method_name, &result_module);
 
-			return method(method_name, result_module, obj, block, argc, argv);
+			return method((rt_value)method_name, result_module, obj, block, argc, argv);
 		}
 	};
 };

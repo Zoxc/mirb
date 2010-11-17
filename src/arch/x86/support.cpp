@@ -13,12 +13,12 @@ namespace Mirb
 				return Mirb::Support::create_closure(block, self, method_name, method_module, argc, argv);
 			}
 
-			rt_value __fastcall call(rt_value method_name, rt_value dummy, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+			rt_value __fastcall call(Symbol *method_name, rt_value dummy, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 			{
 				return Mirb::Support::call(method_name, obj, block, argc, argv);
 			}
 
-			rt_value __fastcall super(rt_value method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+			rt_value __fastcall super(Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 			{
 				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
 			}
