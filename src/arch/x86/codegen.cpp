@@ -144,7 +144,7 @@ namespace Mirb
 		{
 			if(long_mode)
 			{
-				if(var->reg)
+				if(var->flags.get<Tree::Variable::Register>())
 				{
 					mov_imm_to_reg(imm, var->loc);
 				}
@@ -156,7 +156,7 @@ namespace Mirb
 			}
 			else
 			{
-				if(var->reg)
+				if(var->flags.get<Tree::Variable::Register>())
 				{
 					mov_imm_to_reg(imm, var->loc);
 				}
@@ -198,7 +198,7 @@ namespace Mirb
 		
 		void NativeGenerator::mov_reg_to_var(size_t reg, Tree::Variable *var)
 		{
-			if(var->reg)
+			if(var->flags.get<Tree::Variable::Register>())
 				mov_reg_to_reg(reg, var->loc);
 			else
 			{
@@ -210,7 +210,7 @@ namespace Mirb
 		
 		void NativeGenerator::mov_var_to_reg(Tree::Variable *var, size_t reg)
 		{
-			if(var->reg)
+			if(var->flags.get<Tree::Variable::Register>())
 				mov_reg_to_reg(var->loc, reg);
 			else
 			{
@@ -230,7 +230,7 @@ namespace Mirb
 
 		void NativeGenerator::mov_arg_to_var(size_t arg, Tree::Variable *var)
 		{
-			if(var->reg)
+			if(var->flags.get<Tree::Variable::Register>())
 				mov_arg_to_reg(arg, var->loc);
 			else
 			{
@@ -261,7 +261,7 @@ namespace Mirb
 		
 		void NativeGenerator::push_var(Tree::Variable *var)
 		{
-			if(var->reg)
+			if(var->flags.get<Tree::Variable::Register>())
 				push_reg(var->loc);
 			else
 			{
@@ -285,13 +285,13 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(MoveOp &op)
 		{
-			if(op.src->reg)
+			if(op.src->flags.get<Tree::Variable::Register>())
 			{
 				mov_reg_to_var(op.src->loc, op.dst);
 			}
 			else
 			{
-				if(op.dst->reg)
+				if(op.dst->flags.get<Tree::Variable::Register>())
 					mov_var_to_reg(op.src, op.dst->loc);
 				else
 				{
@@ -313,7 +313,7 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(PushOp &op)
 		{
-			if(op.var->reg)
+			if(op.var->flags.get<Tree::Variable::Register>())
 				push_reg(op.var->loc);
 			else
 			{

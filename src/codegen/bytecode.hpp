@@ -85,7 +85,7 @@ namespace Mirb
 
 				Tree::Variable *lock(Tree::Variable *var, size_t reg)
 				{
-					var->reg = true;
+					var->flags.set<Tree::Variable::Register>();
 					var->loc = reg;
 
 					return var;

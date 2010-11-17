@@ -191,7 +191,7 @@ namespace Mirb
 
 				// Assign a location to this interval
 
-				if((*i)->reg)
+				if((*i)->flags.get<Tree::Variable::Register>())
 				{
 					// Check if this register can be assigned by other variables
 
@@ -207,7 +207,7 @@ namespace Mirb
 						{
 							std::remove(active.begin(), active.end(), used);
 							used->loc = stack_loc++;
-							used->reg = false;
+							used->flags.clear<Tree::Variable::Register>();
 						}
 
 						used_reg[loc] = *i;
@@ -223,10 +223,10 @@ namespace Mirb
 
 					if(spill->range.stop > (*i)->range.stop)
 					{
-						(*i)->reg = true;
-						(*i)->reg = spill->reg;
+						(*i)->flags.set<Tree::Variable::Register>();
+						(*i)->loc = spill->loc;
 						spill->loc = stack_loc++;
-						spill->reg = false;
+						spill->flags.clear<Tree::Variable::Register>();
 						active.erase(active.begin());
 						add_active(*i);
 						used_reg[Arch::Register::to_virtual((*i)->loc)] = *i;
@@ -236,7 +236,7 @@ namespace Mirb
 				}
 				else
 				{
-					(*i)->reg = true;
+					(*i)->flags.set<Tree::Variable::Register>();
 					(*i)->loc = get_reg(*i);
 					add_active(*i);
 				}

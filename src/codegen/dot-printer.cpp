@@ -96,7 +96,7 @@ namespace Mirb
 
 			for(auto i = block->scope->variable_list.begin(); i != block->scope->variable_list.end(); ++i)
 			{
-				if(i()->reg && i()->type != Tree::Variable::Heap)
+				if(i()->flags.get<Tree::Variable::Register>() && i()->type != Tree::Variable::Heap)
 					file << "<tr><td align='left' bgcolor='gray95'><font color='gray52'>" << printer.var(*i) << "</font></td><td align='left' bgcolor='grey90'><font color='gray30'>" << i()->loc << "</font></td></tr>";
 			}
 

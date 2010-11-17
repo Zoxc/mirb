@@ -3,6 +3,7 @@
 #include "../common.hpp"
 #include "../simpler-list.hpp"
 #include "../vector.hpp"
+#include "../simple-set.hpp"
 #include "nodes.hpp"
 
 namespace Mirb
@@ -94,15 +95,21 @@ namespace Mirb
 					Heap,
 					Types
 				};
+
+				enum Flags
+				{
+					Register,
+					FlushCallerSavedRegs
+				};
 				
 				Type type;
 				Scope *owner; // Only valid for heap variables
 				
-				Variable(Type type) : type(type), reg(false) {}
+				Variable(Type type) : type(type) {}
 
 				LiveRange range;
 
-				bool reg;
+				SimpleSet flags;
 
 				size_t loc;
 
