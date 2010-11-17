@@ -50,6 +50,8 @@ namespace Mirb
 				
 				BasicBlock *next_block;
 				BasicBlock *branch_block;
+
+				size_t loc;
 				
 				size_t loc_start;
 				size_t loc_stop;

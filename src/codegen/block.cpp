@@ -14,19 +14,22 @@ namespace Mirb
 			#endif
 		}
 		
-		template<typename T> struct Use
+		template<typename T> struct UseDef
 		{
-			template<typename lambda> static void func(lambda func, T &opcode)
+			static void func(BasicBlock &block, T &opcode)
 			{
-				opcode.use([&](Tree::Variable *var) { func(var); });
-			}
-		};
+				opcode.use([&](Tree::Variable *var) {
+					var->range.stop = block.loc;
+					
+					if(!BitSetWrapper<MemoryPool>::get(block.def_bits, var->index))
+						BitSetWrapper<MemoryPool>::set(block.use_bits, var->index);
+				});
 
-		template<typename T> struct Def
-		{
-			template<typename lambda> static void func(lambda func, T &opcode)
-			{
-				opcode.def([&](Tree::Variable *var) { func(var); });
+				opcode.def([&](Tree::Variable *var) {
+					var->range.update_start(block.loc);
+					
+					BitSetWrapper<MemoryPool>::set(block.def_bits, var->index);
+				});
 			}
 		};
 		
@@ -42,18 +45,9 @@ namespace Mirb
 
 			for(auto i = opcodes.begin(); i != opcodes.end(); ++i)
 			{
-				i().virtual_do<Use>([&](Tree::Variable *var) {
-					var->range.stop = loc;
-					
-					if(!w.get(def_bits, var->index))
-						w.set(use_bits, var->index);
-				});
+				this->loc = loc;
 
-				i().virtual_do<Def>([&](Tree::Variable *var) {
-					var->range.update_start(loc);
-					
-					w.set(def_bits, var->index);
-				});
+				i().virtual_do<UseDef>(*this);
 
 				++loc;
 			}
