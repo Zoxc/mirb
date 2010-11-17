@@ -86,8 +86,6 @@
 			<Option compiler="gcc" use="1" buildCommand="as $file -o $object" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="runtime\x86.cpp" />
-		<Unit filename="runtime\x86.hpp" />
 		<Unit filename="src\allocator.hpp" />
 		<Unit filename="src\arch\arch.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />

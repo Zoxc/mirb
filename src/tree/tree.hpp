@@ -99,7 +99,7 @@ namespace Mirb
 				enum Flags
 				{
 					Register,
-					FlushCallerSavedRegs
+					FlushCallerSavedRegisters
 				};
 				
 				Type type;

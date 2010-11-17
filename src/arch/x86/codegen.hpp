@@ -56,50 +56,6 @@ namespace Mirb
 					stream.d((size_t)func - ((size_t)stream.position + 4));
 				}
 
-				template<size_t reg> void preserve_reg()
-				{
-					if(!BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-						return;
-
-					size_t index = Arch::Register::to_virtual(reg);
-
-					if(index == (size_t)Arch::Register::None || index < Arch::caller_save_start)
-						return;
-
-					rex(reg_high(reg), 0, 0);
-					stream.b(0x89);
-					modrm(1, reg, Arch::Register::BP);
-					stream.b((int8_t)stack_offset(block->stack_vars + (index - Arch::caller_save_start)));
-				}
-
-				template<size_t reg> void restore_reg()
-				{
-					if(!BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-						return;
-
-					size_t index = Arch::Register::to_virtual(reg);
-
-					if(index == (size_t)Arch::Register::None || index < 3)
-						return;
-
-					rex(reg_high(reg), 0, 0);
-					stream.b(0x8B);
-					modrm(1, reg, Arch::Register::BP);
-					stream.b((int8_t)stack_offset(block->stack_vars + (index - 3)));
-				}
-
-				void preserve_reg(size_t reg);
-				void restore_reg(size_t reg);
-				void preserve();
-				void restore();
-
-				template<typename T> void preserve_regs(T code)
-				{
-					preserve();
-					code();
-					restore();
-				}
-
 				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;
 			public:
 				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream) {}
@@ -111,7 +67,7 @@ namespace Mirb
 				{
 					debug_fail("Not implemented");
 				}
-
+				
 				void generate(Block *block);
 		};
 		
@@ -127,6 +83,11 @@ namespace Mirb
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
+
+		template<typename T> struct FlushRegisters { static const bool value = false; };
+				
+		template<> struct FlushRegisters<ClosureOp> { static const bool value = true; };
+		template<> struct FlushRegisters<CallOp> { static const bool value = true; };
 	};
 };
 

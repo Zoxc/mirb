@@ -1,13 +1,14 @@
 #include <algorithm>
 #include "../memory-pool.hpp"
 #include "../arch/arch.hpp"
+#include "../arch/codegen.hpp"
 #include "block.hpp"
 
 namespace Mirb
 {
 	namespace CodeGen
 	{
-		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : pred_blocks(1, memory_pool), branch_block(0)
+		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : block(block), pred_blocks(1, memory_pool), branch_block(0)
 		{
 			#ifdef DEBUG
 				id = block.basic_block_count++;
@@ -18,25 +19,37 @@ namespace Mirb
 		{
 			static void func(BasicBlock &block, T &opcode)
 			{
+				if(FlushRegisters<T>::value)
+				{
+					auto var = new (block.block.memory_pool) Tree::Variable(Tree::Variable::Temporary);
+					
+					var->flags.set<Tree::Variable::FlushCallerSavedRegisters>();
+
+					block.block.scope->variable_list.push(var);
+					
+					var->range.start = block.block.loc;
+					var->range.stop = block.block.loc;
+				}
+
 				opcode.use([&](Tree::Variable *var) {
-					var->range.stop = block.loc;
+					var->range.stop = block.block.loc;
 					
 					if(!BitSetWrapper<MemoryPool>::get(block.def_bits, var->index))
 						BitSetWrapper<MemoryPool>::set(block.use_bits, var->index);
 				});
 
 				opcode.def([&](Tree::Variable *var) {
-					var->range.update_start(block.loc);
+					var->range.update_start(block.block.loc);
 					
 					BitSetWrapper<MemoryPool>::set(block.def_bits, var->index);
 				});
 			}
 		};
 		
-		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t &loc)
+		void BasicBlock::prepare_liveness(BitSetWrapper<MemoryPool> &w)
 		{
 			in_work_list = false;
-			loc_start = loc;
+			loc_start = block.loc;
 
 			in = w.create_clean();
 			out = w.create_clean();
@@ -45,14 +58,12 @@ namespace Mirb
 
 			for(auto i = opcodes.begin(); i != opcodes.end(); ++i)
 			{
-				this->loc = loc;
-
 				i().virtual_do<UseDef>(*this);
 
-				++loc;
+				++block.loc;
 			}
 
-			loc_stop = loc - 1;
+			loc_stop = block.loc - 1;
 		}
 		
 		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope)
@@ -73,10 +84,10 @@ namespace Mirb
 		{
 			BitSetWrapper<MemoryPool> w(memory_pool, scope->variable_list.size());
 
-			size_t loc = 0;
+			loc = 0;
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
-				i().prepare_liveness(w, loc);
+				i().prepare_liveness(w);
 
 			List<BasicBlock, BasicBlock, &BasicBlock::work_list_entry> work_list;
 
@@ -140,7 +151,14 @@ namespace Mirb
 
 			// TODO: Sort directly on scope->variable_list
 
-			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) { return a->range.start < b->range.start; });
+			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) -> bool {
+				if(a->range.start < b->range.start)
+					return true;
+				else if(a->range.start == b->range.start)
+					return a->flags.get<Tree::Variable::FlushCallerSavedRegisters>();
+				else
+					return false; 
+			});
 			
 			BitSetWrapper<MemoryPool> w(memory_pool, Arch::registers);
 			Tree::Variable *used_reg[Arch::registers] = {0};
@@ -169,8 +187,30 @@ namespace Mirb
 
 				active.insert(pos, var);
 			};
-
+			
 			size_t stack_loc = 0;
+			
+			auto flush_reg = [&](size_t loc, Tree::Variable *var) -> void {
+				Tree::Variable *used = used_reg[loc];
+
+				if(used)
+				{
+					Tree::Variable *spill = active.front();
+
+					if(spill != used)
+					{
+						used->loc = spill->loc;
+						used_reg[Arch::Register::to_virtual(used->loc)] = used;
+					}
+					
+					spill->loc = stack_loc++;
+					spill->flags.clear<Tree::Variable::Register>();
+
+					active.erase(active.begin());
+				}
+
+				used_reg[loc] = var;
+			};
 
 			for(auto i = variables.begin(); i != variables.end(); ++i)
 			{
@@ -179,13 +219,21 @@ namespace Mirb
 				auto j = active.rbegin();
 				
 				for(; j != active.rend() && (*j)->range.stop <= (*i)->range.start; ++j)
-					used_reg[Arch::Register::to_virtual((*j)->loc)] = false;
+					used_reg[Arch::Register::to_virtual((*j)->loc)] = 0;
 				
 				active.resize(active.size() - (j - active.rbegin()));
 
 				// Assign a location to this interval
 
-				if((*i)->flags.get<Tree::Variable::Register>())
+				if((*i)->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
+				{
+					// Flush all caller saved registers
+
+					std::for_each(Arch::caller_saved, Arch::caller_saved + (sizeof(Arch::caller_saved) / sizeof(size_t)), [&] (size_t reg) {
+						flush_reg(Arch::Register::to_virtual(reg), 0);
+					});
+				}
+				else if((*i)->flags.get<Tree::Variable::Register>())
 				{
 					// Check if this register can be assigned by other variables
 
@@ -195,16 +243,7 @@ namespace Mirb
 					{
 						// This register can be used by other variables, make sure it is free
 
-						Tree::Variable *used = used_reg[loc];
-
-						if(used)
-						{
-							std::remove(active.begin(), active.end(), used);
-							used->loc = stack_loc++;
-							used->flags.clear<Tree::Variable::Register>();
-						}
-
-						used_reg[loc] = *i;
+						flush_reg(loc, *i);
 
 						add_active(*i);
 					}

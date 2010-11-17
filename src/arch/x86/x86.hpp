@@ -5,8 +5,7 @@ namespace Mirb
 {
 	namespace Arch
 	{
-		static const size_t registers = 5;
-		static const size_t caller_save_start = 3;
+		const size_t registers  = 5;
 		
 		class Register
 		{
@@ -39,6 +38,11 @@ namespace Mirb
 					return to_virtual_table[reg];
 				}
 				
+		};
+		
+		const size_t caller_saved[2] = {
+			Register::CX,
+			Register::DX
 		};
 	};
 };

@@ -34,7 +34,7 @@ namespace Mirb
 			
 			// TODO: Only emmit when needed
 			stream.b(0x81); stream.b(0xEC); // add esp,
-			stream.d((block->stack_vars + Arch::registers - Arch::caller_save_start) * sizeof(size_t));
+			stream.d(block->stack_vars);
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
 				push_reg(Arch::Register::BX);
@@ -92,18 +92,6 @@ namespace Mirb
 			#ifdef DEBUG
 				Arch::Disassembly::dump_code(stream, 0);
 			#endif
-		}
-
-		void NativeGenerator::preserve()
-		{
-			preserve_reg<Arch::Register::CX>();
-			preserve_reg<Arch::Register::DX>();
-		}
-
-		void NativeGenerator::restore()
-		{
-			restore_reg<Arch::Register::CX>();
-			restore_reg<Arch::Register::DX>();
 		}
 
 		size_t NativeGenerator::reg_low(size_t reg)
@@ -346,11 +334,11 @@ namespace Mirb
 			
 			push_imm((size_t)op.block);
 
-			preserve_regs([&] {
-				call(&Arch::Support::create_closure);
+			call(&Arch::Support::create_closure);
 
-				stack_pop(op.scope_count + 6);
-			});
+			stack_pop(op.scope_count + 6);
+
+			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(CallOp &op)
@@ -365,13 +353,14 @@ namespace Mirb
 			
 			push_var(op.obj);
 
-			preserve_regs([&] {
-				mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
+			mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
 
-				call(&Arch::Support::call);
+			call(&Arch::Support::call);
 
-				stack_pop(op.param_count);
-			});
+			stack_pop(op.param_count);
+
+			if(op.var)
+				mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(BranchIfOp &op)
@@ -401,6 +390,7 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(ReturnOp &op)
 		{
+			mov_var_to_reg(op.var, Arch::Register::AX);
 		}
 	};
 };

@@ -767,6 +767,9 @@ namespace Mirb
 				
 				for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
 				{
+					if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
+						continue;
+
 					dot_printer.highlight = *i;
 
 					dot_printer.print_block(block, "bytecode/bytecode.dot");

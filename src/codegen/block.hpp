@@ -33,6 +33,8 @@ namespace Mirb
 					size_t id;
 				#endif
 
+				Block &block;
+
 				Entry<BasicBlock> entry;
 				Entry<BasicBlock> work_list_entry;
 
@@ -51,14 +53,12 @@ namespace Mirb
 				BasicBlock *next_block;
 				BasicBlock *branch_block;
 
-				size_t loc;
-				
 				size_t loc_start;
 				size_t loc_stop;
 
 				void *final;
 				
-				void prepare_liveness(BitSetWrapper<MemoryPool> &w, size_t &loc);
+				void prepare_liveness(BitSetWrapper<MemoryPool> &w);
 				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope);
 				
 				void next(BasicBlock *block)
@@ -104,7 +104,9 @@ namespace Mirb
 				#ifdef DEBUG
 					size_t basic_block_count; // Nicer basic block labeling...
 				#endif
-
+				
+				size_t loc;
+				
 				void analyse_liveness();
 				void allocate_registers();
 				
