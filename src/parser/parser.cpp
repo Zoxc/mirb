@@ -391,35 +391,35 @@ namespace Mirb
 	}
 
 	size_t Parser::operator_precedences[] = {
-		0, // MUL,
-		0, // DIV,
-		0, // MOD,
+		8, // MUL,
+		8, // DIV,
+		8, // MOD,
 		
-		1, // ADD,
-		1, // SUB,
+		7, // ADD,
+		7, // SUB,
 		
-		2, // LEFT_SHIFT,
-		2, // RIGHT_SHIFT,
+		6, // LEFT_SHIFT,
+		6, // RIGHT_SHIFT,
 		
-		3, // AMPERSAND, // BITWISE_AND
+		5, // AMPERSAND, // BITWISE_AND
 		
 		4, // BITWISE_XOR,
 		4, // BITWISE_OR,
 		
-		7, // LOGICAL_AND,
+		1, // LOGICAL_AND,
 		
-		8, // LOGICAL_OR,
+		0, // LOGICAL_OR,
 		
-		5, // GREATER,
-		5, // GREATER_OR_EQUAL,
-		5, // LESS,
-		5, // LESS_OR_EQUAL,
+		3, // GREATER,
+		3, // GREATER_OR_EQUAL,
+		3, // LESS,
+		3, // LESS_OR_EQUAL,
 		
-		6, // EQUALITY,
-		6, // CASE_EQUALITY,
-		6, // NO_EQUALITY,
-		6, // MATCHES,
-		6, // NOT_MATCHES,
+		2, // EQUALITY,
+		2, // CASE_EQUALITY,
+		2, // NO_EQUALITY,
+		2, // MATCHES,
+		2, // NOT_MATCHES,
 	};
 
 	bool Parser::is_precedence_operator(Lexeme::Type op)
