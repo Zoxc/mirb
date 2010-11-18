@@ -1,5 +1,5 @@
 #include "lexer.hpp"
-#include "../compiler.hpp"
+#include "../parser/parser.hpp"
 
 namespace Mirb
 {
@@ -40,7 +40,7 @@ namespace Mirb
 						lexeme.type = Lexeme::INTEGER;
 						lexeme.stop = &input;
 
-						compiler.report(lexeme.dup(memory_pool), "Invalid octal number '" + lexeme.string() + "'");
+						parser.report(lexeme.dup(memory_pool), "Invalid octal number '" + lexeme.string() + "'");
 					}
 					else
 					{
@@ -97,7 +97,7 @@ namespace Mirb
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::REAL;
 			
-			compiler.report(lexeme.dup(memory_pool), "no .<digit> floating literal anymore; put 0 before dot");
+			parser.report(lexeme.dup(memory_pool), "no .<digit> floating literal anymore; put 0 before dot");
 		}
 		else
 		{
@@ -123,7 +123,7 @@ namespace Mirb
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::HEX;
 
-			compiler.report(lexeme.dup(memory_pool), "Invalid hex number: '" + lexeme.string() + "'");
+			parser.report(lexeme.dup(memory_pool), "Invalid hex number: '" + lexeme.string() + "'");
 		}
 	}
 };

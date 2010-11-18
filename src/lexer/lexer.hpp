@@ -6,7 +6,7 @@
 
 namespace Mirb
 {
-	class Compiler;
+	class Parser;
 	class Symbol;
 	class SymbolPool;
 
@@ -24,7 +24,7 @@ namespace Mirb
 			Input input;
 			
 			SymbolPool &symbol_pool;
-			Compiler &compiler;
+			Parser &parser;
 			
 			static bool jump_table_ready;
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
@@ -85,7 +85,7 @@ namespace Mirb
 					Lexeme lexeme;
 			};
 			
-			Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler);
+			Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser);
 			
 			MemoryPool &memory_pool;
 			Keywords keywords;

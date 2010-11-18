@@ -1,6 +1,6 @@
 #include "lexer.hpp"
 #include "../symbol-pool.hpp"
-#include "../compiler.hpp"
+#include "../parser/parser.hpp"
 
 namespace Mirb
 {
@@ -93,7 +93,7 @@ namespace Mirb
 							if(process_null(&input))
 							{
 								lexeme.stop = &input;
-								compiler.report(lexeme.dup(memory_pool), "Unterminated string");
+								parser.report(lexeme.dup(memory_pool), "Unterminated string");
 								goto done;
 							}
 							else
@@ -104,7 +104,7 @@ namespace Mirb
 							const char_t *start = lexeme.start;
 							lexeme.start = &input - 1;
 							lexeme.stop = &input + 1;
-							compiler.report(lexeme.dup(memory_pool), "Invalid escape string");
+							parser.report(lexeme.dup(memory_pool), "Invalid escape string");
 							lexeme.start = start;
 					}
 					break;
@@ -113,7 +113,7 @@ namespace Mirb
 					if(process_null(&input))
 					{
 						lexeme.stop = &input;
-						compiler.report(lexeme.dup(memory_pool), "Unterminated string");
+						parser.report(lexeme.dup(memory_pool), "Unterminated string");
 						goto done;
 					}
 					else
@@ -305,7 +305,7 @@ namespace Mirb
 							{
 								lexeme.stop = &input;
 
-								compiler.report(lexeme.dup(memory_pool), "Unterminated string");
+								parser.report(lexeme.dup(memory_pool), "Unterminated string");
 								goto done;
 							}
 							else
@@ -316,7 +316,7 @@ namespace Mirb
 							const char_t *start = lexeme.start;
 							lexeme.start = &input - 1;
 							lexeme.stop = &input + 1;
-							compiler.report(lexeme.dup(memory_pool), "Invalid escape string");
+							parser.report(lexeme.dup(memory_pool), "Invalid escape string");
 							lexeme.start = start;
 					}
 					break;
@@ -326,7 +326,7 @@ namespace Mirb
 					{
 						overhead -= 1;
 						lexeme.stop = &input;
-						compiler.report(lexeme.dup(memory_pool), "Unterminated string");
+						parser.report(lexeme.dup(memory_pool), "Unterminated string");
 						goto done;
 					}
 					else

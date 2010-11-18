@@ -8,19 +8,26 @@
 #include "../lexer/lexer.hpp"
 #include "../tree/nodes.hpp"
 #include "../tree/tree.hpp"
+#include "../message.hpp"
 
 namespace Mirb
 {
-	class Compiler;
-	
 	class Parser
 	{
 		public:
-			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler);
+			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool);
 			~Parser();
 			
 			Lexer lexer;
+
+			SimpleList<Message> messages;
+			const char *filename;
+
 			MemoryPool &memory_pool;
+			
+			void load(const char_t *input, size_t length);
+			
+			void report(Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
 			Tree::Fragment *fragment;
 			Tree::Scope *scope;
@@ -116,8 +123,6 @@ namespace Mirb
 			}
 			
 		private:
-			Compiler &compiler;
-			
 			bool match(Lexeme::Type what)
 			{
 				if(lexeme() == what)

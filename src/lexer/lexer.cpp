@@ -1,6 +1,6 @@
 #include "lexer.hpp"
 #include "../symbol-pool.hpp"
-#include "../compiler.hpp"
+#include "../parser/parser.hpp"
 
 namespace Mirb
 {
@@ -176,11 +176,11 @@ namespace Mirb
 		const char_t *start = lexeme.start;
 		lexeme.start = &input - 1;
 		lexeme.stop = &input;
-		compiler.report(lexeme.dup(memory_pool), "Unexpected null terminator");
+		parser.report(lexeme.dup(memory_pool), "Unexpected null terminator");
 		lexeme.start = start;
 	}
 
-	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : symbol_pool(symbol_pool), compiler(compiler), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this)
+	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this)
 	{
 		setup_jump_table();
 	}

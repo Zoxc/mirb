@@ -1,6 +1,6 @@
 #include "lexer.hpp"
 #include "../symbol-pool.hpp"
-#include "../compiler.hpp"
+#include "../parser/parser.hpp"
 
 namespace Mirb
 {
@@ -25,9 +25,9 @@ namespace Mirb
 		lexeme.type = Lexeme::NONE;
 
 		if (lexeme.length() == 1)
-			compiler.report(lexeme.dup(memory_pool), "Invalid character '" + lexeme.string() + "'");
+			parser.report(lexeme.dup(memory_pool), "Invalid character '" + lexeme.string() + "'");
 		else
-			compiler.report(lexeme.dup(memory_pool), "Invalid characters '" + lexeme.string() + "'");
+			parser.report(lexeme.dup(memory_pool), "Invalid characters '" + lexeme.string() + "'");
 
 		restep();
 	}

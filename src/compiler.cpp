@@ -1,23 +1,28 @@
 #include "compiler.hpp"
 #include "symbol-pool.hpp"
+#include "arch/codegen.hpp"
+#include "codegen/bytecode.hpp"
+
+#include "../runtime/code_heap.hpp"
 
 namespace Mirb
 {
-	Compiler::Compiler() : parser(symbol_pool, memory_pool, *this), filename(0)
+	Block *Compiler::compile(Tree::Scope *scope, MemoryPool &memory_pool)
 	{
-	}
+		CodeGen::ByteCodeGenerator generator(memory_pool);
+		
+		CodeGen::Block *block = generator.to_bytecode(scope);
 
-	Compiler::~Compiler()
-	{
-	}
-	
-	void Compiler::load(const char_t *input, size_t length)
-	{
-		parser.lexer.load(input, length);
-	}
-	
-	void Compiler::report(Range &range, std::string text, Message::Severity severity)
-	{
-		new StringMessage(*this, range, severity, text);
+		size_t block_size = CodeGen::NativeMeasurer::measure(block);
+
+		void *block_code = rt_code_heap_alloc(block_size);
+
+		MemStream stream(block_code, block_size);
+
+		CodeGen::NativeGenerator native_generator(stream, memory_pool);
+
+		native_generator.generate(block);
+		
+		return block->final;
 	}
 };

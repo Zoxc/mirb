@@ -4,7 +4,7 @@
 
 namespace Mirb
 {
-	class Compiler;
+	class Parser;
 	class Range;
 
 	class Message
@@ -18,11 +18,11 @@ namespace Mirb
 				SEVERITIES
 			};
 
-			Message(Compiler &compiler, Range &range, Severity severity);
+			Message(Parser &parser, Range &range, Severity severity);
 
 			static std::string severity_names[SEVERITIES];
 
-			Compiler &compiler;
+			Parser &parser;
 			Range &range;
 			Severity severity;
 			SimpleEntry<Message> entry;
@@ -38,7 +38,7 @@ namespace Mirb
 		private:
 			std::string text;
 		public:
-			StringMessage(Compiler &compiler, Range &range, Severity severity, std::string text) : Message(compiler, range, severity), text(text) {}
+			StringMessage(Parser &parser, Range &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
 
 			std::string string()
 			{

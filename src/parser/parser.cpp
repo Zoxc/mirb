@@ -3,7 +3,7 @@
 
 namespace Mirb
 {
-	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Compiler &compiler) : lexer(symbol_pool, memory_pool, compiler), memory_pool(memory_pool), fragment(0), scope(0), compiler(compiler)
+	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool) : lexer(symbol_pool, memory_pool, *this), memory_pool(memory_pool), fragment(0), scope(0)
 	{
 	}
 	
@@ -11,6 +11,15 @@ namespace Mirb
 	{
 	}
 	
+	void Parser::load(const char_t *input, size_t length)
+	{
+		lexer.load(input, length);
+	}
+	
+	void Parser::report(Range &range, std::string text, Message::Severity severity)
+	{
+		new StringMessage(*this, range, severity, text);
+	}
 	bool Parser::is_constant(Symbol *symbol)
 	{
 		const char c = *symbol->string.c_str;
@@ -28,7 +37,7 @@ namespace Mirb
 	
 	void Parser::error(std::string text)
 	{
-		compiler.report(lexer.lexeme.dup(memory_pool), text);
+		report(lexer.lexeme.dup(memory_pool), text);
 	}
 
 	void Parser::expected(Lexeme::Type what, bool skip)

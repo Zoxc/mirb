@@ -49,17 +49,18 @@ void rt_destroy(void)
 
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
-	Compiler compiler;
+	MemoryPool memory_pool;
+	Parser parser(symbol_pool, memory_pool);
 	
-	compiler.filename = filename;
-	compiler.load((const char_t *)input, strlen(input));
-
-	Tree::Fragment fragment(0, Tree::Chunk::main_size);
-	Tree::Scope *scope = compiler.parser.parse_main(&fragment);
+	parser.filename = filename;
+	parser.load((const char_t *)input, strlen(input));
 	
-	if(!compiler.messages.empty())
+ 	Tree::Fragment fragment(0, Tree::Chunk::main_size);
+	Tree::Scope *scope = parser.parse_main(&fragment);
+	
+	if(!parser.messages.empty())
 	{
-		for(auto i = compiler.messages.begin(); i != compiler.messages.end(); ++i)
+		for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
 			std::cout << i().format() << "\n";
 
 		return RT_NIL;
@@ -73,25 +74,11 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 		std::cout << "\n-----\n";
 	#endif
 	
-	/*ByteCodeGenerator generator(compiler);
-	
-	struct block *block = generator.to_bytecode(scope);
-	
-	if(!compiler.messages.empty())
-	{
-		for(auto i = compiler.messages.begin(); i; ++i)
-			std::cout << i().format() << "\n";
-		
-		return RT_NIL;
-	}
-	
-	struct rt_block *runtime_block = compile_block(block);
+	Block *block = Compiler::compile(scope, memory_pool);
 
-	compiler.filename = 0; // make sure compiler is on stack until blocks are generated... TODO: fix this
+	rt_value result = block->compiled(method_name, method_module, self, RT_NIL, 0, 0);
 
-	rt_value result = runtime_block->compiled(0, method_name, method_module, self, RT_NIL, 0, 0);
-
-	runtime_block = 0; // Make sure runtime_block stays on stack*/
+	block = 0; // Make sure runtime_block stays on stack*/
 
 	return RT_NIL;
 }

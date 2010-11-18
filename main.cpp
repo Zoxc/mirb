@@ -31,20 +31,21 @@ int main()
 		
 		std::getline(std::cin, line);
 		
-		Compiler compiler;
+		MemoryPool memory_pool;
+		Parser parser(symbol_pool, memory_pool);
 		
-		compiler.filename = "Input";
-		compiler.load((const char_t *)line.c_str(), line.length());
+		parser.filename = "Input";
+		parser.load((const char_t *)line.c_str(), line.length());
 		
-		if(compiler.parser.lexeme() == Lexeme::END && compiler.messages.empty())
+		if(parser.lexeme() == Lexeme::END && parser.messages.empty())
 			break;
 		
 		Tree::Fragment fragment(0, Tree::Chunk::main_size);
-		Tree::Scope *scope = compiler.parser.parse_main(&fragment);
+		Tree::Scope *scope = parser.parse_main(&fragment);
 		
-		if(!compiler.messages.empty())
+		if(!parser.messages.empty())
 		{
-			for(auto i = compiler.messages.begin(); i != compiler.messages.end(); ++i)
+			for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
 				std::cout << i().format() << "\n";
 				
 			continue;
@@ -58,23 +59,11 @@ int main()
 			std::cout << "\n-----\n";
 		#endif
 		
-		CodeGen::ByteCodeGenerator generator(compiler.memory_pool);
-		
-		CodeGen::Block *block = generator.to_bytecode(scope);
+		Block *block = Compiler::compile(scope, memory_pool);
 
-		size_t block_size = CodeGen::NativeMeasurer::measure(block);
-
-		void *block_code = rt_code_heap_alloc(block_size);
-
-		MemStream stream(block_code, block_size);
-
-		CodeGen::NativeGenerator native_generator(stream, compiler.memory_pool);
-
-		native_generator.generate(block);
-		
 		//__asm__("int3\n"); // Make debugging life easier
 		
-		rt_value result = block->final->compiled(RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
+		rt_value result = block->compiled(RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 		
 		printf("=> "); rt_print(result); printf("\n");
 		

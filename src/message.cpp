@@ -1,5 +1,5 @@
 #include "message.hpp"
-#include "compiler.hpp"
+#include "parser/parser.hpp"
 #include "range.hpp"
 
 namespace Mirb
@@ -10,9 +10,9 @@ namespace Mirb
 		"Error"
 	};
 	
-	Message::Message(Compiler &compiler, Range &range, Severity severity) : compiler(compiler), range(range), severity(severity)
+	Message::Message(Parser &parser, Range &range, Severity severity) : parser(parser), range(range), severity(severity)
 	{
-		auto i = compiler.messages.mutable_iterator();
+		auto i = parser.messages.mutable_iterator();
 		
 		while(i)
 		{
@@ -29,7 +29,7 @@ namespace Mirb
 	{
 		std::stringstream result;
 
-		result << compiler.filename << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
+		result << parser.filename << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
 		
 		for(const char_t *i = range.line_start; i < range.start; ++i)
 		{
