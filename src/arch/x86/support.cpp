@@ -20,11 +20,6 @@ namespace Mirb
 
 				__asm
 				{
-					push ebx
-					push eax
-					push ecx
-					push edx
-
 					push argv
 					push argc
 					push block
@@ -36,11 +31,6 @@ namespace Mirb
 					call ebx
 
 					mov result, eax
-
-					pop ebx
-					pop ecx
-					pop eax
-					pop ebx
 				}
 
 				return result;
