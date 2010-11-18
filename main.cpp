@@ -61,8 +61,6 @@ int main()
 		
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		//__asm__("int3\n"); // Make debugging life easier
-		
 		rt_value result = block->compiled(RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
 		
 		printf("=> "); rt_print(result); printf("\n");

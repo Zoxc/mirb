@@ -14,6 +14,14 @@ namespace Mirb
 			return 0x1000;
 		}
 
+		void NativeGenerator::generate_stub(Mirb::Block *block)
+		{
+			push_imm((size_t)block);
+			
+			stream.b(0xE9);
+			stream.d((size_t)Arch::Support::jit_stub - ((size_t)stream.position + 4));
+		}
+
 		template<typename T> struct Generate
 		{
 			// TODO: Figure out why things break when generator is a reference
@@ -27,14 +35,14 @@ namespace Mirb
 		{
 			this->block = block;
 
-			block->final->compiled = (rt_compiled_block_t)stream.pointer();
+			push_reg(Arch::Register::BP);
+			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
 
-			stream.b(0x55); // push ebp
-			stream.b(0x89); stream.b(0xE5); // mov esp, ebp
-			
-			// TODO: Only emmit when needed
-			stream.b(0x81); stream.b(0xEC); // add esp,
-			stream.d(block->stack_vars);
+			if(block->stack_vars)
+			{
+				stream.b(0x81); stream.b(0xEC); // add esp,
+				stream.d(block->stack_vars * sizeof(size_t));
+			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
 				push_reg(Arch::Register::BX);
@@ -74,9 +82,9 @@ namespace Mirb
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
 				stream.b(0x5B); // pop ebx
 
-			stream.b(0x89); stream.b(0xEC); // mov esp, ebp
+			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
 			stream.b(0x5D); // pop ebp
-
+			
 			stream.b(0xC2); // ret 16
 			stream.w(16);
 			

@@ -6,6 +6,7 @@
 
 namespace Mirb
 {
+	class Block;
 	class MemoryPool;
 	
 	namespace Tree
@@ -59,6 +60,8 @@ namespace Mirb
 				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;
 			public:
 				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream) {}
+				
+				static const size_t stub_size = 10;
 
 				static const size_t long_mode = false;
 				static const size_t spare = Arch::Register::AX;
@@ -69,6 +72,7 @@ namespace Mirb
 				}
 				
 				void generate(Block *block);
+				void generate_stub(Mirb::Block *block);
 		};
 		
 		template<> void NativeGenerator::generate(MoveOp &op);

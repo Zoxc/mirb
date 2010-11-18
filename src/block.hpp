@@ -9,9 +9,15 @@ struct exception_block;
 
 namespace Mirb
 {
+	namespace Tree
+	{
+		class Scope;
+	};
+	
 	class Block
 	{
 		public:
+			Tree::Scope *scope;
 			rt_compiled_block_t compiled; // A pointer to a compiled function.
 			Symbol *name; // The name of this block.
 			

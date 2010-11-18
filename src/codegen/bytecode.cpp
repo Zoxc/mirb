@@ -10,11 +10,6 @@
 #include "../compiler.hpp"
 #include "../block.hpp"
 
-#ifdef DEBUG
-	#include "printer.hpp"
-	#include "dot-printer.hpp"
-#endif
-
 namespace Mirb
 {
 	namespace CodeGen
@@ -575,21 +570,21 @@ namespace Mirb
 			else
 				super = 0;
 			
-			gen<ClassOp>(var, self_var(), node->name, super, to_bytecode(node->scope));
+			gen<ClassOp>(var, self_var(), node->name, super, compile(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::ModuleNode *)basic_node;
 			
-			gen<ModuleOp>(var, self_var(), node->name, to_bytecode(node->scope));
+			gen<ModuleOp>(var, self_var(), node->name, compile(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			auto node = (Tree::MethodNode *)basic_node;
 			
-			gen<MethodOp>(self_var(), node->name, to_bytecode(node->scope));
+			gen<MethodOp>(self_var(), node->name, defer(node->scope));
 			
 			if(var)
 				gen<LoadOp>(var, RT_NIL);
@@ -699,17 +694,19 @@ namespace Mirb
 		
 		Block *ByteCodeGenerator::to_bytecode(Tree::Scope *scope)
 		{
-			Block *block = new (memory_pool) Block(memory_pool, scope);
-			block->final = new (gc) Mirb::Block;
+			this->scope = scope;
+
+			block = new (memory_pool) Block(memory_pool, scope);
+
+			if(scope->final)
+				block->final = scope->final;
+			else
+			{
+				block->final = new (gc) Mirb::Block;
+				scope->final = block->final;
+			}
 			
 			scope->block = block;
-			
-			Tree::Scope *prev_scope = this->scope;
-			Block *prev_block = this->block;
-			BasicBlock *prev_basic = this->basic;
-			
-			this->scope = scope;
-			this->block = block;
 			
 			block->return_var = create_var();
 
@@ -745,50 +742,19 @@ namespace Mirb
 
 			block->epilog->next_block = 0;
 
-			block->analyse_liveness();
-			block->allocate_registers();
-
-			#ifdef DEBUG
-				DotPrinter dot_printer;
-				ByteCodePrinter printer(block);
-
-				std::cout << printer.print();
-
-				std::system("mkdir bytecode");
-				
-				dot_printer.print_block(block, "bytecode/bytecode.dot");
-
-				std::stringstream path;
-				
-				path << "bytecode/block-" << block;
-				
-				std::system(("mkdir \"" + path.str() + "\"").c_str());
-				std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
-				
-				for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
-				{
-					if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
-						continue;
-
-					dot_printer.highlight = *i;
-
-					dot_printer.print_block(block, "bytecode/bytecode.dot");
-					
-					std::stringstream result;
-
-					result << "dot -Tpng bytecode/bytecode.dot -o " << path.str() << "/var" << i()->index << ".png";
-
-					std::system(result.str().c_str());
-				}
-			#endif
-
-			this->block = prev_block;
-			this->basic = prev_basic;
-			this->scope = prev_scope;
-			
 			return block;
 		}
 		
+		Mirb::Block *ByteCodeGenerator::compile(Tree::Scope *scope)
+		{
+			return Compiler::compile(scope, memory_pool);
+		}
+
+		Mirb::Block *ByteCodeGenerator::defer(Tree::Scope *scope)
+		{
+			return Compiler::defer(scope, memory_pool);
+		}
+
 		bool ByteCodeGenerator::has_ensure_block(Block *block)
 		{
 			struct exception_block *exception_block = block->current_exception_block;
@@ -836,7 +802,7 @@ namespace Mirb
 			if(scope)
 			{
 				var = create_var();
-				Block *block_attach = to_bytecode(scope);
+				auto *block_attach = defer(scope);
 				
 				size_t scopes = 0;
 
@@ -851,7 +817,7 @@ namespace Mirb
 					}
 				}
 				
-				gen<ClosureOp, Tree::Variable *, Tree::Variable *, Block *, size_t>(var, self_var(), block_attach, scopes);
+				gen<ClosureOp, Tree::Variable *, Tree::Variable *, Mirb::Block *, size_t>(var, self_var(), block_attach, scopes);
 			}
 			
 			return var;

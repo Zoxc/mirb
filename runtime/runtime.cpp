@@ -80,7 +80,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 
 	block = 0; // Make sure runtime_block stays on stack*/
 
-	return RT_NIL;
+	return result;
 }
 
 struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module)

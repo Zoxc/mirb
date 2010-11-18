@@ -56,6 +56,9 @@ namespace Mirb
 				
 				bool has_ensure_block(Block *block);
 				
+				Mirb::Block *compile(Tree::Scope *scope);
+				Mirb::Block *defer(Tree::Scope *scope);
+				
 				void to_bytecode(Tree::Node *node, Tree::Variable *var)
 				{
 					(this->*jump_table[node->type()])(node, var);

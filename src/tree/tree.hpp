@@ -8,6 +8,8 @@
 
 namespace Mirb
 {
+	class Block;
+
 	namespace CodeGen
 	{
 		class Block;
@@ -193,6 +195,7 @@ namespace Mirb
 				Scope(Fragment &fragment, Scope *parent, Type type);
 				
 				CodeGen::Block *block;
+				Block *final;
 				Fragment *fragment;
 				Type type;
 				Scope *parent; // The scope enclosing this one

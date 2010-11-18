@@ -35,6 +35,7 @@
     <ClInclude Include="..\..\src\arch\arch.hpp" />
     <ClInclude Include="..\..\src\arch\bytecode.hpp" />
     <ClInclude Include="..\..\src\arch\codegen.hpp" />
+    <ClInclude Include="..\..\src\arch\support.hpp" />
     <ClInclude Include="..\..\src\arch\x86\codegen.hpp" />
     <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
     <ClInclude Include="..\..\src\arch\x86\support.hpp" />

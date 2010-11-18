@@ -4,13 +4,14 @@
 #include "symbol.hpp"
 #include "string.hpp"
 
+#include "../../src/arch/support.hpp"
+
 rt_value rt_Proc;
 
 rt_compiled_block(rt_proc_call)
 {
-	return RT_NIL;
-	// TODO: Fix this
-	//return RT_PROC(obj)->closure->compiled((rt_value **)&RT_PROC(obj)->scopes, RT_PROC(obj)->method_name, RT_PROC(obj)->method_module, RT_PROC(obj)->self, block, argc, argv);
+	struct rt_proc *proc = RT_PROC(obj);
+	return Mirb::Arch::Support::closure_call(proc->closure->compiled, (rt_value **)&proc->scopes, (Mirb::Symbol *)proc->method_name, proc->method_module, proc->self, block, argc, argv);
 }
 
 void rt_proc_init(void)

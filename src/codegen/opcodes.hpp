@@ -9,6 +9,7 @@ namespace Mirb
 {
 	class MemoryPool;
 	class Symbol;
+	class Block;
 	
 	namespace Tree
 	{
@@ -17,8 +18,6 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
-		class Block;
-
 		class BasicBlock;
 		
 		struct MoveOp;
