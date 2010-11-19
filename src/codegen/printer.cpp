@@ -87,7 +87,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::print_block(Block *block)
+		std::string ByteCodePrinter::print_block(Mirb::Block *block)
 		{
 			std::stringstream result;
 			
@@ -327,7 +327,7 @@ namespace Mirb
 		std::string ByteCodePrinter::print()
 		{
 			std::stringstream result;
-			result << ";\n; " << print_block(block) << "\n;\n";
+			result << ";\n; " << print_block(block->final) << "\n;\n";
 			
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
 				result << print_basic_block(*i) << "\n";

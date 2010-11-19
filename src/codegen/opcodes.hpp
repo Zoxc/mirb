@@ -272,13 +272,13 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *self;
-			Block *block;
+			Mirb::Block *block;
 			size_t scope_count;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(self); };
 
-			ClosureOp(Tree::Variable *var, Tree::Variable *self, Block *block, size_t scope_count) : var(var), self(self), block(block), scope_count(scope_count) {}
+			ClosureOp(Tree::Variable *var, Tree::Variable *self, Mirb::Block *block, size_t scope_count) : var(var), self(self), block(block), scope_count(scope_count) {}
 		};
 		
 		struct ClassOp:
@@ -288,17 +288,19 @@ namespace Mirb
 			Tree::Variable *self;
 			Symbol *name;
 			Tree::Variable *super;
-			Block *block;
+			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 
 			template<typename T> void use(T use)
 			{
 				use(self);
-				use(super);
+				
+				if(super)
+					use(super);
 			};
 
-			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Block *block) : var(var), self(self), name(name), super(super), block(block) {}
+			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Mirb::Block *block) : var(var), self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
@@ -307,12 +309,12 @@ namespace Mirb
 			Tree::Variable *var;
 			Tree::Variable *self;
 			Symbol *name;
-			Block *block;
+			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			template<typename T> void use(T use) { use(self); };
 
-			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Block *block) : var(var), self(self), name(name), block(block) {}
+			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Mirb::Block *block) : var(var), self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
@@ -320,11 +322,11 @@ namespace Mirb
 		{
 			Tree::Variable *self;
 			Symbol *name;
-			Block *block;
+			Mirb::Block *block;
 			
 			template<typename T> void use(T use) { use(self); };
 			
-			MethodOp(Tree::Variable *self, Symbol *name, Block *block) : self(self), name(name), block(block) {}
+			MethodOp(Tree::Variable *self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
 		};
 		
 		struct CallOp:

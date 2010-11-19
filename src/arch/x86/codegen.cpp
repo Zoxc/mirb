@@ -349,6 +349,41 @@ namespace Mirb
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(ClassOp &op)
+		{
+			if(op.super)
+				push_var(op.super);
+			else
+				push_imm((size_t)rt_Object);
+			
+			push_imm((size_t)op.name);
+			push_var(op.self);
+			call(&Arch::Support::define_class);
+			
+			push_reg(Arch::Register::SP); // dummy
+			push_imm(0);
+			push_imm(0);
+			push_reg(Arch::Register::AX); // obj
+			call(op.block->compiled);
+			
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(ModuleOp &op)
+		{
+			push_imm((size_t)op.name);
+			push_var(op.self);
+			call(&Arch::Support::define_module);
+			
+			push_reg(Arch::Register::SP); // dummy
+			push_imm(0);
+			push_imm(0);
+			push_reg(Arch::Register::AX); // obj
+			call(op.block->compiled);
+			
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
 		template<> void NativeGenerator::generate(CallOp &op)
 		{
 			push_reg(Arch::Register::SP);

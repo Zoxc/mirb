@@ -25,6 +25,22 @@ namespace Mirb
 
 			return closure;
 		}
+		
+		rt_value define_class(rt_value obj, rt_value name, rt_value super)
+		{
+			if(obj == rt_main)
+				obj = rt_Object;
+			
+			return rt_define_class_symbol(obj, name, super);
+		}
+		
+		rt_value define_module(rt_value obj, rt_value name)
+		{
+			if(obj == rt_main)
+				obj = rt_Object;
+			
+			return rt_define_module_symbol(obj, name);
+		}
 
 		rt_value call(Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 		{

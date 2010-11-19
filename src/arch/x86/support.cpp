@@ -9,6 +9,16 @@ namespace Mirb
 	{
 		namespace Support
 		{
+			rt_value __stdcall define_class(rt_value obj, rt_value name, rt_value super)
+			{
+				return Mirb::Support::define_class(obj, name, super);
+			}
+			
+			rt_value __stdcall define_module(rt_value obj, rt_value name)
+			{
+				return Mirb::Support::define_module(obj, name);
+			}
+			
 			rt_compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 
 			rt_compiled_block_t __fastcall jit_invoke(Block *block)

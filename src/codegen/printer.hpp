@@ -4,6 +4,7 @@
 
 namespace Mirb
 {
+	class Block;
 	class Symbol;
 
 	namespace Tree
@@ -31,7 +32,7 @@ namespace Mirb
 				
 				std::string label(BasicBlock *label);
 				std::string raw(size_t imm);
-				std::string print_block(Block *block);
+				std::string print_block(Mirb::Block *block);
 			public:
 				ByteCodePrinter(Block *block) : block(block), highlight(0) {}
 

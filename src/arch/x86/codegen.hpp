@@ -82,15 +82,19 @@ namespace Mirb
 		template<> void NativeGenerator::generate(PushImmediateOp &op);
 		template<> void NativeGenerator::generate(PushRawOp &op);
 		template<> void NativeGenerator::generate(ClosureOp &op);
+		template<> void NativeGenerator::generate(ClassOp &op);
+		template<> void NativeGenerator::generate(ModuleOp &op);
 		template<> void NativeGenerator::generate(CallOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
-
+		
 		template<typename T> struct FlushRegisters { static const bool value = false; };
-				
+		
 		template<> struct FlushRegisters<ClosureOp> { static const bool value = true; };
+		template<> struct FlushRegisters<ClassOp> { static const bool value = true; };
+		template<> struct FlushRegisters<ModuleOp> { static const bool value = true; };
 		template<> struct FlushRegisters<CallOp> { static const bool value = true; };
 	};
 };
