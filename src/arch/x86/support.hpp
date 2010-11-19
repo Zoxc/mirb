@@ -9,7 +9,11 @@ namespace Mirb
 	{
 		namespace Support
 		{
-			void jit_stub(Block *code_block, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+			#ifdef _MSC_VER
+				void jit_stub();
+			#else
+				extern void jit_stub() mirb_external("mirb_arch_support_jit_stub");
+			#endif
 			
 			rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 

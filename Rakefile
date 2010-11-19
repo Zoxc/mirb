@@ -53,9 +53,7 @@ package = Package.new do
 	cxx.std 'c++0x'
 	
 	# files
-	files = collect('main.cpp', 'runtime/**/*.cpp', 'src/**/*.cpp') - collect('runtime/x86.*')
-	
-	#files += collect('runtime/**/*.S') unless debug_info
+	files = collect('main.cpp', 'runtime/**/*.cpp', 'src/**/*.cpp', 'src/**/*.S') - collect('runtime/x86.*')
 	
 	files.merge(Executable).name(output, windows)
 end
