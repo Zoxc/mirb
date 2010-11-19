@@ -19,6 +19,11 @@ namespace Mirb
 				return Mirb::Support::define_module(obj, name);
 			}
 			
+			void __stdcall define_method(rt_value obj, rt_value name, Block *block)
+			{
+				return Mirb::Support::define_method(obj, name, block);
+			}
+			
 			rt_compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 
 			rt_compiled_block_t __fastcall jit_invoke(Block *block)

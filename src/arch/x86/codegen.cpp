@@ -384,6 +384,14 @@ namespace Mirb
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(MethodOp &op)
+		{
+			push_imm((size_t)op.block);
+			push_imm((size_t)op.name);
+			push_var(op.self);
+			call(&Arch::Support::define_method);
+		}
+		
 		template<> void NativeGenerator::generate(CallOp &op)
 		{
 			push_reg(Arch::Register::SP);

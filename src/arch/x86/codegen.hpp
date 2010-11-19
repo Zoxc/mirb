@@ -95,6 +95,7 @@ namespace Mirb
 		template<> struct FlushRegisters<ClosureOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ClassOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ModuleOp> { static const bool value = true; };
+		template<> struct FlushRegisters<MethodOp> { static const bool value = true; };
 		template<> struct FlushRegisters<CallOp> { static const bool value = true; };
 	};
 };

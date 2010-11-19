@@ -46,7 +46,7 @@ static inline rt_value rt_real_class_of(rt_value obj)
 	return rt_real_class(rt_class_of(obj));
 }
 
-static inline void rt_class_set_method(rt_value obj, rt_value name, struct rt_block *block)
+static inline void rt_class_set_method(rt_value obj, rt_value name, Mirb::Block *block)
 {
 	int ret;
 
@@ -63,7 +63,7 @@ static inline void rt_class_set_method(rt_value obj, rt_value name, struct rt_bl
 	hash_value(RT_CLASS(obj)->methods, k) = block;
 }
 
-static inline struct rt_block *rt_class_get_method(rt_value obj, rt_value name)
+static inline Mirb::Block *rt_class_get_method(rt_value obj, rt_value name)
 {
 	if(!RT_CLASS(obj)->methods)
 		return 0;

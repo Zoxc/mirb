@@ -79,21 +79,6 @@ static inline rt_value rt_realloc(rt_value old, size_t size)
 #define HASH_RUNTIME_STR(name, val_t)								\
 	HASH_INIT(name, const char *, val_t, 1, hash_str_hash_func, hash_str_hash_equal, , , , rt_runtime_malloc, rt_runtime_malloc, rt_runtime_realloc, rt_runtime_free)
 
-/*
- * Structure for code blocks
- */
-
-struct rt_block;
-
-VEC_RUNTIME(struct rt_block *, rt_blocks);
-
-struct rt_block {
-	rt_compiled_block_t compiled; // A pointer to a compiled function.
-	rt_value name; // The name of this block.
-	vec_t(rt_blocks) blocks; // A list of child blocks so the GC won't free them.
-};
-
-
 enum rt_type {
 	C_FIXNUM,
 	C_TRUE,
@@ -111,8 +96,13 @@ enum rt_type {
 	C_EXCEPTION
 };
 
+namespace Mirb
+{
+	class Block;
+};
+
 HASH_RUNTIME(rt_hash, rt_value, rt_value);
-HASH_RUNTIME(rt_methods, rt_value, struct rt_block *);
+HASH_RUNTIME(rt_methods, rt_value, Mirb::Block *);
 
 struct rt_common {
 	size_t flags;
@@ -172,7 +162,7 @@ void rt_print(rt_value obj);
 rt_value rt_inspect(rt_value obj);
 
 rt_compiled_block_t __cdecl rt_lookup(rt_value obj, rt_value name, rt_value *result_module) mirb_external("rt_lookup");
-struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
+Mirb::Block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module);
 rt_compiled_block_t __cdecl rt_lookup_super(rt_value module, rt_value name, rt_value *result_module) mirb_external("rt_lookup_super");
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[]);

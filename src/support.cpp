@@ -41,7 +41,19 @@ namespace Mirb
 			
 			return rt_define_module_symbol(obj, name);
 		}
+		
+		void define_method(rt_value obj, rt_value name, Block *block)
+		{
+			if(obj == rt_main)
+				obj = rt_Object;
 
+			#ifdef DEBUG
+				printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+			#endif
+			
+			rt_class_set_method(obj, name, block);
+		}
+		
 		rt_value call(Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 		{
 			rt_value method_module;

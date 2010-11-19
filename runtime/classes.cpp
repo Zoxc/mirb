@@ -5,6 +5,9 @@
 #include "classes/string.hpp"
 #include "classes/module.hpp"
 
+#include "../src/gc.hpp"
+#include "../src/block.hpp"
+
 rt_value rt_main;
 
 static inline bool rt_object_has_vars(rt_value obj)
@@ -222,18 +225,16 @@ void rt_include_module(rt_value obj, rt_value module)
 
 void rt_define_method(rt_value obj, const char *name, rt_compiled_block_t compiled_block)
 {
-	struct rt_block *block = (struct rt_block *)rt_alloc(sizeof(struct rt_block));
-
-	vec_init(rt_blocks, &block->blocks);
-
+	Mirb::Block *block = new (Mirb::gc) Mirb::Block;
+	
 	block->compiled = compiled_block;
-	block->name = rt_symbol_from_cstr(name);
-
+	block->name = (Mirb::Symbol *)rt_symbol_from_cstr(name);
+	
 	#ifdef DEBUG
 		printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), name);
 	#endif
-
-	rt_class_set_method(obj, block->name, block);
+	
+	rt_class_set_method(obj, (rt_value)block->name, block);
 }
 
 void rt_define_singleton_method(rt_value obj, const char *name, rt_compiled_block_t block)

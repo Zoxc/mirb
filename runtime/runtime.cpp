@@ -83,11 +83,11 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	return result;
 }
 
-struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module)
+Mirb::Block *rt_lookup_method(rt_value module, rt_value name, rt_value *result_module)
 {
 	do
 	{
-		struct rt_block *result = rt_class_get_method(module, name);
+		Mirb::Block *result = rt_class_get_method(module, name);
 
 		if(result)
 		{
@@ -104,7 +104,7 @@ struct rt_block *rt_lookup_method(rt_value module, rt_value name, rt_value *resu
 
 rt_compiled_block_t rt_lookup(rt_value obj, rt_value name, rt_value *result_module)
 {
-	struct rt_block *result = rt_lookup_method(rt_class_of(obj), name, result_module);
+	Mirb::Block *result = rt_lookup_method(rt_class_of(obj), name, result_module);
 
 	if(!result)
 	{
@@ -117,7 +117,7 @@ rt_compiled_block_t rt_lookup(rt_value obj, rt_value name, rt_value *result_modu
 
 rt_compiled_block_t rt_lookup_super(rt_value module, rt_value name, rt_value *result_module)
 {
-	struct rt_block *result = rt_lookup_method(RT_CLASS(module)->super, name, result_module);
+	Mirb::Block *result = rt_lookup_method(RT_CLASS(module)->super, name, result_module);
 
 	if(!result)
 	{
@@ -131,7 +131,7 @@ rt_compiled_block_t rt_lookup_super(rt_value module, rt_value name, rt_value *re
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[])
 {
 	rt_value module;
-	struct rt_block *method = rt_lookup_method(rt_class_of(obj), name, &module);
+	Mirb::Block *method = rt_lookup_method(rt_class_of(obj), name, &module);
 
 	if(!method)
 	{
@@ -145,7 +145,7 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 rt_value rt_inspect(rt_value obj)
 {
 	rt_value dummy;
-	struct rt_block *inspect = rt_lookup_method(rt_class_of(obj), rt_symbol_from_cstr("inspect"), &dummy);
+	Mirb::Block *inspect = rt_lookup_method(rt_class_of(obj), rt_symbol_from_cstr("inspect"), &dummy);
 
 	rt_value result = RT_NIL;
 
