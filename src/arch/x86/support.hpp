@@ -22,6 +22,7 @@ namespace Mirb
 			rt_value __stdcall define_class(rt_value obj, rt_value name, rt_value super);
 			rt_value __stdcall define_module(rt_value obj, rt_value name);
 			void __stdcall define_method(rt_value obj, rt_value name, Block *block);
+			rt_value __stdcall define_string(const char *string);
 
 			rt_value __fastcall call(Symbol *method_name, rt_value dummy, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 			rt_value __fastcall super(Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);

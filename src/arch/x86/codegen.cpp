@@ -443,6 +443,14 @@ namespace Mirb
 		{
 			mov_var_to_reg(op.var, Arch::Register::AX);
 		}
+		
+		template<> void NativeGenerator::generate(StringOp &op)
+		{
+			push_imm((size_t)op.str);
+			call(&Arch::Support::define_string);
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
 	};
 };
 

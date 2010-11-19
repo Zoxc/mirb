@@ -26,6 +26,12 @@ namespace Mirb
 			return closure;
 		}
 		
+		rt_value define_string(const char *string)
+		{
+			// TODO: Make sure string is not garbage collected. Replace it with something nicer.
+			return rt_string_from_cstr(string);
+		}
+		
 		rt_value define_class(rt_value obj, rt_value name, rt_value super)
 		{
 			if(obj == rt_main)
