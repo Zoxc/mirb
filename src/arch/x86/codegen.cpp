@@ -444,10 +444,32 @@ namespace Mirb
 			mov_var_to_reg(op.var, Arch::Register::AX);
 		}
 		
+		template<> void NativeGenerator::generate(ArrayOp &op)
+		{
+			push_reg(Arch::Register::SP);
+			push_imm(op.element_count);
+			call(&Arch::Support::create_array);
+			
+			stack_pop(op.element_count + 2);
+			
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
 		template<> void NativeGenerator::generate(StringOp &op)
 		{
 			push_imm((size_t)op.str);
 			call(&Arch::Support::define_string);
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(InterpolateOp &op)
+		{
+			push_reg(Arch::Register::SP);
+			push_imm(op.param_count);
+			call(&Arch::Support::interpolate);
+			
+			stack_pop(op.param_count + 2);
+			
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		

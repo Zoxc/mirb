@@ -8,6 +8,8 @@ namespace Mirb
 	namespace Support
 	{
 		rt_value create_closure(Block *block, rt_value self, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
+		rt_value create_array(size_t argc, rt_value argv[]);
+		rt_value interpolate(size_t argc, rt_value argv[]);
 		
 		rt_value define_string(const char *string);
 		rt_value define_class(rt_value obj, rt_value name, rt_value super);

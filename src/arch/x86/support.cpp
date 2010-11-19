@@ -28,6 +28,16 @@ namespace Mirb
 			{
 				return Mirb::Support::define_string(string);
 			}
+				
+			rt_value __cdecl interpolate(size_t argc, rt_value argv[])
+			{
+				return Mirb::Support::interpolate(argc, argv);
+			}
+			
+			rt_value __cdecl create_array(size_t argc, rt_value argv[])
+			{
+				return Mirb::Support::create_array(argc, argv);
+			}
 			
 			rt_compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 

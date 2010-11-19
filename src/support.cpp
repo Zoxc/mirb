@@ -1,5 +1,6 @@
 #include "support.hpp"
 #include "../../runtime/classes/proc.hpp"
+#include "../../runtime/classes/array.hpp"
 
 namespace Mirb
 {
@@ -24,6 +25,55 @@ namespace Mirb
 			}
 
 			return closure;
+		}
+		
+		rt_value interpolate(size_t argc, rt_value argv[])
+		{
+			size_t length = 0;
+
+			RT_ARG_EACH(i)
+			{
+				if(rt_type(argv[i]) != C_STRING)
+					argv[i] = rt_call(argv[i], "to_s", 0, 0);
+
+				length += RT_STRING(argv[i])->length;
+			}
+
+			char *new_str = (char *)rt_alloc_data(length + 1);
+			char *current = new_str;
+
+			RT_ARG_EACH(i)
+			{
+				size_t length = RT_STRING(argv[i])->length;
+
+				memcpy(current, RT_STRING(argv[i])->string, length);
+
+				current += length;
+			}
+
+			*current = 0;
+
+			return rt_string_from_raw_str(new_str, length);
+		}
+		
+		rt_value create_array(size_t argc, rt_value argv[])
+		{
+			rt_value array = rt_alloc(sizeof(struct rt_array));
+
+			RT_COMMON(array)->flags = C_ARRAY;
+			RT_COMMON(array)->class_of = rt_Array;
+			RT_COMMON(array)->vars = 0;
+
+			RT_ARRAY(array)->data.size = argc;
+			RT_ARRAY(array)->data.max = argc;
+			RT_ARRAY(array)->data.array = (rt_value *)rt_alloc(argc * sizeof(rt_value));
+
+			RT_ARG_EACH_RAW(i)
+			{
+				RT_ARRAY(array)->data.array[i] = RT_ARG(i);
+			}
+
+			return array;
 		}
 		
 		rt_value define_string(const char *string)
