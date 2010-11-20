@@ -34,6 +34,26 @@ namespace Mirb
 				return Mirb::Support::interpolate(argc, argv);
 			}
 			
+			rt_value __stdcall get_const(rt_value obj, Symbol *name)
+			{
+				return Mirb::Support::get_const(obj, name);
+			}
+
+			void __stdcall set_const(rt_value obj, Symbol *name, rt_value value)
+			{
+				return Mirb::Support::set_const(obj, name, value);
+			}
+			
+			rt_value __stdcall get_ivar(rt_value obj, Symbol *name)
+			{
+				return Mirb::Support::get_ivar(obj, name);
+			}
+
+			void __stdcall set_ivar(rt_value obj, Symbol *name, rt_value value)
+			{
+				return Mirb::Support::set_ivar(obj, name, value);
+			}
+
 			rt_value __cdecl create_array(size_t argc, rt_value argv[])
 			{
 				return Mirb::Support::create_array(argc, argv);

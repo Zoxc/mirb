@@ -297,6 +297,9 @@ namespace Mirb
 					to_bytecode(node->right, temp);
 						
 					gen<SetIVarOp>(self_var(), variable->name, temp);
+
+					if(var)
+						gen<MoveOp>(var, temp);
 					
 					return;
 				}
@@ -316,6 +319,9 @@ namespace Mirb
 					to_bytecode(node->right, value);
 					
 					gen<SetConstOp>(obj, variable->name, value);
+
+					if(var)
+						gen<MoveOp>(var, value);
 					
 					return;	
 				}	

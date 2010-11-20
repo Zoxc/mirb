@@ -527,6 +527,43 @@ namespace Mirb
 			}
 		}
 		
+		template<> void NativeGenerator::generate(GetIVarOp &op)
+		{
+			push_imm((size_t)op.name);
+			push_var(op.self);
+			
+			call(&Arch::Support::get_ivar);
+
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(SetIVarOp &op)
+		{
+			push_var(op.var);
+			push_imm((size_t)op.name);
+			push_var(op.self);
+			
+			call(&Arch::Support::set_ivar);
+		}
+		
+		template<> void NativeGenerator::generate(GetConstOp &op)
+		{
+			push_var(op.var);
+			push_imm((size_t)op.name);
+			push_var(op.obj);
+			
+			call(&Arch::Support::set_const);
+		}
+		
+		template<> void NativeGenerator::generate(SetConstOp &op)
+		{
+			push_var(op.var);
+			push_imm((size_t)op.name);
+			push_var(op.obj);
+			
+			call(&Arch::Support::set_const);
+		}
+		
 		template<> void NativeGenerator::generate(BranchIfOp &op)
 		{
 			test_var(op.var);

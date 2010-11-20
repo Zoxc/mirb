@@ -21,6 +21,12 @@ namespace Mirb
 			rt_value __cdecl create_array(size_t argc, rt_value argv[]);
 			rt_value __cdecl interpolate(size_t argc, rt_value argv[]);
 			
+			rt_value __stdcall get_const(rt_value obj, Symbol *name);
+			void __stdcall set_const(rt_value obj, Symbol *name, rt_value value);
+			
+			rt_value __stdcall get_ivar(rt_value obj, Symbol *name);
+			void __stdcall set_ivar(rt_value obj, Symbol *name, rt_value value);
+
 			rt_value __stdcall define_class(rt_value obj, rt_value name, rt_value super);
 			rt_value __stdcall define_module(rt_value obj, rt_value name);
 			void __stdcall define_method(rt_value obj, rt_value name, Block *block);

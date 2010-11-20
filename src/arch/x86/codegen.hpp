@@ -93,6 +93,10 @@ namespace Mirb
 		template<> void NativeGenerator::generate(GetHeapOp &op);
 		template<> void NativeGenerator::generate(GetHeapVarOp &op);
 		template<> void NativeGenerator::generate(SetHeapVarOp &op);
+		template<> void NativeGenerator::generate(GetIVarOp &op);
+		template<> void NativeGenerator::generate(SetIVarOp &op);
+		template<> void NativeGenerator::generate(GetConstOp &op);
+		template<> void NativeGenerator::generate(SetConstOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
@@ -109,6 +113,10 @@ namespace Mirb
 		template<> struct FlushRegisters<MethodOp> { static const bool value = true; };
 		template<> struct FlushRegisters<CallOp> { static const bool value = true; };
 		template<> struct FlushRegisters<SuperOp> { static const bool value = true; };
+		template<> struct FlushRegisters<GetIVarOp> { static const bool value = true; };
+		template<> struct FlushRegisters<SetIVarOp> { static const bool value = true; };
+		template<> struct FlushRegisters<GetConstOp> { static const bool value = true; };
+		template<> struct FlushRegisters<SetConstOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };

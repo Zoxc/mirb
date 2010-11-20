@@ -1,6 +1,7 @@
 #include "support.hpp"
 #include "../../runtime/classes/proc.hpp"
 #include "../../runtime/classes/array.hpp"
+#include "../../runtime/constant.hpp"
 
 namespace Mirb
 {
@@ -27,6 +28,48 @@ namespace Mirb
 			return closure;
 		}
 		
+		rt_value get_const(rt_value obj, Symbol *name)
+		{
+			if(obj == rt_main)
+				obj = rt_Object;
+
+			#ifdef DEBUG
+				std::cout << "Looking up constant " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << "\n";
+			#endif
+
+			return rt_const_get(obj, (rt_value)name);
+		}
+
+		void set_const(rt_value obj, Symbol *name, rt_value value)
+		{
+			if(obj == rt_main)
+				obj = rt_Object;
+
+			#ifdef DEBUG
+				std::cout << "Setting constant " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << " to " << rt_string_to_cstr(rt_inspect(value)) << "\n";
+			#endif
+
+			rt_const_set(obj, (rt_value)name, value);
+		}
+		
+		rt_value get_ivar(rt_value obj, Symbol *name)
+		{
+			#ifdef DEBUG
+				std::cout << "Looking up instance variable " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << "\n";
+			#endif
+
+			return rt_object_get_var(obj, (rt_value)name);
+		}
+
+		void set_ivar(rt_value obj, Symbol *name, rt_value value)
+		{
+			#ifdef DEBUG
+				std::cout << "Setting instance variable " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << " to " << rt_string_to_cstr(rt_inspect(value)) << "\n";
+			#endif
+
+			rt_object_set_var(obj, (rt_value)name, value);
+		}
+
 		rt_value interpolate(size_t argc, rt_value argv[])
 		{
 			size_t length = 0;

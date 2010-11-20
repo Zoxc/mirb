@@ -14,29 +14,21 @@ namespace Mirb
 		namespace Disassembly
 		{
 			#define MIRB_SYMBOL(name) {(void *)&name, #name}
-
+			
 			static Symbol symbols[] = {
 				MIRB_SYMBOL(Arch::Support::create_closure),
-				/*MIRB_SYMBOL(rt_support_define_class),
-				MIRB_SYMBOL(rt_support_define_module),
-				MIRB_SYMBOL(rt_support_define_method),*/
+				MIRB_SYMBOL(Arch::Support::create_array),
+				MIRB_SYMBOL(Arch::Support::interpolate),
+				MIRB_SYMBOL(Arch::Support::get_const),
+				MIRB_SYMBOL(Arch::Support::set_const),
+				MIRB_SYMBOL(Arch::Support::get_ivar),
+				MIRB_SYMBOL(Arch::Support::set_ivar),
+				MIRB_SYMBOL(Arch::Support::define_string),
+				MIRB_SYMBOL(Arch::Support::define_class),
+				MIRB_SYMBOL(Arch::Support::define_module),
+				MIRB_SYMBOL(Arch::Support::define_method),
 				MIRB_SYMBOL(Arch::Support::call),
 				MIRB_SYMBOL(Arch::Support::super),
-				/*MIRB_SYMBOL(rt_support_get_ivar),
-				MIRB_SYMBOL(rt_support_set_ivar),
-				MIRB_SYMBOL(rt_support_break),
-				MIRB_SYMBOL(rt_support_return),
-				MIRB_SYMBOL(rt_support_alloc_scope),
-
-				#ifdef WIN32
-					MIRB_SYMBOL(rt_support_handler),
-				#endif
-
-				MIRB_SYMBOL(rt_support_interpolate),
-				MIRB_SYMBOL(rt_support_array),
-				MIRB_SYMBOL(rt_support_get_const),
-				MIRB_SYMBOL(rt_support_set_const),
-				MIRB_SYMBOL(rt_support_define_string)*/
 			};
 
 			const char *find_symbol(void *address, Vector<Symbol *, MemoryPool> *symbols)
