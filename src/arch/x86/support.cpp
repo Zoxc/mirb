@@ -99,8 +99,6 @@ namespace Mirb
 			#else
 				rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 				{
-					rt_value result;
-					
 					typedef rt_value (__stdcall __attribute__((__regparm__(3))) *closure_block_t)(rt_value *scopes[], rt_value method_module, Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 					
 					closure_block_t closure_code = (closure_block_t)code;

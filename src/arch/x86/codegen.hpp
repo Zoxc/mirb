@@ -85,6 +85,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(ClassOp &op);
 		template<> void NativeGenerator::generate(ModuleOp &op);
 		template<> void NativeGenerator::generate(CallOp &op);
+		template<> void NativeGenerator::generate(SuperOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
@@ -100,6 +101,7 @@ namespace Mirb
 		template<> struct FlushRegisters<ModuleOp> { static const bool value = true; };
 		template<> struct FlushRegisters<MethodOp> { static const bool value = true; };
 		template<> struct FlushRegisters<CallOp> { static const bool value = true; };
+		template<> struct FlushRegisters<SuperOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };

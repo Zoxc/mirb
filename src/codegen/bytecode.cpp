@@ -817,7 +817,7 @@ namespace Mirb
 					}
 				}
 				
-				gen<ClosureOp, Tree::Variable *, Tree::Variable *, Mirb::Block *, size_t>(var, self_var(), block_attach, scopes);
+				gen<ClosureOp>(var, self_var(), block_attach, scopes);
 			}
 			
 			return var;
@@ -844,6 +844,14 @@ namespace Mirb
 			param_count = parameters;
 			
 			return block_arg(scope);
+		}
+
+		Tree::Variable *ByteCodeGenerator::Gen::lock(Tree::Variable *var, size_t reg)
+		{
+			var->flags.set<Tree::Variable::Register>();
+			var->loc = reg;
+
+			return var;
 		}
 	};
 };

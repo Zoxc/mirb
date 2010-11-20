@@ -414,6 +414,26 @@ namespace Mirb
 				mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(SuperOp &op)
+		{
+			push_reg(Arch::Register::SP);
+			push_imm(op.param_count);
+
+			if(op.block)
+				push_var(op.block);
+			else
+				push_imm(RT_NIL);
+			
+			push_var(op.self);
+
+			call(&Arch::Support::super);
+
+			stack_pop(op.param_count);
+
+			if(op.var)
+				mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
 		template<> void NativeGenerator::generate(BranchIfOp &op)
 		{
 			test_var(op.var);
