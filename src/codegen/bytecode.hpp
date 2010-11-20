@@ -66,7 +66,8 @@ namespace Mirb
 				
 				Tree::Variable *reuse(Tree::Variable *var)
 				{
-					return var ? var : create_var();
+					// TODO: Make sure no code stores results in the returned variable
+					return create_var();
 				}
 				
 				Tree::Variable *self_var();
