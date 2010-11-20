@@ -235,6 +235,60 @@ namespace Mirb
 			}
 		}
 
+		void NativeGenerator::mov_reg_index_to_reg(size_t sreg, size_t index, size_t dreg)
+		{
+			rex(reg_high(dreg), 0, 0);
+			stream.b(0x8B);
+			
+			if(index)
+			{
+				modrm(1, reg_low(dreg), sreg);
+				stream.b((int8_t)index * sizeof(size_t));
+			}
+			else
+				modrm(0, reg_low(dreg), sreg);
+		}
+
+		void NativeGenerator::mov_var_index_to_reg(Tree::Variable *var, size_t index, size_t reg)
+		{
+			if(var->flags.get<Tree::Variable::Register>())
+			{
+				mov_reg_index_to_reg(var->loc, index, reg);
+			}
+			else
+			{
+				mov_var_to_reg(var, spare);
+				mov_reg_index_to_reg(spare, index, reg);
+			}
+		}
+		
+		void NativeGenerator::mov_reg_to_reg_index(size_t sreg, size_t dreg, size_t index)
+		{
+			rex(reg_high(sreg), 0, 0);
+			stream.b(0x89);
+
+			if(index)
+			{
+				modrm(1, reg_low(sreg), dreg);
+				stream.b((int8_t)index * sizeof(size_t));
+			}
+			else
+				modrm(0, reg_low(sreg), dreg);
+		}
+
+		void NativeGenerator::mov_reg_to_var_index(size_t reg, Tree::Variable *var, size_t index)
+		{
+			if(var->flags.get<Tree::Variable::Register>())
+			{
+				mov_reg_to_reg_index(reg, var->loc, index);
+			}
+			else
+			{
+				mov_var_to_reg(var, spare);
+				mov_reg_to_reg_index(reg, spare, index);
+			}
+		}
+
 		void NativeGenerator::push_reg(size_t reg)
 		{
 			rex(0, 0, reg_high(reg));
@@ -432,6 +486,45 @@ namespace Mirb
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(GetHeapOp &op)
+		{
+			if(op.var->flags.get<Tree::Variable::Register>())
+			{
+				mov_var_index_to_reg(op.heaps, op.index, op.var->loc);
+			}
+			else
+			{
+				mov_var_index_to_reg(op.heaps, op.index, spare);
+				mov_reg_to_var(spare, op.var);
+			}
+		}
+		
+		template<> void NativeGenerator::generate(GetHeapVarOp &op)
+		{
+			if(op.var->flags.get<Tree::Variable::Register>())
+			{
+				mov_var_index_to_reg(op.heap, op.index->loc, op.var->loc);
+			}
+			else
+			{
+				mov_var_index_to_reg(op.heap, op.index->loc, spare);
+				mov_reg_to_var(spare, op.var);
+			}
+		}
+		
+		template<> void NativeGenerator::generate(SetHeapVarOp &op)
+		{
+			if(op.var->flags.get<Tree::Variable::Register>())
+			{
+				mov_reg_to_var_index(op.var->loc, op.heap, op.index->loc);
+			}
+			else
+			{
+				mov_var_to_reg(op.var, spare);
+				mov_reg_to_var_index(spare, op.heap, op.index->loc);
+			}
 		}
 		
 		template<> void NativeGenerator::generate(BranchIfOp &op)

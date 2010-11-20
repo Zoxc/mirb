@@ -50,6 +50,10 @@ namespace Mirb
 				void test_var(Tree::Variable *var);
 				void mov_arg_to_reg(size_t arg, size_t reg);
 				void mov_arg_to_var(size_t arg, Tree::Variable *var);
+				void mov_reg_index_to_reg(size_t sreg, size_t index, size_t dreg);
+				void mov_var_index_to_reg(Tree::Variable *var, size_t index, size_t reg);
+				void mov_reg_to_reg_index(size_t sreg, size_t dreg, size_t index);
+				void mov_reg_to_var_index(size_t reg, Tree::Variable *var, size_t index);
 				
 				template<typename T> void call(T *func)
 				{
@@ -86,6 +90,9 @@ namespace Mirb
 		template<> void NativeGenerator::generate(ModuleOp &op);
 		template<> void NativeGenerator::generate(CallOp &op);
 		template<> void NativeGenerator::generate(SuperOp &op);
+		template<> void NativeGenerator::generate(GetHeapOp &op);
+		template<> void NativeGenerator::generate(GetHeapVarOp &op);
+		template<> void NativeGenerator::generate(SetHeapVarOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
