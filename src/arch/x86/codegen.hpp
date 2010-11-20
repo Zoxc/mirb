@@ -120,6 +120,13 @@ namespace Mirb
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };
+
+		template<typename T> struct CanRaiseException { static const bool value = false; };
+
+		template<> struct CanRaiseException<ClassOp> { static const bool value = true; };
+		template<> struct CanRaiseException<ModuleOp> { static const bool value = true; };
+		template<> struct CanRaiseException<CallOp> { static const bool value = true; };
+		template<> struct CanRaiseException<SuperOp> { static const bool value = true; };
 	};
 };
 

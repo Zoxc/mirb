@@ -265,7 +265,7 @@ namespace Mirb
 				{
 					auto op = (HandlerOp *)opcode;
 					
-					return "handler " + raw(op->id);
+					return "handler " + (op->id == (size_t)-1 ? "nil" : raw(op->id));
 				}
 				
 				case Opcode::Unwind:

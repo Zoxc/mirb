@@ -25,6 +25,9 @@ namespace Mirb
 					
 					var->flags.set<Tree::Variable::FlushCallerSavedRegisters>();
 
+					if(CanRaiseException<T>::value)
+						var->flags.set<Tree::Variable::FlushRegisters>();
+
 					block.block.scope->variable_list.push(var);
 					
 					var->range.start = block.block.loc;
@@ -229,11 +232,27 @@ namespace Mirb
 
 				if((*i)->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
 				{
-					// Flush all caller saved registers
+					if(scope->require_exceptions && (*i)->flags.get<Tree::Variable::FlushRegisters>())
+					{
+						// Flush all registers
+						for(auto l = active.begin(); l != active.end(); ++l)
+						{
+							(*l)->loc = stack_loc++;
+							(*l)->flags.clear<Tree::Variable::Register>();
+						}
 
-					std::for_each(Arch::caller_saved, Arch::caller_saved + (sizeof(Arch::caller_saved) / sizeof(size_t)), [&] (size_t reg) {
-						flush_reg(registers.to_virtual(reg), 0);
-					});
+						memset(used_reg, 0, sizeof(used_reg));
+
+						active.resize(0);
+					}
+					else
+					{
+						// Flush all caller saved registers
+
+						std::for_each(Arch::caller_saved, Arch::caller_saved + (sizeof(Arch::caller_saved) / sizeof(size_t)), [&] (size_t reg) {
+							flush_reg(registers.to_virtual(reg), 0);
+						});
+					}
 				}
 				else if((*i)->flags.get<Tree::Variable::Register>())
 				{
