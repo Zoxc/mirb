@@ -16,8 +16,9 @@ namespace Mirb
 			#endif
 			
 			rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
-
-			rt_value __cdecl create_closure(Block *block, rt_value self, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
+			
+			rt_value *__stdcall create_heap(size_t bytes);
+			rt_value __cdecl create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[]);
 			rt_value __cdecl create_array(size_t argc, rt_value argv[]);
 			rt_value __cdecl interpolate(size_t argc, rt_value argv[]);
 			

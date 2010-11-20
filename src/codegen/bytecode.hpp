@@ -261,6 +261,9 @@ namespace Mirb
 				}
 				
 				Tree::Variable *create_var();
+
+				Tree::Variable *read_variable(Tree::Variable *var);
+				void write_variable(Tree::Variable *var, Tree::Variable *value);
 				
 				Block *to_bytecode(Tree::Scope *scope);
 		};

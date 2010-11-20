@@ -105,7 +105,32 @@ namespace Mirb
 				gen<LoadOp>(var, RT_INT2FIX(node->value));
 			}
 		}
-		
+
+		Tree::Variable *ByteCodeGenerator::read_variable(Tree::Variable *var)
+		{
+			if(var->type == Tree::Variable::Heap)
+			{
+				Tree::Variable *heap;
+
+				if(var->owner != scope)
+				{
+					heap = create_var();
+
+					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+				}
+				else
+					heap = block->heap_var;
+
+				Tree::Variable *result = create_var();
+
+				gen<GetHeapVarOp>(result, heap, var);
+
+				return result;
+			}
+			
+			return var;
+		}
+
 		void ByteCodeGenerator::convert_variable(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if(!var)
@@ -113,23 +138,7 @@ namespace Mirb
 
 			auto node = (Tree::VariableNode *)basic_node;
 
-			if(node->var->type == Tree::Variable::Heap)
-			{
-				Tree::Variable *heap;
-
-				if(node->var->owner != scope)
-				{
-					heap = reuse(var);
-
-					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(node->var->owner));
-				}
-				else
-					heap = block->heap_var;
-
-				gen<GetHeapVarOp>(var, heap, node->var);
-			}
-			else
-				gen<MoveOp>(var, node->var);
+			gen<MoveOp>(var, read_variable(node->var));
 		}
 		
 		void ByteCodeGenerator::convert_ivar(Tree::Node *basic_node, Tree::Variable *var)
@@ -244,6 +253,29 @@ namespace Mirb
 			
 			gen(label_end);
 		}
+
+		void ByteCodeGenerator::write_variable(Tree::Variable *var, Tree::Variable *value)
+		{
+			if(var->type == Tree::Variable::Heap)
+			{
+				Tree::Variable *heap;
+
+				if(var->owner != scope)
+				{
+					heap = create_var();
+
+					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+				}
+				else
+					heap = block->heap_var;
+
+				gen<SetHeapVarOp>(heap, var, value);
+			}
+			else
+			{
+				gen<MoveOp>(var, value);
+			}
+		}
 		
 		void ByteCodeGenerator::convert_assignment(Tree::Node *basic_node, Tree::Variable *var)
 		{
@@ -260,19 +292,8 @@ namespace Mirb
 						Tree::Variable *temp = reuse(var);
 
 						to_bytecode(node->right, temp);
-
-						Tree::Variable *heap;
-
-						if(variable->var->owner != scope)
-						{
-							heap = create_var();
-
-							gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(variable->var->owner));
-						}
-						else
-							heap = block->heap_var;
-
-						gen<SetHeapVarOp>(heap, variable->var, temp);
+						
+						write_variable(variable->var, temp);
 
 						if(var)
 							gen<MoveOp>(var, temp);
@@ -405,6 +426,11 @@ namespace Mirb
 		{
 			auto node = (Tree::SuperNode *)basic_node;
 			
+			Tree::Variable *module_var = scope->owner->super_module_var;
+			Tree::Variable *name_var = scope->owner->super_name_var;
+
+			// TODO: module_var and name_var may be heap variables
+
 			if(node->pass_args)
 			{
 				Tree::Variable *closure = scope->owner->block_parameter;
@@ -418,7 +444,10 @@ namespace Mirb
 					gen<PushOp>(*i);
 				}
 				
-				gen<SuperOp>(var, self_var(), scope->super_module_var, scope->super_name_var, param_count, closure, node->break_id);
+				module_var = read_variable(module_var);
+				name_var = read_variable(name_var);
+				
+				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->break_id);
 			}
 			else
 			{
@@ -426,7 +455,10 @@ namespace Mirb
 				
 				Tree::Variable *closure = call_args(node->arguments, param_count, scope, 0);
 				
-				gen<SuperOp>(var, self_var(), scope->super_module_var, scope->super_name_var, param_count, closure, node->break_id);
+				module_var = read_variable(module_var);
+				name_var = read_variable(name_var);
+
+				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->break_id);
 			}
 			
 			if(node->break_id != Tree::InvokeNode::no_break_id)
@@ -716,9 +748,6 @@ namespace Mirb
 			
 			block->return_var = create_var();
 
-			if(scope->heap_vars)
-				block->heap_var = create_var();
-
 			if(scope->referenced_scopes.size() > 0)
 				block->heap_array_var = create_var();
 			
@@ -740,12 +769,26 @@ namespace Mirb
 			
 			gen(block->prolog);
 
+			BasicBlock *body = create_block();
+
+			split(body);
+
+			if(scope->heap_vars)
+			{
+				block->heap_var = create_var();
+				gen<CreateHeapOp>(block->heap_var);
+			}
+
 			to_bytecode(scope->group, block->return_var);
 			
 			split(block->epilog);
 
 			gen<ReturnOp>(block->return_var);
 
+			basic = block->prolog;
+
+			gen<PrologueOp>();
+			
 			block->epilog->next_block = 0;
 
 			return block;

@@ -53,13 +53,6 @@ namespace Mirb
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
 				push_reg(Arch::Register::DI);
 			
-			if(block->self_var)
-				mov_arg_to_var(0, block->self_var);
-
-			// TODO: Fix the case when block_parameter is on the heap
-			if(block->scope->block_parameter)
-				mov_arg_to_var(0, block->scope->block_parameter);
-			
 			index = 0;
 
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
@@ -360,6 +353,11 @@ namespace Mirb
 		{
 			mov_imm_to_var(op.imm, op.var);
 		}
+
+		template<> void NativeGenerator::generate(LoadArgOp &op)
+		{
+			mov_arg_to_var(op.arg, op.var);
+		}
 		
 		template<> void NativeGenerator::generate(PushOp &op)
 		{
@@ -388,17 +386,13 @@ namespace Mirb
 			push_reg(Arch::Register::SP);
 			push_imm(op.scope_count);
 			
-			// TODO: Push the real variables
-			push_imm(RT_NIL);
-			push_imm(RT_NIL);
-			
 			push_var(op.self);
 			
 			push_imm((size_t)op.block);
 
 			call(&Arch::Support::create_closure);
 
-			stack_pop(op.scope_count + 6);
+			stack_pop(op.scope_count + 4);
 
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
@@ -486,6 +480,14 @@ namespace Mirb
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(CreateHeapOp &op)
+		{
+			push_imm(block->scope->heap_vars * sizeof(size_t));
+			call(&Arch::Support::create_heap);
+
+			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(GetHeapOp &op)

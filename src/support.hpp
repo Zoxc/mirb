@@ -7,8 +7,9 @@ namespace Mirb
 {
 	namespace Support
 	{
-		rt_value create_closure(Block *block, rt_value self, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[]);
+		rt_value create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[]);
 		rt_value create_array(size_t argc, rt_value argv[]);
+		rt_value *create_heap(size_t bytes);
 		rt_value interpolate(size_t argc, rt_value argv[]);
 
 		rt_value get_const(rt_value obj, Symbol *name);

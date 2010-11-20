@@ -7,8 +7,6 @@
 struct rt_proc {
 	struct rt_common common;
 	rt_value self;
-	rt_value method_name;
-	rt_value method_module;
 	Mirb::Block *closure;
 	size_t scope_count;
 	rt_value *scopes[];

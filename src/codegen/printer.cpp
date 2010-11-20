@@ -121,6 +121,13 @@ namespace Mirb
 					return var(op->var) + " = " + raw(op->imm);
 				}
 				
+				case Opcode::LoadArg:
+				{
+					auto op = (LoadArgOp *)opcode;
+					
+					return var(op->var) + " = arg " + raw(op->arg);
+				}
+				
 				case Opcode::Push:
 				{
 					auto op = (PushOp *)opcode;
@@ -182,6 +189,13 @@ namespace Mirb
 					auto op = (SuperOp *)opcode;
 					
 					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+				}
+				
+				case Opcode::CreateHeap:
+				{
+					auto op = (CreateHeapOp *)opcode;
+					
+					return var(op->var) + " = create_heap";
 				}
 				
 				case Opcode::GetHeap:
@@ -306,6 +320,11 @@ namespace Mirb
 					auto op = (InterpolateOp *)opcode;
 					
 					return var(op->var) + " = interpolate " + raw(op->param_count);
+				}
+
+				case Opcode::Prologue:
+				{
+					return "prologue";
 				}
 				
 				default:

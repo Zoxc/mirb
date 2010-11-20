@@ -23,6 +23,7 @@ namespace Mirb
 		struct MoveOp;
 		struct LoadOp;
 		struct LoadRawOp;
+		struct LoadArgOp;
 		struct PushOp;
 		struct PushImmediateOp;
 		struct PushRawOp;
@@ -32,6 +33,7 @@ namespace Mirb
 		struct MethodOp;
 		struct CallOp;
 		struct SuperOp;
+		struct CreateHeapOp;
 		struct GetHeapOp;
 		struct GetHeapVarOp;
 		struct SetHeapVarOp;
@@ -59,6 +61,7 @@ namespace Mirb
 				Move,
 				Load,
 				LoadRaw,
+				LoadArg,
 				Push,
 				PushImmediate,
 				PushRaw,
@@ -68,6 +71,7 @@ namespace Mirb
 				Method,
 				Call,
 				Super,
+				CreateHeap,
 				GetHeap,
 				GetHeapVar,
 				SetHeapVar,
@@ -87,6 +91,7 @@ namespace Mirb
 				Array,
 				String,
 				Interpolate,
+				Prologue,
 			};
 			
 			Type op;
@@ -104,9 +109,12 @@ namespace Mirb
 						
 					case Load:
 						return T<LoadOp>::func(arg, (LoadOp &)*this);
-
+						
 					case LoadRaw:
 						return T<LoadRawOp>::func(arg, (LoadRawOp &)*this);
+
+					case LoadArg:
+						return T<LoadArgOp>::func(arg, (LoadArgOp &)*this);
 
 					case Push:
 						return T<PushOp>::func(arg, (PushOp &)*this);
@@ -134,7 +142,10 @@ namespace Mirb
 						
 					case Super:
 						return T<SuperOp>::func(arg, (SuperOp &)*this);
-
+						
+					case CreateHeap:
+						return T<CreateHeapOp>::func(arg, (CreateHeapOp &)*this);
+						
 					case GetHeap:
 						return T<GetHeapOp>::func(arg, (GetHeapOp &)*this);
 						
@@ -239,6 +250,25 @@ namespace Mirb
 			template<typename T> void def(T def) { def(var); };
 
 			LoadRawOp(Tree::Variable *var, size_t imm) : var(var), imm(imm) {}
+		};
+		
+		struct LoadArgOp:
+			public OpcodeWrapper<Opcode::LoadArg>
+		{
+			enum Arg
+			{
+				Object,
+				Block,
+				ArgCount,
+				ArgValues
+			};
+
+			Tree::Variable *var;
+			size_t arg;
+			
+			template<typename T> void def(T def) { def(var); };
+
+			LoadArgOp(Tree::Variable *var, size_t arg) : var(var), arg(arg) {}
 		};
 		
 		struct PushOp:
@@ -376,6 +406,16 @@ namespace Mirb
 			};
 
 			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
+		};
+		
+		struct CreateHeapOp:
+			public OpcodeWrapper<Opcode::CreateHeap>
+		{
+			Tree::Variable *var;
+			
+			template<typename T> void def(T def) { def(var); };
+
+			CreateHeapOp(Tree::Variable *var) : var(var) {}
 		};
 		
 		struct GetHeapOp:
@@ -596,6 +636,11 @@ namespace Mirb
 			template<typename T> void def(T def) { def(var); };
 
 			InterpolateOp(Tree::Variable *var, size_t param_count) : var(var), param_count(param_count) {}
+		};
+		
+		struct PrologueOp:
+			public OpcodeWrapper<Opcode::Prologue>
+		{
 		};
 	};
 };

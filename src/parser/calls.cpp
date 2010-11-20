@@ -164,38 +164,33 @@ namespace Mirb
 		
 		auto result = new (fragment) Tree::SuperNode;
 		
-		// TODO: Only create super variables in the owner and reference them on the heap
-		
 		Tree::Scope *owner = scope->owner;
-		Tree::Scope *current = scope;
 		
-		while(true)
+		if(!owner->super_module_var)
 		{
-			if(!current->super_module_var)
-			{
-				current->super_module_var = current->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
-				current->super_module_var->name = 0;
+			owner->super_module_var = owner->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
+			owner->super_module_var->name = 0;
 				
-				current->super_name_var = current->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
-				current->super_name_var->name = 0;
+			owner->super_name_var = owner->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
+			owner->super_name_var->name = 0;
+			
+			if(scope != owner)
+			{
+				scope->require_var(owner, owner->super_module_var);
+				scope->require_var(owner, owner->super_name_var);
 			}
-			
-			if(owner == current)
-				break;
-			
-			current = current->parent;
 		}
 		
 		bool parenthesis = false;
 		
 		parse_arguments(result->arguments, has_arguments(), &parenthesis);
 		
-		result->block= parse_block();
+		result->block = parse_block();
 		
 		if(result->arguments.empty() && !parenthesis)
 		{
-			if(current != owner)
-				owner->zsupers.push(current);
+			if(scope != owner)
+				owner->zsupers.push(scope);
 			
 			result->pass_args = true;
 		}

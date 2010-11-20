@@ -6,6 +6,43 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
+		template<> struct ByteCodeGenerator::Gen0<PrologueOp>:
+			public Gen
+		{
+			static PrologueOp *gen(ByteCodeGenerator &bcg)
+			{
+				if(bcg.block->heap_array_var)
+					bcg.gen<MoveOp>(bcg.block->heap_array_var, lock(bcg.create_var(), Arch::Register::AX));
+				
+				if(bcg.scope->super_name_var)
+					bcg.write_variable(bcg.scope->super_module_var, lock(bcg.create_var(), Arch::Register::CX));
+
+				if(bcg.scope->super_module_var)
+					bcg.write_variable(bcg.scope->super_module_var, lock(bcg.create_var(), Arch::Register::DX));
+
+				Tree::Variable *block_parameter = bcg.block->scope->block_parameter;
+
+				if(block_parameter)
+				{
+					if(block_parameter->type == Tree::Variable::Heap)
+					{
+						Tree::Variable *value = bcg.create_var();
+
+						bcg.gen<LoadArgOp>(value, LoadArgOp::Object);
+
+						bcg.write_variable(block_parameter, value);
+					}
+					else
+						bcg.gen<LoadArgOp>(bcg.block->self_var, LoadArgOp::Object);
+				}
+				
+				if(bcg.block->self_var)
+					bcg.gen<LoadArgOp>(bcg.block->self_var, LoadArgOp::Object);
+
+				return 0;
+			}
+		};
+
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> struct ByteCodeGenerator::Gen7<SuperOp, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>:
 			public Gen
 		{

@@ -44,7 +44,7 @@ namespace Mirb
 			if(var->type != Variable::Heap)
 			{
 				var->type = Variable::Heap;
-				var->index = owner->heap_vars++;
+				var->loc = owner->heap_vars++;
 				var->owner = owner;
 			}
 			

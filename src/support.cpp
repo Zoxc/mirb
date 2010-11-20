@@ -7,7 +7,7 @@ namespace Mirb
 {
 	namespace Support
 	{
-		rt_value create_closure(Block *block, rt_value self, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[])
+		rt_value create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[])
 		{
 			rt_value closure = (rt_value)rt_alloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
 
@@ -16,8 +16,6 @@ namespace Mirb
 			RT_COMMON(closure)->vars = 0;
 			RT_PROC(closure)->self = self;
 			RT_PROC(closure)->closure = block;
-			RT_PROC(closure)->method_name = method_name;
-			RT_PROC(closure)->method_module = method_module;
 			RT_PROC(closure)->scope_count = argc;
 
 			RT_ARG_EACH_RAW(i)
@@ -26,6 +24,11 @@ namespace Mirb
 			}
 
 			return closure;
+		}
+
+		rt_value *create_heap(size_t bytes)
+		{
+			return (rt_value *)rt_alloc(bytes);
 		}
 		
 		rt_value get_const(rt_value obj, Symbol *name)

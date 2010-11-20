@@ -56,6 +56,10 @@ h1. Operations
   @V = R@
   Loads the raw immediate @R@ into @V@.
 
+* _LoadArg_
+  @V = arg R@
+  Loads the argument with index @R@ into @V@.
+
 * _Push_
   @push V@
   Moves the value of @V@ onto the stack.
@@ -91,6 +95,10 @@ h1. Operations
 * _Super_
   @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], Rbreak@
   Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
+
+* _CreateHeap_
+  @V = create_heap@
+  Creates a new variable heap and stores it in @V@.
 
 * _GetHeap_
   @V = heap Vheaps, Rindex@
@@ -167,3 +175,7 @@ h1. Operations
 * _Interpolate_
   @V = interpolate Rparams@
   Creates an string from concatenating the last @Rparams@ on the stack then pops them off it. If any parameter is not already a string, it is converted to a string by calling @to_s@ on it.
+
+* _Prologue_
+  @prologue@
+  A dummy opcode which backends specializes to generate a prologue.

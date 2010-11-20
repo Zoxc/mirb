@@ -16,6 +16,7 @@ namespace Mirb
 			#define MIRB_SYMBOL(name) {(void *)&name, #name}
 			
 			static Symbol symbols[] = {
+				MIRB_SYMBOL(Arch::Support::create_heap),
 				MIRB_SYMBOL(Arch::Support::create_closure),
 				MIRB_SYMBOL(Arch::Support::create_array),
 				MIRB_SYMBOL(Arch::Support::interpolate),

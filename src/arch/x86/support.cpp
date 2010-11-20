@@ -9,6 +9,11 @@ namespace Mirb
 	{
 		namespace Support
 		{
+			rt_value *__stdcall create_heap(size_t bytes)
+			{
+				return Mirb::Support::create_heap(bytes);
+			}
+
 			rt_value __stdcall define_class(rt_value obj, rt_value name, rt_value super)
 			{
 				return Mirb::Support::define_class(obj, name, super);
@@ -127,9 +132,9 @@ namespace Mirb
 				}
 			#endif
 			
-			rt_value __cdecl create_closure(Block *block, rt_value self, rt_value method_name, rt_value method_module, size_t argc, rt_value *argv[])
+			rt_value __cdecl create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[])
 			{
-				return Mirb::Support::create_closure(block, self, method_name, method_module, argc, argv);
+				return Mirb::Support::create_closure(block, self, argc, argv);
 			}
 
 			rt_value __fastcall call(Symbol *method_name, rt_value dummy, rt_value obj, rt_value block, size_t argc, rt_value argv[])
