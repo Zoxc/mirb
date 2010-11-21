@@ -304,6 +304,7 @@ namespace Mirb
 			memory_pool(memory_pool),
 			current_exception_block(0),
 			current_exception_block_id(-1),
+			heap_array_var(0),
 			self_var(0)
 		{
 			#ifdef DEBUG

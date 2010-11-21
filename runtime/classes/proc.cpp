@@ -11,7 +11,7 @@ rt_value rt_Proc;
 rt_compiled_block(rt_proc_call)
 {
 	struct rt_proc *proc = RT_PROC(obj);
-	return Mirb::Arch::Support::closure_call(proc->closure->compiled, (Mirb::Value **)&proc->scopes, 0, Mirb::value_nil, proc->self, block, argc, (Mirb::Value *)argv);
+	return Mirb::Arch::Support::closure_call(proc->closure->compiled, (Mirb::value_t **)&proc->scopes, 0, Mirb::value_nil, proc->self, block, argc, argv);
 }
 
 void rt_proc_init(void)

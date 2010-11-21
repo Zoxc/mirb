@@ -234,11 +234,11 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Load>
 		{
 			Tree::Variable *var;
-			Value imm;
+			value_t imm;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			LoadOp(Tree::Variable *var, Value imm) : var(var), imm(imm) {}
+			LoadOp(Tree::Variable *var, value_t imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadRawOp:
@@ -284,9 +284,9 @@ namespace Mirb
 		struct PushImmediateOp:
 			public OpcodeWrapper<Opcode::PushImmediate>
 		{
-			Value imm;
+			value_t imm;
 			
-			PushImmediateOp(Value imm) : imm(imm) {}
+			PushImmediateOp(value_t imm) : imm(imm) {}
 		};
 		
 		struct PushRawOp:

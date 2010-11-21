@@ -11,16 +11,18 @@ struct rt_array;
 
 namespace Mirb
 {
-	const size_t value_nil = 0;
-	const size_t value_true = 2;
-	const size_t value_false = 4;
-	const size_t value_undef = 6;
-	const size_t value_highest = value_undef;
-	
 	class Object;
 	class Symbol;
+
+	typedef size_t value_t;
 	
-	union Value
+	const value_t value_nil = 0;
+	const value_t value_true = 2;
+	const value_t value_false = 4;
+	const value_t value_undef = 6;
+	const value_t value_highest = value_undef;
+
+	struct Value
 	{
 		enum Type {
 			Fixnum,
@@ -40,59 +42,44 @@ namespace Mirb
 			Types
 		};
 
-		size_t raw;
-		rt_value value;
-		Mirb::Object *object;
-		Mirb::Symbol *symbol;
-
-		struct rt_common *rt_common;
-		struct rt_proc *rt_proc;
-		struct rt_string *rt_string;
-		struct rt_array *rt_array;
-
-		Value() {}
-
-		Value(bool value)
+		union cast
 		{
-			raw = value ? value_true : value_false;
-		}
-		
-		Value(size_t value) : raw(value) {}
-		
-		// TODO: Remove this
-		operator rt_value() { return raw; }
-		
-		operator struct rt_common *() { return rt_common; }
-		operator struct rt_proc *() { return rt_proc; }
-		operator struct rt_string *() { return rt_string; }
-		operator struct rt_array *() { return rt_array; }
+			value_t value;
+			
+			cast(size_t value) : value(value) {}
 
-		// Typecasting to native pointers
-
-		Value(Mirb::Object * object) : object(object) {}
-		Value(Mirb::Symbol * symbol) : symbol(symbol) {}
-
-		operator Mirb::Object *() { return object; }
-		operator Mirb::Symbol *() { return symbol; }
+			cast(bool value)
+			{
+				this->value = value ? value_true : value_false;
+			}
 		
-		bool test()
-		{
-			return (raw & ~(value_false | value_true)) != 0;
-		}
+			cast(Mirb::Object * object) : value((value_t)object) {}
+			cast(Mirb::Symbol * symbol) : value((value_t)symbol) {}
+
+			operator value_t() { return value; }
+			
+			operator struct rt_common *() { return (struct rt_common *)value; }
+			operator struct rt_proc *() { return (struct rt_proc *)value; }
+			operator struct rt_string *() { return (struct rt_string *)value; }
+			operator struct rt_array *() { return (struct rt_array *)value; }
+
+			operator Mirb::Object *() { return (Mirb::Object *)value; }
+			operator Mirb::Symbol *() { return (Mirb::Symbol *)value; }
+		};
 		
-		Type type();
+		Type type(value_t value);
 	};
-	
+
 	class ValueMapFunctions:
-		public MapFunctions<Value, Value>
+		public MapFunctions<value_t, value_t>
 	{
 		public:
-			static Value invalid_value()
+			static value_t invalid_value()
 			{
 				return value_undef;
 			}
 	};
 
-	typedef Map<Value, Value, GC, ValueMapFunctions> ValueMap;
+	typedef Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
 };
 

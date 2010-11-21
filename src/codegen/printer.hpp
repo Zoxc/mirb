@@ -23,11 +23,11 @@ namespace Mirb
 			private:
 				Block *block;
 
-				std::string imm(Value imm);
+				std::string imm(value_t imm);
 				
 				std::string imm(Symbol *imm)
 				{
-					return this->imm(Value(imm));
+					return this->imm((value_t)Value::cast(imm));
 				};
 				
 				std::string label(BasicBlock *label);

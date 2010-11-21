@@ -77,7 +77,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	
 	Block *block = Compiler::compile(scope, memory_pool);
 
-	rt_value result = block->compiled(Value(method_name), method_module, self, value_nil, 0, 0);
+	rt_value result = block->compiled(Mirb::Value::cast(method_name), method_module, self, value_nil, 0, 0);
 
 	block = 0; // Make sure runtime_block stays on stack*/
 
@@ -140,7 +140,7 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 		RT_ASSERT(0);
 	}
 	
-	return method->compiled(Value(name), module, obj, block, argc, (Value *)argv);
+	return method->compiled(Mirb::Value::cast(name), module, obj, block, argc, argv);
 }
 
 rt_value rt_inspect(rt_value obj)

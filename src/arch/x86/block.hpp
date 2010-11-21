@@ -5,5 +5,5 @@ namespace Mirb
 {
 	class Symbol;
 	
-	typedef Value (__fastcall *compiled_block_t)(Symbol *method_name, Value method_module, Value obj, Value block, size_t argc, Value argv[]);
+	typedef value_t (__fastcall *compiled_block_t)(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[]);
 };

@@ -3,13 +3,13 @@
 
 namespace Mirb
 {
-	Value::Type Value::type()
+	Value::Type Value::type(value_t value)
 	{
-		if (raw & 1)
+		if (value & 1)
 			return Fixnum;
-		else if (raw <= value_highest)
+		else if (value <= value_highest)
 		{
-			switch(raw)
+			switch(value)
 			{
 				case value_true:
 					return True;
@@ -25,7 +25,7 @@ namespace Mirb
 			}
 		}
 		else
-			return (Type)object->type;
+			return ((Mirb::Object *)value)->type;
 	}
 };
 

@@ -9,7 +9,7 @@ namespace Mirb
 	{
 		public:
 			Value::Type type;
-			Value instance_of;
+			value_t instance_of;
 			ValueMap *ivars;
 	};
 };
