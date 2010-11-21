@@ -1,9 +1,10 @@
 #pragma once
-#include <cstring>
+#include "common.hpp"
+#include "allocator.hpp"
 
 namespace Mirb
 {
-	template<class K, class V, class S> class HashTableFunctions
+	template<class K, class V, class A> class HashTableFunctions
 	{
 		public:
 			static size_t hash_key(K key)
@@ -31,28 +32,17 @@ namespace Mirb
 				return false;
 			}
 
-			static V create_value(S storage, K key)
+			static V create_value(typename A::Ref alloc_ref, K key)
 			{
 				return 0;
 			}
-
-			static V *alloc(S storage, size_t entries)
-			{
-				return new V[entries];
-			}
-
-			static void free(S storage, V *table, size_t entries)
-			{
-				return delete[] table;
-			}
 	};
 
-	template<class K, class V, class S, class T> class HashTable
+	template<class K, class V, class T, class A = StdLibAllocator> class HashTable
 	{
 		private:
 			V *table;
-			S storage;
-			size_t size;
+			typename A::Storage alloc_ref;
 			size_t mask;
 			size_t entries;
 
@@ -65,13 +55,27 @@ namespace Mirb
 				while(T::valid_value(entry))
 				{
 					if(T::compare_key_value(key, entry))
+					{
+						if(T::valid_value(tail))
+						{
+							V next = T::get_value_next(entry);
+							T::set_value_next(tail, value);
+							T::set_value_next(value, next);
+						}
+						else
+						{
+							table[index] = value;
+							T::set_value_next(value, T::invalid_value());
+						}
+
 						return entry;
+					}
 
 					tail = entry;
 					entry = T::get_value_next(entry);
 				}
 
-				if(tail)
+				if(T::valid_value(tail))
 					T::set_value_next(tail, value);
 				else
 					table[index] = value;
@@ -83,16 +87,15 @@ namespace Mirb
 
 			void expand()
 			{
-				size_t size = this->size + 1;
-				size_t real_size = 1 << size;
-				size_t mask = real_size - 1;
+				size_t size = (this->mask + 1) << 1;
+				size_t mask = size - 1;
 
-				V *table = T::alloc(this->storage, real_size);
-				std::memset(table, 0, real_size * sizeof(V));
+				V *table = (V *)alloc_ref.alloc(size * sizeof(V));
+				std::memset(table, 0, size * sizeof(V));
 
-				V *end = this->table + (1 << this->size);
+				V *end = this->table + size;
 
-				for(V *slot = this->table; slot != end; slot++)
+				for(V *slot = this->table; slot != end; ++slot)
 				{
 					V entry = *slot;
 
@@ -106,9 +109,8 @@ namespace Mirb
 					}
 				}
 
-				T::free(this->storage, this->table, 1 << this->size);
+				alloc_ref.free(this->table);
 
-				this->size = size;
 				this->mask = mask;
 				this->table = table;
 			}
@@ -121,6 +123,17 @@ namespace Mirb
 					expand();
 			}
 
+			void setup(size_t initial)
+			{
+				entries = 0;
+				
+				size_t size = 1 << initial;
+				mask = size - 1;
+
+				table = (V *)alloc_ref.alloc(size * sizeof(V));
+				memset(table, 0, size * sizeof(V));
+			}
+
 		protected:
 			V* get_table()
 			{
@@ -129,25 +142,23 @@ namespace Mirb
 
 			size_t get_size()
 			{
-				return 1 << size;
+				return mask + 1;
 			}
 
 		public:
-			HashTable(size_t initial, S storage) : storage(storage)
+			HashTable(size_t initial) : alloc_ref(A::Storage::def_ref())
 			{
-				entries = 0;
+				setup(initial);
+			}
 
-				size = initial;
-				size_t real_size = 1 << size;
-				mask = real_size - 1;
-
-				table = T::alloc(this->storage, real_size);;
-				memset(table, 0, real_size * sizeof(V));
+			HashTable(size_t initial, typename A::Ref alloc_ref) : alloc_ref(alloc_ref)
+			{
+				setup(initial);
 			}
 
 			~HashTable()
 			{
-				T::free(this->storage, this->table, 1 << this->size);
+				alloc_ref.free(this->table);
 			}
 
 			V get(K key)
@@ -170,7 +181,7 @@ namespace Mirb
 
 				if(T::create_value())
 				{
-					V value = T::create_value(storage, key);
+					V value = T::create_value(alloc_ref, key);
 
 					if(tail)
 						T::set_value_next(tail, value);

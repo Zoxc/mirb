@@ -4,7 +4,7 @@ namespace Mirb
 {
 	namespace Tree
 	{
-		Scope::Scope(Fragment &fragment, Scope *parent, Type type) : fragment(&fragment), type(type), parent(parent), variables(2, &fragment), referenced_scopes(fragment), variable_list(2, fragment), zsupers(fragment)
+		Scope::Scope(Fragment &fragment, Scope *parent, Type type) : fragment(&fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment), variable_list(2, fragment), zsupers(fragment)
 		{
 			final = 0;
 			require_exceptions = false;
@@ -81,11 +81,6 @@ namespace Mirb
 			}
 			
 			return 0;
-		}
-		
-		NamedVariable **VariableMapFunctions::alloc(Fragment *fragment, size_t entries)
-		{
-			return (NamedVariable **)fragment->alloc(sizeof(NamedVariable *) * entries);
 		}
 		
 		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(*this), chunk_size(chunk_size)

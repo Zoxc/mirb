@@ -139,7 +139,7 @@ namespace Mirb
 		};
 
 		class VariableMapFunctions:
-			public HashTableFunctions<Symbol *, NamedVariable *, Fragment *>
+			public HashTableFunctions<Symbol *, NamedVariable *, Fragment>
 		{
 			public:
 				static bool compare_key_value(Symbol *key, NamedVariable *value)
@@ -171,15 +171,9 @@ namespace Mirb
 				{
 					return true;
 				}
-				
-				static NamedVariable **alloc(Fragment *fragment, size_t entries);
-				
-				static void free(Fragment *fragment, NamedVariable **table, size_t entries)
-				{
-				}
 		};
 		
-		typedef HashTable<Symbol *, NamedVariable *, Fragment *, VariableMapFunctions> VariableMap;
+		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
 		class Scope
 		{

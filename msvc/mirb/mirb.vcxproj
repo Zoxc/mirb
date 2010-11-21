@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
+    <ClInclude Include="..\..\src\classes\object.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
     <ClInclude Include="..\..\src\codegen\dot-printer.hpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
     <ClInclude Include="..\..\src\list.hpp" />
+    <ClInclude Include="..\..\src\map.hpp" />
     <ClInclude Include="..\..\src\memory-pool.hpp" />
     <ClInclude Include="..\..\src\mem_stream.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
@@ -69,6 +71,7 @@
     <ClInclude Include="..\..\src\tree\nodes.hpp" />
     <ClInclude Include="..\..\src\tree\printer.hpp" />
     <ClInclude Include="..\..\src\tree\tree.hpp" />
+    <ClInclude Include="..\..\src\value.hpp" />
     <ClInclude Include="..\..\src\vector.hpp" />
     <ClInclude Include="..\..\vector.hpp" />
   </ItemGroup>
@@ -118,6 +121,7 @@
     <ClCompile Include="..\..\src\tree\nodes.cpp" />
     <ClCompile Include="..\..\src\tree\printer.cpp" />
     <ClCompile Include="..\..\src\tree\tree.cpp" />
+    <ClCompile Include="..\..\src\value.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\arch\x86\bytecode.hpp" />

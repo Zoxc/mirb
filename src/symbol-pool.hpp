@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "hash-table.hpp"
+#include "gc.hpp"
 
 #include "../runtime/classes/symbol.hpp"
 
@@ -44,7 +45,7 @@ namespace Mirb
 	};
 
 	class SymbolPoolFunctions:
-		public HashTableFunctions<StringKey &, Symbol *, bool>
+		public HashTableFunctions<StringKey &, Symbol *, GC>
 	{
 		public:
 			static bool compare_key_value(StringKey &key, Symbol *value)
@@ -79,7 +80,7 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(bool, StringKey &key)
+			static Symbol *create_value(GC::Ref alloc_ref, StringKey &key)
 			{
 				size_t length = key.length;
 				Symbol *result = (Symbol *)rt_alloc_root(sizeof(Symbol));
@@ -97,24 +98,15 @@ namespace Mirb
 
 				return result;
 			}
-
-			static Symbol **alloc(bool, size_t entries)
-			{
-				return (Symbol **)rt_alloc(sizeof(Symbol *) * entries);
-			}
-
-			static void free(bool, Symbol **table, size_t entries)
-			{
-			}
 	};
 
-	typedef HashTable<StringKey &, Symbol *, bool, SymbolPoolFunctions> SymbolPoolHashTable;
+	typedef HashTable<StringKey &, Symbol *, SymbolPoolFunctions, GC> SymbolPoolHashTable;
 
 	class SymbolPool:
 		public SymbolPoolHashTable
 	{
 		public:
-			SymbolPool() : SymbolPoolHashTable(8, false) {}
+			SymbolPool() : SymbolPoolHashTable(8) {}
 			
 			Symbol *get(const char *string)
 			{

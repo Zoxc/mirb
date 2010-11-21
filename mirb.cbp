@@ -102,6 +102,7 @@
 		<Unit filename="src\arch\x86\x86.hpp" />
 		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
+		<Unit filename="src\classes\object.hpp" />
 		<Unit filename="src\codegen\block.cpp" />
 		<Unit filename="src\codegen\block.hpp" />
 		<Unit filename="src\codegen\bytecode.cpp" />
@@ -155,6 +156,8 @@
 		</Unit>
 		<Unit filename="src\tree\tree.cpp" />
 		<Unit filename="src\tree\tree.hpp" />
+		<Unit filename="src\value.cpp" />
+		<Unit filename="src\value.hpp" />
 		<Unit filename="src\vector.hpp" />
 		<Unit filename="vector.hpp" />
 		<Extensions>

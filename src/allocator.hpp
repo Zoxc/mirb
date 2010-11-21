@@ -21,6 +21,11 @@ namespace Mirb
 						return *(Wrap *)0;
 					}
 
+					operator T()
+					{
+						return ref;
+					}
+
 					void *alloc(size_t bytes)
 					{
 						return ref.alloc(bytes);
@@ -48,7 +53,7 @@ namespace Mirb
 			StdLibAllocator(bool dummy)
 			{
 			}
-
+			
 			static bool def_ref()
 			{
 				return true;
@@ -63,6 +68,8 @@ namespace Mirb
 			{
 				return std::realloc(table, bytes);
 			}
+
+			static const bool can_free = true;
 
 			void free(void *table)
 			{
