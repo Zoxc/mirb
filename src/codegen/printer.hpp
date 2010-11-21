@@ -1,6 +1,6 @@
 #pragma once
-#include "../../runtime/runtime.hpp"
 #include "../common.hpp"
+#include "../value.hpp"
 
 namespace Mirb
 {
@@ -23,11 +23,11 @@ namespace Mirb
 			private:
 				Block *block;
 
-				std::string imm(rt_value imm);
+				std::string imm(Value imm);
 				
 				std::string imm(Symbol *imm)
 				{
-					return this->imm((rt_value)imm);
+					return this->imm(Value(imm));
 				};
 				
 				std::string label(BasicBlock *label);

@@ -9,57 +9,57 @@ namespace Mirb
 	{
 		namespace Support
 		{
-			rt_value *__stdcall create_heap(size_t bytes)
+			Value *__stdcall create_heap(size_t bytes)
 			{
 				return Mirb::Support::create_heap(bytes);
 			}
 
-			rt_value __stdcall define_class(rt_value obj, rt_value name, rt_value super)
+			Value __stdcall define_class(Value obj, Value name, Value super)
 			{
 				return Mirb::Support::define_class(obj, name, super);
 			}
 			
-			rt_value __stdcall define_module(rt_value obj, rt_value name)
+			Value __stdcall define_module(Value obj, Value name)
 			{
 				return Mirb::Support::define_module(obj, name);
 			}
 			
-			void __stdcall define_method(rt_value obj, rt_value name, Block *block)
+			void __stdcall define_method(Value obj, Value name, Block *block)
 			{
 				return Mirb::Support::define_method(obj, name, block);
 			}
 			
-			rt_value __stdcall define_string(const char *string)
+			Value __stdcall define_string(const char *string)
 			{
 				return Mirb::Support::define_string(string);
 			}
 				
-			rt_value __cdecl interpolate(size_t argc, rt_value argv[])
+			Value __cdecl interpolate(size_t argc, Value argv[])
 			{
 				return Mirb::Support::interpolate(argc, argv);
 			}
 			
-			rt_value __stdcall get_const(rt_value obj, Symbol *name)
+			Value __stdcall get_const(Value obj, Symbol *name)
 			{
 				return Mirb::Support::get_const(obj, name);
 			}
 
-			void __stdcall set_const(rt_value obj, Symbol *name, rt_value value)
+			void __stdcall set_const(Value obj, Symbol *name, Value value)
 			{
 				return Mirb::Support::set_const(obj, name, value);
 			}
 			
-			rt_value __stdcall get_ivar(rt_value obj, Symbol *name)
+			Value __stdcall get_ivar(Value obj, Symbol *name)
 			{
 				return Mirb::Support::get_ivar(obj, name);
 			}
 
-			void __stdcall set_ivar(rt_value obj, Symbol *name, rt_value value)
+			void __stdcall set_ivar(Value obj, Symbol *name, Value value)
 			{
 				return Mirb::Support::set_ivar(obj, name, value);
 			}
 
-			rt_value __cdecl create_array(size_t argc, rt_value argv[])
+			Value __cdecl create_array(size_t argc, Value argv[])
 			{
 				return Mirb::Support::create_array(argc, argv);
 			}
@@ -72,9 +72,9 @@ namespace Mirb
 			}
 
 			#ifdef _MSC_VER
-				rt_value closure_call(compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+				Value closure_call(compiled_block_t code, Value *scopes[], Symbol *method_name, Value method_module, Value obj, Value block, size_t argc, Value argv[])
 				{
-					rt_value result;
+					Value result;
 
 					__asm
 					{
@@ -122,9 +122,9 @@ namespace Mirb
 					}
 				}
 			#else
-				rt_value closure_call(compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+				Value closure_call(compiled_block_t code, Value *scopes[], Symbol *method_name, Value method_module, Value obj, Value block, size_t argc, Value argv[])
 				{
-					typedef rt_value (__stdcall __attribute__((__regparm__(3))) *closure_block_t)(rt_value *scopes[], rt_value method_module, Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+					typedef Value (__stdcall __attribute__((__regparm__(3))) *closure_block_t)(Value *scopes[], Value method_module, Symbol *method_name, Value obj, Value block, size_t argc, Value argv[]);
 					
 					closure_block_t closure_code = (closure_block_t)code;
 					
@@ -132,17 +132,17 @@ namespace Mirb
 				}
 			#endif
 			
-			rt_value __cdecl create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[])
+			Value __cdecl create_closure(Block *block, Value self, size_t argc, Value *argv[])
 			{
 				return Mirb::Support::create_closure(block, self, argc, argv);
 			}
 
-			rt_value __fastcall call(Symbol *method_name, rt_value dummy, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+			Value __fastcall call(Symbol *method_name, Value dummy, Value obj, Value block, size_t argc, Value argv[])
 			{
 				return Mirb::Support::call(method_name, obj, block, argc, argv);
 			}
 
-			rt_value __fastcall super(Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+			Value __fastcall super(Symbol *method_name, Value method_module, Value obj, Value block, size_t argc, Value argv[])
 			{
 				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
 			}

@@ -194,12 +194,12 @@ namespace Mirb
 				gen_if(label_true, temp);
 
 				split(label_false);
-				gen<LoadOp>(var, RT_TRUE);
+				gen<LoadOp>(var, value_true);
 				gen<BranchOp>(label_end);
 				label_false->next(label_end);
 
 				gen(label_true);
-				gen<LoadOp>(var, RT_FALSE);
+				gen<LoadOp>(var, value_false);
 				label_true->next(label_end);
 				
 				gen(label_end);
@@ -361,19 +361,19 @@ namespace Mirb
 		void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if(var)
-				gen<LoadOp>(var, RT_NIL);
+				gen<LoadOp>(var, value_nil);
 		}
 		
 		void ByteCodeGenerator::convert_true(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if(var)
-				gen<LoadOp>(var, RT_TRUE);
+				gen<LoadOp>(var, value_true);
 		}
 		
 		void ByteCodeGenerator::convert_false(Tree::Node *basic_node, Tree::Variable *var)
 		{
 			if(var)
-				gen<LoadOp>(var, RT_FALSE);
+				gen<LoadOp>(var, value_false);
 		}
 		
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, Tree::Variable *var)
@@ -525,7 +525,7 @@ namespace Mirb
 			if(node->statements.empty())
 			{
 				if (var)
-					gen<LoadOp>(var, RT_NIL);
+					gen<LoadOp>(var, value_nil);
 				
 				return;
 			}
@@ -625,7 +625,7 @@ namespace Mirb
 			gen<MethodOp>(self_var(), node->name, defer(node->scope));
 			
 			if(var)
-				gen<LoadOp>(var, RT_NIL);
+				gen<LoadOp>(var, value_nil);
 		}
 		
 		void ByteCodeGenerator::convert_handler(Tree::Node *basic_node, Tree::Variable *var)

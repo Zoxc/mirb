@@ -1,6 +1,6 @@
 #pragma once
-#include "../../runtime/runtime.hpp"
 #include "../common.hpp"
+#include "../value.hpp"
 #include "../simple-list.hpp"
 #include "../simpler-list.hpp"
 #include "../list.hpp"
@@ -234,11 +234,11 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Load>
 		{
 			Tree::Variable *var;
-			rt_value imm;
+			Value imm;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			LoadOp(Tree::Variable *var, rt_value imm) : var(var), imm(imm) {}
+			LoadOp(Tree::Variable *var, Value imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadRawOp:
@@ -284,9 +284,9 @@ namespace Mirb
 		struct PushImmediateOp:
 			public OpcodeWrapper<Opcode::PushImmediate>
 		{
-			rt_value imm;
+			Value imm;
 			
-			PushImmediateOp(rt_value imm) : imm(imm) {}
+			PushImmediateOp(Value imm) : imm(imm) {}
 		};
 		
 		struct PushRawOp:

@@ -67,7 +67,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::imm(rt_value imm)
+		std::string ByteCodePrinter::imm(Value imm)
 		{
 			return std::string(rt_string_to_cstr(rt_inspect(imm)));
 		}

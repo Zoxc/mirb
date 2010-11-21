@@ -8,9 +8,9 @@ namespace Mirb
 {
 	namespace Support
 	{
-		rt_value create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[])
+		Value create_closure(Block *block, Value self, size_t argc, Value *argv[])
 		{
-			rt_value closure = (rt_value)rt_alloc(sizeof(struct rt_proc) + sizeof(rt_value *) * argc);
+			Value closure = (Value)rt_alloc(sizeof(struct rt_proc) + sizeof(Value *) * argc);
 
 			RT_COMMON(closure)->flags = C_PROC;
 			RT_COMMON(closure)->class_of = rt_Proc;
@@ -21,18 +21,18 @@ namespace Mirb
 
 			RT_ARG_EACH_RAW(i)
 			{
-				RT_PROC(closure)->scopes[i] = RT_ARG(i);
+				RT_PROC(closure)->scopes[i] = (rt_value *)RT_ARG(i);
 			}
 
 			return closure;
 		}
 
-		rt_value *create_heap(size_t bytes)
+		Value *create_heap(size_t bytes)
 		{
-			return (rt_value *)rt_alloc(bytes);
+			return (Value *)rt_alloc(bytes);
 		}
 		
-		rt_value get_const(rt_value obj, Symbol *name)
+		Value get_const(Value obj, Symbol *name)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
@@ -41,10 +41,10 @@ namespace Mirb
 				std::cout << "Looking up constant " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << "\n";
 			#endif
 
-			return rt_const_get(obj, (rt_value)name);
+			return rt_const_get(obj, (Value)name);
 		}
 
-		void set_const(rt_value obj, Symbol *name, rt_value value)
+		void set_const(Value obj, Symbol *name, Value value)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
@@ -53,28 +53,28 @@ namespace Mirb
 				std::cout << "Setting constant " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << " to " << rt_string_to_cstr(rt_inspect(value)) << "\n";
 			#endif
 
-			rt_const_set(obj, (rt_value)name, value);
+			rt_const_set(obj, (Value)name, value);
 		}
 		
-		rt_value get_ivar(rt_value obj, Symbol *name)
+		Value get_ivar(Value obj, Symbol *name)
 		{
 			#ifdef DEBUG
 				std::cout << "Looking up instance variable " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << "\n";
 			#endif
 
-			return rt_object_get_var(obj, (rt_value)name);
+			return rt_object_get_var(obj, (Value)name);
 		}
 
-		void set_ivar(rt_value obj, Symbol *name, rt_value value)
+		void set_ivar(Value obj, Symbol *name, Value value)
 		{
 			#ifdef DEBUG
 				std::cout << "Setting instance variable " << name->get_string() << " in " << rt_string_to_cstr(rt_inspect(obj)) << " to " << rt_string_to_cstr(rt_inspect(value)) << "\n";
 			#endif
 
-			rt_object_set_var(obj, (rt_value)name, value);
+			rt_object_set_var(obj, (Value)name, value);
 		}
 
-		rt_value interpolate(size_t argc, rt_value argv[])
+		Value interpolate(size_t argc, Value argv[])
 		{
 			size_t length = 0;
 
@@ -103,9 +103,9 @@ namespace Mirb
 			return rt_string_from_raw_str(new_str, length);
 		}
 		
-		rt_value create_array(size_t argc, rt_value argv[])
+		Value create_array(size_t argc, Value argv[])
 		{
-			rt_value array = rt_alloc(sizeof(struct rt_array));
+			Value array = rt_alloc(sizeof(struct rt_array));
 
 			RT_COMMON(array)->flags = C_ARRAY;
 			RT_COMMON(array)->class_of = rt_Array;
@@ -113,7 +113,7 @@ namespace Mirb
 
 			RT_ARRAY(array)->data.size = argc;
 			RT_ARRAY(array)->data.max = argc;
-			RT_ARRAY(array)->data.array = (rt_value *)rt_alloc(argc * sizeof(rt_value));
+			RT_ARRAY(array)->data.array = (rt_value *)rt_alloc(argc * sizeof(Value));
 
 			RT_ARG_EACH_RAW(i)
 			{
@@ -123,13 +123,13 @@ namespace Mirb
 			return array;
 		}
 		
-		rt_value define_string(const char *string)
+		Value define_string(const char *string)
 		{
 			// TODO: Make sure string is not garbage collected. Replace it with something nicer.
 			return rt_string_from_cstr(string);
 		}
 		
-		rt_value define_class(rt_value obj, rt_value name, rt_value super)
+		Value define_class(Value obj, Value name, Value super)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
@@ -137,7 +137,7 @@ namespace Mirb
 			return rt_define_class_symbol(obj, name, super);
 		}
 		
-		rt_value define_module(rt_value obj, rt_value name)
+		Value define_module(Value obj, Value name)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
@@ -145,7 +145,7 @@ namespace Mirb
 			return rt_define_module_symbol(obj, name);
 		}
 		
-		void define_method(rt_value obj, rt_value name, Block *block)
+		void define_method(Value obj, Value name, Block *block)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
@@ -157,22 +157,22 @@ namespace Mirb
 			rt_class_set_method(obj, name, block);
 		}
 		
-		rt_value call(Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+		Value call(Symbol *method_name, Value obj, Value block, size_t argc, Value argv[])
 		{
-			rt_value method_module;
+			Value method_module;
 
-			rt_compiled_block_t method = rt_lookup(obj, (rt_value)method_name, &method_module);
+			compiled_block_t method = (compiled_block_t)rt_lookup(obj, (Value)method_name, (rt_value *)&method_module);
 
-			return method((rt_value)method_name, method_module, obj, block, argc, argv);
+			return method(method_name, method_module, obj, block, argc, argv);
 		}
 
-		rt_value super(Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+		Value super(Symbol *method_name, Value method_module, Value obj, Value block, size_t argc, Value argv[])
 		{
-			rt_value result_module;
+			Value result_module;
 
-			rt_compiled_block_t method = rt_lookup_super(method_module, (rt_value)method_name, &result_module);
+			compiled_block_t method = (compiled_block_t)rt_lookup_super(method_module, (Value)method_name, (rt_value *)&result_module);
 
-			return method((rt_value)method_name, result_module, obj, block, argc, argv);
+			return method(method_name, result_module, obj, block, argc, argv);
 		}
 	};
 };
