@@ -88,8 +88,10 @@
 		</Unit>
 		<Unit filename="src\allocator.hpp" />
 		<Unit filename="src\arch\arch.hpp" />
+		<Unit filename="src\arch\block.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />
 		<Unit filename="src\arch\codegen.hpp" />
+		<Unit filename="src\arch\x86\block.hpp" />
 		<Unit filename="src\arch\x86\bytecode.cpp" />
 		<Unit filename="src\arch\x86\bytecode.hpp" />
 		<Unit filename="src\arch\x86\codegen.cpp" />
@@ -103,6 +105,7 @@
 		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
 		<Unit filename="src\classes\object.hpp" />
+		<Unit filename="src\classes\symbol.hpp" />
 		<Unit filename="src\codegen\block.cpp" />
 		<Unit filename="src\codegen\block.hpp" />
 		<Unit filename="src\codegen\bytecode.cpp" />

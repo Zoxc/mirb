@@ -68,7 +68,7 @@ namespace Mirb
 		native_generator.generate(block);
 
 		block->final->scope = 0;
-		block->final->compiled = (rt_compiled_block_t)block_code;
+		block->final->compiled = (compiled_block_t)block_code;
 		
 		return block->final;
 	}
@@ -91,12 +91,12 @@ namespace Mirb
 
 		native_generator.generate_stub(block);
 
-		block->compiled = (rt_compiled_block_t)block_code;
+		block->compiled = (compiled_block_t)block_code;
 		
 		return block;
 	}
 
-	rt_compiled_block_t Compiler::defered_compile(Block *block)
+	compiled_block_t Compiler::defered_compile(Block *block)
 	{
 		MemoryPool memory_pool;
 

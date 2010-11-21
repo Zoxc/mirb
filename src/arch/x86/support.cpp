@@ -64,15 +64,15 @@ namespace Mirb
 				return Mirb::Support::create_array(argc, argv);
 			}
 			
-			rt_compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
+			compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 
-			rt_compiled_block_t __fastcall jit_invoke(Block *block)
+			compiled_block_t __fastcall jit_invoke(Block *block)
 			{
 				return Compiler::defered_compile(block);
 			}
 
 			#ifdef _MSC_VER
-				rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+				rt_value closure_call(compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 				{
 					rt_value result;
 
@@ -122,7 +122,7 @@ namespace Mirb
 					}
 				}
 			#else
-				rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
+				rt_value closure_call(compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[])
 				{
 					typedef rt_value (__stdcall __attribute__((__regparm__(3))) *closure_block_t)(rt_value *scopes[], rt_value method_module, Symbol *method_name, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 					

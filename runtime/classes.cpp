@@ -227,7 +227,7 @@ void rt_define_method(rt_value obj, const char *name, rt_compiled_block_t compil
 {
 	Mirb::Block *block = new (Mirb::gc) Mirb::Block;
 	
-	block->compiled = compiled_block;
+	block->compiled = (Mirb::compiled_block_t)compiled_block;
 	block->name = (Mirb::Symbol *)rt_symbol_from_cstr(name);
 	
 	#ifdef DEBUG

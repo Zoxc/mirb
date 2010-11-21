@@ -47,6 +47,18 @@ namespace Mirb
 			raw = value ? value_true : value_false;
 		}
 		
+		// TODO: Remove this
+		Value(rt_value value) : raw(value) {}
+		operator rt_value() { return raw; }
+
+		// Typecasting to native pointers
+
+		Value(Mirb::Object * object) : object(object) {}
+		Value(Mirb::Symbol * symbol) : symbol(symbol) {}
+
+		operator Mirb::Object *() { return object; }
+		operator Mirb::Symbol *() { return symbol; }
+		
 		bool test()
 		{
 			return (raw & ~(value_false | value_true)) != 0;

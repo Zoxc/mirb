@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "src/compiler.hpp"
+#include "src/parser/parser.hpp"
 #include "src/block.hpp"
 #include "src/mem_stream.hpp"
 #include "src/arch/codegen.hpp"
@@ -61,7 +62,7 @@ int main()
 		
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		rt_value result = block->compiled(RT_NIL, rt_class_of(rt_main), rt_main, RT_NIL, 0, 0);
+		rt_value result = block->compiled(value_nil, rt_class_of(rt_main), rt_main, value_nil, 0, 0);
 		
 		printf("=> "); rt_print(result); printf("\n");
 		

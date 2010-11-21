@@ -1,10 +1,9 @@
 #pragma once
 #include "common.hpp"
-#include "memory-pool.hpp"
-#include "message.hpp"
 #include "map.hpp"
+#include "vector.hpp"
 #include "simple-list.hpp"
-#include "parser/parser.hpp"
+#include "arch/block.hpp"
 
 struct exception_block;
 
@@ -19,7 +18,7 @@ namespace Mirb
 	{
 		public:
 			Tree::Scope *scope;
-			rt_compiled_block_t compiled; // A pointer to a compiled function.
+			compiled_block_t compiled; // A pointer to a compiled function.
 			Symbol *name; // The name of this block.
 			
 			Vector<struct exception_block *> exception_blocks;

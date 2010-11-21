@@ -15,7 +15,7 @@ namespace Mirb
 				extern void jit_stub() mirb_external("mirb_arch_support_jit_stub");
 			#endif
 			
-			rt_value closure_call(rt_compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
+			rt_value closure_call(compiled_block_t code, rt_value *scopes[], Symbol *method_name, rt_value method_module, rt_value obj, rt_value block, size_t argc, rt_value argv[]);
 			
 			rt_value *__stdcall create_heap(size_t bytes);
 			rt_value __cdecl create_closure(Block *block, rt_value self, size_t argc, rt_value *argv[]);

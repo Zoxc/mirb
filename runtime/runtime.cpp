@@ -1,4 +1,5 @@
 #include "../src/compiler.hpp"
+#include "../src/parser/parser.hpp"
 
 #ifdef DEBUG
 	#include "../src/tree/printer.hpp"
@@ -76,7 +77,7 @@ rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, co
 	
 	Block *block = Compiler::compile(scope, memory_pool);
 
-	rt_value result = block->compiled(method_name, method_module, self, RT_NIL, 0, 0);
+	rt_value result = block->compiled(Value(method_name), method_module, self, value_nil, 0, 0);
 
 	block = 0; // Make sure runtime_block stays on stack*/
 
@@ -112,7 +113,7 @@ rt_compiled_block_t rt_lookup(rt_value obj, rt_value name, rt_value *result_modu
 		RT_ASSERT(0);
 	}
 
-	return result->compiled;
+	return (rt_compiled_block_t)result->compiled;
 }
 
 rt_compiled_block_t rt_lookup_super(rt_value module, rt_value name, rt_value *result_module)
@@ -125,7 +126,7 @@ rt_compiled_block_t rt_lookup_super(rt_value module, rt_value name, rt_value *re
 		RT_ASSERT(0);
 	}
 
-	return result->compiled;
+	return (rt_compiled_block_t)result->compiled;
 }
 
 rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc, rt_value argv[])
@@ -139,7 +140,7 @@ rt_value rt_call_block(rt_value obj, rt_value name, rt_value block, size_t argc,
 		RT_ASSERT(0);
 	}
 	
-	return method->compiled(name, module, obj, block, argc, argv);
+	return method->compiled(Value(name), module, obj, block, argc, (Value *)argv);
 }
 
 rt_value rt_inspect(rt_value obj)
@@ -149,7 +150,7 @@ rt_value rt_inspect(rt_value obj)
 
 	rt_value result = RT_NIL;
 
-	if(inspect && (inspect->compiled != (rt_compiled_block_t)rt_object_inspect || rt_lookup_method(rt_class_of(obj), rt_symbol_from_cstr("to_s"), &dummy)))
+	if(inspect && (inspect->compiled != (Mirb::compiled_block_t)rt_object_inspect || rt_lookup_method(rt_class_of(obj), rt_symbol_from_cstr("to_s"), &dummy)))
 		result = rt_call(obj, "inspect", 0, 0);
 
 	if(rt_type(result) == C_STRING)

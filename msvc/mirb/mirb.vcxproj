@@ -33,9 +33,11 @@
     <ClInclude Include="..\..\runtime\x86.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\arch\arch.hpp" />
+    <ClInclude Include="..\..\src\arch\block.hpp" />
     <ClInclude Include="..\..\src\arch\bytecode.hpp" />
     <ClInclude Include="..\..\src\arch\codegen.hpp" />
     <ClInclude Include="..\..\src\arch\support.hpp" />
+    <ClInclude Include="..\..\src\arch\x86\block.hpp" />
     <ClInclude Include="..\..\src\arch\x86\codegen.hpp" />
     <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
     <ClInclude Include="..\..\src\arch\x86\support.hpp" />
@@ -43,6 +45,7 @@
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
+    <ClInclude Include="..\..\src\classes\symbol.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
     <ClInclude Include="..\..\src\codegen\dot-printer.hpp" />

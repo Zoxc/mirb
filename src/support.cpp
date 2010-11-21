@@ -1,4 +1,5 @@
 #include "support.hpp"
+#include "classes/symbol.hpp"
 #include "../../runtime/classes/proc.hpp"
 #include "../../runtime/classes/array.hpp"
 #include "../../runtime/constant.hpp"
