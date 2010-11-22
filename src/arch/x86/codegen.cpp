@@ -37,9 +37,12 @@ namespace Mirb
 
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
-
+			
 			if(block->scope->require_exceptions)
 			{
+				locals_offset = sizeof(Arch::Support::Frame) - sizeof(size_t);
+				block->final->ebp_offset = locals_offset;
+
 				// Store Arch::Support::Frame on stack
 				
 				// old_ebp is already pushed
@@ -84,23 +87,34 @@ namespace Mirb
 					stream.d((size_t)&Arch::Support::current_frame);
 				#endif
 			}
-
-			block->final->local_storage = block->stack_vars * sizeof(size_t);
-
+			else
+				locals_offset = 0;
+			
 			if(block->stack_vars)
 			{
 				stream.b(0x81); stream.b(0xEC); // add esp,
 				stream.d(block->stack_vars * sizeof(size_t));
+				
+				block->final->ebp_offset += block->stack_vars * sizeof(size_t);
 			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
+			{
+				block->final->ebp_offset += sizeof(size_t);
 				push_reg(Arch::Register::BX);
+			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
+			{
+				block->final->ebp_offset += sizeof(size_t);
 				push_reg(Arch::Register::SI);
+			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
+			{
+				block->final->ebp_offset += sizeof(size_t);
 				push_reg(Arch::Register::DI);
+			}
 			
 			index = 0;
 
@@ -133,6 +147,34 @@ namespace Mirb
 					modrm(0, Arch::Register::CX, Arch::Register::BP);
 					stream.d((size_t)&Arch::Support::current_frame);
 				#endif
+				
+				for(auto i = block->final->exception_blocks.begin(); i != block->final->exception_blocks.end(); ++i)
+				{
+					if(i()->ensure_label.block)
+						i()->ensure_label.address = i()->ensure_label.block->final;
+					else
+						i()->ensure_label.address = 0;
+					
+					for(auto j = i()->handlers.begin(); j != i()->handlers.end(); ++j)
+					{
+						switch(j()->type)
+						{
+							case RuntimeException:
+							{
+								RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)*j;
+								
+								handler->rescue_label.address = handler->rescue_label.block->final;
+								
+								break;
+							}
+
+							case ClassException:
+							case FilterException:
+							default:
+								break;
+						}
+					}
+				}
 			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
@@ -163,11 +205,21 @@ namespace Mirb
 				Vector<Arch::Disassembly::Symbol *, MemoryPool> symbols(memory_pool);
 
 				Arch::Disassembly::Symbol final_block;
+				Arch::Disassembly::Symbol final_block_owner;
+				
 
 				final_block.address = (void *)block->final;
 				final_block.symbol = "Mirb::Block *block";
 
 				symbols.push(&final_block);
+				
+				if(block->scope->owner != block->scope)
+				{
+					final_block_owner.address = (void *)block->scope->owner->final;
+					final_block_owner.symbol = "Mirb::Block *owner";
+
+					symbols.push(&final_block_owner);
+				}
 
 				Arch::Disassembly::dump_code(stream, &symbols);
 			#endif
@@ -238,12 +290,12 @@ namespace Mirb
 		
 		int NativeGenerator::stack_offset(size_t loc)
 		{
-			return -(int)((1 + loc) * sizeof(size_t));
+			return -(int)((1 + loc) * sizeof(size_t) + locals_offset);
 		}
 
 		int NativeGenerator::stack_offset(Tree::Variable *var)
 		{
-			return stack_offset( var->loc);
+			return stack_offset(var->loc);
 		}
 
 		void NativeGenerator::stack_pop(size_t count)

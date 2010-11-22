@@ -33,6 +33,8 @@ namespace Mirb
 				Block *block;
 				size_t index;
 				
+				size_t locals_offset;
+				
 				static const size_t handler_offset = -8;
 				static const size_t handling_offset = -12;
 

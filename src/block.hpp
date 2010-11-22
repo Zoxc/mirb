@@ -51,7 +51,7 @@ namespace Mirb
 		size_t parent_index;
 		ExceptionBlock *parent;
 		Vector<ExceptionHandler *> handlers;
-		BlockLabel block_label;
+		BlockLabel block_label; // TODO: Find out what this is used for
 		BlockLabel ensure_label;
 	};
 	
@@ -86,7 +86,7 @@ namespace Mirb
 			
 			Vector<ExceptionBlock *> exception_blocks;
 			void **break_targets;
-			size_t local_storage;
+			size_t ebp_offset;
 			void *epilog;
 			
 			Vector<Block *> blocks; // A list of child blocks so the GC won't free them.

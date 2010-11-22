@@ -266,6 +266,8 @@ namespace Mirb
 				frame->handling = 1;
 
 				size_t ebp_value = (size_t)&frame->old_ebp;
+				
+				//TODO: Make sure the block index is set correctly
 
 				while(block != target)
 				{
@@ -297,16 +299,14 @@ namespace Mirb
 								pop ebx
 							}
 						#else
-							int dummy1, dummy2;
-
-							__asm__ __volatile__("pushl %%ebp\n"
+							__asm__ volatile("pushl %%ebp\n"
 								"pushl %%ebx\n"
-								"mov %0, %%ebp\n"
-								"call *%1\n"
+								"mov %%eax, %%ebp\n"
+								"call *%%ecx\n"
 								"popl %%ebx\n"
 								"popl %%ebp\n"
-							: "=a" (dummy1), "=c" (dummy2)
-							: "0" (ebp_value), "1" (target_label)
+							:
+							: "a" (ebp_value), "c" (target_label)
 							: "esi", "edi", "edx", "memory");
 						#endif
 					}
@@ -319,13 +319,15 @@ namespace Mirb
 			
 			static void __noreturn jump_to_handler(Frame *frame, void *target, value_t value)
 			{
+				//TODO: Make sure the block index and current_frame is set correctly
+				
 				size_t ebp_value = (size_t)&frame->old_ebp;
-				size_t esp_value = ebp_value - 20 - 12 - frame->block->local_storage;
+				size_t esp_value = ebp_value - frame->block->ebp_offset;
 
 				#ifdef DEBUG
 					printf("Jump target found\n");
 					printf("Ebp: %x\n", ebp_value);
-					printf("Esp: %x\n", ebp_value - 20 - 12 - frame->block->local_storage);
+					printf("Esp: %x\n", esp_value);
 					printf("Eip: %x\n", (size_t)target);
 				#endif
 				
@@ -349,7 +351,7 @@ namespace Mirb
 					:
 					: "r" (target),
 						"r" (esp_value),
-						"r" (ebp),
+						"r" (ebp_value),
 						"a" (value)
 					: "%ecx");
 				#endif
