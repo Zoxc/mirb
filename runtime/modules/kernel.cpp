@@ -6,6 +6,7 @@
 #include "../classes/string.hpp"
 #include "../classes/exception.hpp"
 #include "../x86.hpp"
+#include "../../src/arch/support.hpp"
 
 rt_value rt_Kernel;
 
@@ -162,12 +163,12 @@ rt_compiled_block(rt_kernel_raise)
 	else
 		RT_EXCEPTION(exception)->backtrace = RT_NIL;
 
-	struct rt_exception_data data;
+	Mirb::ExceptionData data;
 
-	data.type = E_RUBY_EXCEPTION;
+	data.type = Mirb::RubyException;
 	data.payload[0] = (void *)exception;
 
-	rt_exception_raise(&data);
+	Mirb::Arch::Support::exception_raise(&data);
 }
 
 void rt_kernel_init(void)

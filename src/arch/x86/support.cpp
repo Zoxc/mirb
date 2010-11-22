@@ -267,11 +267,11 @@ namespace Mirb
 
 				size_t ebp_value = (size_t)&frame->old_ebp;
 				
-				//TODO: Make sure the block index is set correctly
-
 				while(block != target)
 				{
 					void *target_label = block->ensure_label.address;
+
+					frame->block_index = block->parent_index;
 
 					if(target_label)
 					{
@@ -319,8 +319,8 @@ namespace Mirb
 			
 			static void __noreturn jump_to_handler(Frame *frame, void *target, value_t value)
 			{
-				//TODO: Make sure the block index and current_frame is set correctly
-				
+				current_frame = frame;
+
 				size_t ebp_value = (size_t)&frame->old_ebp;
 				size_t esp_value = ebp_value - frame->block->ebp_offset;
 
@@ -341,7 +341,7 @@ namespace Mirb
 						
 						mov ebp, ebx
 						mov esp, ecx
-						call edx
+						jmp edx
 					}
 				#else
 					__asm__ __volatile__("mov %0, %%ecx\n"
@@ -358,7 +358,7 @@ namespace Mirb
 				__builtin_unreachable();
 			}
 
-			static void __noreturn handle_return(Frame *frame, Frame *top ,ExceptionBlock *block, value_t value)
+			static void __noreturn handle_return(Frame *frame, Frame *top, ExceptionBlock *block, value_t value)
 			{
 				global_unwind(frame, top);
 
@@ -367,7 +367,13 @@ namespace Mirb
 				 */
 
 				local_unwind(frame, block, 0);
+				
+				/*
+				 * Set to the current handler index to the parent
+				 */
 
+				frame->block_index = block->parent_index;
+				
 				/*
 				 * Go to the handler and never return
 				 */

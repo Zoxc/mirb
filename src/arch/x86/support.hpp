@@ -29,6 +29,8 @@ namespace Mirb
 				size_t old_ebp;
 			};
 
+			void __noreturn exception_raise(ExceptionData *data);
+
 			extern Frame *current_frame;
 
 			void __noreturn __stdcall far_return(rt_value value, Block *target);
