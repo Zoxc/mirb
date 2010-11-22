@@ -46,6 +46,7 @@ namespace Mirb
 		struct BranchOp;
 		struct ReturnOp;
 		struct HandlerOp;
+		struct FlushOp;
 		struct UnwindOp;
 		struct UnwindReturnOp;
 		struct UnwindBreakOp;
@@ -84,6 +85,7 @@ namespace Mirb
 				Branch,
 				Return,
 				Handler,
+				Flush,
 				Unwind,
 				UnwindReturn,
 				UnwindBreak,
@@ -180,6 +182,9 @@ namespace Mirb
 
 					case Handler:
 						return T<HandlerOp>::func(arg, (HandlerOp &)*this);
+						
+					case Flush:
+						return T<FlushOp>::func(arg, (FlushOp &)*this);
 						
 					case Unwind:
 						return T<UnwindOp>::func(arg, (UnwindOp &)*this);
@@ -566,6 +571,11 @@ namespace Mirb
 			size_t id;
 			
 			HandlerOp(size_t id) : id(id) {}
+		};
+		
+		struct FlushOp:
+			public OpcodeWrapper<Opcode::Flush>
+		{
 		};
 		
 		struct UnwindOp:

@@ -282,6 +282,11 @@ namespace Mirb
 					return "handler " + (op->id == (size_t)-1 ? "nil" : raw(op->id));
 				}
 				
+				case Opcode::Flush:
+				{
+					return "flush";
+				}
+				
 				case Opcode::Unwind:
 				{
 					return "unwind";

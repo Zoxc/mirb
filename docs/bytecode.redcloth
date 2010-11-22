@@ -152,6 +152,10 @@ h1. Operations
   @handler R@
   Sets the index of the exception handler which is to be used from this point. If @R@ is -1, no handler is used.
 
+* _Flush_
+  @flush@
+  This opcode makes sure no variables are stored in a register. Used at the start of exception handlers.
+
 * _Unwind_
   @unwind@
   Continues with a stack unwind if an exception was raised.

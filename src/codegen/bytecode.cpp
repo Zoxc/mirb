@@ -689,6 +689,8 @@ namespace Mirb
 
 					exception_block->handlers.push(handler);
 					
+					gen<FlushOp>();
+					
 					to_bytecode(i().group, var);
 					
 					gen<BranchOp>(ok_label);
@@ -712,6 +714,8 @@ namespace Mirb
 			{
 				split(exception_block->ensure_label.block);
 				
+				gen<FlushOp>();
+					
 				/*
 				 * Output ensure node
 				 */

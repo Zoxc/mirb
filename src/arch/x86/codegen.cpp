@@ -740,6 +740,10 @@ namespace Mirb
 			stream.b((int8_t)handler_offset);
 			stream.d(op.id);
 		}
+		
+		template<> void NativeGenerator::generate(FlushOp &op)
+		{
+		}
 
 		template<> void NativeGenerator::generate(UnwindOp &op)
 		{

@@ -111,6 +111,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
 		template<> void NativeGenerator::generate(HandlerOp &op);
+		template<> void NativeGenerator::generate(FlushOp &op);
 		template<> void NativeGenerator::generate(UnwindOp &op);
 		template<> void NativeGenerator::generate(UnwindReturnOp &op);
 		template<> void NativeGenerator::generate(UnwindBreakOp &op);
@@ -131,6 +132,7 @@ namespace Mirb
 		template<> struct FlushRegisters<SetIVarOp> { static const bool value = true; };
 		template<> struct FlushRegisters<GetConstOp> { static const bool value = true; };
 		template<> struct FlushRegisters<SetConstOp> { static const bool value = true; };
+		template<> struct FlushRegisters<FlushOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };
@@ -141,6 +143,7 @@ namespace Mirb
 		template<> struct CanRaiseException<ModuleOp> { static const bool value = true; };
 		template<> struct CanRaiseException<CallOp> { static const bool value = true; };
 		template<> struct CanRaiseException<SuperOp> { static const bool value = true; };
+		template<> struct CanRaiseException<FlushOp> { static const bool value = true; };
 	};
 };
 
