@@ -688,11 +688,12 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(GetConstOp &op)
 		{
-			push_var(op.var);
 			push_imm((size_t)op.name);
 			push_var(op.obj);
 			
-			call(&Arch::Support::set_const);
+			call(&Arch::Support::get_const);
+
+			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(SetConstOp &op)
