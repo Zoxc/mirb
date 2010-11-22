@@ -544,7 +544,8 @@ namespace Mirb
 			push_reg(Arch::Register::AX); // obj
 			call(op.block->compiled);
 			
-			mov_reg_to_var(Arch::Register::AX, op.var);
+			if(op.var)
+				mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(ModuleOp &op)
@@ -559,7 +560,8 @@ namespace Mirb
 			push_reg(Arch::Register::AX); // obj
 			call(op.block->compiled);
 			
-			mov_reg_to_var(Arch::Register::AX, op.var);
+			if(op.var)
+				mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(MethodOp &op)
