@@ -9,11 +9,74 @@ struct exception_block;
 
 namespace Mirb
 {
+	namespace CodeGen
+	{
+		class BasicBlock;
+		struct BreakTargetOp;
+	};
+
 	namespace Tree
 	{
 		class Scope;
 	};
 	
+	enum ExceptionHandlerType {
+		RuntimeException,
+		ClassException,
+		FilterException,
+	};
+
+	struct ExceptionHandler {
+		ExceptionHandlerType type;
+	};
+	
+	union BlockLabel
+	{
+		CodeGen::BasicBlock *block;
+		void *address;
+	};
+	
+	struct RuntimeExceptionHandler:
+		public ExceptionHandler
+	{
+		BlockLabel rescue_label;
+	};
+
+	struct ClassExceptionHandler:
+		public RuntimeExceptionHandler
+	{
+	};
+
+	struct ExceptionBlock {
+		size_t parent_index;
+		ExceptionBlock *parent;
+		Vector<ExceptionHandler *> handlers;
+		BlockLabel block_label;
+		BlockLabel ensure_label;
+	};
+	
+	enum ExceptionType {
+		RubyException,
+		ReturnException,
+		BreakException,
+		ThrowException
+	};
+
+	class Block;
+
+	struct ExceptionData {
+		ExceptionType type;
+		Block *target;
+		union
+		{
+			struct
+			{
+				value_t value;
+			} break_data;
+		};
+		void *payload[3];
+	};
+
 	class Block
 	{
 		public:
@@ -21,7 +84,7 @@ namespace Mirb
 			compiled_block_t compiled; // A pointer to a compiled function.
 			Symbol *name; // The name of this block.
 			
-			Vector<struct exception_block *> exception_blocks;
+			Vector<ExceptionBlock *> exception_blocks;
 			void **break_targets;
 			size_t local_storage;
 			void *epilog;

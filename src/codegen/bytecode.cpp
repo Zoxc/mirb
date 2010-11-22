@@ -417,9 +417,6 @@ namespace Mirb
 			Tree::Variable *closure = call_args(node->arguments, param_count, node->block ? node->block->scope : 0, 0);
 			
 			gen<CallOp>(var, obj, node->method, param_count, closure, node->break_id);
-			
-			if(node->break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[node->break_id] = (void *)gen<BreakTargetOp>();
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, Tree::Variable *var)
@@ -460,9 +457,6 @@ namespace Mirb
 
 				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->break_id);
 			}
-			
-			if(node->break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[node->break_id] = (void *)gen<BreakTargetOp>();
 		}
 		
 		void ByteCodeGenerator::convert_if(Tree::Node *basic_node, Tree::Variable *var)
@@ -637,7 +631,7 @@ namespace Mirb
 			/*
 			 * Allocate and setup the new exception block
 			 */
-			struct exception_block *exception_block = (struct exception_block *)malloc(sizeof(struct exception_block));
+			ExceptionBlock *exception_block = new ExceptionBlock;
 			size_t index = block->final->exception_blocks.size();
 			size_t old_index = block->current_exception_block_id;
 			
@@ -648,12 +642,10 @@ namespace Mirb
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
-				exception_block->ensure_label = (void *)create_block();
+				exception_block->ensure_label.block = create_block();
 			else
-				exception_block->ensure_label = 0;
+				exception_block->ensure_label.block = 0;
 			
-			vec_init(rt_exception_handlers, &exception_block->handlers);
-
 			block->final->exception_blocks.push(exception_block);
 			
 			/*
@@ -668,9 +660,11 @@ namespace Mirb
 			 */
 			BasicBlock *body = split(create_block());
 
-			exception_block->block_label = (void *)body;
+			exception_block->block_label.block = body;
 			
 			to_bytecode(node->code, var);
+
+			// TODO: Flush registers when entering an exception handler
 			
 			if(!node->rescues.empty())
 			{
@@ -686,13 +680,14 @@ namespace Mirb
 				 */
 				for(auto i = node->rescues.begin(); i != node->rescues.end(); ++i)
 				{
-					struct runtime_exception_handler *handler = (struct runtime_exception_handler *)malloc(sizeof(struct runtime_exception_handler));
-					handler->common.type = E_RUNTIME_EXCEPTION;
+					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler;
+					handler->type = RuntimeException;
 
 					BasicBlock *handler_body = gen(create_block());
 
-					handler->rescue_label = (void *)handler_body;
-					vec_push(rt_exception_handlers, &exception_block->handlers, (struct exception_handler *)handler);
+					handler->rescue_label.block = handler_body;
+
+					exception_block->handlers.push(handler);
 					
 					to_bytecode(i().group, var);
 					
@@ -715,7 +710,7 @@ namespace Mirb
 			 */
 			if(node->ensure_group)
 			{
-				split((BasicBlock *)exception_block->ensure_label);
+				split(exception_block->ensure_label.block);
 				
 				/*
 				 * Output ensure node
@@ -762,7 +757,7 @@ namespace Mirb
 			if(scope->break_targets)
 			{
 				scope->require_exceptions = true;
-				block->final->break_targets = (void **)malloc(scope->break_targets * sizeof(void *));
+				block->final->break_targets = new void *[scope->break_targets];
 			}
 			else
 				block->final->break_targets = 0;
@@ -806,11 +801,11 @@ namespace Mirb
 
 		bool ByteCodeGenerator::has_ensure_block(Block *block)
 		{
-			struct exception_block *exception_block = block->current_exception_block;
+			ExceptionBlock *exception_block = block->current_exception_block;
 			
 			while(exception_block)
 			{
-				if(exception_block->ensure_label != (void *)-1)
+				if(exception_block->ensure_label.block != 0)
 					return true;
 
 				exception_block = exception_block->parent;

@@ -12,6 +12,7 @@ struct exception_block;
 namespace Mirb
 {
 	class Block;
+	struct ExceptionBlock;
 	
 	namespace Tree
 	{
@@ -87,7 +88,7 @@ namespace Mirb
 				/*
 				 * Exception related fields
 				 */
-				struct exception_block *current_exception_block;
+				ExceptionBlock *current_exception_block;
 				size_t current_exception_block_id;
 
 				size_t var_count;

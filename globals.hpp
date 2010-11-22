@@ -5,6 +5,7 @@
 	#define MSVC 1
 	#pragma warning(disable:4355)
 	#pragma warning(disable:4996)
+	#pragma warning(disable:4731)
 	#pragma warning(disable:4200) // TODO: Remove this
 	#define mirb_external(name)
 	#define __thread __declspec(thread)

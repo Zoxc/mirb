@@ -38,6 +38,55 @@ namespace Mirb
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
 
+			if(block->scope->require_exceptions)
+			{
+				// Store Arch::Support::Frame on stack
+				
+				// old_ebp is already pushed
+
+				// block @ ebp - 4
+				push_imm((size_t)block->final);
+
+				// block_index @ ebp - 8
+				push_imm((size_t)-1);
+
+				// handling @ ebp - 12
+				push_imm(0);
+
+				// handler @ ebp - 16
+				push_imm((size_t)&Arch::Support::exception_handler);
+
+				#ifdef MIRB_SEH_EXCEPTIONS
+					// prev @ ebp - 20
+					stream.b(0x64); // push dword [fs:0]
+					stream.b(0xFF);
+					stream.b(0x35);
+					stream.d(0);
+
+					/*
+					 * Append the struct to the linked list
+					 */
+					stream.b(0x64); // mov dword [fs:0], esp
+					stream.b(0x89);
+					stream.b(0x25);
+					stream.d(0);
+				#else
+					// prev @ ebp - 20
+					stream.b(0xFF); // push dword [Arch::Support::current_frame]
+					modrm(0, 6, Arch::Register::BP);
+					stream.d((size_t)&Arch::Support::current_frame);
+
+					/*
+					 * Append the struct to the linked list
+					 */
+					stream.b(0x89); // mov dword [Arch::Support::current_frame], esp
+					modrm(0, Arch::Register::SP, Arch::Register::BP);
+					stream.d((size_t)&Arch::Support::current_frame);
+				#endif
+			}
+
+			block->final->local_storage = block->stack_vars * sizeof(size_t);
+
 			if(block->stack_vars)
 			{
 				stream.b(0x81); stream.b(0xEC); // add esp,
@@ -65,6 +114,26 @@ namespace Mirb
 					index++;
 				}
 			}
+
+			if(block->scope->require_exceptions)
+			{
+				block->final->epilog = stream.position;
+
+				stream.b(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+				stream.b(0x4D);
+				stream.b(-20);
+
+				#ifdef MIRB_SEH_EXCEPTIONS
+					stream.b(0x64); // mov dword [fs:0], ecx
+					stream.b(0x89);
+					stream.b(0x0D);
+					stream.d(0);	
+				#else
+					stream.b(0x89); // mov dword [Arch::Support::current_frame], ecx
+					modrm(0, Arch::Register::CX, Arch::Register::BP);
+					stream.d((size_t)&Arch::Support::current_frame);
+				#endif
+			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
 				stream.b(0x5F); // pop edi
@@ -91,7 +160,16 @@ namespace Mirb
 			}
 
 			#ifdef DEBUG
-				Arch::Disassembly::dump_code(stream, 0);
+				Vector<Arch::Disassembly::Symbol *, MemoryPool> symbols(memory_pool);
+
+				Arch::Disassembly::Symbol final_block;
+
+				final_block.address = (void *)block->final;
+				final_block.symbol = "Mirb::Block *block";
+
+				symbols.push(&final_block);
+
+				Arch::Disassembly::dump_code(stream, &symbols);
 			#endif
 		}
 
@@ -457,6 +535,9 @@ namespace Mirb
 			call(&Arch::Support::call);
 
 			stack_pop(op.param_count);
+			
+			if(op.break_id != Tree::InvokeNode::no_break_id)
+				block->final->break_targets[op.break_id] = stream.position;
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);
@@ -477,6 +558,9 @@ namespace Mirb
 			call(&Arch::Support::super);
 
 			stack_pop(op.param_count);
+
+			if(op.break_id != Tree::InvokeNode::no_break_id)
+				block->final->break_targets[op.break_id] = stream.position;
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);
@@ -596,6 +680,43 @@ namespace Mirb
 			mov_var_to_reg(op.var, Arch::Register::AX);
 		}
 		
+		template<> void NativeGenerator::generate(HandlerOp &op)
+		{
+			// TODO: Use inc/dec where possible
+			stream.b(0xC7);
+			modrm(1, 0, Arch::Register::BP);
+			stream.b((int8_t)handler_offset);
+			stream.d(op.id);
+		}
+
+		template<> void NativeGenerator::generate(UnwindOp &op)
+		{
+			stream.b(0x83); // cmp dword [ebp + handling_offset], 0
+			modrm(1, 7, Arch::Register::BP);
+			stream.b((int8_t)handling_offset);
+			stream.b(0);
+
+			stream.b(0x74); // jz +1
+			stream.b(1);
+
+			stream.b(0xC3); // ret
+		}
+		
+		template<> void NativeGenerator::generate(UnwindReturnOp &op)
+		{
+			push_imm((size_t)op.code);
+			push_var(op.var);
+			call(&Arch::Support::far_return);
+		}
+
+		template<> void NativeGenerator::generate(UnwindBreakOp &op)
+		{
+			push_imm(op.index);
+			push_imm((size_t)op.code);
+			push_var(op.var);
+			call(&Arch::Support::far_break);
+		}
+
 		template<> void NativeGenerator::generate(ArrayOp &op)
 		{
 			push_reg(Arch::Register::SP);

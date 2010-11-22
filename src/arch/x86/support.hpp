@@ -8,6 +8,32 @@ namespace Mirb
 	{
 		namespace Support
 		{
+			struct Frame;
+			
+			#ifdef MIRB_SEH_EXCEPTIONS
+				typedef EXCEPTION_DISPOSITION( __cdecl *rt_exception_handler_t)(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context);
+
+				EXCEPTION_DISPOSITION __cdecl exception_handler(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context);
+			#else
+				typedef void (*exception_handler_t)(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
+
+				void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
+			#endif
+
+			struct Frame {
+				Frame *prev;
+				exception_handler_t handler;
+				size_t handling;
+				size_t block_index;
+				Mirb::Block *block;
+				size_t old_ebp;
+			};
+
+			extern Frame *current_frame;
+
+			void __noreturn __stdcall far_return(rt_value value, Block *target);
+			void __noreturn __stdcall far_break(rt_value value, Block *target, size_t id);
+
 			#ifdef _MSC_VER
 				void jit_stub();
 			#else

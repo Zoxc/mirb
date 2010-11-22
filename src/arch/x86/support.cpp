@@ -9,6 +9,8 @@ namespace Mirb
 	{
 		namespace Support
 		{
+			Frame *current_frame;
+
 			value_t *__stdcall create_heap(size_t bytes)
 			{
 				return Mirb::Support::create_heap(bytes);
@@ -146,6 +148,354 @@ namespace Mirb
 			{
 				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
 			}
+			
+			#ifdef MIRB_SEH_EXCEPTIONS
+				static bool rt_find_seh_target(void *target)
+				{
+					struct rt_frame *frame;
+
+					__asm__ __volatile__("movl %%fs:(0), %0\n" : "=r" (frame));
+
+					while(true)
+					{
+						if(frame == (void *)-1)
+							return false;
+
+						if(frame->handler == rt_support_handler)
+						{
+							if(frame->block == target)
+								return true;
+						}
+
+						frame = frame->prev;
+					}
+				}
+			#endif
+			
+			void __noreturn exception_raise(ExceptionData *data)
+			{
+				#ifdef WIN_SEH
+					RaiseException(RT_SEH_RUBY, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);
+
+					__builtin_unreachable();
+				#else
+					Frame *top = current_frame;
+					Frame *frame = top;
+
+					while(frame)
+					{
+						frame->handler(frame, top, data, false);
+						frame = frame->prev;
+					}
+
+					debug_fail("Unable to find a exception handler");
+				#endif
+			}
+
+			void __noreturn __stdcall far_return(rt_value value, Block *target)
+			{
+				#ifdef MIRB_SEH_EXCEPTIONS
+					if(!rt_find_seh_target(target))
+						RT_ASSERT(0);
+				#endif
+
+				ExceptionData data;
+
+				data.type = ReturnException;
+				data.target = target;
+				data.payload[1] = (void *)value;
+
+				exception_raise(&data);
+			}
+
+			void __noreturn __stdcall far_break(rt_value value, Block *target, size_t id)
+			{
+				#ifdef MIRB_SEH_EXCEPTIONS
+					if(!rt_find_seh_target(target))
+						RT_ASSERT(0);
+				#endif
+
+				ExceptionData data;
+
+				data.type = BreakException;
+				data.target = target;
+				data.payload[1] = (void *)value;
+				data.payload[2] = (void *)id;
+
+				exception_raise(&data);
+			}
+
+			static void global_unwind(Frame *target, Frame *top)
+			{
+				#ifdef MIRB_SEH_EXCEPTIONS
+					extern void __stdcall RtlUnwind(
+						PVOID TargetFrame,
+						PVOID TargetIp,
+						PEXCEPTION_RECORD ExceptionRecord,
+						PVOID ReturnValue
+					);
+
+					int dummy;
+
+					__asm__ __volatile__("pushl %%ebp\n"
+						"pushl %%ebx\n"
+						"pushl $0\n"
+						"pushl $0\n"
+						"pushl 0f\n"
+						"pushl %0\n"
+						"call _RtlUnwind@16\n"
+						"0:\n"
+						"popl %%ebx\n"
+						"popl %%ebp\n"
+					: "=a" (dummy)
+					: "0" (target)
+					: "esi", "edi", "edx", "ecx", "memory");
+				#else
+					Frame *frame = top;
+
+					while(frame != target)
+					{
+						frame->handler(frame, 0, 0, true);
+						frame = frame->prev;
+					}
+				#endif
+			}
+
+			static void local_unwind(Frame *frame, ExceptionBlock *block, ExceptionBlock *target)
+			{
+				frame->handling = 1;
+
+				size_t ebp_value = (size_t)&frame->old_ebp;
+
+				while(block != target)
+				{
+					void *target_label = block->ensure_label.address;
+
+					if(target_label)
+					{
+						#ifdef DEBUG
+							printf("Ensure block found\n");
+							printf("Ebp: %x\n", ebp_value);
+							printf("Eip: %x\n", (size_t)target_label);
+						#endif
+
+						#ifdef _MSC_VER
+							__asm
+							{
+								push ebx
+								push esi
+								push edi
+								push ebp
+
+								mov eax, target_label
+								mov ebp, ebp_value
+								call eax
+								
+								pop ebp
+								pop edi
+								pop esi
+								pop ebx
+							}
+						#else
+							int dummy1, dummy2;
+
+							__asm__ __volatile__("pushl %%ebp\n"
+								"pushl %%ebx\n"
+								"mov %0, %%ebp\n"
+								"call *%1\n"
+								"popl %%ebx\n"
+								"popl %%ebp\n"
+							: "=a" (dummy1), "=c" (dummy2)
+							: "0" (ebp_value), "1" (target_label)
+							: "esi", "edi", "edx", "memory");
+						#endif
+					}
+
+					block = block->parent;
+				}
+
+				frame->handling = 0;
+			}
+			
+			static void __noreturn jump_to_handler(Frame *frame, void *target, value_t value)
+			{
+				size_t ebp_value = (size_t)&frame->old_ebp;
+				size_t esp_value = ebp_value - 20 - 12 - frame->block->local_storage;
+
+				#ifdef DEBUG
+					printf("Jump target found\n");
+					printf("Ebp: %x\n", ebp_value);
+					printf("Esp: %x\n", ebp_value - 20 - 12 - frame->block->local_storage);
+					printf("Eip: %x\n", (size_t)target);
+				#endif
+				
+				#ifdef _MSC_VER
+					__asm
+					{
+						mov eax, value
+						mov ebx, ebp_value
+						mov ecx, esp_value
+						mov edx, target
+						
+						mov ebp, ebx
+						mov esp, ecx
+						call edx
+					}
+				#else
+					__asm__ __volatile__("mov %0, %%ecx\n"
+						"mov %1, %%esp\n"
+						"mov %2, %%ebp\n"
+						"jmp *%%ecx\n"
+					:
+					: "r" (target),
+						"r" (esp_value),
+						"r" (ebp),
+						"a" (value)
+					: "%ecx");
+				#endif
+				__builtin_unreachable();
+			}
+
+			static void __noreturn handle_return(Frame *frame, Frame *top ,ExceptionBlock *block, value_t value)
+			{
+				global_unwind(frame, top);
+
+				/*
+				 * Execute frame local ensure handlers
+				 */
+
+				local_unwind(frame, block, 0);
+
+				/*
+				 * Go to the handler and never return
+				 */
+
+				jump_to_handler(frame, frame->block->epilog, value);
+			}
+
+			static void __noreturn handle_break(Frame *frame, Frame *top, value_t value, size_t id)
+			{
+				global_unwind(frame, top);
+
+				/*
+				 * Go to the handler and never return
+				 */
+
+				jump_to_handler(frame, frame->block->break_targets[id], value);
+			}
+
+			static void __noreturn rescue(Frame *frame, Frame *top, ExceptionBlock *block, ExceptionBlock *current_block, void *rescue_label)
+			{
+				global_unwind(frame, top);
+
+				/*
+				 * Execute frame local ensure handlers
+				 */
+
+				local_unwind(frame, block, current_block);
+
+				/*
+				 * Set to the current handler index to the parent
+				 */
+
+				frame->block_index = current_block->parent_index;
+
+				/*
+				 * Go to the handler and never return
+				 */
+
+				jump_to_handler(frame, rescue_label, 0);
+			}
+			
+			static void handle_exception(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
+			{
+				if(frame->block_index == (size_t)-1) // Outside any exception block
+				{
+					if(!unwinding && data && data->target == frame->block)
+					{
+						switch(data->type)
+						{
+							case ReturnException:
+								handle_return(frame, top, 0, (rt_value)data->payload[1]);
+								break;
+
+							case BreakException:
+								handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+								break;
+
+							default:
+								break;
+						}
+					}
+
+					return;
+				}
+
+				ExceptionBlock *block = frame->block->exception_blocks[frame->block_index];
+
+				if(unwinding)
+				{
+					local_unwind(frame, block, 0);
+				}
+				else if(data)
+				{
+					switch(data->type)
+					{
+						case BreakException:
+							handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+							break;
+
+						case ReturnException:
+							handle_return(frame, top, block, (rt_value)data->payload[1]);
+							break;
+
+						case RubyException:
+						{
+							ExceptionBlock *current_block = block;
+
+							while(current_block)
+							{
+								for(auto i = current_block->handlers.begin(); i != current_block->handlers.end(); ++i)
+								{
+									switch(i()->type)
+									{
+										case RuntimeException:
+											rescue(frame, top, block, current_block, ((RuntimeExceptionHandler *)i())->rescue_label.address);
+
+										default:
+											break;
+									}
+								}
+
+								current_block = current_block->parent;
+							}
+						}
+						break;
+
+						default:
+							debug_fail("Unknown exception type");
+					}
+				}
+			}
+			
+			#ifdef MIRB_SEH_EXCEPTIONS
+				EXCEPTION_DISPOSITION __cdecl exception_handler(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context)
+				{
+					ExceptionData *data = 0;
+
+					if(exception->ExceptionCode == RT_SEH_RUBY)
+						data = (struct rt_exception_data *)exception->ExceptionInformation[0];
+
+					handle_exception(frame, 0, data, exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND));
+
+					return ExceptionContinueSearch;
+				}
+			#else
+				void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
+				{
+					handle_exception(frame, top, data, unwinding);
+				}
+			#endif
 		};
 	};
 };

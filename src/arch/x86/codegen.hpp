@@ -28,8 +28,13 @@ namespace Mirb
 		{
 			private:
 				MemStream &stream;
+				MemoryPool &memory_pool;
+
 				Block *block;
 				size_t index;
+				
+				static const size_t handler_offset = -8;
+				static const size_t handling_offset = -12;
 
 				size_t reg_low(size_t reg);
 				size_t reg_high(size_t reg);
@@ -63,7 +68,7 @@ namespace Mirb
 
 				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;
 			public:
-				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream) {}
+				NativeGenerator(MemStream &stream, MemoryPool &memory_pool) : stream(stream), memory_pool(memory_pool) {}
 				
 				static const size_t stub_size = 10;
 
@@ -103,6 +108,10 @@ namespace Mirb
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
+		template<> void NativeGenerator::generate(HandlerOp &op);
+		template<> void NativeGenerator::generate(UnwindOp &op);
+		template<> void NativeGenerator::generate(UnwindReturnOp &op);
+		template<> void NativeGenerator::generate(UnwindBreakOp &op);
 		template<> void NativeGenerator::generate(ArrayOp &op);
 		template<> void NativeGenerator::generate(StringOp &op);
 		template<> void NativeGenerator::generate(InterpolateOp &op);

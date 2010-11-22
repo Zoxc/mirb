@@ -16,6 +16,10 @@ namespace Mirb
 			#define MIRB_SYMBOL(name) {(void *)&name, #name}
 			
 			static Symbol symbols[] = {
+				MIRB_SYMBOL(Arch::Support::exception_handler),
+				MIRB_SYMBOL(Arch::Support::current_frame),
+				MIRB_SYMBOL(Arch::Support::far_return),
+				MIRB_SYMBOL(Arch::Support::far_break),
 				MIRB_SYMBOL(Arch::Support::create_heap),
 				MIRB_SYMBOL(Arch::Support::create_closure),
 				MIRB_SYMBOL(Arch::Support::create_array),
@@ -98,7 +102,7 @@ namespace Mirb
 				}
 	
 				if(symbol)
-					printf(" ;%s", symbol);
+					printf(" ; %s", symbol);
 	
 				printf("\n");
 			}

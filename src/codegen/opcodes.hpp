@@ -87,7 +87,6 @@ namespace Mirb
 				Unwind,
 				UnwindReturn,
 				UnwindBreak,
-				BreakTarget,
 				Array,
 				String,
 				Interpolate,
@@ -191,9 +190,6 @@ namespace Mirb
 					case UnwindBreak:
 						return T<UnwindBreakOp>::func(arg, (UnwindBreakOp &)*this);
 
-					case BreakTarget:
-						return T<BreakTargetOp>::func(arg, (BreakTargetOp &)*this);
-						
 					case Array:
 						return T<ArrayOp>::func(arg, (ArrayOp &)*this);
 
@@ -581,28 +577,23 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::UnwindReturn>
 		{
 			Tree::Variable *var;
-			void *code;
+			Mirb::Block *code;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			UnwindReturnOp(Tree::Variable *var, void *code) : var(var), code(code) {}
+			UnwindReturnOp(Tree::Variable *var, Mirb::Block *code) : var(var), code(code) {}
 		};
 		
 		struct UnwindBreakOp:
 			public OpcodeWrapper<Opcode::UnwindBreak>
 		{
 			Tree::Variable *var;
-			void *code;
+			Mirb::Block *code;
 			size_t index;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			UnwindBreakOp(Tree::Variable *var, void *code, size_t index) : var(var), code(code), index(index) {}
-		};
-		
-		struct BreakTargetOp:
-			public OpcodeWrapper<Opcode::BreakTarget>
-		{
+			UnwindBreakOp(Tree::Variable *var, Mirb::Block *code, size_t index) : var(var), code(code), index(index) {}
 		};
 		
 		struct ArrayOp:

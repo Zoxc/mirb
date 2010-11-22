@@ -291,14 +291,14 @@ namespace Mirb
 				{
 					auto op = (UnwindReturnOp *)opcode;
 					
-					return "ret " + var(op->var) + ", " + raw((size_t)op->code);
+					return "ret " + var(op->var) + ", " + print_block(op->code);
 				}
 				
 				case Opcode::UnwindBreak:
 				{
 					auto op = (UnwindBreakOp *)opcode;
 					
-					return "break " + var(op->var) + ", " + raw((size_t)op->code) + ", " + raw(op->index);
+					return "break " + var(op->var) + ", " + print_block(op->code) + ", " + raw(op->index);
 				}
 				
 				case Opcode::Array:
