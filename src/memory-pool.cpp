@@ -98,7 +98,7 @@ namespace Mirb
 
 			char_t *next = result + bytes;
 		
-			if(next >= max)
+			if(next > max)
 				return get_page(bytes);
 
 			current = next;

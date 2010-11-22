@@ -112,10 +112,10 @@ namespace Mirb
 						pop ecx
 						pop eax
 
-						push [esp + 24]
-						push [esp + 24]
-						push [esp + 24]
-						push [esp + 24]
+						push [esp + 24] // argv
+						push [esp + 24] // argc
+						push [esp + 24] // block
+						push [esp + 24] // obj
 						call ebx
 
 						pop ebx

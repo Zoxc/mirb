@@ -98,8 +98,8 @@ namespace Mirb
 		template<> void NativeGenerator::generate(ModuleOp &op);
 		template<> void NativeGenerator::generate(CallOp &op);
 		template<> void NativeGenerator::generate(SuperOp &op);
+		template<> void NativeGenerator::generate(LookupOp &op);
 		template<> void NativeGenerator::generate(CreateHeapOp &op);
-		template<> void NativeGenerator::generate(GetHeapOp &op);
 		template<> void NativeGenerator::generate(GetHeapVarOp &op);
 		template<> void NativeGenerator::generate(SetHeapVarOp &op);
 		template<> void NativeGenerator::generate(GetIVarOp &op);

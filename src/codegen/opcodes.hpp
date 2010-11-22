@@ -33,8 +33,8 @@ namespace Mirb
 		struct MethodOp;
 		struct CallOp;
 		struct SuperOp;
+		struct LookupOp;
 		struct CreateHeapOp;
-		struct GetHeapOp;
 		struct GetHeapVarOp;
 		struct SetHeapVarOp;
 		struct GetIVarOp;
@@ -72,8 +72,8 @@ namespace Mirb
 				Method,
 				Call,
 				Super,
+				Lookup,
 				CreateHeap,
-				GetHeap,
 				GetHeapVar,
 				SetHeapVar,
 				GetIVar,
@@ -144,11 +144,11 @@ namespace Mirb
 					case Super:
 						return T<SuperOp>::func(arg, (SuperOp &)*this);
 						
+					case Lookup:
+						return T<LookupOp>::func(arg, (LookupOp &)*this);
+						
 					case CreateHeap:
 						return T<CreateHeapOp>::func(arg, (CreateHeapOp &)*this);
-						
-					case GetHeap:
-						return T<GetHeapOp>::func(arg, (GetHeapOp &)*this);
 						
 					case GetHeapVar:
 						return T<GetHeapVarOp>::func(arg, (GetHeapVarOp &)*this);
@@ -409,6 +409,19 @@ namespace Mirb
 			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
 		};
 		
+		struct LookupOp:
+			public OpcodeWrapper<Opcode::Lookup>
+		{
+			Tree::Variable *var;
+			Tree::Variable *array_var;
+			size_t index;
+			
+			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(array_var); };
+
+			LookupOp(Tree::Variable *var, Tree::Variable *array_var, size_t index) : var(var), array_var(array_var), index(index) {}
+		};
+		
 		struct CreateHeapOp:
 			public OpcodeWrapper<Opcode::CreateHeap>
 		{
@@ -417,19 +430,6 @@ namespace Mirb
 			template<typename T> void def(T def) { def(var); };
 
 			CreateHeapOp(Tree::Variable *var) : var(var) {}
-		};
-		
-		struct GetHeapOp:
-			public OpcodeWrapper<Opcode::GetHeap>
-		{
-			Tree::Variable *var;
-			Tree::Variable *heaps;
-			size_t index;
-			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(heaps); };
-
-			GetHeapOp(Tree::Variable *var, Tree::Variable *heaps, size_t index) : var(var), heaps(heaps), index(index) {}
 		};
 		
 		struct GetHeapVarOp:

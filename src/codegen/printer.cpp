@@ -191,18 +191,18 @@ namespace Mirb
 					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
 				}
 				
+				case Opcode::Lookup:
+				{
+					auto op = (LookupOp *)opcode;
+					
+					return var(op->var) + " = " + var(op->array_var) + "[" + raw(op->index) + "]";
+				}
+				
 				case Opcode::CreateHeap:
 				{
 					auto op = (CreateHeapOp *)opcode;
 					
 					return var(op->var) + " = create_heap";
-				}
-				
-				case Opcode::GetHeap:
-				{
-					auto op = (GetHeapOp *)opcode;
-					
-					return var(op->var) + " = heap " + var(op->heaps) + ", " + raw(op->index);
 				}
 				
 				case Opcode::GetHeapVar:

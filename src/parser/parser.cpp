@@ -149,6 +149,8 @@ namespace Mirb
 		{
 			auto result = new (fragment) Tree::AssignmentNode;
 			auto binary_op = new (fragment) Tree::BinaryOpNode;
+
+			result->op = Lexeme::ASSIGN;
 			
 			result->left = variable;
 			result->right = binary_op;

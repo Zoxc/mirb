@@ -69,10 +69,8 @@ namespace Mirb
 			loc_stop = block.loc - 1;
 		}
 		
-		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope)
+		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope, size_t var_count)
 		{
-			size_t var_count = scope->variable_list.size();
-
 			for(size_t i = 0; i < var_count; ++i)
 			{
 				if(w.get(in, i))
@@ -85,7 +83,9 @@ namespace Mirb
 
 		void Block::analyse_liveness()
 		{
-			BitSetWrapper<MemoryPool> w(memory_pool, scope->variable_list.size());
+			size_t var_count = scope->variable_list.size(); // scope->variable_list may mutate in prepare_liveness()
+
+			BitSetWrapper<MemoryPool> w(memory_pool, var_count);
 
 			loc = 0;
 
@@ -141,7 +141,7 @@ namespace Mirb
 			}
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
-				i().update_ranges(w, scope);
+				i().update_ranges(w, scope, var_count);
 		}
 
 		void Block::allocate_registers()
@@ -305,6 +305,7 @@ namespace Mirb
 			current_exception_block(0),
 			current_exception_block_id(-1),
 			heap_array_var(0),
+			heap_var(0),
 			self_var(0)
 		{
 			#ifdef DEBUG

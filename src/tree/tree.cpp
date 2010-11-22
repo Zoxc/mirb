@@ -156,7 +156,7 @@ namespace Mirb
 				
 				uint8_t *next = result + bytes;
 				
-				if(next >= end)
+				if(next > end)
 					return 0;
 				
 				current = next;

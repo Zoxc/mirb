@@ -20,6 +20,9 @@ namespace Mirb
 				if(bcg.scope->super_module_var)
 					bcg.write_variable(bcg.scope->super_module_var, lock(bcg.create_var(), Arch::Register::DX));
 
+				if(bcg.block->heap_var)
+					bcg.gen<CreateHeapOp>(bcg.block->heap_var);
+				
 				Tree::Variable *block_parameter = bcg.block->scope->block_parameter;
 
 				if(block_parameter)
@@ -28,12 +31,33 @@ namespace Mirb
 					{
 						Tree::Variable *value = bcg.create_var();
 
-						bcg.gen<LoadArgOp>(value, LoadArgOp::Object);
+						bcg.gen<LoadArgOp>(value, LoadArgOp::Block);
 
 						bcg.write_variable(block_parameter, value);
 					}
 					else
-						bcg.gen<LoadArgOp>(bcg.block->self_var, LoadArgOp::Object);
+						bcg.gen<LoadArgOp>(block_parameter, LoadArgOp::Block);
+				}
+
+				if(!bcg.scope->parameters.empty())
+				{
+					Tree::Variable *argv = bcg.create_var();
+					bcg.gen<LoadArgOp>(argv, LoadArgOp::ArgValues);
+
+					size_t index = 0;
+					for(auto i = bcg.scope->parameters.begin(); i != bcg.scope->parameters.end(); ++i, ++index)
+					{
+						if(i().type == Tree::Variable::Heap)
+						{
+							Tree::Variable *value = bcg.create_var();
+
+							bcg.gen<LookupOp>(value, argv, index);
+
+							bcg.write_variable(*i, value);
+						}
+						else
+							bcg.gen<LookupOp>(*i, argv, index);
+					}
 				}
 				
 				if(bcg.block->self_var)

@@ -96,13 +96,13 @@ h1. Operations
   @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], Rbreak@
   Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
 
+* _Lookup_
+  @V = Varray_var[Rindex]@
+  Stores the value with the index @Rindex@ in the array @array_var@ in @V@.
+
 * _CreateHeap_
   @V = create_heap@
   Creates a new variable heap and stores it in @V@.
-
-* _GetHeap_
-  @V = heap Vheaps, Rindex@
-  Stores the heap with the index @Rindex@ in heap array @Vheaps@ in @V@.
 
 * _GetHeapVar_
   @V = heap_var Vheap, Vindex@

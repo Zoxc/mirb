@@ -60,7 +60,7 @@ namespace Mirb
 				void *final;
 				
 				void prepare_liveness(BitSetWrapper<MemoryPool> &w);
-				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope);
+				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope, size_t var_count);
 				
 				void next(BasicBlock *block)
 				{

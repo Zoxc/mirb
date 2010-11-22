@@ -11,7 +11,7 @@ namespace Mirb
 	{
 		size_t NativeMeasurer::measure(Block *block)
 		{
-			return 0x1000;
+			return 0x1000; //TODO: Fix this...
 		}
 
 		void NativeGenerator::generate_stub(Mirb::Block *block)
@@ -620,25 +620,25 @@ namespace Mirb
 				mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(LookupOp &op)
+		{
+			if(op.var->flags.get<Tree::Variable::Register>())
+			{
+				mov_var_index_to_reg(op.array_var, op.index, op.var->loc);
+			}
+			else
+			{
+				mov_var_index_to_reg(op.array_var, op.index, spare);
+				mov_reg_to_var(spare, op.var);
+			}
+		}
+		
 		template<> void NativeGenerator::generate(CreateHeapOp &op)
 		{
 			push_imm(block->scope->heap_vars * sizeof(size_t));
 			call(&Arch::Support::create_heap);
 
 			mov_reg_to_var(Arch::Register::AX, op.var);
-		}
-		
-		template<> void NativeGenerator::generate(GetHeapOp &op)
-		{
-			if(op.var->flags.get<Tree::Variable::Register>())
-			{
-				mov_var_index_to_reg(op.heaps, op.index, op.var->loc);
-			}
-			else
-			{
-				mov_var_index_to_reg(op.heaps, op.index, spare);
-				mov_reg_to_var(spare, op.var);
-			}
 		}
 		
 		template<> void NativeGenerator::generate(GetHeapVarOp &op)

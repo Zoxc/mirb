@@ -116,7 +116,7 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
 					heap = block->heap_var;
@@ -264,7 +264,7 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<GetHeapOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
 					heap = block->heap_var;
@@ -567,7 +567,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<UnwindBreakOp>(temp, scope->parent->block->final, scope->break_id);
+			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_id);
 		}
 		
 		void ByteCodeGenerator::convert_next(Tree::Node *basic_node, Tree::Variable *var)
@@ -664,8 +664,6 @@ namespace Mirb
 			
 			to_bytecode(node->code, var);
 
-			// TODO: Flush registers when entering an exception handler
-			
 			if(!node->rescues.empty())
 			{
 				/*
@@ -773,10 +771,7 @@ namespace Mirb
 			split(body);
 
 			if(scope->heap_vars)
-			{
 				block->heap_var = create_var();
-				gen<CreateHeapOp>(block->heap_var);
-			}
 
 			to_bytecode(scope->group, block->return_var);
 			
@@ -860,7 +855,7 @@ namespace Mirb
 						gen<PushOp>(block->heap_var);
 					else
 					{
-						gen<GetHeapOp>(var, block->heap_array_var, scope->referenced_scopes.index_of(i));
+						gen<LookupOp>(var, block->heap_array_var, scope->referenced_scopes.index_of(i));
 						gen<PushOp>(var);
 					}
 				}
