@@ -654,10 +654,6 @@ namespace Mirb
 			/*
 			 * Output the regular code
 			 */
-			BasicBlock *body = split(create_block());
-
-			exception_block->block_label.block = body;
-			
 			to_bytecode(node->code, var);
 
 			if(!node->rescues.empty())

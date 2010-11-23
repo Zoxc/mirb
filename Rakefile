@@ -22,6 +22,8 @@ package = Package.new do
 	
 	set Toolchain::Optimization, debug ? :none : :balanced
 	set Toolchain::Exceptions, :none
+	set Toolchain::Reflection, false
+	set Toolchain::StackProtection, windows ? :none : :full
 	set Toolchain::StaticLibraries, false
 	
 	set Toolchain::DebugInformation, debug

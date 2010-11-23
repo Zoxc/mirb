@@ -51,7 +51,6 @@ namespace Mirb
 		size_t parent_index;
 		ExceptionBlock *parent;
 		Vector<ExceptionHandler *> handlers;
-		BlockLabel block_label; // TODO: Find out what this is used for
 		BlockLabel ensure_label;
 	};
 	
