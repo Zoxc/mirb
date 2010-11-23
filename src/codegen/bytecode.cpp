@@ -195,8 +195,7 @@ namespace Mirb
 
 				split(label_false);
 				gen<LoadOp>(var, value_true);
-				gen<BranchOp>(label_end);
-				label_false->next(label_end);
+				gen_branch(label_end);
 
 				gen(label_true);
 				gen<LoadOp>(var, value_false);
@@ -469,9 +468,6 @@ namespace Mirb
 			BasicBlock *label_end = create_block();
 			BasicBlock *body = create_block();
 			
-			body->next(label_end);
-			label_else->next(label_end);
-
 			to_bytecode(node->left, temp);
 			
 			if(node->inverted)
@@ -489,26 +485,26 @@ namespace Mirb
 				to_bytecode(node->middle, result_left);
 				
 				gen<MoveOp>(var, result_left);
-				gen<BranchOp>(label_end);
+				gen_branch(label_end);
 
 				gen(label_else);
 
 				to_bytecode(node->right, result_right);
 				
 				gen<MoveOp>(var, result_right);
-				gen(label_end);
+				split(label_end);
 			}
 			else
 			{
 				to_bytecode(node->middle, 0);
 				
-				gen<BranchOp>(label_end);
+				gen_branch(label_end);
 
 				gen(label_else);
 
 				to_bytecode(node->right, 0);
 
-				gen(label_end);
+				split(label_end);
 			}
 		}
 		
@@ -584,7 +580,7 @@ namespace Mirb
 		
 		void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, Tree::Variable *var)
 		{
-			branch(block->prolog);
+			branch(body);
 		}
 		
 		void ByteCodeGenerator::convert_class(Tree::Node *basic_node, Tree::Variable *var)
@@ -670,8 +666,7 @@ namespace Mirb
 				 * Skip the rescue block
 				 */
 				BasicBlock *ok_label = create_block();
-				gen<BranchOp>(ok_label);
-				body->next(ok_label);
+				gen_branch(ok_label);
 				
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
@@ -691,8 +686,7 @@ namespace Mirb
 					
 					to_bytecode(i().group, var);
 					
-					gen<BranchOp>(ok_label);
-					handler_body->next(ok_label);
+					gen_branch(ok_label);
 				}
 				
 				gen(ok_label);
@@ -753,7 +747,7 @@ namespace Mirb
 				scope->require_args(*i);
 			}
 
-			block->prolog = create_block();
+			body = create_block();
 			block->epilog = create_block();
 			
 			if(scope->break_targets)
@@ -764,10 +758,10 @@ namespace Mirb
 			else
 				block->final->break_targets = 0;
 			
-			gen(block->prolog);
-
-			BasicBlock *body = create_block();
-
+			BasicBlock *prolog = create_block();
+			
+			gen(prolog);
+			
 			split(body);
 
 			if(scope->heap_vars)
@@ -779,7 +773,7 @@ namespace Mirb
 
 			gen<ReturnOp>(block->return_var);
 
-			basic = block->prolog;
+			basic = prolog;
 
 			gen<PrologueOp>();
 			

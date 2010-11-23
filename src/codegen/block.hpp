@@ -80,7 +80,6 @@ namespace Mirb
 			public:
 				Mirb::Block *final;
 				Tree::Scope *scope;
-				BasicBlock *prolog; // The point after the prolog of the block.
 				BasicBlock *epilog; // The end of the block
 
 				MemoryPool &memory_pool;

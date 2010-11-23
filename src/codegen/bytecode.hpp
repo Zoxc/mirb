@@ -51,6 +51,7 @@ namespace Mirb
 				Block *block;
 
 				BasicBlock *basic;
+				BasicBlock *body; // The point after the prolog of the block.
 				
 				Tree::Scope *scope;
 				
@@ -98,6 +99,15 @@ namespace Mirb
 					return result;
 				}
 				
+				BranchOp *gen_branch(BasicBlock *block)
+				{
+					BranchOp *result = gen<BranchOp>(block);
+					
+					basic->next(block);
+					
+					return result;
+				}
+				
 				BasicBlock *list(BasicBlock *block)
 				{
 					this->block->basic_blocks.append(block);
@@ -123,11 +133,12 @@ namespace Mirb
 				
 				void branch(BasicBlock *block)
 				{
-					gen<BranchOp>(block);
-					basic->next(block);
-					basic = create_block();
+					gen_branch(block);
+					
+					//TODO: Eliminate code generation from this point. The block will never be reached
+					gen(create_block());
 				}
-
+				
 				Tree::Variable *block_arg(Tree::Scope *scope);
 				Tree::Variable *call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var);
 				
