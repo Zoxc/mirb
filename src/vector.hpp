@@ -1,5 +1,6 @@
 #pragma once
 #include "allocator.hpp"
+#include "common.hpp"
 
 namespace Mirb
 {
@@ -10,6 +11,34 @@ namespace Mirb
 			typename A::Storage alloc_ref;
 			size_t _size;
 			size_t _capacity;
+
+			void expand(size_t num)
+			{
+				if(_size + num > _capacity)
+				{
+					size_t old_capacity = _capacity;
+
+					if(table)
+					{
+						do
+						{
+							_capacity <<= 1;
+						}
+						while(_size + num > _capacity);
+
+						table = (T *)alloc_ref.realloc((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
+					}
+					else
+					{
+						_capacity = 1;
+
+						while(_size + num > _capacity)
+							_capacity <<= 1;
+						
+						table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+					}
+				}
+			}
 		
 		public:
 			Vector(size_t initial) : alloc_ref(A::Storage::def_ref())
@@ -42,10 +71,38 @@ namespace Mirb
 				table = 0;
 			}
 			
+			Vector(const Vector &vector) :
+				_size(vector._size),
+				_capacity(vector._size),
+				alloc_ref(vector.alloc_ref)
+			{
+				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+
+				std::memcpy(table, vector.table, sizeof(T) * _size);
+			}
+			
 			~Vector()
 			{
 				if(table)
 					alloc_ref.free((void *)table);
+			}
+			
+			Vector operator=(const Vector& other)
+			{
+				if(this == &other)
+					return *this;
+				
+				if(table)
+					alloc_ref.free((void *)table);
+
+				_size = other._size;
+				_capacity = other._size;
+				
+				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+
+				std::memcpy(table, other.table, sizeof(T) * _size);
+
+				return *this;
 			}
 			
 			size_t size()
@@ -65,28 +122,21 @@ namespace Mirb
 			
 			T operator [](size_t index)
 			{
-				assert(index < _size);
+				debug_assert(index < _size);
 				return table[index];
 			}
 			
 			void push(T entry)
 			{
-				if(_size + 1 > _capacity)
-				{
-					if(table)
-					{
-						size_t old_capacity = _capacity;
-						_capacity <<= 1;
-						table = (T *)alloc_ref.realloc((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
-					}
-					else
-					{
-						_capacity = 1;
-						table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
-					}
-				}
-				
+				expand(1);
+
 				table[_size++] = entry;
+			}
+			
+			T pop()
+			{
+				debug_assert(_size);
+				return table[--_size];
 			}
 			
 			size_t index_of(T entry)

@@ -28,7 +28,7 @@ namespace Mirb
 				return *this;
 			}
 			
-			Range(const Range &range) : start(0), stop(0), error(false)
+			Range(const Range &range)
 			{
 				*this = range;
 			}

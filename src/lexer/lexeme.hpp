@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include "../range.hpp"
 #include "../symbol-pool.hpp"
+#include "../vector.hpp"
 
 namespace Mirb
 {
@@ -163,7 +164,9 @@ namespace Mirb
 			static const Type keyword_end = KW_END;
 			static const Type values_end = NONE;
 
-			Lexeme(Lexer &lexer) : lexer(lexer) {}
+			Lexeme(Lexer &lexer, MemoryPool &memory_pool) : lexer(lexer), curlies(memory_pool) {}
+			
+			Lexeme(const Lexeme &lexeme);
 			
 			Lexeme& operator=(const Lexeme& other);
 			
@@ -176,7 +179,7 @@ namespace Mirb
 			const char_t *prev;
 			
 			//TODO: Write a vector class to avoid leaks
-			std::vector<bool> curlies;
+			Vector<bool, MemoryPool> curlies;
 			
 			union
 			{

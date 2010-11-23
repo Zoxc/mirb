@@ -249,7 +249,7 @@ namespace Mirb
 					{
 						input++;
 						
-						lexeme.curlies.push_back(true);
+						lexeme.curlies.push(true);
 						
 						lexeme.type = Lexeme::STRING_START;
 						
@@ -359,9 +359,7 @@ namespace Mirb
 		if(lexeme.curlies.size() == 0)
 			return;
 		
-		bool string = lexeme.curlies.back();
-		
-		lexeme.curlies.pop_back();
+		bool string = lexeme.curlies.pop();
 		
 		if(!string)
 			return;

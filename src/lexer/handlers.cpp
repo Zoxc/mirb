@@ -89,7 +89,7 @@ namespace Mirb
 	{
 		input++;
 		
-		lexeme.curlies.push_back(false);
+		lexeme.curlies.push(false);
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::CURLY_OPEN;

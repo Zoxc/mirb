@@ -129,6 +129,18 @@ namespace Mirb
 		"end",
 	};
 
+	Lexeme::Lexeme(const Lexeme &lexeme) :
+		Range(lexeme),
+		lexer(lexeme.lexer),
+		whitespace(lexeme.whitespace),
+		allow_keywords(lexeme.allow_keywords),
+		type(lexeme.type),
+		prev(lexeme.prev),
+		symbol(lexeme.symbol),
+		curlies(lexeme.curlies)
+	{
+	}
+	
 	Lexeme& Lexeme::operator=(const Lexeme& other)
 	{
 		if(this == &other)
