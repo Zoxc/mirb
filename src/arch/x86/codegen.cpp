@@ -491,14 +491,7 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(PushOp &op)
 		{
-			if(op.var->flags.get<Tree::Variable::Register>())
-				push_reg(op.var->loc);
-			else
-			{
-				rex(0, 0, 0);
-				stream.b(0x8B);
-				stack_modrm(6, op.var);
-			}
+			push_var(op.var);
 		}
 		
 		template<> void NativeGenerator::generate(PushImmediateOp &op)
