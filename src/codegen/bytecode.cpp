@@ -174,7 +174,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), Tree::InvokeNode::no_break_id);
+			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), (Mirb::Block *)0);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var)
@@ -227,7 +227,7 @@ namespace Mirb
 			
 			gen<PushOp>(right);
 			
-			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), Tree::InvokeNode::no_break_id);
+			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), (Mirb::Block *)0);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var)
@@ -415,7 +415,7 @@ namespace Mirb
 			
 			Tree::Variable *closure = call_args(node->arguments, param_count, node->block ? node->block->scope : 0, 0);
 			
-			gen<CallOp>(var, obj, node->method, param_count, closure, node->break_id);
+			gen<CallOp>(var, obj, node->method, param_count, closure, node->block ? node->block->scope->final : 0);
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, Tree::Variable *var)
@@ -429,7 +429,7 @@ namespace Mirb
 
 			if(node->pass_args)
 			{
-				Tree::Variable *closure = scope->owner->block_parameter;
+				Tree::Variable *closure = node->block ? block_arg(scope) : scope->owner->block_parameter;
 				
 				// push arguments
 				
@@ -443,7 +443,7 @@ namespace Mirb
 				module_var = read_variable(module_var);
 				name_var = read_variable(name_var);
 				
-				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->break_id);
+				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->block ? node->block->scope->final : 0);
 			}
 			else
 			{
@@ -454,7 +454,7 @@ namespace Mirb
 				module_var = read_variable(module_var);
 				name_var = read_variable(name_var);
 
-				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->break_id);
+				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->block ? node->block->scope->final : 0);
 			}
 		}
 		

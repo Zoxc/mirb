@@ -200,10 +200,11 @@ namespace Mirb
 				/*
 				 * Break related fields
 				 */
-				bool can_break; // If this block can raise a exception because of a break.
 				size_t break_id; // Which of the parent's break targets this block belongs to.
 				size_t break_targets; // Number of child blocks that can raise a break exception.
 				
+				static const size_t no_break_id = (size_t)-1;
+
 				/*
 				 * Exception related fields
 				 */

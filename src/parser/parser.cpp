@@ -165,20 +165,6 @@ namespace Mirb
 		}
 	}
 	
-	Tree::Node *Parser::parse_identifier()
-	{
-		Symbol *symbol = lexer.lexeme.symbol;
-
-		lexer.step();
-		
-		if(is_assignment_op())
-		{
-			return parse_assignment(parse_variable(symbol));
-		}
-		else
-			return parse_call(symbol,  new (fragment) Tree::SelfNode, true); // Function call or local variable
-	}
-
 	Tree::Node *Parser::parse_array()
 	{
 		auto result = new (fragment) Tree::ArrayNode;
@@ -248,126 +234,127 @@ namespace Mirb
 				return parse_array();
 
 			case Lexeme::STRING:
-				{
-					auto result = new (fragment) Tree::StringNode;
+			{
+				auto result = new (fragment) Tree::StringNode;
 
-					result->string = lexer.lexeme.c_str;
+				result->string = lexer.lexeme.c_str;
 
-					lexer.step();
+				lexer.step();
 
-					return result;
-				}
+				return result;
+			}
 
 			case Lexeme::STRING_START:
+			{
+				auto result = new (fragment) Tree::InterpolatedStringNode;
+					
+				do
 				{
-					auto result = new (fragment) Tree::InterpolatedStringNode;
-					
-					do
-					{
-						auto pair = new (fragment) Tree::InterpolatedPairNode;
+					auto pair = new (fragment) Tree::InterpolatedPairNode;
 						
-						pair->string = lexer.lexeme.c_str;
+					pair->string = lexer.lexeme.c_str;
 						
-						lexer.step();
+					lexer.step();
 						
-						pair->group = parse_group();
+					pair->group = parse_group();
 						
-						result->pairs.append(pair);
-					}
-					while(lexeme() == Lexeme::STRING_CONTINUE);
-					
-					if(require(Lexeme::STRING_END))
-					{
-						result->tail = lexer.lexeme.c_str;
-
-						lexer.step();
-					}
-					else
-						result->tail = 0;
-
-					return result;
+					result->pairs.append(pair);
 				}
+				while(lexeme() == Lexeme::STRING_CONTINUE);
+					
+				if(require(Lexeme::STRING_END))
+				{
+					result->tail = lexer.lexeme.c_str;
+
+					lexer.step();
+				}
+				else
+					result->tail = 0;
+
+				return result;
+			}
 
 			case Lexeme::KW_SELF:
-				{
-					lexer.step();
+			{
+				lexer.step();
 
-					return new (fragment) Tree::SelfNode;
-				}
+				return new (fragment) Tree::SelfNode;
+			}
 
 			case Lexeme::KW_TRUE:
-				{
-					lexer.step();
+			{
+				lexer.step();
 
-					return new (fragment) Tree::TrueNode;
-				}
+				return new (fragment) Tree::TrueNode;
+			}
 
 			case Lexeme::KW_FALSE:
-				{
-					lexer.step();
+			{
+				lexer.step();
 
-					return new (fragment) Tree::FalseNode;
-				}
+				return new (fragment) Tree::FalseNode;
+			}
 
 			case Lexeme::KW_NIL:
-				{
-					lexer.step();
+			{
+				lexer.step();
 
-					return new (fragment) Tree::NilNode;
-				}
+				return new (fragment) Tree::NilNode;
+			}
 
 			case Lexeme::INTEGER:
-				{
-					auto result = new (fragment) Tree::IntegerNode;
+			{
+				auto result = new (fragment) Tree::IntegerNode;
 					
-					std::string str = lexer.lexeme.string();
+				std::string str = lexer.lexeme.string();
 					
-					result->value = atoi(str.c_str());
+				result->value = atoi(str.c_str());
 					
-					lexer.step();
+				lexer.step();
 					
-					return result;
-				}
+				return result;
+			}
 
 			case Lexeme::IVAR:
-				{
-					Symbol *symbol = lexer.lexeme.symbol;
+			{
+				Symbol *symbol = lexer.lexeme.symbol;
 					
-					lexer.step();
-					
-					auto variable = new (fragment) Tree::IVarNode(symbol);
-					
-					if(is_assignment_op())
-						return parse_assignment(variable);
-					else
-						return variable;
-				}
+				lexer.step();
+				
+				return new (fragment) Tree::IVarNode(symbol);
+			}
 
 			case Lexeme::IDENT:
-				return parse_identifier();
+			{
+				Symbol *symbol = lexer.lexeme.symbol;
+
+				lexer.step();
+				
+				return parse_call(symbol, new (fragment) Tree::SelfNode, true); // Function call, constant or local variable
+			}
 
 			case Lexeme::EXT_IDENT:
 				return parse_call(0, new (fragment) Tree::SelfNode, false);
 
 			case Lexeme::PARENT_OPEN:
-				{
-					lexer.step();
+			{
+				lexer.step();
 					
-					auto result = parse_group();
+				auto result = parse_group();
 					
-					match(Lexeme::PARENT_CLOSE);
+				match(Lexeme::PARENT_CLOSE);
 					
-					return result;
-				}
+				return result;
+			}
 
 			default:
-				{
-					error("Expected expression but found " + lexer.lexeme.describe());
+			{
+				error("Expected expression but found " + lexer.lexeme.describe());
 					
-					lexer.step();
+				lexer.step();
 					
-					return 0;
-				}
+				return 0;
+			}
 		}
 	}
 
@@ -487,7 +474,140 @@ namespace Mirb
 
 		return left;
 	}
+	
+	Tree::Node *Parser::build_assignment(Tree::Node *left)
+	{
+		if(lexeme() == Lexeme::ASSIGN)
+		{
+			auto result = new (fragment) Tree::AssignmentNode;
+			
+			lexer.step();
+			
+			result->op = Lexeme::ASSIGN;
+			
+			result->left = left;
+			
+			result->right = parse_expression();
+			
+			return result;
+		}
+		else
+		{
+			auto result = new (fragment) Tree::AssignmentNode;
+			auto binary_op = new (fragment) Tree::BinaryOpNode;
 
+			result->op = Lexeme::ASSIGN;
+			
+			result->left = left;
+			result->right = binary_op;
+			binary_op->left = left;
+			binary_op->op = Lexeme::assign_to_operator(lexeme());
+			
+			lexer.step();
+			
+			binary_op->right = parse_expression();
+			
+			return result;
+		}
+	};
+
+	Tree::Node *Parser::parse_assignment()
+	{
+		Tree::Node *result = parse_ternary_if();
+		
+		while(is_assignment_op())
+			result = process_assignment(result);
+		
+		return result;
+	}
+
+	Tree::Node *Parser::process_assignment(Tree::Node *input)
+	{
+		if(!input)
+			return 0;
+
+		switch(input->type())
+		{
+			case Tree::Node::Call:
+			{
+				auto node = (Tree::CallNode *)input;
+					
+				if(!node->arguments.empty() || node->block)
+					break;
+				
+				if(node->can_be_var)
+					return build_assignment(parse_variable(node->method, 0));
+				else
+				{
+					Symbol *mutated = node->method;
+					
+					if(mutated)
+					{
+						rt_value name = rt_string_from_symbol((rt_value)node->method);
+					
+						rt_concat_string(name, rt_string_from_cstr("="));
+					
+						mutated = (Symbol *)rt_symbol_from_string(name);
+					}
+					
+					if(lexeme() == Lexeme::ASSIGN)
+					{
+						lexer.step();
+						
+						node->method = mutated;
+						
+						Tree::Node *argument = parse_expression();
+						
+						if(argument)
+							node->arguments.append(argument);
+
+						return input;
+					}
+					else
+					{
+						// TODO: Save node->object in a temporary variable
+						auto result = new (fragment) Tree::CallNode;
+						
+						result->object = node->object;
+						result->method = mutated;
+						result->block = 0;
+						
+						auto binary_op = new (fragment) Tree::BinaryOpNode;
+						
+						binary_op->left = node;
+						binary_op->op = Lexeme::assign_to_operator(lexeme());
+						
+						lexer.step();
+						
+						binary_op->right = parse_expression();
+						
+						result->arguments.append(binary_op);
+						
+						return result;
+					}
+				}
+
+				break;
+			};
+
+			case Tree::Node::Variable:
+			case Tree::Node::Constant: //TODO: Make sure constant's object is not re-evaluated
+			case Tree::Node::IVar:
+				return build_assignment(input);
+
+			default:
+				break;
+		}
+			
+		error("Cannot assign a value to an expression.");
+		
+		lexer.step();
+
+		parse_expression();
+
+		return input;
+	}
+	
 	Tree::Node *Parser::parse_boolean_unary()
 	{
 		if(lexeme() == Lexeme::KW_NOT)

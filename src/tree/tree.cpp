@@ -4,19 +4,23 @@ namespace Mirb
 {
 	namespace Tree
 	{
-		Scope::Scope(Fragment &fragment, Scope *parent, Type type) : fragment(&fragment), type(type), parent(parent), variables(2, fragment), referenced_scopes(fragment), variable_list(2, fragment), zsupers(fragment)
+		Scope::Scope(Fragment &fragment, Scope *parent, Type type) :
+			final(0),
+			fragment(&fragment),
+			type(type),
+			parent(parent),
+			break_id(no_break_id),
+			break_targets(0),
+			require_exceptions(false),
+			variables(2, fragment),
+			heap_vars(0),
+			block_parameter(0),
+			super_module_var(0),
+			super_name_var(0),
+			referenced_scopes(fragment),
+			variable_list(2, fragment),
+			zsupers(fragment)
 		{
-			final = 0;
-			require_exceptions = false;
-			break_targets = 0;
-			can_break = false;
-			
-			heap_vars = 0;
-			
-			block_parameter = 0;
-			super_module_var = 0;
-			super_name_var = 0;
-			
 			owner = parent ? parent->owner : 0;
 		}
 	

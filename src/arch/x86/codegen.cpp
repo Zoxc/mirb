@@ -570,8 +570,8 @@ namespace Mirb
 			push_reg(Arch::Register::SP);
 			push_imm(op.param_count);
 
-			if(op.block)
-				push_var(op.block);
+			if(op.block_var)
+				push_var(op.block_var);
 			else
 				push_imm(RT_NIL);
 			
@@ -583,8 +583,13 @@ namespace Mirb
 
 			stack_pop(op.param_count);
 			
-			if(op.break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[op.break_id] = stream.position;
+			if(op.block)
+			{
+				size_t break_id = op.block->scope->break_id;
+			
+				if(break_id != Tree::Scope::no_break_id)
+					block->final->break_targets[break_id] = stream.position;
+			}
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);
@@ -595,8 +600,8 @@ namespace Mirb
 			push_reg(Arch::Register::SP);
 			push_imm(op.param_count);
 
-			if(op.block)
-				push_var(op.block);
+			if(op.block_var)
+				push_var(op.block_var);
 			else
 				push_imm(RT_NIL);
 			
@@ -605,9 +610,14 @@ namespace Mirb
 			call(&Arch::Support::super);
 
 			stack_pop(op.param_count);
-
-			if(op.break_id != Tree::InvokeNode::no_break_id)
-				block->final->break_targets[op.break_id] = stream.position;
+			
+			if(op.block)
+			{
+				size_t break_id = op.block->scope->break_id;
+			
+				if(break_id != Tree::Scope::no_break_id)
+					block->final->break_targets[break_id] = stream.position;
+			}
 
 			if(op.var)
 				mov_reg_to_var(Arch::Register::AX, op.var);

@@ -67,20 +67,6 @@ namespace Mirb
 		return result;
 	}
 
-	Tree::Node *Parser::secure_block(Tree::BlockNode *result, Tree::InvokeNode *parent)
-	{
-		if(!result)
-			return parent;
-		
-		if(result->scope->can_break)
-		{
-			parent->break_id = scope->break_targets++;
-			result->scope->break_id = parent->break_id;
-		}
-		
-		return parent;
-	}
-
 	bool Parser::has_arguments()
 	{
 		if(is_expression())
@@ -110,6 +96,9 @@ namespace Mirb
 					}
 					break;
 
+				case Lexeme::CURLY_OPEN:
+					return false;
+
 				default:
 					return true;
 			}
@@ -118,11 +107,8 @@ namespace Mirb
 			return false;
 	}
 
-	void Parser::parse_arguments(Tree::NodeList &arguments, bool has_args, bool *parenthesis)
+	void Parser::parse_arguments(Tree::NodeList &arguments, bool *parenthesis)
 	{
-		if(!has_args || lexeme() == Lexeme::CURLY_OPEN)
-			return;
-		
 		if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
 		{
 			if(parenthesis)
@@ -144,18 +130,20 @@ namespace Mirb
 		}
 	}
 
-	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args)
+	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args, bool can_be_var)
 	{
 		auto result = new (fragment) Tree::CallNode;
 		
 		result->object = object;
 		result->method = symbol;
+		result->can_be_var = can_be_var;
 		
-		parse_arguments(result->arguments, has_args, 0);
+		if(has_args)
+			parse_arguments(result->arguments, 0);
 		
 		result->block = parse_block();
 		
-		return secure_block(result->block, result);
+		return result;
 	}
 
 	Tree::Node *Parser::parse_super()
@@ -183,7 +171,8 @@ namespace Mirb
 		
 		bool parenthesis = false;
 		
-		parse_arguments(result->arguments, has_arguments(), &parenthesis);
+		if(has_arguments())
+			parse_arguments(result->arguments, &parenthesis);
 		
 		result->block = parse_block();
 		
@@ -197,7 +186,7 @@ namespace Mirb
 		else
 			result->pass_args = false;
 		
-		return secure_block(result->block, result);
+		return result;
 	}
 
 	Tree::Node *Parser::parse_yield()
@@ -235,14 +224,16 @@ namespace Mirb
 			local = scope->defined(symbol, true) != 0;
 		
 		bool has_args = has_arguments();
+		bool can_be_var = default_var && !has_args;
+		bool constant = symbol && is_constant(symbol);
 		
-		if(default_var && !has_args && (local || (symbol && is_constant(symbol)))) // Variable or constant
+		if(can_be_var && !has_args && (local || constant)) // Variable or constant
 		{
 			return parse_variable(symbol);
 		}
 		else // Call
 		{
-			return alloc_call_node(child, symbol, has_args);
+			return alloc_call_node(child, symbol, has_args, can_be_var && !constant);
 		}
 	}
 
@@ -320,104 +311,12 @@ namespace Mirb
 
 					match(Lexeme::SQUARE_CLOSE);
 
-					return secure_block(result->block, result);
+					return result;
 				}
 
 			default:
 				debug_fail("Invalid lookup lexeme");
 		}
-	}
-
-	Tree::Node *Parser::parse_lookup_tail(Tree::Node *tail)
-	{
-		if(!is_assignment_op())
-			return tail;
-		
-		if(!tail)
-		{
-			lexer.step();
-			parse_expression();
-			return 0;
-		}
-		
-		Tree::Node *handler = tail;
-		
-		switch(tail->type())
-		{
-			case Tree::Node::Constant:
-			{
-				Tree::ConstantNode *node = (Tree::ConstantNode *)tail;
-				
-				return parse_assignment(node);
-			}
-			
-			case Tree::Node::Call:
-			{
-				Tree::CallNode *node = (Tree::CallNode *)tail;
-				
-				if(!node->arguments.empty() || node->block)
-					break;
-				
-				Symbol *mutated = node->method;
-				
-				if(mutated)
-				{
-					rt_value name = rt_string_from_symbol((rt_value)node->method);
-					
-					rt_concat_string(name, rt_string_from_cstr("="));
-					
-					mutated = (Symbol *)rt_symbol_from_string(name);
-				}
-				
-				if(lexeme() == Lexeme::ASSIGN)
-				{
-					lexer.step();
-					
-					node->method = mutated;
-					
-					Tree::Node *argument = parse_expression();
-					
-					if(argument)
-						node->arguments.append(argument);
-
-					return handler;
-				}
-				else
-				{
-					// TODO: Save node->object in a temporary variable
-					auto result = new (fragment) Tree::CallNode;
-					
-					result->object = node->object;
-					result->method = mutated;
-					result->block = 0;
-					
-					auto binary_op = new (fragment) Tree::BinaryOpNode;
-					
-					binary_op->left = node;
-					binary_op->op = Lexeme::assign_to_operator(lexeme());
-					
-					lexer.step();
-					
-					binary_op->right = parse_expression();
-					
-					result->arguments.append(binary_op);
-					
-					return result;
-				}
-				
-			}
-			
-			default:
-				break;
-		}
-		
-		error("Cannot assign a value to an expression.");
-		
-		lexer.step();
-
-		parse_expression();
-
-		return 0;
 	}
 
 	Tree::Node *Parser::parse_lookup_chain()
@@ -431,6 +330,6 @@ namespace Mirb
 			result = node;
 		}
 
-		return parse_lookup_tail(result);
+		return result;
 	}
 };

@@ -367,8 +367,8 @@ namespace Mirb
 			Tree::Variable *obj;
 			Symbol *method;
 			size_t param_count;
-			Tree::Variable *block;
-			size_t break_id;
+			Tree::Variable *block_var;
+			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
@@ -376,11 +376,11 @@ namespace Mirb
 			{
 				use(obj);
 
-				if(block)
-					use(block);
+				if(block_var)
+					use(block_var);
 			};
 
-			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), obj(obj), method(method), param_count(param_count), block(block), break_id(break_id) {}
+			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block_var, Mirb::Block *block) : var(var), obj(obj), method(method), param_count(param_count), block_var(block_var), block(block) {}
 		};
 		
 		struct SuperOp:
@@ -391,8 +391,8 @@ namespace Mirb
 			Tree::Variable *module;
 			Tree::Variable *method;
 			size_t param_count;
-			Tree::Variable *block;
-			size_t break_id;
+			Tree::Variable *block_var;
+			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
@@ -402,11 +402,11 @@ namespace Mirb
 				use(module);
 				use(method);
 
-				if(block)
-					use(block);
+				if(block_var)
+					use(block_var);
 			};
 
-			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block, size_t break_id) : var(var), self(self), module(module), method(method), param_count(param_count), block(block), break_id(break_id) {}
+			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block_var, Mirb::Block *block) : var(var), self(self), module(module), method(method), param_count(param_count), block_var(block_var), block(block) {}
 		};
 		
 		struct LookupOp:

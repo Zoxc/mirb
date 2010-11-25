@@ -89,6 +89,9 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::print_block(Mirb::Block *block)
 		{
+			if(!block)
+				return "nil";
+			
 			std::stringstream result;
 			
 			result << "block " << block;
@@ -181,14 +184,14 @@ namespace Mirb
 				{
 					auto op = (CallOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block_var) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Super:
 				{
 					auto op = (SuperOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block) + ", " + (op->break_id == Tree::InvokeNode::no_break_id ? "nil" : raw(op->break_id));
+					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block_var) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Lookup:

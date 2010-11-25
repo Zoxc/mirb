@@ -53,9 +53,10 @@ namespace Mirb
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
+			Tree::Node *build_assignment(Tree::Node *left);
+			Tree::Node *process_assignment(Tree::Node *input);
 			Tree::Node *parse_assignment(Tree::Node *variable);
 			Tree::Node *parse_array();
-			Tree::Node *parse_identifier();
 			Tree::Node *parse_unary();
 			Tree::Node *parse_boolean_unary();
 			Tree::Node *parse_factor();
@@ -64,7 +65,7 @@ namespace Mirb
 			
 			Tree::Node *parse_expression()
 			{
-				return parse_ternary_if();
+				return parse_assignment();
 			}
 			
 			Tree::Node *parse_statement()
@@ -85,6 +86,7 @@ namespace Mirb
 			Tree::Node *parse_if();
 			Tree::Node *parse_unless();
 			Tree::Node *parse_ternary_if();
+			Tree::Node *parse_assignment();
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_case();
 			Tree::Node *parse_begin();
@@ -99,11 +101,9 @@ namespace Mirb
 			bool has_arguments();
 			bool is_lookup();
 			Tree::Node *parse_lookup(Tree::Node *child);
-			Tree::Node *parse_lookup_tail(Tree::Node *tail);
 			Tree::BlockNode *parse_block();
-			void parse_arguments(Tree::NodeList &arguments, bool has_args, bool *parenthesis);
-			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args);
-			Tree::Node *secure_block(Tree::BlockNode *result, Tree::InvokeNode *parent);
+			void parse_arguments(Tree::NodeList &arguments, bool *parenthesis);
+			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args, bool can_be_var = false);
 			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, bool default_var);
 			Tree::Node *parse_lookup_chain();
 			Tree::Node *parse_yield();

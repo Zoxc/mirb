@@ -183,11 +183,6 @@ namespace Mirb
 			
 			NodeList arguments;
 			BlockNode *block; // can be zero
-			size_t break_id;
-			
-			static const size_t no_break_id;
-			
-			InvokeNode() : break_id(no_break_id) {}
 		};
 		
 		struct CallNode:
@@ -197,6 +192,7 @@ namespace Mirb
 			
 			Node *object;
 			Symbol *method;
+			bool can_be_var;
 		};
 		
 		struct SuperNode:

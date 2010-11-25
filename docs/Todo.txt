@@ -20,4 +20,3 @@
 [ ] BasicObject
 [ ] Fix constant resolution path
 [ ] Fix up the parser
-[ ] Move assignments way down the precedence table

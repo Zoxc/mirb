@@ -52,7 +52,8 @@ namespace Mirb
 		
 		if(scope->type == Tree::Scope::Closure)
 		{
-			scope->can_break = true; // Flag our parent should check
+			if(scope->break_id == Tree::Scope::no_break_id)
+				scope->break_id = scope->parent->break_targets++;
 		}
 		else
 			error("Break outside of block.");
@@ -137,11 +138,11 @@ namespace Mirb
 			node->inverted = false;
 			
 			node->left = result;
-			node->middle = parse_ternary_if();
+			node->middle = parse_expression();
 			
 			match(Lexeme::COLON);
 			
-			node->right = parse_ternary_if();
+			node->right = parse_expression();
 			
 			return node;
 		}
