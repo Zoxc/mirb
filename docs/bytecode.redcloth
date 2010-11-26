@@ -89,12 +89,12 @@ h1. Operations
   Defines an method with the name @Iname@ on @Vself@. @B@ contains the block for the method.
 
 * _Call_
-  @[V] = call Vobject, Imethod, Rparameters, [Vblock], Rbreak@
-  Looks up the method with the symbol @Imethod@ in @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
+  @[V] = call Vobject, Imethod, Rparameters, [Vblock], [B]@
+  Looks up the method with the symbol @Imethod@ in @Vobject@ and calls it with the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @B@ contains the pointer to the block passed by @Vblock@, if any.
 
 * _Super_
-  @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], Rbreak@
-  Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @Rbreak@ contains a break id if @Vblock@ is expected to break or -1 if no break is expected.
+  @[V] = super Vself, Vmodule, Vmethod, Rparameters, [Vblock], [B]@
+  Looks up the method with the symbol in @Vmethod@ in the parent of @Vmodule@ and calls it with @Vself@ as self and the block @Vblock@ (if present). It then pops @Rparameters@ from the stack. The result is stored in @V@ if present. @B@ contains the pointer to the block passed by @Vblock@, if any.
 
 * _Lookup_
   @V = Varray_var[Rindex]@

@@ -235,6 +235,7 @@ namespace Mirb
 			Node *ensure_group;
 		};
 		
+		//TODO: Make sure no void nodes are in found in expressions.
 		struct VoidNode:
 			public Node
 		{
