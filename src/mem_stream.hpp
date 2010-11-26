@@ -40,27 +40,47 @@ namespace Mirb
 				check_size();
 			}
 			
-			void b(uint8_t var)
+			void u8(uint8_t var)
 			{
 				write(var);
 			}
 
-			void w(uint16_t var)
+			void i8(int8_t var)
 			{
 				write(var);
 			}
-		
-			void d(uint32_t var)
+			
+			void u16(uint16_t var)
+			{
+				write(var);
+			}
+			
+			void i16(int16_t var)
+			{
+				write(var);
+			}
+			
+			void u32(uint32_t var)
 			{
 				write(var);
 			}
 
-			void q(uint64_t var)
+			void i32(int32_t var)
+			{
+				write(var);
+			}
+			
+			void u64(uint64_t var)
 			{
 				write(var);
 			}
 
-			void s(size_t var)
+			void i64(int64_t var)
+			{
+				write(var);
+			}
+
+			void u(size_t var)
 			{
 				write(var);
 			}

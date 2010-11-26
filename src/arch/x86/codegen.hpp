@@ -64,8 +64,8 @@ namespace Mirb
 				
 				template<typename T> void call(T *func)
 				{
-					stream.b(0xE8);
-					stream.d((size_t)func - ((size_t)stream.position + 4));
+					stream.u8(0xE8);
+					stream.u32((size_t)func - ((size_t)stream.position + 4));
 				}
 
 				SimplerList<BranchOpcode, BranchOpcode, &BranchOpcode::branch_entry> branch_list;

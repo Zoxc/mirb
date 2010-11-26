@@ -18,8 +18,8 @@ namespace Mirb
 		{
 			push_imm((size_t)block);
 			
-			stream.b(0xE9);
-			stream.d((size_t)Arch::Support::jit_stub - ((size_t)stream.position + 4));
+			stream.u8(0xE9);
+			stream.u32((size_t)Arch::Support::jit_stub - ((size_t)stream.position + 4));
 		}
 
 		template<typename T> struct Generate
@@ -61,30 +61,30 @@ namespace Mirb
 
 				#ifdef MIRB_SEH_EXCEPTIONS
 					// prev @ ebp - 20
-					stream.b(0x64); // push dword [fs:0]
-					stream.b(0xFF);
-					stream.b(0x35);
-					stream.d(0);
+					stream.u8(0x64); // push dword [fs:0]
+					stream.u8(0xFF);
+					stream.u8(0x35);
+					stream.u32(0);
 
 					/*
 					 * Append the struct to the linked list
 					 */
-					stream.b(0x64); // mov dword [fs:0], esp
-					stream.b(0x89);
-					stream.b(0x25);
-					stream.d(0);
+					stream.u8(0x64); // mov dword [fs:0], esp
+					stream.u8(0x89);
+					stream.u8(0x25);
+					stream.u32(0);
 				#else
 					// prev @ ebp - 20
-					stream.b(0xFF); // push dword [Arch::Support::current_frame]
+					stream.u8(0xFF); // push dword [Arch::Support::current_frame]
 					modrm(0, 6, Arch::Register::BP);
-					stream.d((size_t)&Arch::Support::current_frame);
+					stream.u32((size_t)&Arch::Support::current_frame);
 
 					/*
 					 * Append the struct to the linked list
 					 */
-					stream.b(0x89); // mov dword [Arch::Support::current_frame], esp
+					stream.u8(0x89); // mov dword [Arch::Support::current_frame], esp
 					modrm(0, Arch::Register::SP, Arch::Register::BP);
-					stream.d((size_t)&Arch::Support::current_frame);
+					stream.u32((size_t)&Arch::Support::current_frame);
 				#endif
 			}
 			else
@@ -92,8 +92,8 @@ namespace Mirb
 			
 			if(block->stack_vars)
 			{
-				stream.b(0x81); stream.b(0xEC); // add esp,
-				stream.d(block->stack_vars * sizeof(size_t));
+				stream.u8(0x81); stream.u8(0xEC); // add esp,
+				stream.u32(block->stack_vars * sizeof(size_t));
 				
 				block->final->ebp_offset += block->stack_vars * sizeof(size_t);
 			}
@@ -133,19 +133,19 @@ namespace Mirb
 			{
 				block->final->epilog = stream.position;
 
-				stream.b(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
-				stream.b(0x4D);
-				stream.b(-20);
+				stream.u8(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+				stream.u8(0x4D);
+				stream.u8(-20);
 
 				#ifdef MIRB_SEH_EXCEPTIONS
-					stream.b(0x64); // mov dword [fs:0], ecx
-					stream.b(0x89);
-					stream.b(0x0D);
-					stream.d(0);	
+					stream.u8(0x64); // mov dword [fs:0], ecx
+					stream.u8(0x89);
+					stream.u8(0x0D);
+					stream.u32(0);
 				#else
-					stream.b(0x89); // mov dword [Arch::Support::current_frame], ecx
+					stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
 					modrm(0, Arch::Register::CX, Arch::Register::BP);
-					stream.d((size_t)&Arch::Support::current_frame);
+					stream.u32((size_t)&Arch::Support::current_frame);
 				#endif
 				
 				for(auto i = block->final->exception_blocks.begin(); i != block->final->exception_blocks.end(); ++i)
@@ -178,19 +178,19 @@ namespace Mirb
 			}
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-				stream.b(0x5F); // pop edi
+				stream.u8(0x5F); // pop edi
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-				stream.b(0x5E); // pop esi
+				stream.u8(0x5E); // pop esi
 			
 			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-				stream.b(0x5B); // pop ebx
+				stream.u8(0x5B); // pop ebx
 
 			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
-			stream.b(0x5D); // pop ebp
+			stream.u8(0x5D); // pop ebp
 			
-			stream.b(0xC2); // ret 16
-			stream.w(16);
+			stream.u8(0xC2); // ret 16
+			stream.u16(16);
 			
 
 			// Update the branch targets
@@ -238,25 +238,25 @@ namespace Mirb
 		void NativeGenerator::rex(size_t r, size_t x, size_t b)
 		{
 			if(long_mode)
-				stream.b(0x40 | 8 | r << 2 | x << 1 | b);
+				stream.u8(0x40 | 8 | r << 2 | x << 1 | b);
 		}
 		
 		void NativeGenerator::modrm(size_t mod, size_t reg, size_t rm)
 		{
-			stream.b(mod << 6 | reg << 3 | rm);
+			stream.u8(mod << 6 | reg << 3 | rm);
 		}
 
 		void NativeGenerator::stack_modrm(size_t reg, Tree::Variable *var)
 		{
 			modrm(1, reg, Arch::Register::BP);
-			stream.b((int8_t)stack_offset(var));
+			stream.i8(stack_offset(var));
 		}
 
 		void NativeGenerator::mov_imm_to_reg(size_t imm, size_t reg)
 		{
 			rex(0, 0, reg_high(reg));
-			stream.b(0xB8 + reg_low(reg));
-			stream.s(imm);
+			stream.u8(0xB8 + reg_low(reg));
+			stream.u(imm);
 		}
 
 		void NativeGenerator::mov_imm_to_var(size_t imm, Tree::Variable *var)
@@ -281,9 +281,9 @@ namespace Mirb
 				}
 				else
 				{
-					stream.b(0xC7);
+					stream.u8(0xC7);
 					stack_modrm(0, var);
-					stream.s(imm);
+					stream.u(imm);
 				}
 			}
 		}
@@ -300,9 +300,9 @@ namespace Mirb
 
 		void NativeGenerator::stack_pop(size_t count)
 		{
-			stream.b(0x81);
-			stream.b(0xC4);
-			stream.d(sizeof(size_t) * count);
+			stream.u8(0x81);
+			stream.u8(0xC4);
+			stream.u32(sizeof(size_t) * count);
 		}
 
 		void NativeGenerator::mov_reg_to_reg(size_t src, size_t dst)
@@ -311,7 +311,7 @@ namespace Mirb
 				return;
 
 			rex(reg_high(src), 0, reg_high(dst));
-			stream.b(0x89);
+			stream.u8(0x89);
 			modrm(3, reg_low(src), reg_low(dst));
 		}
 		
@@ -322,7 +322,7 @@ namespace Mirb
 			else
 			{
 				rex(reg_high(reg), 0, 0);
-				stream.b(0x89);
+				stream.u8(0x89);
 				stack_modrm(reg_low(reg), var);
 			}
 		}
@@ -334,7 +334,7 @@ namespace Mirb
 			else
 			{
 				rex(reg_high(reg), 0, 0);
-				stream.b(0x8B);
+				stream.u8(0x8B);
 				stack_modrm(reg_low(reg), var);
 			}
 		}
@@ -342,9 +342,9 @@ namespace Mirb
 		void NativeGenerator::mov_arg_to_reg(size_t arg, size_t reg)
 		{
 			rex(reg_high(reg), 0, 0);
-			stream.b(0x8B);
+			stream.u8(0x8B);
 			modrm(1, reg, Arch::Register::BP);
-			stream.b((int8_t)arg * sizeof(size_t) + 2 * sizeof(size_t));
+			stream.i8(arg * sizeof(size_t) + 2 * sizeof(size_t));
 		}
 
 		void NativeGenerator::mov_arg_to_var(size_t arg, Tree::Variable *var)
@@ -361,12 +361,12 @@ namespace Mirb
 		void NativeGenerator::mov_reg_index_to_reg(size_t sreg, size_t index, size_t dreg)
 		{
 			rex(reg_high(dreg), 0, 0);
-			stream.b(0x8B);
+			stream.u8(0x8B);
 			
 			if(index)
 			{
 				modrm(1, reg_low(dreg), sreg);
-				stream.b((int8_t)index * sizeof(size_t));
+				stream.i8(index * sizeof(size_t));
 			}
 			else
 				modrm(0, reg_low(dreg), sreg);
@@ -388,12 +388,12 @@ namespace Mirb
 		void NativeGenerator::mov_reg_to_reg_index(size_t sreg, size_t dreg, size_t index)
 		{
 			rex(reg_high(sreg), 0, 0);
-			stream.b(0x89);
+			stream.u8(0x89);
 
 			if(index)
 			{
 				modrm(1, reg_low(sreg), dreg);
-				stream.b((int8_t)index * sizeof(size_t));
+				stream.i8(index * sizeof(size_t));
 			}
 			else
 				modrm(0, reg_low(sreg), dreg);
@@ -415,7 +415,7 @@ namespace Mirb
 		void NativeGenerator::push_reg(size_t reg)
 		{
 			rex(0, 0, reg_high(reg));
-			stream.b(0x50 + reg_low(reg));
+			stream.u8(0x50 + reg_low(reg));
 		}
 
 		void NativeGenerator::push_imm(size_t imm)
@@ -427,8 +427,8 @@ namespace Mirb
 			}
 			else
 			{
-				stream.b(0x68);
-				stream.s(imm);
+				stream.u8(0x68);
+				stream.u(imm);
 			}
 		}
 		
@@ -439,7 +439,7 @@ namespace Mirb
 			else
 			{
 				rex(0, 0, 0);
-				stream.b(0xFF);
+				stream.u8(0xFF);
 				stack_modrm(6, var);
 			}
 		}
@@ -451,9 +451,9 @@ namespace Mirb
 			debug_assert(spare == Arch::Register::AX);
 
 			rex(0, 0, 0);
-			stream.b(0x83); // and eax, ~(RT_FALSE | RT_NIL)
+			stream.u8(0x83); // and eax, ~(value_false | value_nil)
 			modrm(3, 4, Arch::Register::AX);
-			stream.b((int8_t)(~(RT_FALSE | RT_NIL)));
+			stream.i8((int8_t)~(value_false | value_nil));
 		}
 		
 		template<> void NativeGenerator::generate(MoveOp &op)
@@ -711,8 +711,8 @@ namespace Mirb
 		template<> void NativeGenerator::generate(BranchIfOp &op)
 		{
 			test_var(op.var);
-			stream.b(0x0F);
-			stream.b(0x85);
+			stream.u8(0x0F);
+			stream.u8(0x85);
 			op.code = stream.reserve(4);
 			branch_list.append(&op);
 		}
@@ -720,15 +720,15 @@ namespace Mirb
 		template<> void NativeGenerator::generate(BranchUnlessOp &op)
 		{
 			test_var(op.var);
-			stream.b(0x0F);
-			stream.b(0x84);
+			stream.u8(0x0F);
+			stream.u8(0x84);
 			op.code = stream.reserve(4);
 			branch_list.append(&op);
 		}
 		
 		template<> void NativeGenerator::generate(BranchOp &op)
 		{
-			stream.b(0xE9);
+			stream.u8(0xE9);
 			op.code = stream.reserve(4);
 			branch_list.append(&op);
 		}
@@ -741,10 +741,10 @@ namespace Mirb
 		template<> void NativeGenerator::generate(HandlerOp &op)
 		{
 			// TODO: Use inc/dec where possible
-			stream.b(0xC7);
+			stream.u8(0xC7);
 			modrm(1, 0, Arch::Register::BP);
-			stream.b((int8_t)handler_offset);
-			stream.d(op.id);
+			stream.i8((int8_t)handler_offset);
+			stream.u32(op.id);
 		}
 		
 		template<> void NativeGenerator::generate(FlushOp &op)
@@ -753,15 +753,15 @@ namespace Mirb
 
 		template<> void NativeGenerator::generate(UnwindOp &op)
 		{
-			stream.b(0x83); // cmp dword [ebp + handling_offset], 0
+			stream.u8(0x83); // cmp dword [ebp + handling_offset], 0
 			modrm(1, 7, Arch::Register::BP);
-			stream.b((int8_t)handling_offset);
-			stream.b(0);
+			stream.i8((int8_t)handling_offset);
+			stream.u8(0);
 
-			stream.b(0x74); // jz +1
-			stream.b(1);
+			stream.u8(0x74); // jz +1
+			stream.u8(1);
 
-			stream.b(0xC3); // ret
+			stream.u8(0xC3); // ret
 		}
 		
 		template<> void NativeGenerator::generate(UnwindReturnOp &op)
