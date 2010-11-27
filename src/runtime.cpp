@@ -199,7 +199,7 @@ namespace Mirb
 
 	void class_name(value_t obj, value_t under, Symbol *name)
 	{
-		value_t under_path = get_var(under, Symbol::from_string("__classpath__"));
+		value_t under_path = get_var(under, Symbol::from_literal("__classpath__"));
 
 		value_t new_path;
 
@@ -211,12 +211,12 @@ namespace Mirb
 		{
  			new_path = rt_dup_string(under_path);
 
-			rt_concat_string(new_path, String::from_string("::"));
+			rt_concat_string(new_path, String::from_literal("::"));
 			rt_concat_string(new_path, String::from_symbol(name));
 		}
 
-		set_var(obj, Symbol::from_string("__classname__"), String::from_symbol(name));
-		set_var(obj, Symbol::from_string("__classpath__"), new_path);
+		set_var(obj, Symbol::from_literal("__classname__"), String::from_symbol(name));
+		set_var(obj, Symbol::from_literal("__classpath__"), new_path);
 
 		set_const(under, name, obj);
 	}
@@ -278,7 +278,7 @@ namespace Mirb
 		if(Value::type(result) == Value::String)
 			return result;
 		else
-			return String::from_string("nil");
+			return String::from_literal("nil");
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -481,7 +481,7 @@ namespace Mirb
 
 	mirb_compiled_block(main_to_s)
 	{
-		return String::from_string("main");
+		return String::from_literal("main");
 	}
 
 	mirb_compiled_block(main_include)

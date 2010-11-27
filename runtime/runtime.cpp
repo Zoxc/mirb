@@ -51,7 +51,8 @@ void rt_destroy(void)
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
 	MemoryPool memory_pool;
-	Parser parser(symbol_pool, memory_pool, CharArray(filename));
+	CharArray filename_str(filename);
+	Parser parser(symbol_pool, memory_pool, filename_str);
 	
 	parser.load((const char_t *)input, strlen(input));
 	

@@ -31,8 +31,10 @@ int main()
 		
 		std::getline(std::cin, line);
 		
+		CharArray filename("Input");
+		
 		MemoryPool memory_pool;
-		Parser parser(symbol_pool, memory_pool, CharArray("Input"));
+		Parser parser(symbol_pool, memory_pool, filename);
 		
 		parser.load((const char_t *)line.c_str(), line.length());
 		

@@ -47,7 +47,6 @@ namespace Mirb
 
 			static Symbol *create_value(GC::Ref alloc_ref, CharArray &key)
 			{
-				size_t length = key.length;
 				Symbol *result = (Symbol *)rt_alloc_root(sizeof(Symbol));
 
 				rt_symbol_setup((rt_value)result);
@@ -67,6 +66,11 @@ namespace Mirb
 		public:
 			SymbolPool() : SymbolPoolHashTable(8) {}
 			
+			Symbol *get(CharArray &char_array)
+			{
+				return SymbolPoolHashTable::get(char_array);
+			}
+
 			Symbol *get(const char *string)
 			{
 				CharArray key((const char_t *)string);

@@ -9,8 +9,8 @@ namespace Mirb
 	{
 		public:
 			Object(Value::Type type, value_t instance_of) : type(type), instance_of(instance_of) {}
-			Object::Object() : type(Value::Object), instance_of(Object::class_ref) {}
-
+			Object() : type(Value::Object), instance_of(Object::class_ref) {}
+			
 			static value_t allocate();
 			
 			const Value::Type type;

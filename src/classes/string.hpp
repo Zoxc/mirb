@@ -12,9 +12,16 @@ namespace Mirb
 			String(CharArray &char_array) : Object(Value::String, class_ref), string(char_array) {}
 			String(const char_t *c_str, size_t length) : Object(Value::String, class_ref), string(c_str, length) {}
 			
+			template<size_t length> String(const char (&string)[length]) : Object(Value::String, class_ref), string(string) {}
+			
 			std::string get_string()
 			{
 				return string.get_string();
+			}
+			
+			template<size_t length> static value_t from_literal(const char (&string)[length])
+			{
+				return auto_cast(new (gc) String(string));
 			}
 			
 			CharArray string;
