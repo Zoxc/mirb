@@ -44,6 +44,7 @@
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
+    <ClInclude Include="..\..\src\classes\class.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
     <ClInclude Include="..\..\src\classes\symbol.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\range.hpp" />
+    <ClInclude Include="..\..\src\runtime.hpp" />
     <ClInclude Include="..\..\src\simple-list.hpp" />
     <ClInclude Include="..\..\src\simple-set.hpp" />
     <ClInclude Include="..\..\src\simpler-list.hpp" />
@@ -101,6 +103,9 @@
     <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
     <ClCompile Include="..\..\src\arch\x86\support.cpp" />
     <ClCompile Include="..\..\src\arch\x86\x86.cpp" />
+    <ClCompile Include="..\..\src\classes\class.cpp" />
+    <ClCompile Include="..\..\src\classes\object.cpp" />
+    <ClCompile Include="..\..\src\classes\symbol.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
@@ -118,6 +123,7 @@
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
     <ClCompile Include="..\..\src\parser\parser.cpp" />
     <ClCompile Include="..\..\src\parser\structures.cpp" />
+    <ClCompile Include="..\..\src\runtime.cpp" />
     <ClCompile Include="..\..\src\support.cpp" />
     <ClCompile Include="..\..\src\symbol-pool.cpp" />
     <ClCompile Include="..\..\src\tree\node.cpp" />

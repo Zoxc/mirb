@@ -136,8 +136,8 @@ namespace Mirb
 		allow_keywords(lexeme.allow_keywords),
 		type(lexeme.type),
 		prev(lexeme.prev),
-		symbol(lexeme.symbol),
-		curlies(lexeme.curlies)
+		curlies(lexeme.curlies),
+		symbol(lexeme.symbol)
 	{
 	}
 	

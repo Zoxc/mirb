@@ -104,7 +104,11 @@
 		<Unit filename="src\arch\x86\x86.hpp" />
 		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
+		<Unit filename="src\classes\class.cpp" />
+		<Unit filename="src\classes\class.hpp" />
+		<Unit filename="src\classes\object.cpp" />
 		<Unit filename="src\classes\object.hpp" />
+		<Unit filename="src\classes\symbol.cpp" />
 		<Unit filename="src\classes\symbol.hpp" />
 		<Unit filename="src\codegen\block.cpp" />
 		<Unit filename="src\codegen\block.hpp" />
@@ -140,6 +144,8 @@
 		<Unit filename="src\parser\parser.hpp" />
 		<Unit filename="src\parser\structures.cpp" />
 		<Unit filename="src\range.hpp" />
+		<Unit filename="src\runtime.cpp" />
+		<Unit filename="src\runtime.hpp" />
 		<Unit filename="src\simple-list.hpp" />
 		<Unit filename="src\simple-set.hpp" />
 		<Unit filename="src\simpler-list.hpp" />

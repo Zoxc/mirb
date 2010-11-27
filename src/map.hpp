@@ -32,7 +32,7 @@ namespace Mirb
 			size_t mask;
 			size_t entries;
 			
-			bool store(V *table, size_t mask, K key, V value)
+			bool store(Pair **table, size_t mask, K key, V value)
 			{
 				size_t index = T::hash_key(key) & mask;
 				Pair *pair = table[index];
@@ -69,7 +69,7 @@ namespace Mirb
 				size_t size = (this->mask + 1) << 1;
 				size_t mask = size - 1;
 
-				Pair **table = alloc_ref.alloc(size * sizeof(V));
+				Pair **table = (Pair **)alloc_ref.alloc(size * sizeof(V));
 				std::memset(table, 0, size * sizeof(Pair *));
 
 				Pair **end = this->table + size;
@@ -111,7 +111,7 @@ namespace Mirb
 				size_t size = 1 << initial;
 				mask = size - 1;
 
-				table = alloc_ref.alloc(size * sizeof(V));
+				table = (Pair **)alloc_ref.alloc(size * sizeof(V));
 				memset(table, 0, size * sizeof(V));
 			}
 
@@ -165,15 +165,59 @@ namespace Mirb
 
 				return T::invalid_value();
 			}
+			
+			template<typename func> V try_get(K key, func fails)
+			{
+				size_t index = T::hash_key(key) & mask;
+				Pair *pair = table[index];
+
+				while(pair)
+				{
+					if(pair->key == key)
+						return pair->value;
+					
+					pair = pair->next;
+				}
+
+				return fails();
+			}
+			
+			V *get_ref(K key)
+			{
+				size_t index = T::hash_key(key) & mask;
+				Pair *pair = table[index];
+
+				while(pair)
+				{
+					if(pair->key == key)
+						return &pair->value;
+					
+					pair = pair->next;
+				}
+
+				return 0;
+			}
+			
+			bool has(K key)
+			{
+				size_t index = T::hash_key(key) & mask;
+				Pair *pair = table[index];
+
+				while(pair)
+				{
+					if(pair->key == key)
+						return true;
+					
+					pair = pair->next;
+				}
+
+				return false;
+			}
 
 			void set(K key, V value)
 			{
-				V existing = store(table, mask, key, value);
-
 				if(store(table, mask, key, value))
 					increase();
-
-				return existing;
 			}
 	};
 };

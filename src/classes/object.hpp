@@ -10,7 +10,12 @@ namespace Mirb
 		public:
 			Value::Type type;
 			value_t instance_of;
-			ValueMap *ivars;
+			ValueMap *vars;
+
+			static const size_t vars_initial = 1;
+
+			static value_t class_ref;
 	};
+
 };
 

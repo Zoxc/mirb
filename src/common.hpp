@@ -32,15 +32,27 @@ namespace Mirb
 		return value & ~(alignment - 1);
 	};
 	
-	static inline void __noreturn debug_fail(std::string message = "");
+	static inline void __noreturn runtime_fail(std::string message = "");
 
-	template<typename T> static inline void debug_assert(T expr, std::string message = "")
+	template<typename T> static inline void runtime_assert(T expr, std::string message = "")
 	{
 		assert(expr);
 	}
 
-	static inline void debug_fail(std::string message)
+	static inline void runtime_fail(std::string message)
 	{
 		assert(0);
+	}
+	
+	static inline void __noreturn debug_fail(std::string message = "");
+
+	template<typename T> static inline void debug_assert(T expr, std::string message = "")
+	{
+		runtime_assert(expr, message);
+	}
+
+	static inline void debug_fail(std::string message)
+	{
+		runtime_fail(message);
 	}
 };

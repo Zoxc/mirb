@@ -27,7 +27,7 @@ namespace Mirb
 				
 				std::string imm(Symbol *imm)
 				{
-					return this->imm((value_t)Value::cast(imm));
+					return this->imm((value_t)auto_cast(imm));
 				};
 				
 				std::string label(BasicBlock *label);

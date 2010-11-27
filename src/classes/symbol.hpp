@@ -1,5 +1,6 @@
 #pragma once
 #include "../common.hpp"
+#include "../value.hpp"
 #include "../hash-table.hpp"
 #include "../gc.hpp"
 
@@ -42,5 +43,7 @@ namespace Mirb
 					return result;
 				}
 			}
+
+			static value_t class_ref;
 	};
 };

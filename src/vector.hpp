@@ -72,9 +72,9 @@ namespace Mirb
 			}
 			
 			Vector(const Vector &vector) :
+				alloc_ref(vector.alloc_ref),
 				_size(vector._size),
-				_capacity(vector._size),
-				alloc_ref(vector.alloc_ref)
+				_capacity(vector._size)
 			{
 				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
 
