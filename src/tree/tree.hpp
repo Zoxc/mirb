@@ -1,9 +1,9 @@
 #pragma once
 #include "../../runtime/runtime.hpp"
 #include "../common.hpp"
-#include "../simpler-list.hpp"
-#include "../vector.hpp"
-#include "../simple-set.hpp"
+#include "../generic/simpler-list.hpp"
+#include "../generic/vector.hpp"
+#include "../generic/simple-set.hpp"
 #include "nodes.hpp"
 
 namespace Mirb

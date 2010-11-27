@@ -1,6 +1,6 @@
 #include "message.hpp"
 #include "parser/parser.hpp"
-#include "range.hpp"
+#include "generic/range.hpp"
 
 namespace Mirb
 {

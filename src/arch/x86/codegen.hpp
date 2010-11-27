@@ -2,7 +2,7 @@
 #include "x86.hpp"
 #include "../../codegen/bytecode.hpp"
 #include "../../codegen/opcodes.hpp"
-#include "../../mem_stream.hpp"
+#include "../../generic/mem_stream.hpp"
 
 namespace Mirb
 {

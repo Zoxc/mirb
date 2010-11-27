@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "memory-pool.hpp"
+#include "generic/memory-pool.hpp"
 #include "block.hpp"
 
 namespace Mirb

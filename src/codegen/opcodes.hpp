@@ -1,9 +1,9 @@
 #pragma once
 #include "../common.hpp"
 #include "../value.hpp"
-#include "../simple-list.hpp"
-#include "../simpler-list.hpp"
-#include "../list.hpp"
+#include "../generic/simple-list.hpp"
+#include "../generic/simpler-list.hpp"
+#include "../generic/list.hpp"
 
 namespace Mirb
 {

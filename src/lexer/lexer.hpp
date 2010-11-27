@@ -1,6 +1,6 @@
 #pragma once
 #include "../common.hpp"
-#include "../range.hpp"
+#include "../generic/range.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
 

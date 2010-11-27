@@ -1,8 +1,8 @@
 #pragma once
 #include "../common.hpp"
-#include "../range.hpp"
 #include "../symbol-pool.hpp"
-#include "../vector.hpp"
+#include "../generic/range.hpp"
+#include "../generic/vector.hpp"
 
 namespace Mirb
 {

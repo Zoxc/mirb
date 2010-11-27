@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "allocator.hpp"
+#include "generic/allocator.hpp"
 
 namespace Mirb
 {

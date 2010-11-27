@@ -1,8 +1,8 @@
 #pragma once
 #include "common.hpp"
-#include "map.hpp"
-#include "vector.hpp"
-#include "simple-list.hpp"
+#include "generic/map.hpp"
+#include "generic/vector.hpp"
+#include "generic/simple-list.hpp"
 #include "arch/block.hpp"
 
 struct exception_block;

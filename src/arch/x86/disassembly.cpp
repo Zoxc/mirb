@@ -3,7 +3,7 @@ extern "C"
 	#include <udis86.h>
 };
 
-#include "../../mem_stream.hpp"
+#include "../../generic/mem_stream.hpp"
 #include "disassembly.hpp"
 #include "support.hpp"
 

@@ -2,7 +2,7 @@
 #include "disassembly.hpp"
 #include "support.hpp"
 #include "../../tree/tree.hpp"
-#include "../../mem_stream.hpp"
+#include "../../generic/mem_stream.hpp"
 #include "../../block.hpp"
 
 namespace Mirb

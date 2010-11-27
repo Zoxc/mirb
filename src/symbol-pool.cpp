@@ -1,4 +1,4 @@
-#include "range.hpp"
+#include "generic/range.hpp"
 #include "symbol-pool.hpp"
 
 namespace Mirb

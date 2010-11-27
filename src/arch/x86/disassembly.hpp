@@ -1,7 +1,7 @@
 #pragma once
 #include "../../common.hpp"
-#include "../../vector.hpp"
-#include "../../memory-pool.hpp"
+#include "../../generic/vector.hpp"
+#include "../../generic/memory-pool.hpp"
 
 namespace Mirb
 {

@@ -1,9 +1,9 @@
 #pragma once
 #include "../common.hpp"
-#include "../memory-pool.hpp"
-#include "../list.hpp"
-#include "../vector.hpp"
-#include "../bit-set-wrapper.hpp"
+#include "../generic/memory-pool.hpp"
+#include "../generic/list.hpp"
+#include "../generic/vector.hpp"
+#include "../generic/bit-set-wrapper.hpp"
 #include "opcodes.hpp"
 #include "../tree/tree.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../common.hpp"
-#include "../simple-list.hpp"
+#include "../generic/simple-list.hpp"
 
 namespace Mirb
 {

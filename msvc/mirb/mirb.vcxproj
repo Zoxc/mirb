@@ -31,7 +31,6 @@
     <ClInclude Include="..\..\runtime\modules\kernel.hpp" />
     <ClInclude Include="..\..\runtime\runtime.hpp" />
     <ClInclude Include="..\..\runtime\x86.hpp" />
-    <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\arch\arch.hpp" />
     <ClInclude Include="..\..\src\arch\block.hpp" />
     <ClInclude Include="..\..\src\arch\bytecode.hpp" />
@@ -42,7 +41,6 @@
     <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
     <ClInclude Include="..\..\src\arch\x86\support.hpp" />
     <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
-    <ClInclude Include="..\..\src\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\classes\class.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
@@ -55,21 +53,24 @@
     <ClInclude Include="..\..\src\common.hpp" />
     <ClInclude Include="..\..\src\compiler.hpp" />
     <ClInclude Include="..\..\src\gc.hpp" />
-    <ClInclude Include="..\..\src\hash-table.hpp" />
+    <ClInclude Include="..\..\src\generic\allocator.hpp" />
+    <ClInclude Include="..\..\src\generic\bit-set-wrapper.hpp" />
+    <ClInclude Include="..\..\src\generic\hash-table.hpp" />
+    <ClInclude Include="..\..\src\generic\list.hpp" />
+    <ClInclude Include="..\..\src\generic\map.hpp" />
+    <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
+    <ClInclude Include="..\..\src\generic\mem_stream.hpp" />
+    <ClInclude Include="..\..\src\generic\range.hpp" />
+    <ClInclude Include="..\..\src\generic\simple-list.hpp" />
+    <ClInclude Include="..\..\src\generic\simple-set.hpp" />
+    <ClInclude Include="..\..\src\generic\simpler-list.hpp" />
+    <ClInclude Include="..\..\src\generic\vector.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
-    <ClInclude Include="..\..\src\list.hpp" />
-    <ClInclude Include="..\..\src\map.hpp" />
-    <ClInclude Include="..\..\src\memory-pool.hpp" />
-    <ClInclude Include="..\..\src\mem_stream.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
-    <ClInclude Include="..\..\src\range.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
-    <ClInclude Include="..\..\src\simple-list.hpp" />
-    <ClInclude Include="..\..\src\simple-set.hpp" />
-    <ClInclude Include="..\..\src\simpler-list.hpp" />
     <ClInclude Include="..\..\src\support.hpp" />
     <ClInclude Include="..\..\src\symbol-pool.hpp" />
     <ClInclude Include="..\..\src\tree\node.hpp" />
@@ -77,7 +78,6 @@
     <ClInclude Include="..\..\src\tree\printer.hpp" />
     <ClInclude Include="..\..\src\tree\tree.hpp" />
     <ClInclude Include="..\..\src\value.hpp" />
-    <ClInclude Include="..\..\src\vector.hpp" />
     <ClInclude Include="..\..\vector.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -112,12 +112,12 @@
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />
+    <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />
     <ClCompile Include="..\..\src\lexer\lexer.cpp" />
     <ClCompile Include="..\..\src\lexer\numbers.cpp" />
     <ClCompile Include="..\..\src\lexer\strings.cpp" />
-    <ClCompile Include="..\..\src\memory-pool.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />

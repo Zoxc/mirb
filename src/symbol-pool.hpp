@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "hash-table.hpp"
+#include "generic/hash-table.hpp"
 #include "gc.hpp"
 #include "classes/symbol.hpp"
 

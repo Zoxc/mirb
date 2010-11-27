@@ -1,7 +1,7 @@
 #pragma once
 #include "../value.hpp"
 #include "../gc.hpp"
-#include "../map.hpp"
+#include "../generic/map.hpp"
 
 namespace Mirb
 {

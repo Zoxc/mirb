@@ -1,7 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "gc.hpp"
-#include "map.hpp"
+#include "generic/map.hpp"
 #include "../runtime/runtime.hpp"
 
 struct rt_common;

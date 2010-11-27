@@ -8,9 +8,6 @@
 #include "src/compiler.hpp"
 #include "src/parser/parser.hpp"
 #include "src/block.hpp"
-#include "src/mem_stream.hpp"
-#include "src/arch/codegen.hpp"
-#include "src/codegen/bytecode.hpp"
 
 #ifdef DEBUG
 	#include "src/tree/printer.hpp"

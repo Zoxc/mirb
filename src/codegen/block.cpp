@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "../memory-pool.hpp"
+#include "../generic/memory-pool.hpp"
 #include "../arch/arch.hpp"
 #include "../arch/codegen.hpp"
 #include "block.hpp"

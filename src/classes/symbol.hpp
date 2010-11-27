@@ -1,7 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include "../value.hpp"
-#include "../hash-table.hpp"
+#include "../generic/hash-table.hpp"
 #include "../gc.hpp"
 
 #include "../../runtime/classes/symbol.hpp"

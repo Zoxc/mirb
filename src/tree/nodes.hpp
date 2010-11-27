@@ -2,7 +2,7 @@
 #include "../common.hpp"
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
-#include "../simpler-list.hpp"
+#include "../generic/simpler-list.hpp"
 #include "node.hpp"
 
 namespace Mirb
