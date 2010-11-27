@@ -14,6 +14,8 @@ namespace Mirb
 			bool singleton;
 
 			static value_t class_ref;
+
+			static void initialize();
 	};
 };
 

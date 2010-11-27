@@ -26,7 +26,7 @@ namespace Mirb
 				else
 					return string.get_string();
 			}
-			
+
 			static Symbol *from_string(const char *string);
 			static Symbol *from_string(std::string string);
 			static Symbol *from_char_array(CharArray &char_array);
@@ -39,5 +39,7 @@ namespace Mirb
 			}
 
 			static value_t class_ref;
+
+			static void initialize();
 	};
 };

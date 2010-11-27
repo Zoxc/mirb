@@ -1,0 +1,29 @@
+#include "nil-class.hpp"
+#include "object.hpp"
+#include "symbol.hpp"
+#include "string.hpp"
+#include "../runtime.hpp"
+
+namespace Mirb
+{
+	value_t NilClass::class_ref;
+
+	mirb_compiled_block(nilclass_to_s)
+	{
+		return rt_string_from_cstr("");
+	}
+
+	mirb_compiled_block(nilclass_inspect)
+	{
+		return String::from_literal("nil");
+	}
+	
+	void NilClass::initialize()
+	{
+		define_method(NilClass::class_ref, "inspect", nilclass_inspect);
+		define_method(NilClass::class_ref, "to_s", nilclass_to_s);
+
+		set_const(Object::class_ref, Symbol::from_literal("NIL"), value_nil);
+	};
+};
+

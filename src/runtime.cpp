@@ -8,9 +8,9 @@
 #include "classes/symbol.hpp"
 #include "classes/class.hpp"
 #include "classes/fixnum.hpp"
-#include "classes/true.hpp"
-#include "classes/false.hpp"
-#include "classes/nil.hpp"
+#include "classes/true-class.hpp"
+#include "classes/false-class.hpp"
+#include "classes/nil-class.hpp"
 #include "classes/string.hpp"
 
 #include "../runtime/classes/module.hpp"
@@ -30,13 +30,13 @@ namespace Mirb
 			switch(obj)
 			{
 				case RT_TRUE:
-					return True::class_ref;
+					return TrueClass::class_ref;
 
 				case RT_FALSE:
-					return False::class_ref;
+					return FalseClass::class_ref;
 
 				case RT_NIL:
-					return Nil::class_ref;
+					return NilClass::class_ref;
 
 				default:
 					Mirb::debug_fail("Unknown literal type");
@@ -510,7 +510,7 @@ namespace Mirb
 		class_name(Symbol::class_ref, Object::class_ref, Symbol::from_string("Symbol"));
 		class_name(String::class_ref, Object::class_ref, Symbol::from_string("String"));
 
-		main = Object::allocate();
+		main = Object::allocate(Object::class_ref);
 
 		define_singleton_method(main, "to_s", &main_to_s);
 		define_singleton_method(main, "include", &main_include);

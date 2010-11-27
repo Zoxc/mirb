@@ -1,5 +1,6 @@
 #include "char-array.hpp"
 #include "gc.hpp"
+#include "classes/string.hpp"
 
 namespace Mirb
 {
@@ -23,8 +24,13 @@ namespace Mirb
 	{
 		*this = string;
 	}
-
+	
 	CharArray::CharArray(CharArray &char_array)
+	{
+		*this = char_array;
+	}
+	
+	CharArray::CharArray(CharArray &&char_array)
 	{
 		*this = char_array;
 	}
@@ -55,7 +61,7 @@ namespace Mirb
 		return *this;
 	}
 
-	CharArray& CharArray::operator=(CharArray& other)
+	CharArray& CharArray::operator=(CharArray &other)
 	{	
 		if(this == &other)
 			return *this;
@@ -66,6 +72,56 @@ namespace Mirb
 		shared = true;
 		other.shared = true;
 
+		return *this;
+	}
+	
+	CharArray& CharArray::operator=(CharArray &&other)
+	{	
+		if(this == &other)
+			return *this;
+
+		length = other.length;
+		data = other.data;
+		shared = other.shared;
+
+		return *this;
+	}
+
+	void CharArray::localize()
+	{
+		if(shared)
+		{
+			char_t *new_data = (char_t *)gc.alloc(length);
+
+			memcpy(new_data, data, length);
+
+			data = new_data;
+			shared = false;
+		}
+	}
+
+	void CharArray::append(CharArray &&other)
+	{
+		CharArray &ref = other;
+		append(ref);
+	}
+	
+	void CharArray::append(CharArray& other)
+	{
+		localize();
+
+		char_t *other_data = other.data;
+
+		data = (char_t *)gc.realloc(data, length, length + other.length);
+		memcpy(data + length, other_data, other.length);
+
+		length += other.length;
+	}
+
+	CharArray &CharArray::operator+=(CharArray& other)
+	{
+		append(other);
+		
 		return *this;
 	}
 	
@@ -90,4 +146,45 @@ namespace Mirb
 		return hash;
 	}
 	
+	CharArray operator+(CharArray &lhs, CharArray &rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(rhs);
+		return char_array;
+	}
+
+	CharArray operator+(CharArray &&lhs, CharArray &rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(rhs);
+		return char_array;
+	}
+
+	CharArray operator+(CharArray &lhs, CharArray &&rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(rhs);
+		return char_array;
+	}
+
+	CharArray operator+(CharArray &&lhs, CharArray &&rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(rhs);
+		return char_array;
+	}
+
+	value_t CharArray::to_string()
+	{
+		return auto_cast(new (gc) String(*this));
+	}
+
+	CharArray CharArray::hex(size_t value)
+	{
+		char_t buffer[15];
+
+		size_t length = sprintf((char *)buffer, "%x", value);
+
+		return CharArray(buffer, length);
+	}
 };

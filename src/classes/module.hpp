@@ -21,6 +21,8 @@ namespace Mirb
 			BlockMap *get_methods();
 
 			static value_t class_ref;
+
+			static void initialize();
 	};
 };
 

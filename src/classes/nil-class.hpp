@@ -3,8 +3,10 @@
 
 namespace Mirb
 {
-	namespace True
+	namespace NilClass
 	{
 		extern value_t class_ref;
+
+		void initialize();
 	};
 };

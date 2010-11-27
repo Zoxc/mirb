@@ -32,5 +32,7 @@ namespace Mirb
 			static value_t from_string(const char *c_str);
 			
 			static value_t class_ref;
+
+			static void initialize();
 	};
 };
