@@ -129,32 +129,32 @@ namespace Mirb
 			return rt_string_from_cstr(string);
 		}
 		
-		value_t define_class(value_t obj, value_t name, value_t super)
+		value_t define_class(value_t obj, Symbol *name, value_t super)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
 			
-			return rt_define_class_symbol(obj, name, super);
+			return rt_define_class_symbol(obj, (rt_value)name, super);
 		}
 		
-		value_t define_module(value_t obj, value_t name)
+		value_t define_module(value_t obj, Symbol *name)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
 			
-			return rt_define_module_symbol(obj, name);
+			return rt_define_module_symbol(obj, (rt_value)name);
 		}
 		
-		void define_method(value_t obj, value_t name, Block *block)
+		void define_method(value_t obj, Symbol *name, Block *block)
 		{
 			if(obj == rt_main)
 				obj = rt_Object;
 
 			#ifdef DEBUG
-				printf("Defining method %s.%s\n", rt_string_to_cstr(rt_inspect(obj)), rt_symbol_to_cstr(name));
+				std::cout << "Defining method " << rt_string_to_cstr(rt_inspect(obj)) << "." << name->get_string() << "\n";
 			#endif
 			
-			rt_class_set_method(obj, name, block);
+			rt_class_set_method(obj, (rt_value)name, block);
 		}
 		
 		value_t call(Symbol *method_name, value_t obj, value_t block, size_t argc, value_t argv[])

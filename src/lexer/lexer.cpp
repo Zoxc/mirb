@@ -10,7 +10,6 @@ namespace Mirb
 			mapping.insert(std::pair<Symbol *, Lexeme::Type>(pool.get(Lexeme::names[i]), (Lexeme::Type)i));
 	}
 	
-	bool Lexer::jump_table_ready = 0;
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
 	
 	Lexer::Context::Context(Lexer &lexer) : input(lexer.input), lexeme(lexer.lexeme)
@@ -77,9 +76,7 @@ namespace Mirb
 
 	void Lexer::setup_jump_table()
 	{
-		if(jump_table_ready)
-			return;
-		
+		// TODO: Replace with lambda function
 		#define forchar(name, start, stop) for(int name = start; name <= stop; name++)
 
 		// Unknown
@@ -165,8 +162,6 @@ namespace Mirb
 		
 		jump_table['\''] = &Lexer::simple_string;
 		jump_table['\"'] = &Lexer::string;
-		
-		jump_table_ready = true;
 	}
 	
 	void Lexer::report_null()
@@ -180,7 +175,6 @@ namespace Mirb
 
 	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool)
 	{
-		setup_jump_table();
 	}
 	
 	void Lexer::restore(Context &context)

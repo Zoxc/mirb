@@ -19,7 +19,7 @@ namespace Mirb
 			push_imm((size_t)block);
 			
 			stream.u8(0xE9);
-			stream.u32((size_t)Arch::Support::jit_stub - ((size_t)stream.position + 4));
+			stream.u32((size_t)&Arch::Support::jit_stub - ((size_t)stream.position + 4));
 		}
 
 		template<typename T> struct Generate

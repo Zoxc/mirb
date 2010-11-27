@@ -25,7 +25,19 @@ namespace Mirb
 					return false;
 			}
 		}
-	
+		
+		template<> bool of_type<Mirb::Module>(value_t value)
+		{
+			switch(Value::type(value))
+			{
+				case Module:
+					return true;
+
+				default:
+					return false;
+			}
+		}
+
 		template<> bool of_type<Mirb::Class>(value_t value)
 		{
 			switch(Value::type(value))
@@ -39,10 +51,20 @@ namespace Mirb
 					return false;
 			}
 		}
-
+		
 		template<> bool of_type<Mirb::Symbol>(value_t value)
 		{
 			return Value::type(value) == Symbol;
+		}
+		
+		template<> bool of_type<Mirb::String>(value_t value)
+		{
+			return Value::type(value) == String;
+		}
+		
+		bool test(value_t value)
+		{
+			return (value & ~(value_nil | value_false)) != 0;
 		}
 
 		bool by_value(value_t value)

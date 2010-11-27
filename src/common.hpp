@@ -36,11 +36,16 @@ namespace Mirb
 
 	template<typename T> static inline void runtime_assert(T expr, std::string message = "")
 	{
+		if(!expr && message != "")
+			std::cout << message << "\n";
+
 		assert(expr);
 	}
 
 	static inline void runtime_fail(std::string message)
 	{
+		std::cout << message << "\n";
+
 		assert(0);
 	}
 	

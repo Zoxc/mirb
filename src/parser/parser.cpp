@@ -3,7 +3,7 @@
 
 namespace Mirb
 {
-	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool) : lexer(symbol_pool, memory_pool, *this), memory_pool(memory_pool), fragment(0), scope(0)
+	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, CharArray &filename) : lexer(symbol_pool, memory_pool, *this), filename(filename), memory_pool(memory_pool), fragment(0), scope(0)
 	{
 	}
 	
@@ -20,9 +20,10 @@ namespace Mirb
 	{
 		new StringMessage(*this, range, severity, text);
 	}
+
 	bool Parser::is_constant(Symbol *symbol)
 	{
-		const char c = *symbol->string.c_str;
+		const char c = *symbol->string.data;
 
 		return c >= 'A' && c <= 'Z';
 	}
@@ -543,7 +544,7 @@ namespace Mirb
 					
 					if(mutated)
 					{
-						rt_value name = rt_string_from_symbol((rt_value)node->method);
+						value_t name = rt_string_from_symbol((rt_value)node->method);
 					
 						rt_concat_string(name, rt_string_from_cstr("="));
 					

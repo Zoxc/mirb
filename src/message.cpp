@@ -29,7 +29,7 @@ namespace Mirb
 	{
 		std::stringstream result;
 
-		result << parser.filename << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
+		result << parser.filename.get_string() << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
 		
 		for(const char_t *i = range.line_start; i < range.start; ++i)
 		{

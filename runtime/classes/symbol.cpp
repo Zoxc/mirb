@@ -8,7 +8,7 @@ rt_value rt_Symbol;
 
 const char *rt_symbol_to_cstr(rt_value value)
 {
-	return (const char *)((Mirb::Symbol *)value)->string.c_str;
+	return (const char *)((Mirb::Symbol *)value)->string.data;
 }
 
 void rt_symbol_setup(rt_value symbol)

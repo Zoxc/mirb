@@ -51,9 +51,8 @@ void rt_destroy(void)
 rt_value rt_eval(rt_value self, rt_value method_name, rt_value method_module, const char *input, const char *filename)
 {
 	MemoryPool memory_pool;
-	Parser parser(symbol_pool, memory_pool);
+	Parser parser(symbol_pool, memory_pool, CharArray(filename));
 	
-	parser.filename = filename;
 	parser.load((const char_t *)input, strlen(input));
 	
  	Tree::Fragment fragment(0, Tree::Chunk::main_size);

@@ -16,17 +16,17 @@ namespace Mirb
 				return Mirb::Support::create_heap(bytes);
 			}
 
-			value_t __stdcall define_class(value_t obj, value_t name, value_t super)
+			value_t __stdcall define_class(value_t obj, Symbol *name, value_t super)
 			{
 				return Mirb::Support::define_class(obj, name, super);
 			}
 			
-			value_t __stdcall define_module(value_t obj, value_t name)
+			value_t __stdcall define_module(value_t obj, Symbol *name)
 			{
 				return Mirb::Support::define_module(obj, name);
 			}
 			
-			void __stdcall define_method(value_t obj, value_t name, Block *block)
+			void __stdcall define_method(value_t obj, Symbol *name, Block *block)
 			{
 				return Mirb::Support::define_method(obj, name, block);
 			}
@@ -137,6 +137,16 @@ namespace Mirb
 			value_t __cdecl create_closure(Block *block, value_t self, size_t argc, value_t *argv[])
 			{
 				return Mirb::Support::create_closure(block, self, argc, argv);
+			}
+			
+			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module)
+			{
+				return (compiled_block_t)rt_lookup(obj, (rt_value)name, result_module);
+			}
+
+			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module)
+			{
+				return (compiled_block_t)rt_lookup_super(module, (rt_value)name, result_module);
 			}
 
 			value_t __fastcall call(Symbol *method_name, value_t dummy, value_t obj, value_t block, size_t argc, value_t argv[])

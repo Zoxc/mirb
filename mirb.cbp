@@ -86,7 +86,6 @@
 			<Option compiler="gcc" use="1" buildCommand="as $file -o $object" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="src\allocator.hpp" />
 		<Unit filename="src\arch\arch.hpp" />
 		<Unit filename="src\arch\block.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />
@@ -102,7 +101,6 @@
 		<Unit filename="src\arch\x86\support.hpp" />
 		<Unit filename="src\arch\x86\x86.cpp" />
 		<Unit filename="src\arch\x86\x86.hpp" />
-		<Unit filename="src\bit-set-wrapper.hpp" />
 		<Unit filename="src\block.hpp" />
 		<Unit filename="src\classes\class.cpp" />
 		<Unit filename="src\classes\class.hpp" />
@@ -124,7 +122,19 @@
 		<Unit filename="src\compiler.hpp" />
 		<Unit filename="src\gc.cpp" />
 		<Unit filename="src\gc.hpp" />
-		<Unit filename="src\hash-table.hpp" />
+		<Unit filename="src\generic\allocator.hpp" />
+		<Unit filename="src\generic\bit-set-wrapper.hpp" />
+		<Unit filename="src\generic\hash-table.hpp" />
+		<Unit filename="src\generic\list.hpp" />
+		<Unit filename="src\generic\map.hpp" />
+		<Unit filename="src\generic\mem_stream.hpp" />
+		<Unit filename="src\generic\memory-pool.cpp" />
+		<Unit filename="src\generic\memory-pool.hpp" />
+		<Unit filename="src\generic\range.hpp" />
+		<Unit filename="src\generic\simple-list.hpp" />
+		<Unit filename="src\generic\simple-set.hpp" />
+		<Unit filename="src\generic\simpler-list.hpp" />
+		<Unit filename="src\generic\vector.hpp" />
 		<Unit filename="src\lexer\handlers.cpp" />
 		<Unit filename="src\lexer\input.hpp" />
 		<Unit filename="src\lexer\lexeme.cpp" />
@@ -133,9 +143,6 @@
 		<Unit filename="src\lexer\lexer.hpp" />
 		<Unit filename="src\lexer\numbers.cpp" />
 		<Unit filename="src\lexer\strings.cpp" />
-		<Unit filename="src\list.hpp" />
-		<Unit filename="src\memory-pool.cpp" />
-		<Unit filename="src\memory-pool.hpp" />
 		<Unit filename="src\message.cpp" />
 		<Unit filename="src\message.hpp" />
 		<Unit filename="src\parser\calls.cpp" />
@@ -143,12 +150,8 @@
 		<Unit filename="src\parser\parser.cpp" />
 		<Unit filename="src\parser\parser.hpp" />
 		<Unit filename="src\parser\structures.cpp" />
-		<Unit filename="src\range.hpp" />
 		<Unit filename="src\runtime.cpp" />
 		<Unit filename="src\runtime.hpp" />
-		<Unit filename="src\simple-list.hpp" />
-		<Unit filename="src\simple-set.hpp" />
-		<Unit filename="src\simpler-list.hpp" />
 		<Unit filename="src\support.cpp" />
 		<Unit filename="src\support.hpp" />
 		<Unit filename="src\symbol-pool.cpp" />
@@ -167,7 +170,6 @@
 		<Unit filename="src\tree\tree.hpp" />
 		<Unit filename="src\value.cpp" />
 		<Unit filename="src\value.hpp" />
-		<Unit filename="src\vector.hpp" />
 		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />

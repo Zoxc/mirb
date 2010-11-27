@@ -1,22 +1,17 @@
 #pragma once
 #include "../value.hpp"
 #include "../block.hpp"
-#include "object.hpp"
+#include "module.hpp"
 
 namespace Mirb
 {
 	class Class:
-		public Object
+		public Module
 	{
-		private:
-			BlockMap *methods;
-
 		public:
-			value_t superclass;
+			Class(Value::Type type, value_t instance_of, value_t superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
 
-			static const size_t methods_initial = 1;
-			
-			BlockMap *get_methods();
+			bool singleton;
 
 			static value_t class_ref;
 	};

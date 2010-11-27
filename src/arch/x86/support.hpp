@@ -55,10 +55,13 @@ namespace Mirb
 			value_t __stdcall get_ivar(value_t obj, Symbol *name);
 			void __stdcall set_ivar(value_t obj, Symbol *name, value_t value);
 
-			value_t __stdcall define_class(value_t obj, value_t name, value_t super);
-			value_t __stdcall define_module(value_t obj, value_t name);
-			void __stdcall define_method(value_t obj, value_t name, Block *block);
+			value_t __stdcall define_class(value_t obj, Symbol *name, value_t super);
+			value_t __stdcall define_module(value_t obj, Symbol *name);
+			void __stdcall define_method(value_t obj, Symbol *name, Block *block);
 			value_t __stdcall define_string(const char *string);
+			
+			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_lookup");
+			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_lookup_super");
 
 			value_t __fastcall call(Symbol *method_name, value_t dummy, value_t obj, value_t block, size_t argc, value_t argv[]);
 			value_t __fastcall super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[]);

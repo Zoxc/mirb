@@ -26,9 +26,7 @@ namespace Mirb
 			SymbolPool &symbol_pool;
 			Parser &parser;
 			
-			static bool jump_table_ready;
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
-			static void setup_jump_table();
 
 			bool process_null(const char_t *input, bool expected = false);
 			void build_string(const char_t *start, char_t *str, size_t length);
@@ -85,6 +83,8 @@ namespace Mirb
 					Lexeme lexeme;
 			};
 			
+			static void setup_jump_table();
+
 			Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser);
 			
 			MemoryPool &memory_pool;

@@ -18,9 +18,9 @@ namespace Mirb
 		void set_ivar(value_t obj, Symbol *name, value_t value);
 		
 		value_t define_string(const char *string);
-		value_t define_class(value_t obj, value_t name, value_t super);
-		value_t define_module(value_t obj, value_t name);
-		void define_method(value_t obj, value_t name, Block *block);
+		value_t define_class(value_t obj, Symbol *name, value_t super);
+		value_t define_module(value_t obj, Symbol *name);
+		void define_method(value_t obj, Symbol *name, Block *block);
 		
 		value_t call(Symbol *method_name, value_t obj, value_t block, size_t argc, value_t argv[]);
 		value_t super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[]);

@@ -15,13 +15,13 @@ namespace Mirb
 	class Parser
 	{
 		public:
-			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool);
+			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, CharArray &filename);
 			~Parser();
 			
 			Lexer lexer;
 
 			SimpleList<Message> messages;
-			const char *filename;
+			CharArray filename;
 
 			MemoryPool &memory_pool;
 			

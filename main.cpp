@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "src/compiler.hpp"
+#include "src/runtime.hpp"
 #include "src/parser/parser.hpp"
 #include "src/block.hpp"
 
@@ -22,6 +23,7 @@ int main()
 	#endif
 	
 	rt_create();
+	Mirb::create();
 	
 	while(1)
 	{
@@ -30,9 +32,8 @@ int main()
 		std::getline(std::cin, line);
 		
 		MemoryPool memory_pool;
-		Parser parser(symbol_pool, memory_pool);
+		Parser parser(symbol_pool, memory_pool, CharArray("Input"));
 		
-		parser.filename = "Input";
 		parser.load((const char_t *)line.c_str(), line.length());
 		
 		if(parser.lexeme() == Lexeme::END && parser.messages.empty())
