@@ -33,7 +33,7 @@ namespace Mirb
 	mirb_compiled_block(string_concat)
 	{
 		auto self = cast<String>(obj);
-		auto other = cast<String>(RT_ARG(0));
+		auto other = cast<String>(MIRB_ARG(0));
 
 		self->string.append(other->string);
 

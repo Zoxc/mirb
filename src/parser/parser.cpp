@@ -543,13 +543,7 @@ namespace Mirb
 					Symbol *mutated = node->method;
 					
 					if(mutated)
-					{
-						value_t name = rt_string_from_symbol((rt_value)node->method);
-					
-						rt_concat_string(name, rt_string_from_cstr("="));
-					
-						mutated = (Symbol *)rt_symbol_from_string(name);
-					}
+						mutated = Symbol::from_char_array(node->method->string + "=");
 					
 					if(lexeme() == Lexeme::ASSIGN)
 					{

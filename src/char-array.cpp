@@ -108,11 +108,17 @@ namespace Mirb
 	
 	void CharArray::append(CharArray& other)
 	{
-		localize();
-
+		char_t *this_data = data;
 		char_t *other_data = other.data;
 
-		data = (char_t *)gc.realloc(data, length, length + other.length);
+		if(shared)
+		{
+			data = (char_t *)gc.alloc(length + other.length);
+			memcpy(data, this_data, length);
+		}
+		else
+			data = (char_t *)gc.realloc(data, length, length + other.length);
+		
 		memcpy(data + length, other_data, other.length);
 
 		length += other.length;
@@ -164,7 +170,7 @@ namespace Mirb
 		const char_t *start = data;
 		const char_t *stop = data + length;
 
-		for(const char_t *c = start; c < stop; c++)
+		for(const char_t *c = start; c != stop; c++)
 		{
 			hash += *c;
 			hash += hash << 10;

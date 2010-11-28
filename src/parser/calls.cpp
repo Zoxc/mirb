@@ -203,7 +203,7 @@ namespace Mirb
 		
 		child->var = scope->block_parameter;
 		
-		return alloc_call_node(child, (Symbol *)rt_symbol_from_cstr("call"), has_arguments());
+		return alloc_call_node(child, Symbol::from_literal("call"), has_arguments());
 	}
 
 	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, bool default_var)
@@ -301,7 +301,7 @@ namespace Mirb
 					
 					auto result = new (fragment) Tree::CallNode;
 					
-					result->method = (Symbol *)rt_symbol_from_cstr("[]");
+					result->method = Symbol::from_literal("[]");
 					
 					result->object = child;
 					

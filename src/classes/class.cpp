@@ -6,7 +6,13 @@
 namespace Mirb
 {
 	value_t Class::class_ref;
-	
+
+	Class::Class(value_t module, value_t superclass) : Module(Value::IClass, module, superclass), singleton(false)
+	{
+		methods = cast<Module>(module)->get_methods();
+		vars = get_vars(module);
+	}
+
 	mirb_compiled_block(class_to_s)
 	{
 		auto self = cast<Class>(obj);
@@ -18,9 +24,10 @@ namespace Mirb
 		else if(self->singleton)
 		{
 			value_t real = get_var(obj, Symbol::from_literal("__attached__"));
-			String *real_string = cast<String>(real);
-
+			
 			real = call(real, "inspect", 0, 0);
+
+			String *real_string = cast<String>(real);
 
 			CharArray result = "#<Class:" + real_string->string + ">";
 
@@ -36,7 +43,7 @@ namespace Mirb
 
 	mirb_compiled_block(class_superclass)
 	{
-		rt_value super = real_class(cast<Module>(obj)->superclass);
+		value_t super = real_class(cast<Module>(obj)->superclass);
 
 		if(super)
 			return super;

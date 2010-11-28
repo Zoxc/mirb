@@ -16,7 +16,7 @@ namespace Mirb
 	
 	mirb_compiled_block(object_tap)
 	{
-		rt_call(block, "call", 1, &obj);
+		call(block, "call", 1, &obj);
 		return obj;
 	}
 
@@ -58,12 +58,12 @@ namespace Mirb
 
 	mirb_compiled_block(object_equal)
 	{
-		return auto_cast(obj == RT_ARG(0));
+		return auto_cast(obj == MIRB_ARG(0));
 	}
 
 	mirb_compiled_block(object_not_equal)
 	{
-		return auto_cast(obj != RT_ARG(0));
+		return auto_cast(obj != MIRB_ARG(0));
 	}
 
 	mirb_compiled_block(object_not)
@@ -84,7 +84,7 @@ namespace Mirb
 		define_method(Object::class_ref, "!=", object_not_equal);
 		define_method(Object::class_ref, "!", object_not);
 
-		rt_define_singleton_method(Object::class_ref, "allocate", rt_Object_allocate);
+		define_singleton_method(Object::class_ref, "allocate", Object_allocate);
 	}
 };
 

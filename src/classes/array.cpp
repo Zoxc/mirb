@@ -16,7 +16,7 @@ namespace Mirb
 	{
 		auto self = cast<Array>(obj);
 
-		RT_ARG_EACH(i)
+		MIRB_ARG_EACH(i)
 		{
 			self->vector.push(argv[i]);
 		}

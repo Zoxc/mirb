@@ -2,12 +2,6 @@
 #include "common.hpp"
 #include "gc.hpp"
 #include "generic/map.hpp"
-#include "../runtime/runtime.hpp"
-
-struct rt_common;
-struct rt_proc;
-struct rt_string;
-struct rt_array;
 
 namespace Mirb
 {
@@ -121,11 +115,6 @@ namespace Mirb
 		}
 
 		operator value_t() { return value; }
-		
-		operator struct rt_common *() { return (struct rt_common *)value; }
-		operator struct rt_proc *() { return (struct rt_proc *)value; }
-		operator struct rt_string *() { return (struct rt_string *)value; }
-		operator struct rt_array *() { return (struct rt_array *)value; }
 		
 		operator Object *() { return (Object *)value; }
 		operator Module *() { return (Module *)value; }

@@ -8,11 +8,11 @@ namespace Mirb
 	class Module:
 		public Object
 	{
-		private:
+		protected:
 			BlockMap *methods;
 
 		public:
-			Module(Value::Type type, value_t instance_of, value_t superclass) : Object(type, instance_of), superclass(superclass) {}
+			Module(Value::Type type, value_t instance_of, value_t superclass) : Object(type, instance_of), methods(0), superclass(superclass) {}
 
 			value_t superclass;
 
@@ -24,5 +24,7 @@ namespace Mirb
 
 			static void initialize();
 	};
+
+	mirb_compiled_block(module_include);
 };
 

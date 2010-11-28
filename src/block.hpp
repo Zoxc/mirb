@@ -66,19 +66,8 @@ namespace Mirb
 	struct ExceptionData {
 		ExceptionType type;
 		Block *target;
-		union
-		{
-			struct
-			{
-				value_t value;
-			} break_data;
-
-			struct
-			{
-				value_t exception;
-			} ruby_data;
-		};
-		void *payload[3];
+		value_t value;
+		size_t id;
 	};
 
 	class Block

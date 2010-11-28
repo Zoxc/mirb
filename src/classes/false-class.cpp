@@ -15,6 +15,8 @@ namespace Mirb
 
 	void FalseClass::initialize()
 	{
+		FalseClass::class_ref = define_class(Object::class_ref, "FalseClass", Object::class_ref);
+
 		define_method(FalseClass::class_ref, "to_s", falseclass_to_s);
 
 		set_const(Object::class_ref, Symbol::from_literal("FALSE"), value_false);

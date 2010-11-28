@@ -1,6 +1,7 @@
 #include "kernel.hpp"
 #include "../classes/object.hpp"
 #include "../classes/string.hpp"
+#include "../classes/symbol.hpp"
 #include "../classes/exception.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
@@ -15,7 +16,7 @@ namespace Mirb
 		if(block)
 			return block;
 		else
-			return RT_NIL;
+			return value_nil;
 	}
 
 	mirb_compiled_block(kernel_eval)
@@ -45,7 +46,7 @@ namespace Mirb
 		FILE* file = 0;
 
 		#ifndef WIN32
-			if(stat(rt_string_to_cstr(*filename), &buf) != -1)
+			if(stat(filename_c_str.c_str_ref(), &buf) != -1)
 				is_dir = S_ISDIR(buf.st_mode);
 		#endif
 
@@ -82,7 +83,7 @@ namespace Mirb
 		FILE* file = open_file(filename);
 
 		if(!file)
-			return RT_NIL;
+			return value_nil;
 
 		fseek(file, 0, SEEK_END);
 
@@ -92,17 +93,19 @@ namespace Mirb
 
 		char *data = (char *)malloc(length + 1);
 
+		runtime_assert(data);
+
 		if(fread(data, 1, length, file) != length)
 		{
 			free(data);
 			fclose(file);
 
-			return RT_NIL;
+			return value_nil;
 		}
 
 		data[length] = 0;
 
-		value_t result = eval(self, value_nil, class_of(main), (char_t *)data, length, filename);
+		value_t result = eval(self, Symbol::from_char_array("in " + filename), class_of(main), (char_t *)data, length, filename);
 
 		free(data);
 		fclose(file);
@@ -112,7 +115,7 @@ namespace Mirb
 
 	mirb_compiled_block(kernel_load)
 	{
-		value_t filename = RT_ARG(0);
+		value_t filename = MIRB_ARG(0);
 
 		return run_file(obj, cast<String>(filename)->string);
 	}
@@ -121,13 +124,13 @@ namespace Mirb
 	{
 		MIRB_ARG_EACH(i)
 		{
-			value_t obj = argv[i];
+			value_t arg = argv[i];
 
-			if(Value::type(obj) != Value::String)
-				obj = rt_call(obj, "to_s", 0, 0);
+			if(Value::type(arg) != Value::String)
+				arg = call(arg, "to_s");
 			
-			if(Value::type(obj) == Value::String)
-				std::cout << cast<String>(obj)->string.get_string();
+			if(Value::type(arg) == Value::String)
+				std::cout << cast<String>(arg)->string.get_string();
 		}
 		
 		return value_nil;
@@ -171,7 +174,7 @@ namespace Mirb
 
 		data.type = Mirb::RubyException;
 		data.target = 0;
-		data.payload[0] = (void *)exception;
+		data.value = auto_cast(exception);
 
 		Arch::Support::exception_raise(&data);
 	}

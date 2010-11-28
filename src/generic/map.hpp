@@ -72,7 +72,7 @@ namespace Mirb
 				Pair **table = (Pair **)alloc_ref.alloc(size * sizeof(V));
 				std::memset(table, 0, size * sizeof(Pair *));
 
-				Pair **end = this->table + size;
+				Pair **end = this->table + (this->mask + 1);
 
 				for(Pair **slot = this->table; slot != end; ++slot)
 				{

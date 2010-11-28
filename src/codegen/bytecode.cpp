@@ -1,14 +1,10 @@
 #include "bytecode.hpp"
 #include "../arch/bytecode.hpp"
 #include "../tree/nodes.hpp"
-#include "../../runtime/classes.hpp"
-#include "../../runtime/classes/symbol.hpp"
-#include "../../runtime/classes/fixnum.hpp"
-#include "../../runtime/support.hpp"
-
 #include "../tree/tree.hpp"
 #include "../compiler.hpp"
 #include "../block.hpp"
+#include "../classes/fixnum.hpp"
 
 namespace Mirb
 {
@@ -102,7 +98,7 @@ namespace Mirb
 			{
 				auto node = (Tree::IntegerNode *)basic_node;
 				
-				gen<LoadOp>(var, RT_INT2FIX(node->value));
+				gen<LoadOp>(var, Fixnum::from_int(node->value));
 			}
 		}
 
@@ -158,7 +154,7 @@ namespace Mirb
 			if(node->obj)
 				to_bytecode(node->obj, var);
 			else if(var)
-				gen<LoadOp>(var, rt_Object);
+				gen<LoadOp>(var, Object::class_ref);
 			
 			if(!var)
 				return;
@@ -174,7 +170,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), (Mirb::Block *)0);
+			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), (Mirb::Block *)0);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var)
@@ -227,7 +223,7 @@ namespace Mirb
 			
 			gen<PushOp>(right);
 			
-			gen<CallOp>(var, left, (Symbol *)rt_symbol_from_cstr(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), (Mirb::Block *)0);
+			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), (Mirb::Block *)0);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var)
@@ -334,7 +330,7 @@ namespace Mirb
 					if(variable->obj)
 						to_bytecode(variable->obj, obj);
 					else
-						gen<LoadOp>(obj, rt_Object);
+						gen<LoadOp>(obj, Object::class_ref);
 					
 					to_bytecode(node->right, value);
 					

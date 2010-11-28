@@ -1,7 +1,8 @@
 #include "support.hpp"
 #include "../../support.hpp"
 #include "../../compiler.hpp"
-#include "../../../runtime/classes/proc.hpp"
+#include "../../runtime.hpp"
+#include "../../classes/proc.hpp"
 
 namespace Mirb
 {
@@ -141,12 +142,12 @@ namespace Mirb
 			
 			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module)
 			{
-				return (compiled_block_t)rt_lookup(obj, (rt_value)name, result_module);
+				return Mirb::lookup(obj, name, result_module);
 			}
 
 			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module)
 			{
-				return (compiled_block_t)rt_lookup_super(module, (rt_value)name, result_module);
+				return Mirb::lookup_super(module, name, result_module);
 			}
 
 			value_t __fastcall call(Symbol *method_name, value_t dummy, value_t obj, value_t block, size_t argc, value_t argv[])
@@ -160,9 +161,9 @@ namespace Mirb
 			}
 			
 			#ifdef MIRB_SEH_EXCEPTIONS
-				static bool rt_find_seh_target(void *target)
+				static bool find_seh_target(void *target)
 				{
-					struct rt_frame *frame;
+					Frame *frame;
 
 					__asm__ __volatile__("movl %%fs:(0), %0\n" : "=r" (frame));
 
@@ -171,7 +172,7 @@ namespace Mirb
 						if(frame == (void *)-1)
 							return false;
 
-						if(frame->handler == rt_support_handler)
+						if(frame->handler == &exception_handler)
 						{
 							if(frame->block == target)
 								return true;
@@ -184,8 +185,8 @@ namespace Mirb
 			
 			void __noreturn exception_raise(ExceptionData *data)
 			{
-				#ifdef WIN_SEH
-					RaiseException(RT_SEH_RUBY, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);
+				#ifdef MIRB_SEH_EXCEPTIONS
+					RaiseException(seh_ruby, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);
 
 					__builtin_unreachable();
 				#else
@@ -202,10 +203,10 @@ namespace Mirb
 				#endif
 			}
 
-			void __noreturn __stdcall far_return(rt_value value, Block *target)
+			void __noreturn __stdcall far_return(value_t value, Block *target)
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
-					if(!rt_find_seh_target(target))
+					if(!find_seh_target(target))
 						RT_ASSERT(0);
 				#endif
 
@@ -213,15 +214,15 @@ namespace Mirb
 
 				data.type = ReturnException;
 				data.target = target;
-				data.payload[1] = (void *)value;
+				data.value = value;
 
 				exception_raise(&data);
 			}
 
-			void __noreturn __stdcall far_break(rt_value value, Block *target, size_t id)
+			void __noreturn __stdcall far_break(value_t value, Block *target, size_t id)
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
-					if(!rt_find_seh_target(target))
+					if(!find_seh_target(target))
 						RT_ASSERT(0);
 				#endif
 
@@ -229,8 +230,8 @@ namespace Mirb
 
 				data.type = BreakException;
 				data.target = target;
-				data.payload[1] = (void *)value;
-				data.payload[2] = (void *)id;
+				data.value = value;
+				data.id = id;
 
 				exception_raise(&data);
 			}
@@ -434,11 +435,11 @@ namespace Mirb
 						switch(data->type)
 						{
 							case ReturnException:
-								handle_return(frame, top, 0, (rt_value)data->payload[1]);
+								handle_return(frame, top, 0, data->value);
 								break;
 
 							case BreakException:
-								handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+								handle_break(frame, top, data->value, data->id);
 								break;
 
 							default:
@@ -460,11 +461,11 @@ namespace Mirb
 					switch(data->type)
 					{
 						case BreakException:
-							handle_break(frame, top, (size_t)data->payload[1], (rt_value)data->payload[2]);
+							handle_break(frame, top,  data->value, data->id);
 							break;
 
 						case ReturnException:
-							handle_return(frame, top, block, (rt_value)data->payload[1]);
+							handle_return(frame, top, block, data->value);
 							break;
 
 						case RubyException:
@@ -501,8 +502,8 @@ namespace Mirb
 				{
 					ExceptionData *data = 0;
 
-					if(exception->ExceptionCode == RT_SEH_RUBY)
-						data = (struct rt_exception_data *)exception->ExceptionInformation[0];
+					if(exception->ExceptionCode == seh_ruby)
+						data = (ExceptionData *)exception->ExceptionInformation[0];
 
 					handle_exception(frame, 0, data, exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND));
 

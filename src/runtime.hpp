@@ -35,7 +35,7 @@ namespace Mirb
 	std::string inspect_object(value_t obj);
 	value_t inspect(value_t obj);
 	ValueMap *get_vars(value_t obj);
-	value_t get_const(value_t obj, Symbol *name);
+	value_t get_const(value_t obj, Symbol *name, bool require = true);
 	void set_const(value_t obj, Symbol *name, value_t value);
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);
@@ -54,10 +54,13 @@ namespace Mirb
 	compiled_block_t lookup(value_t obj, Symbol *name, value_t *result_module);
 	compiled_block_t lookup_super(value_t module, Symbol *name, value_t *result_module);
 
+	// TODO: Replace const char * with literal templates
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	value_t call(value_t obj, const char *name, size_t argc, value_t argv[]);
 	value_t call(value_t obj, const char *name, value_t block, size_t argc, value_t argv[]);
 	value_t call(value_t obj, Symbol *name, size_t argc, value_t argv[]);
+	value_t call(value_t obj, Symbol *name);
+	value_t call(value_t obj, const char *name);
 
 	void setup_classes();
 

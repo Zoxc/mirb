@@ -1,7 +1,4 @@
 #include "globals.hpp"
-#include "runtime/classes.hpp"
-#include "runtime/classes/symbol.hpp"
-#include "runtime/classes/string.hpp"
 
 #include <iostream>
 #include "src/compiler.hpp"
@@ -21,7 +18,6 @@ int main()
 		GC_INIT();
 	#endif
 	
-	rt_create();
 	Mirb::initialize();
 	
 	while(1)
@@ -61,9 +57,9 @@ int main()
 		
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		rt_value result = block->compiled(value_nil, rt_class_of(rt_main), rt_main, value_nil, 0, 0);
+		value_t result = block->compiled(value_nil, class_of(Mirb::main), Mirb::main, value_nil, 0, 0);
 		
-		printf("=> "); rt_print(result); printf("\n");
+		std::cout << "=> " << inspect_object(result) << "\n";
 		
 		block = 0; // Make sure block stays on stack */
 	}
@@ -71,7 +67,6 @@ int main()
 	std::cout << "Exiting gracefully...";
 	
 	Mirb::finalize();
-	rt_destroy();
 	
 	return 0;
 }

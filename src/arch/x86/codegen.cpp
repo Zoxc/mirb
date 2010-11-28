@@ -2,6 +2,7 @@
 #include "disassembly.hpp"
 #include "support.hpp"
 #include "../../tree/tree.hpp"
+#include "../../classes/object.hpp"
 #include "../../generic/mem_stream.hpp"
 #include "../../block.hpp"
 
@@ -525,7 +526,7 @@ namespace Mirb
 			if(op.super)
 				push_var(op.super);
 			else
-				push_imm((size_t)rt_Object);
+				push_imm((size_t)Object::class_ref);
 			
 			push_imm((size_t)op.name);
 			push_var(op.self);
@@ -573,7 +574,7 @@ namespace Mirb
 			if(op.block_var)
 				push_var(op.block_var);
 			else
-				push_imm(RT_NIL);
+				push_imm(value_nil);
 			
 			push_var(op.obj);
 
@@ -603,7 +604,7 @@ namespace Mirb
 			if(op.block_var)
 				push_var(op.block_var);
 			else
-				push_imm(RT_NIL);
+				push_imm(value_nil);
 			
 			push_var(op.self);
 

@@ -47,12 +47,9 @@ namespace Mirb
 
 			static Symbol *create_value(GC::Ref alloc_ref, CharArray &key)
 			{
-				Symbol *result = (Symbol *)rt_alloc_root(sizeof(Symbol));
-
-				rt_symbol_setup((rt_value)result);
+				Symbol *result = new (gc) Symbol(key);
 
 				result->next = 0;
-				result->string = key;
 
 				return result;
 			}

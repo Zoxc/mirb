@@ -69,6 +69,3 @@
 		RT_ASSERT(0);
 	}
 #endif
-
-#include "vector.hpp"
-#include "hash.hpp"

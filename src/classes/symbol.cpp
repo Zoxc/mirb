@@ -12,7 +12,7 @@ namespace Mirb
 		return symbol_pool.get(string);
 	}
 	
-	Symbol *Symbol::from_string(std::string string)
+	Symbol *Symbol::from_string(const std::string &string)
 	{
 		return symbol_pool.get(string);
 	}
@@ -22,18 +22,27 @@ namespace Mirb
 		return symbol_pool.get(char_array);
 	}
 	
+	Symbol *Symbol::from_char_array(CharArray &&char_array)
+	{
+		CharArray &string = char_array;
+
+		return symbol_pool.get(string);
+	}
+	
 	mirb_compiled_block(symbol_to_s)
+	{
+		auto self = cast<Symbol>(obj);
+
+		return self->string.to_string();
+	}
+
+	mirb_compiled_block(symbol_inspect)
 	{
 		auto self = cast<Symbol>(obj);
 
 		CharArray string = ":" + self->string;
 
 		return string.to_string();
-	}
-
-	mirb_compiled_block(symbol_inspect)
-	{
-		return rt_string_from_cstr(rt_symbol_to_cstr(obj));
 	}
 
 	void Symbol::initialize()

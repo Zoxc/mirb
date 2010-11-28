@@ -1,4 +1,5 @@
 #include "../tree/tree.hpp"
+#include "../runtime.hpp"
 #include "printer.hpp"
 #include "opcodes.hpp"
 #include "block.hpp"
@@ -69,7 +70,7 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::imm(value_t imm)
 		{
-			return std::string(rt_string_to_cstr(rt_inspect(imm)));
+			return inspect_object(imm);
 		}
 		
 		std::string ByteCodePrinter::label(BasicBlock *label)

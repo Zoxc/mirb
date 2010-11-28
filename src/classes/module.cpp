@@ -26,7 +26,7 @@ namespace Mirb
 
 	mirb_compiled_block(module_append_features)
 	{
-		include_module(RT_ARG(0), obj);
+		include_module(MIRB_ARG(0), obj);
 
 		return obj;
 	}
@@ -38,7 +38,7 @@ namespace Mirb
 
 	mirb_compiled_block(module_include)
 	{
-		RT_ARG_EACH(i)
+		MIRB_ARG_EACH(i)
 		{
 			call(argv[i], "append_features", 1, &obj);
 			call(argv[i], "included", 1, &obj);

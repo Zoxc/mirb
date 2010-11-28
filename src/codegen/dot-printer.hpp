@@ -1,5 +1,4 @@
 #pragma once
-#include "../../runtime/runtime.hpp"
 #include "../common.hpp"
 
 namespace Mirb

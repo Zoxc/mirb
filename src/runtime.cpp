@@ -12,9 +12,11 @@
 #include "classes/false-class.hpp"
 #include "classes/nil-class.hpp"
 #include "classes/string.hpp"
+#include "classes/proc.hpp"
+#include "classes/array.hpp"
+#include "classes/exception.hpp"
+#include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
-
-#include "../runtime/classes/module.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -26,17 +28,17 @@ namespace Mirb
 	{
 		if(obj & 1)
 			return Fixnum::class_ref;
-		else if(obj <= RT_MAX)
+		else if(obj <= value_highest)
 		{
 			switch(obj)
 			{
-				case RT_TRUE:
+				case value_true:
 					return TrueClass::class_ref;
 
-				case RT_FALSE:
+				case value_false:
 					return FalseClass::class_ref;
 
-				case RT_NIL:
+				case value_nil:
 					return NilClass::class_ref;
 
 				default:
@@ -62,7 +64,7 @@ namespace Mirb
 
 	value_t define_class(value_t under, Symbol *name, value_t super)
 	{
-		value_t existing = get_const(under, auto_cast(name));
+		value_t existing = get_const(under, auto_cast(name), false);
 
 		if(existing != value_undef)
 			return existing;
@@ -72,7 +74,7 @@ namespace Mirb
 		class_name(obj, under, name);
 
 		#ifdef DEBUG
-			std::cout << "Defining class " << inspect_object(obj) << "(" << obj << ") < " << inspect_object(super) << "(" << super << ")\n";
+			std::cout << "Defining class " << inspect_object(obj) << "(" << CharArray::hex(obj).get_string() << ") < " << inspect_object(super) << "(" << CharArray::hex(super).get_string() << ")\n";
 		#endif
 
 		return obj;
@@ -85,17 +87,12 @@ namespace Mirb
 	
 	value_t module_create_bare()
 	{
-		Module *module = new (gc) Module(Value::Module, Module::class_ref, 0);
-
-		module->get_methods();
-		get_vars(auto_cast(module));
-
-		return auto_cast(module);
+		return auto_cast(new (gc) Module(Value::Module, Module::class_ref, 0));
 	}
 
 	value_t define_module(value_t under, Symbol *name)
 	{
-		value_t existing = get_const(under, name);
+		value_t existing = get_const(under, name, false);
 
 		if(existing != value_undef)
 			return existing;
@@ -105,7 +102,7 @@ namespace Mirb
 		class_name(obj, under, name);
 
 		#ifdef DEBUG
-			std::cout << "Defining module " << inspect_object(obj) << "(" << obj << ")\n";
+			std::cout << "Defining module " << inspect_object(obj) << "(" << CharArray::hex(obj).get_string() << ")\n";
 		#endif
 
 		return obj;
@@ -121,7 +118,7 @@ namespace Mirb
 		if(Value::type(module) == Value::IClass)
 			module = cast<Module>(module)->instance_of;
 
-		return auto_cast(new (gc) Class(Value::IClass, module, super));
+		return auto_cast(new (gc) Class(module, super));
 	}
 
 	void include_module(value_t obj, value_t module)
@@ -137,7 +134,7 @@ namespace Mirb
 				switch(Value::type(i))
 				{
 					case Value::IClass:
-						if(cast<Module>(i)->vars == cast<Module>(i)->vars)
+						if(cast<Module>(i)->vars == cast<Module>(module)->vars)
 						{
 							if(!found_superclass)
 								c = i;
@@ -168,7 +165,7 @@ namespace Mirb
 	
 	value_t singleton_class(value_t object)
 	{
-		value_t c = rt_class_of(object);
+		value_t c = class_of(object);
 
 		if(cast<Class>(c)->singleton)
 			return c;
@@ -202,22 +199,19 @@ namespace Mirb
 	{
 		value_t under_path = get_var(under, Symbol::from_literal("__classpath__"));
 
-		value_t new_path;
+		CharArray new_path;
 
-		if(under == rt_Object)
+		if(under == Object::class_ref)
 		{
-			new_path = String::from_symbol(name);
+			new_path = name->string;
 		}
 		else
 		{
- 			new_path = rt_dup_string(under_path);
-
-			rt_concat_string(new_path, String::from_literal("::"));
-			rt_concat_string(new_path, String::from_symbol(name));
+			new_path = cast<String>(under_path)->string + "::" + name->string;
 		}
 
 		set_var(obj, Symbol::from_literal("__classname__"), String::from_symbol(name));
-		set_var(obj, Symbol::from_literal("__classpath__"), new_path);
+		set_var(obj, Symbol::from_literal("__classpath__"), new_path.to_string());
 
 		set_const(under, name, obj);
 	}
@@ -245,7 +239,7 @@ namespace Mirb
 
 		cast<Object>(object)->instance_of = singleton; // TODO: Fix the case when object is not a instance of Object
 
-		set_var(singleton, Symbol::from_string("__attached__"), object);
+		set_var(singleton, Symbol::from_literal("__attached__"), object);
 
 		if(cast<Object>(object)->type == Value::Class)
 		{
@@ -269,17 +263,17 @@ namespace Mirb
 	value_t inspect(value_t obj)
 	{
 		value_t dummy;
-		Block *inspect = lookup_method(rt_class_of(obj), Symbol::from_string("inspect"), &dummy);
+		Block *inspect = lookup_method(class_of(obj), Symbol::from_string("inspect"), &dummy);
 
 		value_t result = value_nil;
 
-		if(inspect && (inspect->compiled != (Mirb::compiled_block_t)rt_object_inspect || lookup_method(rt_class_of(obj), Symbol::from_string("to_s"), &dummy)))
-			result = call(obj, "inspect", 0, 0);
+		if(inspect && (inspect->compiled != (Mirb::compiled_block_t)object_inspect || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
+			result = call(obj, "inspect");
 
 		if(Value::type(result) == Value::String)
 			return result;
 		else
-			return String::from_literal("nil");
+			return object_to_s(value_nil, value_nil, obj, 0, 0, 0);
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -295,7 +289,7 @@ namespace Mirb
 		return object->vars;
 	}
 	
-	value_t get_const(value_t obj, Symbol *name)
+	value_t get_const(value_t obj, Symbol *name, bool require)
 	{
 		// TODO: Fix constant lookup
 
@@ -323,7 +317,10 @@ namespace Mirb
 		if(result != value_undef)
 			return result;
 
-		Mirb::debug_fail("Unable to find constant " + name->get_string() + " on " + inspect_object(obj) + "\n");
+		if(require)
+			Mirb::debug_fail("Unable to find constant " + name->get_string() + " on " + inspect_object(obj));
+		else
+			return value_undef;
 	}
 
 	void set_const(value_t obj, Symbol *name, value_t value)
@@ -332,13 +329,13 @@ namespace Mirb
 
 		value_t *old = vars->get_ref(auto_cast(name));
 
-		if (old)
-			set_var(obj, name, *old);
-		else
+		if(old)
 		{
 			std::cout << "Warning: Reassigning constant " << name->get_string() << " to " << inspect_object(value) << "\n";
 			*old = value;
 		}
+		else
+			set_var(obj, name, value);
 	}
 	
 	value_t get_ivar(value_t obj, Symbol *name)
@@ -468,6 +465,16 @@ namespace Mirb
 	{
 		return call(obj, name, value_nil, argc, argv);
 	}
+
+	value_t call(value_t obj, Symbol *name)
+	{
+		return call(obj, name, value_nil, 0, 0);
+	}
+
+	value_t call(value_t obj, const char *name)
+	{
+		return call(obj, name, value_nil, 0, 0);
+	}
 	
 	value_t main;
 
@@ -478,7 +485,7 @@ namespace Mirb
 
 	mirb_compiled_block(main_include)
 	{
-		return rt_module_include(RT_NIL, RT_NIL, rt_Object, block, argc, argv);
+		return module_include(value_nil, value_nil, Object::class_ref, block, argc, argv);
 	}
 
 	void setup_classes()
@@ -496,11 +503,11 @@ namespace Mirb
 		Symbol::class_ref = class_create_unnamed(Object::class_ref);
 		String::class_ref = class_create_unnamed(Object::class_ref);
 
-		class_name(Object::class_ref, Object::class_ref, Symbol::from_string("Object"));
-		class_name(Module::class_ref, Object::class_ref, Symbol::from_string("Module"));
-		class_name(Class::class_ref, Object::class_ref, Symbol::from_string("Class"));
-		class_name(Symbol::class_ref, Object::class_ref, Symbol::from_string("Symbol"));
-		class_name(String::class_ref, Object::class_ref, Symbol::from_string("String"));
+		class_name(Object::class_ref, Object::class_ref, Symbol::from_literal("Object"));
+		class_name(Module::class_ref, Object::class_ref, Symbol::from_literal("Module"));
+		class_name(Class::class_ref, Object::class_ref, Symbol::from_literal("Class"));
+		class_name(Symbol::class_ref, Object::class_ref, Symbol::from_literal("Symbol"));
+		class_name(String::class_ref, Object::class_ref, Symbol::from_literal("String"));
 
 		main = Object::allocate(Object::class_ref);
 
@@ -512,6 +519,25 @@ namespace Mirb
 	{
 		Lexer::setup_jump_table();
 		ExecutableHeap::initialize();
+
+		setup_classes();
+		
+		Class::initialize();
+		Object::initialize();
+		Module::initialize();
+		
+		Kernel::initialize();
+		
+		TrueClass::initialize();
+		FalseClass::initialize();
+		NilClass::initialize();
+
+		Symbol::initialize();
+		String::initialize();
+		Fixnum::initialize();
+		Proc::initialize();
+		Array::initialize();
+		Exception::initialize();
 	}
 
 	void finalize()

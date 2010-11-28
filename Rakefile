@@ -11,7 +11,7 @@ package = Package.new do
 
 	windows = Rake::Win32.windows?
 	vendor = 'vendor' + (windows ? '' : '_linux')
-	debug = false
+	debug = true
 	debug_info = true
 	no_gc = true
 	valgrind = true
@@ -55,7 +55,7 @@ package = Package.new do
 	cxx.std 'c++0x'
 	
 	# files
-	files = collect('main.cpp', 'runtime/**/*.cpp', 'src/**/*.cpp', 'src/**/*.S') - collect('runtime/x86.*')
+	files = collect('main.cpp', 'src/**/*.cpp', 'src/**/*.S') - collect('runtime/x86.*')
 	
 	files.merge(Executable).name(output, windows)
 end

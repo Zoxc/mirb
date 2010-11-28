@@ -12,24 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\globals.hpp" />
-    <ClInclude Include="..\..\hash.hpp" />
-    <ClInclude Include="..\..\runtime\classes.hpp" />
-    <ClInclude Include="..\..\runtime\classes\array.hpp" />
-    <ClInclude Include="..\..\runtime\classes\bool.hpp" />
-    <ClInclude Include="..\..\runtime\classes\class.hpp" />
-    <ClInclude Include="..\..\runtime\classes\exception.hpp" />
-    <ClInclude Include="..\..\runtime\classes\fixnum.hpp" />
-    <ClInclude Include="..\..\runtime\classes\module.hpp" />
-    <ClInclude Include="..\..\runtime\classes\object.hpp" />
-    <ClInclude Include="..\..\runtime\classes\proc.hpp" />
-    <ClInclude Include="..\..\runtime\classes\string.hpp" />
-    <ClInclude Include="..\..\runtime\classes\symbol.hpp" />
-    <ClInclude Include="..\..\runtime\constant.hpp" />
-    <ClInclude Include="..\..\runtime\exceptions.hpp" />
-    <ClInclude Include="..\..\runtime\gc.hpp" />
-    <ClInclude Include="..\..\runtime\modules\kernel.hpp" />
-    <ClInclude Include="..\..\runtime\runtime.hpp" />
-    <ClInclude Include="..\..\runtime\x86.hpp" />
     <ClInclude Include="..\..\src\arch\arch.hpp" />
     <ClInclude Include="..\..\src\arch\block.hpp" />
     <ClInclude Include="..\..\src\arch\bytecode.hpp" />
@@ -89,25 +71,9 @@
     <ClInclude Include="..\..\src\tree\printer.hpp" />
     <ClInclude Include="..\..\src\tree\tree.hpp" />
     <ClInclude Include="..\..\src\value.hpp" />
-    <ClInclude Include="..\..\vector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\main.cpp" />
-    <ClCompile Include="..\..\runtime\classes.cpp" />
-    <ClCompile Include="..\..\runtime\classes\array.cpp" />
-    <ClCompile Include="..\..\runtime\classes\bool.cpp" />
-    <ClCompile Include="..\..\runtime\classes\class.cpp" />
-    <ClCompile Include="..\..\runtime\classes\exception.cpp" />
-    <ClCompile Include="..\..\runtime\classes\fixnum.cpp" />
-    <ClCompile Include="..\..\runtime\classes\module.cpp" />
-    <ClCompile Include="..\..\runtime\classes\object.cpp" />
-    <ClCompile Include="..\..\runtime\classes\proc.cpp" />
-    <ClCompile Include="..\..\runtime\classes\string.cpp" />
-    <ClCompile Include="..\..\runtime\classes\symbol.cpp" />
-    <ClCompile Include="..\..\runtime\constant.cpp" />
-    <ClCompile Include="..\..\runtime\exceptions.cpp" />
-    <ClCompile Include="..\..\runtime\modules\kernel.cpp" />
-    <ClCompile Include="..\..\runtime\runtime.cpp" />
     <ClCompile Include="..\..\src\arch\x86\bytecode.cpp" />
     <ClCompile Include="..\..\src\arch\x86\codegen.cpp" />
     <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
@@ -215,7 +181,7 @@
       <UseFullPaths>true</UseFullPaths>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>

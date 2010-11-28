@@ -66,7 +66,7 @@ namespace Mirb
 					printf(" %.2X", (size_t)*(address + index++));
 
 				while(min_length-- > 0)
-					printf("   ");
+					std::cout << "   ";
 			}
 
 			void dump_instruction(ud_t* ud_obj, Vector<Symbol *, MemoryPool> *symbols)
@@ -75,7 +75,7 @@ namespace Mirb
 
 				dump_hex(ud_insn_ptr(ud_obj), ud_insn_len(ud_obj));
 
-				printf(" %s", ud_insn_asm(ud_obj));
+				std::cout << " " << ud_insn_asm(ud_obj);
 	
 				const char *symbol = 0;
 	
@@ -102,9 +102,9 @@ namespace Mirb
 				}
 	
 				if(symbol)
-					printf(" ; %s", symbol);
+					std::cout << " ; " << symbol;
 	
-				printf("\n");
+				std::cout << "\n";
 			}
 
 			void dump_code(MemStream &stream, Vector<Symbol *, MemoryPool> *symbols)

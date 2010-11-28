@@ -22,7 +22,7 @@ namespace Mirb
 	{
 		auto self = cast<Exception>(obj);
 
-		self->message = RT_ARG(0);
+		self->message = MIRB_ARG(0);
 
 		return obj;
 	}

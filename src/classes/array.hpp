@@ -1,6 +1,5 @@
 #pragma once
 #include "object.hpp"
-#include "../vector.hpp"
 
 namespace Mirb
 {

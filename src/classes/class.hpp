@@ -10,6 +10,7 @@ namespace Mirb
 	{
 		public:
 			Class(Value::Type type, value_t instance_of, value_t superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
+			Class(value_t module, value_t superclass);
 
 			bool singleton;
 

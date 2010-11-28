@@ -1,9 +1,6 @@
 #pragma once
 
 #include "../../globals.hpp"
-#include "../../runtime/classes.hpp"
-#include "../../runtime/runtime.hpp"
-
 #include "../gc.hpp"
 #include "../lexer/lexer.hpp"
 #include "../tree/nodes.hpp"

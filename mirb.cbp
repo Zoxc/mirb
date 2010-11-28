@@ -35,7 +35,7 @@
 			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 			<Add option="-fstrict-aliasing" />
-			<Add option="-DWIN_SEH" />
+			<Add option="-DMIRB_SEH_EXCEPTIONS" />
 			<Add option="-DNO_GC" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />
@@ -46,44 +46,7 @@
 			<Add directory="vendor\udis86\libudis86\.libs" />
 		</Linker>
 		<Unit filename="globals.hpp" />
-		<Unit filename="hash.hpp" />
 		<Unit filename="main.cpp" />
-		<Unit filename="runtime\classes.cpp" />
-		<Unit filename="runtime\classes.hpp" />
-		<Unit filename="runtime\classes\array.cpp" />
-		<Unit filename="runtime\classes\array.hpp" />
-		<Unit filename="runtime\classes\bool.cpp" />
-		<Unit filename="runtime\classes\bool.hpp" />
-		<Unit filename="runtime\classes\class.cpp" />
-		<Unit filename="runtime\classes\class.hpp" />
-		<Unit filename="runtime\classes\exception.cpp" />
-		<Unit filename="runtime\classes\exception.hpp" />
-		<Unit filename="runtime\classes\fixnum.cpp" />
-		<Unit filename="runtime\classes\fixnum.hpp" />
-		<Unit filename="runtime\classes\module.cpp" />
-		<Unit filename="runtime\classes\module.hpp" />
-		<Unit filename="runtime\classes\object.cpp" />
-		<Unit filename="runtime\classes\object.hpp" />
-		<Unit filename="runtime\classes\proc.cpp" />
-		<Unit filename="runtime\classes\proc.hpp" />
-		<Unit filename="runtime\classes\string.cpp" />
-		<Unit filename="runtime\classes\string.hpp" />
-		<Unit filename="runtime\classes\symbol.cpp" />
-		<Unit filename="runtime\classes\symbol.hpp" />
-		<Unit filename="runtime\constant.cpp" />
-		<Unit filename="runtime\constant.hpp" />
-		<Unit filename="runtime\exceptions.cpp" />
-		<Unit filename="runtime\exceptions.hpp" />
-		<Unit filename="runtime\modules\kernel.cpp" />
-		<Unit filename="runtime\modules\kernel.hpp" />
-		<Unit filename="runtime\runtime.cpp" />
-		<Unit filename="runtime\runtime.hpp" />
-		<Unit filename="runtime\support.cpp" />
-		<Unit filename="runtime\support.hpp" />
-		<Unit filename="runtime\x86.S">
-			<Option compiler="gcc" use="1" buildCommand="as $file -o $object" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="src\arch\arch.hpp" />
 		<Unit filename="src\arch\block.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />
@@ -192,7 +155,6 @@
 		<Unit filename="src\tree\tree.hpp" />
 		<Unit filename="src\value.cpp" />
 		<Unit filename="src\value.hpp" />
-		<Unit filename="vector.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

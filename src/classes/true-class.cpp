@@ -15,6 +15,8 @@ namespace Mirb
 
 	void TrueClass::initialize()
 	{
+		TrueClass::class_ref = define_class(Object::class_ref, "TrueClass", Object::class_ref);
+
 		define_method(TrueClass::class_ref, "to_s", trueclass_to_s);
 
 		set_const(Object::class_ref, Symbol::from_literal("TRUE"), value_true);

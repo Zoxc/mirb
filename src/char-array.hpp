@@ -7,7 +7,7 @@ namespace Mirb
 	class CharArray
 	{
 		public:
-			CharArray() : length(0), shared(false) {}
+			CharArray() : length(0), data(0), shared(false) {}
 			CharArray(const char_t *c_str);
 			CharArray(const std::string &string);
 			CharArray(const char_t *c_str, size_t length);
@@ -63,7 +63,7 @@ namespace Mirb
 			template<size_t length> void set_literal(const char (&string)[length])
 			{
 				data = (char_t *)&string;
-				this->length = length;
+				this->length = length - 1;
 				shared = true;
 			}
 			
