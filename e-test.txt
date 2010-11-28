@@ -1,2 +1,0 @@
-begin return 3 ensure print "hi" end
-tap { break 5 }
