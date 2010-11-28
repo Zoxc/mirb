@@ -60,10 +60,10 @@ namespace Mirb
 
 			CharArray c_str();
 			
-			template<size_t length> void set_literal(const char (&string)[length])
+			template<size_t string_length> void set_literal(const char (&string)[string_length])
 			{
 				data = (char_t *)&string;
-				this->length = length - 1;
+				length = string_length - 1;
 				shared = true;
 			}
 			
