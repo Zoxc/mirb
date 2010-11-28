@@ -73,7 +73,6 @@
     <ClInclude Include="..\..\src\value.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\main.cpp" />
     <ClCompile Include="..\..\src\arch\x86\bytecode.cpp" />
     <ClCompile Include="..\..\src\arch\x86\codegen.cpp" />
     <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
@@ -105,6 +104,7 @@
     <ClCompile Include="..\..\src\lexer\lexer.cpp" />
     <ClCompile Include="..\..\src\lexer\numbers.cpp" />
     <ClCompile Include="..\..\src\lexer\strings.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />

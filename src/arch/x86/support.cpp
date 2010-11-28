@@ -199,7 +199,7 @@ namespace Mirb
 						frame = frame->prev;
 					}
 
-					debug_fail("Unable to find a exception handler");
+					runtime_fail("Unable to find a exception handler");
 				#endif
 			}
 
@@ -207,7 +207,7 @@ namespace Mirb
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
 					if(!find_seh_target(target))
-						RT_ASSERT(0);
+						runtime_fail("Unable to find handler for return");
 				#endif
 
 				ExceptionData data;
@@ -223,7 +223,7 @@ namespace Mirb
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
 					if(!find_seh_target(target))
-						RT_ASSERT(0);
+						runtime_fail("Unable to find handler for break");
 				#endif
 
 				ExceptionData data;

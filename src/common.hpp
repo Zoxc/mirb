@@ -1,5 +1,4 @@
 #pragma once
-#include "../globals.hpp"
 #include <iostream>
 #include <map>
 #include <vector>
@@ -10,9 +9,45 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+#include <cstdarg>
+#include <cstring>
+#include <cassert>
+
+#ifdef _MSC_VER
+	#define WIN32 1
+	#define MSVC 1
+	#pragma warning(disable:4355)
+	#pragma warning(disable:4996)
+	#pragma warning(disable:4731)
+	#pragma warning(disable:4200) // TODO: Remove this
+	#define mirb_external(name)
+	#define __thread __declspec(thread)
+	#define __noreturn __declspec(noreturn)
+#else
+	#define __noreturn __attribute__((noreturn)) 
+	#define mirb_external(name) __asm__(name)
+#endif
 
 #ifdef WIN32
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
+	#include <excpt.h>
+#else
+	#define __stdcall __attribute__((__stdcall__))
+	#define __fastcall __attribute__((__fastcall__))
+	#define __cdecl __attribute__((__cdecl__))
+
+	#include <sys/mman.h>
+	#include <sys/stat.h>
+#endif
+
+#ifdef VALGRIND
+	#ifndef NO_GC
+		#define NO_GC
+	#endif
 #endif
 
 namespace Mirb
@@ -33,6 +68,18 @@ namespace Mirb
 	};
 	
 	static inline void __noreturn runtime_fail(std::string message = "");
+	
+	#ifndef __has_builtin
+	  #define __has_builtin(x) 0
+	#endif
+
+	#if !__has_builtin(__builtin_unreachable)
+		static inline void __noreturn __builtin_unreachable();
+		static inline void __builtin_unreachable()
+		{
+			runtime_fail("Unreachable code");
+		}
+	#endif
 
 	template<typename T> static inline void runtime_assert(T expr, std::string message = "")
 	{

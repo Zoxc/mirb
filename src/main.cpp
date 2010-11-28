@@ -1,13 +1,12 @@
-#include "globals.hpp"
-
 #include <iostream>
-#include "src/compiler.hpp"
-#include "src/runtime.hpp"
-#include "src/parser/parser.hpp"
-#include "src/block.hpp"
+#include "common.hpp"
+#include "compiler.hpp"
+#include "runtime.hpp"
+#include "parser/parser.hpp"
+#include "block.hpp"
 
 #ifdef DEBUG
-	#include "src/tree/printer.hpp"
+	#include "tree/printer.hpp"
 #endif
 
 using namespace Mirb;
@@ -17,7 +16,7 @@ int main()
 	#ifndef NO_GC
 		GC_INIT();
 	#endif
-	
+
 	Mirb::initialize();
 	
 	while(1)
