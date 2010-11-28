@@ -104,8 +104,12 @@
 		<Unit filename="src\block.hpp" />
 		<Unit filename="src\char-array.cpp" />
 		<Unit filename="src\char-array.hpp" />
+		<Unit filename="src\classes\array.cpp" />
+		<Unit filename="src\classes\array.hpp" />
 		<Unit filename="src\classes\class.cpp" />
 		<Unit filename="src\classes\class.hpp" />
+		<Unit filename="src\classes\exception.cpp" />
+		<Unit filename="src\classes\exception.hpp" />
 		<Unit filename="src\classes\false-class.cpp" />
 		<Unit filename="src\classes\false-class.hpp" />
 		<Unit filename="src\classes\fixnum.cpp" />
@@ -116,6 +120,8 @@
 		<Unit filename="src\classes\nil-class.hpp" />
 		<Unit filename="src\classes\object.cpp" />
 		<Unit filename="src\classes\object.hpp" />
+		<Unit filename="src\classes\proc.cpp" />
+		<Unit filename="src\classes\proc.hpp" />
 		<Unit filename="src\classes\string.cpp" />
 		<Unit filename="src\classes\string.hpp" />
 		<Unit filename="src\classes\symbol.cpp" />

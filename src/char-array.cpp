@@ -125,6 +125,13 @@ namespace Mirb
 		return *this;
 	}
 	
+	CharArray &CharArray::operator+=(CharArray &&other)
+	{
+		append(other);
+		
+		return *this;
+	}
+
 	size_t CharArray::hash()
 	{
 		size_t hash = 0;

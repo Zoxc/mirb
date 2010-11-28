@@ -34,8 +34,16 @@ namespace Mirb
 				append(char_array);
 			}
 			
-			CharArray &operator+=(CharArray& other);
+			CharArray &operator+=(CharArray &other);
+			CharArray &operator+=(CharArray &&other);
+			
+			template<size_t length> CharArray &operator+=(const char (&string)[length])
+			{
+				append(string);
 
+				return *this;
+			}
+			
 			size_t hash();
 			
 			size_t length;

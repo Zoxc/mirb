@@ -120,7 +120,7 @@ namespace Mirb
 				return &table[_size - 1];
 			}
 			
-			T operator [](size_t index)
+			T &operator [](size_t index)
 			{
 				debug_assert(index < _size);
 				return table[index];
@@ -193,12 +193,12 @@ namespace Mirb
 					return *current++;
 				}
 				
-				T operator*() const 
+				T &operator*() const 
 				{
 					return *current;
 				}
 				
-				T operator ()() const 
+				T &operator ()() const 
 				{
 					return *current;
 				}

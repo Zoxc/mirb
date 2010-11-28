@@ -62,6 +62,21 @@ namespace Mirb
 			return Value::type(value) == String;
 		}
 		
+		template<> bool of_type<Mirb::Array>(value_t value)
+		{
+			return Value::type(value) == Array;
+		}
+		
+		template<> bool of_type<Mirb::Exception>(value_t value)
+		{
+			return Value::type(value) == Exception;
+		}
+		
+		template<> bool of_type<Mirb::Proc>(value_t value)
+		{
+			return Value::type(value) == Proc;
+		}
+		
 		bool test(value_t value)
 		{
 			return (value & ~(value_nil | value_false)) != 0;

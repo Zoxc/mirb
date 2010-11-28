@@ -16,6 +16,16 @@ namespace Mirb
 	{
 		return obj >> 1;
 	}
+	
+	value_t Fixnum::from_size_t(size_t value)
+	{
+		return int_to_fix(value);
+	}
+
+	size_t Fixnum::to_size_t(value_t obj)
+	{
+		return fix_to_int(obj);
+	}
 
 	mirb_compiled_block(fixnum_to_s)
 	{

@@ -16,6 +16,9 @@ namespace Mirb
 	class Class;
 	class Symbol;
 	class String;
+	class Array;
+	class Exception;
+	class Proc;
 
 	typedef size_t value_t;
 	
@@ -59,6 +62,9 @@ namespace Mirb
 		template<> bool of_type<Mirb::Class>(value_t value);
 		template<> bool of_type<Mirb::Symbol>(value_t value);
 		template<> bool of_type<Mirb::String>(value_t value);
+		template<> bool of_type<Mirb::Array>(value_t value);
+		template<> bool of_type<Mirb::Exception>(value_t value);
+		template<> bool of_type<Mirb::Proc>(value_t value);
 
 		Type type(value_t value);
 	};
@@ -93,24 +99,42 @@ namespace Mirb
 		{
 			debug_assert(Value::of_type<Symbol>(value));
 		}
-
+		
 		auto_cast(String *obj) : value((value_t)obj)
 		{
 			debug_assert(Value::of_type<String>(value));
 		}
 
+		auto_cast(Array *obj) : value((value_t)obj)
+		{
+			debug_assert(Value::of_type<Array>(value));
+		}
+		
+		auto_cast(Exception *obj) : value((value_t)obj)
+		{
+			debug_assert(Value::of_type<Exception>(value));
+		}
+
+		auto_cast(Proc *obj) : value((value_t)obj)
+		{
+			debug_assert(Value::of_type<Proc>(value));
+		}
+
 		operator value_t() { return value; }
-			
+		
 		operator struct rt_common *() { return (struct rt_common *)value; }
 		operator struct rt_proc *() { return (struct rt_proc *)value; }
 		operator struct rt_string *() { return (struct rt_string *)value; }
 		operator struct rt_array *() { return (struct rt_array *)value; }
-			
+		
 		operator Object *() { return (Object *)value; }
 		operator Module *() { return (Module *)value; }
 		operator Class *() { return (Class *)value; }
 		operator Symbol *() { return (Symbol *)value; }
 		operator String *() { return (String *)value; }
+		operator Array *() { return (Array *)value; }
+		operator Exception *() { return (Exception *)value; }
+		operator Proc *() { return (Proc *)value; }
 	};
 
 	template<typename T> T *cast(value_t obj)
