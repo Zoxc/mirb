@@ -3,9 +3,8 @@
 #include "gc.hpp"
 #include "block.hpp"
 #include "arch/codegen.hpp"
+#include "generic/executable-heap.hpp"
 #include "codegen/bytecode.hpp"
-
-#include "../runtime/code_heap.hpp"
 
 #ifdef DEBUG
 	#include "codegen/printer.hpp"
@@ -63,13 +62,15 @@ namespace Mirb
 
 		size_t block_size = CodeGen::NativeMeasurer::measure(block);
 
-		void *block_code = rt_code_heap_alloc(block_size);
+		void *block_code = ExecutableHeap::alloc(block_size);
 
 		MemStream stream(block_code, block_size);
 
 		CodeGen::NativeGenerator native_generator(stream, memory_pool);
 
 		native_generator.generate(block);
+		
+		ExecutableHeap::resize(block_code, stream.size());
 
 		block->final->scope = 0;
 		block->final->compiled = (compiled_block_t)block_code;
@@ -87,7 +88,7 @@ namespace Mirb
 		
 		size_t block_size = CodeGen::NativeGenerator::stub_size;
 
-		void *block_code = rt_code_heap_alloc(block_size);
+		void *block_code = ExecutableHeap::alloc(block_size);
 
 		MemStream stream(block_code, block_size);
 

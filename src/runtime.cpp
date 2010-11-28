@@ -12,6 +12,7 @@
 #include "classes/false-class.hpp"
 #include "classes/nil-class.hpp"
 #include "classes/string.hpp"
+#include "generic/executable-heap.hpp"
 
 #include "../runtime/classes/module.hpp"
 
@@ -370,15 +371,6 @@ namespace Mirb
 		return cast<Class>(obj)->get_methods()->set(name, method);
 	}
 	
-	void create()
-	{
-		Lexer::setup_jump_table();
-	}
-
-	void destroy()
-	{
-	}
-
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename)
 	{
 		MemoryPool memory_pool;
@@ -515,6 +507,16 @@ namespace Mirb
 		define_singleton_method(main, "to_s", &main_to_s);
 		define_singleton_method(main, "include", &main_include);
 	}
+	
+	void initialize()
+	{
+		Lexer::setup_jump_table();
+		ExecutableHeap::initialize();
+	}
 
+	void finalize()
+	{
+		ExecutableHeap::finalize();
+	}
 };
 

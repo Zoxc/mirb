@@ -1,5 +1,4 @@
 #include "globals.hpp"
-#include "runtime/code_heap.hpp"
 #include "runtime/classes.hpp"
 #include "runtime/classes/symbol.hpp"
 #include "runtime/classes/string.hpp"
@@ -23,7 +22,7 @@ int main()
 	#endif
 	
 	rt_create();
-	Mirb::create();
+	Mirb::initialize();
 	
 	while(1)
 	{
@@ -71,6 +70,7 @@ int main()
 	
 	std::cout << "Exiting gracefully...";
 	
+	Mirb::finalize();
 	rt_destroy();
 	
 	return 0;

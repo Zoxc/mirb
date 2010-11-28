@@ -70,8 +70,6 @@
 		<Unit filename="runtime\classes\string.hpp" />
 		<Unit filename="runtime\classes\symbol.cpp" />
 		<Unit filename="runtime\classes\symbol.hpp" />
-		<Unit filename="runtime\code_heap.cpp" />
-		<Unit filename="runtime\code_heap.hpp" />
 		<Unit filename="runtime\constant.cpp" />
 		<Unit filename="runtime\constant.hpp" />
 		<Unit filename="runtime\exceptions.cpp" />
@@ -144,6 +142,8 @@
 		<Unit filename="src\gc.hpp" />
 		<Unit filename="src\generic\allocator.hpp" />
 		<Unit filename="src\generic\bit-set-wrapper.hpp" />
+		<Unit filename="src\generic\executable-heap.cpp" />
+		<Unit filename="src\generic\executable-heap.hpp" />
 		<Unit filename="src\generic\hash-table.hpp" />
 		<Unit filename="src\generic\list.hpp" />
 		<Unit filename="src\generic\map.hpp" />

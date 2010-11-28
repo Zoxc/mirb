@@ -4,6 +4,12 @@
 
 namespace Mirb
 {
+	#define MIRB_ARG_INDEX(index) (argc - 1 - (index))
+	#define MIRB_ARG(index) (argv[MIRB_ARG_INDEX(index)])
+	#define MIRB_ARG_EACH_RAW(i) for(size_t i = 0; i < argc; i++)
+	#define MIRB_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
+	#define MIRB_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
+
 	class Symbol;
 	class CharArray;
 	
@@ -39,8 +45,8 @@ namespace Mirb
 	Block *get_method(value_t obj, Symbol *name);
 	void set_method(value_t obj, Symbol *name, Block *method);
 
-	void create();
-	void destroy();
+	void initialize();
+	void finalize();
 
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename);
 	

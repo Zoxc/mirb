@@ -24,7 +24,6 @@
     <ClInclude Include="..\..\runtime\classes\proc.hpp" />
     <ClInclude Include="..\..\runtime\classes\string.hpp" />
     <ClInclude Include="..\..\runtime\classes\symbol.hpp" />
-    <ClInclude Include="..\..\runtime\code_heap.hpp" />
     <ClInclude Include="..\..\runtime\constant.hpp" />
     <ClInclude Include="..\..\runtime\exceptions.hpp" />
     <ClInclude Include="..\..\runtime\gc.hpp" />
@@ -65,6 +64,7 @@
     <ClInclude Include="..\..\src\gc.hpp" />
     <ClInclude Include="..\..\src\generic\allocator.hpp" />
     <ClInclude Include="..\..\src\generic\bit-set-wrapper.hpp" />
+    <ClInclude Include="..\..\src\generic\executable-heap.hpp" />
     <ClInclude Include="..\..\src\generic\hash-table.hpp" />
     <ClInclude Include="..\..\src\generic\list.hpp" />
     <ClInclude Include="..\..\src\generic\map.hpp" />
@@ -103,7 +103,6 @@
     <ClCompile Include="..\..\runtime\classes\proc.cpp" />
     <ClCompile Include="..\..\runtime\classes\string.cpp" />
     <ClCompile Include="..\..\runtime\classes\symbol.cpp" />
-    <ClCompile Include="..\..\runtime\code_heap.cpp" />
     <ClCompile Include="..\..\runtime\constant.cpp" />
     <ClCompile Include="..\..\runtime\exceptions.cpp" />
     <ClCompile Include="..\..\runtime\modules\kernel.cpp" />
@@ -132,6 +131,7 @@
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />
+    <ClCompile Include="..\..\src\generic\executable-heap.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />

@@ -9,7 +9,6 @@
 using namespace Mirb;
 
 #include "runtime.hpp"
-#include "code_heap.hpp"
 #include "classes/symbol.hpp"
 #include "classes/string.hpp"
 #include "classes/bool.hpp"
@@ -22,8 +21,6 @@ using namespace Mirb;
 
 void rt_create(void)
 {
-	rt_code_heap_create();
-
 	rt_setup_classes();
 
 	rt_class_init();
@@ -43,8 +40,6 @@ void rt_create(void)
 
 void rt_destroy(void)
 {
-	rt_code_heap_destroy();
-
 	rt_destroy_classes();
 }
 
