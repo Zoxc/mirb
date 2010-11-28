@@ -52,6 +52,14 @@ namespace Mirb
 
 			value_t to_string();
 			
+			const char *c_str_ref();
+			size_t c_str_length();
+
+			const char_t *str_ref();
+			size_t str_length();
+
+			CharArray c_str();
+			
 			template<size_t length> void set_literal(const char (&string)[length])
 			{
 				data = (char_t *)&string;

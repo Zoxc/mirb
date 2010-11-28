@@ -79,6 +79,7 @@
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
+    <ClInclude Include="..\..\src\modules\kernel.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
     <ClInclude Include="..\..\src\support.hpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="..\..\src\lexer\numbers.cpp" />
     <ClCompile Include="..\..\src\lexer\strings.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
+    <ClCompile Include="..\..\src\modules\kernel.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
     <ClCompile Include="..\..\src\parser\parser.cpp" />

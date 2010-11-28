@@ -72,6 +72,11 @@ namespace Mirb
 			{
 				value_t value;
 			} break_data;
+
+			struct
+			{
+				value_t exception;
+			} ruby_data;
 		};
 		void *payload[3];
 	};

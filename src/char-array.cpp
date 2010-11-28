@@ -131,7 +131,32 @@ namespace Mirb
 		
 		return *this;
 	}
+	
+	const char *CharArray::c_str_ref()
+	{
+		return (char *)data;
+	}
+	
+	size_t CharArray::c_str_length()
+	{
+		return length - 1;
+	}
 
+	const char_t *CharArray::str_ref()
+	{
+		return data;
+	}
+	
+	size_t CharArray::str_length()
+	{
+		return length - 1;
+	}
+
+	CharArray CharArray::c_str()
+	{
+		return *this + "\x00";
+	}
+			
 	size_t CharArray::hash()
 	{
 		size_t hash = 0;

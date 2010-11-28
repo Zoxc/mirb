@@ -165,6 +165,8 @@
 		<Unit filename="src\lexer\strings.cpp" />
 		<Unit filename="src\message.cpp" />
 		<Unit filename="src\message.hpp" />
+		<Unit filename="src\modules\kernel.cpp" />
+		<Unit filename="src\modules\kernel.hpp" />
 		<Unit filename="src\parser\calls.cpp" />
 		<Unit filename="src\parser\control-flow.cpp" />
 		<Unit filename="src\parser\parser.cpp" />
