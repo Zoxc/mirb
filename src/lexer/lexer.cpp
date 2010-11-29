@@ -151,7 +151,7 @@ namespace Mirb
 		
 		jump_table['='] = &Lexer::assign_equal;
 		
-		jump_table['<'] = &Lexer::assign<Lexeme::LESS, Lexeme::LESS_OR_EQUAL, '<', Lexeme::LEFT_SHIFT, Lexeme::ASSIGN_LEFT_SHIFT>;
+		jump_table['<'] = &Lexer::compare;
 		jump_table['>'] = &Lexer::assign<Lexeme::GREATER, Lexeme::GREATER_OR_EQUAL, '>', Lexeme::RIGHT_SHIFT, Lexeme::ASSIGN_RIGHT_SHIFT>;
 		
 		jump_table['{'] = &Lexer::curly_open;

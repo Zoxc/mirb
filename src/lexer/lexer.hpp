@@ -50,6 +50,7 @@ namespace Mirb
 			void carrige_return();
 			
 			void assign_equal();
+			void compare();
 			
 			void exclamation();
 			

@@ -57,6 +57,7 @@ namespace Mirb
 				LESS,
 				LESS_OR_EQUAL,
 				
+				COMPARE,
 				EQUALITY,
 				CASE_EQUALITY,
 				NO_EQUALITY,

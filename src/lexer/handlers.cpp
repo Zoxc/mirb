@@ -169,6 +169,48 @@ namespace Mirb
 		lexeme.stop = &input;
 	}
 	
+	void Lexer::compare()
+	{
+		input++;
+		
+		switch(input)
+		{
+			case '<':
+				input++;
+				if(input == '=')
+				{
+					input++;
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::ASSIGN_LEFT_SHIFT;
+				}
+				else
+				{
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::LEFT_SHIFT;
+				}
+				break;
+				
+			case '=':
+				input++;
+				if(input == '>')
+				{
+					input++;
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::COMPARE;
+				}
+				else
+				{
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::LESS_OR_EQUAL;
+				}
+				break;
+				
+			default:
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::LESS;
+		}
+	}
+	
 	void Lexer::comment()
 	{
 		eol();

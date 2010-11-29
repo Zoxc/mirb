@@ -414,6 +414,7 @@ namespace Mirb
 		3, // LESS,
 		3, // LESS_OR_EQUAL,
 		
+		2, // COMPARE,
 		2, // EQUALITY,
 		2, // CASE_EQUALITY,
 		2, // NO_EQUALITY,
