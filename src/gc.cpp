@@ -1,15 +1,17 @@
 #include "gc.hpp"
 
-#ifdef DEBUG
-	#define GC_DEBUG
+#ifndef NO_GC
+	#ifdef DEBUG
+		#define GC_DEBUG
+	#endif
+
+	#define GC_THREADS
+
+	extern "C"
+	{
+		#include <gc/include/gc.h>
+	};
 #endif
-
-#define GC_THREADS
-
-extern "C"
-{
-    #include <gc/include/gc.h>
-};
 
 namespace Mirb
 {
