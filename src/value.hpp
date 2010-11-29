@@ -116,19 +116,59 @@ namespace Mirb
 
 		operator value_t() { return value; }
 		
-		operator Object *() { return (Object *)value; }
-		operator Module *() { return (Module *)value; }
-		operator Class *() { return (Class *)value; }
-		operator Symbol *() { return (Symbol *)value; }
-		operator String *() { return (String *)value; }
-		operator Array *() { return (Array *)value; }
-		operator Exception *() { return (Exception *)value; }
-		operator Proc *() { return (Proc *)value; }
+		operator Object *()
+		{
+			debug_assert(Value::of_type<Object>(value));
+			return (Object *)value;
+		}
+
+		operator Module *()
+		{
+			debug_assert(Value::of_type<Module>(value));
+			return (Module *)value;
+		}
+
+		operator Class *()
+		{
+			debug_assert(Value::of_type<Class>(value));
+			return (Class *)value;
+		}
+
+		operator Symbol *()
+		{
+			debug_assert(Value::of_type<Symbol>(value));
+			return (Symbol *)value;
+		}
+
+		operator String *()
+		{
+			debug_assert(Value::of_type<String>(value));
+			return (String *)value;
+		}
+		
+		operator Array *()
+		{
+			debug_assert(Value::of_type<Array>(value));
+			return (Array *)value;
+		}
+		
+		operator Exception *()
+		{
+			debug_assert(Value::of_type<Exception>(value));
+			return (Exception *)value;
+		}
+		
+		operator Proc *()
+		{
+			debug_assert(Value::of_type<Proc>(value));
+			return (Proc *)value;
+		}
 	};
 
 	template<typename T> T *cast(value_t obj)
 	{
-		return auto_cast(obj);
+		debug_assert(Value::of_type<T>(obj));
+		return (T *)obj;
 	}
 	
 	class ValueMapFunctions:

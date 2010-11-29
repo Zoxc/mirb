@@ -81,11 +81,16 @@ namespace Mirb
 		}
 	#endif
 
-	template<typename T> static inline void runtime_assert(T expr, std::string message = "")
+	template<typename T> static inline void runtime_assert(T expr, std::string message)
 	{
 		if(!expr && message != "")
 			std::cout << message << "\n";
 
+		assert(expr);
+	}
+	
+	template<typename T> static inline void runtime_assert(T expr)
+	{
 		assert(expr);
 	}
 
@@ -98,9 +103,14 @@ namespace Mirb
 	
 	static inline void __noreturn debug_fail(std::string message = "");
 
-	template<typename T> static inline void debug_assert(T expr, std::string message = "")
+	template<typename T> static inline void debug_assert(T expr, std::string message)
 	{
 		runtime_assert(expr, message);
+	}
+	
+	template<typename T> static inline void debug_assert(T expr)
+	{
+		runtime_assert(expr);
 	}
 
 	static inline void debug_fail(std::string message)

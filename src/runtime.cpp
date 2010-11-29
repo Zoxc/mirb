@@ -303,7 +303,7 @@ namespace Mirb
 				if(value != value_undef)
 					return value;
 
-				obj = cast<Class>(obj)->superclass;
+				obj = cast<Module>(obj)->superclass;
 			}
 
 			return value_undef;
@@ -360,12 +360,12 @@ namespace Mirb
 	
 	Block *get_method(value_t obj, Symbol *name)
 	{
-		return cast<Class>(obj)->get_methods()->get(name);
+		return cast<Module>(obj)->get_methods()->get(name);
 	}
 
 	void set_method(value_t obj, Symbol *name, Block *method)
 	{
-		return cast<Class>(obj)->get_methods()->set(name, method);
+		return cast<Module>(obj)->get_methods()->set(name, method);
 	}
 	
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename)

@@ -31,6 +31,8 @@ namespace Mirb
 			switch(Value::type(value))
 			{
 				case Module:
+				case Class:
+				case IClass:
 					return true;
 
 				default:
@@ -44,7 +46,6 @@ namespace Mirb
 			{
 				case Class:
 				case IClass:
-				case Module:
 					return true;
 
 				default:
@@ -125,7 +126,7 @@ namespace Mirb
 				}
 			}
 			else
-				return cast<Mirb::Object>(value)->type;
+				return ((Mirb::Object *)value)->type; // Do a simple cast here to avoid stack overflow
 		}
 	};
 };
