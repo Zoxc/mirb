@@ -1,10 +1,10 @@
-require 'test/testing'
+require_relative 'test/testing'
 
 include Testing
 
-require 'test/procs'
-require 'test/exceptions'
-require 'test/object'
-require 'test/control_flow'
+require_relative 'test/procs'
+require_relative 'test/exceptions'
+require_relative 'test/object'
+require_relative 'test/control_flow'
 
 run!

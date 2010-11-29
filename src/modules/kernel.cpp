@@ -190,6 +190,7 @@ namespace Mirb
 		define_method(Kernel::class_ref, "print", kernel_print);
 		define_method(Kernel::class_ref, "load", kernel_load);
 		define_method(Kernel::class_ref, "require", kernel_load);
+		define_method(Kernel::class_ref, "require_relative", kernel_load);
 		define_method(Kernel::class_ref, "raise", kernel_raise);
 	}
 };
