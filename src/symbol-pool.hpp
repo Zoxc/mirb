@@ -47,11 +47,7 @@ namespace Mirb
 
 			static Symbol *create_value(GC::Ref alloc_ref, CharArray &key)
 			{
-				Symbol *result = new (gc) Symbol(key);
-
-				result->next = 0;
-
-				return result;
+				return new (gc) Symbol(key);
 			}
 	};
 

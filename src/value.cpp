@@ -125,7 +125,7 @@ namespace Mirb
 				}
 			}
 			else
-				return (Type)(uint16_t)cast<Mirb::Object>(value)->type; // TODO: Remove the typecast when everything is migrated
+				return cast<Mirb::Object>(value)->type;
 		}
 	};
 };
