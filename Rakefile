@@ -20,10 +20,10 @@ package = Package.new do
 	# setup toolchain
 	set Toolchain::Architecture, Arch::X86
 	
-	set Toolchain::Optimization, debug ? :none : :balanced
+	set Toolchain::Optimization, debug ? :none : :speed
 	set Toolchain::Exceptions, :none
 	set Toolchain::Reflection, false
-	set Toolchain::StackProtection, windows ? :none : :full
+	set Toolchain::StackProtection, (windows || !debug) ? :none : (:full)
 	set Toolchain::StaticLibraries, false
 	
 	set Toolchain::DebugInformation, debug
@@ -46,8 +46,6 @@ package = Package.new do
 	# languages
 	use Assembly::WithCPP
 	c = use Languages::C
-	c.std 'c99'
-	c.define('WIN_SEH') if windows
 	c.define('VALGRIND') if valgrind
 	c.define('NO_GC') if no_gc
 	c.define 'DEBUG' if debug_info

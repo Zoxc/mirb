@@ -22,11 +22,11 @@ namespace Mirb
 			#ifdef WIN32
 				heap = (unsigned char *)VirtualAlloc(0, code_heap_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
-				runtime_assert(heap);
+				mirb_runtime_assert(heap);
 			#else
 				heap = (unsigned char *)mmap(0, code_heap_size, PROT_READ | PROT_EXEC | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-				runtime_assert(heap != MAP_FAILED);
+				mirb_runtime_assert(heap != MAP_FAILED);
 			#endif
 
 			next = heap;
@@ -43,7 +43,7 @@ namespace Mirb
 
 			next = (unsigned char *)align((size_t)next + size, code_heap_align);
 
-			runtime_assert(next <= end); // Heap is out of memory!
+			mirb_runtime_assert(next <= end); // Heap is out of memory!
 
 			return result;
 		}

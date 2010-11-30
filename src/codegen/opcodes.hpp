@@ -205,7 +205,7 @@ namespace Mirb
 						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
 
 					default:
-						debug_fail("Unknown opcode type");
+						mirb_debug_abort("Unknown opcode type");
 				};
 			}
 

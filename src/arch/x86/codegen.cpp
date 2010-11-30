@@ -449,7 +449,7 @@ namespace Mirb
 		{
 			mov_var_to_reg(var, spare);
 
-			debug_assert(spare == Arch::Register::AX);
+			mirb_debug_assert(spare == Arch::Register::AX);
 
 			rex(0, 0, 0);
 			stream.u8(0x83); // and eax, ~(value_false | value_nil)

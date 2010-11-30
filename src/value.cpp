@@ -97,7 +97,7 @@ namespace Mirb
 						return true;
 
 					default:
-						Mirb::debug_fail("Unknown literal type");
+						mirb_runtime_abort("Unknown literal type");
 				}
 			}
 			else
@@ -122,11 +122,11 @@ namespace Mirb
 						return Nil;
 
 					default:
-						Mirb::debug_fail("Unknown literal type");
+						mirb_runtime_abort("Unknown literal type");
 				}
 			}
 			else
-				return ((Mirb::Object *)value)->type; // Do a simple cast here to avoid stack overflow
+				return ((Mirb::Object *)value)->type; // Do a simple cast here to avoid stack overflow when debugging is enabled
 		}
 	};
 };

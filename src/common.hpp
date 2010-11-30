@@ -1,24 +1,11 @@
 #pragma once
-#include <iostream>
-#include <map>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <cstring>
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstdint>
-#include <cstdarg>
-#include <cstring>
-#include <cassert>
-
 #ifdef _MSC_VER
 	#define WIN32 1
 	#define MSVC 1
 	#pragma warning(disable:4355)
 	#pragma warning(disable:4996)
 	#pragma warning(disable:4731)
+	#pragma warning(disable:4530)
 	#pragma warning(disable:4200) // TODO: Remove this
 	#define mirb_external(name)
 	#define __thread __declspec(thread)
@@ -44,6 +31,20 @@
 	#include <sys/stat.h>
 #endif
 
+#include <iostream>
+#include <map>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <cstring>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <cstdarg>
+#include <cstring>
+#include <cassert>
+
 #ifdef VALGRIND
 	#ifndef NO_GC
 		#define NO_GC
@@ -67,8 +68,27 @@ namespace Mirb
 		return value & ~(alignment - 1);
 	};
 	
-	static inline void __noreturn runtime_fail(std::string message = "");
+	static inline void __noreturn runtime_abort_with_message(std::string message);
 	
+	static inline void runtime_abort_with_message(std::string message)
+	{
+		std::cout << message << "\n";
+		std::abort();
+	}
+	
+	#define mirb_stringify(value) #value
+	#define mirb_runtime_abort_internal(expression, file, line, message) runtime_abort_with_message(file ":" mirb_stringify(line) ": " + std::string(message))
+	#define mirb_runtime_abort(message) mirb_runtime_abort_internal(expression, __FILE__, __LINE__, message)
+	#define mirb_runtime_assert(expression) assert(expression)
+
+	#ifdef DEBUG
+		#define mirb_debug_assert(expression) assert(expression)
+		#define mirb_debug_abort(message) mirb_runtime_abort_internal(expression, __FILE__, __LINE__, message)
+	#else
+		#define mirb_debug_assert(expression)
+		#define mirb_debug_abort(message)
+	#endif
+
 	#ifndef __has_builtin
 	  #define __has_builtin(x) 0
 	#endif
@@ -77,44 +97,7 @@ namespace Mirb
 		static inline void __noreturn __builtin_unreachable();
 		static inline void __builtin_unreachable()
 		{
-			runtime_fail("Unreachable code");
+			mirb_runtime_abort("Unreachable code");
 		}
 	#endif
-
-	template<typename T> static inline void runtime_assert(T expr, std::string message)
-	{
-		if(!expr && message != "")
-			std::cout << message << "\n";
-
-		assert(expr);
-	}
-	
-	template<typename T> static inline void runtime_assert(T expr)
-	{
-		assert(expr);
-	}
-
-	static inline void runtime_fail(std::string message)
-	{
-		std::cout << message << "\n";
-
-		assert(0);
-	}
-	
-	static inline void __noreturn debug_fail(std::string message = "");
-
-	template<typename T> static inline void debug_assert(T expr, std::string message)
-	{
-		runtime_assert(expr, message);
-	}
-	
-	template<typename T> static inline void debug_assert(T expr)
-	{
-		runtime_assert(expr);
-	}
-
-	static inline void debug_fail(std::string message)
-	{
-		runtime_fail(message);
-	}
 };

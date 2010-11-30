@@ -11,7 +11,7 @@ namespace Mirb
 
 			void check_size()
 			{
-				debug_assert(size() <= _capacity, "Too much has been written");
+				mirb_debug_assert(size() <= _capacity && "Too much has been written");
 			}
 		public:
 			MemStream(void *memory, size_t capacity) : memory(memory), _capacity(capacity), position(memory) {}

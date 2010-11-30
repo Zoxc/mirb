@@ -40,9 +40,9 @@ namespace Mirb
 
 				case value_nil:
 					return NilClass::class_ref;
-
+	
 				default:
-					Mirb::debug_fail("Unknown literal type");
+					mirb_runtime_abort("Unknown literal type");
 			}
 		}
 		else
@@ -279,7 +279,7 @@ namespace Mirb
 	ValueMap *get_vars(value_t obj)
 	{
 		if(!Value::of_type<Object>(obj))
-			Mirb::runtime_fail("No value map on objects passed by value"); // TODO: Fix this
+			mirb_runtime_abort("No value map on objects passed by value"); // TODO: Fix this
 
 		Object *object = auto_cast(obj);
 
@@ -318,7 +318,7 @@ namespace Mirb
 			return result;
 
 		if(require)
-			Mirb::debug_fail("Unable to find constant " + name->get_string() + " on " + inspect_object(obj));
+			mirb_runtime_abort("Unable to find constant " + name->get_string() + " on " + inspect_object(obj));
 		else
 			return value_undef;
 	}
@@ -427,7 +427,7 @@ namespace Mirb
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
 		if(!result)
-			runtime_fail("Undefined method " + name->get_string() + " on " + inspect_object(obj));
+			mirb_runtime_abort("Undefined method " + name->get_string() + " on " + inspect_object(obj));
 
 		return result->compiled;
 	}
@@ -437,7 +437,7 @@ namespace Mirb
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
 		if(!result)
-			runtime_fail("No superclass method " + name->get_string() + " for " + inspect_object(module));
+			mirb_runtime_abort("No superclass method " + name->get_string() + " for " + inspect_object(module));
 
 		return result->compiled;
 	}

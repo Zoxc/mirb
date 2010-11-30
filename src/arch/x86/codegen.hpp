@@ -79,7 +79,7 @@ namespace Mirb
 
 				template<typename T> void generate(T &op)
 				{
-					debug_fail("Not implemented");
+					mirb_debug_abort("Not implemented");
 				}
 				
 				void generate(Block *block);

@@ -122,7 +122,7 @@ namespace Mirb
 			
 			T &operator [](size_t index)
 			{
-				debug_assert(index < _size);
+				mirb_debug_assert(index < _size);
 				return table[index];
 			}
 			
@@ -135,7 +135,7 @@ namespace Mirb
 			
 			T pop()
 			{
-				debug_assert(_size);
+				mirb_debug_assert(_size);
 				return table[--_size];
 			}
 			

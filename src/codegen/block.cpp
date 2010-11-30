@@ -180,7 +180,7 @@ namespace Mirb
 						return real;
 					}
 
-				debug_fail("No more registers!");
+				mirb_runtime_abort("No more registers!");
 			};
 
 			// TODO: Don't use std::vector

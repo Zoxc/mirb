@@ -343,7 +343,7 @@ namespace Mirb
 				}	
 				
 				default:
-					debug_fail("Unknown left hand expression");
+					mirb_debug_abort("Unknown left hand expression");
 			}
 		}
 		

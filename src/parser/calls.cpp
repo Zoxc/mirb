@@ -315,7 +315,7 @@ namespace Mirb
 				}
 
 			default:
-				debug_fail("Invalid lookup lexeme");
+				mirb_runtime_abort("Invalid lookup lexeme");
 		}
 	}
 

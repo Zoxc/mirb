@@ -199,7 +199,7 @@ namespace Mirb
 						frame = frame->prev;
 					}
 
-					runtime_fail("Unable to find a exception handler");
+					mirb_runtime_abort("Unable to find a exception handler");
 				#endif
 			}
 
@@ -207,7 +207,7 @@ namespace Mirb
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
 					if(!find_seh_target(target))
-						runtime_fail("Unable to find handler for return");
+						mirb_runtime_abort("Unable to find handler for return");
 				#endif
 
 				ExceptionData data;
@@ -223,7 +223,7 @@ namespace Mirb
 			{
 				#ifdef MIRB_SEH_EXCEPTIONS
 					if(!find_seh_target(target))
-						runtime_fail("Unable to find handler for break");
+						mirb_runtime_abort("Unable to find handler for break");
 				#endif
 
 				ExceptionData data;
@@ -492,7 +492,7 @@ namespace Mirb
 						break;
 
 						default:
-							debug_fail("Unknown exception type");
+							mirb_debug_abort("Unknown exception type");
 					}
 				}
 			}
