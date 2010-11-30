@@ -68,8 +68,6 @@ namespace Mirb
 
 	void Fixnum::initialize()
 	{
-		Fixnum::class_ref = define_class(Object::class_ref, "Fixnum", Object::class_ref);
-
 		define_method(Fixnum::class_ref, "to_s", fixnum_to_s);
 
 		define_method(Fixnum::class_ref, "+", fixnum_add);

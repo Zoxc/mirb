@@ -26,27 +26,10 @@ namespace Mirb
 {
 	value_t class_of(value_t obj)
 	{
-		if(obj & 1)
-			return Fixnum::class_ref;
-		else if(obj <= value_highest)
-		{
-			switch(obj)
-			{
-				case value_true:
-					return TrueClass::class_ref;
-
-				case value_false:
-					return FalseClass::class_ref;
-
-				case value_nil:
-					return NilClass::class_ref;
-	
-				default:
-					mirb_runtime_abort("Unknown literal type");
-			}
-		}
-		else
+		if(Value::object_ref(obj))
 			return cast<Object>(obj)->instance_of;
+		else
+			return Value::class_of_literal(obj);
 	}
 
 	value_t real_class(value_t obj)
@@ -273,7 +256,7 @@ namespace Mirb
 		if(Value::type(result) == Value::String)
 			return result;
 		else
-			return object_to_s(value_nil, value_nil, obj, 0, 0, 0);
+			return object_to_s(0, value_nil, obj, 0, 0, 0);
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -485,7 +468,7 @@ namespace Mirb
 
 	mirb_compiled_block(main_include)
 	{
-		return module_include(value_nil, value_nil, Object::class_ref, block, argc, argv);
+		return module_include(0, value_nil, Object::class_ref, block, argc, argv);
 	}
 
 	void setup_classes()
@@ -508,7 +491,16 @@ namespace Mirb
 		class_name(Class::class_ref, Object::class_ref, Symbol::from_literal("Class"));
 		class_name(Symbol::class_ref, Object::class_ref, Symbol::from_literal("Symbol"));
 		class_name(String::class_ref, Object::class_ref, Symbol::from_literal("String"));
+		
+		// Setup variables required by Value::initialize()
+		
+		NilClass::class_ref = define_class(Object::class_ref, "NilClass", Object::class_ref);
+		FalseClass::class_ref = define_class(Object::class_ref, "FalseClass", Object::class_ref);
+		TrueClass::class_ref = define_class(Object::class_ref, "TrueClass", Object::class_ref);
+		Fixnum::class_ref = define_class(Object::class_ref, "Fixnum", Object::class_ref);
 
+		Value::initialize();
+		
 		main = Object::allocate(Object::class_ref);
 
 		define_singleton_method(main, "to_s", &main_to_s);
@@ -521,7 +513,7 @@ namespace Mirb
 		ExecutableHeap::initialize();
 
 		setup_classes();
-		
+
 		Class::initialize();
 		Object::initialize();
 		Module::initialize();

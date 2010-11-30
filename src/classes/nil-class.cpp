@@ -20,8 +20,6 @@ namespace Mirb
 	
 	void NilClass::initialize()
 	{
-		NilClass::class_ref = define_class(Object::class_ref, "NilClass", Object::class_ref);
-
 		define_method(NilClass::class_ref, "inspect", nilclass_inspect);
 		define_method(NilClass::class_ref, "to_s", nilclass_to_s);
 

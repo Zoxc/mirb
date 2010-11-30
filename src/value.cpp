@@ -1,10 +1,61 @@
 #include "value.hpp"
 #include "classes/object.hpp"
+#include "classes/fixnum.hpp"
+#include "classes/nil-class.hpp"
+#include "classes/false-class.hpp"
+#include "classes/true-class.hpp"
 
 namespace Mirb
 {
 	namespace Value
 	{
+		Type type_table[literal_count];
+		value_t class_of_table[literal_count];
+
+		void initialize()
+		{
+			for(value_t i = 0; i < literal_count; ++i)
+			{
+				if(i & fixnum_mask)
+				{
+					type_table[i] = Fixnum;
+					class_of_table[i] = Mirb::Fixnum::class_ref;
+					continue;
+				}
+
+				switch(i)
+				{
+					case value_nil:
+					{
+						type_table[i] = Nil;
+						class_of_table[i] = NilClass::class_ref;
+						break;
+					}
+
+					case value_false:
+					{
+						type_table[i] = False;
+						class_of_table[i] = FalseClass::class_ref;
+						break;
+					}
+
+					case value_true:
+					{
+						type_table[i] = True;
+						class_of_table[i] = TrueClass::class_ref;
+						break;
+					}
+
+					default:
+					{
+						type_table[i] = None;
+						class_of_table[i] = 0;
+						break;
+					}
+				}
+			}
+		}
+
 		template<> bool of_type<Mirb::Object>(value_t value)
 		{
 			switch(Value::type(value))
@@ -82,51 +133,23 @@ namespace Mirb
 		{
 			return (value & ~(value_nil | value_false)) != 0;
 		}
-
-		bool by_value(value_t value)
+		
+		bool object_ref(value_t value)
 		{
-			if (value & 1)
-				return true;
-			else if (value <= value_highest)
-			{
-				switch(value)
-				{
-					case value_true:
-					case value_false:
-					case value_nil:
-						return true;
-
-					default:
-						mirb_runtime_abort("Unknown literal type");
-				}
-			}
-			else
-				return false;
+			return (value & object_ref_mask) == 0;
+		}
+		
+		value_t class_of_literal(value_t value)
+		{
+			return class_of_table[value & literal_mask];
 		}
 
 		Type type(value_t value)
 		{
-			if (value & 1)
-				return Fixnum;
-			else if (value <= value_highest)
-			{
-				switch(value)
-				{
-					case value_true:
-						return True;
-
-					case value_false:
-						return False;
-
-					case value_nil:
-						return Nil;
-
-					default:
-						mirb_runtime_abort("Unknown literal type");
-				}
-			}
-			else
+			if(object_ref(value))
 				return ((Mirb::Object *)value)->type; // Do a simple cast here to avoid stack overflow when debugging is enabled
+			else
+				return type_table[value & literal_mask];
 		}
 	};
 };

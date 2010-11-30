@@ -14,17 +14,39 @@ namespace Mirb
 	class Exception;
 	class Proc;
 
+	/* Format for tagged pointers
+	 *
+	 *  1 - fixnum
+	 * 00 - object reference, only above 0x4 (0x4 would make the value zero if bit 2 and 3 is cleared)
+	 * 10 - literal objects
+	 */
+	 
+	/* Bit layout for literal objects. You can test a value by clearing bit 2 and 3, if the result is 0, it's nil or false.
+	 *
+	 * 0010 - nil
+	 * 0110 - false
+	 * 1010 - true
+	 * 1110 - undef
+	 */
+
 	typedef size_t value_t;
+
+	const value_t fixnum_mask = 1;
+	const value_t object_ref_mask = 3;
 	
-	const value_t value_nil = 0;
-	const value_t value_true = 2;
-	const value_t value_false = 4;
-	const value_t value_undef = 6;
+	const value_t literal_mask = 0xF;
+	const value_t literal_count = literal_mask + 1;
+	
+	const value_t value_nil = 2;
+	const value_t value_false = 6;
+	const value_t value_true = 10;
+	const value_t value_undef = 14;
 	const value_t value_highest = value_undef;
 
 	namespace Value
 	{
 		enum Type {
+			None,
 			Fixnum,
 			True,
 			False,
@@ -38,14 +60,15 @@ namespace Mirb
 			String,
 			Array,
 			Proc,
-			Exception,
-			Types
+			Exception
 		};
+
+		bool object_ref(value_t value);
+		
+		value_t class_of_literal(value_t value);
 
 		bool test(value_t value);
 
-		bool by_value(value_t value);
-		
 		template<class T> bool of_type(value_t value)
 		{
 			return false;
@@ -61,6 +84,8 @@ namespace Mirb
 		template<> bool of_type<Mirb::Proc>(value_t value);
 
 		Type type(value_t value);
+
+		void initialize();
 	};
 	
 	union auto_cast

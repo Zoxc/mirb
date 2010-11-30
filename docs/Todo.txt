@@ -23,4 +23,4 @@
 [ ] Replace the stack operations in the bytecode with stack allocated buffers
 [ ] Create some form of DSL to generate Ruby function from C++ functions. Support C++ methods too
 [ ] Write a new precise garbage collector
-[ ] Steal Rubinius' tagging scheme
+[X] Steal Rubinius' tagging scheme (almost)

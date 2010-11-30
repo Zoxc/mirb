@@ -21,7 +21,7 @@ namespace Mirb
 		if(Value::test(name))
 			return name;
 
-		return object_to_s(value_nil, value_nil, obj, 0, 0, 0); // TODO: Replace by super
+		return object_to_s(0, value_nil, obj, 0, 0, 0); // TODO: Replace by super
 	}
 
 	mirb_compiled_block(module_append_features)
