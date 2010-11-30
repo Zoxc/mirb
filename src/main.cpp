@@ -1,4 +1,3 @@
-#include <iostream>
 #include "common.hpp"
 #include "compiler.hpp"
 #include "runtime.hpp"
