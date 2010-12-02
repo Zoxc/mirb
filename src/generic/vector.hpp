@@ -42,7 +42,7 @@ namespace Mirb
 				}
 			}
 
-			template<typename Aother> void initialize_copy(const Vector<T, typename Aother>& other)
+			template<typename Aother> void initialize_copy(const Vector<T, Aother>& other)
 			{
 				_size = other.size();
 				_capacity = other.capacity();
@@ -123,16 +123,29 @@ namespace Mirb
 					alloc_ref.free((void *)table);
 			}
 			
-			template<typename Aother> Vector operator=(const Vector<T, Aother>& other)
+			Vector &operator=(const Vector& other)
 			{
 				if(this == &other)
 					return *this;
 				
 				if(table)
 					alloc_ref.free((void *)table);
-
+				
 				initialize_copy(other);
-
+				
+				return *this;
+			}
+			
+			template<typename Aother> Vector &operator=(const Vector<T, Aother>& other)
+			{
+				if(this == &other)
+					return *this;
+				
+				if(table)
+					alloc_ref.free((void *)table);
+				
+				initialize_copy(other);
+				
 				return *this;
 			}
 			
