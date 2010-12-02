@@ -277,6 +277,7 @@ namespace Mirb
 				void write_variable(Tree::Variable *var, Tree::Variable *value);
 				
 				Block *to_bytecode(Tree::Scope *scope);
+				Block *create();
 		};
 	};
 };

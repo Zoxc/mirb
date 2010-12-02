@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\classes\exception.hpp" />
     <ClInclude Include="..\..\src\classes\false-class.hpp" />
     <ClInclude Include="..\..\src\classes\fixnum.hpp" />
+    <ClInclude Include="..\..\src\classes\method.hpp" />
     <ClInclude Include="..\..\src\classes\module.hpp" />
     <ClInclude Include="..\..\src\classes\nil-class.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
@@ -61,6 +62,7 @@
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
+    <ClInclude Include="..\..\src\method.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
@@ -106,6 +108,7 @@
     <ClCompile Include="..\..\src\lexer\strings.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
+    <ClCompile Include="..\..\src\method.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />

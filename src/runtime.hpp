@@ -1,6 +1,7 @@
 #pragma once
 #include "value.hpp"
 #include "block.hpp"
+#include "method.hpp"
 
 namespace Mirb
 {
@@ -61,7 +62,7 @@ namespace Mirb
 	value_t call(value_t obj, Symbol *name, size_t argc, value_t argv[]);
 	value_t call(value_t obj, Symbol *name);
 	value_t call(value_t obj, const char *name);
-
+	
 	void setup_classes();
 
 	extern value_t main;

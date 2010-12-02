@@ -712,6 +712,29 @@ namespace Mirb
 		ByteCodeGenerator::ByteCodeGenerator(MemoryPool &memory_pool) : memory_pool(memory_pool) 
 		{
 		}
+
+		Block *ByteCodeGenerator::create()
+		{
+			scope = 0;
+
+			block = new (memory_pool) Block(memory_pool);
+			block->epilog = create_block();
+			block->return_var = create_var();
+			block->final = new (gc) Mirb::Block;
+
+			body = create_block();
+			gen(body);
+			
+			split(block->epilog);
+			
+			gen<ReturnOp>(block->return_var);
+			
+			block->epilog->next_block = 0;
+			
+			basic = body;
+
+			return block;
+		}
 		
 		Block *ByteCodeGenerator::to_bytecode(Tree::Scope *scope)
 		{
@@ -817,9 +840,9 @@ namespace Mirb
 			auto var = new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
 
 			var->owner = scope;
-			var->index = scope->variable_list.size();
+			var->index = block->variable_list.size();
 
-			scope->variable_list.push(var);
+			block->variable_list.push(var);
 			
 			return var;
 		}

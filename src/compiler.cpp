@@ -42,7 +42,7 @@ namespace Mirb
 				std::system(("mkdir \"" + path.str() + "\"").c_str());
 				std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
 				
-				for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
+				for(auto i = block->variable_list.begin(); i != block->variable_list.end(); ++i)
 				{
 					if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
 						continue;

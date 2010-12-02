@@ -15,6 +15,11 @@ namespace Mirb
 			return 0x1000; //TODO: Fix this...
 		}
 
+		size_t NativeMeasurer::measure_method(Block *block)
+		{
+			return 0x1000; //TODO: Fix this...
+		}
+
 		void NativeGenerator::generate_stub(Mirb::Block *block)
 		{
 			push_imm((size_t)block);
@@ -31,6 +36,108 @@ namespace Mirb
 				generator->generate<T>(opcode);
 			}
 		};
+		
+		void NativeGenerator::push_regs()
+		{
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
+			{
+				block->final->ebp_offset += sizeof(size_t);
+				push_reg(Arch::Register::BX);
+			}
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
+			{
+				block->final->ebp_offset += sizeof(size_t);
+				push_reg(Arch::Register::SI);
+			}
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
+			{
+				block->final->ebp_offset += sizeof(size_t);
+				push_reg(Arch::Register::DI);
+			}
+		}
+
+		void NativeGenerator::pop_regs()
+		{
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
+				stream.u8(0x5F); // pop edi
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
+				stream.u8(0x5E); // pop esi
+			
+			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
+				stream.u8(0x5B); // pop ebx
+		}
+
+		void NativeGenerator::generate_bytecode()
+		{
+			index = 0;
+
+			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
+			{
+				i().final = stream.position;
+
+				for(auto o = i().opcodes.begin(); o != i().opcodes.end(); ++o)
+				{
+					o().virtual_do<Generate>(this);
+					index++;
+				}
+			}
+			
+			// Update the branch targets
+			
+			for(auto o = branch_list.begin(); o != branch_list.end(); ++o)
+			{
+				size_t *addr = (size_t *)o().code;
+				*addr = (size_t)o().label->final - ((size_t)addr + 4);
+			}
+		}
+
+		void NativeGenerator::disassemble()
+		{
+			#ifdef DEBUG
+				Vector<Arch::Disassembly::Symbol *, MemoryPool> symbols(memory_pool);
+
+				Arch::Disassembly::Symbol final_block;
+				Arch::Disassembly::Symbol final_block_owner;
+				
+				final_block.address = (void *)block->final;
+				final_block.symbol = "Mirb::Block *block";
+
+				symbols.push(&final_block);
+				
+				if(block->scope && (block->scope->owner != block->scope))
+				{
+					final_block_owner.address = (void *)block->scope->owner->final;
+					final_block_owner.symbol = "Mirb::Block *owner";
+
+					symbols.push(&final_block_owner);
+				}
+
+				Arch::Disassembly::dump_code(stream, &symbols);
+			#endif
+		}
+
+		void NativeGenerator::generate_method(Block *block)
+		{
+			this->block = block;
+
+			push_reg(Arch::Register::BP);
+			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
+			
+			push_regs();
+			generate_bytecode();
+			pop_regs();
+
+			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
+			stream.u8(0x5D); // pop ebp
+			
+			stream.u8(0xC2); // ret 16
+			stream.u16(16);
+
+			disassemble();			
+		}
 
 		void NativeGenerator::generate(Block *block)
 		{
@@ -98,37 +205,10 @@ namespace Mirb
 				
 				block->final->ebp_offset += block->stack_vars * sizeof(size_t);
 			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::BX);
-			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::SI);
-			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::DI);
-			}
-			
-			index = 0;
 
-			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
-			{
-				i().final = stream.position;
+			push_regs();
 
-				for(auto o = i().opcodes.begin(); o != i().opcodes.end(); ++o)
-				{
-					o().virtual_do<Generate>(this);
-					index++;
-				}
-			}
+			generate_bytecode();
 
 			if(block->scope->require_exceptions)
 			{
@@ -177,53 +257,16 @@ namespace Mirb
 					}
 				}
 			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-				stream.u8(0x5F); // pop edi
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-				stream.u8(0x5E); // pop esi
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-				stream.u8(0x5B); // pop ebx
 
+			pop_regs();
+			
 			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
 			stream.u8(0x5D); // pop ebp
 			
 			stream.u8(0xC2); // ret 16
 			stream.u16(16);
 			
-
-			// Update the branch targets
-			
-			for(auto o = branch_list.begin(); o != branch_list.end(); ++o)
-			{
-				size_t *addr = (size_t *)o().code;
-				*addr = (size_t)o().label->final - ((size_t)addr + 4);
-			}
-
-			#ifdef DEBUG
-				Vector<Arch::Disassembly::Symbol *, MemoryPool> symbols(memory_pool);
-
-				Arch::Disassembly::Symbol final_block;
-				Arch::Disassembly::Symbol final_block_owner;
-				
-
-				final_block.address = (void *)block->final;
-				final_block.symbol = "Mirb::Block *block";
-
-				symbols.push(&final_block);
-				
-				if(block->scope->owner != block->scope)
-				{
-					final_block_owner.address = (void *)block->scope->owner->final;
-					final_block_owner.symbol = "Mirb::Block *owner";
-
-					symbols.push(&final_block_owner);
-				}
-
-				Arch::Disassembly::dump_code(stream, &symbols);
-			#endif
+			disassemble();
 		}
 
 		size_t NativeGenerator::reg_low(size_t reg)

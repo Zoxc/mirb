@@ -28,7 +28,7 @@ namespace Mirb
 					if(CanRaiseException<T>::value)
 						var->flags.set<Tree::Variable::FlushRegisters>();
 
-					block.block.scope->variable_list.push(var);
+					block.block.variable_list.push(var);
 					
 					var->range.start = block.block.loc;
 					var->range.stop = block.block.loc;
@@ -69,21 +69,21 @@ namespace Mirb
 			loc_stop = block.loc - 1;
 		}
 		
-		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope, size_t var_count)
+		void BasicBlock::update_ranges(BitSetWrapper<MemoryPool> &w, size_t var_count)
 		{
 			for(size_t i = 0; i < var_count; ++i)
 			{
 				if(w.get(in, i))
-					scope->variable_list[i]->range.update_start(loc_start);
+					block.variable_list[i]->range.update_start(loc_start);
 					
 				if(w.get(out, i))
-					scope->variable_list[i]->range.update_stop(loc_stop);
+					block.variable_list[i]->range.update_stop(loc_stop);
 			}
 		}
 
 		void Block::analyse_liveness()
 		{
-			size_t var_count = scope->variable_list.size(); // scope->variable_list may mutate in prepare_liveness()
+			size_t var_count = variable_list.size(); // variable_list may mutate in prepare_liveness()
 
 			BitSetWrapper<MemoryPool> w(memory_pool, var_count);
 
@@ -141,18 +141,18 @@ namespace Mirb
 			}
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
-				i().update_ranges(w, scope, var_count);
+				i().update_ranges(w, var_count);
 		}
 
 		void Block::allocate_registers()
 		{
 			std::vector<Tree::Variable *> variables;
 
-			for(auto i = scope->variable_list.begin(); i != scope->variable_list.end(); ++i)
+			for(auto i = variable_list.begin(); i != variable_list.end(); ++i)
 				if(i()->type != Tree::Variable::Heap)
 					variables.push_back(*i);
 
-			// TODO: Sort directly on scope->variable_list
+			// TODO: Sort directly on variable_list
 
 			std::sort(variables.begin(), variables.end(), [](Tree::Variable *a, Tree::Variable *b) -> bool {
 				if(a->range.start < b->range.start)
@@ -302,12 +302,27 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
 			scope(scope),
 			memory_pool(memory_pool),
-			current_exception_block(0),
-			current_exception_block_id(-1),
-			heap_array_var(0),
-			heap_var(0),
-			self_var(0)
+			variable_list(scope->variable_list, memory_pool)
 		{
+			initialize();
+		}
+		
+		Block::Block(MemoryPool &memory_pool) :
+			scope(0),
+			memory_pool(memory_pool),
+			variable_list(memory_pool)
+		{
+			initialize();
+		}
+		
+		void Block::initialize()
+		{
+			current_exception_block = 0;
+			current_exception_block_id = -1;
+			heap_array_var = 0;
+			heap_var = 0;
+			self_var = 0;
+
 			#ifdef DEBUG
 				basic_block_count = 0;
 			#endif

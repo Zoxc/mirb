@@ -47,12 +47,12 @@ namespace Mirb
 
 			result << " (";
 			
-			for(size_t i = 0; i < main_block->scope->variable_list.size(); ++i)
+			for(size_t i = 0; i < main_block->variable_list.size(); ++i)
 				result << (BitSetWrapper<MemoryPool>::get(block->in, i) ? "1" : "0");
 			
 			result << ")(";
 			
-			for(size_t i = 0; i < main_block->scope->variable_list.size(); ++i)
+			for(size_t i = 0; i < main_block->variable_list.size(); ++i)
 				result << (BitSetWrapper<MemoryPool>::get(block->out, i) ? "1" : "0");
 			
 			result << ")</font></td></tr>";
@@ -94,7 +94,7 @@ namespace Mirb
 
 			file << "<tr><td bgcolor='gray22'><font color='gray81'>var</font></td><td bgcolor='gray22'><font color='gray81'>reg</font></td></tr>";
 
-			for(auto i = block->scope->variable_list.begin(); i != block->scope->variable_list.end(); ++i)
+			for(auto i = block->variable_list.begin(); i != block->variable_list.end(); ++i)
 			{
 				if(i()->flags.get<Tree::Variable::Register>() && i()->type != Tree::Variable::Heap)
 					file << "<tr><td align='left' bgcolor='gray95'><font color='gray52'>" << printer.var(*i) << "</font></td><td align='left' bgcolor='grey90'><font color='gray30'>" << i()->loc << "</font></td></tr>";

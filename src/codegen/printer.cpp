@@ -15,9 +15,9 @@ namespace Mirb
 			
 			std::stringstream result;
 			
-			if((block->scope->referenced_scopes.size() > 0) && (var == block->heap_array_var))
+			if(block->scope && (block->scope->referenced_scopes.size() > 0) && (var == block->heap_array_var))
 				result << "@heap_array";
-			else if(block->scope->heap_vars && (var == block->heap_var))
+			else if(block->scope && block->scope->heap_vars && (var == block->heap_var))
 				result << "@heap";
 			else if(var == block->self_var)
 				result << "@self";

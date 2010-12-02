@@ -60,7 +60,7 @@ namespace Mirb
 				void *final;
 				
 				void prepare_liveness(BitSetWrapper<MemoryPool> &w);
-				void update_ranges(BitSetWrapper<MemoryPool> &w, Tree::Scope *scope, size_t var_count);
+				void update_ranges(BitSetWrapper<MemoryPool> &w, size_t var_count);
 				
 				void next(BasicBlock *block)
 				{
@@ -77,6 +77,8 @@ namespace Mirb
 
 		class Block
 		{
+			private:
+				void initialize();
 			public:
 				Mirb::Block *final;
 				Tree::Scope *scope;
@@ -95,6 +97,8 @@ namespace Mirb
 				size_t stack_vars;
 				
 				bit_set_t used_registers;
+
+				Vector<Tree::Variable *, MemoryPool> variable_list; // A list of all variables in this block. Copied from Tree::Scope::variable_list on creation.
 				
 				Tree::Variable *heap_array_var;
 				Tree::Variable *heap_var;
@@ -111,6 +115,7 @@ namespace Mirb
 				void allocate_registers();
 				
 				Block(MemoryPool &memory_pool, Tree::Scope *scope);
+				Block(MemoryPool &memory_pool);
 				
 				List<BasicBlock> basic_blocks; // A linked list of basic blocks
 		};

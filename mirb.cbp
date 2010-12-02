@@ -73,6 +73,7 @@
 		<Unit filename="src\classes\false-class.hpp" />
 		<Unit filename="src\classes\fixnum.cpp" />
 		<Unit filename="src\classes\fixnum.hpp" />
+		<Unit filename="src\classes\method.hpp" />
 		<Unit filename="src\classes\module.cpp" />
 		<Unit filename="src\classes\module.hpp" />
 		<Unit filename="src\classes\nil-class.cpp" />
@@ -127,6 +128,8 @@
 		<Unit filename="src\main.cpp" />
 		<Unit filename="src\message.cpp" />
 		<Unit filename="src\message.hpp" />
+		<Unit filename="src\method.cpp" />
+		<Unit filename="src\method.hpp" />
 		<Unit filename="src\modules\kernel.cpp" />
 		<Unit filename="src\modules\kernel.hpp" />
 		<Unit filename="src\parser\calls.cpp" />

@@ -22,6 +22,7 @@ namespace Mirb
 		{
 			public:
 				static size_t measure(Block *block);
+				static size_t measure_method(Block *block);
 		};
 
 		class NativeGenerator
@@ -62,6 +63,11 @@ namespace Mirb
 				void mov_reg_to_reg_index(size_t sreg, size_t dreg, size_t index);
 				void mov_reg_to_var_index(size_t reg, Tree::Variable *var, size_t index);
 				
+				void push_regs();
+				void pop_regs();
+				void generate_bytecode();
+				void disassemble();
+				
 				template<typename T> void call(T *func)
 				{
 					stream.u8(0xE8);
@@ -83,6 +89,7 @@ namespace Mirb
 				}
 				
 				void generate(Block *block);
+				void generate_method(Block *block);
 				void generate_stub(Mirb::Block *block);
 		};
 		

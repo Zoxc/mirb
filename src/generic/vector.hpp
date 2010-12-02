@@ -20,6 +20,8 @@ namespace Mirb
 
 					if(table)
 					{
+						mirb_debug_assert(_size > 0);
+
 						do
 						{
 							_capacity <<= 1;
@@ -39,7 +41,24 @@ namespace Mirb
 					}
 				}
 			}
-		
+
+			template<typename Aother> void initialize_copy(const Vector<T, typename Aother>& other)
+			{
+				_size = other.size();
+				_capacity = other.capacity();
+				
+				if(other.raw())
+				{
+					table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+
+					std::memcpy(table, other.raw(), sizeof(T) * _size);
+				}
+				else
+				{
+					table = 0;
+				}
+			}
+
 		public:
 			Vector(size_t initial) : alloc_ref(A::Storage::def_ref())
 			{
@@ -74,11 +93,28 @@ namespace Mirb
 			Vector(const Vector &vector) :
 				alloc_ref(vector.alloc_ref),
 				_size(vector._size),
-				_capacity(vector._size)
+				_capacity(vector._capacity)
 			{
-				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+				if(vector.raw())
+				{
+					table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
 
-				std::memcpy(table, vector.table, sizeof(T) * _size);
+					std::memcpy(table, vector.table, sizeof(T) * _size);
+				}
+				else
+				{
+					table = 0;
+				}
+			}
+			
+			template<typename Aother> Vector(const Vector<T, Aother>& other)
+			{
+				initialize_copy(other);
+			}
+			
+			template<typename Aother> Vector(const Vector<T, Aother>& other, typename A::Ref alloc_ref) : alloc_ref(alloc_ref)
+			{
+				initialize_copy(other);
 			}
 			
 			~Vector()
@@ -87,7 +123,7 @@ namespace Mirb
 					alloc_ref.free((void *)table);
 			}
 			
-			Vector operator=(const Vector& other)
+			template<typename Aother> Vector operator=(const Vector<T, Aother>& other)
 			{
 				if(this == &other)
 					return *this;
@@ -95,28 +131,40 @@ namespace Mirb
 				if(table)
 					alloc_ref.free((void *)table);
 
-				_size = other._size;
-				_capacity = other._size;
-				
-				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
-
-				std::memcpy(table, other.table, sizeof(T) * _size);
+				initialize_copy(other);
 
 				return *this;
 			}
 			
-			size_t size()
+			size_t size() const
 			{
 				return _size;
 			}
 			
+			size_t capacity() const
+			{
+				return _capacity;
+			}
+			
+			const T &first() const
+			{
+				return *table;
+			}
+			
+			T *raw() const
+			{
+				return table;
+			}
+			
 			T &first()
 			{
+				mirb_debug_assert(_size > 0);
 				return *table;
 			}
 			
 			T &last()
 			{
+				mirb_debug_assert(_size > 0);
 				return &table[_size - 1];
 			}
 			
@@ -206,7 +254,7 @@ namespace Mirb
 			
 			Iterator begin()
 			{
-				return Iterator(&first());
+				return Iterator(raw());
 			}
 
 			Iterator end()
