@@ -103,6 +103,8 @@
 		<Unit filename="src\gc.cpp" />
 		<Unit filename="src\gc.hpp" />
 		<Unit filename="src\generic\allocator.hpp" />
+		<Unit filename="src\generic\benchmark.cpp" />
+		<Unit filename="src\generic\benchmark.hpp" />
 		<Unit filename="src\generic\bit-set-wrapper.hpp" />
 		<Unit filename="src\generic\executable-heap.cpp" />
 		<Unit filename="src\generic\executable-heap.hpp" />

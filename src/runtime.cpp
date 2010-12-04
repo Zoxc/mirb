@@ -17,6 +17,7 @@
 #include "classes/exception.hpp"
 #include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
+#include "generic/benchmark.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -512,24 +513,26 @@ namespace Mirb
 		Lexer::setup_jump_table();
 		ExecutableHeap::initialize();
 
-		setup_classes();
+		std::cout << "Initialized in " << benchmark([] {
+			setup_classes();
 
-		Class::initialize();
-		Object::initialize();
-		Module::initialize();
+			Class::initialize();
+			Object::initialize();
+			Module::initialize();
 		
-		Kernel::initialize();
+			Kernel::initialize();
 		
-		TrueClass::initialize();
-		FalseClass::initialize();
-		NilClass::initialize();
+			TrueClass::initialize();
+			FalseClass::initialize();
+			NilClass::initialize();
 
-		Symbol::initialize();
-		String::initialize();
-		Fixnum::initialize();
-		Proc::initialize();
-		Array::initialize();
-		Exception::initialize();
+			Symbol::initialize();
+			String::initialize();
+			Fixnum::initialize();
+			Proc::initialize();
+			Array::initialize();
+			Exception::initialize();
+		}).format();
 	}
 
 	void finalize()
