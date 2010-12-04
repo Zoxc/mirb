@@ -180,6 +180,10 @@ h1. Operations
   @V = interpolate Rparams@
   Creates an string from concatenating the last @Rparams@ on the stack then pops them off it. If any parameter is not already a string, it is converted to a string by calling @to_s@ on it.
 
+* _StaticCall_
+  @V = static_call ...@
+  Calls an C function with a variable number of arguments and stores the result in @V@.
+
 * _Prologue_
   @prologue@
   A dummy opcode which backends specializes to generate a prologue.

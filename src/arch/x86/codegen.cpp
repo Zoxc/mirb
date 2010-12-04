@@ -527,7 +527,7 @@ namespace Mirb
 		{
 			mov_imm_to_var(op.imm, op.var);
 		}
-
+		
 		template<> void NativeGenerator::generate(LoadArgOp &op)
 		{
 			mov_arg_to_var(op.arg, op.var);
@@ -852,6 +852,17 @@ namespace Mirb
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
+		template<> void NativeGenerator::generate(StaticCallOp &op)
+		{
+			for(size_t i = 0; i < op.arg_count; ++i)
+				push_var(op.args[op.arg_count - 1 - i]);
+
+			call(op.function);
+
+			stack_pop(op.arg_count);
+
+			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
 	};
 };
 

@@ -31,18 +31,18 @@ namespace Mirb
 					{
 						Tree::Variable *value = bcg.create_var();
 
-						bcg.gen<LoadArgOp>(value, LoadArgOp::Block);
+						bcg.gen<LoadArgOp>(value, ArgType::Block);
 
 						bcg.write_variable(block_parameter, value);
 					}
 					else
-						bcg.gen<LoadArgOp>(block_parameter, LoadArgOp::Block);
+						bcg.gen<LoadArgOp>(block_parameter, ArgType::Block);
 				}
 
 				if(!bcg.scope->parameters.empty())
 				{
 					Tree::Variable *argv = bcg.create_var();
-					bcg.gen<LoadArgOp>(argv, LoadArgOp::ArgValues);
+					bcg.gen<LoadArgOp>(argv, ArgType::Values);
 
 					size_t index = 0;
 					for(auto i = bcg.scope->parameters.begin(); i != bcg.scope->parameters.end(); ++i, ++index)
@@ -61,12 +61,12 @@ namespace Mirb
 				}
 				
 				if(bcg.block->self_var)
-					bcg.gen<LoadArgOp>(bcg.block->self_var, LoadArgOp::Object);
+					bcg.gen<LoadArgOp>(bcg.block->self_var, ArgType::Self);
 
 				return 0;
 			}
 		};
-
+		
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> struct ByteCodeGenerator::Gen7<SuperOp, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>:
 			public Gen
 		{

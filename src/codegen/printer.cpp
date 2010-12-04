@@ -331,6 +331,20 @@ namespace Mirb
 					return var(op->var) + " = interpolate " + raw(op->param_count);
 				}
 
+				case Opcode::StaticCall:
+				{
+					auto op = (StaticCallOp *)opcode;
+					
+					std::stringstream result;
+					
+					result << var(op->var) << " = static_call 0x" << op->function;
+
+					for(size_t i = 0; i < op->arg_count; ++i)
+						result << ", " << var(op->args[i]);
+					
+					return result.str();
+				}
+
 				case Opcode::Prologue:
 				{
 					return "prologue";

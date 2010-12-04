@@ -125,6 +125,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(ArrayOp &op);
 		template<> void NativeGenerator::generate(StringOp &op);
 		template<> void NativeGenerator::generate(InterpolateOp &op);
+		template<> void NativeGenerator::generate(StaticCallOp &op);
 		
 		template<typename T> struct FlushRegisters { static const bool value = false; };
 		
@@ -143,6 +144,7 @@ namespace Mirb
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };
+		template<> struct FlushRegisters<StaticCallOp> { static const bool value = true; };
 
 		template<typename T> struct CanRaiseException { static const bool value = false; };
 

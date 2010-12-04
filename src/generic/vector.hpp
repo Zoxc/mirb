@@ -274,6 +274,60 @@ namespace Mirb
 			{
 				return Iterator(&table[_size]);
 			}
+			
+			class ReverseIterator
+			{
+			private:
+				T *current;
+
+			public:
+				ReverseIterator(T *start) : current(start) {}
+				
+				bool operator ==(const ReverseIterator &other) const 
+				{
+					return current == other.current;
+				}
+				
+				bool operator !=(const ReverseIterator &other) const 
+				{
+					return current != other.current;
+				}
+			
+				T *position() const 
+				{
+					return current;
+				}
+				
+				T &operator ++()
+				{
+					return *--current;
+				}
+				
+				T &operator ++(int)
+				{
+					return *current--;
+				}
+				
+				T &operator*() const 
+				{
+					return *current;
+				}
+				
+				T &operator ()() const 
+				{
+					return *current;
+				}
+			};
+			
+			ReverseIterator rbegin()
+			{
+				return ReverseIterator(table + _size - 1);
+			}
+
+			ReverseIterator rend()
+			{
+				return ReverseIterator(table - 1);
+			}
 
 			size_t index_of(Iterator &iter)
 			{

@@ -54,6 +54,18 @@ namespace Mirb
 		struct ArrayOp;
 		struct StringOp;
 		struct InterpolateOp;
+		struct StaticCallOp;
+		
+		struct ArgType
+		{
+			enum Arg
+			{
+				Self,
+				Block,
+				Count,
+				Values
+			};
+		};
 		
 		struct Opcode
 		{
@@ -92,7 +104,8 @@ namespace Mirb
 				Array,
 				String,
 				Interpolate,
-				Prologue,
+				StaticCall,
+				Prologue
 			};
 			
 			Type op;
@@ -113,7 +126,7 @@ namespace Mirb
 						
 					case LoadRaw:
 						return T<LoadRawOp>::func(arg, (LoadRawOp &)*this);
-
+						
 					case LoadArg:
 						return T<LoadArgOp>::func(arg, (LoadArgOp &)*this);
 
@@ -200,9 +213,12 @@ namespace Mirb
 
 					case String:
 						return T<StringOp>::func(arg, (StringOp &)*this);
-
+						
 					case Interpolate:
 						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
+
+					case StaticCall:
+						return T<StaticCallOp>::func(arg, (StaticCallOp &)*this);
 
 					default:
 						mirb_debug_abort("Unknown opcode type");
@@ -256,14 +272,6 @@ namespace Mirb
 		struct LoadArgOp:
 			public OpcodeWrapper<Opcode::LoadArg>
 		{
-			enum Arg
-			{
-				Object,
-				Block,
-				ArgCount,
-				ArgValues
-			};
-
 			Tree::Variable *var;
 			size_t arg;
 			
@@ -637,6 +645,25 @@ namespace Mirb
 			template<typename T> void def(T def) { def(var); };
 
 			InterpolateOp(Tree::Variable *var, size_t param_count) : var(var), param_count(param_count) {}
+		};
+		
+		struct StaticCallOp:
+			public OpcodeWrapper<Opcode::StaticCall>
+		{
+			Tree::Variable *var;
+			void *function;
+			Tree::Variable **args;
+			size_t arg_count;
+			
+			template<typename T> void def(T def) { def(var); };
+
+			template<typename T> void use(T use)
+			{
+				for(size_t i = 0; i < arg_count; ++i)
+					use(args[i]);
+			};
+
+			StaticCallOp(Tree::Variable *var, void *function, Tree::Variable **args, size_t arg_count) : var(var), function(function), args(args), arg_count(arg_count) {}
 		};
 		
 		struct PrologueOp:

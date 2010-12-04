@@ -18,6 +18,8 @@ namespace Mirb
 	value_t real_class(value_t obj);
 	value_t real_class_of(value_t obj);
 
+	value_t singleton_class(value_t object);
+
 	value_t define_class(value_t under, Symbol *name, value_t super);
 	value_t define_class(value_t under, std::string name, value_t super);
 	value_t define_module(value_t under, Symbol *name);

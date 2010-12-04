@@ -10,7 +10,9 @@
 	#define mirb_external(name)
 	#define __thread __declspec(thread)
 	#define __noreturn __declspec(noreturn)
+	#define mirb_unused
 #else
+	#define mirb_unused __attribute__((unused)) 
 	#define __noreturn __attribute__((noreturn)) 
 	#define mirb_external(name) __asm__(name)
 #endif

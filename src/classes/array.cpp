@@ -76,8 +76,6 @@ namespace Mirb
 	{
 		Array::class_ref = define_class(Object::class_ref, "Array", Object::class_ref);
 		
-		singleton_method<Array>("allocate", &Array_allocate, Arg::self);
-		
 		define_singleton_method(Array::class_ref, "allocate", Array_allocate);
 		
 		define_method(Array::class_ref, "push", array_push);
