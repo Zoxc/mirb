@@ -10,12 +10,12 @@ namespace Mirb
 	
 	value_t NilClass::to_s()
 	{
-		return String::from_literal("nil");
+		return String::from_literal("");
 	}
 
 	value_t NilClass::inspect()
 	{
-		return String::from_literal("");
+		return String::from_literal("nil");
 	}
 	
 	void NilClass::initialize()
