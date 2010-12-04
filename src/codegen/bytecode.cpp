@@ -420,9 +420,7 @@ namespace Mirb
 			
 			Tree::Variable *module_var = scope->owner->super_module_var;
 			Tree::Variable *name_var = scope->owner->super_name_var;
-
-			// TODO: module_var and name_var may be heap variables
-
+			
 			if(node->pass_args)
 			{
 				Tree::Variable *closure = node->block ? block_arg(scope) : scope->owner->block_parameter;

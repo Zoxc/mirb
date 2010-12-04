@@ -179,7 +179,6 @@ namespace Mirb
 			Type type;
 			const char_t *prev;
 			
-			//TODO: Write a vector class to avoid leaks
 			Vector<bool, MemoryPool> curlies;
 			
 			union
