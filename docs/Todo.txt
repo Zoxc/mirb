@@ -21,7 +21,7 @@
 [ ] Fix constant resolution path
 [ ] Fix up the parser
 [ ] Replace the stack operations in the bytecode with stack allocated buffers
-[ ] Create some form of DSL to generate Ruby function from C++ functions. Support C++ methods too
+[X] Create some form of DSL to generate Ruby function from C++ functions. Support C++ methods too
 [ ] Write a new precise garbage collector
 [X] Steal Rubinius' tagging scheme (almost)
 [ ] Use user defined literals from symbols ("to_s"intern) or some other way of passing string literals to templates (this might not be possible...)
