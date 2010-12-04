@@ -13,7 +13,7 @@ namespace Mirb
 		vars = get_vars(module);
 	}
 
-	mirb_compiled_block(class_to_s)
+	value_t Class::to_s(value_t obj)
 	{
 		auto self = cast<Class>(obj);
 
@@ -40,8 +40,8 @@ namespace Mirb
 			return result.to_string();
 		}
 	}
-
-	mirb_compiled_block(class_superclass)
+	
+	value_t Class::method_superclass(value_t obj)
 	{
 		value_t super = real_class(cast<Module>(obj)->superclass);
 
@@ -51,7 +51,7 @@ namespace Mirb
 			return value_nil;
 	}
 
-	mirb_compiled_block(class_new)
+	value_t Class::method_new(value_t obj, size_t argc, value_t argv[])
 	{
 		value_t result = call(obj, "allocate", 0, 0);
 
@@ -62,8 +62,8 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		define_method(Class::class_ref, "to_s", class_to_s);
-		define_method(Class::class_ref, "superclass", class_superclass);
-		define_method(Class::class_ref, "new", class_new);
+		static_method<Arg::Self>(Class::class_ref, "to_s", &to_s);
+		static_method<Arg::Self>(Class::class_ref, "superclass", &method_superclass);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(Class::class_ref, "new", &method_new);
 	}
 };

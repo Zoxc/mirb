@@ -6,8 +6,8 @@
 namespace Mirb
 {
 	value_t Proc::class_ref;
-
-	mirb_compiled_block(proc_call)
+	
+	value_t Proc::call(value_t obj, value_t block, size_t argc, value_t argv[])
 	{
 		auto self = cast<Proc>(obj);
 
@@ -18,7 +18,7 @@ namespace Mirb
 	{
 		Proc::class_ref = define_class(Object::class_ref, "Proc", Object::class_ref);
 
-		define_method(Proc::class_ref, "call", proc_call);
+		static_method<Arg::Self, Arg::Block, Arg::Count, Arg::Values>(Proc::class_ref, "call", &call);
 	}
 };
 

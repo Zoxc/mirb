@@ -29,14 +29,14 @@ namespace Mirb
 		return symbol_pool.get(string);
 	}
 	
-	mirb_compiled_block(symbol_to_s)
+	value_t Symbol::to_s(value_t obj)
 	{
 		auto self = cast<Symbol>(obj);
 
 		return self->string.to_string();
 	}
-
-	mirb_compiled_block(symbol_inspect)
+	
+	value_t Symbol::inspect(value_t obj)
 	{
 		auto self = cast<Symbol>(obj);
 
@@ -47,8 +47,8 @@ namespace Mirb
 
 	void Symbol::initialize()
 	{
-		define_method(Symbol::class_ref, "to_s", symbol_to_s);
-		define_method(Symbol::class_ref, "inspect", symbol_inspect);
+		static_method<Arg::Self>(Symbol::class_ref, "to_s", &to_s);
+		static_method<Arg::Self>(Symbol::class_ref, "inspect", &inspect);
 	}
 };
 

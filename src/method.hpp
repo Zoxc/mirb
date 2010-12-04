@@ -25,28 +25,23 @@ namespace Mirb
 
 	namespace Arg
 	{
-		class Argument
+		class Self
 		{
 			public:
 				typedef value_t type;
-		};
 
-		class Self:
-			public Argument
-		{
-			public:
 				static Tree::Variable *gen(MethodGen &g);
 		};
 
-		class Block:
-			public Argument
+		class Block
 		{
 			public:
+				typedef value_t type;
+
 				static Tree::Variable *gen(MethodGen &g);
 		};
 		
-		class Count:
-			public Argument
+		class Count
 		{
 			public:
 				typedef size_t type;
@@ -54,11 +49,18 @@ namespace Mirb
 				static Tree::Variable *gen(MethodGen &g);
 		};
 
-		class Values:
-			public Argument
+		class Values
 		{
 			public:
 				typedef value_t *type;
+
+				static Tree::Variable *gen(MethodGen &g);
+		};
+		
+		class Value
+		{
+			public:
+				typedef value_t type;
 
 				static Tree::Variable *gen(MethodGen &g);
 		};
@@ -72,6 +74,24 @@ namespace Mirb
 		template<typename Arg1, typename T> void *cast_function(T *function)
 		{
 			value_t (*test)(typename Arg1::type) mirb_unused = function;
+			return (void *)function;
+		}
+		
+		template<typename Arg1, typename Arg2, typename T> void *cast_function(T *function)
+		{
+			value_t (*test)(typename Arg1::type, typename Arg2::type) mirb_unused = function;
+			return (void *)function;
+		}
+		
+		template<typename Arg1, typename Arg2, typename Arg3, typename T> void *cast_function(T *function)
+		{
+			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type) mirb_unused = function;
+			return (void *)function;
+		}
+		
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename T> void *cast_function(T *function)
+		{
+			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type) mirb_unused = function;
 			return (void *)function;
 		}
 		
@@ -115,6 +135,7 @@ namespace Mirb
 			Symbol *name;
 			void *function;
 			size_t arg_count;
+			Tree::Variable *rb_args;
 			size_t index;
 			CodeGen::Block *block;
 			MemoryPool memory_pool;
@@ -122,9 +143,12 @@ namespace Mirb
 
 			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
 		public:
+			size_t rb_arg_index;
 			CodeGen::ByteCodeGenerator *g;
 			
 			MethodGen(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
+
+			Tree::Variable *get_rb_args();
 
 			template<class T> void apply()
 			{
@@ -160,6 +184,16 @@ namespace Mirb
 		return gen.gen();
 	}
 	
+	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
+	{
+		MethodGen gen(flags, module, name, function, 4);
+		gen.apply<Arg1>();
+		gen.apply<Arg2>();
+		gen.apply<Arg3>();
+		gen.apply<Arg4>();
+		return gen.gen();
+	}
+	
 	template<class Object, value_t (Object::*function)(), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *) = &Arg::call_method<Object, function>; // TODO: Fix workaround for VC++ bug?
@@ -184,13 +218,43 @@ namespace Mirb
 		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, Object::class_ref, Arg::symbol_cast(name), (void *)stub);
 	}
 	
-	template<class Object, typename N, typename F> Block *singleton_method(N &&name, F function, size_t flags = 0)
+	template<typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method(Method::Static | Method::Singleton | flags, Object::class_ref, Arg::symbol_cast(name), Arg::cast_function(function));
+		return generate_method(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function(function));
 	}
 	
-	template<class Object, typename Arg1, typename N, typename F> Block *singleton_method(N &&name, F function, size_t flags = 0)
+	template<typename Arg1, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1>(Method::Static | Method::Singleton | flags, Object::class_ref, Arg::symbol_cast(name), Arg::cast_function<Arg1>(function));
+		return generate_method<Arg1>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1>(function));
+	}
+	
+	template<typename Arg1, typename Arg2, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method<Arg1, Arg2>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
+	}
+	
+	template<typename Arg1, typename Arg2, typename Arg3, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method<Arg1, Arg2, Arg3>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3>(function));
+	}
+	
+	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method<Arg1, Arg2, Arg3, Arg4>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3, Arg4>(function));
+	}
+	
+	template<typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function(function));
+	}
+	
+	template<typename Arg1, typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method<Arg1>(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1>(function));
+	}
+
+	template<typename Arg1, typename Arg2, typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
+	{
+		return generate_method<Arg1, Arg2>(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
 	}
 };

@@ -27,7 +27,7 @@ namespace Mirb
 	
 		Tree::Variable *Block::gen(MethodGen &g)
 		{
-			return gen_arg<CodeGen::ArgType::Self>(g.g);
+			return gen_arg<CodeGen::ArgType::Block>(g.g);
 		}
 	
 		Tree::Variable *Count::gen(MethodGen &g)
@@ -39,6 +39,13 @@ namespace Mirb
 		{
 			return gen_arg<CodeGen::ArgType::Values>(g.g);
 		}
+
+		Tree::Variable *Value::gen(MethodGen &g)
+		{
+			Tree::Variable *var = g.g->create_var();
+			g.g->gen<CodeGen::LookupOp>(var, g.get_rb_args(), g.rb_arg_index++);
+			return var;
+		}
 	};
 	
 	
@@ -47,7 +54,9 @@ namespace Mirb
 		module(module),
 		name(name),
 		function(function),
-		arg_count(arg_count)
+		arg_count(arg_count),
+		rb_args(0),
+		rb_arg_index(0)
 	{
 		if((flags & Method::Static) == 0)
 		{
@@ -60,6 +69,17 @@ namespace Mirb
 		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
 		args = new Tree::Variable *[arg_count];
 		block = g->create();
+	}
+
+	Tree::Variable *MethodGen::get_rb_args()
+	{
+		if(!rb_args)
+		{
+			rb_args = g->create_var();
+			g->gen<CodeGen::LoadArgOp>(rb_args, CodeGen::ArgType::Values);
+		}
+
+		return rb_args;
 	}
 
 	Block *MethodGen::gen()
@@ -75,7 +95,7 @@ namespace Mirb
 		block->analyse_liveness();
 		block->allocate_registers();
 
-		#ifdef DEBUG
+		#ifdef MIRB_DEBUG_BRIDGE
 			CodeGen::ByteCodePrinter printer(block);
 
 			std::cout << printer.print();
@@ -113,7 +133,7 @@ namespace Mirb
 	
 	Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 3);
+		MethodGen gen(flags, module, name, function, 0);
 		return gen.gen();
 	}
 };

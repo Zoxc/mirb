@@ -157,28 +157,6 @@ namespace Mirb
 		return class_create_singleton(object, c);
 	}
 
-	void define_method(value_t obj, std::string name, compiled_block_t compiled_block)
-	{
-		Block *block = new (gc) Block;
-		
-		block->compiled = compiled_block;
-
-		Symbol *name_as_symbol = Symbol::from_string(name);
-
-		block->name = name_as_symbol;
-	
-		#ifdef DEBUG
-			std::cout << "Defining method " << inspect_object(obj) << "." << name << "\n";
-		#endif
-		
-		set_method(obj, name_as_symbol, block);
-	}
-
-	void define_singleton_method(value_t obj, std::string name, compiled_block_t compiled_block)
-	{
-		define_method(singleton_class(obj), name, compiled_block);
-	}
-
 	void class_name(value_t obj, value_t under, Symbol *name)
 	{
 		value_t under_path = get_var(under, Symbol::from_literal("__classpath__"));
@@ -251,13 +229,13 @@ namespace Mirb
 
 		value_t result = value_nil;
 
-		if(inspect && (inspect->compiled != (Mirb::compiled_block_t)object_inspect || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
+		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
 
 		if(Value::type(result) == Value::String)
 			return result;
 		else
-			return object_to_s(0, value_nil, obj, 0, 0, 0);
+			return Object::to_s(obj);
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -461,15 +439,15 @@ namespace Mirb
 	}
 	
 	value_t main;
-
-	mirb_compiled_block(main_to_s)
+	
+	value_t main_to_s()
 	{
 		return String::from_literal("main");
 	}
-
-	mirb_compiled_block(main_include)
+	
+	value_t main_include(size_t argc, value_t argv[])
 	{
-		return module_include(0, value_nil, Object::class_ref, block, argc, argv);
+		return Module::include(Object::class_ref, argc, argv);
 	}
 
 	void setup_classes()
@@ -504,8 +482,8 @@ namespace Mirb
 		
 		main = Object::allocate(Object::class_ref);
 
-		define_singleton_method(main, "to_s", &main_to_s);
-		define_singleton_method(main, "include", &main_include);
+		singleton_method(main, "to_s", &main_to_s);
+		singleton_method<Arg::Count, Arg::Values>(main, "include", &main_include);
 	}
 	
 	void initialize()
@@ -532,7 +510,7 @@ namespace Mirb
 			Proc::initialize();
 			Array::initialize();
 			Exception::initialize();
-		}).format();
+		}).format() << "\n";
 	}
 
 	void finalize()

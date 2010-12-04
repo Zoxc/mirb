@@ -1,3 +1,4 @@
+#include "../common.hpp"
 #include <fstream>
 #include "dot-printer.hpp"
 #include "printer.hpp"

@@ -13,6 +13,10 @@ namespace Mirb
 	class Symbol:
 		public Object
 	{
+		private:
+			static value_t to_s(value_t obj);
+			static value_t inspect(value_t obj);
+
 		public:
 			Symbol(CharArray &char_array) : Object(Value::Symbol, class_ref), string(char_array) {}
 

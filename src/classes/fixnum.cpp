@@ -37,7 +37,7 @@ namespace Mirb
 		return (int)fix_to_int(obj);
 	}
 	
-	mirb_compiled_block(fixnum_to_s)
+	value_t Fixnum::to_s(value_t obj)
 	{
 		char_t buffer[15];
 
@@ -46,34 +46,34 @@ namespace Mirb
 		return CharArray(buffer, length).to_string();
 	}
 
-	mirb_compiled_block(fixnum_add)
+	value_t Fixnum::add(value_t obj, value_t other)
 	{
-		return int_to_fix(fix_to_int(obj) + fix_to_int(MIRB_ARG(0)));
+		return int_to_fix(fix_to_int(obj) + fix_to_int(other));
 	}
-
-	mirb_compiled_block(fixnum_sub)
+	
+	value_t Fixnum::sub(value_t obj, value_t other)
 	{
-		return int_to_fix(fix_to_int(obj) - fix_to_int(MIRB_ARG(0)));
+		return int_to_fix(fix_to_int(obj) - fix_to_int(other));
 	}
-
-	mirb_compiled_block(fixnum_mul)
+	
+	value_t Fixnum::mul(value_t obj, value_t other)
 	{
-		return int_to_fix(fix_to_int(obj) * fix_to_int(MIRB_ARG(0)));
+		return int_to_fix(fix_to_int(obj) * fix_to_int(other));
 	}
-
-	mirb_compiled_block(fixnum_div)
+	
+	value_t Fixnum::div(value_t obj, value_t other)
 	{
-		return int_to_fix(fix_to_int(obj) / fix_to_int(MIRB_ARG(0)));
+		return int_to_fix(fix_to_int(obj) / fix_to_int(other));
 	}
 
 	void Fixnum::initialize()
 	{
-		define_method(Fixnum::class_ref, "to_s", fixnum_to_s);
+		static_method<Arg::Self>(Fixnum::class_ref, "to_s", &to_s);
 
-		define_method(Fixnum::class_ref, "+", fixnum_add);
-		define_method(Fixnum::class_ref, "-", fixnum_sub);
-		define_method(Fixnum::class_ref, "*", fixnum_mul);
-		define_method(Fixnum::class_ref, "/", fixnum_div);
+		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "+", &add);
+		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "-", &sub);
+		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "*", &mul);
+		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "/", &div);
 	}
 };
 

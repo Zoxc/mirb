@@ -16,7 +16,7 @@ namespace Mirb
 		return auto_cast(new (gc) String((const char_t *)c_str, std::strlen(c_str)));
 	}
 	
-	mirb_compiled_block(string_inspect)
+	value_t String::inspect(value_t obj)
 	{
 		auto self = cast<String>(obj);
 
@@ -24,29 +24,29 @@ namespace Mirb
 
 		return result.to_string();
 	}
-
-	mirb_compiled_block(string_to_s)
+	
+	value_t String::to_s(value_t obj)
 	{
 		return obj;
 	}
-
-	mirb_compiled_block(string_concat)
+	
+	value_t String::concat(value_t obj, value_t other)
 	{
 		auto self = cast<String>(obj);
-		auto other = cast<String>(MIRB_ARG(0));
+		auto other_str = cast<String>(other);
 
-		self->string.append(other->string);
+		self->string.append(other_str->string);
 
 		return obj;
 	}
 
 	void String::initialize()
 	{
-		define_method(String::class_ref, "inspect", string_inspect);
-		define_method(String::class_ref, "to_s", string_to_s);
-		define_method(String::class_ref, "concat", string_concat);
-		define_method(String::class_ref, "<<", string_concat);
-		define_method(String::class_ref, "+", string_concat);
+		static_method<Arg::Self>(String::class_ref, "inspect", &inspect);
+		static_method<Arg::Self>(String::class_ref, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Value>(String::class_ref, "concat", &concat);
+		static_method<Arg::Self, Arg::Value>(String::class_ref, "<<", &concat);
+		static_method<Arg::Self, Arg::Value>(String::class_ref, "+", &concat);
 	}
 };
 

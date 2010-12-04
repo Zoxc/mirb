@@ -27,9 +27,6 @@ namespace Mirb
 
 	void include_module(value_t obj, value_t module);
 
-	void define_method(value_t obj, std::string name, compiled_block_t compiled_block);
-	void define_singleton_method(value_t obj, std::string name, compiled_block_t compiled_block);
-
 	void class_name(value_t obj, value_t under, Symbol *name);
 	value_t class_create_unnamed(value_t super);
 	value_t class_create_bare(value_t super);

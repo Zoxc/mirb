@@ -7,6 +7,11 @@ namespace Mirb
 	class String:
 		public Object
 	{
+		private:
+			static value_t inspect(value_t obj);
+			static value_t to_s(value_t obj);
+			static value_t concat(value_t obj, value_t other);
+			
 		public:
 			String(value_t instance_of) : Object(Value::String, instance_of) {}
 			String(CharArray &char_array) : Object(Value::String, class_ref), string(char_array) {}

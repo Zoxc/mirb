@@ -8,29 +8,25 @@
 namespace Mirb
 {
 	value_t Object::class_ref;
+	Block *Object::inspect_block;
 
 	value_t Object::allocate(value_t instance_of)
 	{
 		return auto_cast(new (gc) Object(instance_of));
 	}
 	
-	mirb_compiled_block(object_tap)
+	value_t Object::tap(value_t obj, value_t block)
 	{
 		call(block, "call", 1, &obj);
 		return obj;
 	}
-
-	mirb_compiled_block(Object_allocate)
-	{
-		return Object::allocate(obj);
-	}
-
-	mirb_compiled_block(object_inspect)
+	
+	value_t Object::inspect(value_t obj)
 	{
 		return call(obj, "to_s", 0, 0);
 	}
-
-	mirb_compiled_block(object_to_s)
+	
+	value_t Object::to_s(value_t obj)
 	{
 		value_t c = real_class_of(obj);
 		value_t name = get_var(c, Symbol::from_literal("__classname__"));
@@ -50,41 +46,41 @@ namespace Mirb
 			return result.to_string();
 		}
 	}
-
-	mirb_compiled_block(object_dummy)
+	
+	value_t Object::dummy()
 	{
 		return value_nil;
 	}
-
-	mirb_compiled_block(object_equal)
+	
+	value_t Object::equal(value_t obj, value_t other)
 	{
-		return auto_cast(obj == MIRB_ARG(0));
+		return auto_cast(obj == other);
 	}
-
-	mirb_compiled_block(object_not_equal)
+	
+	value_t Object::not_equal(value_t obj, value_t other)
 	{
-		return auto_cast(obj != MIRB_ARG(0));
+		return auto_cast(obj != other);
 	}
-
-	mirb_compiled_block(object_not)
+	
+	value_t Object::method_not(value_t obj)
 	{
 		return auto_cast(!Value::test(obj));
 	}
 	
 	void Object::initialize()
 	{
-		define_method(Object::class_ref, "initialize", object_dummy);
-		define_method(Object::class_ref, "inspect", object_inspect);
-		define_method(Object::class_ref, "to_s", object_to_s);
-		define_method(Object::class_ref, "tap", object_tap);
-		define_method(Object::class_ref, "equal?", object_equal);
-		define_method(Object::class_ref, "eql?", object_equal);
-		define_method(Object::class_ref, "==", object_equal);
-		define_method(Object::class_ref, "===", object_equal);
-		define_method(Object::class_ref, "!=", object_not_equal);
-		define_method(Object::class_ref, "!", object_not);
+		static_method(Object::class_ref, "initialize", &dummy);
+		inspect_block = static_method<Arg::Self>(Object::class_ref, "inspect", &inspect);
+		static_method<Arg::Self>(Object::class_ref, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Block>(Object::class_ref, "tap", &tap);
+		static_method<Arg::Self, Arg::Value>(Object::class_ref, "equal?", &equal);
+		static_method<Arg::Self, Arg::Value>(Object::class_ref, "eql?", &equal);
+		static_method<Arg::Self, Arg::Value>(Object::class_ref, "==", &equal);
+		static_method<Arg::Self, Arg::Value>(Object::class_ref, "===", &equal);
+		static_method<Arg::Self, Arg::Value>(Object::class_ref, "!=", &not_equal);
+		static_method<Arg::Self>(Object::class_ref, "!", &method_not);
 
-		define_singleton_method(Object::class_ref, "allocate", Object_allocate);
+		singleton_method<Arg::Self>(Object::class_ref, "allocate", &allocate);
 	}
 };
 

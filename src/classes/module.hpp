@@ -8,6 +8,11 @@ namespace Mirb
 	class Module:
 		public Object
 	{
+		private:
+			static value_t to_s(value_t obj);
+			static value_t append_features(value_t obj, value_t mod);
+			static value_t included(value_t obj);
+			
 		protected:
 			BlockMap *methods;
 
@@ -15,6 +20,8 @@ namespace Mirb
 			Module(Value::Type type, value_t instance_of, value_t superclass) : Object(type, instance_of), methods(0), superclass(superclass) {}
 
 			value_t superclass;
+
+			static value_t include(value_t obj, size_t argc, value_t argv[]);
 
 			static const size_t methods_initial = 1;
 			
@@ -24,7 +31,5 @@ namespace Mirb
 
 			static void initialize();
 	};
-
-	mirb_compiled_block(module_include);
 };
 

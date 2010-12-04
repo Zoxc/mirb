@@ -6,13 +6,13 @@
 namespace Mirb
 {
 	value_t Array::class_ref;
-
-	mirb_compiled_block(Array_allocate)
+	
+	value_t Array::allocate(value_t obj)
 	{
 		return auto_cast(new (gc) Array(obj));
 	}
 
-	mirb_compiled_block(array_push)
+	value_t Array::push(value_t obj, size_t argc, value_t argv[])
 	{
 		auto self = cast<Array>(obj);
 
@@ -23,8 +23,8 @@ namespace Mirb
 
 		return obj;
 	}
-
-	mirb_compiled_block(array_pop)
+	
+	value_t Array::pop(value_t obj)
 	{
 		auto self = cast<Array>(obj);
 
@@ -33,8 +33,8 @@ namespace Mirb
 		else
 			return value_nil;
 	}
-
-	mirb_compiled_block(array_inspect)
+	
+	value_t Array::inspect(value_t obj)
 	{
 		auto self = cast<Array>(obj);
 
@@ -54,15 +54,15 @@ namespace Mirb
 
 		return result.to_string();
 	}
-
-	mirb_compiled_block(array_length)
+	
+	value_t Array::length(value_t obj)
 	{
 		auto self = cast<Array>(obj);
 
 		return Fixnum::from_size_t(self->vector.size());
 	}
-
-	mirb_compiled_block(array_each)
+	
+	value_t Array::each(value_t obj, value_t block)
 	{
 		auto self = cast<Array>(obj);
 
@@ -76,14 +76,14 @@ namespace Mirb
 	{
 		Array::class_ref = define_class(Object::class_ref, "Array", Object::class_ref);
 		
-		define_singleton_method(Array::class_ref, "allocate", Array_allocate);
+		singleton_method<Arg::Self>(Array::class_ref, "allocate", &allocate);
 		
-		define_method(Array::class_ref, "push", array_push);
-		define_method(Array::class_ref, "<<", array_push);
-		define_method(Array::class_ref, "pop", array_pop);
-		define_method(Array::class_ref, "length", array_length);
-		define_method(Array::class_ref, "inspect", array_inspect);
-		define_method(Array::class_ref, "each", array_each);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(Array::class_ref, "push", &push);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(Array::class_ref, "<<", &push);
+		static_method<Arg::Self>(Array::class_ref, "pop", &pop);
+		static_method<Arg::Self>(Array::class_ref, "length", &length);
+		static_method<Arg::Self>(Array::class_ref, "inspect", &inspect);
+		static_method<Arg::Self, Arg::Block>(Array::class_ref, "each", &each);
 	}
 };
 

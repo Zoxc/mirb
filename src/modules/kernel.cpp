@@ -11,27 +11,25 @@ namespace Mirb
 {
 	value_t Kernel::class_ref;
 	
-	mirb_compiled_block(kernel_proc)
+	value_t Kernel::proc(value_t block)
 	{
 		if(block)
 			return block;
 		else
 			return value_nil;
 	}
-
-	mirb_compiled_block(kernel_eval)
+	
+	value_t Kernel::eval(value_t obj, value_t code)
 	{
-		value_t arg = MIRB_ARG(0);
-
-		if(Value::type(arg) != Value::String)
+		if(Value::type(code) != Value::String)
 			return value_nil;
 
-		String *input = cast<String>(arg);
+		String *input = cast<String>(code);
 
 		CharArray c_str = input->string.c_str();
 		CharArray filename("eval");
 
-		return eval(obj, method_name, method_module, c_str.str_ref(), c_str.str_length(), filename);
+		return eval(obj, 0, value_nil, c_str.str_ref(), c_str.str_length(), filename);
 	}
 
 	static FILE *open_file(CharArray &filename)
@@ -112,15 +110,13 @@ namespace Mirb
 
 		return result;
 	}
-
-	mirb_compiled_block(kernel_load)
+	
+	value_t Kernel::load(value_t obj, value_t filename)
 	{
-		value_t filename = MIRB_ARG(0);
-
 		return run_file(obj, cast<String>(filename)->string);
 	}
-
-	mirb_compiled_block(kernel_print)
+	
+	value_t Kernel::print(size_t argc, value_t argv[])
 	{
 		MIRB_ARG_EACH(i)
 		{
@@ -135,8 +131,8 @@ namespace Mirb
 		
 		return value_nil;
 	}
-
-	mirb_compiled_block(kernel_raise)
+	
+	value_t Kernel::raise(size_t argc, value_t argv[])
 	{
 		value_t instance_of = Exception::class_ref;
 		value_t message;
@@ -185,12 +181,12 @@ namespace Mirb
 
 		include_module(Object::class_ref, Kernel::class_ref);
 
-		define_method(Kernel::class_ref, "proc", kernel_proc);
-		define_method(Kernel::class_ref, "eval", kernel_eval);
-		define_method(Kernel::class_ref, "print", kernel_print);
-		define_method(Kernel::class_ref, "load", kernel_load);
-		define_method(Kernel::class_ref, "require", kernel_load);
-		define_method(Kernel::class_ref, "require_relative", kernel_load);
-		define_method(Kernel::class_ref, "raise", kernel_raise);
+		static_method<Arg::Block>(Kernel::class_ref, "proc", &proc);
+		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "eval", &eval);
+		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "print", &print);
+		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "load", &load);
+		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require", &load);
+		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require_relative", &load);
+		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "raise", &raise);
 	}
 };

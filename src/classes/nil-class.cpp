@@ -7,21 +7,21 @@
 namespace Mirb
 {
 	value_t NilClass::class_ref;
-
-	mirb_compiled_block(nilclass_to_s)
-	{
-		return String::from_literal("");
-	}
-
-	mirb_compiled_block(nilclass_inspect)
+	
+	value_t NilClass::to_s()
 	{
 		return String::from_literal("nil");
+	}
+
+	value_t NilClass::inspect()
+	{
+		return String::from_literal("");
 	}
 	
 	void NilClass::initialize()
 	{
-		define_method(NilClass::class_ref, "inspect", nilclass_inspect);
-		define_method(NilClass::class_ref, "to_s", nilclass_to_s);
+		static_method(NilClass::class_ref, "to_s", &to_s);
+		static_method(NilClass::class_ref, "inspect", &inspect);
 
 		set_const(Object::class_ref, Symbol::from_literal("NIL"), value_nil);
 	};

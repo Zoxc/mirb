@@ -136,7 +136,9 @@ namespace Mirb
 			stream.u8(0xC2); // ret 16
 			stream.u16(16);
 
-			disassemble();			
+			#ifdef MIRB_DEBUG_BRIDGE
+				disassemble();
+			#endif		
 		}
 
 		void NativeGenerator::generate(Block *block)

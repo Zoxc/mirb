@@ -6,23 +6,23 @@ namespace Mirb
 {
 	value_t Exception::class_ref;
 	
-	mirb_compiled_block(Exception_allocate)
+	value_t Exception::allocate(value_t obj)
 	{
 		return auto_cast(new (gc) Exception(obj));
 	}
 
-	mirb_compiled_block(exception_to_s)
+	value_t Exception::to_s(value_t obj)
 	{
 		auto self = cast<Exception>(obj);
 
 		return self->message;
 	}
 
-	mirb_compiled_block(exception_initialize)
+	value_t Exception::method_initialize(value_t obj, value_t message)
 	{
 		auto self = cast<Exception>(obj);
 
-		self->message = MIRB_ARG(0);
+		self->message = message;
 
 		return obj;
 	}
@@ -31,11 +31,11 @@ namespace Mirb
 	{
 		Exception::class_ref = define_class(Object::class_ref, "Exception", Object::class_ref);
 
-		define_singleton_method(Exception::class_ref, "allocate", Exception_allocate);
+		singleton_method<Arg::Self>(Exception::class_ref, "allocate", &allocate);
 
-		define_method(Exception::class_ref, "initialize", exception_initialize);
-		define_method(Exception::class_ref, "message", exception_to_s);
-		define_method(Exception::class_ref, "to_s", exception_to_s);
+		static_method<Arg::Self, Arg::Value>(Exception::class_ref, "initialize", &method_initialize);
+		static_method<Arg::Self>(Exception::class_ref, "message", &to_s);
+		static_method<Arg::Self>(Exception::class_ref, "to_s", &to_s);
 	}
 };
 
