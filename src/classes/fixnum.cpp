@@ -45,6 +45,16 @@ namespace Mirb
 
 		return CharArray(buffer, length).to_string();
 	}
+	
+	value_t Fixnum::times(value_t obj, value_t block)
+	{
+		size_t times = to_size_t(obj);
+
+		while(times--)
+			call(block, "call");
+
+		return obj;
+	}
 
 	value_t Fixnum::add(value_t obj, value_t other)
 	{
@@ -69,6 +79,7 @@ namespace Mirb
 	void Fixnum::initialize()
 	{
 		static_method<Arg::Self>(Fixnum::class_ref, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Block>(Fixnum::class_ref, "times", &times);
 
 		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "+", &add);
 		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "-", &sub);

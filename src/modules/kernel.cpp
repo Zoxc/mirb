@@ -3,6 +3,7 @@
 #include "../classes/string.hpp"
 #include "../classes/symbol.hpp"
 #include "../classes/exception.hpp"
+#include "../generic/benchmark.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
 #include "../arch/support.hpp"
@@ -17,6 +18,15 @@ namespace Mirb
 			return block;
 		else
 			return value_nil;
+	}
+	
+	value_t Kernel::benchmark(value_t block)
+	{
+		CharArray result = Mirb::benchmark([&] {
+			call(block, "call");
+		}).format();
+
+		return result.to_string();
 	}
 	
 	value_t Kernel::eval(value_t obj, value_t code)
@@ -132,6 +142,24 @@ namespace Mirb
 		return value_nil;
 	}
 	
+	value_t Kernel::puts(size_t argc, value_t argv[])
+	{
+		MIRB_ARG_EACH(i)
+		{
+			value_t arg = argv[i];
+
+			if(Value::type(arg) != Value::String)
+				arg = call(arg, "to_s");
+			
+			if(Value::type(arg) == Value::String)
+				std::cout << cast<String>(arg)->string.get_string();
+
+			std::cout << "\n";
+		}
+		
+		return value_nil;
+	}
+	
 	value_t Kernel::raise(size_t argc, value_t argv[])
 	{
 		value_t instance_of = Exception::class_ref;
@@ -180,10 +208,12 @@ namespace Mirb
 		Kernel::class_ref = define_module(Object::class_ref, "Kernel");
 
 		include_module(Object::class_ref, Kernel::class_ref);
-
+		
 		static_method<Arg::Block>(Kernel::class_ref, "proc", &proc);
+		static_method<Arg::Block>(Kernel::class_ref, "benchmark", &benchmark);
 		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "eval", &eval);
 		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "print", &print);
+		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "puts", &puts);
 		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "load", &load);
 		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require", &load);
 		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require_relative", &load);

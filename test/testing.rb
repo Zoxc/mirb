@@ -11,9 +11,16 @@ module Testing
 		def pass?
 			result = @proc.call
 			if @expect != result
-				print "#{@name} failed. Excepted #{@expect.inspect}, but got #{result.inspect}.\n"
+				puts "#{@name} failed. Excepted #{@expect.inspect}, but got #{result.inspect}."
 			else
-				print "#{@name} passed.\n"
+				puts "#{@name} passed."
+				true
+			end
+		end
+		
+		def silent_pass?
+			result = @proc.call
+			if @expect == result
 				true
 			end
 		end
@@ -34,6 +41,14 @@ module Testing
 			print "All #{Tests.length} test#{"s" if Tests.length != 1} passed successfully.\n"
 		else
 			print "#{failed} of #{Tests.length} failed.\n"
+		end
+	end
+	
+	def silent_run!
+		failed = 0
+		
+		Tests.each do |test|
+			failed += 1 if !test.silent_pass?
 		end
 	end
 end

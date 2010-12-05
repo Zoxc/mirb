@@ -1,10 +1,15 @@
-require_relative 'test/testing'
+initial = benchmark do
+	require_relative 'test/testing'
 
-include Testing
+	include Testing
 
-require_relative 'test/procs'
-require_relative 'test/exceptions'
-require_relative 'test/object'
-require_relative 'test/control_flow'
+	require_relative 'test/procs'
+	require_relative 'test/exceptions'
+	require_relative 'test/object'
+	require_relative 'test/control_flow'
+	
+	run!
+end
 
-run!
+puts "Initial #{initial}"
+puts "Benchmark #{benchmark { 1000.times { silent_run! } } }"
