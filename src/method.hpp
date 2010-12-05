@@ -13,6 +13,7 @@ namespace Mirb
 	namespace CodeGen
 	{
 		class Block;
+		class BasicBlock;
 		class ByteCodeGenerator;
 	};
 
@@ -135,20 +136,25 @@ namespace Mirb
 			Symbol *name;
 			void *function;
 			size_t arg_count;
-			Tree::Variable *rb_args;
 			size_t index;
-			CodeGen::Block *block;
 			MemoryPool memory_pool;
+			CodeGen::BasicBlock *prolog;
 			Tree::Variable **args;
 
 			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
 		public:
-			size_t rb_arg_index;
-			CodeGen::ByteCodeGenerator *g;
-			
-			MethodGen(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
+			Tree::Variable *self_arg;
+			Tree::Variable *name_arg;
+			Tree::Variable *module_arg;
+			Tree::Variable *block_arg;
+			Tree::Variable *argc_arg;
+			Tree::Variable *argv_arg;
+			size_t argv_index;
 
-			Tree::Variable *get_rb_args();
+			CodeGen::ByteCodeGenerator *g;
+			CodeGen::Block *block;
+
+			MethodGen(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
 
 			template<class T> void apply()
 			{

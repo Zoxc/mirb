@@ -50,7 +50,6 @@ namespace Mirb
 				
 				Block *block;
 
-				BasicBlock *basic;
 				BasicBlock *body; // The point after the prolog of the block.
 				
 				Tree::Scope *scope;
@@ -72,14 +71,6 @@ namespace Mirb
 				}
 				
 				Tree::Variable *self_var();
-				
-				BasicBlock *create_block();
-				
-				// TODO: Fix this silly C++ workaround
-				Tree::Variable *null_var()
-				{
-					return 0;
-				}
 				
 				BranchIfOp *gen_if(BasicBlock *ltrue, Tree::Variable *var)
 				{
@@ -115,22 +106,6 @@ namespace Mirb
 					return block;
 				}
 				
-				BasicBlock *gen(BasicBlock *block)
-				{
-					basic = block;
-					list(block);
-
-					return block;
-				}
-				
-				BasicBlock *split(BasicBlock *block)
-				{
-					basic->next(block);
-					gen(block);
-
-					return block;
-				}
-				
 				void branch(BasicBlock *block)
 				{
 					gen_branch(block);
@@ -146,6 +121,28 @@ namespace Mirb
 				ByteCodeGenerator(MemoryPool &memory_pool);
 
 				MemoryPool &memory_pool;
+				
+				BasicBlock *split(BasicBlock *block)
+				{
+					basic->next(block);
+					gen(block);
+
+					return block;
+				}
+				
+				BasicBlock *gen(BasicBlock *block)
+				{
+					basic = block;
+					list(block);
+
+					return block;
+				}
+				
+				// TODO: Fix this silly C++ workaround
+				Tree::Variable *null_var()
+				{
+					return 0;
+				}
 				
 				template<class T> T *append(T *op)
 				{
@@ -230,6 +227,15 @@ namespace Mirb
 						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7)));
 					}
 				};
+				
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> struct Gen8:
+					public Gen
+				{
+					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
+					{
+						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8)));
+					}
+				};
 
 				template<class T> T *gen()
 				{
@@ -265,14 +271,22 @@ namespace Mirb
 				{
 					return Gen6<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
 				}
-
+				
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
 				{
 					return Gen7<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
 				}
 				
-				Tree::Variable *create_var();
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
+				{
+					return Gen8<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8));
+				}
+				
+				BasicBlock *basic;
 
+				Tree::Variable *create_var();
+				BasicBlock *create_block();
+				
 				Tree::Variable *read_variable(Tree::Variable *var);
 				void write_variable(Tree::Variable *var, Tree::Variable *value);
 				
@@ -281,3 +295,5 @@ namespace Mirb
 		};
 	};
 };
+
+#include "../arch/bytecode.hpp"

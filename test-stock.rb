@@ -6,5 +6,5 @@ module Kernel
 	end
 end
 
-require_relative 'test'
+require_relative 'test-bench'
 gets

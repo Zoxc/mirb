@@ -11,39 +11,44 @@
 
 namespace Mirb
 {
-	template<CodeGen::ArgType::Arg arg> static Tree::Variable *gen_arg(CodeGen::ByteCodeGenerator *g)
-	{
-		Tree::Variable *var = g->create_var();
-		g->gen<CodeGen::LoadArgOp>(var, arg);
-		return var;
-	};
-	
 	namespace Arg
 	{
 		Tree::Variable *Self::gen(MethodGen &g)
 		{
-			return gen_arg<CodeGen::ArgType::Self>(g.g);
+			if(!g.self_arg)
+				g.self_arg = g.g->create_var();
+
+			return g.self_arg;
 		}
 	
 		Tree::Variable *Block::gen(MethodGen &g)
 		{
-			return gen_arg<CodeGen::ArgType::Block>(g.g);
+			if(!g.block_arg)
+				g.block_arg = g.g->create_var();
+
+			return g.block_arg;
 		}
 	
 		Tree::Variable *Count::gen(MethodGen &g)
 		{
-			return gen_arg<CodeGen::ArgType::Count>(g.g);
+			if(!g.argc_arg)
+				g.argc_arg = g.g->create_var();
+
+			return g.argc_arg;
 		}
 	
 		Tree::Variable *Values::gen(MethodGen &g)
 		{
-			return gen_arg<CodeGen::ArgType::Values>(g.g);
+			if(!g.argv_arg)
+				g.argv_arg = g.g->create_var();
+
+			return g.argv_arg;
 		}
 
 		Tree::Variable *Value::gen(MethodGen &g)
 		{
 			Tree::Variable *var = g.g->create_var();
-			g.g->gen<CodeGen::LookupOp>(var, g.get_rb_args(), g.rb_arg_index++);
+			g.g->gen<CodeGen::LookupOp>(var, Values::gen(g), g.argv_index++);
 			return var;
 		}
 	};
@@ -55,42 +60,45 @@ namespace Mirb
 		name(name),
 		function(function),
 		arg_count(arg_count),
-		rb_args(0),
-		rb_arg_index(0)
+		self_arg(0),
+		name_arg(0),
+		module_arg(0),
+		block_arg(0),
+		argc_arg(0),
+		argv_arg(0),
+		argv_index(0)
 	{
 		if((flags & Method::Static) == 0)
 		{
 			index = 1;
 			this->arg_count++;
+			args = new Tree::Variable *[this->arg_count];
+			args[0] = Arg::Self::gen(*this);
 		}
 		else
-			index = 0;
-
-		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
-		args = new Tree::Variable *[arg_count];
-		block = g->create();
-	}
-
-	Tree::Variable *MethodGen::get_rb_args()
-	{
-		if(!rb_args)
 		{
-			rb_args = g->create_var();
-			g->gen<CodeGen::LoadArgOp>(rb_args, CodeGen::ArgType::Values);
+			index = 0;
+			args = new Tree::Variable *[arg_count];
 		}
+		
+		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
+		block = g->create();
+		prolog = g->gen(g->create_block());
 
-		return rb_args;
+		block->epilog = g->split(g->create_block());
+		block->epilog->next_block = 0;
 	}
 
 	Block *MethodGen::gen()
 	{
-		if((flags & Method::Static) == 0)
-		{
-			args[0] = g->create_var();
-			g->gen<CodeGen::LoadArgOp>(args[0], CodeGen::ArgType::Self);
-		}
+		Tree::Variable *return_var = g->create_var();
 
-		g->gen<CodeGen::StaticCallOp>(block->return_var, function, args, arg_count);
+		g->gen<CodeGen::StaticCallOp>(return_var, function, args, arg_count);
+		g->gen<CodeGen::ReturnOp>(return_var);
+
+		g->basic = prolog;
+		
+		g->gen<CodeGen::PrologueOp>(g->null_var(), g->null_var(), block_arg, name_arg, module_arg, self_arg, argc_arg, argv_arg);
 
 		block->analyse_liveness();
 		block->allocate_registers();

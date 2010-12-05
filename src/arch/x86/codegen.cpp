@@ -323,9 +323,12 @@ namespace Mirb
 
 		void NativeGenerator::stack_pop(size_t count)
 		{
-			stream.u8(0x81);
-			stream.u8(0xC4);
-			stream.u32(sizeof(size_t) * count);
+			if(count)
+			{
+				stream.u8(0x81);
+				stream.u8(0xC4);
+				stream.u32(sizeof(size_t) * count);
+			}
 		}
 
 		void NativeGenerator::mov_reg_to_reg(size_t src, size_t dst)
@@ -592,16 +595,14 @@ namespace Mirb
 		{
 			push_reg(Arch::Register::SP);
 			push_imm(op.param_count);
-
-			if(op.block_var)
-				push_var(op.block_var);
-			else
-				push_imm(value_nil);
-			
+			push_imm((size_t)op.method);
 			push_var(op.obj);
 
-			mov_imm_to_reg((size_t)op.method, Arch::Register::CX);
-
+			if(op.block_var)
+				mov_var_to_reg(op.block_var, Arch::Register::CX);
+			else
+				mov_imm_to_reg(value_nil, Arch::Register::CX);
+			
 			call(&Arch::Support::call);
 
 			stack_pop(op.param_count);
@@ -622,14 +623,14 @@ namespace Mirb
 		{
 			push_reg(Arch::Register::SP);
 			push_imm(op.param_count);
-
-			if(op.block_var)
-				push_var(op.block_var);
-			else
-				push_imm(value_nil);
-			
+			push_var(op.method);
 			push_var(op.self);
-
+			
+			if(op.block_var)
+				mov_var_to_reg(op.block_var, Arch::Register::CX);
+			else
+				mov_imm_to_reg(value_nil, Arch::Register::CX);
+			
 			call(&Arch::Support::super);
 
 			stack_pop(op.param_count);

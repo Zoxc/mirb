@@ -57,8 +57,8 @@ namespace Mirb
 			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_lookup");
 			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_lookup_super");
 
-			value_t __fastcall call(Symbol *method_name, value_t dummy, value_t obj, value_t block, size_t argc, value_t argv[]);
-			value_t __fastcall super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[]);
+			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[]);
+			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[]);
 		};
 	};
 };

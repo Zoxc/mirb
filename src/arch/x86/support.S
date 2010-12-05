@@ -7,12 +7,12 @@
  * Parameters:::
  *   [%esp + 20]: argv
  *   [%esp + 16]: argc
- *   [%esp + 12]: block
+ *   [%esp + 12]: name
  *   [%esp + 8]: obj
  *   [%esp + 4]: Return address
  *   [%esp]: The block to compile
  *   %eax: Scopes
- *   %ecx: Method name
+ *   %ecx: Passed block
  *   %edx: Method module
  */
 .global mirb_arch_support_jit_stub

@@ -29,6 +29,17 @@ namespace Mirb
 				};
 		};
 		
+		struct StackArg
+		{
+			enum Type
+			{
+				Self,
+				MethodName,
+				Count,
+				Values
+			};
+		};
+		
 		class Registers
 		{
 			public:

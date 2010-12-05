@@ -83,10 +83,10 @@ namespace Mirb
 					{
 						push argv
 						push argc
-						push block
+						push method_name
 						push obj
 						mov eax, scopes
-						mov ecx, method_name
+						mov ecx, block
 						mov edx, method_module
 						mov ebx, code
 						call ebx
@@ -115,7 +115,7 @@ namespace Mirb
 
 						push [esp + 24] // argv
 						push [esp + 24] // argc
-						push [esp + 24] // block
+						push [esp + 24] // name
 						push [esp + 24] // obj
 						call ebx
 
@@ -149,13 +149,13 @@ namespace Mirb
 			{
 				return Mirb::lookup_super(module, name, result_module);
 			}
-
-			value_t __fastcall call(Symbol *method_name, value_t dummy, value_t obj, value_t block, size_t argc, value_t argv[])
+			
+			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
 			{
 				return Mirb::Support::call(method_name, obj, block, argc, argv);
 			}
 
-			value_t __fastcall super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[])
+			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
 			{
 				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
 			}

@@ -1,5 +1,4 @@
 #include "bytecode.hpp"
-#include "../arch/bytecode.hpp"
 #include "../tree/nodes.hpp"
 #include "../tree/tree.hpp"
 #include "../compiler.hpp"
@@ -716,20 +715,7 @@ namespace Mirb
 			scope = 0;
 
 			block = new (memory_pool) Block(memory_pool);
-			block->epilog = create_block();
-			block->return_var = create_var();
 			block->final = new (gc) Mirb::Block;
-
-			body = create_block();
-			gen(body);
-			
-			split(block->epilog);
-			
-			gen<ReturnOp>(block->return_var);
-			
-			block->epilog->next_block = 0;
-			
-			basic = body;
 
 			return block;
 		}
@@ -787,8 +773,29 @@ namespace Mirb
 			gen<ReturnOp>(block->return_var);
 
 			basic = prolog;
+			
+			Tree::Variable *argv = scope->parameters.empty() ? 0 : create_var();
 
-			gen<PrologueOp>();
+			gen<PrologueOp>(block->heap_array_var, block->heap_var, block->scope->block_parameter, block->scope->super_name_var, block->scope->super_module_var, block->self_var, null_var(), argv);
+
+			if(argv)
+			{
+				size_t index = 0;
+
+				for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i, ++index)
+				{
+					if(i().type == Tree::Variable::Heap)
+					{
+						Tree::Variable *value = create_var();
+
+						gen<LookupOp>(value, argv, index);
+
+						write_variable(*i, value);
+					}
+					else
+						gen<LookupOp>(*i, argv, index);
+				}
+			}
 			
 			block->epilog->next_block = 0;
 

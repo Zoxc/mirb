@@ -12,4 +12,4 @@ initial = benchmark do
 end
 
 puts "Initial #{initial}"
-puts "Benchmark #{benchmark { 1000.times { silent_run! } } }"
+#puts "Benchmark #{benchmark { 1000.times { silent_run! } } }"

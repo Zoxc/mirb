@@ -358,7 +358,7 @@ namespace Mirb
 	
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = block->compiled(auto_cast(method_name), method_module, self, value_nil, 0, 0);
+		value_t result = block->compiled(value_nil, method_module, self, auto_cast(method_name), 0, 0);
 
 		block = 0; // Make sure block stays on stack*/
 
@@ -410,7 +410,7 @@ namespace Mirb
 
 		compiled_block_t method = lookup(obj, name, &module);
 
-		return method(auto_cast(name), module, obj, block, argc, argv);
+		return method(block, module, obj, auto_cast(name), argc, argv);
 	}
 
 	value_t call(value_t obj, const char *name, size_t argc, value_t argv[])

@@ -6,63 +6,55 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
-		template<> struct ByteCodeGenerator::Gen0<PrologueOp>:
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> struct ByteCodeGenerator::Gen8<PrologueOp, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>:
 			public Gen
 		{
-			static PrologueOp *gen(ByteCodeGenerator &bcg)
+			static PrologueOp *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
 			{
-				if(bcg.block->heap_array_var)
-					bcg.gen<MoveOp>(bcg.block->heap_array_var, lock(bcg.create_var(), Arch::Register::AX));
+				Tree::Variable *heap_array_var = arg1;
+				Tree::Variable *heap_var = arg2;
+				Tree::Variable *block_parameter = arg3;
+				Tree::Variable *method_name_var = arg4;
+				Tree::Variable *method_module_var = arg5;
+				Tree::Variable *self_var = arg6;
+				Tree::Variable *argc = arg7;
+				Tree::Variable *argv = arg8;
+
+				if(heap_array_var)
+					bcg.gen<MoveOp>(heap_array_var, lock(bcg.create_var(), Arch::Register::AX));
 				
-				if(bcg.scope->super_name_var)
-					bcg.write_variable(bcg.scope->super_module_var, lock(bcg.create_var(), Arch::Register::CX));
-
-				if(bcg.scope->super_module_var)
-					bcg.write_variable(bcg.scope->super_module_var, lock(bcg.create_var(), Arch::Register::DX));
-
-				if(bcg.block->heap_var)
-					bcg.gen<CreateHeapOp>(bcg.block->heap_var);
-				
-				Tree::Variable *block_parameter = bcg.block->scope->block_parameter;
-
 				if(block_parameter)
+					bcg.write_variable(block_parameter, lock(bcg.create_var(), Arch::Register::CX));
+
+				if(method_module_var)
+					bcg.write_variable(method_module_var, lock(bcg.create_var(), Arch::Register::DX));
+
+				if(heap_var)
+					bcg.gen<CreateHeapOp>(heap_var);
+				
+				if(method_name_var)
 				{
-					if(block_parameter->type == Tree::Variable::Heap)
+					if(method_name_var->type == Tree::Variable::Heap)
 					{
 						Tree::Variable *value = bcg.create_var();
 
-						bcg.gen<LoadArgOp>(value, ArgType::Block);
+						bcg.gen<LoadArgOp>(value, Arch::StackArg::MethodName);
 
-						bcg.write_variable(block_parameter, value);
+						bcg.write_variable(method_name_var, value);
 					}
 					else
-						bcg.gen<LoadArgOp>(block_parameter, ArgType::Block);
-				}
-
-				if(!bcg.scope->parameters.empty())
-				{
-					Tree::Variable *argv = bcg.create_var();
-					bcg.gen<LoadArgOp>(argv, ArgType::Values);
-
-					size_t index = 0;
-					for(auto i = bcg.scope->parameters.begin(); i != bcg.scope->parameters.end(); ++i, ++index)
-					{
-						if(i().type == Tree::Variable::Heap)
-						{
-							Tree::Variable *value = bcg.create_var();
-
-							bcg.gen<LookupOp>(value, argv, index);
-
-							bcg.write_variable(*i, value);
-						}
-						else
-							bcg.gen<LookupOp>(*i, argv, index);
-					}
+						bcg.gen<LoadArgOp>(method_name_var, Arch::StackArg::MethodName);
 				}
 				
-				if(bcg.block->self_var)
-					bcg.gen<LoadArgOp>(bcg.block->self_var, ArgType::Self);
-
+				if(self_var)
+					bcg.gen<LoadArgOp>(self_var, Arch::StackArg::Self);
+				
+				if(argc)
+					bcg.gen<LoadArgOp>(argc, Arch::StackArg::Count);
+				
+				if(argv)
+					bcg.gen<LoadArgOp>(argv, Arch::StackArg::Values);
+				
 				return 0;
 			}
 		};
@@ -73,12 +65,10 @@ namespace Mirb
 			static SuperOp *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
 			{
 				Tree::Variable *module_var = lock(bcg.create_var(), Arch::Register::DX);
-				Tree::Variable *name_var = lock(bcg.create_var(), Arch::Register::CX);
 				
 				bcg.gen<MoveOp>(module_var, std::forward<Arg3>(arg3));
-				bcg.gen<MoveOp>(name_var, std::forward<Arg4>(arg4));
 
-				return bcg.append(new (bcg.memory_pool) SuperOp(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), module_var, name_var, std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7)));
+				return bcg.append(new (bcg.memory_pool) SuperOp(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), module_var, std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7)));
 			}
 		};
 	};

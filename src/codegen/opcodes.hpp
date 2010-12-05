@@ -56,17 +56,6 @@ namespace Mirb
 		struct InterpolateOp;
 		struct StaticCallOp;
 		
-		struct ArgType
-		{
-			enum Arg
-			{
-				Self,
-				Block,
-				Count,
-				Values
-			};
-		};
-		
 		struct Opcode
 		{
 			enum Type
@@ -669,6 +658,7 @@ namespace Mirb
 		struct PrologueOp:
 			public OpcodeWrapper<Opcode::Prologue>
 		{
+			PrologueOp(Tree::Variable *heap_array_var, Tree::Variable *heap_var, Tree::Variable *block_parameter, Tree::Variable *method_name_var, Tree::Variable *method_module_var, Tree::Variable *self_var, Tree::Variable *argc, Tree::Variable *argv) {}
 		};
 	};
 };

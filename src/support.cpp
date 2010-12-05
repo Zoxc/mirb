@@ -137,7 +137,7 @@ namespace Mirb
 
 			compiled_block_t method = lookup(obj, method_name, &method_module);
 
-			return method(method_name, method_module, obj, block, argc, argv);
+			return method(block, method_module, obj, method_name, argc, argv);
 		}
 
 		value_t super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[])
@@ -146,7 +146,7 @@ namespace Mirb
 
 			compiled_block_t method = lookup_super(method_module, method_name, &result_module);
 
-			return method(method_name, result_module, obj, block, argc, argv);
+			return method(block, result_module, obj, method_name, argc, argv);
 		}
 	};
 };
