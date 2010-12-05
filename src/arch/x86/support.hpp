@@ -10,18 +10,10 @@ namespace Mirb
 		{
 			struct Frame;
 			
-			#ifdef MIRB_SEH_EXCEPTIONS
-				typedef EXCEPTION_DISPOSITION( __cdecl *exception_handler_t)(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context);
+			typedef void (*exception_handler_t)(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
 
-				EXCEPTION_DISPOSITION __cdecl exception_handler(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context);
-				
-				static const size_t seh_ruby = 0x4D520000;
-			#else
-				typedef void (*exception_handler_t)(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
-
-				void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
-			#endif
-
+			void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
+			
 			struct Frame {
 				Frame *prev;
 				exception_handler_t handler;

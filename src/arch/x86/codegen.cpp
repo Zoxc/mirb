@@ -169,33 +169,17 @@ namespace Mirb
 				// handler @ ebp - 16
 				push_imm((size_t)&Arch::Support::exception_handler);
 
-				#ifdef MIRB_SEH_EXCEPTIONS
-					// prev @ ebp - 20
-					stream.u8(0x64); // push dword [fs:0]
-					stream.u8(0xFF);
-					stream.u8(0x35);
-					stream.u32(0);
+				// prev @ ebp - 20
+				stream.u8(0xFF); // push dword [Arch::Support::current_frame]
+				modrm(0, 6, Arch::Register::BP);
+				stream.u32((size_t)&Arch::Support::current_frame);
 
-					/*
-					 * Append the struct to the linked list
-					 */
-					stream.u8(0x64); // mov dword [fs:0], esp
-					stream.u8(0x89);
-					stream.u8(0x25);
-					stream.u32(0);
-				#else
-					// prev @ ebp - 20
-					stream.u8(0xFF); // push dword [Arch::Support::current_frame]
-					modrm(0, 6, Arch::Register::BP);
-					stream.u32((size_t)&Arch::Support::current_frame);
-
-					/*
-					 * Append the struct to the linked list
-					 */
-					stream.u8(0x89); // mov dword [Arch::Support::current_frame], esp
-					modrm(0, Arch::Register::SP, Arch::Register::BP);
-					stream.u32((size_t)&Arch::Support::current_frame);
-				#endif
+				/*
+				 * Append the struct to the linked list
+				 */
+				stream.u8(0x89); // mov dword [Arch::Support::current_frame], esp
+				modrm(0, Arch::Register::SP, Arch::Register::BP);
+				stream.u32((size_t)&Arch::Support::current_frame);
 			}
 			else
 				locals_offset = 0;
@@ -220,16 +204,9 @@ namespace Mirb
 				stream.u8(0x4D);
 				stream.u8(-20);
 
-				#ifdef MIRB_SEH_EXCEPTIONS
-					stream.u8(0x64); // mov dword [fs:0], ecx
-					stream.u8(0x89);
-					stream.u8(0x0D);
-					stream.u32(0);
-				#else
-					stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
-					modrm(0, Arch::Register::CX, Arch::Register::BP);
-					stream.u32((size_t)&Arch::Support::current_frame);
-				#endif
+				stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
+				modrm(0, Arch::Register::CX, Arch::Register::BP);
+				stream.u32((size_t)&Arch::Support::current_frame);
 				
 				for(auto i = block->final->exception_blocks.begin(); i != block->final->exception_blocks.end(); ++i)
 				{

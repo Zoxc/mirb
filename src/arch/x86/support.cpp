@@ -160,56 +160,22 @@ namespace Mirb
 				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
 			}
 			
-			#ifdef MIRB_SEH_EXCEPTIONS
-				static bool find_seh_target(void *target)
-				{
-					Frame *frame;
-
-					__asm__ __volatile__("movl %%fs:(0), %0\n" : "=r" (frame));
-
-					while(true)
-					{
-						if(frame == (void *)-1)
-							return false;
-
-						if(frame->handler == &exception_handler)
-						{
-							if(frame->block == target)
-								return true;
-						}
-
-						frame = frame->prev;
-					}
-				}
-			#endif
-			
 			void __noreturn exception_raise(ExceptionData *data)
 			{
-				#ifdef MIRB_SEH_EXCEPTIONS
-					RaiseException(seh_ruby, EXCEPTION_NONCONTINUABLE, 1, (const DWORD *)&data);
+				Frame *top = current_frame;
+				Frame *frame = top;
 
-					__builtin_unreachable();
-				#else
-					Frame *top = current_frame;
-					Frame *frame = top;
+				while(frame)
+				{
+					frame->handler(frame, top, data, false);
+					frame = frame->prev;
+				}
 
-					while(frame)
-					{
-						frame->handler(frame, top, data, false);
-						frame = frame->prev;
-					}
-
-					mirb_runtime_abort("Unable to find a exception handler");
-				#endif
+				mirb_runtime_abort("Unable to find a exception handler");
 			}
 
 			void __noreturn __stdcall far_return(value_t value, Block *target)
 			{
-				#ifdef MIRB_SEH_EXCEPTIONS
-					if(!find_seh_target(target))
-						mirb_runtime_abort("Unable to find handler for return");
-				#endif
-
 				ExceptionData data;
 
 				data.type = ReturnException;
@@ -221,11 +187,6 @@ namespace Mirb
 
 			void __noreturn __stdcall far_break(value_t value, Block *target, size_t id)
 			{
-				#ifdef MIRB_SEH_EXCEPTIONS
-					if(!find_seh_target(target))
-						mirb_runtime_abort("Unable to find handler for break");
-				#endif
-
 				ExceptionData data;
 
 				data.type = BreakException;
@@ -238,38 +199,13 @@ namespace Mirb
 
 			static void global_unwind(Frame *target, Frame *top)
 			{
-				#ifdef MIRB_SEH_EXCEPTIONS
-					extern void __stdcall RtlUnwind(
-						PVOID TargetFrame,
-						PVOID TargetIp,
-						PEXCEPTION_RECORD ExceptionRecord,
-						PVOID ReturnValue
-					);
+				Frame *frame = top;
 
-					int dummy;
-
-					__asm__ __volatile__("pushl %%ebp\n"
-						"pushl %%ebx\n"
-						"pushl $0\n"
-						"pushl $0\n"
-						"pushl 0f\n"
-						"pushl %0\n"
-						"call _RtlUnwind@16\n"
-						"0:\n"
-						"popl %%ebx\n"
-						"popl %%ebp\n"
-					: "=a" (dummy)
-					: "0" (target)
-					: "esi", "edi", "edx", "ecx", "memory");
-				#else
-					Frame *frame = top;
-
-					while(frame != target)
-					{
-						frame->handler(frame, 0, 0, true);
-						frame = frame->prev;
-					}
-				#endif
+				while(frame != target)
+				{
+					frame->handler(frame, 0, 0, true);
+					frame = frame->prev;
+				}
 			}
 
 			static void local_unwind(Frame *frame, ExceptionBlock *block, ExceptionBlock *target)
@@ -497,24 +433,10 @@ namespace Mirb
 				}
 			}
 			
-			#ifdef MIRB_SEH_EXCEPTIONS
-				EXCEPTION_DISPOSITION __cdecl exception_handler(EXCEPTION_RECORD *exception, Frame *frame, CONTEXT *context, void *dispatcher_context)
-				{
-					ExceptionData *data = 0;
-
-					if(exception->ExceptionCode == seh_ruby)
-						data = (ExceptionData *)exception->ExceptionInformation[0];
-
-					handle_exception(frame, 0, data, exception->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND));
-
-					return ExceptionContinueSearch;
-				}
-			#else
-				void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
-				{
-					handle_exception(frame, top, data, unwinding);
-				}
-			#endif
+			void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
+			{
+				handle_exception(frame, top, data, unwinding);
+			}
 		};
 	};
 };
