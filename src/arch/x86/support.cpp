@@ -31,8 +31,10 @@ namespace Mirb
 					
 					result += CharArray(inspect_object(module));
 
-					if(block->object != module)
-						result += "(" + CharArray(inspect_object(block->object)) + ")";
+					value_t object = class_of(block->object);
+
+					if(object != module)
+						result += "(" + CharArray(inspect_object(object)) + ")";
 
 					result += "#" + block->name->string + " at <unknown>";
 				};
