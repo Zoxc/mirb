@@ -11,7 +11,7 @@ namespace Mirb
 	{
 		auto self = cast<Proc>(obj);
 
-		return Arch::Support::closure_call(self->block->compiled, self->scopes, self->self, 0, Mirb::value_nil, block, argc, argv);
+		return Arch::Support::closure_call(self->block->compiled, self->scopes, self->self, self->name, self->module, block, argc, argv);
 	}
 
 	void Proc::initialize()

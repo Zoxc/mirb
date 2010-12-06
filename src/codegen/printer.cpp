@@ -157,7 +157,7 @@ namespace Mirb
 				{
 					auto op = (ClosureOp *)opcode;
 					
-					return var(op->var) + " = closure " + var(op->self) + ", " + print_block(op->block) + ", " + raw(op->scope_count);
+					return var(op->var) + " = closure " + var(op->self) + ", " + var(op->name) + ", " + var(op->module) + ", " + print_block(op->block) + ", " + raw(op->scope_count);
 				}
 				
 				case Opcode::Class:

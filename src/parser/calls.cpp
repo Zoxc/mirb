@@ -39,6 +39,8 @@ namespace Mirb
 		
 		lexer.step();
 		
+		scope->gen_ident_vars();
+		
 		auto old_fragment = fragment;
 		auto old_scope = scope;
 		
@@ -152,22 +154,7 @@ namespace Mirb
 		
 		auto result = new (fragment) Tree::SuperNode;
 		
-		Tree::Scope *owner = scope->owner;
-		
-		if(!owner->super_module_var)
-		{
-			owner->super_module_var = owner->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
-			owner->super_module_var->name = 0;
-				
-			owner->super_name_var = owner->alloc_var<Tree::NamedVariable>(Tree::Variable::Temporary);
-			owner->super_name_var->name = 0;
-			
-			if(scope != owner)
-			{
-				scope->require_var(owner, owner->super_module_var);
-				scope->require_var(owner, owner->super_name_var);
-			}
-		}
+		scope->gen_ident_vars();
 		
 		bool parenthesis = false;
 		
@@ -178,8 +165,8 @@ namespace Mirb
 		
 		if(result->arguments.empty() && !parenthesis)
 		{
-			if(scope != owner)
-				owner->zsupers.push(scope);
+			if(scope != scope->owner)
+				scope->owner->zsupers.push(scope);
 			
 			result->pass_args = true;
 		}

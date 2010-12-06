@@ -300,13 +300,20 @@ namespace Mirb
 		{
 			Tree::Variable *var;
 			Tree::Variable *self;
+			Tree::Variable *name;
+			Tree::Variable *module;
 			Mirb::Block *block;
 			size_t scope_count;
 			
 			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(self); };
+			template<typename T> void use(T use)
+			{
+				use(self);
+				use(name);
+				use(module);
+			};
 
-			ClosureOp(Tree::Variable *var, Tree::Variable *self, Mirb::Block *block, size_t scope_count) : var(var), self(self), block(block), scope_count(scope_count) {}
+			ClosureOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *name, Tree::Variable *module, Mirb::Block *block, size_t scope_count) : var(var), self(self), name(name), module(module), block(block), scope_count(scope_count) {}
 		};
 		
 		struct ClassOp:

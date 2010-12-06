@@ -417,9 +417,6 @@ namespace Mirb
 		{
 			auto node = (Tree::SuperNode *)basic_node;
 			
-			Tree::Variable *module_var = scope->owner->super_module_var;
-			Tree::Variable *name_var = scope->owner->super_name_var;
-			
 			if(node->pass_args)
 			{
 				Tree::Variable *closure = node->block ? block_arg(scope) : scope->owner->block_parameter;
@@ -433,10 +430,7 @@ namespace Mirb
 					gen<PushOp>(*i);
 				}
 				
-				module_var = read_variable(module_var);
-				name_var = read_variable(name_var);
-				
-				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->block ? node->block->scope->final : 0);
+				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, param_count, closure, node->block ? node->block->scope->final : 0);
 			}
 			else
 			{
@@ -444,10 +438,7 @@ namespace Mirb
 				
 				Tree::Variable *closure = call_args(node->arguments, param_count, scope, 0);
 				
-				module_var = read_variable(module_var);
-				name_var = read_variable(name_var);
-
-				gen<SuperOp>(var, self_var(), module_var, name_var, param_count, closure, node->block ? node->block->scope->final : 0);
+				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, param_count, closure, node->block ? node->block->scope->final : 0);
 			}
 		}
 		
@@ -776,7 +767,7 @@ namespace Mirb
 			
 			Tree::Variable *argv = scope->parameters.empty() ? 0 : create_var();
 
-			gen<PrologueOp>(block->heap_array_var, block->heap_var, block->scope->block_parameter, block->scope->super_name_var, block->scope->super_module_var, block->self_var, null_var(), argv);
+			gen<PrologueOp>(block->heap_array_var, block->heap_var, block->scope->block_parameter, block->scope->name_var, block->scope->module_var, block->self_var, null_var(), argv);
 
 			if(argv)
 			{
@@ -873,8 +864,8 @@ namespace Mirb
 						gen<PushOp>(var);
 					}
 				}
-				
-				gen<ClosureOp>(var, self_var(), block_attach, scopes);
+
+				gen<ClosureOp>(var, self_var(), this->scope->name_var, this->scope->module_var, block_attach, scopes);
 			}
 			
 			return var;

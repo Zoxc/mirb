@@ -15,15 +15,27 @@ namespace Mirb
 			variables(2, fragment),
 			heap_vars(0),
 			block_parameter(0),
-			super_module_var(0),
-			super_name_var(0),
+			module_var(0),
+			name_var(0),
 			referenced_scopes(fragment),
 			variable_list(2, fragment),
 			zsupers(fragment)
 		{
 			owner = parent ? parent->owner : 0;
 		}
-	
+
+		void Scope::gen_ident_vars()
+		{
+			if(!module_var)
+			{
+				module_var = alloc_var<NamedVariable>(Variable::Temporary);
+				module_var->name = 0;
+				
+				name_var = alloc_var<NamedVariable>(Variable::Temporary);
+				name_var->name = 0;
+			}
+		}
+
 		void Scope::require_scope(Scope *scope)
 		{
 			if(referenced_scopes.find(scope))

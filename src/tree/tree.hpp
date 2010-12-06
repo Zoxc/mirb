@@ -215,8 +215,8 @@ namespace Mirb
 				VariableMap variables; // A hash of the variables in this scope.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
-				NamedVariable *super_module_var; // Pointer to a next module to search from if super is used.
-				NamedVariable *super_name_var; // Pointer to a symbol which contains the name of the called method.
+				NamedVariable *module_var; // Pointer to a module in which this method was found.
+				NamedVariable *name_var; // Pointer to a symbol which contains the name of the called method.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
@@ -277,6 +277,8 @@ namespace Mirb
 				void require_args(Scope *owner);
 				void require_scope(Scope *scope);
 				void require_var(Scope *owner, Variable *var);
+
+				void gen_ident_vars();
 				
 				Scope *defined(Symbol *name, bool recursive);
 		};

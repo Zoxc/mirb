@@ -73,7 +73,7 @@ h1. Operations
   Moves the raw immediate @R@ onto the stack.
 
 * _Closure_
-  @V = closure Vself, B, Rscopes@
+  @V = closure Vself, Vname, Vmethod, B, Rscopes@
   Creates an closures for block @B@ with @Vself@ as self with references to @B@ scopes which are passed on the stack and stores it in the variable @V@. It then pops @Rscopes@ from the stack.
 
 * _Class_

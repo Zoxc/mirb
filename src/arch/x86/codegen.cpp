@@ -564,14 +564,15 @@ namespace Mirb
 		{
 			push_reg(Arch::Register::SP);
 			push_imm(op.scope_count);
-			
+			push_var(op.module);
+			push_var(op.name);
 			push_var(op.self);
 			
 			push_imm((size_t)op.block);
 
 			call(&Arch::Support::create_closure);
 
-			stack_pop(op.scope_count + 4);
+			stack_pop(op.scope_count + 6);
 
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}

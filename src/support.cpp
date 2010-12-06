@@ -9,7 +9,7 @@ namespace Mirb
 {
 	namespace Support
 	{
-		value_t create_closure(Block *block, value_t self, size_t argc, value_t *argv[])
+		value_t create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[])
 		{
 			value_t **scopes = (value_t **)gc.alloc(sizeof(value_t *) * argc);
 			
@@ -18,7 +18,7 @@ namespace Mirb
 				scopes[i] = MIRB_ARG(i);
 			}
 
-			return auto_cast(new (gc) Proc(Proc::class_ref, self, block, argc, scopes));
+			return auto_cast(new (gc) Proc(Proc::class_ref, self, name, module, block, argc, scopes));
 		}
 
 		value_t *create_heap(size_t bytes)

@@ -85,7 +85,7 @@ namespace Mirb
 			value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 			
 			value_t *__stdcall create_heap(size_t bytes);
-			value_t __cdecl create_closure(Block *block, value_t self, size_t argc, value_t *argv[]);
+			value_t __cdecl create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[]);
 			value_t __cdecl create_array(size_t argc, value_t argv[]);
 			value_t __cdecl interpolate(size_t argc, value_t argv[]);
 			

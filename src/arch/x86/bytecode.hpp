@@ -27,24 +27,13 @@ namespace Mirb
 					bcg.write_variable(block_parameter, lock(bcg.create_var(), Arch::Register::CX));
 
 				if(method_module_var)
-					bcg.write_variable(method_module_var, lock(bcg.create_var(), Arch::Register::DX));
+					bcg.gen<MoveOp>(method_module_var, lock(bcg.create_var(), Arch::Register::DX));
 
 				if(heap_var)
 					bcg.gen<CreateHeapOp>(heap_var);
 				
 				if(method_name_var)
-				{
-					if(method_name_var->type == Tree::Variable::Heap)
-					{
-						Tree::Variable *value = bcg.create_var();
-
-						bcg.gen<LoadArgOp>(value, Arch::StackArg::MethodName);
-
-						bcg.write_variable(method_name_var, value);
-					}
-					else
-						bcg.gen<LoadArgOp>(method_name_var, Arch::StackArg::MethodName);
-				}
+					bcg.gen<LoadArgOp>(method_name_var, Arch::StackArg::MethodName);
 				
 				if(self_var)
 					bcg.gen<LoadArgOp>(self_var, Arch::StackArg::Self);

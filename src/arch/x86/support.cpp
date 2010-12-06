@@ -280,9 +280,9 @@ namespace Mirb
 				}
 			#endif
 			
-			value_t __cdecl create_closure(Block *block, value_t self, size_t argc, value_t *argv[])
+			value_t __cdecl create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[])
 			{
-				return Mirb::Support::create_closure(block, self, argc, argv);
+				return Mirb::Support::create_closure(block, self, name, module, argc, argv);
 			}
 			
 			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module)
