@@ -200,18 +200,15 @@ namespace Mirb
 
 				if(used)
 				{
-					Tree::Variable *spill = active.front();
+					used->loc = stack_loc++;
+					used->flags.clear<Tree::Variable::Register>();
 
-					if(spill != used)
-					{
-						used->loc = spill->loc;
-						used_reg[registers.to_virtual(used->loc)] = used;
-					}
-					
-					spill->loc = stack_loc++;
-					spill->flags.clear<Tree::Variable::Register>();
+					auto pos = std::lower_bound(active.begin(), active.end(), used, [](Tree::Variable *a, Tree::Variable *b) { return a->range.stop > b->range.stop; });
 
-					active.erase(active.begin());
+					while(*pos != used)
+						++pos;
+
+					active.erase(pos);
 				}
 
 				used_reg[loc] = var;
