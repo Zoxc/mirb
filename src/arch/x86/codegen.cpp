@@ -125,9 +125,39 @@ namespace Mirb
 
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
+
+			push_reg(Arch::Register::DX); // Push the module value on the stack
+
+			// Store Arch::Support::NativeEntry on stack
+			
+			// type @ ebp - 8
+			push_imm(Arch::Support::Frame::NativeEntry);
+
+			// prev @ ebp - 12
+			stream.u8(0xFF); // push dword [Arch::Support::current_frame]
+			modrm(0, 6, Arch::Register::BP);
+			stream.u32((size_t)&Arch::Support::current_frame);
+
+			/*
+			 * Append the struct to the linked list
+			 */
+			stream.u8(0x89); // mov dword [Arch::Support::current_frame], esp
+			modrm(0, Arch::Register::SP, Arch::Register::BP);
+			stream.u32((size_t)&Arch::Support::current_frame);
+			
+			locals_offset = sizeof(Arch::Support::Frame);
 			
 			push_regs();
 			generate_bytecode();
+
+			stream.u8(0x8B); // mov ecx, dword [ebp - 12] ; Load previous exception frame
+			stream.u8(0x4D);
+			stream.u8(-12);
+
+			stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
+			modrm(0, Arch::Register::CX, Arch::Register::BP);
+			stream.u32((size_t)&Arch::Support::current_frame);
+			
 			pop_regs();
 
 			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
@@ -147,29 +177,29 @@ namespace Mirb
 
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
+
+			push_reg(Arch::Register::DX); // Push the module value on the stack
 			
 			if(block->scope->require_exceptions)
 			{
-				locals_offset = sizeof(Arch::Support::Frame) - sizeof(size_t);
+				locals_offset = sizeof(Arch::Support::ExceptionFrame) - sizeof(Arch::Support::FramePrefix);
 				block->final->ebp_offset = locals_offset;
 
-				// Store Arch::Support::Frame on stack
+				// Store Arch::Support::ExceptionFrame on stack
 				
-				// old_ebp is already pushed
-
-				// block @ ebp - 4
+				// block @ ebp - 8
 				push_imm((size_t)block->final);
 
-				// block_index @ ebp - 8
+				// block_index @ ebp - 12
 				push_imm((size_t)-1);
 
-				// handling @ ebp - 12
+				// handling @ ebp - 16
 				push_imm(0);
 
-				// handler @ ebp - 16
-				push_imm((size_t)&Arch::Support::exception_handler);
+				// type @ ebp - 20
+				push_imm(Arch::Support::Frame::Exception);
 
-				// prev @ ebp - 20
+				// prev @ ebp - 24
 				stream.u8(0xFF); // push dword [Arch::Support::current_frame]
 				modrm(0, 6, Arch::Register::BP);
 				stream.u32((size_t)&Arch::Support::current_frame);
@@ -200,9 +230,9 @@ namespace Mirb
 			{
 				block->final->epilog = stream.position;
 
-				stream.u8(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
+				stream.u8(0x8B); // mov ecx, dword [ebp - 24] ; Load previous exception frame
 				stream.u8(0x4D);
-				stream.u8(-20);
+				stream.u8(-24);
 
 				stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
 				modrm(0, Arch::Register::CX, Arch::Register::BP);
@@ -313,7 +343,7 @@ namespace Mirb
 		
 		int NativeGenerator::stack_offset(size_t loc)
 		{
-			return -(int)((1 + loc) * sizeof(size_t) + locals_offset);
+			return -(int)((2 + loc) * sizeof(size_t) + locals_offset);
 		}
 
 		int NativeGenerator::stack_offset(Tree::Variable *var)

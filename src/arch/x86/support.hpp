@@ -1,6 +1,7 @@
 #pragma once
 #include "../../common.hpp"
 #include "../../block.hpp"
+#include "../../char-array.hpp"
 
 namespace Mirb
 {
@@ -10,22 +11,65 @@ namespace Mirb
 		{
 			struct Frame;
 			
-			typedef void (*exception_handler_t)(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
-
-			void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding);
+			extern Frame *current_frame;
 			
-			struct Frame {
+			struct Frame
+			{
+				enum Type
+				{
+					NativeEntry,
+					Exception
+				};
+
+				Frame(size_t type) : prev(current_frame), type(type)
+				{
+					current_frame = this;
+				}
+
 				Frame *prev;
-				exception_handler_t handler;
+				size_t type;
+			};
+
+			struct FramePrefix
+			{
+				value_t module;
+				size_t prev_ebp; // ebp
+				void *return_address;
+				value_t object;
+				Symbol *name;
+				size_t argc;
+				value_t *argv;
+
+				FramePrefix *prev()
+				{
+					if(prev_ebp)
+						return (FramePrefix *)(prev_ebp - sizeof(size_t));
+					else
+						return 0;
+				};
+			};
+
+			struct ExceptionFrame:
+				public Frame
+			{
 				size_t handling;
 				size_t block_index;
 				Mirb::Block *block;
-				size_t old_ebp;
+				FramePrefix prefix;
+			};
+			
+			struct NativeEntry:
+				public Frame
+			{
+				NativeEntry() : Frame(Frame::NativeEntry) {}
+				FramePrefix prefix;
 			};
 
-			void __noreturn exception_raise(ExceptionData *data);
+			CharArray backtrace();
 
-			extern Frame *current_frame;
+			void handle_exception(ExceptionFrame *frame, ExceptionData *data);
+
+			void __noreturn exception_raise(ExceptionData *data);
 
 			void __noreturn __stdcall far_return(value_t value, Block *target);
 			void __noreturn __stdcall far_break(value_t value, Block *target, size_t id);
@@ -36,7 +80,9 @@ namespace Mirb
 				extern void jit_stub() mirb_external("mirb_arch_support_jit_stub");
 			#endif
 			
-			value_t closure_call(compiled_block_t code, value_t *scopes[], Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[]);
+			value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+			
+			value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 			
 			value_t *__stdcall create_heap(size_t bytes);
 			value_t __cdecl create_closure(Block *block, value_t self, size_t argc, value_t *argv[]);
@@ -54,11 +100,11 @@ namespace Mirb
 			void __stdcall define_method(value_t obj, Symbol *name, Block *block);
 			value_t __stdcall define_string(const char *string);
 			
-			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_lookup");
-			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_lookup_super");
+			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup");
+			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup_super");
 
-			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[]);
-			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[]);
+			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_call");
+			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_super");
 		};
 	};
 };

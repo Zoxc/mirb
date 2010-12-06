@@ -55,7 +55,7 @@ int main()
 		
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = block->compiled(value_nil, class_of(Mirb::main), Mirb::main, 0, 0, 0);
+		value_t result = call_code(block->compiled, Mirb::main, Symbol::from_literal("main"), class_of(Mirb::main), value_nil, 0, 0);
 		
 		std::cout << "=> " << inspect_object(result) << "\n";
 		

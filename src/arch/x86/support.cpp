@@ -3,6 +3,7 @@
 #include "../../compiler.hpp"
 #include "../../runtime.hpp"
 #include "../../classes/proc.hpp"
+#include "../../classes/module.hpp"
 
 namespace Mirb
 {
@@ -11,6 +12,60 @@ namespace Mirb
 		namespace Support
 		{
 			Frame *current_frame;
+
+			CharArray backtrace()
+			{
+				Frame *current = current_frame;
+
+				CharArray result;
+
+				auto list_block = [&](FramePrefix *block)
+				{
+					if(result.length != 0)
+						result += "\n";
+
+					value_t module = block->module;
+
+					if(Value::type(module) == Value::IClass)
+						module = cast<Module>(module)->instance_of;
+					
+					result += CharArray(inspect_object(module));
+
+					if(block->object != module)
+						result += "(" + CharArray(inspect_object(block->object)) + ")";
+
+					result += "#" + block->name->string + " at <unknown>";
+				};
+				
+				while(current)
+				{
+					mirb_debug_assert(current->type == Frame::NativeEntry);
+					
+					NativeEntry *native_entry = (NativeEntry *)current;
+
+					list_block(&native_entry->prefix);
+
+					FramePrefix *block = native_entry->prefix.prev();
+
+					mirb_debug_assert(block);
+
+					do
+					{
+						list_block(block);
+
+						block = block->prev();
+					}
+					while(block);
+
+					do
+					{
+						current = current->prev;
+					}
+					while(current && current->type == Frame::Exception);
+				}
+				
+				return result;
+			}
 
 			value_t *__stdcall create_heap(size_t bytes)
 			{
@@ -75,21 +130,80 @@ namespace Mirb
 			}
 
 			#ifdef _MSC_VER
-				value_t closure_call(compiled_block_t code, value_t *scopes[], Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[])
+				__declspec(naked) value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
+				{
+					__asm
+					{
+						push ecx
+						sub esp, 4
+						push esp
+						push dword ptr [esp + 20]
+						push dword ptr [esp + 20]
+						call lookup
+						pop edx
+						pop ecx
+						jmp eax
+					}
+				}
+
+				__declspec(naked) value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
+				{
+					__asm
+					{
+						push ecx
+						sub esp, 4
+						push esp
+						push dword ptr [esp + 20]
+						push edx
+						call lookup_super
+						pop edx
+						pop ecx
+						jmp eax
+					}
+				}
+			
+				value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
 					value_t result;
 
 					__asm
 					{
+						push ebp
 						push argv
 						push argc
-						push method_name
+						push name
+						push obj
+						mov ecx, block
+						mov edx, module
+						mov ebx, code
+						xor ebp, ebp
+						call ebx
+						pop ebp
+
+						mov result, eax
+					}
+
+					return result;
+				}
+
+				value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				{
+					value_t result;
+
+					__asm
+					{
+						push ebp
+						push argv
+						push argc
+						push name
 						push obj
 						mov eax, scopes
 						mov ecx, block
-						mov edx, method_module
+						mov edx, module
 						mov ebx, code
+						xor ebp, ebp
 						call ebx
+						pop ebp
 
 						mov result, eax
 					}
@@ -125,13 +239,42 @@ namespace Mirb
 					}
 				}
 			#else
-				value_t closure_call(compiled_block_t code, value_t *scopes[], Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[])
+				value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
-					typedef value_t (__stdcall __attribute__((__regparm__(3))) *closure_block_t)(value_t *scopes[], value_t method_module, Symbol *method_name, value_t obj, value_t block, size_t argc, value_t argv[]);
+					value_t result;
 					
-					closure_block_t closure_code = (closure_block_t)code;
+					asm ("pushl %%ebp\n"
+						"pushl %[argv]\n"
+						"pushl %[argc]\n"
+						"pushl %[name]\n"
+						"pushl %[obj]\n"
+						"xorl %%ebp, %%ebp\n"
+						"call *%[code]\n"
+						"popl %%ebp\n"
+					: "=a"(result)
+					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "r"(code), "c"(block), "d"(module)
+					: "memory");
 					
-					return closure_code(scopes, method_module, method_name, obj, block, argc, argv);
+					return result;
+				}
+
+				value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				{
+					value_t result;
+					
+					asm ("pushl %%ebp\n"
+						"pushl %[argv]\n"
+						"pushl %[argc]\n"
+						"pushl %[name]\n"
+						"pushl %[obj]\n"
+						"xorl %%ebp, %%ebp\n"
+						"call *%[code]\n"
+						"popl %%ebp\n"
+					: "=a"(result)
+					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "r"(code), "a"(scopes), "c"(block), "d"(module)
+					: "memory");
+					
+					return result;
 				}
 			#endif
 			
@@ -140,34 +283,28 @@ namespace Mirb
 				return Mirb::Support::create_closure(block, self, argc, argv);
 			}
 			
-			compiled_block_t __cdecl lookup(value_t obj, Symbol *name, value_t *result_module)
+			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module)
 			{
 				return Mirb::lookup(obj, name, result_module);
 			}
 
-			compiled_block_t __cdecl lookup_super(value_t module, Symbol *name, value_t *result_module)
+			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module)
 			{
 				return Mirb::lookup_super(module, name, result_module);
 			}
 			
-			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
-			{
-				return Mirb::Support::call(method_name, obj, block, argc, argv);
-			}
-
-			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
-			{
-				return Mirb::Support::super(method_name, method_module, obj, block, argc, argv);
-			}
-			
 			void __noreturn exception_raise(ExceptionData *data)
 			{
-				Frame *top = current_frame;
-				Frame *frame = top;
+				Frame *frame = current_frame;
 
 				while(frame)
 				{
-					frame->handler(frame, top, data, false);
+					switch(frame->type)
+					{
+						case Frame::Exception:
+							handle_exception((ExceptionFrame *)frame, data);
+					};
+
 					frame = frame->prev;
 				}
 
@@ -197,22 +334,11 @@ namespace Mirb
 				exception_raise(&data);
 			}
 
-			static void global_unwind(Frame *target, Frame *top)
-			{
-				Frame *frame = top;
-
-				while(frame != target)
-				{
-					frame->handler(frame, 0, 0, true);
-					frame = frame->prev;
-				}
-			}
-
-			static void local_unwind(Frame *frame, ExceptionBlock *block, ExceptionBlock *target)
+			static void local_unwind(ExceptionFrame *frame, ExceptionBlock *block, ExceptionBlock *target)
 			{
 				frame->handling = 1;
 
-				size_t ebp_value = (size_t)&frame->old_ebp;
+				size_t ebp_value = (size_t)&frame->prefix.prev_ebp;
 				
 				while(block != target)
 				{
@@ -264,11 +390,11 @@ namespace Mirb
 				frame->handling = 0;
 			}
 			
-			static void __noreturn jump_to_handler(Frame *frame, void *target, value_t value)
+			static void __noreturn jump_to_handler(ExceptionFrame *frame, void *target, value_t value)
 			{
 				current_frame = frame;
 
-				size_t ebp_value = (size_t)&frame->old_ebp;
+				size_t ebp_value = (size_t)&frame->prefix.prev_ebp;
 				size_t esp_value = ebp_value - frame->block->ebp_offset;
 
 				#ifdef DEBUG
@@ -305,10 +431,8 @@ namespace Mirb
 				__builtin_unreachable();
 			}
 
-			static void __noreturn handle_return(Frame *frame, Frame *top, ExceptionBlock *block, value_t value)
+			static void __noreturn handle_return(ExceptionFrame *frame, ExceptionBlock *block, value_t value)
 			{
-				global_unwind(frame, top);
-
 				/*
 				 * Execute frame local ensure handlers
 				 */
@@ -328,10 +452,8 @@ namespace Mirb
 				jump_to_handler(frame, frame->block->epilog, value);
 			}
 
-			static void __noreturn handle_break(Frame *frame, Frame *top, value_t value, size_t id)
+			static void __noreturn handle_break(ExceptionFrame *frame, value_t value, size_t id)
 			{
-				global_unwind(frame, top);
-
 				/*
 				 * Go to the handler and never return
 				 */
@@ -339,10 +461,10 @@ namespace Mirb
 				jump_to_handler(frame, frame->block->break_targets[id], value);
 			}
 
-			static void __noreturn rescue(Frame *frame, Frame *top, ExceptionBlock *block, ExceptionBlock *current_block, void *rescue_label)
+			static void __noreturn rescue(ExceptionFrame *frame, ExceptionBlock *block, ExceptionBlock *current_block, void *rescue_label)
 			{
-				global_unwind(frame, top);
-
+				current_frame = frame;
+				
 				/*
 				 * Execute frame local ensure handlers
 				 */
@@ -362,20 +484,20 @@ namespace Mirb
 				jump_to_handler(frame, rescue_label, 0);
 			}
 			
-			static void handle_exception(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
+			void handle_exception(ExceptionFrame *frame, ExceptionData *data)
 			{
 				if(frame->block_index == (size_t)-1) // Outside any exception block
 				{
-					if(!unwinding && data && data->target == frame->block)
+					if(data->target == frame->block)
 					{
 						switch(data->type)
 						{
 							case ReturnException:
-								handle_return(frame, top, 0, data->value);
+								handle_return(frame, 0, data->value);
 								break;
 
 							case BreakException:
-								handle_break(frame, top, data->value, data->id);
+								handle_break(frame, data->value, data->id);
 								break;
 
 							default:
@@ -388,54 +510,50 @@ namespace Mirb
 
 				ExceptionBlock *block = frame->block->exception_blocks[frame->block_index];
 
-				if(unwinding)
+				switch(data->type)
 				{
-					local_unwind(frame, block, 0);
-				}
-				else if(data)
-				{
-					switch(data->type)
+					case BreakException:
 					{
-						case BreakException:
-							handle_break(frame, top,  data->value, data->id);
-							break;
-
-						case ReturnException:
-							handle_return(frame, top, block, data->value);
-							break;
-
-						case RubyException:
-						{
-							ExceptionBlock *current_block = block;
-
-							while(current_block)
-							{
-								for(auto i = current_block->handlers.begin(); i != current_block->handlers.end(); ++i)
-								{
-									switch(i()->type)
-									{
-										case RuntimeException:
-											rescue(frame, top, block, current_block, ((RuntimeExceptionHandler *)i())->rescue_label.address);
-
-										default:
-											break;
-									}
-								}
-
-								current_block = current_block->parent;
-							}
-						}
+						if(data->target == frame->block)
+							handle_break(frame,  data->value, data->id);
 						break;
-
-						default:
-							mirb_debug_abort("Unknown exception type");
 					}
+
+					case ReturnException:
+					{
+						if(data->target == frame->block)
+							handle_return(frame, block, data->value);
+						break;
+					}
+
+					case RubyException:
+					{
+						ExceptionBlock *current_block = block;
+
+						while(current_block)
+						{
+							for(auto i = current_block->handlers.begin(); i != current_block->handlers.end(); ++i)
+							{
+								switch(i()->type)
+								{
+									case RuntimeException:
+										rescue(frame, block, current_block, ((RuntimeExceptionHandler *)i())->rescue_label.address);
+
+									default:
+										break;
+								}
+							}
+
+							current_block = current_block->parent;
+						}
+					}
+					break;
+
+					default:
+						mirb_debug_abort("Unknown exception type");
 				}
-			}
-			
-			void exception_handler(Frame *frame, Frame *top, ExceptionData *data, bool unwinding)
-			{
-				handle_exception(frame, top, data, unwinding);
+
+				local_unwind(frame, block, 0);
 			}
 		};
 	};

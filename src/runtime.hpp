@@ -54,6 +54,8 @@ namespace Mirb
 	compiled_block_t lookup(value_t obj, Symbol *name, value_t *result_module);
 	compiled_block_t lookup_super(value_t module, Symbol *name, value_t *result_module);
 
+	value_t call_code(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+	
 	// TODO: Replace const char * with literal templates
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	value_t call(value_t obj, const char *name, size_t argc, value_t argv[]);
@@ -61,6 +63,8 @@ namespace Mirb
 	value_t call(value_t obj, Symbol *name, size_t argc, value_t argv[]);
 	value_t call(value_t obj, Symbol *name);
 	value_t call(value_t obj, const char *name);
+
+	CharArray backtrace();
 	
 	void setup_classes();
 

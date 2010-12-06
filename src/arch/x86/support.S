@@ -40,3 +40,37 @@ mirb_arch_support_jit_stub:
 	add esp, 4
 	ret 16
 .endfunc
+
+/*
+ * mirb_arch_support_call
+ */
+.global mirb_arch_support_call
+mirb_arch_support_call:
+.func mirb_arch_support_call
+	push ecx
+	sub esp, 4
+	push esp
+	push dword ptr [esp + 20]
+	push dword ptr [esp + 20]
+	call mirb_arch_support_lookup
+	pop edx
+	pop ecx
+	jmp eax
+.endfunc
+
+/*
+ * mirb_arch_support_super
+ */
+.global mirb_arch_support_super
+mirb_arch_support_super:
+.func mirb_arch_support_super
+	push ecx
+	sub esp, 4
+	push esp
+	push dword ptr [esp + 20]
+	push edx
+	call mirb_arch_support_lookup_super
+	pop edx
+	pop ecx
+	jmp eax
+.endfunc

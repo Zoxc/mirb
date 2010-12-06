@@ -18,6 +18,7 @@
 #include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
 #include "generic/benchmark.hpp"
+#include "arch/support.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -358,7 +359,7 @@ namespace Mirb
 	
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = block->compiled(value_nil, method_module, self, auto_cast(method_name), 0, 0);
+		value_t result = call_code(block->compiled, self, auto_cast(method_name), method_module, value_nil, 0, 0);
 
 		block = 0; // Make sure block stays on stack*/
 
@@ -403,6 +404,11 @@ namespace Mirb
 
 		return result->compiled;
 	}
+
+	value_t call_code(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	{
+		return Arch::Support::ruby_call(code, obj, name, module, block, argc, argv);
+	};
 	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
@@ -410,7 +416,7 @@ namespace Mirb
 
 		compiled_block_t method = lookup(obj, name, &module);
 
-		return method(block, module, obj, auto_cast(name), argc, argv);
+		return call_code(method, obj, auto_cast(name), module, block, argc, argv);
 	}
 
 	value_t call(value_t obj, const char *name, size_t argc, value_t argv[])
@@ -436,6 +442,11 @@ namespace Mirb
 	value_t call(value_t obj, const char *name)
 	{
 		return call(obj, name, value_nil, 0, 0);
+	}
+
+	CharArray backtrace()
+	{
+		return Arch::Support::backtrace();
 	}
 	
 	value_t main;

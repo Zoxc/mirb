@@ -203,6 +203,11 @@ namespace Mirb
 		Arch::Support::exception_raise(&data);
 	}
 
+	value_t Kernel::backtrace()
+	{
+		return Mirb::backtrace().to_string();
+	}
+
 	void Kernel::initialize()
 	{
 		Kernel::class_ref = define_module(Object::class_ref, "Kernel");
@@ -211,6 +216,7 @@ namespace Mirb
 		
 		static_method<Arg::Block>(Kernel::class_ref, "proc", &proc);
 		static_method<Arg::Block>(Kernel::class_ref, "benchmark", &benchmark);
+		static_method(Kernel::class_ref, "backtrace", &backtrace);
 		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "eval", &eval);
 		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "print", &print);
 		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "puts", &puts);
