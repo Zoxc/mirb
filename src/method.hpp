@@ -115,17 +115,6 @@ namespace Mirb
 		{
 			return (obj->*function)(arg1, arg2, arg3);
 		}
-		
-		// TODO: Use these functions elsewhere
-		template<size_t length> Symbol *symbol_cast(const char (&string)[length])
-		{
-			return Symbol::from_literal(string);
-		}
-		
-		static inline Symbol *symbol_cast(Symbol *symbol)
-		{
-			return symbol;
-		}
 	};
 	
 	class MethodGen
@@ -203,64 +192,64 @@ namespace Mirb
 	template<class Object, value_t (Object::*function)(), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *) = &Arg::call_method<Object, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method(Method::Internal | flags, Object::class_ref, Arg::symbol_cast(name), (void *)stub);
+		return generate_method(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, value_t (Object::*function)(typename Arg1::type arg1), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type) = &Arg::call_method<Object, typename Arg1::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1>(Method::Internal | flags, Object::class_ref, Arg::symbol_cast(name), (void *)stub);
+		return generate_method<Arg1>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, typename Arg2, value_t (Object::*function)(typename Arg1::type arg1, typename Arg2::type arg2), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type, typename Arg2::type) = &Arg::call_method<Object, typename Arg1::type, typename Arg2::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1, Arg2>(Method::Internal | flags, Object::class_ref, Arg::symbol_cast(name), (void *)stub);
+		return generate_method<Arg1, Arg2>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, typename Arg2, typename Arg3, value_t (Object::*function)(typename Arg1::type arg1, typename Arg2::type arg2, typename Arg3::type arg3), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type, typename Arg2::type, typename Arg3::type) = &Arg::call_method<Object, typename Arg1::type, typename Arg2::type, typename Arg3::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, Object::class_ref, Arg::symbol_cast(name), (void *)stub);
+		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
 	}
 	
 	template<typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function(function));
+		return generate_method(Method::Static | flags, module, symbol_cast(name), Arg::cast_function(function));
 	}
 	
 	template<typename Arg1, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1>(function));
+		return generate_method<Arg1>(Method::Static | flags, module, symbol_cast(name), Arg::cast_function<Arg1>(function));
 	}
 	
 	template<typename Arg1, typename Arg2, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1, Arg2>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
+		return generate_method<Arg1, Arg2>(Method::Static | flags, module, symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1, Arg2, Arg3>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3>(function));
+		return generate_method<Arg1, Arg2, Arg3>(Method::Static | flags, module, symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3>(function));
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1, Arg2, Arg3, Arg4>(Method::Static | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3, Arg4>(function));
+		return generate_method<Arg1, Arg2, Arg3, Arg4>(Method::Static | flags, module, symbol_cast(name), Arg::cast_function<Arg1, Arg2, Arg3, Arg4>(function));
 	}
 	
 	template<typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function(function));
+		return generate_method(Method::Static | Method::Singleton | flags, module, symbol_cast(name), Arg::cast_function(function));
 	}
 	
 	template<typename Arg1, typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1>(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1>(function));
+		return generate_method<Arg1>(Method::Static | Method::Singleton | flags, module, symbol_cast(name), Arg::cast_function<Arg1>(function));
 	}
 
 	template<typename Arg1, typename Arg2, typename N, typename F> Block *singleton_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
-		return generate_method<Arg1, Arg2>(Method::Static | Method::Singleton | flags, module, Arg::symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
+		return generate_method<Arg1, Arg2>(Method::Static | Method::Singleton | flags, module, symbol_cast(name), Arg::cast_function<Arg1, Arg2>(function));
 	}
 };

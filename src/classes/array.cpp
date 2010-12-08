@@ -67,7 +67,7 @@ namespace Mirb
 		auto self = cast<Array>(obj);
 
 		for(auto i = self->vector.begin(); i != self->vector.end(); ++i)
-			call(block, "call", 1, &(*i));
+			yield(block, 1, &(*i));
 
 		return obj;
 	}

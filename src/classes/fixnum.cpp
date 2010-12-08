@@ -51,7 +51,7 @@ namespace Mirb
 		size_t times = to_size_t(obj);
 
 		while(times--)
-			call(block, "call");
+			yield(block);
 
 		return obj;
 	}

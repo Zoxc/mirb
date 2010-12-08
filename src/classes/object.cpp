@@ -17,7 +17,7 @@ namespace Mirb
 	
 	value_t Object::tap(value_t obj, value_t block)
 	{
-		call(block, "call", 1, &obj);
+		yield(block, 1, &obj);
 		return obj;
 	}
 	

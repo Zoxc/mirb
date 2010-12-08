@@ -418,32 +418,23 @@ namespace Mirb
 
 		return call_code(method, obj, auto_cast(name), module, block, argc, argv);
 	}
-
-	value_t call(value_t obj, const char *name, size_t argc, value_t argv[])
+	
+	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])
 	{
-		return call(obj, Symbol::from_string(name), value_nil, argc, argv);
+		mirb_debug_assert(Value::of_type<Proc>(block));
+		return call(obj, "call", block, argc, argv);
 	}
-
-	value_t call(value_t obj, const char *name, value_t block, size_t argc, value_t argv[])
+	
+	value_t yield(value_t obj, size_t argc, value_t argv[])
 	{
-		return call(obj, Symbol::from_string(name), block, argc, argv);
+		return yield(obj, value_nil, argc, argv);
 	}
-
-	value_t call(value_t obj, Symbol *name, size_t argc, value_t argv[])
+	
+	value_t yield(value_t obj)
 	{
-		return call(obj, name, value_nil, argc, argv);
+		return yield(obj, value_nil, 0, 0);
 	}
-
-	value_t call(value_t obj, Symbol *name)
-	{
-		return call(obj, name, value_nil, 0, 0);
-	}
-
-	value_t call(value_t obj, const char *name)
-	{
-		return call(obj, name, value_nil, 0, 0);
-	}
-
+	
 	CharArray backtrace()
 	{
 		return Arch::Support::backtrace();

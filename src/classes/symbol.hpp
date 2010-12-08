@@ -48,4 +48,14 @@ namespace Mirb
 
 			static void initialize();
 	};
+	
+	template<size_t length> Symbol *symbol_cast(const char (&string)[length])
+	{
+		return Symbol::from_literal(string);
+	}
+	
+	static inline Symbol *symbol_cast(Symbol *symbol)
+	{
+		return symbol;
+	}
 };

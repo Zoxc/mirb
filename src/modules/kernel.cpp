@@ -23,7 +23,7 @@ namespace Mirb
 	value_t Kernel::benchmark(value_t block)
 	{
 		CharArray result = Mirb::benchmark([&] {
-			call(block, "call");
+			yield(block);
 		}).format();
 
 		return result.to_string();

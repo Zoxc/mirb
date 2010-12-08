@@ -2,6 +2,7 @@
 #include "value.hpp"
 #include "block.hpp"
 #include "method.hpp"
+#include "classes/symbol.hpp"
 
 namespace Mirb
 {
@@ -11,7 +12,6 @@ namespace Mirb
 	#define MIRB_ARG_EACH(i) for(size_t i = argc - 1; i != (size_t)-1; i--)
 	#define MIRB_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 
-	class Symbol;
 	class CharArray;
 	
 	value_t class_of(value_t obj);
@@ -56,18 +56,31 @@ namespace Mirb
 
 	value_t call_code(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 	
-	// TODO: Replace const char * with literal templates
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
-	value_t call(value_t obj, const char *name, size_t argc, value_t argv[]);
-	value_t call(value_t obj, const char *name, value_t block, size_t argc, value_t argv[]);
-	value_t call(value_t obj, Symbol *name, size_t argc, value_t argv[]);
-	value_t call(value_t obj, Symbol *name);
-	value_t call(value_t obj, const char *name);
+	
+	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[])
+	{
+		return call(obj, symbol_cast(name), block, argc, argv);
+	}
+	
+	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[])
+	{
+		return call(obj, symbol_cast(name), value_nil, argc, argv);
+	}
+	
+	template<typename T> value_t call(value_t obj, T&& name)
+	{
+		return call(obj, symbol_cast(name), value_nil, 0, 0);
+	}
+	
+	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]);
+	value_t yield(value_t obj, size_t argc, value_t argv[]);
+	value_t yield(value_t obj);
 
 	CharArray backtrace();
 	
 	void setup_classes();
-
+	
 	extern value_t main;
 };
 
