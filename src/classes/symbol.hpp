@@ -18,7 +18,7 @@ namespace Mirb
 			static value_t inspect(value_t obj);
 
 		public:
-			Symbol(CharArray &char_array) : Object(Value::Symbol, class_ref), string(char_array) {}
+			Symbol(const CharArray &char_array) : Object(Value::Symbol, class_ref), string(char_array) {}
 
 			CharArray string;
 
@@ -34,8 +34,7 @@ namespace Mirb
 
 			static Symbol *from_string(const char *string);
 			static Symbol *from_string(const std::string &string);
-			static Symbol *from_char_array(CharArray &char_array);
-			static Symbol *from_char_array(CharArray &&char_array);
+			static Symbol *from_char_array(const CharArray &char_array);
 			
 			template<size_t length> static Symbol *from_literal(const char (&string)[length])
 			{

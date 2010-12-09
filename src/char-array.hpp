@@ -6,12 +6,17 @@ namespace Mirb
 {
 	class CharArray
 	{
+		private:
+			size_t length;
+			char_t *data;
+			mutable bool shared;
+
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
 			CharArray(const char_t *c_str);
 			CharArray(const std::string &string);
 			CharArray(const char_t *c_str, size_t length);
-			CharArray(CharArray &char_array);
+			CharArray(const CharArray &char_array);
 			CharArray(CharArray &&char_array);
 			
 			template<size_t length> CharArray(const char (&string)[length])
@@ -21,12 +26,11 @@ namespace Mirb
 			
 			CharArray& operator=(const char_t *c_str);
 			CharArray& operator=(const std::string &string);
-			CharArray& operator=(CharArray &other);
+			CharArray& operator=(const CharArray &other);
 			CharArray& operator=(CharArray &&other);
 			
 			void localize();
-			void append(CharArray &other);
-			void append(CharArray &&other);
+			void append(const CharArray &other);
 			
 			template<size_t length> void append(const char (&string)[length])
 			{
@@ -34,8 +38,7 @@ namespace Mirb
 				append(char_array);
 			}
 			
-			CharArray &operator+=(CharArray &other);
-			CharArray &operator+=(CharArray &&other);
+			CharArray &operator+=(const CharArray &other);
 			
 			template<size_t length> CharArray &operator+=(const char (&string)[length])
 			{
@@ -44,21 +47,20 @@ namespace Mirb
 				return *this;
 			}
 			
-			size_t hash();
+			size_t size() const;
+			const char_t *raw() const;
 			
-			size_t length;
-			char_t *data;
-			bool shared;
-
-			value_t to_string();
+			size_t hash() const;
 			
-			const char *c_str_ref();
-			size_t c_str_length();
+			value_t to_string() const;
+			
+			const char *c_str_ref() const;
+			size_t c_str_length() const;
 
-			const char_t *str_ref();
-			size_t str_length();
+			const char_t *str_ref() const;
+			size_t str_length() const;
 
-			CharArray c_str();
+			CharArray c_str() const;
 			
 			template<size_t string_length> void set_literal(const char (&string)[string_length])
 			{
@@ -67,12 +69,12 @@ namespace Mirb
 				shared = true;
 			}
 			
-			bool operator ==(CharArray &other)
+			bool operator ==(CharArray &other) const
 			{
 				return length == other.length && memcmp(data, other.data, length) == 0;
 			}
 
-			std::string get_string()
+			std::string get_string() const
 			{
 				return std::string((const char *)data, length);
 			}
@@ -80,36 +82,19 @@ namespace Mirb
 			static CharArray hex(size_t value);
 	};
 	
-	template<size_t length> CharArray operator+(const char (&lhs)[length], CharArray &rhs)
+	template<size_t length> CharArray operator+(const char (&lhs)[length], const CharArray &rhs)
 	{
 		CharArray char_array(lhs);
 		char_array.append(rhs);
 		return char_array;
 	}
 	
-	template<size_t length> CharArray operator+(const char (&lhs)[length], CharArray &&rhs)
+	template<size_t length> CharArray operator+(const CharArray &lhs, const char (&rhs)[length])
 	{
 		CharArray char_array(lhs);
 		char_array.append(rhs);
 		return char_array;
 	}
 	
-	template<size_t length> CharArray operator+(CharArray &lhs, const char (&rhs)[length])
-	{
-		CharArray char_array(lhs);
-		char_array.append(rhs);
-		return char_array;
-	}
-	
-	template<size_t length> CharArray operator+(CharArray &&lhs, const char (&rhs)[length])
-	{
-		CharArray char_array(lhs);
-		char_array.append(rhs);
-		return char_array;
-	}
-	
-	CharArray operator+(CharArray &lhs, CharArray &rhs);
-	CharArray operator+(CharArray &&lhs, CharArray &rhs);
-	CharArray operator+(CharArray &lhs, CharArray &&rhs);
-	CharArray operator+(CharArray &&lhs, CharArray &&rhs);
+	CharArray operator+(const CharArray &lhs, const CharArray &rhs);
 };

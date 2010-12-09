@@ -21,7 +21,7 @@ namespace Mirb
 
 				auto list_block = [&](FramePrefix *block)
 				{
-					if(result.length != 0)
+					if(result.size() != 0)
 						result += "\n";
 
 					value_t module = block->module;

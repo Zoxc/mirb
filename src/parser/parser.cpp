@@ -23,8 +23,8 @@ namespace Mirb
 
 	bool Parser::is_constant(Symbol *symbol)
 	{
-		const char c = *symbol->string.data;
-
+		const char_t c = *symbol->string.raw();
+		
 		return c >= 'A' && c <= 'Z';
 	}
 	

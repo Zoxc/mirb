@@ -25,7 +25,7 @@ namespace Mirb
 		*this = string;
 	}
 	
-	CharArray::CharArray(CharArray &char_array)
+	CharArray::CharArray(const CharArray &char_array)
 	{
 		*this = char_array;
 	}
@@ -61,7 +61,7 @@ namespace Mirb
 		return *this;
 	}
 
-	CharArray& CharArray::operator=(CharArray &other)
+	CharArray& CharArray::operator=(const CharArray &other)
 	{	
 		if(this == &other)
 			return *this;
@@ -100,14 +100,10 @@ namespace Mirb
 		}
 	}
 
-	void CharArray::append(CharArray &&other)
+	void CharArray::append(const CharArray& other)
 	{
-		CharArray &ref = other;
-		append(ref);
-	}
-	
-	void CharArray::append(CharArray& other)
-	{
+		// Note: other may be equal to *this
+
 		char_t *this_data = data;
 		char_t *other_data = other.data;
 
@@ -124,46 +120,49 @@ namespace Mirb
 		length += other.length;
 	}
 
-	CharArray &CharArray::operator+=(CharArray& other)
+	CharArray &CharArray::operator+=(const CharArray& other)
 	{
 		append(other);
 		
 		return *this;
 	}
 	
-	CharArray &CharArray::operator+=(CharArray &&other)
+	size_t CharArray::size() const
 	{
-		append(other);
-		
-		return *this;
+		return length;
 	}
-	
-	const char *CharArray::c_str_ref()
+
+	const char_t *CharArray::raw() const
+	{
+		return data;
+	}
+
+	const char *CharArray::c_str_ref() const
 	{
 		return (char *)data;
 	}
 	
-	size_t CharArray::c_str_length()
+	size_t CharArray::c_str_length() const
 	{
 		return length - 1;
 	}
 
-	const char_t *CharArray::str_ref()
+	const char_t *CharArray::str_ref() const
 	{
 		return data;
 	}
 	
-	size_t CharArray::str_length()
+	size_t CharArray::str_length() const
 	{
 		return length - 1;
 	}
 
-	CharArray CharArray::c_str()
+	CharArray CharArray::c_str() const
 	{
 		return *this + "\x00";
 	}
 			
-	size_t CharArray::hash()
+	size_t CharArray::hash() const
 	{
 		size_t hash = 0;
 
@@ -184,35 +183,14 @@ namespace Mirb
 		return hash;
 	}
 	
-	CharArray operator+(CharArray &lhs, CharArray &rhs)
+	CharArray operator+(const CharArray &lhs, const CharArray &rhs)
 	{
 		CharArray char_array(lhs);
 		char_array.append(rhs);
 		return char_array;
 	}
 
-	CharArray operator+(CharArray &&lhs, CharArray &rhs)
-	{
-		CharArray char_array(lhs);
-		char_array.append(rhs);
-		return char_array;
-	}
-
-	CharArray operator+(CharArray &lhs, CharArray &&rhs)
-	{
-		CharArray char_array(lhs);
-		char_array.append(rhs);
-		return char_array;
-	}
-
-	CharArray operator+(CharArray &&lhs, CharArray &&rhs)
-	{
-		CharArray char_array(lhs);
-		char_array.append(rhs);
-		return char_array;
-	}
-
-	value_t CharArray::to_string()
+	value_t CharArray::to_string() const
 	{
 		return auto_cast(new (gc) String(*this));
 	}

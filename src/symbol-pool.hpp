@@ -7,10 +7,10 @@
 namespace Mirb
 {
 	class SymbolPoolFunctions:
-		public HashTableFunctions<CharArray &, Symbol *, GC>
+		public HashTableFunctions<const CharArray &, Symbol *, GC>
 	{
 		public:
-			static bool compare_key_value(CharArray &key, Symbol *value)
+			static bool compare_key_value(const CharArray &key, Symbol *value)
 			{
 				return key == value->string;
 			}
@@ -30,12 +30,12 @@ namespace Mirb
 				value->next = next;
 			}
 			
-			static size_t hash_key(CharArray &key)
+			static size_t hash_key(const CharArray &key)
 			{
 				return key.hash();
 			}
 			
-			static bool valid_key(CharArray &key)
+			static bool valid_key(const CharArray &key)
 			{
 				return true;
 			}
@@ -45,13 +45,13 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(GC::Ref alloc_ref, CharArray &key)
+			static Symbol *create_value(GC::Ref alloc_ref, const CharArray &key)
 			{
 				return new (gc) Symbol(key);
 			}
 	};
 
-	typedef HashTable<CharArray &, Symbol *, SymbolPoolFunctions, GC> SymbolPoolHashTable;
+	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions, GC> SymbolPoolHashTable;
 
 	class SymbolPool:
 		public SymbolPoolHashTable
@@ -59,7 +59,7 @@ namespace Mirb
 		public:
 			SymbolPool() : SymbolPoolHashTable(8) {}
 			
-			Symbol *get(CharArray &char_array)
+			Symbol *get(const CharArray &char_array)
 			{
 				return SymbolPoolHashTable::get(char_array);
 			}
