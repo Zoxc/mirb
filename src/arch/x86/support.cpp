@@ -4,6 +4,7 @@
 #include "../../runtime.hpp"
 #include "../../classes/proc.hpp"
 #include "../../classes/module.hpp"
+#include "../../classes/exceptions.hpp"
 
 namespace Mirb
 {
@@ -13,57 +14,74 @@ namespace Mirb
 		{
 			Frame *current_frame;
 
+			CharArray FramePrefix::inspect() const
+			{
+				CharArray result;
+
+				value_t module = this->module;
+
+				if(Value::type(module) == Value::IClass)
+					module = cast<Module>(module)->instance_of;
+				
+				result += inspect_obj(module);
+
+				value_t class_of = real_class_of(object);
+
+				if(class_of != module)
+					result += "(" + inspect_obj(class_of) + ")";
+
+				result += "#" + name->string + " at <unknown>";
+
+				return result;
+			}
+
 			CharArray backtrace()
 			{
 				Frame *current = current_frame;
 
 				CharArray result;
 
-				auto list_block = [&](FramePrefix *block)
+				auto list_block = [&](const FramePrefix *block)
 				{
 					if(result.size() != 0)
 						result += "\n";
-
-					value_t module = block->module;
-
-					if(Value::type(module) == Value::IClass)
-						module = cast<Module>(module)->instance_of;
 					
-					result += inspect_obj(module);
-
-					value_t object = class_of(block->object);
-
-					if(object != module)
-						result += "(" + inspect_obj(object) + ")";
-
-					result += "#" + block->name->string + " at <unknown>";
+					result += block->inspect();
 				};
 				
 				while(current)
 				{
-					mirb_debug_assert(current->type == Frame::NativeEntry);
-					
-					NativeEntry *native_entry = (NativeEntry *)current;
+					const FramePrefix *frame;
 
-					list_block(&native_entry->prefix);
+					mirb_debug_assert(current->type == Frame::NativeEntry || current->type == Frame::UnnamedNativeEntry);
 
-					FramePrefix *block = native_entry->prefix.prev();
+					if(current->type == Frame::NativeEntry)
+					{
+						NativeEntry *native_entry = (NativeEntry *)current;
 
-					mirb_debug_assert(block);
+						frame = &native_entry->prefix;
+					}
+					else
+					{
+						UnnamedNativeEntry *native_entry = (UnnamedNativeEntry *)current;
+						frame = FramePrefix::from_ebp(native_entry->ebp);
+					}
+
+					mirb_debug_assert(frame);
 
 					do
 					{
-						list_block(block);
+						list_block(frame);
 
-						block = block->prev();
+						frame = frame->prev();
 					}
-					while(block);
+					while(frame);
 
 					do
 					{
 						current = current->prev;
 					}
-					while(current && current->type == Frame::Exception);
+					while(current && (current->type != Frame::NativeEntry) && (current->type != Frame::UnnamedNativeEntry));
 				}
 				
 				return result;
@@ -131,17 +149,31 @@ namespace Mirb
 				return Compiler::defered_compile(block);
 			}
 
-			value_t __fastcall unknown_call_method(size_t ebp, value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
-			value_t __fastcall unknown_super_method(size_t ebp, value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
+			void __fastcall unknown_call_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
+			void __fastcall unknown_super_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
 			
-			value_t __fastcall unknown_call_method(size_t ebp, value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_call_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 			{
-				mirb_runtime_abort("Undefined method '" + name->get_string() + "' for " + inspect_object(obj));
+				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
+
+				ExceptionData data;
+
+				data.type = RubyException;
+				data.value = auto_cast(new NameError(("Undefined method '" + name->get_string() + "' for " + pretty_inspect(obj)).to_string(), backtrace().to_string()));
+
+				exception_raise(&data);
 			}
 
-			value_t __fastcall unknown_super_method(size_t ebp, value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_super_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 			{
-				mirb_runtime_abort("No superclass method '" + name->get_string() + "' for " + inspect_object(module));
+				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
+
+				ExceptionData data;
+
+				data.type = RubyException;
+				data.value = auto_cast(new NameError(("No superclass method '" + name->get_string() + "' for " + pretty_inspect(module)).to_string(), backtrace().to_string()));
+
+				exception_raise(&data);
 			}
 
 			#ifdef _MSC_VER
@@ -162,7 +194,7 @@ namespace Mirb
 						jmp eax
 
 					unknown_method:
-						push ebp
+						mov ecx, ebp
 						jmp unknown_call_method
 					}
 				}
@@ -184,7 +216,7 @@ namespace Mirb
 						jmp eax
 
 					unknown_method:
-						push ebp
+						mov ecx, ebp
 						jmp unknown_super_method
 					}
 				}
@@ -323,23 +355,48 @@ namespace Mirb
 			void __noreturn exception_raise(ExceptionData *data)
 			{
 				Frame *frame = current_frame;
+				
+				mirb_debug_assert(frame->type == Frame::UnnamedNativeEntry);
+				
+				size_t ebp_target = ((UnnamedNativeEntry *)frame)->ebp;
 
-				while(frame)
+				while(frame->type == Frame::Exception)
 				{
-					switch(frame->type)
-					{
-						case Frame::Exception:
-							handle_exception((ExceptionFrame *)frame, data);
-					};
+					ExceptionFrame *exception_frame = (ExceptionFrame *)frame;
+					handle_exception(exception_frame, data);
+				
+					ebp_target = (size_t)&exception_frame->prefix.prev_ebp;
 
 					frame = frame->prev;
 				}
+				
+				current_frame = frame;
+				current_exception = auto_cast(data->value);
+				
+				#ifdef _MSC_VER
+					__asm
+					{
+						mov esp, ebp_target
+						xor eax, eax
+						pop ebp
+						ret 16
+					}
+				#else
+					__asm__("mov %0, %%esp\n"
+						"xor %%eax, %%eax\n"
+						"pop %%ebp\n"
+						"ret $16\n"
+					:
+					: "r" (ebp_target));
+				#endif
 
-				mirb_runtime_abort("Unable to find a exception handler");
+				__builtin_unreachable();
 			}
 
-			void __noreturn __stdcall far_return(value_t value, Block *target)
+			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target)
 			{
+				UnnamedNativeEntry entry(bp);
+
 				ExceptionData data;
 
 				data.type = ReturnException;
@@ -349,8 +406,10 @@ namespace Mirb
 				exception_raise(&data);
 			}
 
-			void __noreturn __stdcall far_break(value_t value, Block *target, size_t id)
+			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id)
 			{
+				UnnamedNativeEntry entry(bp);
+
 				ExceptionData data;
 
 				data.type = BreakException;

@@ -823,6 +823,7 @@ namespace Mirb
 		{
 			push_imm((size_t)op.code);
 			push_var(op.var);
+			push_reg(Arch::Register::BP);
 			call(&Arch::Support::far_return);
 		}
 
@@ -831,6 +832,7 @@ namespace Mirb
 			push_imm(op.index);
 			push_imm((size_t)op.code);
 			push_var(op.var);
+			push_reg(Arch::Register::BP);
 			call(&Arch::Support::far_break);
 		}
 

@@ -89,12 +89,14 @@ namespace Mirb
 	{
 		return call(obj, symbol_cast(name), value_nil, 0, 0);
 	}
-	
+
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]);
 	value_t yield(value_t obj, size_t argc, value_t argv[]);
 	value_t yield(value_t obj);
 
 	CharArray backtrace();
+	
+	String *enforce_string(value_t obj);
 	
 	void setup_classes();
 	

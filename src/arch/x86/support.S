@@ -53,9 +53,15 @@ mirb_arch_support_call:
 	push dword ptr [esp + 20]
 	push dword ptr [esp + 20]
 	call mirb_arch_support_lookup
+	test eax, eax
 	pop edx
 	pop ecx
+	jz unknown_call_method
 	jmp eax
+
+unknown_call_method:
+	mov ecx, ebp
+	jmp mirb_arch_support_unknown_call_method
 .endfunc
 
 /*
@@ -70,7 +76,13 @@ mirb_arch_support_super:
 	push dword ptr [esp + 20]
 	push edx
 	call mirb_arch_support_lookup_super
+	test eax, eax
 	pop edx
 	pop ecx
+	jz unknown_super_method
 	jmp eax
+
+unknown_super_method:
+	mov ecx, ebp
+	jmp mirb_arch_support_unknown_super_method
 .endfunc

@@ -448,8 +448,11 @@ namespace Mirb
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
-		if(!result)
-			mirb_runtime_abort("No superclass method " + name->get_string() + " for " + inspect_object(module));
+		if(mirb_unlikely(!result))
+		{
+			raise<NameError>("No superclass method '" + name->string + "' for " + pretty_inspect(module));
+			return 0;
+		}
 
 		return result->compiled;
 	}
@@ -492,6 +495,19 @@ namespace Mirb
 		return Arch::Support::backtrace();
 	}
 	
+	String *enforce_string(value_t obj)
+	{
+		if(Value::type(obj) == Value::String)
+			return auto_cast(obj);
+		
+		obj = call(obj, "to_s");
+
+		if(Value::type(obj) != Value::String)
+			return auto_cast(inspect(obj));
+
+		return auto_cast(obj);
+	}
+
 	value_t main;
 	
 	value_t main_to_s()

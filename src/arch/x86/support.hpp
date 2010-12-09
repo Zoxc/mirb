@@ -18,12 +18,18 @@ namespace Mirb
 				enum Type
 				{
 					NativeEntry,
+					UnnamedNativeEntry,
 					Exception
 				};
 
 				Frame(size_t type) : prev(current_frame), type(type)
 				{
 					current_frame = this;
+				}
+
+				~Frame()
+				{
+					current_frame = prev;
 				}
 
 				Frame *prev;
@@ -40,10 +46,17 @@ namespace Mirb
 				size_t argc;
 				value_t *argv;
 
-				FramePrefix *prev()
+				CharArray inspect() const;
+
+				static FramePrefix *from_ebp(size_t ebp)
+				{
+					return (FramePrefix *)(ebp - sizeof(size_t));
+				};
+
+				const FramePrefix *prev() const
 				{
 					if(prev_ebp)
-						return (FramePrefix *)(prev_ebp - sizeof(size_t));
+						return from_ebp(prev_ebp);
 					else
 						return 0;
 				};
@@ -65,14 +78,22 @@ namespace Mirb
 				FramePrefix prefix;
 			};
 
+			struct UnnamedNativeEntry:
+				public Frame
+			{
+				UnnamedNativeEntry(size_t ebp) : Frame(Frame::UnnamedNativeEntry), ebp(ebp) {}
+				size_t ebp;
+			};
+
 			CharArray backtrace();
 
 			void handle_exception(ExceptionFrame *frame, ExceptionData *data);
-
+			
+			void __noreturn exception_raise(ExceptionData *data, Frame *frame);
 			void __noreturn exception_raise(ExceptionData *data);
 
-			void __noreturn __stdcall far_return(value_t value, Block *target);
-			void __noreturn __stdcall far_break(value_t value, Block *target, size_t id);
+			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target);
+			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id);
 
 			#ifdef _MSC_VER
 				void jit_stub();

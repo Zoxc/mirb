@@ -2,6 +2,8 @@
 #include "compiler.hpp"
 #include "runtime.hpp"
 #include "parser/parser.hpp"
+#include "classes/exception.hpp"
+#include "classes/string.hpp"
 #include "block.hpp"
 
 #ifdef DEBUG
@@ -56,8 +58,14 @@ int main()
 		Block *block = Compiler::compile(scope, memory_pool);
 
 		value_t result = call_code(block->compiled, Mirb::main, Symbol::from_literal("main"), class_of(Mirb::main), value_nil, 0, 0);
-		
-		std::cout << "=> " << inspect_object(result) << "\n";
+
+		if(result == value_raise)
+		{
+			Exception *exception = current_exception;
+			std::cout << inspect_object(real_class_of(auto_cast(exception))) << ": " << enforce_string(exception->message)->string.get_string() << "\n" << enforce_string(exception->backtrace)->string.get_string() << "\n";
+		}
+		else
+			std::cout << "=> " << inspect_object(result) << "\n";
 		
 		block = 0; // Make sure block stays on stack */
 	}
