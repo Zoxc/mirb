@@ -69,6 +69,8 @@
 		<Unit filename="src\classes\class.hpp" />
 		<Unit filename="src\classes\exception.cpp" />
 		<Unit filename="src\classes\exception.hpp" />
+		<Unit filename="src\classes\exceptions.cpp" />
+		<Unit filename="src\classes\exceptions.hpp" />
 		<Unit filename="src\classes\false-class.cpp" />
 		<Unit filename="src\classes\false-class.hpp" />
 		<Unit filename="src\classes\fixnum.cpp" />

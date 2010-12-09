@@ -13,7 +13,10 @@ namespace Mirb
 	#define MIRB_ARG_EACH_REV(i) for(size_t i = 0; i < argc; i++)
 
 	class CharArray;
+	class Exception;
 	
+	extern Exception *current_exception;
+
 	value_t class_of(value_t obj);
 	value_t real_class(value_t obj);
 	value_t real_class_of(value_t obj);
@@ -33,7 +36,11 @@ namespace Mirb
 	value_t class_create_singleton(value_t object, value_t super);
 	
 	std::string inspect_object(value_t obj);
+	CharArray inspect_obj(value_t obj);
 	value_t inspect(value_t obj);
+
+	CharArray pretty_inspect(value_t obj);
+	
 	ValueMap *get_vars(value_t obj);
 	value_t get_const(value_t obj, Symbol *name, bool require = true);
 	void set_const(value_t obj, Symbol *name, value_t value);
@@ -48,11 +55,21 @@ namespace Mirb
 	void initialize();
 	void finalize();
 
+	value_t raise(value_t exception_class, const CharArray &message);
+	
+	template<class T> value_t raise(const CharArray &message)
+	{
+		return raise(T::class_ref, message);
+	}
+
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename);
 	
 	Block *lookup_method(value_t module, Symbol *name, value_t *result_module);
 	compiled_block_t lookup(value_t obj, Symbol *name, value_t *result_module);
 	compiled_block_t lookup_super(value_t module, Symbol *name, value_t *result_module);
+
+	compiled_block_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module);
+	compiled_block_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module);
 
 	value_t call_code(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 	

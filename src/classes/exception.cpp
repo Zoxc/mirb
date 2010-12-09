@@ -8,7 +8,7 @@ namespace Mirb
 	
 	value_t Exception::allocate(value_t obj)
 	{
-		return auto_cast(new (gc) Exception(obj));
+		return auto_cast(new (gc) Exception(obj, value_nil, value_nil));
 	}
 
 	value_t Exception::to_s(value_t obj)

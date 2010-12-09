@@ -103,8 +103,8 @@ namespace Mirb
 			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup");
 			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup_super");
 
-			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_call");
-			value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_super");
+			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_call");
+			value_t __fastcall super(value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_super");
 		};
 	};
 };

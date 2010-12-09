@@ -37,6 +37,8 @@ namespace Mirb
 	const value_t literal_mask = 0xF;
 	const value_t literal_count = literal_mask + 1;
 	
+	const value_t value_raise = 0; // Used to indicate that an exception is raised to native code.
+
 	const value_t value_nil = 2;
 	const value_t value_false = 6;
 	const value_t value_true = 10;

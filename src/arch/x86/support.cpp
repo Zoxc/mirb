@@ -29,12 +29,12 @@ namespace Mirb
 					if(Value::type(module) == Value::IClass)
 						module = cast<Module>(module)->instance_of;
 					
-					result += CharArray(inspect_object(module));
+					result += inspect_obj(module);
 
 					value_t object = class_of(block->object);
 
 					if(object != module)
-						result += "(" + CharArray(inspect_object(object)) + ")";
+						result += "(" + inspect_obj(object) + ")";
 
 					result += "#" + block->name->string + " at <unknown>";
 				};
@@ -131,8 +131,21 @@ namespace Mirb
 				return Compiler::defered_compile(block);
 			}
 
+			value_t __fastcall unknown_call_method(size_t ebp, value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
+			value_t __fastcall unknown_super_method(size_t ebp, value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
+			
+			value_t __fastcall unknown_call_method(size_t ebp, value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			{
+				mirb_runtime_abort("Undefined method '" + name->get_string() + "' for " + inspect_object(obj));
+			}
+
+			value_t __fastcall unknown_super_method(size_t ebp, value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			{
+				mirb_runtime_abort("No superclass method '" + name->get_string() + "' for " + inspect_object(module));
+			}
+
 			#ifdef _MSC_VER
-				__declspec(naked) value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
+				__declspec(naked) value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[])
 				{
 					__asm
 					{
@@ -142,13 +155,19 @@ namespace Mirb
 						push dword ptr [esp + 20]
 						push dword ptr [esp + 20]
 						call lookup
+						test eax, eax
 						pop edx
 						pop ecx
+						jz unknown_method
 						jmp eax
+
+					unknown_method:
+						push ebp
+						jmp unknown_call_method
 					}
 				}
 
-				__declspec(naked) value_t __fastcall super(value_t block, value_t method_module, value_t obj, Symbol *method_name, size_t argc, value_t argv[])
+				__declspec(naked) value_t __fastcall super(value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 				{
 					__asm
 					{
@@ -158,9 +177,15 @@ namespace Mirb
 						push dword ptr [esp + 20]
 						push edx
 						call lookup_super
+						test eax, eax
 						pop edx
 						pop ecx
+						jz unknown_method
 						jmp eax
+
+					unknown_method:
+						push ebp
+						jmp unknown_super_method
 					}
 				}
 			
@@ -287,12 +312,12 @@ namespace Mirb
 			
 			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module)
 			{
-				return Mirb::lookup(obj, name, result_module);
+				return Mirb::lookup_nothrow(obj, name, result_module);
 			}
 
 			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module)
 			{
-				return Mirb::lookup_super(module, name, result_module);
+				return Mirb::lookup_super_nothrow(module, name, result_module);
 			}
 			
 			void __noreturn exception_raise(ExceptionData *data)

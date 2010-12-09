@@ -27,6 +27,7 @@
     <ClInclude Include="..\..\src\classes\array.hpp" />
     <ClInclude Include="..\..\src\classes\class.hpp" />
     <ClInclude Include="..\..\src\classes\exception.hpp" />
+    <ClInclude Include="..\..\src\classes\exceptions.hpp" />
     <ClInclude Include="..\..\src\classes\false-class.hpp" />
     <ClInclude Include="..\..\src\classes\fixnum.hpp" />
     <ClInclude Include="..\..\src\classes\method.hpp" />
@@ -85,6 +86,7 @@
     <ClCompile Include="..\..\src\classes\array.cpp" />
     <ClCompile Include="..\..\src\classes\class.cpp" />
     <ClCompile Include="..\..\src\classes\exception.cpp" />
+    <ClCompile Include="..\..\src\classes\exceptions.cpp" />
     <ClCompile Include="..\..\src\classes\false-class.cpp" />
     <ClCompile Include="..\..\src\classes\fixnum.cpp" />
     <ClCompile Include="..\..\src\classes\module.cpp" />

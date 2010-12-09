@@ -15,6 +15,7 @@
 #include "classes/proc.hpp"
 #include "classes/array.hpp"
 #include "classes/exception.hpp"
+#include "classes/exceptions.hpp"
 #include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
 #include "generic/benchmark.hpp"
@@ -26,6 +27,8 @@
 
 namespace Mirb
 {
+	Exception *current_exception;
+
 	value_t class_of(value_t obj)
 	{
 		if(Value::object_ref(obj))
@@ -215,6 +218,13 @@ namespace Mirb
 
 		return singleton;
 	}
+
+	CharArray inspect_obj(value_t obj)
+	{
+		value_t str = inspect(obj);
+
+		return cast<String>(str)->string;
+	}
 	
 	std::string inspect_object(value_t obj)
 	{
@@ -237,6 +247,11 @@ namespace Mirb
 			return result;
 		else
 			return Object::to_s(obj);
+	}
+
+	CharArray pretty_inspect(value_t obj)
+	{
+		return inspect_obj(obj) + ":" + inspect_obj(real_class_of(obj));
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -330,6 +345,17 @@ namespace Mirb
 	{
 		return cast<Module>(obj)->get_methods()->set(name, method);
 	}
+
+	value_t raise(value_t exception_class, const CharArray &message)
+	{
+		current_exception = new (gc) Exception(exception_class, message.to_string(), backtrace().to_string());
+		
+		#ifdef DEBUG
+			std::cout << "Raising exception with message " << message.get_string() << "\n";
+		#endif
+
+		return value_raise;
+	}
 	
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename)
 	{
@@ -385,12 +411,35 @@ namespace Mirb
 		return 0;
 	}
 	
+	compiled_block_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
+	{
+		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
+
+		if(mirb_unlikely(!result))
+			return 0;
+
+		return result->compiled;
+	}
+
+	compiled_block_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
+	{
+		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
+
+		if(mirb_unlikely(!result))
+			return 0;
+
+		return result->compiled;
+	}
+
 	compiled_block_t lookup(value_t obj, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
-		if(!result)
-			mirb_runtime_abort("Undefined method " + name->get_string() + " on " + inspect_object(obj));
+		if(mirb_unlikely(!result))
+		{
+			raise<NameError>("Undefined method '" + name->string + "' for " + pretty_inspect(obj));
+			return 0;
+		}
 
 		return result->compiled;
 	}
@@ -415,6 +464,9 @@ namespace Mirb
 		value_t module;
 
 		compiled_block_t method = lookup(obj, name, &module);
+
+		if(mirb_unlikely(!method))
+			return value_raise;
 
 		return call_code(method, obj, auto_cast(name), module, block, argc, argv);
 	}

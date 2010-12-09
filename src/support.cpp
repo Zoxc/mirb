@@ -136,6 +136,9 @@ namespace Mirb
 			value_t method_module;
 
 			compiled_block_t method = lookup(obj, method_name, &method_module);
+			
+			if(mirb_unlikely(!method))
+				return value_raise;
 
 			return method(block, method_module, obj, method_name, argc, argv);
 		}
@@ -145,7 +148,10 @@ namespace Mirb
 			value_t result_module;
 
 			compiled_block_t method = lookup_super(method_module, method_name, &result_module);
-
+			
+			if(mirb_unlikely(!method))
+				return value_raise;
+			
 			return method(block, result_module, obj, method_name, argc, argv);
 		}
 	};
