@@ -564,6 +564,8 @@ namespace Mirb
 			Proc::initialize();
 			Array::initialize();
 			Exception::initialize();
+			StandardError::initialize();
+			NameError::initialize();
 		}).format() << "\n";
 	}
 
