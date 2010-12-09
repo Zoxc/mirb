@@ -421,7 +421,7 @@ namespace Mirb
 	
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])
 	{
-		mirb_debug_assert(Value::of_type<Proc>(block));
+		mirb_debug_assert(Value::of_type<Proc>(obj));
 		return call(obj, "call", block, argc, argv);
 	}
 	
