@@ -344,7 +344,12 @@ namespace Mirb
 					
 					return result.str();
 				}
-
+				
+				case Opcode::Raise:
+				{
+					return "raise";
+				}
+				
 				case Opcode::Prologue:
 				{
 					return "prologue";

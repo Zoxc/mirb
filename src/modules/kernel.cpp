@@ -163,7 +163,7 @@ namespace Mirb
 	
 	value_t Kernel::raise(size_t argc, value_t argv[])
 	{
-		value_t instance_of = Exception::class_ref;
+		value_t instance_of;
 		value_t message;
 		value_t backtrace;
 
@@ -191,7 +191,7 @@ namespace Mirb
 			i++;
 		}
 		else
-			backtrace = value_nil;
+			backtrace = Mirb::backtrace().to_string();
 
 		Exception *exception = new (gc) Exception(instance_of, message, backtrace);
 

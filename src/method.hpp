@@ -128,6 +128,7 @@ namespace Mirb
 			size_t index;
 			MemoryPool memory_pool;
 			CodeGen::BasicBlock *prolog;
+			CodeGen::BasicBlock *body;
 			Tree::Variable **args;
 
 			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);

@@ -39,7 +39,7 @@ namespace Mirb
 			struct FramePrefix
 			{
 				value_t module;
-				size_t prev_ebp; // ebp
+				size_t prev_bp; // bp = &prev_bp
 				void *return_address;
 				value_t object;
 				Symbol *name;
@@ -48,15 +48,15 @@ namespace Mirb
 
 				CharArray inspect() const;
 
-				static FramePrefix *from_ebp(size_t ebp)
+				static FramePrefix *from_bp(size_t bp)
 				{
-					return (FramePrefix *)(ebp - sizeof(size_t));
+					return (FramePrefix *)(bp - sizeof(size_t));
 				};
 
 				const FramePrefix *prev() const
 				{
-					if(prev_ebp)
-						return from_ebp(prev_ebp);
+					if(prev_bp)
+						return from_bp(prev_bp);
 					else
 						return 0;
 				};
@@ -81,8 +81,8 @@ namespace Mirb
 			struct UnnamedNativeEntry:
 				public Frame
 			{
-				UnnamedNativeEntry(size_t ebp) : Frame(Frame::UnnamedNativeEntry), ebp(ebp) {}
-				size_t ebp;
+				UnnamedNativeEntry(size_t bp) : Frame(Frame::UnnamedNativeEntry), bp(bp) {}
+				size_t bp;
 			};
 
 			CharArray backtrace();
@@ -93,6 +93,8 @@ namespace Mirb
 
 			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target);
 			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id);
+			
+			void __noreturn __stdcall raise(size_t bp);
 
 			#ifdef _MSC_VER
 				void jit_stub();

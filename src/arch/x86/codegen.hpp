@@ -55,6 +55,8 @@ namespace Mirb
 				void push_reg(size_t reg);
 				void push_var(Tree::Variable *var);
 				void push_imm(size_t imm);
+				void zero_test_reg(size_t reg);
+				void zero_test_var(Tree::Variable *var);
 				void test_var(Tree::Variable *var);
 				void mov_arg_to_reg(size_t arg, size_t reg);
 				void mov_arg_to_var(size_t arg, Tree::Variable *var);
@@ -114,7 +116,9 @@ namespace Mirb
 		template<> void NativeGenerator::generate(GetConstOp &op);
 		template<> void NativeGenerator::generate(SetConstOp &op);
 		template<> void NativeGenerator::generate(BranchIfOp &op);
+		template<> void NativeGenerator::generate(BranchIfZeroOp &op);
 		template<> void NativeGenerator::generate(BranchUnlessOp &op);
+		template<> void NativeGenerator::generate(BranchUnlessZeroOp &op);
 		template<> void NativeGenerator::generate(BranchOp &op);
 		template<> void NativeGenerator::generate(ReturnOp &op);
 		template<> void NativeGenerator::generate(HandlerOp &op);
@@ -126,6 +130,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(StringOp &op);
 		template<> void NativeGenerator::generate(InterpolateOp &op);
 		template<> void NativeGenerator::generate(StaticCallOp &op);
+		template<> void NativeGenerator::generate(RaiseOp &op);
 		
 		template<typename T> struct FlushRegisters { static const bool value = false; };
 		

@@ -42,7 +42,9 @@ namespace Mirb
 		struct GetConstOp;
 		struct SetConstOp;
 		struct BranchIfOp;
+		struct BranchIfZeroOp;
 		struct BranchUnlessOp;
+		struct BranchUnlessZeroOp;
 		struct BranchOp;
 		struct ReturnOp;
 		struct HandlerOp;
@@ -55,6 +57,7 @@ namespace Mirb
 		struct StringOp;
 		struct InterpolateOp;
 		struct StaticCallOp;
+		struct RaiseOp;
 		
 		struct Opcode
 		{
@@ -82,7 +85,9 @@ namespace Mirb
 				GetConst,
 				SetConst,
 				BranchIf,
+				BranchIfZero,
 				BranchUnless,
+				BranchUnlessZero,
 				Branch,
 				Return,
 				Handler,
@@ -94,6 +99,7 @@ namespace Mirb
 				String,
 				Interpolate,
 				StaticCall,
+				Raise,
 				Prologue
 			};
 			
@@ -172,9 +178,15 @@ namespace Mirb
 						
 					case BranchIf:
 						return T<BranchIfOp>::func(arg, (BranchIfOp &)*this);
-
+						
+					case BranchIfZero:
+						return T<BranchIfZeroOp>::func(arg, (BranchIfZeroOp &)*this);
+						
 					case BranchUnless:
 						return T<BranchUnlessOp>::func(arg, (BranchUnlessOp &)*this);
+
+					case BranchUnlessZero:
+						return T<BranchUnlessZeroOp>::func(arg, (BranchUnlessZeroOp &)*this);
 
 					case Branch:
 						return T<BranchOp>::func(arg, (BranchOp &)*this);
@@ -202,12 +214,15 @@ namespace Mirb
 
 					case String:
 						return T<StringOp>::func(arg, (StringOp &)*this);
-						
+					
 					case Interpolate:
 						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
-
+					
 					case StaticCall:
 						return T<StaticCallOp>::func(arg, (StaticCallOp &)*this);
+
+					case Raise:
+						return T<RaiseOp>::func(arg, (RaiseOp &)*this);
 
 					default:
 						mirb_debug_abort("Unknown opcode type");
@@ -543,6 +558,16 @@ namespace Mirb
 			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : BranchOpcode(BranchIf, ltrue), var(var) {}
 		};
 		
+		struct BranchIfZeroOp:
+			public BranchOpcode
+		{
+			Tree::Variable *var;
+			
+			template<typename T> void use(T use) { use(var); };
+			
+			BranchIfZeroOp(BasicBlock *label, Tree::Variable *var) : BranchOpcode(BranchIfZero, label), var(var) {}
+		};
+		
 		struct BranchUnlessOp:
 			public BranchOpcode
 		{
@@ -551,6 +576,16 @@ namespace Mirb
 			template<typename T> void use(T use) { use(var); };
 			
 			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : BranchOpcode(BranchUnless, lfalse), var(var) {}
+		};
+		
+		struct BranchUnlessZeroOp:
+			public BranchOpcode
+		{
+			Tree::Variable *var;
+			
+			template<typename T> void use(T use) { use(var); };
+			
+			BranchUnlessZeroOp(BasicBlock *label, Tree::Variable *var) : BranchOpcode(BranchUnlessZero, label), var(var) {}
 		};
 		
 		struct BranchOp:
@@ -660,6 +695,11 @@ namespace Mirb
 			};
 
 			StaticCallOp(Tree::Variable *var, void *function, Tree::Variable **args, size_t arg_count) : var(var), function(function), args(args), arg_count(arg_count) {}
+		};
+		
+		struct RaiseOp:
+			public OpcodeWrapper<Opcode::Raise>
+		{
 		};
 		
 		struct PrologueOp:

@@ -84,16 +84,27 @@ namespace Mirb
 		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
 		block = g->create();
 		prolog = g->gen(g->create_block());
+		body = g->split(g->create_block());
 
-		block->epilog = g->split(g->create_block());
+		block->epilog = g->create_block();
 		block->epilog->next_block = 0;
 	}
 
 	Block *MethodGen::gen()
 	{
+		CodeGen::BasicBlock *raise = g->create_block();
+		body->branch(raise);
+		raise->next(block->epilog);
+
 		Tree::Variable *return_var = g->create_var();
 
 		g->gen<CodeGen::StaticCallOp>(return_var, function, args, arg_count);
+		g->gen<CodeGen::BranchUnlessZeroOp>(block->epilog, return_var);
+		
+		g->gen(raise);
+		g->gen<CodeGen::RaiseOp>();
+		
+		g->gen(block->epilog);
 		g->gen<CodeGen::ReturnOp>(return_var);
 
 		g->basic = prolog;

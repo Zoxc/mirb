@@ -65,7 +65,7 @@ namespace Mirb
 					else
 					{
 						UnnamedNativeEntry *native_entry = (UnnamedNativeEntry *)current;
-						frame = FramePrefix::from_ebp(native_entry->ebp);
+						frame = FramePrefix::from_bp(native_entry->bp);
 					}
 
 					mirb_debug_assert(frame);
@@ -142,6 +142,11 @@ namespace Mirb
 			{
 				return Mirb::Support::create_array(argc, argv);
 			}
+
+			void __noreturn __stdcall raise(size_t bp) // Used for code within NativeEntry
+			{
+				exception_raise(current_exception);
+			}
 			
 			compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 
@@ -150,21 +155,21 @@ namespace Mirb
 				return Compiler::defered_compile(block);
 			}
 
-			void __fastcall unknown_call_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
-			void __fastcall unknown_super_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
+			void __fastcall unknown_call_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
+			void __fastcall unknown_super_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
 			
-			void __fastcall unknown_call_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_call_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 			{
-				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
+				UnnamedNativeEntry entry(bp); // We're entering native code without a name
 
 				Exception *exception = new Exception(NameError::class_ref, ("Undefined method '" + name->get_string() + "' for " + pretty_inspect(obj)).to_string(), backtrace().to_string());
 
 				exception_raise(exception);
 			}
 
-			void __fastcall unknown_super_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_super_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 			{
-				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
+				UnnamedNativeEntry entry(bp); // We're entering native code without a name
 
 				Exception *exception = new Exception(NameError::class_ref, ("No superclass method '" + name->get_string() + "' for " + pretty_inspect(module)).to_string(), backtrace().to_string());
 				
@@ -351,27 +356,34 @@ namespace Mirb
 			{
 				Frame *frame = current_frame;
 				
-				mirb_debug_assert(frame->type == Frame::UnnamedNativeEntry);
+				mirb_debug_assert(frame->type == Frame::UnnamedNativeEntry || frame->type == Frame::NativeEntry);
 				
-				size_t ebp_target = ((UnnamedNativeEntry *)frame)->ebp;
+				size_t bp_target;
+
+				if(frame->type == Frame::UnnamedNativeEntry)
+					bp_target = ((UnnamedNativeEntry *)frame)->bp;
+				else
+					bp_target = (size_t)&((NativeEntry *)frame)->prefix.prev_bp;
+				
+				frame = frame->prev;
 
 				while(frame->type == Frame::Exception)
 				{
 					ExceptionFrame *exception_frame = (ExceptionFrame *)frame;
 					handle_exception(exception_frame, exception);
 				
-					ebp_target = (size_t)&exception_frame->prefix.prev_ebp;
+					bp_target = (size_t)&exception_frame->prefix.prev_bp;
 
 					frame = frame->prev;
 				}
 				
-				current_frame = frame;
+				current_frame = frame ? frame->prev : 0;
 				current_exception = exception;
 				
 				#ifdef _MSC_VER
 					__asm
 					{
-						mov esp, ebp_target
+						mov esp, bp_target
 						xor eax, eax
 						pop ebp
 						ret 16
@@ -382,7 +394,7 @@ namespace Mirb
 						"pop %%ebp\n"
 						"ret $16\n"
 					:
-					: "r" (ebp_target));
+					: "r" (bp_target));
 				#endif
 
 				__builtin_unreachable();
@@ -410,7 +422,7 @@ namespace Mirb
 			{
 				frame->handling = 1;
 
-				size_t ebp_value = (size_t)&frame->prefix.prev_ebp;
+				size_t ebp_value = (size_t)&frame->prefix.prev_bp;
 				
 				while(block != target)
 				{
@@ -466,7 +478,7 @@ namespace Mirb
 			{
 				current_frame = frame;
 
-				size_t ebp_value = (size_t)&frame->prefix.prev_ebp;
+				size_t ebp_value = (size_t)&frame->prefix.prev_bp;
 				size_t esp_value = ebp_value - frame->block->ebp_offset;
 
 				#ifdef DEBUG

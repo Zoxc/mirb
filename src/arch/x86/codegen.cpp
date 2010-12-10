@@ -467,6 +467,25 @@ namespace Mirb
 				mov_reg_to_reg_index(reg, spare, index);
 			}
 		}
+		
+		void NativeGenerator::zero_test_reg(size_t reg)
+		{
+			rex(0, 0, reg_high(reg));
+			stream.u8(0x85);
+			modrm(3, reg_low(reg), reg);
+		}
+
+		void NativeGenerator::zero_test_var(Tree::Variable *var)
+		{
+			if(var->flags.get<Tree::Variable::Register>())
+				zero_test_reg(var->loc);
+			else
+			{
+				rex(0, 0, 0);
+				stream.u8(0x83);
+				stack_modrm(7, var);
+			}
+		}
 
 		void NativeGenerator::push_reg(size_t reg)
 		{
@@ -772,11 +791,29 @@ namespace Mirb
 			branch_list.append(&op);
 		}
 		
+		template<> void NativeGenerator::generate(BranchIfZeroOp &op)
+		{
+			zero_test_var(op.var);
+			stream.u8(0x0F);
+			stream.u8(0x84);
+			op.code = stream.reserve(4);
+			branch_list.append(&op);
+		}
+		
 		template<> void NativeGenerator::generate(BranchUnlessOp &op)
 		{
 			test_var(op.var);
 			stream.u8(0x0F);
 			stream.u8(0x84);
+			op.code = stream.reserve(4);
+			branch_list.append(&op);
+		}
+		
+		template<> void NativeGenerator::generate(BranchUnlessZeroOp &op)
+		{
+			zero_test_var(op.var);
+			stream.u8(0x0F);
+			stream.u8(0x85);
 			op.code = stream.reserve(4);
 			branch_list.append(&op);
 		}
@@ -875,6 +912,12 @@ namespace Mirb
 			stack_pop(op.arg_count);
 
 			mov_reg_to_var(Arch::Register::AX, op.var);
+		}
+		
+		template<> void NativeGenerator::generate(RaiseOp &op)
+		{
+			push_reg(Arch::Register::BP);
+			call(&Arch::Support::raise);
 		}
 	};
 };
