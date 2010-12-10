@@ -3,6 +3,7 @@
 #include "../classes/string.hpp"
 #include "../classes/symbol.hpp"
 #include "../classes/exception.hpp"
+#include "../classes/exceptions.hpp"
 #include "../generic/benchmark.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
@@ -174,7 +175,7 @@ namespace Mirb
 			i++;
 		}
 		else
-			instance_of = Exception::class_ref;
+			instance_of = RuntimeError::class_ref;
 	
 		if(argc > i)
 		{
@@ -194,13 +195,7 @@ namespace Mirb
 
 		Exception *exception = new (gc) Exception(instance_of, message, backtrace);
 
-		ExceptionData data;
-
-		data.type = Mirb::RubyException;
-		data.target = 0;
-		data.value = auto_cast(exception);
-
-		Arch::Support::exception_raise(&data);
+		return raise(auto_cast(exception));
 	}
 
 	value_t Kernel::backtrace()

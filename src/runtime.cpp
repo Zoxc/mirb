@@ -350,10 +350,12 @@ namespace Mirb
 	{
 		current_exception = new (gc) Exception(exception_class, message.to_string(), backtrace().to_string());
 		
-		#ifdef DEBUG
-			std::cout << "Raising exception with message " << message.get_string() << "\n";
-		#endif
+		return value_raise;
+	}
 
+	value_t raise(value_t exception)
+	{
+		current_exception = auto_cast(exception);
 		return value_raise;
 	}
 	
@@ -437,7 +439,7 @@ namespace Mirb
 
 		if(mirb_unlikely(!result))
 		{
-			raise<NameError>("Undefined method '" + name->string + "' for " + pretty_inspect(obj));
+			raise(NameError::class_ref, "Undefined method '" + name->string + "' for " + pretty_inspect(obj));
 			return 0;
 		}
 
@@ -450,7 +452,7 @@ namespace Mirb
 
 		if(mirb_unlikely(!result))
 		{
-			raise<NameError>("No superclass method '" + name->string + "' for " + pretty_inspect(module));
+			raise(NameError::class_ref, "No superclass method '" + name->string + "' for " + pretty_inspect(module));
 			return 0;
 		}
 
@@ -582,6 +584,8 @@ namespace Mirb
 			Exception::initialize();
 			StandardError::initialize();
 			NameError::initialize();
+			RuntimeError::initialize();
+			LocalJumpError::initialize();
 		}).format() << "\n";
 	}
 

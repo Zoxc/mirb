@@ -4,6 +4,7 @@
 #include "../../runtime.hpp"
 #include "../../classes/proc.hpp"
 #include "../../classes/module.hpp"
+#include "../../classes/string.hpp"
 #include "../../classes/exceptions.hpp"
 
 namespace Mirb
@@ -156,24 +157,18 @@ namespace Mirb
 			{
 				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
 
-				ExceptionData data;
+				Exception *exception = new Exception(NameError::class_ref, ("Undefined method '" + name->get_string() + "' for " + pretty_inspect(obj)).to_string(), backtrace().to_string());
 
-				data.type = RubyException;
-				data.value = auto_cast(new NameError(("Undefined method '" + name->get_string() + "' for " + pretty_inspect(obj)).to_string(), backtrace().to_string()));
-
-				exception_raise(&data);
+				exception_raise(exception);
 			}
 
 			void __fastcall unknown_super_method(size_t ebp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
 			{
 				UnnamedNativeEntry entry(ebp); // We're entering native code without a name
 
-				ExceptionData data;
-
-				data.type = RubyException;
-				data.value = auto_cast(new NameError(("No superclass method '" + name->get_string() + "' for " + pretty_inspect(module)).to_string(), backtrace().to_string()));
-
-				exception_raise(&data);
+				Exception *exception = new Exception(NameError::class_ref, ("No superclass method '" + name->get_string() + "' for " + pretty_inspect(module)).to_string(), backtrace().to_string());
+				
+				exception_raise(exception);
 			}
 
 			#ifdef _MSC_VER
@@ -352,7 +347,7 @@ namespace Mirb
 				return Mirb::lookup_super_nothrow(module, name, result_module);
 			}
 			
-			void __noreturn exception_raise(ExceptionData *data)
+			void __noreturn exception_raise(Exception *exception)
 			{
 				Frame *frame = current_frame;
 				
@@ -363,7 +358,7 @@ namespace Mirb
 				while(frame->type == Frame::Exception)
 				{
 					ExceptionFrame *exception_frame = (ExceptionFrame *)frame;
-					handle_exception(exception_frame, data);
+					handle_exception(exception_frame, exception);
 				
 					ebp_target = (size_t)&exception_frame->prefix.prev_ebp;
 
@@ -371,7 +366,7 @@ namespace Mirb
 				}
 				
 				current_frame = frame;
-				current_exception = auto_cast(data->value);
+				current_exception = exception;
 				
 				#ifdef _MSC_VER
 					__asm
@@ -396,28 +391,19 @@ namespace Mirb
 			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target)
 			{
 				UnnamedNativeEntry entry(bp);
-
-				ExceptionData data;
-
-				data.type = ReturnException;
-				data.target = target;
-				data.value = value;
-
-				exception_raise(&data);
+				
+				Exception *exception = new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), target, value);
+				
+				exception_raise(exception);
 			}
 
 			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id)
 			{
 				UnnamedNativeEntry entry(bp);
-
-				ExceptionData data;
-
-				data.type = BreakException;
-				data.target = target;
-				data.value = value;
-				data.id = id;
-
-				exception_raise(&data);
+				
+				Exception *exception = new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), target, value, id);
+				
+				exception_raise(exception);
 			}
 
 			static void local_unwind(ExceptionFrame *frame, ExceptionBlock *block, ExceptionBlock *target)
@@ -570,20 +556,25 @@ namespace Mirb
 				jump_to_handler(frame, rescue_label, 0);
 			}
 			
-			void handle_exception(ExceptionFrame *frame, ExceptionData *data)
+			void handle_exception(ExceptionFrame *frame, Exception *exception)
 			{
 				if(frame->block_index == (size_t)-1) // Outside any exception block
 				{
-					if(data->target == frame->block)
+					if(exception->type == Value::Exception)
+						return;
+
+					auto error = (ReturnException *)exception;
+
+					if(error->target == frame->block)
 					{
-						switch(data->type)
+						switch(error->type)
 						{
-							case ReturnException:
-								handle_return(frame, 0, data->value);
+							case Value::ReturnException:
+								handle_return(frame, 0, error->value);
 								break;
 
-							case BreakException:
-								handle_break(frame, data->value, data->id);
+							case Value::BreakException:
+								handle_break(frame, error->value, static_cast<BreakException *>(exception)->id);
 								break;
 
 							default:
@@ -591,28 +582,33 @@ namespace Mirb
 						}
 					}
 
+
 					return;
 				}
 
 				ExceptionBlock *block = frame->block->exception_blocks[frame->block_index];
 
-				switch(data->type)
+				switch(exception->type)
 				{
-					case BreakException:
+					case Value::BreakException:
 					{
-						if(data->target == frame->block)
-							handle_break(frame,  data->value, data->id);
+						auto error = (BreakException *)exception;
+
+						if(error->target == frame->block)
+							handle_break(frame,  error->value, error->id);
 						break;
 					}
 
-					case ReturnException:
+					case Value::ReturnException:
 					{
-						if(data->target == frame->block)
-							handle_return(frame, block, data->value);
+						auto error = (ReturnException *)exception;
+
+						if(error->target == frame->block)
+							handle_return(frame, block, error->value);
 						break;
 					}
 
-					case RubyException:
+					case Value::Exception:
 					{
 						ExceptionBlock *current_block = block;
 

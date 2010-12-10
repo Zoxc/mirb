@@ -54,14 +54,10 @@ namespace Mirb
 
 	void initialize();
 	void finalize();
-
-	value_t raise(value_t exception_class, const CharArray &message);
 	
-	template<class T> value_t raise(const CharArray &message)
-	{
-		return raise(T::class_ref, message);
-	}
-
+	value_t raise(value_t exception_class, const CharArray &message);
+	value_t raise(value_t exception);
+	
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename);
 	
 	Block *lookup_method(value_t module, Symbol *name, value_t *result_module);

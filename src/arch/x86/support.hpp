@@ -87,10 +87,9 @@ namespace Mirb
 
 			CharArray backtrace();
 
-			void handle_exception(ExceptionFrame *frame, ExceptionData *data);
+			void handle_exception(ExceptionFrame *frame, Exception *exception);
 			
-			void __noreturn exception_raise(ExceptionData *data, Frame *frame);
-			void __noreturn exception_raise(ExceptionData *data);
+			void __noreturn exception_raise(Exception *exception);
 
 			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target);
 			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id);

@@ -54,21 +54,7 @@ namespace Mirb
 		BlockLabel ensure_label;
 	};
 	
-	enum ExceptionType {
-		RubyException,
-		ReturnException,
-		BreakException,
-		ThrowException
-	};
-
 	class Block;
-
-	struct ExceptionData {
-		ExceptionType type;
-		Block *target;
-		value_t value;
-		size_t id;
-	};
 
 	class Block
 	{

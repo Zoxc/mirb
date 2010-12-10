@@ -70,6 +70,8 @@ namespace Mirb
 				case Array:
 				case Proc:
 				case Exception:
+				case ReturnException:
+				case BreakException:
 					return true;
 
 				default:
@@ -121,7 +123,16 @@ namespace Mirb
 		
 		template<> bool of_type<Mirb::Exception>(value_t value)
 		{
-			return Value::type(value) == Exception;
+			switch(Value::type(value))
+			{
+				case Exception:
+				case ReturnException:
+				case BreakException:
+					return true;
+
+				default:
+					return false;
+			}
 		}
 		
 		template<> bool of_type<Mirb::Proc>(value_t value)

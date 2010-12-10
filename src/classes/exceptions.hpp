@@ -3,25 +3,50 @@
 
 namespace Mirb
 {
-	class StandardError:
+	namespace StandardError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
+	
+	namespace NameError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
+	
+	namespace RuntimeError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
+	
+	namespace LocalJumpError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
+	
+	class ReturnException:
 		public Exception
 	{
 		public:
-			StandardError(value_t message, value_t backtrace) : Exception(message, backtrace) {}
+			ReturnException(Value::Type type, value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value) : Exception(type, instance_of, message, backtrace), target(target), value(value) {}
 			
-			static value_t class_ref;
-
-			static void initialize();
+			Block *target;
+			value_t value;
 	};
-
-	class NameError:
-		public StandardError
+	
+	class BreakException:
+		public ReturnException
 	{
 		public:
-			NameError(value_t message, value_t backtrace) : StandardError(message, backtrace) {}
+			BreakException(value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value, size_t id) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), id(id) {}
 			
-			static value_t class_ref;
-
-			static void initialize();
+			size_t id;
 	};
 };

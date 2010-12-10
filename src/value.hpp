@@ -62,7 +62,9 @@ namespace Mirb
 			String,
 			Array,
 			Proc,
-			Exception
+			Exception,
+			ReturnException,
+			BreakException,
 		};
 
 		bool object_ref(value_t value);
