@@ -354,12 +354,12 @@ namespace Mirb
 			
 			void __noreturn exception_raise(Exception *exception)
 			{
-				Frame *frame = current_frame;
-				
-				mirb_debug_assert(frame->type == Frame::UnnamedNativeEntry || frame->type == Frame::NativeEntry);
-				
 				size_t bp_target;
 
+				Frame *frame = current_frame;
+
+				mirb_debug_assert(frame->type == Frame::UnnamedNativeEntry || frame->type == Frame::NativeEntry);
+					
 				if(frame->type == Frame::UnnamedNativeEntry)
 					bp_target = ((UnnamedNativeEntry *)frame)->bp;
 				else
@@ -367,7 +367,7 @@ namespace Mirb
 				
 				frame = frame->prev;
 
-				while(frame->type == Frame::Exception)
+				while(frame && frame->type == Frame::Exception)
 				{
 					ExceptionFrame *exception_frame = (ExceptionFrame *)frame;
 					handle_exception(exception_frame, exception);
