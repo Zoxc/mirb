@@ -143,7 +143,7 @@ namespace Mirb
 				return Mirb::Support::create_array(argc, argv);
 			}
 
-			void __noreturn __stdcall raise(size_t bp) // Used for code within NativeEntry
+			void __noreturn raise() // Used for code within NativeEntry
 			{
 				exception_raise(current_exception);
 			}
@@ -400,7 +400,7 @@ namespace Mirb
 				__builtin_unreachable();
 			}
 
-			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target)
+			void __noreturn __fastcall far_return(size_t bp, size_t dummy, value_t value, Block *target)
 			{
 				UnnamedNativeEntry entry(bp);
 				
@@ -409,7 +409,7 @@ namespace Mirb
 				exception_raise(exception);
 			}
 
-			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id)
+			void __noreturn __fastcall far_break(size_t bp, size_t dummy, value_t value, Block *target, size_t id)
 			{
 				UnnamedNativeEntry entry(bp);
 				

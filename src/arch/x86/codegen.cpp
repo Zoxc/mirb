@@ -860,7 +860,7 @@ namespace Mirb
 		{
 			push_imm((size_t)op.code);
 			push_var(op.var);
-			push_reg(Arch::Register::BP);
+			mov_reg_to_reg(Arch::Register::BP, Arch::Register::CX);
 			call(&Arch::Support::far_return);
 		}
 
@@ -869,7 +869,7 @@ namespace Mirb
 			push_imm(op.index);
 			push_imm((size_t)op.code);
 			push_var(op.var);
-			push_reg(Arch::Register::BP);
+			mov_reg_to_reg(Arch::Register::BP, Arch::Register::CX);
 			call(&Arch::Support::far_break);
 		}
 
@@ -916,7 +916,6 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(RaiseOp &op)
 		{
-			push_reg(Arch::Register::BP);
 			call(&Arch::Support::raise);
 		}
 	};

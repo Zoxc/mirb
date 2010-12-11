@@ -91,10 +91,10 @@ namespace Mirb
 			
 			void __noreturn exception_raise(Exception *exception);
 
-			void __noreturn __stdcall far_return(size_t bp, value_t value, Block *target);
-			void __noreturn __stdcall far_break(size_t bp, value_t value, Block *target, size_t id);
+			void __noreturn __fastcall far_return(size_t bp, size_t dummy, value_t value, Block *target);
+			void __noreturn __fastcall far_break(size_t bp, size_t dummy, value_t value, Block *target, size_t id);
 			
-			void __noreturn __stdcall raise(size_t bp);
+			void __noreturn raise();
 
 			#ifdef _MSC_VER
 				void jit_stub();
