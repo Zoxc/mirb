@@ -22,8 +22,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
+					<Add option="-fno-exceptions -fno-rtti" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
