@@ -9,7 +9,7 @@ namespace Mirb
 	BlockMap *Module::get_methods()
 	{
 		if(!methods)
-			methods = new BlockMap(methods_initial);
+			methods = new BlockMap(methods_initial); // TODO: Allocate with GC
 		
 		return methods;
 	}

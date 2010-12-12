@@ -262,7 +262,7 @@ namespace Mirb
 		Object *object = auto_cast(obj);
 
 		if(!object->vars)
-			object->vars = new ValueMap(Object::vars_initial);
+			object->vars = new ValueMap(Object::vars_initial); // TODO: Allocate with GC
 		
 		return object->vars;
 	}
