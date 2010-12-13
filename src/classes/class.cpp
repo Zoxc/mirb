@@ -24,7 +24,9 @@ namespace Mirb
 		else if(self->singleton)
 		{
 			value_t real = get_var(obj, Symbol::from_literal("__attached__"));
-			
+
+			OnStack<1> os(real);
+
 			real = call(real, "inspect", 0, 0);
 
 			String *real_string = cast<String>(real);
@@ -54,6 +56,8 @@ namespace Mirb
 	value_t Class::method_new(value_t obj, size_t argc, value_t argv[])
 	{
 		value_t result = call(obj, "allocate", 0, 0);
+
+		OnStack<1> os(result); // TODO: egde case, can arguments pass to call be collected?
 
 		call(result, "initialize", argc, argv);
 

@@ -18,7 +18,9 @@ namespace Mirb
 			CharArray FramePrefix::inspect() const
 			{
 				CharArray result;
-
+				
+				OnStack<1> os(result);
+				
 				value_t module = this->module;
 
 				if(Value::type(module) == Value::IClass)
@@ -27,7 +29,7 @@ namespace Mirb
 				result += inspect_obj(module);
 
 				value_t class_of = real_class_of(object);
-
+				
 				if(class_of != module)
 					result += "(" + inspect_obj(class_of) + ")";
 
@@ -41,6 +43,8 @@ namespace Mirb
 				Frame *current = current_frame;
 
 				CharArray result;
+
+				OnStack<1> os(result);
 
 				auto list_block = [&](const FramePrefix *block)
 				{

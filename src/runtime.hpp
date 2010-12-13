@@ -2,6 +2,7 @@
 #include "value.hpp"
 #include "block.hpp"
 #include "method.hpp"
+#include "on-stack.hpp"
 #include "classes/symbol.hpp"
 
 namespace Mirb

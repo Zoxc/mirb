@@ -40,6 +40,8 @@ namespace Mirb
 
 		CharArray result = "[";
 
+		OnStack<1> os(result);
+
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
 			String *desc = cast<String>(call(self->vector[i], "inspect", 0, 0));
