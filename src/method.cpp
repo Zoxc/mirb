@@ -88,6 +88,7 @@ namespace Mirb
 
 		block->epilog = g->create_block();
 		block->epilog->next_block = 0;
+		body->next(block->epilog);
 	}
 
 	Block *MethodGen::gen()
