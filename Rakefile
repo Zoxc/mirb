@@ -1,4 +1,4 @@
-require_relative '../reno-0.2/reno'
+require_relative '../reno/reno'
 
 include Reno
 
