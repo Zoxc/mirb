@@ -26,6 +26,8 @@ namespace Mirb
 	
 	value_t Module::append_features(value_t obj, value_t mod)
 	{
+		OnStack<1> os(obj);
+
 		include_module(mod, obj);
 
 		return obj;
@@ -38,6 +40,8 @@ namespace Mirb
 	
 	value_t Module::include(value_t obj, size_t argc, value_t argv[])
 	{
+		OnStack<1> os(obj);
+
 		MIRB_ARG_EACH(i)
 		{
 			call(argv[i], "append_features", 1, &obj);

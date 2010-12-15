@@ -17,6 +17,8 @@ namespace Mirb
 	
 	value_t Object::tap(value_t obj, value_t block)
 	{
+		OnStack<1> os(obj);
+
 		yield(block, 1, &obj);
 		return obj;
 	}

@@ -122,14 +122,33 @@ namespace Mirb
 				return Mirb::Support::interpolate(argc, argv);
 			}
 			
-			value_t __stdcall get_const(value_t obj, Symbol *name)
+			value_t __stdcall get_const(size_t bp, value_t obj, Symbol *name)
 			{
-				return Mirb::Support::get_const(obj, name);
+				value_t result = Mirb::Support::get_const(obj, name);
+
+				if(mirb_unlikely(result == value_undef))
+				{
+					UnnamedNativeEntry entry(bp); // We're entering native code without a name
+
+					Exception *exception = new Exception(NameError::class_ref, ("Uninitialized constant " + name->get_string() + " on " + pretty_inspect(obj)).to_string(), backtrace().to_string());
+
+					exception_raise(exception);
+				}
+
+				return result;
 			}
 
-			void __stdcall set_const(value_t obj, Symbol *name, value_t value)
+			void __stdcall set_const(size_t bp, value_t obj, Symbol *name, value_t value)
 			{
-				return Mirb::Support::set_const(obj, name, value);
+				bool existing = Mirb::Support::set_const(obj, name, value);
+
+				if(mirb_unlikely(existing))
+				{
+					UnnamedNativeEntry entry(bp); // We're entering native code without a name
+
+					OnStack<1> os(value);
+					std::cout << "Warning: Reassigning constant " << name->get_string() << " to " << inspect_object(value) << "\n";
+				}
 			}
 			
 			value_t __stdcall get_ivar(value_t obj, Symbol *name)

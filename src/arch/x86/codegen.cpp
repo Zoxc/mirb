@@ -767,6 +767,7 @@ namespace Mirb
 		{
 			push_imm((size_t)op.name);
 			push_var(op.obj);
+			push_reg(Arch::Register::BP);
 			
 			call(&Arch::Support::get_const);
 
@@ -778,6 +779,7 @@ namespace Mirb
 			push_var(op.var);
 			push_imm((size_t)op.name);
 			push_var(op.obj);
+			push_reg(Arch::Register::BP);
 			
 			call(&Arch::Support::set_const);
 		}

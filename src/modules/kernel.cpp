@@ -38,7 +38,7 @@ namespace Mirb
 		String *input = cast<String>(code);
 
 		CharArray c_str = input->string.c_str();
-		CharArray filename("eval");
+		CharArray filename("(eval)");
 
 		return eval(obj, 0, value_nil, c_str.str_ref(), c_str.str_length(), filename);
 	}
@@ -191,7 +191,10 @@ namespace Mirb
 			i++;
 		}
 		else
+		{
+			OnStack<2> os(instance_of, message);
 			backtrace = Mirb::backtrace().to_string();
+		}
 
 		Exception *exception = new (gc) Exception(instance_of, message, backtrace);
 

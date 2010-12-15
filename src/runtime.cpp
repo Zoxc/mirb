@@ -52,7 +52,7 @@ namespace Mirb
 
 	value_t define_class(value_t under, Symbol *name, value_t super)
 	{
-		value_t existing = get_const(under, auto_cast(name), false);
+		value_t existing = get_const(under, auto_cast(name));
 
 		if(existing != value_undef)
 			return existing;
@@ -60,10 +60,6 @@ namespace Mirb
 		value_t obj = class_create_unnamed(super);
 		
 		class_name(obj, under, name);
-
-		#ifdef DEBUG
-			std::cout << "Defining class " << inspect_object(obj) << "(" << CharArray::hex(obj).get_string() << ") < " << inspect_object(super) << "(" << CharArray::hex(super).get_string() << ")\n";
-		#endif
 
 		return obj;
 	}
@@ -80,7 +76,7 @@ namespace Mirb
 
 	value_t define_module(value_t under, Symbol *name)
 	{
-		value_t existing = get_const(under, name, false);
+		value_t existing = get_const(under, name);
 
 		if(existing != value_undef)
 			return existing;
@@ -88,10 +84,6 @@ namespace Mirb
 		value_t obj = module_create_bare();
 		
 		class_name(obj, under, name);
-
-		#ifdef DEBUG
-			std::cout << "Defining module " << inspect_object(obj) << "(" << CharArray::hex(obj).get_string() << ")\n";
-		#endif
 
 		return obj;
 	}
@@ -141,7 +133,10 @@ namespace Mirb
 			}
 
 			#ifdef DEBUG
-				std::cout << "Including module " << inspect_object(module) << " in " << inspect_object(obj) << "\n";
+				{
+					OnStack<3> os(module, c, obj);
+					std::cout << "Including module " << inspect_object(module) << " in " << inspect_object(obj) << "\n";
+				}
 			#endif
 
 			c = cast<Module>(c)->superclass = create_include_class(module, cast<Module>(c)->superclass);
@@ -240,6 +235,8 @@ namespace Mirb
 
 		value_t result = value_nil;
 
+		OnStack<1> os(obj);
+
 		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
 
@@ -267,7 +264,7 @@ namespace Mirb
 		return object->vars;
 	}
 	
-	value_t get_const(value_t obj, Symbol *name, bool require)
+	value_t get_const(value_t obj, Symbol *name)
 	{
 		// TODO: Fix constant lookup
 
@@ -295,13 +292,10 @@ namespace Mirb
 		if(result != value_undef)
 			return result;
 
-		if(require)
-			mirb_runtime_abort("Unable to find constant " + name->get_string() + " on " + inspect_object(obj));
-		else
-			return value_undef;
+		return value_undef;
 	}
 
-	void set_const(value_t obj, Symbol *name, value_t value)
+	bool set_const(value_t obj, Symbol *name, value_t value)
 	{
 		ValueMap *vars = get_vars(obj);
 
@@ -309,11 +303,14 @@ namespace Mirb
 
 		if(old)
 		{
-			std::cout << "Warning: Reassigning constant " << name->get_string() << " to " << inspect_object(value) << "\n";
 			*old = value;
+			return true;
 		}
 		else
+		{
 			set_var(obj, name, value);
+			return false;
+		}
 	}
 	
 	value_t get_ivar(value_t obj, Symbol *name)
@@ -348,6 +345,8 @@ namespace Mirb
 
 	value_t raise(value_t exception_class, const CharArray &message)
 	{
+		OnStack<2> os(exception_class, message);
+
 		current_exception = new (gc) Exception(exception_class, message.to_string(), backtrace().to_string());
 		
 		return value_raise;

@@ -31,40 +31,24 @@ namespace Mirb
 			if(obj == main)
 				obj = Object::class_ref;
 
-			#ifdef DEBUG
-				std::cout << "Looking up constant " << name->get_string() << " in " << inspect_object(obj) << "\n";
-			#endif
-
 			return Mirb::get_const(obj, name);
 		}
 
-		void set_const(value_t obj, Symbol *name, value_t value)
+		bool set_const(value_t obj, Symbol *name, value_t value)
 		{
 			if(obj == main)
 				obj = Object::class_ref;
 
-			#ifdef DEBUG
-				std::cout << "Setting constant " << name->get_string() << " in " << inspect_object(obj) << " to " << inspect_object(value) << "\n";
-			#endif
-
-			Mirb::set_const(obj, name, value);
+			return Mirb::set_const(obj, name, value);
 		}
 		
 		value_t get_ivar(value_t obj, Symbol *name)
 		{
-			#ifdef DEBUG
-				std::cout << "Looking up instance variable " << name->get_string() << " in " << inspect_object(obj) << "\n";
-			#endif
-
 			return get_var(obj, name);
 		}
 
 		void set_ivar(value_t obj, Symbol *name, value_t value)
 		{
-			#ifdef DEBUG
-				std::cout << "Setting instance variable " << name->get_string() << " in " << inspect_object(obj) << " to " << inspect_object(value) << "\n";
-			#endif
-
 			set_var(obj, name, value);
 		}
 
@@ -124,10 +108,6 @@ namespace Mirb
 			if(obj == main)
 				obj = Object::class_ref;
 
-			#ifdef DEBUG
-				std::cout << "Defining method " << inspect_object(obj) << "." << name->get_string() << "\n";
-			#endif
-			
 			set_method(obj, name, block);
 		}
 		

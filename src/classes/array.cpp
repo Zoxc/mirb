@@ -40,11 +40,11 @@ namespace Mirb
 
 		CharArray result = "[";
 
-		OnStack<1> os(result);
+		OnStack<2> os(self, result);
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			String *desc = cast<String>(call(self->vector[i], "inspect", 0, 0));
+			String *desc = cast<String>(call(self->vector[i], "inspect"));
 
 			result += desc->string;
 
@@ -67,11 +67,13 @@ namespace Mirb
 	value_t Array::each(value_t obj, value_t block)
 	{
 		auto self = cast<Array>(obj);
+		
+		OnStack<1> os(self);
 
 		for(auto i = self->vector.begin(); i != self->vector.end(); ++i)
 			yield(block, 1, &(*i));
 
-		return obj;
+		return auto_cast(self);
 	}
 
 	void Array::initialize()

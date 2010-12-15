@@ -11,6 +11,10 @@ namespace Mirb
 	{
 		auto self = cast<Proc>(obj);
 
+		OnStack<1> os(self);
+
+		// TODO: Pin self->scopes? If not, remove the OnStack object.
+
 		return Arch::Support::closure_call(self->block->compiled, self->scopes, self->self, self->name, self->module, block, argc, argv);
 	}
 

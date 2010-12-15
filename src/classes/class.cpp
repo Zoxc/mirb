@@ -27,7 +27,7 @@ namespace Mirb
 
 			OnStack<1> os(real);
 
-			real = call(real, "inspect", 0, 0);
+			real = call(real, "inspect");
 
 			String *real_string = cast<String>(real);
 
@@ -57,7 +57,7 @@ namespace Mirb
 	{
 		value_t result = call(obj, "allocate", 0, 0);
 
-		OnStack<1> os(result); // TODO: egde case, can arguments pass to call be collected?
+		OnStack<1> os(result);
 
 		call(result, "initialize", argc, argv);
 

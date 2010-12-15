@@ -12,7 +12,7 @@ namespace Mirb
 		value_t interpolate(size_t argc, value_t argv[]);
 
 		value_t get_const(value_t obj, Symbol *name);
-		void set_const(value_t obj, Symbol *name, value_t value);
+		bool set_const(value_t obj, Symbol *name, value_t value);
 
 		value_t get_ivar(value_t obj, Symbol *name);
 		void set_ivar(value_t obj, Symbol *name, value_t value);

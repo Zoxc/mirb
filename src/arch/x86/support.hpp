@@ -111,8 +111,8 @@ namespace Mirb
 			value_t __cdecl create_array(size_t argc, value_t argv[]);
 			value_t __cdecl interpolate(size_t argc, value_t argv[]);
 			
-			value_t __stdcall get_const(value_t obj, Symbol *name);
-			void __stdcall set_const(value_t obj, Symbol *name, value_t value);
+			value_t __stdcall get_const(size_t bp, value_t obj, Symbol *name);
+			void __stdcall set_const(size_t bp, value_t obj, Symbol *name, value_t value);
 			
 			value_t __stdcall get_ivar(value_t obj, Symbol *name);
 			void __stdcall set_ivar(value_t obj, Symbol *name, value_t value);
