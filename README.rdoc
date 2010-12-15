@@ -2,12 +2,12 @@
 
 mirb is an small fast embeddable Ruby VM. It is designed to be simple to use
 and embed, while stil having a good performance due to a JIT-compiler and
-native C code. It may not end up featuring all of Ruby's core library
+native C++ code. It may not end up featuring all of Ruby's core library
 because of the embeddable nature, but what is added should remain somewhat
 compitable.
 
 It's still very much work in process and the only useful thing it can run
-(that I know of) is the included testing framework. Todo.txt has a list of
+(that I know of) is the included testing framework. docs/Todo.txt has a list of
 some essential missing features.
 
 If you want to know more you can visit http://mirb.heroku.com or join me in
@@ -15,8 +15,10 @@ If you want to know more you can visit http://mirb.heroku.com or join me in
 
 == Building
 
-You can either build it with rake (using Ruby 1.9) or with Code::Blocks or
-Eclipse.
+You can either build it with rake (using Ruby 1.9) or with Visual Studio.
+Building with rake requires reno[https://github.com/Zoxc/reno] to be checked
+out in <tt>./../reno</tt>. You can also build it with Code::Blocks if you
+compile the assembly files for it.
 
 == Credits
 
