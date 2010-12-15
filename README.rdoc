@@ -17,7 +17,9 @@ If you want to know more you can visit http://mirb.heroku.com or join me in
 
 You can either build it with rake (using Ruby 1.9) or with Visual Studio.
 Building with rake requires reno[https://github.com/Zoxc/reno] to be checked
-out in <tt>./../reno</tt>. You can also build it with Code::Blocks if you
+out in <tt>./../reno</tt>. It also requires G++ of version 4.5 or greater.
+If G++'s executable is not called <tt>g++</tt>, you can override it with the
+environment variable <tt>CXX</tt>. You can also build it with Code::Blocks if you
 compile the assembly files for it.
 
 == Credits
