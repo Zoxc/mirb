@@ -119,7 +119,7 @@ namespace Mirb
 			{
 				entries++;
 
-				if(entries > mask)
+				if(mirb_unlikely(entries > mask))
 					expand();
 			}
 
@@ -163,7 +163,7 @@ namespace Mirb
 
 			V get(K key)
 			{
-				if(!T::valid_key(key))
+				if(mirb_unlikely(!T::valid_key(key)))
 					return 0;
 
 				size_t index = T::hash_key(key) & mask;

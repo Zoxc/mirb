@@ -31,7 +31,7 @@ namespace Mirb
 
 	value_t class_of(value_t obj)
 	{
-		if(Value::object_ref(obj))
+		if(mirb_likely(Value::object_ref(obj)))
 			return cast<Object>(obj)->instance_of;
 		else
 			return Value::class_of_literal(obj);
@@ -54,7 +54,7 @@ namespace Mirb
 	{
 		value_t existing = get_const(under, auto_cast(name));
 
-		if(existing != value_undef)
+		if(mirb_unlikely(existing != value_undef))
 			return existing;
 
 		value_t obj = class_create_unnamed(super);
@@ -78,7 +78,7 @@ namespace Mirb
 	{
 		value_t existing = get_const(under, name);
 
-		if(existing != value_undef)
+		if(mirb_unlikely(existing != value_undef))
 			return existing;
 
 		value_t obj = module_create_bare();
@@ -150,7 +150,7 @@ namespace Mirb
 	{
 		value_t c = class_of(object);
 
-		if(cast<Class>(c)->singleton)
+		if(mirb_likely(cast<Class>(c)->singleton))
 			return c;
 
 		return class_create_singleton(object, c);
@@ -240,7 +240,7 @@ namespace Mirb
 		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
 
-		if(Value::type(result) == Value::String)
+		if(mirb_likely(Value::type(result) == Value::String))
 			return result;
 		else
 			return Object::to_s(obj);
@@ -253,12 +253,12 @@ namespace Mirb
 
 	ValueMap *get_vars(value_t obj)
 	{
-		if(!Value::of_type<Object>(obj))
+		if(mirb_unlikely(!Value::of_type<Object>(obj)))
 			mirb_runtime_abort("No value map on objects passed by value"); // TODO: Fix this
 
 		Object *object = auto_cast(obj);
 
-		if(!object->vars)
+		if(mirb_unlikely(!object->vars))
 			object->vars = new ValueMap(Object::vars_initial); // TODO: Allocate with GC
 		
 		return object->vars;
@@ -301,7 +301,7 @@ namespace Mirb
 
 		value_t *old = vars->get_ref(auto_cast(name));
 
-		if(old)
+		if(mirb_unlikely(old != 0))
 		{
 			*old = value;
 			return true;
@@ -498,12 +498,12 @@ namespace Mirb
 	
 	String *enforce_string(value_t obj)
 	{
-		if(Value::type(obj) == Value::String)
+		if(mirb_likely(Value::type(obj) == Value::String))
 			return auto_cast(obj);
 		
 		obj = call(obj, "to_s");
 
-		if(Value::type(obj) != Value::String)
+		if(mirb_unlikely(Value::type(obj) != Value::String))
 			return auto_cast(inspect(obj));
 
 		return auto_cast(obj);

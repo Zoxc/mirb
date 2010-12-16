@@ -100,7 +100,7 @@ namespace Mirb
 			{
 				entries++;
 
-				if(entries > mask)
+				if(mirb_unlikely(entries > mask))
 					expand();
 			}
 

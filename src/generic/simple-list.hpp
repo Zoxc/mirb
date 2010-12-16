@@ -30,7 +30,7 @@ namespace Mirb
 			
 			(node->*field).next = 0;
 			
-			if(last)
+			if(mirb_likely(last != 0))
 			{
 				(last->*field).next = static_cast<E *>(node);
 				last = node;
