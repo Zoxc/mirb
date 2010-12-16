@@ -1,23 +1,35 @@
 #pragma once
 #include "../common.hpp"
 #include "allocator.hpp"
+#include "simpler-list.hpp"
 
 namespace Mirb
 {
 	class MemoryPool:
 			public Allocator
 	{
+		struct Page
+		{
+			SimplerEntry<Page> entry;
+			#ifndef WIN32
+				size_t length;
+			#endif
+		};
+
 		static const unsigned int max_alloc = 0x1000 * 4;
 
 		private:
-			std::vector<char_t *> pages;
+			#ifdef VALGRIND
+				std::vector<char_t *> pages;
+			#else
+				SimplerList<Page> pages;
+			#endif
 
-			char_t *current_page;
 			char_t *current;
 			char_t *max;
 
 			char_t *allocate_page(size_t bytes = max_alloc);
-			void free_page(char_t *page);
+			void free_page(Page *page);
 
 			void *get_page(size_t bytes);
 

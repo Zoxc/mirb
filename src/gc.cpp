@@ -11,16 +11,24 @@
 	{
 		#include <gc/include/gc.h>
 	};
+#else
+	#include "generic/memory-pool.hpp"
 #endif
 
 namespace Mirb
 {
+	#if defined(NO_GC) && !defined(VALGRIND)
+		static MemoryPool gc_heap;
+	#endif
+
 	GC gc;
 
 	void *GC::alloc(size_t bytes)
 	{
-		#ifdef NO_GC
+		#ifdef VALGRIND
 			return std::malloc(bytes);
+		#elif NO_GC
+			return gc_heap.alloc(bytes);
 		#else
 			return GC_MALLOC(bytes);
 		#endif
@@ -28,8 +36,10 @@ namespace Mirb
 
 	void *GC::realloc(void *mem, size_t old, size_t bytes)
 	{
-		#ifdef NO_GC
+		#ifdef VALGRIND
 			return std::realloc(mem, bytes);
+		#elif NO_GC
+			return gc_heap.realloc(mem, old, bytes);
 		#else
 			return GC_REALLOC(mem, bytes);
 		#endif
