@@ -19,20 +19,14 @@ namespace Mirb
 		static const unsigned int max_alloc = 0x1000 * 4;
 
 		private:
-			#ifdef VALGRIND
-				std::vector<char_t *> pages;
-			#else
-				SimplerList<Page> pages;
-			#endif
-
 			char_t *current;
 			char_t *max;
 
+			SimplerList<Page> pages;
+
 			char_t *allocate_page(size_t bytes = max_alloc);
 			void free_page(Page *page);
-
 			void *get_page(size_t bytes);
-
 		public:
 			typedef MemoryPool &Ref;
 			typedef Allocator::Wrap<MemoryPool &> Storage;

@@ -54,8 +54,6 @@ namespace Mirb
 		BlockLabel ensure_label;
 	};
 	
-	class Block;
-
 	class Block
 	{
 		public:

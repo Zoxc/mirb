@@ -6,29 +6,24 @@
 
 namespace Mirb
 {
+	MemoryPool::~MemoryPool()
+	{
+		auto page = pages.begin();
+
+		while(page != pages.end())
+		{
+			Page *current = *page;
+			++page;
+			free_page(current);
+		};
+	}
+	
 	MemoryPool::MemoryPool()
 		: current(0),
 		max(0)
 	{
 	}
-	
-	MemoryPool::~MemoryPool()
-	{
-		#ifdef VALGRIND
-			for(std::vector<char_t *>::iterator page = pages.begin(); page != pages.end(); ++page)
-				std::free(*page);
-		#else
-			auto page = pages.begin();
-
-			while(page != pages.end())
-			{
-				Page *current = *page;
-				++page;
-				free_page(current);
-			};
-		#endif
-	}
-	
+		
 	char_t *MemoryPool::allocate_page(size_t bytes)
 	{
 		char_t *result;
@@ -39,7 +34,7 @@ namespace Mirb
 			result = (char_t *)mmap(0, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 		#endif
 		
-		assert(result);
+		mirb_runtime_assert(result);
 
 		Page *page = new ((void *)result) Page;
 
@@ -63,7 +58,7 @@ namespace Mirb
 	
 	void *MemoryPool::get_page(size_t bytes)
 	{
-		if(mirb_unlikely(bytes > max_alloc))
+		if(mirb_unlikely(bytes > (max_alloc - sizeof(Page))))
 			return allocate_page(bytes + sizeof(Page));
 
 		char_t *result = allocate_page();
@@ -93,9 +88,7 @@ namespace Mirb
 		#ifdef VALGRIND
 			result = (char_t *)malloc(bytes);
 			
-			assert(result);
-
-			pages.push_back(result);
+			mirb_runtime_assert(result);
 		#else
 			result = (char_t *)align((size_t)current, memory_align);
 
