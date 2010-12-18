@@ -277,10 +277,10 @@ namespace Mirb
 		
 		if(lexeme.allow_keywords)
 		{
-			auto value = keywords.mapping.find(lexeme.symbol);
+			Lexeme::Type keyword = keywords.mapping.try_get(lexeme.symbol, [] { return Lexeme::NONE; });
 			
-			if(value != keywords.mapping.end())
-				lexeme.type = value->second;
+			if(keyword != Lexeme::NONE)
+				lexeme.type = keyword;
 		}
 	}
 };

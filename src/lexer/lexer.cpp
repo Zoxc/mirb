@@ -4,10 +4,10 @@
 
 namespace Mirb
 {
-	Keywords::Keywords(SymbolPool &pool)
+	Keywords::Keywords(SymbolPool &pool) : mapping(2)
 	{
 		for(size_t i = (size_t)Lexeme::keyword_start; i <= (size_t)Lexeme::keyword_end; i++)
-			mapping.insert(std::pair<Symbol *, Lexeme::Type>(pool.get(Lexeme::names[i]), (Lexeme::Type)i));
+			mapping.set(pool.get(Lexeme::names[i]), (Lexeme::Type)i);
 	}
 	
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();

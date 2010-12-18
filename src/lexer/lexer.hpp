@@ -1,6 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include "../generic/range.hpp"
+#include "../generic/map.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
 
@@ -15,7 +16,7 @@ namespace Mirb
 		public:
 			Keywords(SymbolPool &pool);
 			
-			std::map<Symbol *, Lexeme::Type> mapping;
+			Map<Symbol *, Lexeme::Type> mapping;
 	};
 	
 	class Lexer
