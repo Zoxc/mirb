@@ -99,6 +99,7 @@ namespace Mirb
 
 				enum Flags
 				{
+					Fixed,
 					Register,
 					FlushCallerSavedRegisters,
 					FlushRegisters

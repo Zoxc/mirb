@@ -253,19 +253,22 @@ namespace Mirb
 						});
 					}
 				}
-				else if((*i)->flags.get<Tree::Variable::Register>())
+				else if((*i)->flags.get<Tree::Variable::Fixed>())
 				{
-					// Check if this register can be assigned by other variables
-
-					size_t loc = registers.to_virtual((*i)->loc);
-
-					if(loc != (size_t)Arch::Register::None) 
+					if((*i)->flags.get<Tree::Variable::Register>())
 					{
-						// This register can be used by other variables, make sure it is free
+						// Check if this register can be assigned by other variables
 
-						flush_reg(loc, *i);
+						size_t loc = registers.to_virtual((*i)->loc);
 
-						add_active(*i);
+						if(loc != (size_t)Arch::Register::None) 
+						{
+							// This register can be used by other variables, make sure it is free
+
+							flush_reg(loc, *i);
+
+							add_active(*i);
+						}
 					}
 				}
 				else if(active.size() == registers.count)

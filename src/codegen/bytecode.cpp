@@ -896,6 +896,7 @@ namespace Mirb
 
 		Tree::Variable *ByteCodeGenerator::Gen::lock(Tree::Variable *var, size_t reg)
 		{
+			var->flags.set<Tree::Variable::Fixed>();
 			var->flags.set<Tree::Variable::Register>();
 			var->loc = reg;
 
