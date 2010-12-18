@@ -76,23 +76,20 @@ namespace Mirb
 
 	void Lexer::setup_jump_table()
 	{
-		// TODO: Replace with lambda function
-		#define forchar(name, start, stop) for(int name = start; name <= stop; name++)
+		auto set_chars = [](char_t start, char_t stop, void (Lexer::*func)()) {
+			for(size_t c = start; c <= stop; ++c)
+				jump_table[c] = func;
+		};
 
 		// Unknown
-		forchar(c, 0, 255)
-			jump_table[c] = &Lexer::unknown;
+		set_chars(0, 255, &Lexer::unknown);
 		
 		// Stop please
 		jump_table[0] = &Lexer::null;
 		
 		// Identifiers
-		forchar(c, 'a', 'z')
-			jump_table[c] = &Lexer::ident;
-		
-		forchar(c, 'A', 'Z')
-			jump_table[c] = &Lexer::ident;
-		
+		set_chars('a', 'z', &Lexer::ident);
+		set_chars('A', 'Z', &Lexer::ident);
 		jump_table['_'] = &Lexer::ident;
 
 		// String
@@ -102,17 +99,11 @@ namespace Mirb
 		// Numbers
 		jump_table['0'] = &Lexer::zero;
 		jump_table['.'] = &Lexer::real;
-
-		forchar(c, '1', '9')
-			jump_table[c] = &Lexer::number;
+		set_chars('1', '9', &Lexer::number);
 
 		// Whitespace
-		forchar(c, 1, 9)
-			jump_table[c] = &Lexer::white;
-
-		forchar(c, 14, 32)
-			jump_table[c] = &Lexer::white;
-
+		set_chars(1, 9, &Lexer::white);
+		set_chars(14, 32, &Lexer::white);
 		jump_table[11] = &Lexer::white;
 		jump_table[12] = &Lexer::white;
 		
