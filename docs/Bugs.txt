@@ -1,4 +1,2 @@
 [ ] Module included in modules which has already been included in other classes/modules doesn't get included in the other classes/modules.
 [ ] You can only have a single + or - unary prefix.
-[N/A] Closures doesn't work with exceptions. (Blocks are not sealed!)
-[ ] Jumping can happen when the stack is screwed up.
