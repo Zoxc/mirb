@@ -81,10 +81,23 @@ namespace Mirb
 			}
 		}
 
+		size_t Block::stack_alloc(size_t size)
+		{
+			size_t result = stack_heap;
+			stack_heap += size;
+
+			stack_heap_size = std::max(stack_heap, stack_heap_size);
+
+			return result;
+		}
+		
+		void Block::stack_free(size_t address)
+		{
+			stack_heap = address;
+		}
+
 		void Block::analyse_liveness()
 		{
-			size_t var_count = variable_list.size(); // variable_list may mutate in prepare_liveness()
-
 			BitSetWrapper<MemoryPool> w(memory_pool, var_count);
 
 			loc = 0;
@@ -158,7 +171,7 @@ namespace Mirb
 				if(a->range.start < b->range.start)
 					return true;
 				else if(a->range.start == b->range.start)
-					return a->flags.get<Tree::Variable::FlushCallerSavedRegisters>();
+					return a->flags.get<Tree::Variable::FlushCallerSavedRegisters>() && !b->flags.get<Tree::Variable::FlushCallerSavedRegisters>();
 				else
 					return false; 
 			});
@@ -193,7 +206,7 @@ namespace Mirb
 				active.insert(pos, var);
 			};
 			
-			size_t stack_loc = 0;
+			size_t stack_loc = stack_heap_size;
 			
 			auto flush_reg = [&](size_t loc, Tree::Variable *var) -> void {
 				Tree::Variable *used = used_reg[loc];
@@ -304,7 +317,8 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
 			scope(scope),
 			memory_pool(memory_pool),
-			variable_list(scope->variable_list, memory_pool)
+			variable_list(scope->variable_list, memory_pool),
+			var_count(scope->variable_list.size())
 		{
 			initialize();
 		}
@@ -312,7 +326,8 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool) :
 			scope(0),
 			memory_pool(memory_pool),
-			variable_list(memory_pool)
+			variable_list(memory_pool),
+			var_count(0)
 		{
 			initialize();
 		}
@@ -324,6 +339,8 @@ namespace Mirb
 			heap_array_var = 0;
 			heap_var = 0;
 			self_var = 0;
+			stack_heap = 0;
+			stack_heap_size = 0;
 
 			#ifdef DEBUG
 				basic_block_count = 0;

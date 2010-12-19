@@ -1,6 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include "../generic/simple-list.hpp"
+#include "../generic/counted-simple-list.hpp"
 
 namespace Mirb
 {
@@ -66,5 +67,6 @@ namespace Mirb
 		};
 		
 		typedef SimpleList<Node, ListNode> NodeList;
+		typedef CountedSimpleList<Node, ListNode> CountedNodeList;
 	};
 };

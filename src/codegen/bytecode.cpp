@@ -9,6 +9,46 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
+		// TODO: Fix - This code assumes the stack grows downwards.
+
+		VariableGroup::VariableGroup(ByteCodeGenerator *bcg, size_t size) : bcg(bcg), size(size)
+		{
+			var = new (bcg->memory_pool) Tree::Variable(Tree::Variable::Temporary);
+			vars = new (bcg->memory_pool) Tree::Variable *[size];
+
+			var->index = bcg->block->var_count++;
+
+			bcg->block->variable_list.push(var);
+
+			address = bcg->block->stack_alloc(size);
+
+			for(size_t i = 0; i < size; ++i)
+			{
+				auto current = new (bcg->memory_pool) Tree::Variable(Tree::Variable::Temporary);
+
+				current->index = bcg->block->var_count++;
+				current->flags.set<Tree::Variable::Fixed>();
+				current->loc = address + size - 1 - i;
+
+				#ifdef DEBUG
+					current->group = var;
+				#endif
+
+				vars[i] = current;
+			}
+		}
+		
+		Tree::Variable *VariableGroup::use()
+		{
+			if(size)
+			{
+				bcg->gen<GroupOp>(var, address + size - 1);
+				bcg->block->stack_free(address);
+			}
+
+			return var;
+		}
+
 		void (ByteCodeGenerator::*ByteCodeGenerator::jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var) = {
 			0, // None
 			&ByteCodeGenerator::convert_string,
@@ -60,35 +100,35 @@ namespace Mirb
 		{
 			auto node = (Tree::InterpolatedStringNode *)basic_node;
 			
-			Tree::Variable *temp = reuse(var);
+			size_t param_count = 0;
+
+			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
+			{
+				if(strlen((const char *)i().string))
+					param_count++;
+				
+				param_count++;
+			}
 			
-			size_t parameters = 0;
+			if(strlen((const char *)node->tail))
+				param_count++;
+			
+			VariableGroup group(this, param_count);
+
+			size_t param = 0;
 			
 			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
 			{
 				if(strlen((const char *)i().string))
-				{
-					parameters++;
-					
-					gen<StringOp>(temp, i().string);
-					gen<PushOp>(temp);
-				}
+					gen<StringOp>(group.vars[param++], i().string);
 				
-				parameters++;
-				
-				to_bytecode(i().group, temp);
-				gen<PushOp>(temp);
-			}
-		
-			if(strlen((const char *)node->tail))
-			{
-				parameters++;
-				
-				gen<StringOp>(temp, node->tail);
-				gen<PushOp>(temp);
+				to_bytecode(i().group, group.vars[param++]);
 			}
 			
-			gen<InterpolateOp>(var, parameters);
+			if(strlen((const char *)node->tail))
+				gen<StringOp>(group.vars[param++], node->tail);
+			
+			gen<InterpolateOp>(var, group.size, group.use());
 		}
 		
 		void ByteCodeGenerator::convert_integer(Tree::Node *basic_node, Tree::Variable *var)
@@ -169,7 +209,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), (size_t)0, null_var(), (Mirb::Block *)0);
+			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), null_var(), (Mirb::Block *)0, (size_t)0, null_var());
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var)
@@ -215,14 +255,12 @@ namespace Mirb
 			Tree::Variable *left = reuse(var);
 			
 			to_bytecode(node->left, left);
+
+			VariableGroup group(this, 1);
 			
-			Tree::Variable *right = create_var();
+			to_bytecode(node->right, group.vars[0]);
 			
-			to_bytecode(node->right, right);
-			
-			gen<PushOp>(right);
-			
-			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), (size_t)1, null_var(), (Mirb::Block *)0);
+			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), null_var(), (Mirb::Block *)0, group.size, group.use());
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var)
@@ -374,8 +412,6 @@ namespace Mirb
 		{
 			auto node = (Tree::ArrayNode *)basic_node;
 			
-			Tree::Variable *temp = reuse(var);
-			
 			if(!var)
 			{
 				for(auto i = node->entries.begin(); i != node->entries.end(); ++i)
@@ -384,18 +420,16 @@ namespace Mirb
 				return;
 			}
 			
-			size_t entries = 0;
+			size_t param = 0;
+
+			VariableGroup group(this, node->entries.size);
 			
 			for(auto i = node->entries.begin(); i != node->entries.end(); ++i)
 			{
-				to_bytecode(*i, temp);
-				
-				gen<PushOp>(temp);
-				
-				entries++;
+				to_bytecode(*i, group.vars[param++]);
 			}
 			
-			gen<ArrayOp>(var, entries);	
+			gen<ArrayOp>(var, group.size, group.use());	
 		}
 		
 		void ByteCodeGenerator::convert_call(Tree::Node *basic_node, Tree::Variable *var)
@@ -406,11 +440,12 @@ namespace Mirb
 			
 			to_bytecode(node->object, obj);
 			
-			size_t param_count;
+			size_t argc;
+			Tree::Variable *argv;
+
+			Tree::Variable *closure = call_args(node->arguments, node->block ? node->block->scope : 0, argc, argv);
 			
-			Tree::Variable *closure = call_args(node->arguments, param_count, node->block ? node->block->scope : 0, 0);
-			
-			gen<CallOp>(var, obj, node->method, param_count, closure, node->block ? node->block->scope->final : 0);
+			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : 0, argc, argv);
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, Tree::Variable *var)
@@ -422,23 +457,24 @@ namespace Mirb
 				Tree::Variable *closure = node->block ? block_arg(scope) : scope->owner->block_parameter;
 				
 				// push arguments
+
+				VariableGroup group(this, scope->owner->parameters.size);
 				
-				size_t param_count = 0;
+				size_t param = 0;
 				
-				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i, ++param_count)
-				{
-					gen<PushOp>(*i);
-				}
+				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i)
+					gen<MoveOp>(group.vars[param++], *i);
 				
-				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, param_count, closure, node->block ? node->block->scope->final : 0);
+				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, closure, node->block ? node->block->scope->final : 0, group.size, group.use());
 			}
 			else
 			{
-				size_t param_count;
+				size_t argc;
+				Tree::Variable *argv;
+
+				Tree::Variable *closure = call_args(node->arguments, scope, argc, argv);
 				
-				Tree::Variable *closure = call_args(node->arguments, param_count, scope, 0);
-				
-				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, param_count, closure, node->block ? node->block->scope->final : 0);
+				gen<SuperOp>(var, self_var(), scope->module_var, scope->name_var, closure, node->block ? node->block->scope->final : 0, argc, argv);
 			}
 		}
 		
@@ -835,8 +871,7 @@ namespace Mirb
 		{
 			auto var = new (memory_pool) Tree::Variable(Tree::Variable::Temporary);
 
-			var->owner = scope;
-			var->index = block->variable_list.size();
+			var->index = block->var_count++;
 
 			block->variable_list.push(var);
 			
@@ -852,44 +887,41 @@ namespace Mirb
 				var = create_var();
 				auto *block_attach = defer(scope);
 				
-				size_t scopes = 0;
+				VariableGroup group(this, scope->referenced_scopes.size());
 
-				for(auto i = scope->referenced_scopes.begin(); i != scope->referenced_scopes.end(); ++i, ++scopes)
+				for(size_t i = 0; i < scope->referenced_scopes.size(); ++i)
 				{
-					if(*i == this->scope)
-						gen<PushOp>(block->heap_var);
+					if(scope->referenced_scopes[i] == this->scope)
+						gen<MoveOp>(group.vars[i], block->heap_var);
 					else
-					{
-						gen<LookupOp>(var, block->heap_array_var, scope->referenced_scopes.index_of(i));
-						gen<PushOp>(var);
-					}
+						gen<LookupOp>(group.vars[i], block->heap_array_var, scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
 				}
 
-				gen<ClosureOp>(var, self_var(), this->scope->name_var, this->scope->module_var, block_attach, scopes);
+				gen<ClosureOp>(var, self_var(), this->scope->name_var, this->scope->module_var, block_attach, group.size, group.use());
 			}
 			
 			return var;
 		}
 		
-		Tree::Variable *ByteCodeGenerator::call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var)
+		Tree::Variable *ByteCodeGenerator::call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, Tree::Variable *&argv)
 		{
-			size_t parameters = 0;
-
 			if(!arguments.empty())
 			{
-				Tree::Variable *temp = reuse(var);
-			
+				VariableGroup group(this, arguments.size);
+
+				size_t param = 0;
+				
 				for(auto i = arguments.begin(); i != arguments.end(); ++i)
-				{
-					parameters++;
-				
-					to_bytecode(*i, temp);
-				
-					gen<PushOp>(temp);
-				}
+					to_bytecode(*i, group.vars[param++]);
+
+				argc = group.size;
+				argv = group.use();
 			}
-			
-			param_count = parameters;
+			else
+			{
+				argc = 0;
+				argv = 0;
+			}
 			
 			return block_arg(scope);
 		}

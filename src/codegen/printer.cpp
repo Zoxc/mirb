@@ -26,8 +26,17 @@ namespace Mirb
 				{
 					case Tree::Variable::Temporary:
 					{
-						result << "%" << var->index;
-					
+						#ifdef DEBUG
+							if(var->group != 0)
+							{
+								result << "%" << var->group->index << "[" << (var->index - var->group->index - 1) << "]";
+							}
+							else
+								result << "%" << var->index;
+						#else
+							result << "%" << var->index;
+						#endif
+											
 						break;
 					}
 				
@@ -132,32 +141,18 @@ namespace Mirb
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
 				
-				case Opcode::Push:
+				case Opcode::Group:
 				{
-					auto op = (PushOp *)opcode;
+					auto op = (GroupOp *)opcode;
 					
-					return "push " + var(op->var);
-				}
-				
-				case Opcode::PushImmediate:
-				{
-					auto op = (PushImmediateOp *)opcode;
-					
-					return "push " + imm(op->imm);
-				}
-				
-				case Opcode::PushRaw:
-				{
-					auto op = (PushRawOp *)opcode;
-					
-					return "push " + raw(op->imm);
+					return var(op->var) + " = group " + raw(op->address);
 				}
 				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
 					
-					return var(op->var) + " = closure " + var(op->self) + ", " + var(op->name) + ", " + var(op->module) + ", " + print_block(op->block) + ", " + raw(op->scope_count);
+					return var(op->var) + " = closure " + var(op->self) + ", " + var(op->name) + ", " + var(op->module) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Class:
@@ -185,14 +180,14 @@ namespace Mirb
 				{
 					auto op = (CallOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + raw(op->param_count) + ", " + var(op->block_var) + ", " + print_block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Super:
 				{
 					auto op = (SuperOp *)opcode;
 					
-					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + raw(op->param_count) + ", " + var(op->block_var) + ", " + print_block(op->block);
+					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Lookup:
@@ -314,7 +309,7 @@ namespace Mirb
 				{
 					auto op = (ArrayOp *)opcode;
 					
-					return var(op->var) + " = array " + raw(op->element_count);
+					return var(op->var) + " = array " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::String:
@@ -328,7 +323,7 @@ namespace Mirb
 				{
 					auto op = (InterpolateOp *)opcode;
 					
-					return var(op->var) + " = interpolate " + raw(op->param_count);
+					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc);
 				}
 
 				case Opcode::StaticCall:

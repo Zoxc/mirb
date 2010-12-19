@@ -93,7 +93,7 @@ namespace Mirb
 		}
 	}
 	
-	void Parser::parse_arguments(Tree::NodeList &arguments)
+	void Parser::parse_arguments(Tree::CountedNodeList &arguments)
 	{
 		do
 		{
@@ -248,21 +248,21 @@ namespace Mirb
 			case Lexeme::STRING_START:
 			{
 				auto result = new (fragment) Tree::InterpolatedStringNode;
-					
+				
 				do
 				{
 					auto pair = new (fragment) Tree::InterpolatedPairNode;
-						
+					
 					pair->string = lexer.lexeme.c_str;
-						
+					
 					lexer.step();
-						
+					
 					pair->group = parse_group();
-						
+					
 					result->pairs.append(pair);
 				}
 				while(lexeme() == Lexeme::STRING_CONTINUE);
-					
+				
 				if(require(Lexeme::STRING_END))
 				{
 					result->tail = lexer.lexeme.c_str;

@@ -28,7 +28,7 @@ namespace Mirb
 				uint8_t *current;
 				uint8_t *end;
 				
-				SimplerEntry<Chunk> entry;
+				SimpleEntry<Chunk> entry;
 				
 				void *allocate(size_t bytes);
 		};
@@ -108,7 +108,13 @@ namespace Mirb
 				Type type;
 				Scope *owner; // Only valid for heap variables
 				
-				Variable(Type type) : type(type) {}
+				Variable(Type type)
+					: type(type)
+					#ifdef DEBUG
+						, group(0)
+					#endif
+				{
+				}
 
 				LiveRange range;
 
@@ -117,6 +123,10 @@ namespace Mirb
 				size_t loc;
 
 				size_t index;
+
+				#ifdef DEBUG
+					Variable *group;
+				#endif
 		};
 
 		class NamedVariable:
@@ -135,7 +145,7 @@ namespace Mirb
 			public:
 				Parameter(Type type) : NamedVariable(type) {}
 				
-				SimplerEntry<Parameter> parameter_entry;
+				SimpleEntry<Parameter> parameter_entry;
 		};
 
 		class VariableMapFunctions:
@@ -222,7 +232,7 @@ namespace Mirb
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
 
-				SimplerList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
+				CountedSimpleList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
 				
 				Vector<Scope *, Fragment> zsupers;
 				

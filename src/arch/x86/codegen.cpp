@@ -298,11 +298,16 @@ namespace Mirb
 		{
 			stream.u8(mod << 6 | reg << 3 | rm);
 		}
-
+		
 		void NativeGenerator::stack_modrm(size_t reg, Tree::Variable *var)
 		{
+			stack_modrm(reg, var->loc);
+		}
+
+		void NativeGenerator::stack_modrm(size_t reg, size_t loc)
+		{
 			modrm(1, reg, Arch::Register::BP);
-			stream.i8(stack_offset(var));
+			stream.i8(stack_offset(loc));
 		}
 
 		void NativeGenerator::mov_imm_to_reg(size_t imm, size_t reg)
@@ -467,6 +472,26 @@ namespace Mirb
 				mov_reg_to_reg_index(reg, spare, index);
 			}
 		}
+
+		void NativeGenerator::load_offset_to_reg(size_t offset, size_t reg)
+		{
+			rex(reg_high(reg), 0, 0);
+			stream.u8(0x8D);
+			stack_modrm(reg, offset);
+		}
+
+		void NativeGenerator::load_offset_to_var(size_t offset, Tree::Variable *dst)
+		{
+			if(dst->flags.get<Tree::Variable::Register>())
+			{
+				load_offset_to_reg(offset, dst->loc);
+			}
+			else
+			{
+				load_offset_to_reg(offset, spare);
+				mov_reg_to_var(spare, dst);
+			}
+		}
 		
 		void NativeGenerator::zero_test_reg(size_t reg)
 		{
@@ -564,25 +589,15 @@ namespace Mirb
 			mov_arg_to_var(op.arg, op.var);
 		}
 		
-		template<> void NativeGenerator::generate(PushOp &op)
+		template<> void NativeGenerator::generate(GroupOp &op)
 		{
-			push_var(op.var);
-		}
-		
-		template<> void NativeGenerator::generate(PushImmediateOp &op)
-		{
-			push_imm(op.imm);
-		}
-		
-		template<> void NativeGenerator::generate(PushRawOp &op)
-		{
-			push_imm(op.imm);
+			load_offset_to_var(op.address, op.var);
 		}
 		
 		template<> void NativeGenerator::generate(ClosureOp &op)
 		{
-			push_reg(Arch::Register::SP);
-			push_imm(op.scope_count);
+			push_var(op.argv);
+			push_imm(op.argc);
 			push_var(op.module);
 			push_var(op.name);
 			push_var(op.self);
@@ -590,8 +605,6 @@ namespace Mirb
 			push_imm((size_t)op.block);
 
 			call(&Arch::Support::create_closure);
-
-			stack_pop(op.scope_count + 6);
 
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
@@ -643,8 +656,12 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(CallOp &op)
 		{
-			push_reg(Arch::Register::SP);
-			push_imm(op.param_count);
+			if(op.argv)
+				push_var(op.argv);
+			else
+				push_reg(Arch::Register::SP);
+			
+			push_imm(op.argc);
 			push_imm((size_t)op.method);
 			push_var(op.obj);
 
@@ -655,8 +672,6 @@ namespace Mirb
 			
 			call(&Arch::Support::call);
 
-			stack_pop(op.param_count);
-			
 			if(op.block)
 			{
 				size_t break_id = op.block->scope->break_id;
@@ -671,8 +686,12 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(SuperOp &op)
 		{
-			push_reg(Arch::Register::SP);
-			push_imm(op.param_count);
+			if(op.argv)
+				push_var(op.argv);
+			else
+				push_reg(Arch::Register::SP);
+
+			push_imm(op.argc);
 			push_var(op.method);
 			push_var(op.self);
 			
@@ -683,8 +702,6 @@ namespace Mirb
 			
 			call(&Arch::Support::super);
 
-			stack_pop(op.param_count);
-			
 			if(op.block)
 			{
 				size_t break_id = op.block->scope->break_id;
@@ -877,12 +894,9 @@ namespace Mirb
 
 		template<> void NativeGenerator::generate(ArrayOp &op)
 		{
-			push_reg(Arch::Register::SP);
-			push_imm(op.element_count);
+			push_var(op.argv);
+			push_imm(op.argc);
 			call(&Arch::Support::create_array);
-			
-			stack_pop(op.element_count + 2);
-			
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		
@@ -895,12 +909,9 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(InterpolateOp &op)
 		{
-			push_reg(Arch::Register::SP);
-			push_imm(op.param_count);
+			push_var(op.argv);
+			push_imm(op.argc);
 			call(&Arch::Support::interpolate);
-			
-			stack_pop(op.param_count + 2);
-			
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
 		

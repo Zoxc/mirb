@@ -116,8 +116,8 @@ namespace Mirb
 			{
 				return Mirb::Support::define_string(string);
 			}
-				
-			value_t __cdecl interpolate(size_t argc, value_t argv[])
+			
+			value_t __stdcall interpolate(size_t argc, value_t argv[])
 			{
 				return Mirb::Support::interpolate(argc, argv);
 			}
@@ -161,7 +161,7 @@ namespace Mirb
 				return Mirb::Support::set_ivar(obj, name, value);
 			}
 
-			value_t __cdecl create_array(size_t argc, value_t argv[])
+			value_t __stdcall create_array(size_t argc, value_t argv[])
 			{
 				return Mirb::Support::create_array(argc, argv);
 			}
@@ -360,7 +360,7 @@ namespace Mirb
 				}
 			#endif
 			
-			value_t __cdecl create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[])
+			value_t __stdcall create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[])
 			{
 				return Mirb::Support::create_closure(block, self, name, module, argc, argv);
 			}

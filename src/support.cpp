@@ -13,10 +13,8 @@ namespace Mirb
 		{
 			value_t **scopes = (value_t **)gc.alloc(sizeof(value_t *) * argc);
 			
-			MIRB_ARG_EACH_RAW(i)
-			{
-				scopes[i] = MIRB_ARG(i);
-			}
+			for(size_t i = 0; i < argc; ++i)
+				scopes[i] = argv[i];
 
 			return auto_cast(new (gc) Proc(Proc::class_ref, self, name, module, block, argc, scopes));
 		}
@@ -56,7 +54,7 @@ namespace Mirb
 		{
 			CharArray result;
 
-			MIRB_ARG_EACH(i)
+			for(size_t i = 0; i < argc; ++i)
 			{
 				value_t obj = argv[i];
 
@@ -73,9 +71,9 @@ namespace Mirb
 		value_t create_array(size_t argc, value_t argv[])
 		{
 			Array *array = new (gc) Array(Array::class_ref);
-
-			MIRB_ARG_EACH(i)
-				array->vector.push(MIRB_ARG(i));
+			
+			for(size_t i = 0; i < argc; ++i)
+				array->vector.push(argv[i]);
 
 			return auto_cast(array);
 		}

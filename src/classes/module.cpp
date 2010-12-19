@@ -42,7 +42,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		MIRB_ARG_EACH(i)
+		for(size_t i = 0; i < argc; ++i)
 		{
 			call(argv[i], "append_features", 1, &obj);
 			call(argv[i], "included", 1, &obj);

@@ -24,9 +24,7 @@ namespace Mirb
 		struct LoadOp;
 		struct LoadRawOp;
 		struct LoadArgOp;
-		struct PushOp;
-		struct PushImmediateOp;
-		struct PushRawOp;
+		struct GroupOp;
 		struct ClosureOp;
 		struct ClassOp;
 		struct ModuleOp;
@@ -67,9 +65,7 @@ namespace Mirb
 				Load,
 				LoadRaw,
 				LoadArg,
-				Push,
-				PushImmediate,
-				PushRaw,
+				Group,
 				Closure,
 				Class,
 				Module,
@@ -125,14 +121,8 @@ namespace Mirb
 					case LoadArg:
 						return T<LoadArgOp>::func(arg, (LoadArgOp &)*this);
 
-					case Push:
-						return T<PushOp>::func(arg, (PushOp &)*this);
-
-					case PushImmediate:
-						return T<PushImmediateOp>::func(arg, (PushImmediateOp &)*this);
-
-					case PushRaw:
-						return T<PushRawOp>::func(arg, (PushRawOp &)*this);
+					case Group:
+						return T<GroupOp>::func(arg, (GroupOp &)*this);
 
 					case Closure:
 						return T<ClosureOp>::func(arg, (ClosureOp &)*this);
@@ -284,32 +274,17 @@ namespace Mirb
 			LoadArgOp(Tree::Variable *var, size_t arg) : var(var), arg(arg) {}
 		};
 		
-		struct PushOp:
-			public OpcodeWrapper<Opcode::Push>
+		struct GroupOp:
+			public OpcodeWrapper<Opcode::Group>
 		{
 			Tree::Variable *var;
-
-			template<typename T> void use(T use) { use(var); };
-
-			PushOp(Tree::Variable *var) : var(var) {}
-		};
-		
-		struct PushImmediateOp:
-			public OpcodeWrapper<Opcode::PushImmediate>
-		{
-			value_t imm;
+			size_t address;
 			
-			PushImmediateOp(value_t imm) : imm(imm) {}
+			template<typename T> void def(T def) { def(var); };
+
+			GroupOp(Tree::Variable *var, size_t address) : var(var), address(address) {}
 		};
-		
-		struct PushRawOp:
-			public OpcodeWrapper<Opcode::PushRaw>
-		{
-			size_t imm;
-			
-			PushRawOp(size_t imm) : imm(imm) {}
-		};
-		
+
 		struct ClosureOp:
 			public OpcodeWrapper<Opcode::Closure>
 		{
@@ -318,7 +293,8 @@ namespace Mirb
 			Tree::Variable *name;
 			Tree::Variable *module;
 			Mirb::Block *block;
-			size_t scope_count;
+			size_t argc;
+			Tree::Variable *argv;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use)
@@ -326,9 +302,10 @@ namespace Mirb
 				use(self);
 				use(name);
 				use(module);
+				use(argv);
 			};
 
-			ClosureOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *name, Tree::Variable *module, Mirb::Block *block, size_t scope_count) : var(var), self(self), name(name), module(module), block(block), scope_count(scope_count) {}
+			ClosureOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *name, Tree::Variable *module, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), self(self), name(name), module(module), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct ClassOp:
@@ -385,21 +362,25 @@ namespace Mirb
 			Tree::Variable *var;
 			Tree::Variable *obj;
 			Symbol *method;
-			size_t param_count;
 			Tree::Variable *block_var;
 			Mirb::Block *block;
+			size_t argc;
+			Tree::Variable *argv;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
 			template<typename T> void use(T use)
 			{
 				use(obj);
-
+				
+				if(argv)
+					use(argv);
+				
 				if(block_var)
 					use(block_var);
 			};
 
-			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, size_t param_count, Tree::Variable *block_var, Mirb::Block *block) : var(var), obj(obj), method(method), param_count(param_count), block_var(block_var), block(block) {}
+			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, Tree::Variable *block_var, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct SuperOp:
@@ -409,9 +390,10 @@ namespace Mirb
 			Tree::Variable *self;
 			Tree::Variable *module;
 			Tree::Variable *method;
-			size_t param_count;
 			Tree::Variable *block_var;
 			Mirb::Block *block;
+			size_t argc;
+			Tree::Variable *argv;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
@@ -421,11 +403,14 @@ namespace Mirb
 				use(module);
 				use(method);
 
+				if(argv)
+					use(argv);
+
 				if(block_var)
 					use(block_var);
 			};
 
-			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, size_t param_count, Tree::Variable *block_var, Mirb::Block *block) : var(var), self(self), module(module), method(method), param_count(param_count), block_var(block_var), block(block) {}
+			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, Tree::Variable *block_var, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), self(self), module(module), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct LookupOp:
@@ -543,7 +528,7 @@ namespace Mirb
 		{
 			BasicBlock *label;
 			void *code;
-			SimplerEntry<BranchOpcode> branch_entry;
+			SimpleEntry<BranchOpcode> branch_entry;
 
 			BranchOpcode(Opcode::Type type, BasicBlock *label) : Opcode(type), label(label) {}
 		};
@@ -649,11 +634,13 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Array>
 		{
 			Tree::Variable *var;
-			size_t element_count;
+			size_t argc;
+			Tree::Variable *argv;
 			
 			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(argv); };
 
-			ArrayOp(Tree::Variable *var, size_t element_count) : var(var), element_count(element_count) {}
+			ArrayOp(Tree::Variable *var, size_t argc, Tree::Variable *argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
 		struct StringOp:
@@ -671,11 +658,13 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Interpolate>
 		{
 			Tree::Variable *var;
-			size_t param_count;
+			size_t argc;
+			Tree::Variable *argv;
 			
 			template<typename T> void def(T def) { def(var); };
+			template<typename T> void use(T use) { use(argv); };
 
-			InterpolateOp(Tree::Variable *var, size_t param_count) : var(var), param_count(param_count) {}
+			InterpolateOp(Tree::Variable *var, size_t argc, Tree::Variable *argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
 		struct StaticCallOp:

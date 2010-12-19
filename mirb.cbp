@@ -108,6 +108,7 @@
 		<Unit filename="src\generic\benchmark.cpp" />
 		<Unit filename="src\generic\benchmark.hpp" />
 		<Unit filename="src\generic\bit-set-wrapper.hpp" />
+		<Unit filename="src\generic\counted-simple-list.hpp" />
 		<Unit filename="src\generic\executable-heap.cpp" />
 		<Unit filename="src\generic\executable-heap.hpp" />
 		<Unit filename="src\generic\hash-table.hpp" />

@@ -49,6 +49,7 @@
     <ClInclude Include="..\..\src\generic\allocator.hpp" />
     <ClInclude Include="..\..\src\generic\benchmark.hpp" />
     <ClInclude Include="..\..\src\generic\bit-set-wrapper.hpp" />
+    <ClInclude Include="..\..\src\generic\counted-simple-list.hpp" />
     <ClInclude Include="..\..\src\generic\executable-heap.hpp" />
     <ClInclude Include="..\..\src\generic\hash-table.hpp" />
     <ClInclude Include="..\..\src\generic\list.hpp" />

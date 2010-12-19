@@ -55,7 +55,7 @@ namespace Mirb
 			Tree::Node *parse_unary();
 			Tree::Node *parse_boolean_unary();
 			Tree::Node *parse_factor();
-			void parse_arguments(Tree::NodeList &arguments);
+			void parse_arguments(Tree::CountedNodeList &arguments);
 			Tree::Node *parse_boolean();
 			
 			Tree::Node *parse_expression()
@@ -97,7 +97,7 @@ namespace Mirb
 			bool is_lookup();
 			Tree::Node *parse_lookup(Tree::Node *child);
 			Tree::BlockNode *parse_block();
-			void parse_arguments(Tree::NodeList &arguments, bool *parenthesis);
+			void parse_arguments(Tree::CountedNodeList &arguments, bool *parenthesis);
 			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args, bool can_be_var = false);
 			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, bool default_var);
 			Tree::Node *parse_lookup_chain();

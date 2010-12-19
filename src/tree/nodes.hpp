@@ -83,7 +83,7 @@ namespace Mirb
 			Node *group;
 		};
 		
-		typedef SimpleList<InterpolatedPairNode, ListNode>  InterpolatedPairList;
+		typedef SimpleList<InterpolatedPairNode, ListNode> InterpolatedPairList;
 		
 		struct InterpolatedStringNode:
 			public Node
@@ -92,7 +92,7 @@ namespace Mirb
 			
 			InterpolatedPairList pairs;
 			
-			const char_t *tail;
+			const char_t *tail; // TODO: Replace with a nicer type
 		};
 		
 		struct IntegerNode:
@@ -165,7 +165,7 @@ namespace Mirb
 		{
 			NodeType type() { return Array; }
 			
-			NodeList entries;
+			CountedNodeList entries;
 		};
 		
 		struct BlockNode:
@@ -181,7 +181,7 @@ namespace Mirb
 		{
 			NodeType type() { return Invoke; }
 			
-			NodeList arguments;
+			CountedNodeList arguments;
 			BlockNode *block; // can be zero
 		};
 		

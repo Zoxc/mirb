@@ -14,6 +14,23 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
+		class ByteCodeGenerator;
+
+		class VariableGroup
+		{
+			private:
+				size_t address;
+				ByteCodeGenerator *bcg;
+				Tree::Variable *var;
+			public:
+				VariableGroup(ByteCodeGenerator *bcg, size_t size);
+				
+				Tree::Variable *use();
+
+				size_t size;
+				Tree::Variable **vars;
+		};
+
 		class ByteCodeGenerator
 		{
 			private:
@@ -48,8 +65,6 @@ namespace Mirb
 
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var);
 				
-				Block *block;
-
 				BasicBlock *body; // The point after the prolog of the block.
 				
 				Tree::Scope *scope;
@@ -71,7 +86,7 @@ namespace Mirb
 				}
 				
 				Tree::Variable *self_var();
-				
+
 				BranchIfOp *gen_if(BasicBlock *ltrue, Tree::Variable *var)
 				{
 					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
@@ -115,12 +130,13 @@ namespace Mirb
 				}
 				
 				Tree::Variable *block_arg(Tree::Scope *scope);
-				Tree::Variable *call_args(Tree::NodeList &arguments, size_t &param_count, Tree::Scope *scope, Tree::Variable *var);
+				Tree::Variable *call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, Tree::Variable *&argv);
 				
 			public:
 				ByteCodeGenerator(MemoryPool &memory_pool);
 
 				MemoryPool &memory_pool;
+				Block *block;
 				
 				BasicBlock *split(BasicBlock *block)
 				{

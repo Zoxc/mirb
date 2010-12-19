@@ -109,7 +109,7 @@ namespace Mirb
 			return false;
 	}
 
-	void Parser::parse_arguments(Tree::NodeList &arguments, bool *parenthesis)
+	void Parser::parse_arguments(Tree::CountedNodeList &arguments, bool *parenthesis)
 	{
 		if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
 		{

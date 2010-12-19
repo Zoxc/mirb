@@ -472,7 +472,7 @@ namespace Mirb
 		if(mirb_unlikely(!method))
 			return value_raise;
 
-		return call_code(method, obj, auto_cast(name), module, block, argc, argv);
+		return call_code(method, obj, name, module, block, argc, argv);
 	}
 	
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])

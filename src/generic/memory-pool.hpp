@@ -10,7 +10,7 @@ namespace Mirb
 	{
 		struct Page
 		{
-			SimplerEntry<Page> entry;
+			SimpleEntry<Page> entry;
 			#ifndef WIN32
 				size_t length;
 			#endif

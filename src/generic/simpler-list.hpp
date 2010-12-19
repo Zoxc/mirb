@@ -1,17 +1,10 @@
 #pragma once
 #include "../common.hpp"
+#include "simple-list.hpp"
 
 namespace Mirb
 {
-	template<class T> class SimplerEntry
-	{
-	public:
-		SimplerEntry() : next(0) {}
-
-		T *next;
-	};
-
-	template<class T, class E = T, SimplerEntry<E> E::*field = &E::entry> class SimplerList
+	template<class T, class E = T, SimpleEntry<E> E::*field = &E::entry> class SimplerList
 	{
 	public:
 		SimplerList() : first(0) {}

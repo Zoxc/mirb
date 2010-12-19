@@ -79,6 +79,8 @@ namespace Mirb
 		{
 			private:
 				void initialize();
+				size_t stack_heap;
+
 			public:
 				Mirb::Block *final;
 				Tree::Scope *scope;
@@ -92,18 +94,21 @@ namespace Mirb
 				ExceptionBlock *current_exception_block;
 				size_t current_exception_block_id;
 
-				size_t var_count;
-
 				size_t stack_vars;
+				size_t stack_heap_size;
 				
 				bit_set_t used_registers;
 
 				Vector<Tree::Variable *, MemoryPool> variable_list; // A list of all variables in this block. Copied from Tree::Scope::variable_list on creation.
+				size_t var_count; // The total variable count. May be greater than variable_list.size().
 				
 				Tree::Variable *heap_array_var;
 				Tree::Variable *heap_var;
 				Tree::Variable *self_var;
 				Tree::Variable *return_var;
+				
+				size_t stack_alloc(size_t size);
+				void stack_free(size_t address);
 				
 				#ifdef DEBUG
 					size_t basic_block_count; // Nicer basic block labeling...

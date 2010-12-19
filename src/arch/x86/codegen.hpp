@@ -47,11 +47,14 @@ namespace Mirb
 				void rex(size_t r, size_t x, size_t b);
 				void modrm(size_t mod, size_t reg, size_t rm);
 				void stack_modrm(size_t reg, Tree::Variable *var);
+				void stack_modrm(size_t reg, size_t loc);
 				void mov_imm_to_reg(size_t imm, size_t reg);
 				void mov_imm_to_var(size_t imm, Tree::Variable *var);
 				void mov_reg_to_reg(size_t src, size_t dst);
 				void mov_reg_to_var(size_t reg, Tree::Variable *var);
 				void mov_var_to_reg(Tree::Variable *var, size_t reg);
+				void load_offset_to_reg(size_t offset, size_t reg);
+				void load_offset_to_var(size_t offset, Tree::Variable *dst);
 				void push_reg(size_t reg);
 				void push_var(Tree::Variable *var);
 				void push_imm(size_t imm);
@@ -99,9 +102,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(LoadOp &op);
 		template<> void NativeGenerator::generate(LoadRawOp &op);
 		template<> void NativeGenerator::generate(LoadArgOp &op);
-		template<> void NativeGenerator::generate(PushOp &op);
-		template<> void NativeGenerator::generate(PushImmediateOp &op);
-		template<> void NativeGenerator::generate(PushRawOp &op);
+		template<> void NativeGenerator::generate(GroupOp &op);
 		template<> void NativeGenerator::generate(ClosureOp &op);
 		template<> void NativeGenerator::generate(ClassOp &op);
 		template<> void NativeGenerator::generate(ModuleOp &op);

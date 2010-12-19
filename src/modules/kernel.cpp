@@ -129,7 +129,7 @@ namespace Mirb
 	
 	value_t Kernel::print(size_t argc, value_t argv[])
 	{
-		MIRB_ARG_EACH(i)
+		for(size_t i = 0; i < argc; ++i)
 		{
 			value_t arg = argv[i];
 
@@ -145,7 +145,7 @@ namespace Mirb
 	
 	value_t Kernel::puts(size_t argc, value_t argv[])
 	{
-		MIRB_ARG_EACH(i)
+		for(size_t i = 0; i < argc; ++i)
 		{
 			value_t arg = argv[i];
 
@@ -169,9 +169,9 @@ namespace Mirb
 
 		size_t i = 0;
 
-		if(Value::type(MIRB_ARG(0)) == Value::Class)
+		if(Value::type(argv[0]) == Value::Class)
 		{
-			instance_of = MIRB_ARG(0);
+			instance_of = argv[0];
 			i++;
 		}
 		else
@@ -179,7 +179,7 @@ namespace Mirb
 	
 		if(argc > i)
 		{
-			message = MIRB_ARG(i);
+			message = argv[i];
 			i++;
 		}
 		else
@@ -187,7 +187,7 @@ namespace Mirb
 
 		if(argc > i)
 		{
-			backtrace = MIRB_ARG(i);
+			backtrace = argv[i];
 			i++;
 		}
 		else
