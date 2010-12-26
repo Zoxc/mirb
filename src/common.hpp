@@ -83,10 +83,16 @@ namespace Mirb
 	#define mirb_stringify(value) #value
 	#define mirb_runtime_abort_internal(expression, file, line, message) runtime_abort_with_message(file ":" mirb_stringify(line) ": " + std::string(message))
 	#define mirb_runtime_abort(message) mirb_runtime_abort_internal(expression, __FILE__, __LINE__, message)
-	#define mirb_runtime_assert(expression) assert(expression)
+
+	#ifdef _MSC_VER
+		#define mirb_runtime_assert(expression) assert(expression)
+	#else
+		#define mirb_runtime_assert_internal(expression, file, line) do { if(!mirb_unlikely(expression)) { std::cout << "Assertion failed: " #expression ", file " file ", line " mirb_stringify(line) "\n"; asm("int $3"); } } while(0)
+		#define mirb_runtime_assert(expression) mirb_runtime_assert_internal(expression, __FILE__, __LINE__)
+	#endif
 
 	#ifdef DEBUG
-		#define mirb_debug_assert(expression) assert(expression)
+		#define mirb_debug_assert(expression) mirb_runtime_assert(expression)
 		#define mirb_debug_abort(message) mirb_runtime_abort_internal(expression, __FILE__, __LINE__, message)
 	#else
 		#define mirb_debug_assert(expression)

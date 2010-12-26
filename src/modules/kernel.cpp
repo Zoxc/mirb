@@ -102,7 +102,7 @@ namespace Mirb
 
 		char *data = (char *)malloc(length + 1);
 
-		mirb_runtime_assert(data);
+		mirb_runtime_assert(data != 0);
 
 		if(fread(data, 1, length, file) != length)
 		{

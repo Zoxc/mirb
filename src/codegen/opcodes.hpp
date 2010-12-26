@@ -55,6 +55,7 @@ namespace Mirb
 		struct StringOp;
 		struct InterpolateOp;
 		struct StaticCallOp;
+		struct SetupVarsOp;
 		struct RaiseOp;
 		
 		struct Opcode
@@ -96,6 +97,7 @@ namespace Mirb
 				Interpolate,
 				StaticCall,
 				Raise,
+				SetupVars,
 				Prologue
 			};
 			
@@ -210,9 +212,12 @@ namespace Mirb
 					
 					case StaticCall:
 						return T<StaticCallOp>::func(arg, (StaticCallOp &)*this);
-
+						
 					case Raise:
 						return T<RaiseOp>::func(arg, (RaiseOp &)*this);
+
+					case SetupVars:
+						return T<SetupVarsOp>::func(arg, (SetupVarsOp &)*this);
 
 					default:
 						mirb_debug_abort("Unknown opcode type");
@@ -689,6 +694,15 @@ namespace Mirb
 		struct RaiseOp:
 			public OpcodeWrapper<Opcode::Raise>
 		{
+		};
+		
+		struct SetupVarsOp:
+			public OpcodeWrapper<Opcode::SetupVars>
+		{
+			Tree::Variable **args;
+			size_t arg_count;
+
+			SetupVarsOp(Tree::Variable **args, size_t arg_count) : args(args), arg_count(arg_count) {}
 		};
 		
 		struct PrologueOp:

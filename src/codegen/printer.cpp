@@ -345,6 +345,25 @@ namespace Mirb
 					return "raise";
 				}
 				
+				case Opcode::SetupVars:
+				{
+					auto op = (SetupVarsOp *)opcode;
+					
+					std::stringstream result;
+					
+					result << "setup_vars";
+
+					for(size_t i = 0; i < op->arg_count; ++i)
+					{
+						result << " " << var(op->args[i]);
+
+						if(i < op->arg_count - 1)
+							result << ",";
+					}
+					
+					return result.str();
+				}
+				
 				case Opcode::Prologue:
 				{
 					return "prologue";

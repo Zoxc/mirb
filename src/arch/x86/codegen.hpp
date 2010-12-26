@@ -52,6 +52,7 @@ namespace Mirb
 				void mov_imm_to_var(size_t imm, Tree::Variable *var);
 				void mov_reg_to_reg(size_t src, size_t dst);
 				void mov_reg_to_var(size_t reg, Tree::Variable *var);
+				void mov_reg_to_var_loc(size_t reg, size_t var_loc);
 				void mov_var_to_reg(Tree::Variable *var, size_t reg);
 				void load_offset_to_reg(size_t offset, size_t reg);
 				void load_offset_to_var(size_t offset, Tree::Variable *dst);
@@ -70,6 +71,7 @@ namespace Mirb
 				
 				void push_regs();
 				void pop_regs();
+				void reserve_stack_space();
 				void generate_bytecode();
 				void disassemble();
 				
@@ -132,6 +134,7 @@ namespace Mirb
 		template<> void NativeGenerator::generate(InterpolateOp &op);
 		template<> void NativeGenerator::generate(StaticCallOp &op);
 		template<> void NativeGenerator::generate(RaiseOp &op);
+		template<> void NativeGenerator::generate(SetupVarsOp &op);
 		
 		template<typename T> struct FlushRegisters { static const bool value = false; };
 		

@@ -22,7 +22,7 @@ namespace Mirb
 			#ifdef WIN32
 				heap = (unsigned char *)VirtualAlloc(0, code_heap_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
-				mirb_runtime_assert(heap);
+				mirb_runtime_assert(heap != 0);
 			#else
 				heap = (unsigned char *)mmap(0, code_heap_size, PROT_READ | PROT_EXEC | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 

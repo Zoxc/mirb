@@ -72,7 +72,7 @@ namespace Mirb
 						frame = FramePrefix::from_bp(native_entry->bp);
 					}
 
-					mirb_debug_assert(frame);
+					mirb_debug_assert(frame != 0);
 
 					do
 					{

@@ -34,7 +34,6 @@
 			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 			<Add option="-fstrict-aliasing" />
-			<Add option="-DMIRB_SEH_EXCEPTIONS" />
 			<Add option="-DNO_GC" />
 			<Add directory="vendor" />
 			<Add directory="vendor\udis86" />

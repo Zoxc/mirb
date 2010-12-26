@@ -93,6 +93,17 @@ namespace Mirb
 				*addr = (size_t)o().label->final - ((size_t)addr + 4);
 			}
 		}
+		
+		void NativeGenerator::reserve_stack_space()
+		{
+			if(block->stack_vars)
+			{
+				stream.u8(0x81); stream.u8(0xEC); // add esp,
+				stream.u32(block->stack_vars * sizeof(size_t));
+				
+				block->final->ebp_offset += block->stack_vars * sizeof(size_t);
+			}
+		}		
 
 		void NativeGenerator::disassemble()
 		{
@@ -147,6 +158,7 @@ namespace Mirb
 			
 			locals_offset = sizeof(Arch::Support::Frame);
 			
+			reserve_stack_space();
 			push_regs();
 			generate_bytecode();
 
@@ -214,13 +226,7 @@ namespace Mirb
 			else
 				locals_offset = 0;
 			
-			if(block->stack_vars)
-			{
-				stream.u8(0x81); stream.u8(0xEC); // add esp,
-				stream.u32(block->stack_vars * sizeof(size_t));
-				
-				block->final->ebp_offset += block->stack_vars * sizeof(size_t);
-			}
+			reserve_stack_space();
 
 			push_regs();
 
@@ -376,15 +382,20 @@ namespace Mirb
 			modrm(3, reg_low(src), reg_low(dst));
 		}
 		
+		void NativeGenerator::mov_reg_to_var_loc(size_t reg, size_t var_loc)
+		{
+			rex(reg_high(reg), 0, 0);
+			stream.u8(0x89);
+			stack_modrm(reg_low(reg), var_loc);
+		}
+		
 		void NativeGenerator::mov_reg_to_var(size_t reg, Tree::Variable *var)
 		{
 			if(var->flags.get<Tree::Variable::Register>())
 				mov_reg_to_reg(reg, var->loc);
 			else
 			{
-				rex(reg_high(reg), 0, 0);
-				stream.u8(0x89);
-				stack_modrm(reg_low(reg), var);
+				mov_reg_to_var_loc(reg, var->loc);
 			}
 		}
 		
@@ -930,6 +941,22 @@ namespace Mirb
 		template<> void NativeGenerator::generate(RaiseOp &op)
 		{
 			call(&Arch::Support::raise);
+		}
+		
+		template<> void NativeGenerator::generate(SetupVarsOp &op)
+		{
+			mov_imm_to_reg(value_nil, spare);
+
+			for(size_t i = block->stack_vars - 1; i != (size_t)-1; --i)
+			{
+				for(size_t j = 0; j < op.arg_count; ++j)
+					if(!op.args[j]->flags.get<Tree::Variable::Register>() && op.args[j]->loc == i)
+						goto next;
+
+				mov_reg_to_var_loc(spare, i);
+
+				next:;
+			}
 		}
 	};
 };

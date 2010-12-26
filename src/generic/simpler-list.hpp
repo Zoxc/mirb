@@ -18,7 +18,7 @@ namespace Mirb
 		
 		void append(T *node)
 		{
-			mirb_debug_assert(node);
+			mirb_debug_assert(node != 0);
 			
 			(node->*field).next = first;
 			first = node;

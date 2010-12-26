@@ -72,13 +72,13 @@ namespace Mirb
 		{
 			index = 1;
 			this->arg_count++;
-			args = new Tree::Variable *[this->arg_count];
+			args = new (memory_pool) Tree::Variable *[this->arg_count];
 			args[0] = Arg::Self::gen(*this);
 		}
 		else
 		{
 			index = 0;
-			args = new Tree::Variable *[arg_count];
+			args = new (memory_pool) Tree::Variable *[arg_count];
 		}
 		
 		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);

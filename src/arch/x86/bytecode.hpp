@@ -19,15 +19,29 @@ namespace Mirb
 				Tree::Variable *self_var = arg6;
 				Tree::Variable *argc = arg7;
 				Tree::Variable *argv = arg8;
+				
+				Tree::Variable **setup_argv = new (bcg.memory_pool) Tree::Variable *[3];
+				size_t setup_argc = 0;
 
 				if(heap_array_var)
+				{
+					setup_argv[setup_argc++] = heap_array_var;
 					bcg.gen<MoveOp>(heap_array_var, lock(bcg.create_var(), Arch::Register::AX));
+				}
 				
 				if(block_parameter)
+				{
+					setup_argv[setup_argc++] = block_parameter;
 					bcg.write_variable(block_parameter, lock(bcg.create_var(), Arch::Register::CX));
+				}
 
 				if(method_module_var)
+				{
+					setup_argv[setup_argc++] = method_module_var;
 					bcg.gen<MoveOp>(method_module_var, lock(bcg.create_var(), Arch::Register::DX));
+				}
+
+				bcg.gen<SetupVarsOp>(setup_argv, setup_argc);
 
 				if(heap_var)
 					bcg.gen<CreateHeapOp>(heap_var);

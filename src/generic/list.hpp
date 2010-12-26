@@ -27,7 +27,7 @@ namespace Mirb
 		
 		void remove(T *node)
 		{
-			mirb_debug_assert(node);
+			mirb_debug_assert(node != 0);
 
 			Entry<E> &entry = node->*field;
 			
@@ -44,7 +44,7 @@ namespace Mirb
 
 		void append(T *node)
 		{
-			mirb_debug_assert(node);
+			mirb_debug_assert(node != 0);
 
 			Entry<E> &entry = node->*field;
 
