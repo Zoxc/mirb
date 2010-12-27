@@ -520,6 +520,7 @@ namespace Mirb
 				rex(0, 0, 0);
 				stream.u8(0x83);
 				stack_modrm(7, var);
+				stream.u8(0);
 			}
 		}
 

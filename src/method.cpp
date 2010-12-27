@@ -5,8 +5,12 @@
 #include "codegen/bytecode.hpp"
 #include "codegen/opcodes.hpp"
 
-#ifdef DEBUG
+#ifdef MIRB_DEBUG_BRIDGE
 	#include "codegen/printer.hpp"
+#endif
+
+#ifdef MIRB_GRAPH_BRIDGE
+	#include "codegen/dot-printer.hpp"
 #endif
 
 namespace Mirb
@@ -119,8 +123,40 @@ namespace Mirb
 			CodeGen::ByteCodePrinter printer(block);
 
 			std::cout << printer.print();
+			
 		#endif
 		
+		#ifdef MIRB_GRAPH_BRIDGE
+			CodeGen::DotPrinter dot_printer;
+			
+			std::system("mkdir bytecode");
+			
+			dot_printer.print_block(block, "bytecode/bytecode.dot");
+
+			std::stringstream path;
+				
+			path << "bytecode/bridge-" << name->get_string() << "-" << block->final;
+				
+			std::system(("mkdir \"" + path.str() + "\"").c_str());
+			std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
+				
+			for(auto i = block->variable_list.begin(); i != block->variable_list.end(); ++i)
+			{
+				if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
+					continue;
+
+				dot_printer.highlight = *i;
+
+				dot_printer.print_block(block, "bytecode/bytecode.dot");
+					
+				std::stringstream result;
+
+				result << "dot -Tpng bytecode/bytecode.dot -o " << path.str() << "/var" << i()->index << ".png";
+
+				std::system(result.str().c_str());
+			}
+		#endif
+
 		size_t block_size = CodeGen::NativeMeasurer::measure_method(block);
 
 		void *block_code = ExecutableHeap::alloc(block_size);

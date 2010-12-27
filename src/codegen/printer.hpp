@@ -10,6 +10,7 @@ namespace Mirb
 	namespace Tree
 	{
 		class Variable;
+		class NamedVariable;
 	};
 	
 	namespace CodeGen
@@ -39,6 +40,7 @@ namespace Mirb
 				Tree::Variable *highlight;
 				
 				std::string var(Tree::Variable *var);
+				std::string var_name(Tree::NamedVariable *var);
 				std::string opcode(Opcode *opcode);
 				std::string print_basic_block(BasicBlock *block);
 				std::string print();

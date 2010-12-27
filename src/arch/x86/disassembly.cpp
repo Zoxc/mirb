@@ -19,6 +19,7 @@ namespace Mirb
 				MIRB_SYMBOL(Arch::Support::current_frame),
 				MIRB_SYMBOL(Arch::Support::far_return),
 				MIRB_SYMBOL(Arch::Support::far_break),
+				MIRB_SYMBOL(Arch::Support::raise),
 				MIRB_SYMBOL(Arch::Support::create_heap),
 				MIRB_SYMBOL(Arch::Support::create_closure),
 				MIRB_SYMBOL(Arch::Support::create_array),
@@ -32,7 +33,7 @@ namespace Mirb
 				MIRB_SYMBOL(Arch::Support::define_module),
 				MIRB_SYMBOL(Arch::Support::define_method),
 				MIRB_SYMBOL(Arch::Support::call),
-				MIRB_SYMBOL(Arch::Support::super),
+				MIRB_SYMBOL(Arch::Support::super)
 			};
 
 			const char *find_symbol(void *address, Vector<Symbol *, MemoryPool> *symbols)

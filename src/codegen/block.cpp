@@ -155,6 +155,27 @@ namespace Mirb
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 				i().update_ranges(w, var_count);
+
+
+			// All unassigned variables will be put on the stack so they will be set to nil at block entry. TODO: Improve this?
+			
+			size_t stack_loc = stack_heap_size;
+			BasicBlock *entry = basic_blocks.first;
+			
+			for(size_t i = 0; i < var_count; ++i)
+			{
+				if(w.get(entry->in, i))
+				{
+					// Skip variables pinned to a location, these are arguments
+					if(variable_list[i]->flags.get<Tree::Variable::Fixed>())
+						continue;
+
+					variable_list[i]->flags.set<Tree::Variable::Fixed>();
+					variable_list[i]->loc = stack_loc++;
+				}
+			}
+			
+			this->stack_vars = stack_loc;
 		}
 
 		void Block::allocate_registers()
@@ -206,7 +227,7 @@ namespace Mirb
 				active.insert(pos, var);
 			};
 			
-			size_t stack_loc = stack_heap_size;
+			size_t stack_loc = stack_vars;
 			
 			auto flush_reg = [&](size_t loc, Tree::Variable *var) -> void {
 				Tree::Variable *used = used_reg[loc];

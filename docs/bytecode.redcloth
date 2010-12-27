@@ -119,7 +119,7 @@ h1. Operations
   Jumps to label @Ltrue@ if the variable @V@ is not @false@ or @nil@.
 
 * _BranchIfZero_
-  @branch Ltrue if V@
+  @branch Ltrue if_zero V@
   Jumps to label @Ltrue@ if the variable @V@ is @0@.
 
 * _BranchUnless_
@@ -127,7 +127,7 @@ h1. Operations
   Jumps to label @Lfalse@ if the variable @V@ is @false@ or @nil@.
 
 * _BranchUnlessZero_
-  @branch Lfalse unless V@
+  @branch Lfalse unless_zero V@
   Jumps to label @Lfalse@ if the variable @V@ is not @0@.
 
 * _Branch_
@@ -181,6 +181,10 @@ h1. Operations
 * _Raise_
   @raise@
   Raises the current thread's exception.
+
+* _SetupVars_
+  @setup_vars@
+  Initializes all stack variables with nil.
 
 * _Prologue_
   @prologue@

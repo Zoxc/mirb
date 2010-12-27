@@ -8,6 +8,20 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
+		std::string ByteCodePrinter::var_name(Tree::NamedVariable *var)
+		{
+			if(var->name)
+				return var->name->get_string();
+			else
+			{
+				std::stringstream result;
+
+				result << "0x" << var;
+
+				return result.str();
+			}
+		}
+
 		std::string ByteCodePrinter::var(Tree::Variable *var)
 		{
 			if(!var)
@@ -44,7 +58,7 @@ namespace Mirb
 					{
 						auto named_var = (Tree::NamedVariable *)var;
 					
-						result << "%" << named_var->name->get_string();
+						result << "%" << var_name(named_var);
 					
 						break;
 					}
@@ -53,7 +67,7 @@ namespace Mirb
 					{
 						auto named_var = (Tree::NamedVariable *)var;
 					
-						result << "!" << named_var->name->get_string();
+						result << "!" << var_name(named_var);
 					
 						break;
 					}
@@ -253,11 +267,25 @@ namespace Mirb
 					return "branch " + label(op->label) + " if " + var(op->var);
 				}
 				
+				case Opcode::BranchIfZero:
+				{
+					auto op = (BranchIfZeroOp *)opcode;
+					
+					return "branch " + label(op->label) + " if_zero " + var(op->var);
+				}
+				
 				case Opcode::BranchUnless:
 				{
 					auto op = (BranchUnlessOp *)opcode;
 					
 					return "branch " + label(op->label) + " unless " + var(op->var);
+				}
+				
+				case Opcode::BranchUnlessZero:
+				{
+					auto op = (BranchUnlessZeroOp *)opcode;
+					
+					return "branch " + label(op->label) + " unless_zero " + var(op->var);
 				}
 				
 				case Opcode::Branch:
