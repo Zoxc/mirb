@@ -109,7 +109,7 @@ namespace Mirb
 			value_t *__stdcall create_heap(size_t bytes);
 			value_t __stdcall create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[]);
 			value_t __stdcall create_array(size_t argc, value_t argv[]);
-			value_t __stdcall interpolate(size_t argc, value_t argv[]);
+			value_t __stdcall interpolate(size_t bp, size_t argc, value_t argv[]);
 			
 			value_t __stdcall get_const(size_t bp, value_t obj, Symbol *name);
 			void __stdcall set_const(size_t bp, value_t obj, Symbol *name, value_t value);

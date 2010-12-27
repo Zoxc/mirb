@@ -25,7 +25,7 @@ namespace Mirb
 					
 					var->flags.set<Tree::Variable::FlushCallerSavedRegisters>();
 
-					if(CanRaiseException<T>::value)
+					if(!LeafOperation<T>::value)
 						var->flags.set<Tree::Variable::FlushRegisters>();
 
 					block.block.variable_list.push(var);
@@ -247,9 +247,7 @@ namespace Mirb
 
 				used_reg[loc] = var;
 			};
-
-			bool require_exceptions = scope && scope->require_exceptions;
-
+			
 			for(auto i = variables.begin(); i != variables.end(); ++i)
 			{
 				// Expire old intervals
@@ -265,7 +263,7 @@ namespace Mirb
 
 				if((*i)->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
 				{
-					if(require_exceptions && (*i)->flags.get<Tree::Variable::FlushRegisters>())
+					if((*i)->flags.get<Tree::Variable::FlushRegisters>())
 					{
 						// Flush all registers
 						for(auto l = active.begin(); l != active.end(); ++l)

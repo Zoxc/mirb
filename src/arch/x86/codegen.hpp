@@ -69,8 +69,6 @@ namespace Mirb
 				void mov_reg_to_reg_index(size_t sreg, size_t dreg, size_t index);
 				void mov_reg_to_var_index(size_t reg, Tree::Variable *var, size_t index);
 				
-				void push_regs();
-				void pop_regs();
 				void reserve_stack_space();
 				void generate_bytecode();
 				void disassemble();
@@ -150,18 +148,26 @@ namespace Mirb
 		template<> struct FlushRegisters<GetConstOp> { static const bool value = true; };
 		template<> struct FlushRegisters<SetConstOp> { static const bool value = true; };
 		template<> struct FlushRegisters<FlushOp> { static const bool value = true; };
+		template<> struct FlushRegisters<UnwindReturnOp> { static const bool value = true; };
+		template<> struct FlushRegisters<UnwindBreakOp> { static const bool value = true; };
 		template<> struct FlushRegisters<ArrayOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StringOp> { static const bool value = true; };
 		template<> struct FlushRegisters<InterpolateOp> { static const bool value = true; };
 		template<> struct FlushRegisters<StaticCallOp> { static const bool value = true; };
 
-		template<typename T> struct CanRaiseException { static const bool value = false; };
+		template<typename T> struct LeafOperation { static const bool value = true; };
 
-		template<> struct CanRaiseException<ClassOp> { static const bool value = true; };
-		template<> struct CanRaiseException<ModuleOp> { static const bool value = true; };
-		template<> struct CanRaiseException<CallOp> { static const bool value = true; };
-		template<> struct CanRaiseException<SuperOp> { static const bool value = true; };
-		template<> struct CanRaiseException<FlushOp> { static const bool value = true; };
+		template<> struct LeafOperation<ClassOp> { static const bool value = false; };
+		template<> struct LeafOperation<ModuleOp> { static const bool value = false; };
+		template<> struct LeafOperation<CallOp> { static const bool value = false; };
+		template<> struct LeafOperation<SuperOp> { static const bool value = false; };
+		template<> struct LeafOperation<GetConstOp> { static const bool value = false; };
+		template<> struct LeafOperation<SetConstOp> { static const bool value = false; };
+		template<> struct LeafOperation<FlushOp> { static const bool value = false; };
+		template<> struct LeafOperation<UnwindReturnOp> { static const bool value = false; };
+		template<> struct LeafOperation<UnwindBreakOp> { static const bool value = false; };
+		template<> struct LeafOperation<InterpolateOp> { static const bool value = false; };
+		template<> struct LeafOperation<StaticCallOp> { static const bool value = false; };
 	};
 };
 

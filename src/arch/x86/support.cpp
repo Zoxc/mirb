@@ -117,8 +117,10 @@ namespace Mirb
 				return Mirb::Support::define_string(string);
 			}
 			
-			value_t __stdcall interpolate(size_t argc, value_t argv[])
+			value_t __stdcall interpolate(size_t bp, size_t argc, value_t argv[])
 			{
+				UnnamedNativeEntry entry(bp); // We're entering native code without a name
+
 				return Mirb::Support::interpolate(argc, argv);
 			}
 			
@@ -251,6 +253,9 @@ namespace Mirb
 					__asm
 					{
 						push ebp
+						push esi
+						push edi
+						push ebx
 						push argv
 						push argc
 						push name
@@ -260,6 +265,9 @@ namespace Mirb
 						mov ebx, code
 						xor ebp, ebp
 						call ebx
+						pop ebx
+						pop edi
+						pop esi
 						pop ebp
 
 						mov result, eax
@@ -275,6 +283,9 @@ namespace Mirb
 					__asm
 					{
 						push ebp
+						push esi
+						push edi
+						push ebx
 						push argv
 						push argc
 						push name
@@ -285,6 +296,9 @@ namespace Mirb
 						mov ebx, code
 						xor ebp, ebp
 						call ebx
+						pop ebx
+						pop edi
+						pop esi
 						pop ebp
 
 						mov result, eax
@@ -334,8 +348,8 @@ namespace Mirb
 						"call *%[code]\n"
 						"popl %%ebp\n"
 					: "=a"(result)
-					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "r"(code), "c"(block), "d"(module)
-					: "memory");
+					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "b"(code), "c"(block), "d"(module)
+					: "esi", "edi", "memory");
 					
 					return result;
 				}
@@ -353,8 +367,8 @@ namespace Mirb
 						"call *%[code]\n"
 						"popl %%ebp\n"
 					: "=a"(result)
-					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "r"(code), "a"(scopes), "c"(block), "d"(module)
-					: "memory");
+					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "b"(code), "a"(scopes), "c"(block), "d"(module)
+					: "esi", "edi", "memory");
 					
 					return result;
 				}
@@ -460,6 +474,8 @@ namespace Mirb
 							printf("Ebp: %x\n", ebp_value);
 							printf("Eip: %x\n", (size_t)target_label);
 						#endif
+
+						// TODO: We need to mark this as a Ruby entry
 
 						#ifdef _MSC_VER
 							__asm

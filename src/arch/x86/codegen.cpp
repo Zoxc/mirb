@@ -37,39 +37,6 @@ namespace Mirb
 			}
 		};
 		
-		void NativeGenerator::push_regs()
-		{
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::BX);
-			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::SI);
-			}
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-			{
-				block->final->ebp_offset += sizeof(size_t);
-				push_reg(Arch::Register::DI);
-			}
-		}
-
-		void NativeGenerator::pop_regs()
-		{
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::DI))
-				stream.u8(0x5F); // pop edi
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::SI))
-				stream.u8(0x5E); // pop esi
-			
-			if(BitSetWrapper<MemoryPool>::get(block->used_registers, Arch::Register::BX))
-				stream.u8(0x5B); // pop ebx
-		}
-
 		void NativeGenerator::generate_bytecode()
 		{
 			index = 0;
@@ -159,7 +126,6 @@ namespace Mirb
 			locals_offset = sizeof(Arch::Support::Frame);
 			
 			reserve_stack_space();
-			push_regs();
 			generate_bytecode();
 
 			stream.u8(0x8B); // mov ecx, dword [ebp - 12] ; Load previous exception frame
@@ -170,8 +136,6 @@ namespace Mirb
 			modrm(0, Arch::Register::CX, Arch::Register::BP);
 			stream.u32((size_t)&Arch::Support::current_frame);
 			
-			pop_regs();
-
 			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
 			stream.u8(0x5D); // pop ebp
 			
@@ -228,8 +192,6 @@ namespace Mirb
 			
 			reserve_stack_space();
 
-			push_regs();
-
 			generate_bytecode();
 
 			if(block->scope->require_exceptions)
@@ -273,8 +235,6 @@ namespace Mirb
 				}
 			}
 
-			pop_regs();
-			
 			mov_reg_to_reg(Arch::Register::BP, Arch::Register::SP);
 			stream.u8(0x5D); // pop ebp
 			
@@ -923,6 +883,7 @@ namespace Mirb
 		{
 			push_var(op.argv);
 			push_imm(op.argc);
+			push_reg(Arch::Register::BP);
 			call(&Arch::Support::interpolate);
 			mov_reg_to_var(Arch::Register::AX, op.var);
 		}
@@ -946,8 +907,9 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(SetupVarsOp &op)
 		{
-			mov_imm_to_reg(value_nil, spare);
-
+			if(block->stack_vars > 0)
+				mov_imm_to_reg(value_nil, spare);
+			
 			for(size_t i = block->stack_vars - 1; i != (size_t)-1; --i)
 			{
 				for(size_t j = 0; j < op.arg_count; ++j)

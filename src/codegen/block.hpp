@@ -100,7 +100,7 @@ namespace Mirb
 				bit_set_t used_registers;
 
 				Vector<Tree::Variable *, MemoryPool> variable_list; // A list of all variables in this block. Copied from Tree::Scope::variable_list on creation.
-				size_t var_count; // The total variable count. May be greater than variable_list.size().
+				size_t var_count; // The total variable count. May be greater than variable_list.size() when dummy variables used to flush register are added.
 				
 				Tree::Variable *heap_array_var;
 				Tree::Variable *heap_var;

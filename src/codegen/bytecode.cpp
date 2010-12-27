@@ -27,12 +27,14 @@ namespace Mirb
 				auto current = new (bcg->memory_pool) Tree::Variable(Tree::Variable::Temporary);
 
 				current->index = bcg->block->var_count++;
-				current->flags.set<Tree::Variable::Fixed>();
+				current->flags.set<Tree::Variable::Fixed>(); // TODO: This is not needed when the variables are not added to variable_list.
 				current->loc = address + size - 1 - i;
 
 				#ifdef DEBUG
 					current->group = var;
 				#endif
+				
+				bcg->block->variable_list.push(current); // TODO: Find a way to avoid adding these to the list. Use a fixed index for all of them?
 
 				vars[i] = current;
 			}
