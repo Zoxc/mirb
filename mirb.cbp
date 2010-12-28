@@ -45,11 +45,8 @@
 			<Add directory="vendor\udis86\libudis86\.libs" />
 		</Linker>
 		<Unit filename="src\arch\arch.hpp" />
-		<Unit filename="src\arch\block.hpp" />
 		<Unit filename="src\arch\bytecode.hpp" />
 		<Unit filename="src\arch\codegen.hpp" />
-		<Unit filename="src\arch\x86\block.hpp" />
-		<Unit filename="src\arch\x86\bytecode.cpp" />
 		<Unit filename="src\arch\x86\bytecode.hpp" />
 		<Unit filename="src\arch\x86\codegen.cpp" />
 		<Unit filename="src\arch\x86\codegen.hpp" />

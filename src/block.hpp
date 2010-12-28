@@ -1,14 +1,16 @@
 #pragma once
 #include "common.hpp"
+#include "gc.hpp"
 #include "generic/map.hpp"
 #include "generic/vector.hpp"
 #include "generic/simple-list.hpp"
-#include "arch/block.hpp"
 
 struct exception_block;
 
 namespace Mirb
 {
+	class Symbol;
+	
 	namespace CodeGen
 	{
 		class BasicBlock;
@@ -57,8 +59,10 @@ namespace Mirb
 	class Block
 	{
 		public:
+			typedef void *compiled_t;
+			
 			Tree::Scope *scope;
-			compiled_block_t compiled; // A pointer to a compiled function.
+			compiled_t compiled; // A pointer to a compiled function.
 			Symbol *name; // The name of this block.
 			
 			Vector<ExceptionBlock *> exception_blocks;

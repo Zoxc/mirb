@@ -34,9 +34,9 @@ namespace Mirb
 			enum Type
 			{
 				Self,
-				MethodName,
-				Count,
-				Values
+				Name,
+				Module,
+				Block
 			};
 		};
 		

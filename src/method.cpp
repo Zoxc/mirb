@@ -172,7 +172,7 @@ namespace Mirb
 		Block *final = block->final;
 
 		final->scope = 0;
-		final->compiled = (compiled_block_t)block_code;
+		final->compiled = (Block::compiled_t)block_code;
 		final->name = name;
 
 		if((flags & Method::Singleton) != 0)

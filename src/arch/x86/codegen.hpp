@@ -36,8 +36,8 @@ namespace Mirb
 				
 				size_t locals_offset;
 				
-				static const size_t handler_offset = -12;
-				static const size_t handling_offset = -16;
+				static const size_t handler_offset = -8;
+				static const size_t handling_offset = -12;
 
 				size_t reg_low(size_t reg);
 				size_t reg_high(size_t reg);

@@ -412,7 +412,7 @@ namespace Mirb
 		return 0;
 	}
 	
-	compiled_block_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
+	Block::compiled_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
@@ -422,7 +422,7 @@ namespace Mirb
 		return result->compiled;
 	}
 
-	compiled_block_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
+	Block::compiled_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
@@ -432,7 +432,7 @@ namespace Mirb
 		return result->compiled;
 	}
 
-	compiled_block_t lookup(value_t obj, Symbol *name, value_t *result_module)
+	Block::compiled_t lookup(value_t obj, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
@@ -445,7 +445,7 @@ namespace Mirb
 		return result->compiled;
 	}
 
-	compiled_block_t lookup_super(value_t module, Symbol *name, value_t *result_module)
+	Block::compiled_t lookup_super(value_t module, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
@@ -458,7 +458,7 @@ namespace Mirb
 		return result->compiled;
 	}
 
-	value_t call_code(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	value_t call_code(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 	{
 		return Arch::Support::ruby_call(code, obj, name, module, block, argc, argv);
 	};
@@ -467,7 +467,7 @@ namespace Mirb
 	{
 		value_t module;
 
-		compiled_block_t method = lookup(obj, name, &module);
+		Block::compiled_t method = lookup(obj, name, &module);
 
 		if(mirb_unlikely(!method))
 			return value_raise;

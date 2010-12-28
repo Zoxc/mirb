@@ -14,8 +14,8 @@ namespace Mirb
 				Tree::Variable *heap_array_var = arg1;
 				Tree::Variable *heap_var = arg2;
 				Tree::Variable *block_parameter = arg3;
-				Tree::Variable *method_name_var = arg4;
-				Tree::Variable *method_module_var = arg5;
+				Tree::Variable *name_var = arg4;
+				Tree::Variable *module_var = arg5;
 				Tree::Variable *self_var = arg6;
 				Tree::Variable *argc = arg7;
 				Tree::Variable *argv = arg8;
@@ -26,19 +26,19 @@ namespace Mirb
 				if(heap_array_var)
 				{
 					setup_argv[setup_argc++] = heap_array_var;
-					bcg.gen<MoveOp>(heap_array_var, lock(bcg.create_var(), Arch::Register::AX));
+					bcg.gen<MoveOp>(heap_array_var, lock(bcg.create_var(), Arch::Register::BX));
 				}
 				
-				if(block_parameter)
+				if(argc)
 				{
-					setup_argv[setup_argc++] = block_parameter;
-					bcg.write_variable(block_parameter, lock(bcg.create_var(), Arch::Register::CX));
+					setup_argv[setup_argc++] = argc;
+					bcg.write_variable(argc, lock(bcg.create_var(), Arch::Register::SI));
 				}
-
-				if(method_module_var)
+				
+				if(argv)
 				{
-					setup_argv[setup_argc++] = method_module_var;
-					bcg.gen<MoveOp>(method_module_var, lock(bcg.create_var(), Arch::Register::DX));
+					setup_argv[setup_argc++] = argv;
+					bcg.gen<MoveOp>(argv, lock(bcg.create_var(), Arch::Register::DI));
 				}
 
 				bcg.gen<SetupVarsOp>(setup_argv, setup_argc);
@@ -46,17 +46,17 @@ namespace Mirb
 				if(heap_var)
 					bcg.gen<CreateHeapOp>(heap_var);
 				
-				if(method_name_var)
-					bcg.gen<LoadArgOp>(method_name_var, Arch::StackArg::MethodName);
-				
 				if(self_var)
 					bcg.gen<LoadArgOp>(self_var, Arch::StackArg::Self);
 				
-				if(argc)
-					bcg.gen<LoadArgOp>(argc, Arch::StackArg::Count);
+				if(name_var)
+					bcg.gen<LoadArgOp>(name_var, Arch::StackArg::Name);
 				
-				if(argv)
-					bcg.gen<LoadArgOp>(argv, Arch::StackArg::Values);
+				if(module_var)
+					bcg.gen<LoadArgOp>(module_var, Arch::StackArg::Module);
+				
+				if(block_parameter)
+					bcg.gen<LoadArgOp>(block_parameter, Arch::StackArg::Block);
 				
 				return 0;
 			}

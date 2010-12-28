@@ -72,7 +72,7 @@ namespace Mirb
 		ExecutableHeap::resize(block_code, stream.size());
 
 		block->final->scope = 0;
-		block->final->compiled = (compiled_block_t)block_code;
+		block->final->compiled = (Block::compiled_t)block_code;
 		
 		return block->final;
 	}
@@ -95,12 +95,12 @@ namespace Mirb
 
 		native_generator.generate_stub(block);
 
-		block->compiled = (compiled_block_t)block_code;
+		block->compiled = (Block::compiled_t)block_code;
 		
 		return block;
 	}
 
-	compiled_block_t Compiler::defered_compile(Block *block)
+	Block::compiled_t Compiler::defered_compile(Block *block)
 	{
 		MemoryPool memory_pool;
 

@@ -22,7 +22,7 @@ namespace Mirb
 
 		void NativeGenerator::generate_stub(Mirb::Block *block)
 		{
-			push_imm((size_t)block);
+			mov_imm_to_reg((size_t)block, Arch::Register::CX);
 			
 			stream.u8(0xE9);
 			stream.u32((size_t)&Arch::Support::jit_stub - ((size_t)stream.position + 4));
@@ -104,14 +104,12 @@ namespace Mirb
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
 
-			push_reg(Arch::Register::DX); // Push the module value on the stack
-
 			// Store Arch::Support::NativeEntry on stack
 			
-			// type @ ebp - 8
+			// type @ ebp - 4
 			push_imm(Arch::Support::Frame::NativeEntry);
 
-			// prev @ ebp - 12
+			// prev @ ebp - 8
 			stream.u8(0xFF); // push dword [Arch::Support::current_frame]
 			modrm(0, 6, Arch::Register::BP);
 			stream.u32((size_t)&Arch::Support::current_frame);
@@ -128,9 +126,9 @@ namespace Mirb
 			reserve_stack_space();
 			generate_bytecode();
 
-			stream.u8(0x8B); // mov ecx, dword [ebp - 12] ; Load previous exception frame
+			stream.u8(0x8B); // mov ecx, dword [ebp - 8] ; Load previous exception frame
 			stream.u8(0x4D);
-			stream.u8(-12);
+			stream.u8(-8);
 
 			stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
 			modrm(0, Arch::Register::CX, Arch::Register::BP);
@@ -154,8 +152,6 @@ namespace Mirb
 			push_reg(Arch::Register::BP);
 			mov_reg_to_reg(Arch::Register::SP, Arch::Register::BP);
 
-			push_reg(Arch::Register::DX); // Push the module value on the stack
-			
 			if(block->scope->require_exceptions)
 			{
 				locals_offset = sizeof(Arch::Support::ExceptionFrame) - sizeof(Arch::Support::FramePrefix);
@@ -163,19 +159,19 @@ namespace Mirb
 
 				// Store Arch::Support::ExceptionFrame on stack
 				
-				// block @ ebp - 8
+				// block @ ebp - 4
 				push_imm((size_t)block->final);
 
-				// block_index @ ebp - 12
+				// block_index @ ebp - 8
 				push_imm((size_t)-1);
 
-				// handling @ ebp - 16
+				// handling @ ebp - 12
 				push_imm(0);
 
-				// type @ ebp - 20
+				// type @ ebp - 16
 				push_imm(Arch::Support::Frame::Exception);
 
-				// prev @ ebp - 24
+				// prev @ ebp - 20
 				stream.u8(0xFF); // push dword [Arch::Support::current_frame]
 				modrm(0, 6, Arch::Register::BP);
 				stream.u32((size_t)&Arch::Support::current_frame);
@@ -198,9 +194,9 @@ namespace Mirb
 			{
 				block->final->epilog = stream.position;
 
-				stream.u8(0x8B); // mov ecx, dword [ebp - 24] ; Load previous exception frame
+				stream.u8(0x8B); // mov ecx, dword [ebp - 20] ; Load previous exception frame
 				stream.u8(0x4D);
-				stream.u8(-24);
+				stream.u8(-20);
 
 				stream.u8(0x89); // mov dword [Arch::Support::current_frame], ecx
 				modrm(0, Arch::Register::CX, Arch::Register::BP);
@@ -314,7 +310,7 @@ namespace Mirb
 		
 		int NativeGenerator::stack_offset(size_t loc)
 		{
-			return -(int)((2 + loc) * sizeof(size_t) + locals_offset);
+			return -(int)((1 + loc) * sizeof(size_t) + locals_offset);
 		}
 
 		int NativeGenerator::stack_offset(Tree::Variable *var)
@@ -628,20 +624,20 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(CallOp &op)
 		{
-			if(op.argv)
-				push_var(op.argv);
+			if(op.block_var)
+				push_var(op.block_var);
 			else
-				push_reg(Arch::Register::SP);
+				push_imm(value_nil);
 			
-			push_imm(op.argc);
+			push_reg(Arch::Register::SP); // placeholder for module
 			push_imm((size_t)op.method);
 			push_var(op.obj);
-
-			if(op.block_var)
-				mov_var_to_reg(op.block_var, Arch::Register::CX);
-			else
-				mov_imm_to_reg(value_nil, Arch::Register::CX);
 			
+			if(op.argv)
+				mov_var_to_reg(op.argv, Arch::Register::DI);
+			
+			mov_imm_to_reg(op.argc, Arch::Register::SI);
+
 			call(&Arch::Support::call);
 
 			if(op.block)
@@ -658,20 +654,21 @@ namespace Mirb
 		
 		template<> void NativeGenerator::generate(SuperOp &op)
 		{
-			if(op.argv)
-				push_var(op.argv);
+			if(op.block_var)
+				push_var(op.block_var);
 			else
-				push_reg(Arch::Register::SP);
-
+				push_imm(value_nil);
+			
 			push_imm(op.argc);
+			push_var(op.module);
 			push_var(op.method);
 			push_var(op.self);
 			
-			if(op.block_var)
-				mov_var_to_reg(op.block_var, Arch::Register::CX);
-			else
-				mov_imm_to_reg(value_nil, Arch::Register::CX);
+			if(op.argv)
+				mov_var_to_reg(op.argv, Arch::Register::DI);
 			
+			mov_imm_to_reg(op.argc, Arch::Register::SI);
+
 			call(&Arch::Support::super);
 
 			if(op.block)

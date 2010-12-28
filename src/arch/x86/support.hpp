@@ -9,6 +9,22 @@ namespace Mirb
 	{
 		namespace Support
 		{
+			/*
+			 * Ruby block calling convention
+			 *
+			 * Passed on stack (top to bottom):
+			 * - value_t obj
+			 * - Symbol *name
+			 * - Module *module
+			 * - value_t block
+			 *
+			 * Passed in registers:
+			 * - <si>: size_t argc
+			 * - <di>: value_t argv[]
+			 *
+			 * All register are callee-save.
+			 */
+
 			struct Frame;
 			
 			extern Frame *current_frame;
@@ -38,19 +54,18 @@ namespace Mirb
 
 			struct FramePrefix
 			{
-				value_t module;
 				size_t prev_bp; // bp = &prev_bp
 				void *return_address;
 				value_t object;
 				Symbol *name;
-				size_t argc;
-				value_t *argv;
+				Module *module;
+				value_t block;
 
 				CharArray inspect() const;
 
 				static FramePrefix *from_bp(size_t bp)
 				{
-					return (FramePrefix *)(bp - sizeof(size_t));
+					return (FramePrefix *)bp;
 				};
 
 				const FramePrefix *prev() const
@@ -102,9 +117,9 @@ namespace Mirb
 				extern void jit_stub() mirb_external("mirb_arch_support_jit_stub");
 			#endif
 			
-			value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+			value_t closure_call(Block::compiled_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 			
-			value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+			value_t ruby_call(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 			
 			value_t *__stdcall create_heap(size_t bytes);
 			value_t __stdcall create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[]);
@@ -122,8 +137,8 @@ namespace Mirb
 			void __stdcall define_method(value_t obj, Symbol *name, Block *block);
 			value_t __stdcall define_string(const char *string);
 			
-			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup");
-			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup_super");
+			Block::compiled_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module) mirb_external("mirb_arch_support_lookup");
+			Block::compiled_t __stdcall lookup_super(Symbol *name, value_t *module) mirb_external("mirb_arch_support_lookup_super");
 
 			value_t __fastcall call(value_t block, value_t dummy, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_call");
 			value_t __fastcall super(value_t block, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_super");

@@ -169,9 +169,9 @@ namespace Mirb
 
 		size_t i = 0;
 
-		if(Value::type(argv[0]) == Value::Class)
+		if((argc > i) && (Value::type(argv[i]) == Value::Class))
 		{
-			instance_of = argv[0];
+			instance_of = argv[i];
 			i++;
 		}
 		else

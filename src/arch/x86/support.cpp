@@ -21,7 +21,7 @@ namespace Mirb
 				
 				OnStack<1> os(result);
 				
-				value_t module = this->module;
+				value_t module = auto_cast(this->module);
 
 				if(Value::type(module) == Value::IClass)
 					module = cast<Module>(module)->instance_of;
@@ -173,17 +173,17 @@ namespace Mirb
 				exception_raise(current_exception);
 			}
 			
-			compiled_block_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
+			Block::compiled_t __fastcall jit_invoke(Block *block) mirb_external("mirb_arch_support_jit_invoke");
 
-			compiled_block_t __fastcall jit_invoke(Block *block)
+			Block::compiled_t __fastcall jit_invoke(Block *block)
 			{
 				return Compiler::defered_compile(block);
 			}
 
-			void __fastcall unknown_call_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_call_method");
-			void __fastcall unknown_super_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[]) mirb_external("mirb_arch_support_unknown_super_method");
+			void __fastcall unknown_call_method(size_t bp, value_t argv[], value_t obj, Symbol *name, value_t module, size_t block) mirb_external("mirb_arch_support_unknown_call_method");
+			void __fastcall unknown_super_method(size_t bp, value_t argv[], value_t obj, Symbol *name, value_t module, size_t block) mirb_external("mirb_arch_support_unknown_super_method");
 			
-			void __fastcall unknown_call_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_call_method(size_t bp, value_t argv[], value_t obj, Symbol *name, value_t module, size_t block)
 			{
 				UnnamedNativeEntry entry(bp); // We're entering native code without a name
 
@@ -192,7 +192,7 @@ namespace Mirb
 				exception_raise(exception);
 			}
 
-			void __fastcall unknown_super_method(size_t bp, value_t module, value_t obj, Symbol *name, size_t argc, value_t argv[])
+			void __fastcall unknown_super_method(size_t bp, value_t argv[], value_t obj, Symbol *name, value_t module, size_t block)
 			{
 				UnnamedNativeEntry entry(bp); // We're entering native code without a name
 
@@ -206,15 +206,12 @@ namespace Mirb
 				{
 					__asm
 					{
-						push ecx
-						sub esp, 4
-						push esp
-						push dword ptr [esp + 20]
-						push dword ptr [esp + 20]
+						lea eax, dword ptr [esp + 12]
+						push eax
+						push dword ptr [esp + 12]
+						push dword ptr [esp + 12]
 						call lookup
 						test eax, eax
-						pop edx
-						pop ecx
 						jz unknown_method
 						jmp eax
 
@@ -228,15 +225,11 @@ namespace Mirb
 				{
 					__asm
 					{
-						push ecx
-						sub esp, 4
-						push esp
-						push dword ptr [esp + 20]
-						push edx
+						lea eax, dword ptr [esp + 12]
+						push eax
+						push dword ptr [esp + 12]
 						call lookup_super
 						test eax, eax
-						pop edx
-						pop ecx
 						jz unknown_method
 						jmp eax
 
@@ -246,7 +239,7 @@ namespace Mirb
 					}
 				}
 			
-				value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				value_t ruby_call(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
 					value_t result;
 
@@ -256,15 +249,15 @@ namespace Mirb
 						push esi
 						push edi
 						push ebx
-						push argv
-						push argc
+						push block
+						push module
 						push name
 						push obj
-						mov ecx, block
-						mov edx, module
-						mov ebx, code
+						mov esi, argc
+						mov edi, argv
+						mov eax, code
 						xor ebp, ebp
-						call ebx
+						call eax
 						pop ebx
 						pop edi
 						pop esi
@@ -276,7 +269,7 @@ namespace Mirb
 					return result;
 				}
 
-				value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				value_t closure_call(Block::compiled_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
 					value_t result;
 
@@ -286,16 +279,16 @@ namespace Mirb
 						push esi
 						push edi
 						push ebx
-						push argv
-						push argc
+						push block
+						push module
 						push name
 						push obj
-						mov eax, scopes
-						mov ecx, block
-						mov edx, module
-						mov ebx, code
+						mov ebx, scopes
+						mov esi, argc
+						mov edi, argv
+						mov eax, code
 						xor ebp, ebp
-						call ebx
+						call eax
 						pop ebx
 						pop edi
 						pop esi
@@ -311,64 +304,45 @@ namespace Mirb
 				{
 					__asm
 					{
-						push ebx
-
-						push eax
-						push ecx
-						push edx
-						mov ecx, [esp + 16]
 						call jit_invoke
-						mov ebx, eax
-						pop edx
-						pop ecx
-						pop eax
-
-						push [esp + 24] // argv
-						push [esp + 24] // argc
-						push [esp + 24] // name
-						push [esp + 24] // obj
-						call ebx
-
-						pop ebx
-						add esp, 4
-						ret 16
+						jmp eax
 					}
 				}
 			#else
-				value_t ruby_call(compiled_block_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				value_t ruby_call(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
 					value_t result;
 					
 					asm ("pushl %%ebp\n"
-						"pushl %[argv]\n"
-						"pushl %[argc]\n"
+						"pushl %[block]\n"
+						"pushl %[module]\n"
 						"pushl %[name]\n"
 						"pushl %[obj]\n"
 						"xorl %%ebp, %%ebp\n"
 						"call *%[code]\n"
 						"popl %%ebp\n"
 					: "=a"(result)
-					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "b"(code), "c"(block), "d"(module)
-					: "esi", "edi", "memory");
+					: [block] "g"(block), [module] "g"(module), [name] "g"(name), [obj] "g"(obj), [code] "b"(code), "S"(argc), "D"(argv)
+					: "ecx", "edx", "memory");
 					
 					return result;
 				}
 
-				value_t closure_call(compiled_block_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+				value_t closure_call(Block::compiled_t code, value_t *scopes[], value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 				{
 					value_t result;
 					
 					asm ("pushl %%ebp\n"
-						"pushl %[argv]\n"
-						"pushl %[argc]\n"
+						"pushl %[block]\n"
+						"pushl %[module]\n"
 						"pushl %[name]\n"
 						"pushl %[obj]\n"
 						"xorl %%ebp, %%ebp\n"
 						"call *%[code]\n"
 						"popl %%ebp\n"
 					: "=a"(result)
-					: [argv] "g"(argv), [argc] "g"(argc), [name] "g"(name), [obj] "g"(obj), [code] "b"(code), "a"(scopes), "c"(block), "d"(module)
-					: "esi", "edi", "memory");
+					: [block] "g"(block), [module] "g"(module), [name] "g"(name), [obj] "g"(obj), [code] "a"(code), "b"(scopes), "S"(argc), "D"(argv)
+					: "ecx", "edx", "memory");
 					
 					return result;
 				}
@@ -379,14 +353,14 @@ namespace Mirb
 				return Mirb::Support::create_closure(block, self, name, module, argc, argv);
 			}
 			
-			compiled_block_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module)
+			Block::compiled_t __stdcall lookup(value_t obj, Symbol *name, value_t *result_module)
 			{
 				return Mirb::lookup_nothrow(obj, name, result_module);
 			}
 
-			compiled_block_t __stdcall lookup_super(value_t module, Symbol *name, value_t *result_module)
+			Block::compiled_t __stdcall lookup_super(Symbol *name, value_t *module)
 			{
-				return Mirb::lookup_super_nothrow(module, name, result_module);
+				return Mirb::lookup_super_nothrow(*module, name, module);
 			}
 			
 			void __noreturn exception_raise(Exception *exception)
@@ -484,11 +458,15 @@ namespace Mirb
 								push esi
 								push edi
 								push ebp
+								push ecx
+								push edx
 
 								mov eax, target_label
 								mov ebp, ebp_value
 								call eax
 								
+								pop edx
+								pop ecx
 								pop ebp
 								pop edi
 								pop esi
@@ -503,7 +481,7 @@ namespace Mirb
 								"popl %%ebp\n"
 							:
 							: "a" (ebp_value), "c" (target_label)
-							: "esi", "edi", "edx", "memory");
+							: "edx", "esi", "edi", "memory");
 						#endif
 					}
 

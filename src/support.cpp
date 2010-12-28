@@ -107,30 +107,6 @@ namespace Mirb
 
 			set_method(obj, name, block);
 		}
-		
-		value_t call(Symbol *method_name, value_t obj, value_t block, size_t argc, value_t argv[])
-		{
-			value_t method_module;
-
-			compiled_block_t method = lookup(obj, method_name, &method_module);
-			
-			if(mirb_unlikely(!method))
-				return value_raise;
-
-			return method(block, method_module, obj, method_name, argc, argv);
-		}
-
-		value_t super(Symbol *method_name, value_t method_module, value_t obj, value_t block, size_t argc, value_t argv[])
-		{
-			value_t result_module;
-
-			compiled_block_t method = lookup_super(method_module, method_name, &result_module);
-			
-			if(mirb_unlikely(!method))
-				return value_raise;
-			
-			return method(block, result_module, obj, method_name, argc, argv);
-		}
 	};
 };
 
