@@ -133,6 +133,8 @@
 		<Unit filename="src\method.hpp" />
 		<Unit filename="src\modules\kernel.cpp" />
 		<Unit filename="src\modules\kernel.hpp" />
+		<Unit filename="src\object-header.cpp" />
+		<Unit filename="src\object-header.hpp" />
 		<Unit filename="src\on-stack.cpp" />
 		<Unit filename="src\on-stack.hpp" />
 		<Unit filename="src\parser\calls.cpp" />

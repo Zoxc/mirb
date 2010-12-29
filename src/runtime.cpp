@@ -39,7 +39,7 @@ namespace Mirb
 
 	value_t real_class(value_t obj)
 	{
-		while(obj && (cast<Class>(obj)->singleton || cast<Class>(obj)->type == Value::IClass))
+		while(obj && (cast<Class>(obj)->singleton || cast<Class>(obj)->get_type() == Value::IClass))
 			obj = cast<Class>(obj)->superclass;
 
 		return obj;
@@ -202,7 +202,7 @@ namespace Mirb
 
 		set_var(singleton, Symbol::from_literal("__attached__"), object);
 
-		if(cast<Object>(object)->type == Value::Class)
+		if(cast<Object>(object)->get_type() == Value::Class)
 		{
 			singleton_class->instance_of = singleton;
 

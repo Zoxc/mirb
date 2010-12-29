@@ -589,14 +589,14 @@ namespace Mirb
 			{
 				if(frame->block_index == (size_t)-1) // Outside any exception block
 				{
-					if(exception->type == Value::Exception)
+					if(exception->get_type() == Value::Exception)
 						return;
 
 					auto error = (ReturnException *)exception;
 
 					if(error->target == frame->block)
 					{
-						switch(error->type)
+						switch(error->get_type())
 						{
 							case Value::ReturnException:
 								handle_return(frame, 0, error->value);
@@ -617,7 +617,7 @@ namespace Mirb
 
 				ExceptionBlock *block = frame->block->exception_blocks[frame->block_index];
 
-				switch(exception->type)
+				switch(exception->get_type())
 				{
 					case Value::BreakException:
 					{

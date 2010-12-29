@@ -158,7 +158,7 @@ namespace Mirb
 		Type type(value_t value)
 		{
 			if(object_ref(value))
-				return ((Mirb::Object *)value)->type; // Do a simple cast here to avoid stack overflow when debugging is enabled
+				return ((Mirb::Object *)value)->get_type(); // Do a simple cast here to avoid stack overflow when debugging is enabled
 			else
 				return type_table[value & literal_mask];
 		}
