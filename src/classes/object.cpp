@@ -12,7 +12,7 @@ namespace Mirb
 
 	value_t Object::allocate(value_t instance_of)
 	{
-		return auto_cast(new (gc) Object(instance_of));
+		return auto_cast(Collector::allocate<Object>(instance_of));
 	}
 	
 	value_t Object::tap(value_t obj, value_t block)

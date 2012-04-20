@@ -1,6 +1,7 @@
 #include "exception.hpp"
 #include "symbol.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {
@@ -8,7 +9,7 @@ namespace Mirb
 	
 	value_t Exception::allocate(value_t obj)
 	{
-		return auto_cast(new (gc) Exception(Value::Exception, obj, value_nil, value_nil));
+		return auto_cast(Collector::allocate<Exception>(Value::Exception, obj, value_nil, value_nil));
 	}
 
 	value_t Exception::to_s(value_t obj)

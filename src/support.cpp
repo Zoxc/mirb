@@ -16,7 +16,7 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
 
-			return auto_cast(new (gc) Proc(Proc::class_ref, self, name, module, block, argc, scopes));
+			return auto_cast(Collector::allocate<Proc>(Proc::class_ref, self, name, module, block, argc, scopes));
 		}
 
 		value_t *create_heap(size_t bytes)
@@ -70,7 +70,7 @@ namespace Mirb
 		
 		value_t create_array(size_t argc, value_t argv[])
 		{
-			Array *array = new (gc) Array(Array::class_ref);
+			Array *array = Collector::allocate<Array>(Array::class_ref);
 			
 			for(size_t i = 0; i < argc; ++i)
 				array->vector.push(argv[i]);
@@ -81,7 +81,7 @@ namespace Mirb
 		value_t define_string(const char *string)
 		{
 			// TODO: Make sure string is not garbage collected. Replace it with something nicer.
-			return auto_cast(new (gc) String((const char_t *)string, std::strlen(string)));
+			return auto_cast(Collector::allocate<String>((const char_t *)string, std::strlen(string)));
 		}
 		
 		value_t define_class(value_t obj, Symbol *name, value_t super)

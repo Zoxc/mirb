@@ -71,7 +71,7 @@ namespace Mirb
 	
 	value_t module_create_bare()
 	{
-		return auto_cast(new (gc) Module(Value::Module, Module::class_ref, 0));
+		return auto_cast(Collector::allocate<Module>(Value::Module, Module::class_ref, 0));
 	}
 
 	value_t define_module(value_t under, Symbol *name)
@@ -98,7 +98,7 @@ namespace Mirb
 		if(Value::type(module) == Value::IClass)
 			module = cast<Module>(module)->instance_of;
 
-		return auto_cast(new (gc) Class(module, super));
+		return auto_cast(Collector::allocate<Class>(module, super));
 	}
 
 	void include_module(value_t obj, value_t module)
@@ -188,7 +188,7 @@ namespace Mirb
 
 	value_t class_create_bare(value_t super)
 	{
-		return auto_cast(new (gc) Class(Value::Class, Class::class_ref, super));
+		return auto_cast(Collector::allocate<Class>(Value::Class, Class::class_ref, super));
 	}
 
 	value_t class_create_singleton(value_t object, value_t super)
@@ -347,7 +347,7 @@ namespace Mirb
 	{
 		OnStack<2> os(exception_class, message);
 
-		current_exception = new (gc) Exception(exception_class, message.to_string(), backtrace().to_string());
+		current_exception = Collector::allocate<Exception>(exception_class, message.to_string(), backtrace().to_string());
 		
 		return value_raise;
 	}

@@ -196,7 +196,7 @@ namespace Mirb
 			backtrace = Mirb::backtrace().to_string();
 		}
 
-		Exception *exception = new (gc) Exception(instance_of, message, backtrace);
+		Exception *exception = Collector::allocate<Exception>(instance_of, message, backtrace);
 
 		return raise(auto_cast(exception));
 	}

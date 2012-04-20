@@ -2,12 +2,13 @@
 #include "common.hpp"
 #include "generic/hash-table.hpp"
 #include "gc.hpp"
+#include "collector.hpp"
 #include "classes/symbol.hpp"
 
 namespace Mirb
 {
 	class SymbolPoolFunctions:
-		public HashTableFunctions<const CharArray &, Symbol *, GC>
+		public HashTableFunctions<const CharArray &, Symbol *, StdLibAllocator>
 	{
 		public:
 			static bool compare_key_value(const CharArray &key, Symbol *value)
@@ -45,13 +46,13 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(GC::Ref alloc_ref, const CharArray &key)
+			static Symbol *create_value(StdLibAllocator::Ref alloc_ref, const CharArray &key)
 			{
-				return new (gc) Symbol(key);
+				return new Symbol(key); // TODO: Allocate as root memory.
 			}
 	};
 
-	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions, GC> SymbolPoolHashTable;
+	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions, StdLibAllocator> SymbolPoolHashTable;
 
 	class SymbolPool:
 		public SymbolPoolHashTable

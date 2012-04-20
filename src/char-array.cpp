@@ -192,7 +192,7 @@ namespace Mirb
 
 	value_t CharArray::to_string() const
 	{
-		return auto_cast(new (gc) String(*this));
+		return auto_cast(Collector::allocate<String>(*this));
 	}
 
 	CharArray CharArray::hex(size_t value)

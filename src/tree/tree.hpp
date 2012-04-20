@@ -34,7 +34,7 @@ namespace Mirb
 		};
 		
 		class Fragment:
-			public Allocator
+			public ConstantHeader<Value::InternalFragment>
 		{
 			public:
 				typedef Fragment &Ref;

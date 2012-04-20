@@ -1,5 +1,6 @@
 #pragma once
 #include "../char-array.hpp"
+#include "../collector.hpp"
 #include "object.hpp"
 
 namespace Mirb
@@ -26,7 +27,7 @@ namespace Mirb
 			
 			template<size_t length> static value_t from_literal(const char (&string)[length])
 			{
-				return auto_cast(new (gc) String(string));
+				return auto_cast(Collector::allocate<String>(string));
 			}
 			
 			CharArray string;

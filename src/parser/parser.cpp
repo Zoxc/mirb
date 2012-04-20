@@ -31,7 +31,11 @@ namespace Mirb
 	Tree::Scope *Parser::allocate_scope(Tree::Scope::Type type)
 	{
 		if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
-			fragment = new (gc) Tree::Fragment(fragment, Tree::Chunk::block_size);
+		{
+			const size_t block_size = Tree::Chunk::block_size; // TODO: Remove workaround for G++ bug?
+			
+			fragment = Collector::allocate<Tree::Fragment>(fragment, block_size);
+		}
 		
 		return scope = new (fragment) Tree::Scope(*fragment, scope, type);
 	}

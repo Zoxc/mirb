@@ -9,7 +9,7 @@ namespace Mirb
 	
 	value_t Array::allocate(value_t obj)
 	{
-		return auto_cast(new (gc) Array(obj));
+		return auto_cast(Collector::allocate<Array>(obj));
 	}
 
 	value_t Array::push(value_t obj, size_t argc, value_t argv[])

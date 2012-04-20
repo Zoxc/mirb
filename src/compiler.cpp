@@ -79,7 +79,7 @@ namespace Mirb
 
 	Block *Compiler::defer(Tree::Scope *scope, MemoryPool &memory_pool)
 	{
-		Block *block = new (gc) Block;
+		Block *block = Collector::allocate<Block>();
 		
 		block->scope = scope;
 

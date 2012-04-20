@@ -95,6 +95,8 @@
 		<Unit filename="src\codegen\opcodes.hpp" />
 		<Unit filename="src\codegen\printer.cpp" />
 		<Unit filename="src\codegen\printer.hpp" />
+		<Unit filename="src\collector.cpp" />
+		<Unit filename="src\collector.hpp" />
 		<Unit filename="src\common.hpp" />
 		<Unit filename="src\compiler.cpp" />
 		<Unit filename="src\compiler.hpp" />

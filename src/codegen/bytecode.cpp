@@ -744,7 +744,7 @@ namespace Mirb
 			scope = 0;
 
 			block = new (memory_pool) Block(memory_pool);
-			block->final = new (gc) Mirb::Block;
+			block->final = Collector::allocate<Mirb::Block>();
 
 			return block;
 		}
@@ -759,7 +759,7 @@ namespace Mirb
 				block->final = scope->final;
 			else
 			{
-				block->final = new (gc) Mirb::Block;
+				block->final = Collector::allocate<Mirb::Block>();
 				scope->final = block->final;
 			}
 			

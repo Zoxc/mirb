@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "gc.hpp"
+#include "object-header.hpp"
 #include "generic/map.hpp"
 #include "generic/vector.hpp"
 #include "generic/simple-list.hpp"
@@ -56,7 +57,8 @@ namespace Mirb
 		BlockLabel ensure_label;
 	};
 	
-	class Block
+	class Block: // TODO: Pin or create a dummy class which references the real one. Blocks are currently hardcoded in generated assembly.
+		public ConstantHeader<Value::InternalBlock>
 	{
 		public:
 			typedef void *compiled_t;

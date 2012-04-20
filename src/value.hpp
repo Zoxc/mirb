@@ -49,6 +49,8 @@ namespace Mirb
 	{
 		enum Type {
 			None,
+			InternalBlock,
+			InternalFragment,
 			Fixnum,
 			True,
 			False,
