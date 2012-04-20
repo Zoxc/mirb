@@ -7,8 +7,6 @@
 
 namespace Mirb
 {
-	const size_t CodeGen::no_var = -1;
-
 	namespace CodeGen
 	{
 		// TODO: Fix - This code assumes the stack grows downwards.
@@ -150,10 +148,10 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<LookupOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, block->final->heap_array_var, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->heap_var;
+					heap = block->final->heap_var;
 
 				var_t result = create_var();
 
@@ -295,10 +293,10 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<LookupOp>(heap, block->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, block->final->heap_array_var, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->heap_var;
+					heap = block->final->heap_var;
 
 				gen<SetHeapVarOp>(heap, var->loc, value);
 			}
@@ -569,7 +567,7 @@ namespace Mirb
 				gen<UnwindReturnOp>(temp, block->final);
 			else
 			{
-				gen<MoveOp>(block->return_var, temp);
+				gen<MoveOp>(block->final->return_var, temp);
 				branch(block->epilog);
 			}
 		}
@@ -593,7 +591,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<MoveOp>(block->return_var, temp);
+			gen<MoveOp>(block->final->return_var, temp);
 			branch(block->epilog);
 		}
 		
@@ -697,7 +695,7 @@ namespace Mirb
 
 					exception_block->handlers.push(handler);
 					
-					gen<FlushOp>();
+					//gen<FlushOp>(); Flush
 					
 					to_bytecode(i().group, var);
 					
@@ -721,7 +719,7 @@ namespace Mirb
 			{
 				split(exception_block->ensure_label.block);
 				
-				gen<FlushOp>();
+				//gen<FlushOp>(); Flush
 					
 				/*
 				 * Output ensure node
@@ -762,10 +760,10 @@ namespace Mirb
 			
 			scope->block = block;
 			
-			block->return_var = create_var();
+			block->final->return_var = create_var();
 
 			if(scope->referenced_scopes.size() > 0)
-				block->heap_array_var = create_var();
+				block->final->heap_array_var = create_var();
 			
 			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
@@ -790,19 +788,17 @@ namespace Mirb
 			split(body);
 
 			if(scope->heap_vars)
-				block->heap_var = create_var();
+				block->final->heap_var = create_var();
 
-			to_bytecode(scope->group, block->return_var);
+			to_bytecode(scope->group, block->final->return_var);
 			
 			split(block->epilog);
 
-			gen<ReturnOp>(block->return_var);
+			gen<ReturnOp>();
 
 			basic = prolog;
 			
 			var_t argv = scope->parameters.empty() ? 0 : create_var();
-
-			gen<PrologueOp>(block->heap_array_var, block->heap_var, ref(block->scope->block_parameter), ref(block->scope->name_var), ref(block->scope->module_var), block->self_var, no_var, argv);
 
 			if(argv)
 			{
@@ -860,10 +856,10 @@ namespace Mirb
 		
 		var_t ByteCodeGenerator::self_var()
 		{
-			if(!is_var(block->self_var))
-				block->self_var = create_var();
+			if(!is_var(block->final->self_var))
+				block->final->self_var = create_var();
 			
-			return block->self_var;
+			return block->final->self_var;
 		}
 		
 		var_t ByteCodeGenerator::create_var()
@@ -885,9 +881,9 @@ namespace Mirb
 				for(size_t i = 0; i < scope->referenced_scopes.size(); ++i)
 				{
 					if(scope->referenced_scopes[i] == this->scope)
-						gen<MoveOp>(group[i], block->heap_var);
+						gen<MoveOp>(group[i], block->final->heap_var);
 					else
-						gen<LookupOp>(group[i], block->heap_array_var, scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
+						gen<LookupOp>(group[i], block->final->heap_array_var, scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
 				}
 
 				gen<ClosureOp>(var, self_var(), ref(this->scope->name_var), ref(this->scope->module_var), block_attach, group.size, group.use());

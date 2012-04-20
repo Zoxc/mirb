@@ -38,22 +38,9 @@ namespace Mirb
 			std::system(("mkdir \"" + path.str() + "\"").c_str());
 			std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
 		#endif
-/*
-		size_t block_size = CodeGen::NativeMeasurer::measure(block);
 
-		void *block_code = ExecutableHeap::alloc(block_size);
+		block->finalize();
 
-		MemStream stream(block_code, block_size);
-
-		CodeGen::NativeGenerator native_generator(stream, memory_pool);
-
-		native_generator.generate(block);
-		
-		ExecutableHeap::resize(block_code, stream.size());
-
-		block->final->scope = 0;
-		block->final->compiled = (Block::compiled_t)block_code;
-		*/
 		return block->final;
 	}
 
@@ -78,16 +65,5 @@ namespace Mirb
 		block->compiled = (Block::compiled_t)block_code;
 		*/
 		return block;
-	}
-
-	Block::compiled_t Compiler::defered_compile(Block *block)
-	{
-		MemoryPool memory_pool;
-
-		compile(block->scope, memory_pool);
-		
-		block->scope = 0;
-
-		return block->compiled;
 	}
 };

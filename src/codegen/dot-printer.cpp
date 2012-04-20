@@ -15,17 +15,13 @@ namespace Mirb
 			std::stringstream result;
 
 			result << "B" << block << ":";
-			
+			/*
 			if(block->opcodes.last)
 				result << "C" << block->opcodes.last;
 			else
 				result << "header";
-
+				*/
 			result << " -> " << "B" << next << ":header";
-
-			if(highlight)
-				if(BitSetWrapper<MemoryPool>::get(next->in, highlight->index))
-					result << "[color=dodgerblue2]";
 
 			result << ";\n";
 
@@ -48,7 +44,7 @@ namespace Mirb
 
 			result << "</font></td></tr>";
 			
-			for(auto i = block->opcodes.begin(); i != block->opcodes.end(); ++i)
+/*			for(auto i = block->opcodes.begin(); i != block->opcodes.end(); ++i)
 			{
 				result << "<tr><td align='left' bgcolor='";
 
@@ -58,7 +54,7 @@ namespace Mirb
 					result << "gray95";
 
 				result << "' port='C" << *i << "'><font color='gray52'>" << loc++ << ":</font> <font color='gray22'>" << printer.opcode(*i) << "</font></td></tr>";
-			}
+			}*/
 
 			result << "</table>" << ">] [shape=plaintext];\n";
 
@@ -81,17 +77,6 @@ namespace Mirb
 			
 			file << "digraph bytecode { \n";
 			
-			file << "vars [fontname=Courier New] [fontsize=9] [label=<" << "<table border='1' cellborder='0' cellspacing='0'>";
-
-			file << "<tr><td bgcolor='gray22'><font color='gray81'>var</font></td><td bgcolor='gray22'><font color='gray81'>reg</font></td></tr>";
-
-			for(auto i = 0; i < block->var_count; ++i)
-			{
-				file << "<tr><td align='left' bgcolor='gray95'><font color='gray52'>" << printer.var(i) << "</font></td><td align='left' bgcolor='grey90'><font color='gray30'>" << i << "</font></td></tr>";
-			}
-
-			file << "</table>" << ">] [shape=plaintext];\n";
-
 			size_t loc = 0;
 			
 			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)

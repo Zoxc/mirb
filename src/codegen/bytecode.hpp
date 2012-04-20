@@ -16,8 +16,6 @@ namespace Mirb
 	{
 		class ByteCodeGenerator;
 		
-		extern const size_t no_var;
-
 		class VariableGroup
 		{
 			private:
@@ -98,31 +96,25 @@ namespace Mirb
 				
 				var_t self_var();
 
-				BranchIfOp *gen_if(BasicBlock *ltrue, var_t var)
+				void gen_if(BasicBlock *ltrue, var_t var)
 				{
-					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
+					basic->branches.push(BasicBlock::BranchInfo(gen<BranchIfOp>(var), ltrue));
 					
-					basic->branch(result->label);
-
-					return result;
+					basic->branch(ltrue);
 				}
 				
-				BranchUnlessOp *gen_unless(BasicBlock *lfalse, var_t var)
+				void gen_unless(BasicBlock *lfalse, var_t var)
 				{
-					BranchUnlessOp *result = gen<BranchUnlessOp>(lfalse, var);
+					basic->branches.push(BasicBlock::BranchInfo(gen<BranchUnlessOp>(var), lfalse));
 					
-					basic->branch(result->label);
-
-					return result;
+					basic->branch(lfalse);
 				}
 				
-				BranchOp *gen_branch(BasicBlock *block)
+				void gen_branch(BasicBlock *block)
 				{
-					BranchOp *result = gen<BranchOp>(block);
+					basic->branches.push(BasicBlock::BranchInfo(gen<BranchOp>(), block));
 					
 					basic->next(block);
-					
-					return result;
 				}
 				
 				BasicBlock *list(BasicBlock *block)
@@ -170,11 +162,10 @@ namespace Mirb
 					return var != no_var;
 				}
 				
-				template<class T> T *append(T *op)
+				template<class T> size_t append(T &op)
 				{
-					basic->opcodes.append(op);
-
-					return op;
+					basic->opcodes.write((const char *)&op, sizeof(T));
+					return (size_t)basic->opcodes.tellp() - sizeof(T);
 				}
 
 				struct Gen
@@ -184,125 +175,134 @@ namespace Mirb
 				template<class T> struct Gen0:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg)
+					static size_t gen(ByteCodeGenerator &bcg)
 					{
-						return bcg.append(new (bcg.memory_pool) T);
+						T op;
+						return bcg.append(op);
 					}
 				};
 				
 				template<class T, typename Arg1> struct Gen1:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1)));
+						T op(std::forward<Arg1>(arg1));
+						return bcg.append(op);
 					}
 				};
 				
 				template<class T, typename Arg1, typename Arg2> struct Gen2:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
+						return bcg.append(op);
 					}
 				};
 				
 				template<class T, typename Arg1, typename Arg2, typename Arg3> struct Gen3:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
+						return bcg.append(op);
 					}
 				};
 
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> struct Gen4:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4));
+						return bcg.append(op);
 					}
 				};
 
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> struct Gen5:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5));
+						return bcg.append(op);
 					}
 				};
 
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6> struct Gen6:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
+						return bcg.append(op);
 					}
 				};
 
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> struct Gen7:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
+						return bcg.append(op);
 					}
 				};
 				
 				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> struct Gen8:
 					public Gen
 				{
-					static T *gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
+					static size_t gen(ByteCodeGenerator &bcg, Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
 					{
-						return bcg.append(new (bcg.memory_pool) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8)));
+						T op(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8));
+						return bcg.append(op);
 					}
 				};
 
-				template<class T> T *gen()
+				template<class T> size_t gen()
 				{
 					return Gen0<T>::gen(*this);
 				}
 
-				template<class T, typename Arg1> T *gen(Arg1 arg1)
+				template<class T, typename Arg1> size_t gen(Arg1 arg1)
 				{
 					return Gen1<T, Arg1>::gen(*this, std::forward<Arg1>(arg1));
 				}
 
-				template<class T, typename Arg1, typename Arg2> T *gen(Arg1&& arg1, Arg2&& arg2)
+				template<class T, typename Arg1, typename Arg2> size_t gen(Arg1&& arg1, Arg2&& arg2)
 				{
 					return Gen2<T, Arg1, Arg2>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
 				}
 
-				template<class T, typename Arg1, typename Arg2, typename Arg3> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
+				template<class T, typename Arg1, typename Arg2, typename Arg3> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3)
 				{
 					return Gen3<T, Arg1, Arg2, Arg3>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3));
 				}
 
-				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
 				{
 					return Gen4<T, Arg1, Arg2, Arg3, Arg4>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4));
 				}
 
-				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5)
 				{
 					return Gen5<T, Arg1, Arg2, Arg3, Arg4, Arg5>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5));
 				}
 
-				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6)
 				{
 					return Gen6<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6));
 				}
 				
-				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7)
 				{
 					return Gen7<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7));
 				}
 				
-				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> T *gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
+				template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8> size_t gen(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4, Arg5&& arg5, Arg6&& arg6, Arg7&& arg7, Arg8&& arg8)
 				{
 					return Gen8<T, Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>::gen(*this, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8));
 				}

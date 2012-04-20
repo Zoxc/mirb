@@ -6,7 +6,7 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
-		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : block(block), pred_blocks(1, memory_pool), branch_block(0)
+		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : block(block), branch_block(0)
 		{
 			#ifdef DEBUG
 				id = block.basic_block_count++;
@@ -43,14 +43,47 @@ namespace Mirb
 		{
 			initialize();
 		}
+
+		void Block::finalize()
+		{
+			size_t size = 0;
+
+			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
+				size += (size_t)i().opcodes.tellp();
+
+			const char *opcodes = (const char *)malloc(size);
+			mirb_runtime_assert(opcodes);
+			size_t pos = 0;
+			
+			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
+			{
+				std::string data = i().opcodes.str();
+
+				i().pos = pos;
+
+				memcpy((void *)&opcodes[pos], data.data(), data.size());
+
+				pos += data.size();
+			}
+			
+			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
+			{
+				for(auto j = i().branches.begin(); j != i().branches.end(); ++j)
+				{
+					BranchOp *op = (BranchOp *)&opcodes[i().pos + (*j).first];
+
+					op->pos = (*j).second->pos;
+				}
+			}
+
+			final->opcodes = opcodes;
+			final->var_words = var_count;
+		}
 		
 		void Block::initialize()
 		{
 			current_exception_block = 0;
 			current_exception_block_id = -1;
-			heap_array_var = 0;
-			heap_var = 0;
-			self_var = 0;
 			stack_heap = 0;
 			stack_heap_size = 0;
 

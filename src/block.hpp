@@ -57,16 +57,28 @@ namespace Mirb
 		BlockLabel ensure_label;
 	};
 	
+	typedef size_t var_t;
+	
+	extern const var_t no_var;
+
 	class Block: // TODO: Pin or create a dummy class which references the real one. Blocks are currently hardcoded in generated assembly.
 		public ConstantHeader<Value::InternalBlock>
 	{
 		public:
-			typedef void *compiled_t;
-			
+			Block();
+
 			Tree::Scope *scope;
-			compiled_t compiled; // A pointer to a compiled function.
 			Symbol *name; // The name of this block.
 			
+			var_t heap_array_var;
+			var_t heap_var;
+			var_t self_var;
+			var_t return_var;
+
+			size_t var_words;
+
+			const char *opcodes;
+				
 			Vector<ExceptionBlock *> exception_blocks;
 			void **break_targets;
 			size_t ebp_offset;

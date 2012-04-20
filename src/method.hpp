@@ -32,7 +32,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static CodeGen::var_t gen(MethodGen &g);
+				static var_t gen(MethodGen &g);
 		};
 
 		class Block
@@ -40,7 +40,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static CodeGen::var_t gen(MethodGen &g);
+				static var_t gen(MethodGen &g);
 		};
 		
 		class Count
@@ -48,7 +48,7 @@ namespace Mirb
 			public:
 				typedef size_t type;
 
-				static CodeGen::var_t gen(MethodGen &g);
+				static var_t gen(MethodGen &g);
 		};
 
 		class Values
@@ -56,7 +56,7 @@ namespace Mirb
 			public:
 				typedef value_t *type;
 
-				static CodeGen::var_t gen(MethodGen &g);
+				static var_t gen(MethodGen &g);
 		};
 		
 		class Value
@@ -64,7 +64,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static CodeGen::var_t gen(MethodGen &g);
+				static var_t gen(MethodGen &g);
 		};
 
 		template<typename T> void *cast_function(T *function)
@@ -130,16 +130,16 @@ namespace Mirb
 			MemoryPool memory_pool;
 			CodeGen::BasicBlock *prolog;
 			CodeGen::BasicBlock *body;
-			CodeGen::var_t *args;
+			var_t *args;
 
 			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
 		public:
-			CodeGen::var_t self_arg;
-			CodeGen::var_t name_arg;
-			CodeGen::var_t module_arg;
-			CodeGen::var_t block_arg;
-			CodeGen::var_t argc_arg;
-			CodeGen::var_t argv_arg;
+			var_t self_arg;
+			var_t name_arg;
+			var_t module_arg;
+			var_t block_arg;
+			var_t argc_arg;
+			var_t argv_arg;
 			size_t argv_index;
 
 			CodeGen::ByteCodeGenerator *g;

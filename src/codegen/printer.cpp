@@ -102,8 +102,11 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::label(BasicBlock *label)
 		{
+			if(!label)
+				return "error_label";
+
 			std::stringstream result;
-			
+
 			result << "#";
 			
 			#ifdef DEBUG
@@ -113,6 +116,22 @@ namespace Mirb
 			#endif
 			
 			return result.str();
+		}
+		
+		std::string ByteCodePrinter::label(const char *opcode)
+		{
+			BasicBlock *block = 0;
+
+			for(auto i = basic_block->branches.begin(); i != basic_block->branches.end(); ++i)
+			{
+				if((*i).first == (opcode - data))
+				{
+					block = (*i).second;
+					break;
+				}
+			}
+
+			return label(block);
 		}
 		
 		std::string ByteCodePrinter::print_block(Mirb::Block *block)
@@ -127,13 +146,17 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::opcode(Opcode *opcode)
+		std::string ByteCodePrinter::opcode(const char *&opcode)
 		{
-			switch(opcode->op)
+			std::string result;
+
+			switch(*opcode)
 			{
 				case Opcode::Move:
 				{
 					auto op = (MoveOp *)opcode;
+
+					opcode += sizeof(MoveOp);
 					
 					return var(op->dst) + " = " + var(op->src);
 				}
@@ -141,6 +164,8 @@ namespace Mirb
 				case Opcode::Load:
 				{
 					auto op = (LoadOp *)opcode;
+
+					opcode += sizeof(LoadOp);
 					
 					return var(op->var) + " = " + imm(op->imm);
 				}
@@ -148,6 +173,8 @@ namespace Mirb
 				case Opcode::LoadRaw:
 				{
 					auto op = (LoadRawOp *)opcode;
+
+					opcode += sizeof(LoadRawOp);
 					
 					return var(op->var) + " = " + raw(op->imm);
 				}
@@ -155,6 +182,8 @@ namespace Mirb
 				case Opcode::LoadArg:
 				{
 					auto op = (LoadArgOp *)opcode;
+
+					opcode += sizeof(LoadArgOp);
 					
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
@@ -162,6 +191,8 @@ namespace Mirb
 				case Opcode::Group:
 				{
 					auto op = (GroupOp *)opcode;
+
+					opcode += sizeof(GroupOp);
 					
 					return var(op->var) + " = group " + raw(op->address);
 				}
@@ -169,6 +200,8 @@ namespace Mirb
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
+
+					opcode += sizeof(ClosureOp);
 					
 					return var(op->var) + " = closure " + var(op->self) + ", " + var(op->name) + ", " + var(op->module) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
@@ -176,6 +209,8 @@ namespace Mirb
 				case Opcode::Class:
 				{
 					auto op = (ClassOp *)opcode;
+
+					opcode += sizeof(ClassOp);
 					
 					return (op->var ? var(op->var) + " = " : "") + "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
 				}
@@ -183,6 +218,8 @@ namespace Mirb
 				case Opcode::Module:
 				{
 					auto op = (ModuleOp *)opcode;
+
+					opcode += sizeof(ModuleOp);
 					
 					return (op->var ? var(op->var) + " = " : "") + "module " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
 				}
@@ -190,6 +227,8 @@ namespace Mirb
 				case Opcode::Method:
 				{
 					auto op = (MethodOp *)opcode;
+
+					opcode += sizeof(MethodOp);
 					
 					return "method " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
 				}
@@ -197,6 +236,8 @@ namespace Mirb
 				case Opcode::Call:
 				{
 					auto op = (CallOp *)opcode;
+
+					opcode += sizeof(CallOp);
 					
 					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
@@ -204,6 +245,8 @@ namespace Mirb
 				case Opcode::Super:
 				{
 					auto op = (SuperOp *)opcode;
+
+					opcode += sizeof(SuperOp);
 					
 					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
@@ -211,6 +254,8 @@ namespace Mirb
 				case Opcode::Lookup:
 				{
 					auto op = (LookupOp *)opcode;
+
+					opcode += sizeof(LookupOp);
 					
 					return var(op->var) + " = " + var(op->array_var) + "[" + raw(op->index) + "]";
 				}
@@ -218,6 +263,8 @@ namespace Mirb
 				case Opcode::CreateHeap:
 				{
 					auto op = (CreateHeapOp *)opcode;
+
+					opcode += sizeof(CreateHeapOp);
 					
 					return var(op->var) + " = create_heap";
 				}
@@ -225,6 +272,8 @@ namespace Mirb
 				case Opcode::GetHeapVar:
 				{
 					auto op = (GetHeapVarOp *)opcode;
+
+					opcode += sizeof(GetHeapVarOp);
 					
 					return var(op->var) + " = heap_var " + var(op->heap) + ", " + var(op->index);
 				}
@@ -232,6 +281,8 @@ namespace Mirb
 				case Opcode::SetHeapVar:
 				{
 					auto op = (SetHeapVarOp *)opcode;
+
+					opcode += sizeof(SetHeapVarOp);
 					
 					return "heap_var " + var(op->heap) + ", " + var(op->index) + " = " + var(op->var);
 				}
@@ -239,6 +290,8 @@ namespace Mirb
 				case Opcode::GetIVar:
 				{
 					auto op = (GetIVarOp *)opcode;
+
+					opcode += sizeof(GetIVarOp);
 					
 					return var(op->var) + " = ivar " + var(op->self) + ", " + imm(op->name);
 				}
@@ -246,6 +299,8 @@ namespace Mirb
 				case Opcode::SetIVar:
 				{
 					auto op = (SetIVarOp *)opcode;
+
+					opcode += sizeof(SetIVarOp);
 					
 					return "ivar " + var(op->self) + ", " + imm(op->name) + " = " + var(op->var);
 				}
@@ -253,6 +308,8 @@ namespace Mirb
 				case Opcode::GetConst:
 				{
 					auto op = (GetConstOp *)opcode;
+
+					opcode += sizeof(GetConstOp);
 					
 					return var(op->var) + " = const " + var(op->obj) + ", " + imm(op->name);
 				}
@@ -260,6 +317,8 @@ namespace Mirb
 				case Opcode::SetConst:
 				{
 					auto op = (SetConstOp *)opcode;
+
+					opcode += sizeof(SetConstOp);
 					
 					return "const " + var(op->obj) + ", " + imm(op->name) + " = " + var(op->var);
 				}
@@ -268,64 +327,87 @@ namespace Mirb
 				{
 					auto op = (BranchIfOp *)opcode;
 					
-					return "branch " + label(op->label) + " if " + var(op->var);
+					result = "branch " + label(opcode) + " if " + var(op->var);
+
+					opcode += sizeof(BranchIfOp);
+
+					break;
 				}
 				
 				case Opcode::BranchIfZero:
 				{
 					auto op = (BranchIfZeroOp *)opcode;
 					
-					return "branch " + label(op->label) + " if_zero " + var(op->var);
+					result = "branch " + label(opcode) + " if_zero " + var(op->var);
+
+					opcode += sizeof(BranchIfZeroOp);
+
+					break;
 				}
 				
 				case Opcode::BranchUnless:
 				{
 					auto op = (BranchUnlessOp *)opcode;
 					
-					return "branch " + label(op->label) + " unless " + var(op->var);
+					result = "branch " + label(opcode) + " unless " + var(op->var);
+
+					opcode += sizeof(BranchUnlessOp);
+
+					break;
 				}
 				
 				case Opcode::BranchUnlessZero:
 				{
 					auto op = (BranchUnlessZeroOp *)opcode;
 					
-					return "branch " + label(op->label) + " unless_zero " + var(op->var);
+					result = "branch " + label(opcode) + " unless_zero " + var(op->var);
+
+					opcode += sizeof(BranchUnlessZeroOp);
+
+					break;
 				}
 				
 				case Opcode::Branch:
 				{
 					auto op = (BranchOp *)opcode;
 					
-					return "branch " + label(op->label);
+					result = "branch " + label(opcode);
+
+					opcode += sizeof(BranchOp);
+
+					break;
 				}
 				
 				case Opcode::Return:
 				{
 					auto op = (ReturnOp *)opcode;
+
+					opcode += sizeof(ReturnOp);
 					
-					return "ret " + var(op->var);
+					return "ret " + var(block->final->return_var);
 				}
 				
 				case Opcode::Handler:
 				{
 					auto op = (HandlerOp *)opcode;
+
+					opcode += sizeof(HandlerOp);
 					
 					return "handler " + (op->id == (size_t)-1 ? "nil" : raw(op->id));
 				}
 				
-				case Opcode::Flush:
-				{
-					return "flush";
-				}
-				
 				case Opcode::Unwind:
 				{
+					opcode += sizeof(UnwindOp);
+
 					return "unwind";
 				}
 				
 				case Opcode::UnwindReturn:
 				{
 					auto op = (UnwindReturnOp *)opcode;
+
+					opcode += sizeof(UnwindReturnOp);
 					
 					return "ret " + var(op->var) + ", " + print_block(op->code);
 				}
@@ -333,6 +415,8 @@ namespace Mirb
 				case Opcode::UnwindBreak:
 				{
 					auto op = (UnwindBreakOp *)opcode;
+
+					opcode += sizeof(UnwindBreakOp);
 					
 					return "break " + var(op->var) + ", " + print_block(op->code) + ", " + raw(op->index);
 				}
@@ -340,6 +424,8 @@ namespace Mirb
 				case Opcode::Array:
 				{
 					auto op = (ArrayOp *)opcode;
+
+					opcode += sizeof(ArrayOp);
 					
 					return var(op->var) + " = array " + var(op->argv) + ", " + raw(op->argc);
 				}
@@ -347,6 +433,8 @@ namespace Mirb
 				case Opcode::String:
 				{
 					auto op = (StringOp *)opcode;
+
+					opcode += sizeof(StringOp);
 					
 					return var(op->var) + " = string '" + (const char *)op->str + "'";
 				}
@@ -354,6 +442,8 @@ namespace Mirb
 				case Opcode::Interpolate:
 				{
 					auto op = (InterpolateOp *)opcode;
+
+					opcode += sizeof(InterpolateOp);
 					
 					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc);
 				}
@@ -361,6 +451,8 @@ namespace Mirb
 				case Opcode::StaticCall:
 				{
 					auto op = (StaticCallOp *)opcode;
+
+					opcode += sizeof(StaticCallOp);
 					
 					std::stringstream result;
 					
@@ -374,12 +466,16 @@ namespace Mirb
 				
 				case Opcode::Raise:
 				{
+					opcode += sizeof(RaiseOp);
+
 					return "raise";
 				}
 				
 				case Opcode::SetupVars:
 				{
 					auto op = (SetupVarsOp *)opcode;
+
+					opcode += sizeof(SetupVarsOp);
 					
 					std::stringstream result;
 					
@@ -396,23 +492,27 @@ namespace Mirb
 					return result.str();
 				}
 				
-				case Opcode::Prologue:
-				{
-					return "prologue";
-				}
-				
 				default:
+					opcode += 1;
+
 					return "<unknown>";
 			}
+
+			return result;
 		}
 		
 		std::string ByteCodePrinter::print_basic_block(BasicBlock *block)
 		{
 			std::stringstream result;
 			result << label(block) << ":\n";
+
+			std::string code = block->opcodes.str();
+
+			basic_block = block;
+			data = code.data();
 			
-			for(auto i = block->opcodes.begin(); i != block->opcodes.end(); ++i)
-				result << opcode(*i) << "\n";
+			for(const char *c = code.data(); c != code.data() + code.size();)
+				result << opcode(c) << "\n";
 			
 			return result.str();
 		}

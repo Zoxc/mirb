@@ -1,6 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include "../value.hpp"
+#include "../block.hpp"
 #include "../generic/simple-list.hpp"
 #include "../generic/simpler-list.hpp"
 #include "../generic/list.hpp"
@@ -20,8 +21,6 @@ namespace Mirb
 	{
 		class BasicBlock;
 		
-		typedef size_t var_t;
-
 		struct MoveOp;
 		struct LoadOp;
 		struct LoadRawOp;
@@ -48,7 +47,6 @@ namespace Mirb
 		struct BranchOp;
 		struct ReturnOp;
 		struct HandlerOp;
-		struct FlushOp;
 		struct UnwindOp;
 		struct UnwindReturnOp;
 		struct UnwindBreakOp;
@@ -58,6 +56,7 @@ namespace Mirb
 		struct InterpolateOp;
 		struct StaticCallOp;
 		struct SetupVarsOp;
+		struct ReturnOp;
 		struct RaiseOp;
 		
 		struct Opcode
@@ -90,7 +89,6 @@ namespace Mirb
 				Branch,
 				Return,
 				Handler,
-				Flush,
 				Unwind,
 				UnwindReturn,
 				UnwindBreak,
@@ -99,16 +97,13 @@ namespace Mirb
 				Interpolate,
 				StaticCall,
 				Raise,
-				SetupVars,
-				Prologue
+				SetupVars
 			};
 			
 			Type op;
 
 			Opcode(Type op) : op(op) {}
 			
-			SimpleEntry<Opcode> entry;
-
 			template<template<typename> class T, typename Arg> auto virtual_do(Arg arg) -> decltype(T<Opcode>::func(arg, *(Opcode *)0))
 			{
 				switch(op)
@@ -533,11 +528,9 @@ namespace Mirb
 		struct BranchOpcode:
 			public Opcode
 		{
-			BasicBlock *label;
-			void *code;
-			SimpleEntry<BranchOpcode> branch_entry;
+			size_t pos;
 
-			BranchOpcode(Opcode::Type type, BasicBlock *label) : Opcode(type), label(label) {}
+			BranchOpcode(Opcode::Type type) : Opcode(type) {}
 		};
 		
 		struct BranchIfOp:
@@ -547,7 +540,7 @@ namespace Mirb
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchIfOp(BasicBlock *ltrue, var_t var) : BranchOpcode(BranchIf, ltrue), var(var) {}
+			BranchIfOp(var_t var) : BranchOpcode(BranchIf), var(var) {}
 		};
 		
 		struct BranchIfZeroOp:
@@ -557,7 +550,7 @@ namespace Mirb
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchIfZeroOp(BasicBlock *label, var_t var) : BranchOpcode(BranchIfZero, label), var(var) {}
+			BranchIfZeroOp(var_t var) : BranchOpcode(BranchIfZero), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
@@ -567,7 +560,7 @@ namespace Mirb
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchUnlessOp(BasicBlock *lfalse, var_t var) : BranchOpcode(BranchUnless, lfalse), var(var) {}
+			BranchUnlessOp(var_t var) : BranchOpcode(BranchUnless), var(var) {}
 		};
 		
 		struct BranchUnlessZeroOp:
@@ -577,23 +570,19 @@ namespace Mirb
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchUnlessZeroOp(BasicBlock *label, var_t var) : BranchOpcode(BranchUnlessZero, label), var(var) {}
+			BranchUnlessZeroOp(var_t var) : BranchOpcode(BranchUnlessZero), var(var) {}
 		};
 		
 		struct BranchOp:
 			public BranchOpcode
 		{
-			BranchOp(BasicBlock *label) : BranchOpcode(Branch, label) {}
+			BranchOp() : BranchOpcode(Branch) {}
 		};
 		
 		struct ReturnOp:
 			public OpcodeWrapper<Opcode::Return>
 		{
-			var_t var;
-			
-			template<typename T> void use(T use) { use(var); };
-			
-			ReturnOp(var_t var) : var(var) {}
+			ReturnOp() {}
 		};
 		
 		struct HandlerOp:
@@ -602,11 +591,6 @@ namespace Mirb
 			size_t id;
 			
 			HandlerOp(size_t id) : id(id) {}
-		};
-		
-		struct FlushOp:
-			public OpcodeWrapper<Opcode::Flush>
-		{
 		};
 		
 		struct UnwindOp:
@@ -705,12 +689,6 @@ namespace Mirb
 			size_t arg_count;
 
 			SetupVarsOp(var_t *args, size_t arg_count) : args(args), arg_count(arg_count) {}
-		};
-		
-		struct PrologueOp:
-			public OpcodeWrapper<Opcode::Prologue>
-		{
-			PrologueOp(var_t heap_array_var, var_t heap_var, var_t block_parameter, var_t method_name_var, var_t method_module_var, var_t self_var, var_t argc, var_t argv) {}
 		};
 	};
 };

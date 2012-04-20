@@ -19,6 +19,7 @@
 #include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
 #include "generic/benchmark.hpp"
+#include "vm.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -385,7 +386,7 @@ namespace Mirb
 	
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = call_code(block->compiled, self, auto_cast(method_name), method_module, value_nil, 0, 0);
+		value_t result = call_code(block, self, auto_cast(method_name), method_module, value_nil, 0, 0);
 
 		block = 0; // Make sure block stays on stack*/
 
@@ -411,27 +412,27 @@ namespace Mirb
 		return 0;
 	}
 	
-	Block::compiled_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
+	Block *lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
 		if(mirb_unlikely(!result))
 			return 0;
 
-		return result->compiled;
+		return result;
 	}
 
-	Block::compiled_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
+	Block *lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
 		if(mirb_unlikely(!result))
 			return 0;
 
-		return result->compiled;
+		return result;
 	}
 
-	Block::compiled_t lookup(value_t obj, Symbol *name, value_t *result_module)
+	Block *lookup(value_t obj, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
@@ -441,10 +442,10 @@ namespace Mirb
 			return 0;
 		}
 
-		return result->compiled;
+		return result;
 	}
 
-	Block::compiled_t lookup_super(value_t module, Symbol *name, value_t *result_module)
+	Block *lookup_super(value_t module, Symbol *name, value_t *result_module)
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
@@ -454,21 +455,19 @@ namespace Mirb
 			return 0;
 		}
 
-		return result->compiled;
+		return result;
 	}
 
-	value_t call_code(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 	{
-		// TODO: Fix
-		//return Arch::Support::ruby_call(code, obj, name, module, block, argc, argv);
-		return value_nil;
+		return evaluate_block(code, obj, name, module, block, argc, argv);
 	};
 	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
 		value_t module;
 
-		Block::compiled_t method = lookup(obj, name, &module);
+		Block *method = lookup(obj, name, &module);
 
 		if(mirb_unlikely(!method))
 			return value_raise;

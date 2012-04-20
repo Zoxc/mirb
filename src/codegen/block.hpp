@@ -38,41 +38,26 @@ namespace Mirb
 				Block &block;
 
 				Entry<BasicBlock> entry;
-				Entry<BasicBlock> work_list_entry;
 
-				bool in_work_list;
-				
-				bit_set_t def_bits;
-				bit_set_t use_bits;
-				
-				bit_set_t in;
-				bit_set_t out;
+				std::stringstream opcodes;
 
-				Vector<BasicBlock *, MemoryPool> pred_blocks;
+				typedef std::pair<size_t, BasicBlock *> BranchInfo;
 
-				SimpleList<Opcode> opcodes; // A linked list of opcodes
+				Vector<BranchInfo> branches;
 				
 				BasicBlock *next_block;
 				BasicBlock *branch_block;
 
-				size_t loc_start;
-				size_t loc_stop;
-
-				void *final;
-				
-				void prepare_liveness(BitSetWrapper<MemoryPool> &w);
-				void update_ranges(BitSetWrapper<MemoryPool> &w, size_t var_count);
+				size_t pos;
 				
 				void next(BasicBlock *block)
 				{
 					next_block = block;
-					block->pred_blocks.push(this);
 				}
 
 				void branch(BasicBlock *block)
 				{
 					branch_block = block;
-					block->pred_blocks.push(this);
 				}
 		};
 		
@@ -97,13 +82,10 @@ namespace Mirb
 
 				size_t stack_vars;
 				size_t stack_heap_size;
+
+				void finalize();
 				
 				size_t var_count; // The total variable count. May be greater than variable_list.size() when dummy variables used to flush register are added.
-				
-				CodeGen::var_t heap_array_var;
-				CodeGen::var_t heap_var;
-				CodeGen::var_t self_var;
-				CodeGen::var_t return_var;
 				
 				size_t stack_alloc(size_t size);
 				void stack_free(size_t address);
@@ -113,9 +95,6 @@ namespace Mirb
 				#endif
 				
 				size_t loc;
-				
-				void analyse_liveness(ByteCodeGenerator &g);
-				void allocate_registers();
 				
 				Block(MemoryPool &memory_pool, Tree::Scope *scope);
 				Block(MemoryPool &memory_pool);

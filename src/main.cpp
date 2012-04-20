@@ -57,7 +57,7 @@ int main()
 		
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = call_code(block->compiled, Mirb::main, Symbol::from_literal("main"), class_of(Mirb::main), value_nil, 0, 0);
+		value_t result = call_code(block, Mirb::main, Symbol::from_literal("main"), class_of(Mirb::main), value_nil, 0, 0);
 
 		if(result == value_raise)
 		{

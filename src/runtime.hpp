@@ -86,20 +86,20 @@ namespace Mirb
 	/*
 	 * lookup (calls Ruby code)
 	 */
-	Block::compiled_t lookup(value_t obj, Symbol *name, value_t *result_module);
+	Block *lookup(value_t obj, Symbol *name, value_t *result_module);
 
 	/*
 	 * lookup_super (calls Ruby code)
 	 */
-	Block::compiled_t lookup_super(value_t module, Symbol *name, value_t *result_module);
+	Block *lookup_super(value_t module, Symbol *name, value_t *result_module);
 
-	Block::compiled_t lookup_nothrow(value_t obj, Symbol *name, value_t *result_module);
-	Block::compiled_t lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module);
+	Block *lookup_nothrow(value_t obj, Symbol *name, value_t *result_module);
+	Block *lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module);
 	
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
 	
 	/*
 	 * call (calls Ruby code)

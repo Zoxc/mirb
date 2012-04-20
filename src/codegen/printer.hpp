@@ -24,6 +24,8 @@ namespace Mirb
 		{
 			private:
 				Block *block;
+				BasicBlock *basic_block;
+				const char *data;
 
 				std::string imm(value_t imm);
 				
@@ -32,6 +34,7 @@ namespace Mirb
 					return this->imm((value_t)auto_cast(imm));
 				};
 				
+				std::string label(const char *opcode);
 				std::string label(BasicBlock *label);
 				std::string raw(size_t imm);
 				std::string print_block(Mirb::Block *block);
@@ -42,7 +45,7 @@ namespace Mirb
 				
 				std::string var(var_t var);
 				std::string var_name(Tree::NamedVariable *var);
-				std::string opcode(Opcode *opcode);
+				std::string opcode(const char *&opcode);
 				std::string print_basic_block(BasicBlock *block);
 				std::string print();
 		};
