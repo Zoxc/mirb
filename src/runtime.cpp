@@ -19,7 +19,6 @@
 #include "modules/kernel.hpp"
 #include "generic/executable-heap.hpp"
 #include "generic/benchmark.hpp"
-#include "arch/support.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -460,7 +459,9 @@ namespace Mirb
 
 	value_t call_code(Block::compiled_t code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 	{
-		return Arch::Support::ruby_call(code, obj, name, module, block, argc, argv);
+		// TODO: Fix
+		//return Arch::Support::ruby_call(code, obj, name, module, block, argc, argv);
+		return value_nil;
 	};
 	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
@@ -493,7 +494,9 @@ namespace Mirb
 	
 	CharArray backtrace()
 	{
-		return Arch::Support::backtrace();
+		// TODO: Fix
+		//return Arch::Support::backtrace();
+		return "";
 	}
 	
 	String *enforce_string(value_t obj)

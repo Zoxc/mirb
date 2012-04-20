@@ -12,14 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\globals.hpp" />
-    <ClInclude Include="..\..\src\arch\arch.hpp" />
-    <ClInclude Include="..\..\src\arch\bytecode.hpp" />
-    <ClInclude Include="..\..\src\arch\codegen.hpp" />
-    <ClInclude Include="..\..\src\arch\support.hpp" />
-    <ClInclude Include="..\..\src\arch\x86\codegen.hpp" />
-    <ClInclude Include="..\..\src\arch\x86\disassembly.hpp" />
-    <ClInclude Include="..\..\src\arch\x86\support.hpp" />
-    <ClInclude Include="..\..\src\arch\x86\x86.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\char-array.hpp" />
     <ClInclude Include="..\..\src\classes\array.hpp" />
@@ -79,10 +71,6 @@
     <ClInclude Include="..\..\src\value.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\arch\x86\codegen.cpp" />
-    <ClCompile Include="..\..\src\arch\x86\disassembly.cpp" />
-    <ClCompile Include="..\..\src\arch\x86\support.cpp" />
-    <ClCompile Include="..\..\src\arch\x86\x86.cpp" />
     <ClCompile Include="..\..\src\char-array.cpp" />
     <ClCompile Include="..\..\src\classes\array.cpp" />
     <ClCompile Include="..\..\src\classes\class.cpp" />
@@ -131,9 +119,6 @@
     <ClCompile Include="..\..\src\tree\tree.cpp" />
     <ClCompile Include="..\..\src\value.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\arch\x86\bytecode.hpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}</ProjectGuid>
     <RootNamespace>mirb</RootNamespace>
@@ -171,7 +156,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\vendor\udis86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;NO_GC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_GRAPH_BYTECODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>

@@ -97,14 +97,6 @@ namespace Mirb
 					Types
 				};
 
-				enum Flags
-				{
-					Fixed,
-					Register,
-					FlushCallerSavedRegisters,
-					FlushRegisters
-				};
-				
 				Type type;
 				Scope *owner; // Only valid for heap variables
 				
@@ -117,8 +109,6 @@ namespace Mirb
 				}
 
 				LiveRange range;
-
-				SimpleSet flags;
 
 				size_t loc;
 

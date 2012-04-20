@@ -24,7 +24,8 @@ namespace Mirb
 	{
 		class Block;
 		class BasicBlock;
-		
+		class ByteCodeGenerator;
+
 		class BasicBlock
 		{
 			public:
@@ -74,7 +75,7 @@ namespace Mirb
 					block->pred_blocks.push(this);
 				}
 		};
-
+		
 		class Block
 		{
 			private:
@@ -97,15 +98,12 @@ namespace Mirb
 				size_t stack_vars;
 				size_t stack_heap_size;
 				
-				bit_set_t used_registers;
-
-				Vector<Tree::Variable *, MemoryPool> variable_list; // A list of all variables in this block. Copied from Tree::Scope::variable_list on creation.
 				size_t var_count; // The total variable count. May be greater than variable_list.size() when dummy variables used to flush register are added.
 				
-				Tree::Variable *heap_array_var;
-				Tree::Variable *heap_var;
-				Tree::Variable *self_var;
-				Tree::Variable *return_var;
+				CodeGen::var_t heap_array_var;
+				CodeGen::var_t heap_var;
+				CodeGen::var_t self_var;
+				CodeGen::var_t return_var;
 				
 				size_t stack_alloc(size_t size);
 				void stack_free(size_t address);
@@ -116,7 +114,7 @@ namespace Mirb
 				
 				size_t loc;
 				
-				void analyse_liveness();
+				void analyse_liveness(ByteCodeGenerator &g);
 				void allocate_registers();
 				
 				Block(MemoryPool &memory_pool, Tree::Scope *scope);

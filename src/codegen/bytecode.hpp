@@ -15,55 +15,58 @@ namespace Mirb
 	namespace CodeGen
 	{
 		class ByteCodeGenerator;
+		
+		extern const size_t no_var;
 
 		class VariableGroup
 		{
 			private:
 				size_t address;
 				ByteCodeGenerator *bcg;
-				Tree::Variable *var;
+				var_t var;
 			public:
 				VariableGroup(ByteCodeGenerator *bcg, size_t size);
+
+				var_t operator[](size_t index);
 				
-				Tree::Variable *use();
+				var_t use();
 
 				size_t size;
-				Tree::Variable **vars;
 		};
 
 		class ByteCodeGenerator
 		{
 			private:
-				void convert_string(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_interpolated_string(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_integer(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_variable(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_ivar(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_constant(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_unary_op(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_boolean_not(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_binary_op(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_boolean_op(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_assignment(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_self(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_nil(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_true(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_false(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_array(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_call(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_super(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_if(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_group(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_return(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_break(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_next(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_redo(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_class(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_module(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_method(Tree::Node *basic_node, Tree::Variable *var);
-				void convert_handler(Tree::Node *basic_node, Tree::Variable *var);
+				void convert_string(Tree::Node *basic_node, var_t var);
+				void convert_interpolated_string(Tree::Node *basic_node, var_t var);
+				void convert_integer(Tree::Node *basic_node, var_t var);
+				void convert_variable(Tree::Node *basic_node, var_t var);
+				void convert_ivar(Tree::Node *basic_node, var_t var);
+				void convert_constant(Tree::Node *basic_node, var_t var);
+				void convert_unary_op(Tree::Node *basic_node, var_t var);
+				void convert_boolean_not(Tree::Node *basic_node, var_t var);
+				void convert_binary_op(Tree::Node *basic_node, var_t var);
+				void convert_boolean_op(Tree::Node *basic_node, var_t var);
+				void convert_assignment(Tree::Node *basic_node, var_t var);
+				void convert_self(Tree::Node *basic_node, var_t var);
+				void convert_nil(Tree::Node *basic_node, var_t var);
+				void convert_true(Tree::Node *basic_node, var_t var);
+				void convert_false(Tree::Node *basic_node, var_t var);
+				void convert_array(Tree::Node *basic_node, var_t var);
+				void convert_call(Tree::Node *basic_node, var_t var);
+				void convert_super(Tree::Node *basic_node, var_t var);
+				void convert_if(Tree::Node *basic_node, var_t var);
+				void convert_group(Tree::Node *basic_node, var_t var);
+				void convert_return(Tree::Node *basic_node, var_t var);
+				void convert_break(Tree::Node *basic_node, var_t var);
+				void convert_next(Tree::Node *basic_node, var_t var);
+				void convert_redo(Tree::Node *basic_node, var_t var);
+				void convert_class(Tree::Node *basic_node, var_t var);
+				void convert_module(Tree::Node *basic_node, var_t var);
+				void convert_method(Tree::Node *basic_node, var_t var);
+				void convert_handler(Tree::Node *basic_node, var_t var);
 
-				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, Tree::Variable *var);
+				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, var_t var);
 				
 				BasicBlock *body; // The point after the prolog of the block.
 				
@@ -74,20 +77,28 @@ namespace Mirb
 				Mirb::Block *compile(Tree::Scope *scope);
 				Mirb::Block *defer(Tree::Scope *scope);
 				
-				void to_bytecode(Tree::Node *node, Tree::Variable *var)
+				void to_bytecode(Tree::Node *node, var_t var)
 				{
 					(this->*jump_table[node->type()])(node, var);
 				}
 				
-				Tree::Variable *reuse(Tree::Variable *var)
+				var_t reuse(var_t var)
 				{
 					// TODO: Make sure no code stores results in the returned variable
 					return create_var();
 				}
 				
-				Tree::Variable *self_var();
+				var_t ref(Tree::Variable *var)
+				{
+					if(var)
+						return var->loc;
+					else
+						return no_var;
+				}
+				
+				var_t self_var();
 
-				BranchIfOp *gen_if(BasicBlock *ltrue, Tree::Variable *var)
+				BranchIfOp *gen_if(BasicBlock *ltrue, var_t var)
 				{
 					BranchIfOp *result = gen<BranchIfOp>(ltrue, var);
 					
@@ -96,7 +107,7 @@ namespace Mirb
 					return result;
 				}
 				
-				BranchUnlessOp *gen_unless(BasicBlock *lfalse, Tree::Variable *var)
+				BranchUnlessOp *gen_unless(BasicBlock *lfalse, var_t var)
 				{
 					BranchUnlessOp *result = gen<BranchUnlessOp>(lfalse, var);
 					
@@ -129,8 +140,8 @@ namespace Mirb
 					gen(create_block());
 				}
 				
-				Tree::Variable *block_arg(Tree::Scope *scope);
-				Tree::Variable *call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, Tree::Variable *&argv);
+				var_t block_arg(Tree::Scope *scope);
+				var_t call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv);
 				
 			public:
 				ByteCodeGenerator(MemoryPool &memory_pool);
@@ -154,10 +165,9 @@ namespace Mirb
 					return block;
 				}
 				
-				// TODO: Fix this silly C++ workaround
-				Tree::Variable *null_var()
+				bool is_var(var_t var)
 				{
-					return 0;
+					return var != no_var;
 				}
 				
 				template<class T> T *append(T *op)
@@ -169,7 +179,6 @@ namespace Mirb
 
 				struct Gen
 				{
-					static Tree::Variable *lock(Tree::Variable *var, size_t reg);
 				};
 
 				template<class T> struct Gen0:
@@ -300,16 +309,14 @@ namespace Mirb
 				
 				BasicBlock *basic;
 
-				Tree::Variable *create_var();
+				var_t create_var();
 				BasicBlock *create_block();
 				
-				Tree::Variable *read_variable(Tree::Variable *var);
-				void write_variable(Tree::Variable *var, Tree::Variable *value);
+				var_t read_variable(Tree::Variable *var);
+				void write_variable(Tree::Variable *var, var_t value);
 				
 				Block *to_bytecode(Tree::Scope *scope);
 				Block *create();
 		};
 	};
 };
-
-#include "../arch/bytecode.hpp"

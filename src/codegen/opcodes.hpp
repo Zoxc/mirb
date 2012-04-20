@@ -20,6 +20,8 @@ namespace Mirb
 	{
 		class BasicBlock;
 		
+		typedef size_t var_t;
+
 		struct MoveOp;
 		struct LoadOp;
 		struct LoadRawOp;
@@ -237,69 +239,69 @@ namespace Mirb
 		struct MoveOp:
 			public OpcodeWrapper<Opcode::Move>
 		{
-			Tree::Variable *dst;
-			Tree::Variable *src;
+			var_t dst;
+			var_t src;
 
 			template<typename T> void def(T def) { def(dst); };
 			template<typename T> void use(T use) { use(src); };
 			
-			MoveOp(Tree::Variable *dst, Tree::Variable *src) : dst(dst), src(src) {}
+			MoveOp(var_t dst, var_t src) : dst(dst), src(src) {}
 		};
 		
 		struct LoadOp:
 			public OpcodeWrapper<Opcode::Load>
 		{
-			Tree::Variable *var;
+			var_t var;
 			value_t imm;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			LoadOp(Tree::Variable *var, value_t imm) : var(var), imm(imm) {}
+			LoadOp(var_t var, value_t imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadRawOp:
 			public OpcodeWrapper<Opcode::LoadRaw>
 		{
-			Tree::Variable *var;
+			var_t var;
 			size_t imm;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			LoadRawOp(Tree::Variable *var, size_t imm) : var(var), imm(imm) {}
+			LoadRawOp(var_t var, size_t imm) : var(var), imm(imm) {}
 		};
 		
 		struct LoadArgOp:
 			public OpcodeWrapper<Opcode::LoadArg>
 		{
-			Tree::Variable *var;
+			var_t var;
 			size_t arg;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			LoadArgOp(Tree::Variable *var, size_t arg) : var(var), arg(arg) {}
+			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
 		};
 		
 		struct GroupOp:
 			public OpcodeWrapper<Opcode::Group>
 		{
-			Tree::Variable *var;
+			var_t var;
 			size_t address;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			GroupOp(Tree::Variable *var, size_t address) : var(var), address(address) {}
+			GroupOp(var_t var, size_t address) : var(var), address(address) {}
 		};
 
 		struct ClosureOp:
 			public OpcodeWrapper<Opcode::Closure>
 		{
-			Tree::Variable *var;
-			Tree::Variable *self;
-			Tree::Variable *name;
-			Tree::Variable *module;
+			var_t var;
+			var_t self;
+			var_t name;
+			var_t module;
 			Mirb::Block *block;
 			size_t argc;
-			Tree::Variable *argv;
+			var_t argv;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use)
@@ -310,16 +312,16 @@ namespace Mirb
 				use(argv);
 			};
 
-			ClosureOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *name, Tree::Variable *module, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), self(self), name(name), module(module), block(block), argc(argc), argv(argv) {}
+			ClosureOp(var_t var, var_t self, var_t name, var_t module, Mirb::Block *block, size_t argc, var_t argv) : var(var), self(self), name(name), module(module), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct ClassOp:
 			public OpcodeWrapper<Opcode::Class>
 		{
-			Tree::Variable *var;
-			Tree::Variable *self;
+			var_t var;
+			var_t self;
 			Symbol *name;
-			Tree::Variable *super;
+			var_t super;
 			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
@@ -332,45 +334,45 @@ namespace Mirb
 					use(super);
 			};
 
-			ClassOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Tree::Variable *super, Mirb::Block *block) : var(var), self(self), name(name), super(super), block(block) {}
+			ClassOp(var_t var, var_t self, Symbol *name, var_t super, Mirb::Block *block) : var(var), self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
 			public OpcodeWrapper<Opcode::Module>
 		{
-			Tree::Variable *var;
-			Tree::Variable *self;
+			var_t var;
+			var_t self;
 			Symbol *name;
 			Mirb::Block *block;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			template<typename T> void use(T use) { use(self); };
 
-			ModuleOp(Tree::Variable *var, Tree::Variable *self, Symbol *name, Mirb::Block *block) : var(var), self(self), name(name), block(block) {}
+			ModuleOp(var_t var, var_t self, Symbol *name, Mirb::Block *block) : var(var), self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
 			public OpcodeWrapper<Opcode::Method>
 		{
-			Tree::Variable *self;
+			var_t self;
 			Symbol *name;
 			Mirb::Block *block;
 			
 			template<typename T> void use(T use) { use(self); };
 			
-			MethodOp(Tree::Variable *self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
+			MethodOp(var_t self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
 		};
 		
 		struct CallOp:
 			public OpcodeWrapper<Opcode::Call>
 		{
-			Tree::Variable *var;
-			Tree::Variable *obj;
+			var_t var;
+			var_t obj;
 			Symbol *method;
-			Tree::Variable *block_var;
+			var_t block_var;
 			Mirb::Block *block;
 			size_t argc;
-			Tree::Variable *argv;
+			var_t argv;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
@@ -385,20 +387,20 @@ namespace Mirb
 					use(block_var);
 			};
 
-			CallOp(Tree::Variable *var, Tree::Variable *obj, Symbol *method, Tree::Variable *block_var, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
+			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct SuperOp:
 			public OpcodeWrapper<Opcode::Super>
 		{
-			Tree::Variable *var;
-			Tree::Variable *self;
-			Tree::Variable *module;
-			Tree::Variable *method;
-			Tree::Variable *block_var;
+			var_t var;
+			var_t self;
+			var_t module;
+			var_t method;
+			var_t block_var;
 			Mirb::Block *block;
 			size_t argc;
-			Tree::Variable *argv;
+			var_t argv;
 			
 			template<typename T> void def(T def) { if(var) def(var); };
 			
@@ -415,51 +417,51 @@ namespace Mirb
 					use(block_var);
 			};
 
-			SuperOp(Tree::Variable *var, Tree::Variable *self, Tree::Variable *module, Tree::Variable *method, Tree::Variable *block_var, Mirb::Block *block, size_t argc, Tree::Variable *argv) : var(var), self(self), module(module), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
+			SuperOp(var_t var, var_t self, var_t module, var_t method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), self(self), module(module), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct LookupOp:
 			public OpcodeWrapper<Opcode::Lookup>
 		{
-			Tree::Variable *var;
-			Tree::Variable *array_var;
+			var_t var;
+			var_t array_var;
 			size_t index;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(array_var); };
 
-			LookupOp(Tree::Variable *var, Tree::Variable *array_var, size_t index) : var(var), array_var(array_var), index(index) {}
+			LookupOp(var_t var, var_t array_var, size_t index) : var(var), array_var(array_var), index(index) {}
 		};
 		
 		struct CreateHeapOp:
 			public OpcodeWrapper<Opcode::CreateHeap>
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			CreateHeapOp(Tree::Variable *var) : var(var) {}
+			CreateHeapOp(var_t var) : var(var) {}
 		};
 		
 		struct GetHeapVarOp:
 			public OpcodeWrapper<Opcode::GetHeapVar>
 		{
-			Tree::Variable *var;
-			Tree::Variable *heap;
-			Tree::Variable *index;
+			var_t var;
+			var_t heap;
+			var_t index;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(heap); };
 
-			GetHeapVarOp(Tree::Variable *var, Tree::Variable *heap, Tree::Variable *index) : var(var), heap(heap), index(index) {}
+			GetHeapVarOp(var_t var, var_t heap, var_t index) : var(var), heap(heap), index(index) {}
 		};
 		
 		struct SetHeapVarOp:
 			public OpcodeWrapper<Opcode::SetHeapVar>
 		{
-			Tree::Variable *heap;
-			Tree::Variable *index;
-			Tree::Variable *var;
+			var_t heap;
+			var_t index;
+			var_t var;
 			
 			template<typename T> void use(T use)
 			{
@@ -467,28 +469,28 @@ namespace Mirb
 				use(var);
 			};
 			
-			SetHeapVarOp(Tree::Variable *heap, Tree::Variable *index, Tree::Variable *var) : heap(heap), index(index), var(var) {}
+			SetHeapVarOp(var_t heap, var_t index, var_t var) : heap(heap), index(index), var(var) {}
 		};
 		
 		struct GetIVarOp:
 			public OpcodeWrapper<Opcode::GetIVar>
 		{
-			Tree::Variable *var;
-			Tree::Variable *self;
+			var_t var;
+			var_t self;
 			Symbol *name;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(self); };
 
-			GetIVarOp(Tree::Variable *var, Tree::Variable *self, Symbol *name) : var(var), self(self), name(name) {}
+			GetIVarOp(var_t var, var_t self, Symbol *name) : var(var), self(self), name(name) {}
 		};
 		
 		struct SetIVarOp:
 			public OpcodeWrapper<Opcode::SetIVar>
 		{
-			Tree::Variable *self;
+			var_t self;
 			Symbol *name;
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use)
 			{
@@ -496,28 +498,28 @@ namespace Mirb
 				use(var);
 			};
 			
-			SetIVarOp(Tree::Variable *self, Symbol *name, Tree::Variable *var) : self(self), name(name), var(var) {}
+			SetIVarOp(var_t self, Symbol *name, var_t var) : self(self), name(name), var(var) {}
 		};
 		
 		struct GetConstOp:
 			public OpcodeWrapper<Opcode::GetConst>
 		{
-			Tree::Variable *var;
-			Tree::Variable *obj;
+			var_t var;
+			var_t obj;
 			Symbol *name;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(obj); };
 
-			GetConstOp(Tree::Variable *var, Tree::Variable *obj, Symbol *name) : var(var), obj(obj), name(name) {}
+			GetConstOp(var_t var, var_t obj, Symbol *name) : var(var), obj(obj), name(name) {}
 		};
 		
 		struct SetConstOp:
 			public OpcodeWrapper<Opcode::SetConst>
 		{
-			Tree::Variable *obj;
+			var_t obj;
 			Symbol *name;
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use)
 			{
@@ -525,7 +527,7 @@ namespace Mirb
 				use(var);
 			};
 			
-			SetConstOp(Tree::Variable *obj, Symbol *name, Tree::Variable *var) : obj(obj), name(name), var(var) {}
+			SetConstOp(var_t obj, Symbol *name, var_t var) : obj(obj), name(name), var(var) {}
 		};
 		
 		struct BranchOpcode:
@@ -541,41 +543,41 @@ namespace Mirb
 		struct BranchIfOp:
 			public BranchOpcode
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchIfOp(BasicBlock *ltrue, Tree::Variable *var) : BranchOpcode(BranchIf, ltrue), var(var) {}
+			BranchIfOp(BasicBlock *ltrue, var_t var) : BranchOpcode(BranchIf, ltrue), var(var) {}
 		};
 		
 		struct BranchIfZeroOp:
 			public BranchOpcode
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchIfZeroOp(BasicBlock *label, Tree::Variable *var) : BranchOpcode(BranchIfZero, label), var(var) {}
+			BranchIfZeroOp(BasicBlock *label, var_t var) : BranchOpcode(BranchIfZero, label), var(var) {}
 		};
 		
 		struct BranchUnlessOp:
 			public BranchOpcode
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchUnlessOp(BasicBlock *lfalse, Tree::Variable *var) : BranchOpcode(BranchUnless, lfalse), var(var) {}
+			BranchUnlessOp(BasicBlock *lfalse, var_t var) : BranchOpcode(BranchUnless, lfalse), var(var) {}
 		};
 		
 		struct BranchUnlessZeroOp:
 			public BranchOpcode
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			BranchUnlessZeroOp(BasicBlock *label, Tree::Variable *var) : BranchOpcode(BranchUnlessZero, label), var(var) {}
+			BranchUnlessZeroOp(BasicBlock *label, var_t var) : BranchOpcode(BranchUnlessZero, label), var(var) {}
 		};
 		
 		struct BranchOp:
@@ -587,11 +589,11 @@ namespace Mirb
 		struct ReturnOp:
 			public OpcodeWrapper<Opcode::Return>
 		{
-			Tree::Variable *var;
+			var_t var;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			ReturnOp(Tree::Variable *var) : var(var) {}
+			ReturnOp(var_t var) : var(var) {}
 		};
 		
 		struct HandlerOp:
@@ -615,69 +617,69 @@ namespace Mirb
 		struct UnwindReturnOp:
 			public OpcodeWrapper<Opcode::UnwindReturn>
 		{
-			Tree::Variable *var;
+			var_t var;
 			Mirb::Block *code;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			UnwindReturnOp(Tree::Variable *var, Mirb::Block *code) : var(var), code(code) {}
+			UnwindReturnOp(var_t var, Mirb::Block *code) : var(var), code(code) {}
 		};
 		
 		struct UnwindBreakOp:
 			public OpcodeWrapper<Opcode::UnwindBreak>
 		{
-			Tree::Variable *var;
+			var_t var;
 			Mirb::Block *code;
 			size_t index;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			UnwindBreakOp(Tree::Variable *var, Mirb::Block *code, size_t index) : var(var), code(code), index(index) {}
+			UnwindBreakOp(var_t var, Mirb::Block *code, size_t index) : var(var), code(code), index(index) {}
 		};
 		
 		struct ArrayOp:
 			public OpcodeWrapper<Opcode::Array>
 		{
-			Tree::Variable *var;
+			var_t var;
 			size_t argc;
-			Tree::Variable *argv;
+			var_t argv;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(argv); };
 
-			ArrayOp(Tree::Variable *var, size_t argc, Tree::Variable *argv) : var(var), argc(argc), argv(argv) {}
+			ArrayOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
 		struct StringOp:
 			public OpcodeWrapper<Opcode::String>
 		{
-			Tree::Variable *var;
+			var_t var;
 			const char_t *str;
 			
 			template<typename T> void def(T def) { def(var); };
 
-			StringOp(Tree::Variable *var, const char_t *str) : var(var), str(str) {}
+			StringOp(var_t var, const char_t *str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:
 			public OpcodeWrapper<Opcode::Interpolate>
 		{
-			Tree::Variable *var;
+			var_t var;
 			size_t argc;
-			Tree::Variable *argv;
+			var_t argv;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(argv); };
 
-			InterpolateOp(Tree::Variable *var, size_t argc, Tree::Variable *argv) : var(var), argc(argc), argv(argv) {}
+			InterpolateOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
 		struct StaticCallOp:
 			public OpcodeWrapper<Opcode::StaticCall>
 		{
-			Tree::Variable *var;
+			var_t var;
 			void *function;
-			Tree::Variable **args;
+			var_t *args;
 			size_t arg_count;
 			
 			template<typename T> void def(T def) { def(var); };
@@ -688,7 +690,7 @@ namespace Mirb
 					use(args[i]);
 			};
 
-			StaticCallOp(Tree::Variable *var, void *function, Tree::Variable **args, size_t arg_count) : var(var), function(function), args(args), arg_count(arg_count) {}
+			StaticCallOp(var_t var, void *function, var_t *args, size_t arg_count) : var(var), function(function), args(args), arg_count(arg_count) {}
 		};
 		
 		struct RaiseOp:
@@ -699,16 +701,16 @@ namespace Mirb
 		struct SetupVarsOp:
 			public OpcodeWrapper<Opcode::SetupVars>
 		{
-			Tree::Variable **args;
+			var_t *args;
 			size_t arg_count;
 
-			SetupVarsOp(Tree::Variable **args, size_t arg_count) : args(args), arg_count(arg_count) {}
+			SetupVarsOp(var_t *args, size_t arg_count) : args(args), arg_count(arg_count) {}
 		};
 		
 		struct PrologueOp:
 			public OpcodeWrapper<Opcode::Prologue>
 		{
-			PrologueOp(Tree::Variable *heap_array_var, Tree::Variable *heap_var, Tree::Variable *block_parameter, Tree::Variable *method_name_var, Tree::Variable *method_module_var, Tree::Variable *self_var, Tree::Variable *argc, Tree::Variable *argv) {}
+			PrologueOp(var_t heap_array_var, var_t heap_var, var_t block_parameter, var_t method_name_var, var_t method_module_var, var_t self_var, var_t argc, var_t argv) {}
 		};
 	};
 };

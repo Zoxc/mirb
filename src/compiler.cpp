@@ -2,7 +2,6 @@
 #include "symbol-pool.hpp"
 #include "gc.hpp"
 #include "block.hpp"
-#include "arch/codegen.hpp"
 #include "generic/executable-heap.hpp"
 #include "codegen/bytecode.hpp"
 
@@ -25,9 +24,6 @@ namespace Mirb
 			std::cout << printer.print();
 		#endif
 		
-		block->analyse_liveness();
-		block->allocate_registers();
-
 		#ifdef MIRB_GRAPH_BYTECODE
 			CodeGen::DotPrinter dot_printer;
 			
@@ -41,24 +37,8 @@ namespace Mirb
 				
 			std::system(("mkdir \"" + path.str() + "\"").c_str());
 			std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
-				
-			for(auto i = block->variable_list.begin(); i != block->variable_list.end(); ++i)
-			{
-				if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
-					continue;
-
-				dot_printer.highlight = *i;
-
-				dot_printer.print_block(block, "bytecode/bytecode.dot");
-					
-				std::stringstream result;
-
-				result << "dot -Tpng bytecode/bytecode.dot -o " << path.str() << "/var" << i()->index << ".png";
-
-				std::system(result.str().c_str());
-			}
 		#endif
-
+/*
 		size_t block_size = CodeGen::NativeMeasurer::measure(block);
 
 		void *block_code = ExecutableHeap::alloc(block_size);
@@ -73,7 +53,7 @@ namespace Mirb
 
 		block->final->scope = 0;
 		block->final->compiled = (Block::compiled_t)block_code;
-		
+		*/
 		return block->final;
 	}
 
@@ -84,7 +64,7 @@ namespace Mirb
 		block->scope = scope;
 
 		scope->final = block;
-		
+		/*
 		size_t block_size = CodeGen::NativeGenerator::stub_size;
 
 		void *block_code = ExecutableHeap::alloc(block_size);
@@ -96,7 +76,7 @@ namespace Mirb
 		native_generator.generate_stub(block);
 
 		block->compiled = (Block::compiled_t)block_code;
-		
+		*/
 		return block;
 	}
 

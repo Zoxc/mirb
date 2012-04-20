@@ -1,6 +1,5 @@
 #include "method.hpp"
 #include "runtime.hpp"
-#include "arch/codegen.hpp"
 #include "generic/executable-heap.hpp"
 #include "codegen/bytecode.hpp"
 #include "codegen/opcodes.hpp"
@@ -17,7 +16,7 @@ namespace Mirb
 {
 	namespace Arg
 	{
-		Tree::Variable *Self::gen(MethodGen &g)
+		CodeGen::var_t Self::gen(MethodGen &g)
 		{
 			if(!g.self_arg)
 				g.self_arg = g.g->create_var();
@@ -25,7 +24,7 @@ namespace Mirb
 			return g.self_arg;
 		}
 	
-		Tree::Variable *Block::gen(MethodGen &g)
+		CodeGen::var_t Block::gen(MethodGen &g)
 		{
 			if(!g.block_arg)
 				g.block_arg = g.g->create_var();
@@ -33,7 +32,7 @@ namespace Mirb
 			return g.block_arg;
 		}
 	
-		Tree::Variable *Count::gen(MethodGen &g)
+		CodeGen::var_t Count::gen(MethodGen &g)
 		{
 			if(!g.argc_arg)
 				g.argc_arg = g.g->create_var();
@@ -41,7 +40,7 @@ namespace Mirb
 			return g.argc_arg;
 		}
 	
-		Tree::Variable *Values::gen(MethodGen &g)
+		CodeGen::var_t Values::gen(MethodGen &g)
 		{
 			if(!g.argv_arg)
 				g.argv_arg = g.g->create_var();
@@ -49,9 +48,9 @@ namespace Mirb
 			return g.argv_arg;
 		}
 
-		Tree::Variable *Value::gen(MethodGen &g)
+		CodeGen::var_t Value::gen(MethodGen &g)
 		{
-			Tree::Variable *var = g.g->create_var();
+			CodeGen::var_t var = g.g->create_var();
 			g.g->gen<CodeGen::LookupOp>(var, Values::gen(g), g.argv_index++);
 			return var;
 		}
@@ -76,13 +75,13 @@ namespace Mirb
 		{
 			index = 1;
 			this->arg_count++;
-			args = new (memory_pool) Tree::Variable *[this->arg_count];
+			args = new (memory_pool) CodeGen::var_t[this->arg_count];
 			args[0] = Arg::Self::gen(*this);
 		}
 		else
 		{
 			index = 0;
-			args = new (memory_pool) Tree::Variable *[arg_count];
+			args = new (memory_pool) CodeGen::var_t[arg_count];
 		}
 		
 		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
@@ -101,7 +100,7 @@ namespace Mirb
 		body->branch(raise);
 		raise->next(block->epilog);
 
-		Tree::Variable *return_var = g->create_var();
+		CodeGen::var_t return_var = g->create_var();
 
 		g->gen<CodeGen::StaticCallOp>(return_var, function, args, arg_count);
 		g->gen<CodeGen::BranchUnlessZeroOp>(block->epilog, return_var);
@@ -114,10 +113,7 @@ namespace Mirb
 
 		g->basic = prolog;
 		
-		g->gen<CodeGen::PrologueOp>(g->null_var(), g->null_var(), block_arg, name_arg, module_arg, self_arg, argc_arg, argv_arg);
-
-		block->analyse_liveness();
-		block->allocate_registers();
+		g->gen<CodeGen::PrologueOp>(CodeGen::no_var, CodeGen::no_var, block_arg, name_arg, module_arg, self_arg, argc_arg, argv_arg);
 
 		#ifdef MIRB_DEBUG_BRIDGE
 			CodeGen::ByteCodePrinter printer(block);
@@ -156,7 +152,7 @@ namespace Mirb
 				std::system(result.str().c_str());
 			}
 		#endif
-
+			/*
 		size_t block_size = CodeGen::NativeMeasurer::measure_method(block);
 
 		void *block_code = ExecutableHeap::alloc(block_size);
@@ -168,13 +164,17 @@ namespace Mirb
 		native_generator.generate_method(block);
 		
 		ExecutableHeap::resize(block_code, stream.size());
+		
+		*/
 
 		Block *final = block->final;
-
+		
+/*
 		final->scope = 0;
 		final->compiled = (Block::compiled_t)block_code;
 		final->name = name;
-
+		
+		*/
 		if((flags & Method::Singleton) != 0)
 			module = singleton_class(module);
 
@@ -184,7 +184,7 @@ namespace Mirb
 		
 		set_method(module, name, final);
 		
-		return final;
+		return block->final;
 	}
 	
 	Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)

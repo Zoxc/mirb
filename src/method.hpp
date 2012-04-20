@@ -5,6 +5,7 @@
 #include "generic/memory-pool.hpp"
 #include "generic/vector.hpp"
 #include "generic/simple-list.hpp"
+#include "codegen/opcodes.hpp"
 
 namespace Mirb
 {
@@ -31,7 +32,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static Tree::Variable *gen(MethodGen &g);
+				static CodeGen::var_t gen(MethodGen &g);
 		};
 
 		class Block
@@ -39,7 +40,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static Tree::Variable *gen(MethodGen &g);
+				static CodeGen::var_t gen(MethodGen &g);
 		};
 		
 		class Count
@@ -47,7 +48,7 @@ namespace Mirb
 			public:
 				typedef size_t type;
 
-				static Tree::Variable *gen(MethodGen &g);
+				static CodeGen::var_t gen(MethodGen &g);
 		};
 
 		class Values
@@ -55,7 +56,7 @@ namespace Mirb
 			public:
 				typedef value_t *type;
 
-				static Tree::Variable *gen(MethodGen &g);
+				static CodeGen::var_t gen(MethodGen &g);
 		};
 		
 		class Value
@@ -63,7 +64,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static Tree::Variable *gen(MethodGen &g);
+				static CodeGen::var_t gen(MethodGen &g);
 		};
 
 		template<typename T> void *cast_function(T *function)
@@ -129,16 +130,16 @@ namespace Mirb
 			MemoryPool memory_pool;
 			CodeGen::BasicBlock *prolog;
 			CodeGen::BasicBlock *body;
-			Tree::Variable **args;
+			CodeGen::var_t *args;
 
 			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
 		public:
-			Tree::Variable *self_arg;
-			Tree::Variable *name_arg;
-			Tree::Variable *module_arg;
-			Tree::Variable *block_arg;
-			Tree::Variable *argc_arg;
-			Tree::Variable *argv_arg;
+			CodeGen::var_t self_arg;
+			CodeGen::var_t name_arg;
+			CodeGen::var_t module_arg;
+			CodeGen::var_t block_arg;
+			CodeGen::var_t argc_arg;
+			CodeGen::var_t argv_arg;
 			size_t argv_index;
 
 			CodeGen::ByteCodeGenerator *g;

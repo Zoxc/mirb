@@ -22,12 +22,16 @@ namespace Mirb
 			}
 		}
 
-		std::string ByteCodePrinter::var(Tree::Variable *var)
+		std::string ByteCodePrinter::var(var_t var)
 		{
-			if(!var)
+			if(var == -1)
 				return "nil";
 			
 			std::stringstream result;
+
+			result << "%" << var;
+
+			return result.str();/*
 			
 			if(block->scope && (block->scope->referenced_scopes.size() > 0) && (var == block->heap_array_var))
 				result << "@heap_array";
@@ -79,7 +83,7 @@ namespace Mirb
 			if(highlight == var)
 				return "<font color='dodgerblue2'>" + result.str() + "</font>";
 			else
-				return result.str();
+				return result.str();*/
 		}
 		
 		std::string ByteCodePrinter::raw(size_t imm)

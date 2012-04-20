@@ -7,7 +7,6 @@
 #include "../generic/benchmark.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
-#include "../arch/support.hpp"
 
 namespace Mirb
 {
