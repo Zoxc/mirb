@@ -9,12 +9,12 @@ namespace Mirb
 	
 	static value_t int_to_fix(size_t imm)
 	{
-		return (imm << 1) | 1;
+		return (value_t)((imm << 1) | 1);
 	}
 	
 	static size_t fix_to_int(value_t obj)
 	{
-		return obj >> 1;
+		return (size_t)obj >> 1;
 	}
 	
 	value_t Fixnum::from_size_t(size_t value)

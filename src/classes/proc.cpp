@@ -11,11 +11,19 @@ namespace Mirb
 		auto self = cast<Proc>(obj);
 
 		OnStack<1> os(self);
+		
+		ProcFrame frame;
 
-		// TODO: Pin self->scopes? If not, remove the OnStack object.
-		// VMFIX
-		//return Arch::Support::closure_call(self->block->compiled, self->scopes, self->self, self->name, self->module, block, argc, argv);
-		return value_nil;
+		frame.code = self->block;
+		frame.obj = self->self;
+		frame.name = self->name;
+		frame.module = self->module;
+		frame.block = block;
+		frame.argc = argc;
+		frame.argv = argv;
+		frame.scopes = self->scopes;
+
+		return call_frame(frame);
 	}
 
 	void Proc::initialize()

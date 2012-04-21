@@ -6,6 +6,7 @@
 namespace Mirb
 {
 	class Object;
+	class ObjectHeader;
 	class Module;
 	class Class;
 	class Symbol;
@@ -13,6 +14,7 @@ namespace Mirb
 	class Array;
 	class Exception;
 	class Proc;
+	struct value_view;
 
 	/* Format for tagged pointers
 	 *
@@ -28,21 +30,25 @@ namespace Mirb
 	 * 1010 - true
 	 * 1110 - undef
 	 */
-
-	typedef size_t value_t;
-
-	const value_t fixnum_mask = 1;
-	const value_t object_ref_mask = 3;
 	
-	const value_t literal_mask = 0xF;
-	const value_t literal_count = literal_mask + 1;
+	typedef ObjectHeader *value_t;
+
+	const size_t fixnum_mask = 1;
+	const size_t object_ref_mask = 3;
+	
+	const size_t literal_mask = 0xF;
+	const size_t literal_count = (literal_mask + 1);
 	
 	const value_t value_raise = 0; // Used to indicate that an exception is raised to native code.
+	
+	const size_t value_nil_num = 2;
+	const size_t value_false_num = 6;
+	const size_t value_true_num = 10;
 
-	const value_t value_nil = 2;
-	const value_t value_false = 6;
-	const value_t value_true = 10;
-	const value_t value_undef = 14;
+	const value_t value_nil = (value_t)value_nil_num;
+	const value_t value_false = (value_t)value_false_num;
+	const value_t value_true = (value_t)value_true_num;
+	const value_t value_undef = (value_t)14;
 	const value_t value_highest = value_undef;
 
 	namespace Value

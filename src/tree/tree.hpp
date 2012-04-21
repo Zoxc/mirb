@@ -62,30 +62,6 @@ namespace Mirb
 		
 		struct SuperNode;
 
-		class LiveRange
-		{
-			public:
-				size_t start;
-				size_t stop;
-
-				LiveRange() : start((size_t)-1), stop(0) {}
-
-				bool contains(size_t loc)
-				{
-					return (start <= loc && stop >= loc);
-				}
-
-				void update_start(size_t loc)
-				{
-					start = std::min(start, loc);
-				}
-
-				void update_stop(size_t loc)
-				{
-					stop = std::max(stop, loc);
-				}
-		};
-		
 		class Variable
 		{
 			public:
@@ -108,11 +84,7 @@ namespace Mirb
 				{
 				}
 
-				LiveRange range;
-
 				size_t loc;
-
-				size_t index;
 
 				#ifdef DEBUG
 					Variable *group;
@@ -229,7 +201,7 @@ namespace Mirb
 				{
 					T *result = new (fragment) T(type);
 					
-					result->index = variable_list.size();
+					result->loc = variable_list.size();
 					
 					result->type = type;
 

@@ -47,7 +47,7 @@ int main()
 			continue;
 		}
 	
-		#ifdef DEBUG
+		#ifdef MIRB_DEBUG_COMPILER
 			DebugPrinter printer;
 			
 			std::cout << "Parsing done.\n-----\n";
@@ -66,8 +66,6 @@ int main()
 		}
 		else
 			std::cout << "=> " << inspect_object(result) << "\n";
-		
-		block = 0; // Make sure block stays on stack */
 	}
 	
 	std::cout << "Exiting gracefully...";

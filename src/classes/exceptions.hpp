@@ -16,6 +16,20 @@ namespace Mirb
 
 		void initialize();
 	};
+
+	namespace TypeError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
+
+	namespace ArgumentError
+	{
+		extern value_t class_ref;
+
+		void initialize();
+	};
 	
 	namespace RuntimeError
 	{
@@ -30,6 +44,8 @@ namespace Mirb
 
 		void initialize();
 	};
+
+	void initialize_exceptions();
 	
 	class ReturnException:
 		public Exception
@@ -45,7 +61,7 @@ namespace Mirb
 		public ReturnException
 	{
 		public:
-			BreakException(value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value, size_t id) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
+			BreakException(value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value, var_t dst) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
 			
 			var_t dst;
 	};

@@ -194,12 +194,21 @@ namespace Mirb
 	{
 		return auto_cast(Collector::allocate<String>(*this));
 	}
-
+	
 	CharArray CharArray::hex(size_t value)
 	{
 		char_t buffer[15];
 
 		size_t length = sprintf((char *)buffer, "%x", value);
+
+		return CharArray(buffer, length);
+	}
+
+	CharArray CharArray::uint(size_t value)
+	{
+		char_t buffer[15];
+
+		size_t length = sprintf((char *)buffer, "%u", value);
 
 		return CharArray(buffer, length);
 	}

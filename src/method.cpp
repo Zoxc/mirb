@@ -1,6 +1,5 @@
 #include "method.hpp"
 #include "runtime.hpp"
-#include "generic/executable-heap.hpp"
 #include "codegen/bytecode.hpp"
 #include "codegen/opcodes.hpp"
 
@@ -17,29 +16,29 @@ namespace Mirb
 	
 	namespace Arg
 	{
-		Self::type Self::apply(Frame &frame, size_t &index)
+		Self::type Self::apply(Frame &frame, State &state)
 		{
 			return frame.obj;
 		}
 		
-		Block::type Block::apply(Frame &frame, size_t &index)
+		Block::type Block::apply(Frame &frame, State &state)
 		{
 			return frame.block;
 		}
 
-		Count::type Count::apply(Frame &frame, size_t &index)
+		Count::type Count::apply(Frame &frame, State &state)
 		{
 			return frame.argc;
 		}
 
-		Values::type Values::apply(Frame &frame, size_t &index)
+		Values::type Values::apply(Frame &frame, State &state)
 		{
 			return frame.argv;
 		}
 
-		Value::type Value::apply(Frame &frame, size_t &index)
+		Value::type Value::apply(Frame &frame, State &state)
 		{
-			return frame.argv[index++];
+			return frame.argv[state.index++];
 		}
 	}
 

@@ -31,6 +31,8 @@ namespace Mirb
 		struct CallOp;
 		struct SuperOp;
 		struct LookupOp;
+		struct SelfOp;
+		struct BlockOp;
 		struct CreateHeapOp;
 		struct GetHeapVarOp;
 		struct SetHeapVarOp;
@@ -52,10 +54,6 @@ namespace Mirb
 		struct ArrayOp;
 		struct StringOp;
 		struct InterpolateOp;
-		struct StaticCallOp;
-		struct SetupVarsOp;
-		struct ReturnOp;
-		struct RaiseOp;
 		
 		struct Opcode
 		{
@@ -72,6 +70,8 @@ namespace Mirb
 				Call,
 				Super,
 				Lookup,
+				Self,
+				Block,
 				CreateHeap,
 				GetHeapVar,
 				SetHeapVar,
@@ -91,8 +91,7 @@ namespace Mirb
 				UnwindBreak,
 				Array,
 				String,
-				Interpolate,
-				Raise
+				Interpolate
 			};
 			
 			Type op;
@@ -196,15 +195,6 @@ namespace Mirb
 					case Interpolate:
 						return T<InterpolateOp>::func(arg, (InterpolateOp &)*this);
 					
-					case StaticCall:
-						return T<StaticCallOp>::func(arg, (StaticCallOp &)*this);
-						
-					case Raise:
-						return T<RaiseOp>::func(arg, (RaiseOp &)*this);
-
-					case SetupVars:
-						return T<SetupVarsOp>::func(arg, (SetupVarsOp &)*this);
-
 					default:
 						mirb_debug_abort("Unknown opcode type");
 				};
@@ -268,34 +258,31 @@ namespace Mirb
 		struct ClassOp:
 			public OpcodeWrapper<Opcode::Class>
 		{
-			var_t self;
+			var_t var;
 			Symbol *name;
 			var_t super;
 			Mirb::Block *block;
 			
-			ClassOp(var_t self, Symbol *name, var_t super, Mirb::Block *block) : self(self), name(name), super(super), block(block) {}
+			ClassOp(var_t var, Symbol *name, var_t super, Mirb::Block *block) : var(var), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
 			public OpcodeWrapper<Opcode::Module>
 		{
-			var_t self;
+			var_t var;
 			Symbol *name;
 			Mirb::Block *block;
 			
-			ModuleOp(var_t self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
+			ModuleOp(var_t var, Symbol *name, Mirb::Block *block) : var(var), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
 			public OpcodeWrapper<Opcode::Method>
 		{
-			var_t self;
 			Symbol *name;
 			Mirb::Block *block;
 			
-			template<typename T> void use(T use) { use(self); };
-			
-			MethodOp(var_t self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
+			MethodOp(Symbol *name, Mirb::Block *block) : name(name), block(block) {}
 		};
 		
 		struct CallOp:
@@ -341,23 +328,34 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Lookup>
 		{
 			var_t var;
-			var_t array_var;
 			size_t index;
 			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(array_var); };
+			LookupOp(var_t var, size_t index) : var(var), index(index) {}
+		};
+		
+		struct SelfOp:
+			public OpcodeWrapper<Opcode::Self>
+		{
+			var_t var;
 
-			LookupOp(var_t var, var_t array_var, size_t index) : var(var), array_var(array_var), index(index) {}
+			SelfOp(var_t var) : var(var) {}
+		};
+		
+		struct BlockOp:
+			public OpcodeWrapper<Opcode::Block>
+		{
+			var_t var;
+
+			BlockOp(var_t var) : var(var) {}
 		};
 		
 		struct CreateHeapOp:
 			public OpcodeWrapper<Opcode::CreateHeap>
 		{
 			var_t var;
+			size_t vars;
 			
-			template<typename T> void def(T def) { def(var); };
-
-			CreateHeapOp(var_t var) : var(var) {}
+			CreateHeapOp(var_t var, size_t vars) : var(var), vars(vars) {}
 		};
 		
 		struct GetHeapVarOp:
@@ -487,7 +485,9 @@ namespace Mirb
 		struct ReturnOp:
 			public OpcodeWrapper<Opcode::Return>
 		{
-			ReturnOp() {}
+			var_t var;
+			
+			ReturnOp(var_t var) : var(var) {}
 		};
 		
 		struct HandlerOp:
@@ -561,11 +561,6 @@ namespace Mirb
 			template<typename T> void use(T use) { use(argv); };
 
 			InterpolateOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
-		};
-		
-		struct RaiseOp:
-			public OpcodeWrapper<Opcode::Raise>
-		{
 		};
 	};
 };

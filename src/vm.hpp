@@ -22,6 +22,13 @@ namespace Mirb
 			CharArray inspect();
 	};
 
+	class ProcFrame:
+		public Frame
+	{
+		public:
+			value_t **scopes;
+	};
+
 	extern Frame *current_frame;
 
 	value_t evaluate_block(Frame &frame);

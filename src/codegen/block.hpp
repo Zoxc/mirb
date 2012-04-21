@@ -3,7 +3,6 @@
 #include "../generic/memory-pool.hpp"
 #include "../generic/list.hpp"
 #include "../generic/vector.hpp"
-#include "../generic/bit-set-wrapper.hpp"
 #include "opcodes.hpp"
 #include "../tree/tree.hpp"
 
@@ -82,6 +81,10 @@ namespace Mirb
 
 				size_t stack_vars;
 				size_t stack_heap_size;
+				
+				var_t self_var;
+				var_t return_var;
+				var_t heap_var;
 
 				void finalize();
 				

@@ -128,7 +128,7 @@ namespace Mirb
 					case Tree::Variable::Temporary:
 					{
 						std::stringstream out;
-						out << "__temp" << var->index << "__";
+						out << "__temp" << var->loc << "__";
 						return out.str();
 					}
 					
@@ -138,7 +138,7 @@ namespace Mirb
 						else
 						{
 							std::stringstream out;
-							out << "__temp" << var->index << "__";
+							out << "__temp" << var->loc << "__";
 							return out.str();
 						}
 				}

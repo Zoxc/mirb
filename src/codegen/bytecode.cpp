@@ -148,10 +148,10 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<LookupOp>(heap, block->final->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->final->heap_var;
+					heap = block->heap_var;
 
 				var_t result = create_var();
 
@@ -236,7 +236,7 @@ namespace Mirb
 				gen(label_end);
 			}
 			else
-				to_bytecode(node->value, 0);
+				to_bytecode(node->value, no_var);
 		}
 		
 		void ByteCodeGenerator::convert_binary_op(Tree::Node *basic_node, var_t var)
@@ -293,10 +293,10 @@ namespace Mirb
 				{
 					heap = create_var();
 
-					gen<LookupOp>(heap, block->final->heap_array_var, scope->referenced_scopes.index_of(var->owner));
+					gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->final->heap_var;
+					heap = block->heap_var;
 
 				gen<SetHeapVarOp>(heap, var->loc, value);
 			}
@@ -440,9 +440,9 @@ namespace Mirb
 			size_t argc;
 			var_t argv;
 
-			var_t closure = call_args(node->arguments, node->block ? node->block->scope : 0, argc, argv, var);
+			var_t closure = call_args(node->arguments, node->block ? node->block->scope : nullptr, argc, argv, var);
 			
-			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : 0, argc, argv);
+			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, var_t var)
@@ -462,7 +462,7 @@ namespace Mirb
 				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i)
 					gen<MoveOp>(group[param++], ref(*i));
 				
-				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : 0, group.size, group.use());
+				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, group.size, group.use());
 			}
 			else
 			{
@@ -471,7 +471,7 @@ namespace Mirb
 
 				var_t closure = call_args(node->arguments, scope, argc, argv, var);
 				
-				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : 0, argc, argv);
+				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
 			}
 		}
 		
@@ -513,13 +513,13 @@ namespace Mirb
 			}
 			else
 			{
-				to_bytecode(node->middle, 0);
+				to_bytecode(node->middle, no_var);
 				
 				gen_branch(label_end);
 
 				gen(label_else);
 
-				to_bytecode(node->right, 0);
+				to_bytecode(node->right, no_var);
 
 				split(label_end);
 			}
@@ -539,7 +539,7 @@ namespace Mirb
 			
 			for(auto i = node->statements.begin(); i != node->statements.end(); ++i)
 			{
-				to_bytecode(*i, i().entry.next ? 0 : var);
+				to_bytecode(*i, i().entry.next ? no_var : var);
 			}
 		}
 		
@@ -567,7 +567,7 @@ namespace Mirb
 				gen<UnwindReturnOp>(temp, block->final);
 			else
 			{
-				gen<MoveOp>(block->final->return_var, temp);
+				gen<MoveOp>(block->return_var, temp);
 				branch(block->epilog);
 			}
 		}
@@ -580,8 +580,6 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 
-			mirb_debug_assert(scope->break_dst != no_var);
-			
 			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_dst);
 		}
 		
@@ -593,7 +591,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<MoveOp>(block->final->return_var, temp);
+			gen<MoveOp>(block->return_var, temp);
 			branch(block->epilog);
 		}
 		
@@ -615,29 +613,23 @@ namespace Mirb
 				to_bytecode(node->super, super);
 			}
 			else
-				super = 0;
+				super = no_var;
 			
-			gen<ClassOp>(self_var(), node->name, super, compile(node->scope));
-
-			if(is_var(var))
-				gen<LoadOp>(var, value_nil);
+			gen<ClassOp>(var, node->name, super, compile(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::ModuleNode *)basic_node;
 			
-			gen<ModuleOp>(self_var(), node->name, compile(node->scope));
-
-			if(is_var(var))
-				gen<LoadOp>(var, value_nil);
+			gen<ModuleOp>(var, node->name, compile(node->scope));
 		}
 		
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::MethodNode *)basic_node;
 			
-			gen<MethodOp>(self_var(), node->name, defer(node->scope));
+			gen<MethodOp>(node->name, defer(node->scope));
 			
 			if(is_var(var))
 				gen<LoadOp>(var, value_nil);
@@ -682,6 +674,7 @@ namespace Mirb
 				 * Skip the rescue block
 				 */
 				BasicBlock *ok_label = create_block();
+				gen<HandlerOp>(exception_block->parent);
 				gen_branch(ok_label);
 				
 				/*
@@ -712,7 +705,6 @@ namespace Mirb
 			 * Restore the old exception frame
 			 */
 			block->current_exception_block = exception_block->parent;
-			gen<HandlerOp>(block->current_exception_block);
 			
 			/*
 			 * Check for ensure node
@@ -726,7 +718,7 @@ namespace Mirb
 				/*
 				 * Output ensure node
 				 */
-				to_bytecode(node->ensure_group, 0);
+				to_bytecode(node->ensure_group, no_var);
 				
 				gen<UnwindOp>();
 			}
@@ -762,11 +754,8 @@ namespace Mirb
 			
 			scope->block = block;
 			
-			block->final->return_var = create_var();
+			block->return_var = create_var();
 
-			if(scope->referenced_scopes.size() > 0)
-				block->final->heap_array_var = create_var();
-			
 			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
 				scope->require_args(*i);
@@ -790,30 +779,39 @@ namespace Mirb
 			split(body);
 
 			if(scope->heap_vars)
-				block->final->heap_var = create_var();
+				block->heap_var = create_var();
 
-			to_bytecode(scope->group, block->final->return_var);
+			to_bytecode(scope->group, block->return_var);
 			
 			split(block->epilog);
 
-			gen<ReturnOp>();
+			gen<ReturnOp>(block->return_var);
 
 			basic = prolog;
 			
+			if(is_var(block->self_var))
+				gen<SelfOp>(block->self_var);
+
+			if(scope->heap_vars)
+				gen<CreateHeapOp>(block->heap_var, block->scope->heap_vars);
+			
+			if(scope->block_parameter)
+				gen<BlockOp>(ref(scope->block_parameter));
+			
 			size_t index = 0;
 
-			for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i, ++index)
+			for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i)
 			{
 				if(i().type == Tree::Variable::Heap)
 				{
 					var_t value = create_var();
 
-					gen<LoadArgOp>(value, index);
+					gen<LoadArgOp>(value, index++);
 
 					write_variable(*i, value);
 				}
 				else
-					gen<LoadArgOp>(ref(*i), index);
+					gen<LoadArgOp>(ref(*i), index++);
 			}
 			
 			block->epilog->next_block = 0;
@@ -828,7 +826,7 @@ namespace Mirb
 
 		Mirb::Block *ByteCodeGenerator::defer(Tree::Scope *scope)
 		{
-			return Compiler::defer(scope, memory_pool);
+			return Compiler::defer(scope);
 		}
 
 		bool ByteCodeGenerator::has_ensure_block(Block *block)
@@ -853,10 +851,10 @@ namespace Mirb
 		
 		var_t ByteCodeGenerator::self_var()
 		{
-			if(!is_var(block->final->self_var))
-				block->final->self_var = create_var();
+			if(!is_var(block->self_var))
+				block->self_var = create_var();
 			
-			return block->final->self_var;
+			return block->self_var;
 		}
 		
 		var_t ByteCodeGenerator::create_var()
@@ -866,7 +864,7 @@ namespace Mirb
 
 		var_t ByteCodeGenerator::block_arg(Tree::Scope *scope, var_t break_dst)
 		{
-			var_t var = 0;
+			var_t var = no_var;
 			
 			if(scope)
 			{
@@ -881,9 +879,9 @@ namespace Mirb
 				for(size_t i = 0; i < scope->referenced_scopes.size(); ++i)
 				{
 					if(scope->referenced_scopes[i] == this->scope)
-						gen<MoveOp>(group[i], block->final->heap_var);
+						gen<MoveOp>(group[i], block->heap_var);
 					else
-						gen<LookupOp>(group[i], block->final->heap_array_var, scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
+						gen<LookupOp>(group[i], scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
 				}
 
 				if(scope->break_id != Tree::Scope::no_break_id)

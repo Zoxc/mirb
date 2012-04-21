@@ -2,7 +2,7 @@
 
 namespace Mirb
 {
-	const size_t header_magic = 0x0123BEEF;
+	const size_t header_magic = 12345;
 
 	ObjectHeader::ObjectHeader(Value::Type type) : type(type), value(false)
 	{

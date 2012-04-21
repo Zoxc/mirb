@@ -75,6 +75,7 @@ namespace Mirb
 	/*
 	 * raise (calls Ruby code)
 	 */
+	bool type_error(value_t value, value_t expected);
 	value_t raise(value_t exception_class, const CharArray &message);
 
 	value_t raise(value_t exception);
@@ -103,6 +104,7 @@ namespace Mirb
 	 * call_code (calls Ruby code)
 	 */
 	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+	value_t call_frame(Frame &frame);
 	
 	/*
 	 * call (calls Ruby code)

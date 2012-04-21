@@ -39,9 +39,7 @@
     <ClInclude Include="..\..\src\gc.hpp" />
     <ClInclude Include="..\..\src\generic\allocator.hpp" />
     <ClInclude Include="..\..\src\generic\benchmark.hpp" />
-    <ClInclude Include="..\..\src\generic\bit-set-wrapper.hpp" />
     <ClInclude Include="..\..\src\generic\counted-simple-list.hpp" />
-    <ClInclude Include="..\..\src\generic\executable-heap.hpp" />
     <ClInclude Include="..\..\src\generic\hash-table.hpp" />
     <ClInclude Include="..\..\src\generic\list.hpp" />
     <ClInclude Include="..\..\src\generic\map.hpp" />
@@ -95,7 +93,6 @@
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />
     <ClCompile Include="..\..\src\generic\benchmark.cpp" />
-    <ClCompile Include="..\..\src\generic\executable-heap.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />
@@ -159,7 +156,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\vendor\udis86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_DEBUG_BRIDGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_DEBUG_COMPILER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>

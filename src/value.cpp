@@ -14,7 +14,7 @@ namespace Mirb
 
 		void initialize()
 		{
-			for(value_t i = 0; i < literal_count; ++i)
+			for(size_t i = 0; i < literal_count; ++i)
 			{
 				if(i & fixnum_mask)
 				{
@@ -25,21 +25,21 @@ namespace Mirb
 
 				switch(i)
 				{
-					case value_nil:
+					case value_nil_num:
 					{
 						type_table[i] = Nil;
 						class_of_table[i] = NilClass::class_ref;
 						break;
 					}
 
-					case value_false:
+					case value_false_num:
 					{
 						type_table[i] = False;
 						class_of_table[i] = FalseClass::class_ref;
 						break;
 					}
 
-					case value_true:
+					case value_true_num:
 					{
 						type_table[i] = True;
 						class_of_table[i] = TrueClass::class_ref;
@@ -142,17 +142,17 @@ namespace Mirb
 		
 		bool test(value_t value)
 		{
-			return (value & ~(value_nil | value_false)) != 0;
+			return ((size_t)value & ~(value_nil_num | value_false_num)) != 0;
 		}
 		
 		bool object_ref(value_t value)
 		{
-			return (value & object_ref_mask) == 0;
+			return ((size_t)value & object_ref_mask) == 0;
 		}
 		
 		value_t class_of_literal(value_t value)
 		{
-			return class_of_table[value & literal_mask];
+			return class_of_table[(size_t)value & literal_mask];
 		}
 
 		Type type(value_t value)
@@ -160,7 +160,7 @@ namespace Mirb
 			if(object_ref(value))
 				return ((Mirb::Object *)value)->get_type(); // Do a simple cast here to avoid stack overflow when debugging is enabled
 			else
-				return type_table[value & literal_mask];
+				return type_table[(size_t)value & literal_mask];
 		}
 	};
 };

@@ -16,6 +16,6 @@ namespace Mirb
 		private:
 		public:
 			static Block *compile(Tree::Scope *scope, MemoryPool &memory_pool);
-			static Block *defer(Tree::Scope *scope, MemoryPool &memory_pool);
+			static Block *defer(Tree::Scope *scope);
 	};
 };

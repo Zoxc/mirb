@@ -17,7 +17,6 @@
 #include "classes/exception.hpp"
 #include "classes/exceptions.hpp"
 #include "modules/kernel.hpp"
-#include "generic/executable-heap.hpp"
 #include "generic/benchmark.hpp"
 #include "vm.hpp"
 
@@ -82,7 +81,7 @@ namespace Mirb
 	
 	value_t module_create_bare()
 	{
-		return auto_cast(Collector::allocate<Module>(Value::Module, Module::class_ref, 0));
+		return auto_cast(Collector::allocate<Module>(Value::Module, Module::class_ref, nullptr));
 	}
 
 	value_t define_module(value_t under, Symbol *name)
@@ -146,7 +145,10 @@ namespace Mirb
 			#ifdef DEBUG
 				{
 					OnStack<3> os(module, c, obj);
-					std::cout << "Including module " << inspect_object(module) << " in " << inspect_object(obj) << "\n";
+					
+					value_t including = Value::type(module) == Value::IClass ? cast<Module>(module)->instance_of : module;
+
+					std::cout << "Including module " << inspect_object(including) << " in " << inspect_object(obj) << "\n";
 				}
 			#endif
 
@@ -354,6 +356,19 @@ namespace Mirb
 		return cast<Module>(obj)->get_methods()->set(name, method);
 	}
 
+	bool type_error(value_t value, value_t expected)
+	{
+		value_t klass = class_of(value);
+
+		if(klass != expected)
+		{
+			raise(TypeError::class_ref, inspect_obj(value) + " is of class " + inspect_obj(class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
+			return true;
+		}
+		else
+			return false;
+	}
+
 	value_t raise(value_t exception_class, const CharArray &message)
 	{
 		OnStack<2> os(exception_class, message);
@@ -387,7 +402,7 @@ namespace Mirb
 			return value_nil;
 		}
 		
-		#ifdef DEBUG
+		#ifdef MIRB_DEBUG_COMPILER
 			DebugPrinter printer;
 		
 			std::cout << "Parsing done.\n-----\n";
@@ -397,11 +412,7 @@ namespace Mirb
 	
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		value_t result = call_code(block, self, auto_cast(method_name), method_module, value_nil, 0, 0);
-
-		block = 0; // Make sure block stays on stack*/
-
-		return result;
+		return call_code(block, self, auto_cast(method_name), method_module, value_nil, 0, 0);
 	}
 	
 	Block *lookup_method(value_t module, Symbol *name, value_t *result_module)
@@ -418,7 +429,7 @@ namespace Mirb
 
 			module = cast<Class>(module)->superclass;
 		}
-		while(module != 0);
+		while(module != nullptr);
 
 		return 0;
 	}
@@ -469,22 +480,12 @@ namespace Mirb
 		return result;
 	}
 
-	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	value_t call_frame(Frame &frame)
 	{
-		Frame frame;
-
-		frame.code = code;
-		frame.obj = obj;
-		frame.name = name;
-		frame.module = module;
-		frame.block = block;
-		frame.argc = argc;
-		frame.argv = argv;
 		frame.prev = current_frame;
-
 		current_frame = &frame;
 
-		value_t result = code->executor(frame);
+		value_t result = frame.code->executor(frame);
 		
 		#ifdef DEBUG
 			if(current_exception && result != value_raise)
@@ -502,7 +503,7 @@ namespace Mirb
 					current = current->prev;
 				}
 
-				std::cout << "Function raised exception but didn't indicate it: " << backtrace().get_string() << std::endl;
+				std::cout << "Function raised exception but didn't indicate it:\n" << backtrace().get_string() << std::endl;
 			}
 			else
 				current_exception_frame_origin = frame.prev;
@@ -512,6 +513,21 @@ namespace Mirb
 		current_frame = frame.prev;
 
 		return result;
+	}
+
+	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	{
+		Frame frame;
+
+		frame.code = code;
+		frame.obj = obj;
+		frame.name = name;
+		frame.module = module;
+		frame.block = block;
+		frame.argc = argc;
+		frame.argv = argv;
+
+		return call_frame(frame);
 	};
 	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
@@ -595,7 +611,7 @@ namespace Mirb
 
 	void setup_classes()
 	{
-		Object::class_ref = class_create_bare(0);
+		Object::class_ref = class_create_bare(nullptr);
 		Module::class_ref = class_create_bare(Object::class_ref);
 		Class::class_ref = class_create_bare(Module::class_ref);
 
@@ -631,10 +647,9 @@ namespace Mirb
 	
 	void initialize()
 	{
-		Lexer::setup_jump_table();
-		ExecutableHeap::initialize();
-
 		std::cout << "Initialized in " << benchmark([] {
+			Lexer::setup_jump_table();
+
 			setup_classes();
 
 			Class::initialize();
@@ -653,16 +668,12 @@ namespace Mirb
 			Proc::initialize();
 			Array::initialize();
 			Exception::initialize();
-			StandardError::initialize();
-			NameError::initialize();
-			RuntimeError::initialize();
-			LocalJumpError::initialize();
+			initialize_exceptions();
 		}).format() << "\n";
 	}
 
 	void finalize()
 	{
-		ExecutableHeap::finalize();
 	}
 };
 

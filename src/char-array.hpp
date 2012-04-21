@@ -80,6 +80,7 @@ namespace Mirb
 			}
 			
 			static CharArray hex(size_t value);
+			static CharArray uint(size_t value);
 	};
 	
 	template<size_t length> CharArray operator+(const char (&lhs)[length], const CharArray &rhs)

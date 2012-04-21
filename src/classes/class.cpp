@@ -37,7 +37,7 @@ namespace Mirb
 		}
 		else
 		{
-			CharArray result = "#<Class:0x" + CharArray::hex(obj) + ">";
+			CharArray result = "#<Class:0x" + CharArray::hex((size_t)obj) + ">";
 
 			return result.to_string();
 		}

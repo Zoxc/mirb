@@ -123,7 +123,7 @@ namespace Mirb
 	
 	value_t Kernel::load(value_t obj, value_t filename)
 	{
-		return run_file(obj, cast<String>(filename)->string);
+		return run_file(main, cast<String>(filename)->string);
 	}
 	
 	value_t Kernel::print(size_t argc, value_t argv[])

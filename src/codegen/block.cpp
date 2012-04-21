@@ -32,6 +32,8 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
 			scope(scope),
 			memory_pool(memory_pool),
+			heap_var(no_var),
+			self_var(no_var),
 			var_count(scope->variable_list.size())
 		{
 			initialize();

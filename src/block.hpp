@@ -65,17 +65,12 @@ namespace Mirb
 		public ConstantHeader<Value::InternalBlock>
 	{
 		public:
-			Block();
-
 			typedef value_t (*executor_t)(Frame &frame);
+
+			Tree::Scope *scope;
 
 			Symbol *name; // The name of this block.
 			
-			var_t heap_array_var;
-			var_t heap_var;
-			var_t self_var;
-			var_t return_var;
-
 			size_t var_words;
 
 			const char *opcodes;

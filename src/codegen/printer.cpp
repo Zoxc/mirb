@@ -194,7 +194,7 @@ namespace Mirb
 
 					opcode += sizeof(ClassOp);
 					
-					return "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "class " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Module:
@@ -203,7 +203,7 @@ namespace Mirb
 
 					opcode += sizeof(ModuleOp);
 					
-					return "module " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "module " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Method:
@@ -212,7 +212,7 @@ namespace Mirb
 
 					opcode += sizeof(MethodOp);
 					
-					return "method " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
+					return "method " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Call:
@@ -239,7 +239,25 @@ namespace Mirb
 
 					opcode += sizeof(LookupOp);
 					
-					return var(op->var) + " = " + var(op->array_var) + "[" + raw(op->index) + "]";
+					return var(op->var) + " = heaps [" + raw(op->index) + "]";
+				}
+				
+				case Opcode::Self:
+				{
+					auto op = (SelfOp *)opcode;
+
+					opcode += sizeof(SelfOp);
+					
+					return var(op->var) + " = self";
+				}
+				
+				case Opcode::Block:
+				{
+					auto op = (BlockOp *)opcode;
+
+					opcode += sizeof(BlockOp);
+					
+					return var(op->var) + " = block_arg";
 				}
 				
 				case Opcode::CreateHeap:
@@ -248,7 +266,7 @@ namespace Mirb
 
 					opcode += sizeof(CreateHeapOp);
 					
-					return var(op->var) + " = create_heap";
+					return var(op->var) + " = create_heap(" + raw(op->vars) + ")";
 				}
 				
 				case Opcode::GetHeapVar:
@@ -366,7 +384,7 @@ namespace Mirb
 
 					opcode += sizeof(ReturnOp);
 					
-					return "ret " + var(block->final->return_var);
+					return "ret " + var(op->var);
 				}
 				
 				case Opcode::Handler:
@@ -430,17 +448,8 @@ namespace Mirb
 					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc);
 				}
 
-				case Opcode::Raise:
-				{
-					opcode += sizeof(RaiseOp);
-
-					return "raise";
-				}
-				
 				default:
-					opcode += 1;
-
-					return "<unknown>";
+					mirb_runtime_abort("Unknown opcode");
 			}
 
 			return result;

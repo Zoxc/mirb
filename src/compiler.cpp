@@ -2,8 +2,9 @@
 #include "symbol-pool.hpp"
 #include "gc.hpp"
 #include "block.hpp"
-#include "generic/executable-heap.hpp"
+#include "runtime.hpp"
 #include "codegen/bytecode.hpp"
+#include "classes/exceptions.hpp"
 
 #ifdef DEBUG
 	#include "codegen/printer.hpp"
@@ -18,7 +19,7 @@ namespace Mirb
 		
 		CodeGen::Block *block = generator.to_bytecode(scope);
 		
-		#ifdef DEBUG
+		#ifdef MIRB_DEBUG_COMPILER
 			CodeGen::ByteCodePrinter printer(block);
 
 			std::cout << printer.print();
@@ -44,26 +45,25 @@ namespace Mirb
 		return block->final;
 	}
 
-	Block *Compiler::defer(Tree::Scope *scope, MemoryPool &memory_pool)
+	value_t deferred_block(Frame &frame)
+	{
+		{
+			MemoryPool memory_pool;
+
+			Compiler::compile(frame.code->scope, memory_pool);
+		}
+
+		return frame.code->executor(frame);
+	}
+
+	Block *Compiler::defer(Tree::Scope *scope)
 	{
 		Block *block = Collector::allocate<Block>();
 		
-		/*
-		block->scope = scope;
-
 		scope->final = block;
-		size_t block_size = CodeGen::NativeGenerator::stub_size;
+		block->scope = scope;
+		block->executor = deferred_block;
 
-		void *block_code = ExecutableHeap::alloc(block_size);
-
-		MemStream stream(block_code, block_size);
-
-		CodeGen::NativeGenerator native_generator(stream, memory_pool);
-
-		native_generator.generate_stub(block);
-
-		block->compiled = (Block::compiled_t)block_code;
-		*/
 		return block;
 	}
 };

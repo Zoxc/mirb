@@ -44,7 +44,7 @@ namespace Mirb
 
 	size_t *on_stack_reference(value_t &arg)
 	{
-		return &arg;
+		return (size_t *)&arg;
 	}
 
 	size_t *on_stack_reference(const CharArray &value)

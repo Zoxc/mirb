@@ -11,9 +11,11 @@ namespace Mirb
 
 	CharArray Frame::inspect()
 	{
-		CharArray result;
+		CharArray result = " - ";
 
 		OnStack<1> os(result);
+
+		result += inspect_obj(obj) + ".";
 
 		value_t module = auto_cast(this->module);
 
@@ -27,7 +29,16 @@ namespace Mirb
 		if(class_of != module)
 			result += "(" + inspect_obj(class_of) + ")";
 
-		result += "#" + name->string + " at <unknown>";
+		result += "#" + name->string  + "(";
+
+		for(size_t i = 0; i < argc; ++i)
+		{
+			result += inspect_obj(argv[i]);
+			if(i < argc - 1)
+				result += ", ";
+		}
+			
+		result += ") at <unknown>";
 
 		return result;
 	}
@@ -37,6 +48,7 @@ namespace Mirb
 
 	value_t evaluate_block(Frame &frame)
 	{
+		auto &proc_frame = *(ProcFrame *)&frame;
 		const char *ip_start = frame.code->opcodes;
 		const char *ip = ip_start;
 
@@ -102,9 +114,27 @@ namespace Mirb
 				Op(Class)
 					value_t super = op.super == no_var ? Object::class_ref : vars[op.super];
 
-					value_t self = Support::define_class(vars[op.self], op.name, super);
+					value_t self = Support::define_class(frame.obj, op.name, super);
 
-					call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+					value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+					
+					if(result == value_raise)
+						goto handle_exception;
+
+					if(op.var != no_var)
+						vars[op.var] = result;
+				EndOp
+					
+				Op(Module)
+					value_t self = Support::define_module(frame.obj, op.name);
+
+					value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+					
+					if(result == value_raise)
+						goto handle_exception;
+					
+					if(op.var != no_var)
+						vars[op.var] = result;
 				EndOp
 					
 				Op(Super)
@@ -112,7 +142,7 @@ namespace Mirb
 
 					value_t module = frame.module;
 				
-					Block *method = lookup_super(frame.obj, frame.name, &module);
+					Block *method = lookup_super(module, frame.name, &module);
 
 					if(mirb_unlikely(!method))
 					{
@@ -129,22 +159,26 @@ namespace Mirb
 						vars[op.var] = result;
 				EndOp
 					
-				Op(Module)
-					value_t self = Support::define_module(vars[op.self], op.name);
-
-					call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
-				EndOp
-					
 				Op(Method)
-					Support::define_method(vars[op.self], op.name, op.block);
+					Support::define_method(frame.obj, op.name, op.block);
 				EndOp
 					
 				Op(Lookup)
-					vars[op.var] = ((value_t *)vars[op.array_var])[op.index];
+					vars[op.var] = (value_t)proc_frame.scopes[op.index];
+				EndOp
+					
+				Op(Self)
+					vars[op.var] = frame.obj;
 				EndOp
 
-				// TODO: CreateHeapOp unused?
-				
+				Op(Block)
+					vars[op.var] = frame.block;
+				EndOp
+
+				Op(CreateHeap)
+					vars[op.var] = (value_t)Support::create_heap(op.vars * sizeof(var_t));
+				EndOp
+					
 				Op(GetHeapVar)
 					vars[op.var] = ((value_t *)vars[op.heap])[op.index];
 				EndOp
@@ -197,14 +231,14 @@ namespace Mirb
 					set_current_exception(new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
 					goto handle_exception;
 				EndOp
-
+					
 				Op(UnwindBreak)
 					set_current_exception(new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
 					goto handle_exception;
 				EndOp
-
+					
 				Op(Return)
-					value_t result = vars[frame.code->return_var];
+					value_t result = vars[op.var];
 					finalize();
 					return result;
 				EndOp
@@ -264,6 +298,7 @@ handle_exception:
 						case RuntimeException:
 						{
 							current_exception_block = block->parent;
+							set_current_exception(0);
 							ip =  ip_start + ((RuntimeExceptionHandler *)i())->rescue_label.address;
 							goto execute_instruction; // Execute rescue block
 						}

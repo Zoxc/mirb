@@ -39,13 +39,13 @@ namespace Mirb
 		{
 			auto classname = cast<String>(get_var(c, Symbol::from_literal("__classname__")));
 
-			CharArray result = "#<" + classname->string + ":0x" + CharArray::hex(obj) + ">";
+			CharArray result = "#<" + classname->string + ":0x" + CharArray::hex((size_t)obj) + ">";
 
 			return result.to_string();
 		}
 		else
 		{
-			CharArray result = "#<0x" + CharArray::hex(obj) + ">";
+			CharArray result = "#<0x" + CharArray::hex((size_t)obj) + ">";
 			
 			return result.to_string();
 		}

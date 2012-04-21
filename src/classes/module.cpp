@@ -44,8 +44,14 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			call(argv[i], "append_features", 1, &obj);
-			call(argv[i], "included", 1, &obj);
+			if(type_error(argv[i],  Module::class_ref))
+				return value_raise;
+
+			if(call(argv[i], "append_features", 1, &obj) == value_raise)
+				return value_raise;
+			
+			if(call(argv[i], "included", 1, &obj) == value_raise)
+				return value_raise;
 		}
 
 		return obj;
@@ -54,9 +60,9 @@ namespace Mirb
 	void Module::initialize()
 	{
 		static_method<Arg::Self>(Module::class_ref, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Value>(Module::class_ref, "append_features", &append_features);
+		static_method<Arg::Self, Arg::Class<Module>>(Module::class_ref, "append_features", &append_features);
 		static_method<Arg::Self, Arg::Count, Arg::Values>(Module::class_ref, "include", &include);
-		static_method<Arg::Self>(Module::class_ref, "included", &included);
+		static_method<Arg::Class<Module>>(Module::class_ref, "included", &included);
 	}
 };
 
