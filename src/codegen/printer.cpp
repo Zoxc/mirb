@@ -24,66 +24,14 @@ namespace Mirb
 
 		std::string ByteCodePrinter::var(var_t var)
 		{
-			if(var == -1)
+			if(var == no_var)
 				return "nil";
 			
 			std::stringstream result;
 
 			result << "%" << var;
 
-			return result.str();/*
-			
-			if(block->scope && (block->scope->referenced_scopes.size() > 0) && (var == block->heap_array_var))
-				result << "@heap_array";
-			else if(block->scope && block->scope->heap_vars && (var == block->heap_var))
-				result << "@heap";
-			else if(var == block->self_var)
-				result << "@self";
-			else
-				switch(var->type)
-				{
-					case Tree::Variable::Temporary:
-					{
-						#ifdef DEBUG
-							if(var->group != 0)
-							{
-								result << "%" << var->group->index << "[" << (var->index - var->group->index - 1) << "]";
-							}
-							else
-								result << "%" << var->index;
-						#else
-							result << "%" << var->index;
-						#endif
-											
-						break;
-					}
-				
-					case Tree::Variable::Local:
-					{
-						auto named_var = (Tree::NamedVariable *)var;
-					
-						result << "%" << var_name(named_var);
-					
-						break;
-					}
-				
-					case Tree::Variable::Heap:
-					{
-						auto named_var = (Tree::NamedVariable *)var;
-					
-						result << "!" << var_name(named_var);
-					
-						break;
-					}
-				
-					default:
-						assert(0);
-				}
-
-			if(highlight == var)
-				return "<font color='dodgerblue2'>" + result.str() + "</font>";
-			else
-				return result.str();*/
+			return result.str();
 		}
 		
 		std::string ByteCodePrinter::raw(size_t imm)

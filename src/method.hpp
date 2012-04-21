@@ -110,7 +110,7 @@ namespace Mirb
 					if(!Mirb::Value::of_type<T>(result))
 					{
 						state.error = true;
-						raise(TypeError::class_ref, inspect_obj(result) + " is of invalid format.");
+						type_error(result, T::class_ref);
 						return value_raise;
 					}
 					else

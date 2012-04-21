@@ -2,5 +2,5 @@
 
 namespace Mirb
 {
-	const size_t no_var = -1;
+	const var_t no_var = -1;
 }

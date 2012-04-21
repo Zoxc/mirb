@@ -199,7 +199,7 @@ namespace Mirb
 	{
 		char_t buffer[15];
 
-		size_t length = sprintf((char *)buffer, "%x", value);
+		size_t length = sprintf((char *)buffer, "%x", (unsigned int)value);
 
 		return CharArray(buffer, length);
 	}
@@ -208,7 +208,7 @@ namespace Mirb
 	{
 		char_t buffer[15];
 
-		size_t length = sprintf((char *)buffer, "%u", value);
+		size_t length = sprintf((char *)buffer, "%u", (unsigned int)value);
 
 		return CharArray(buffer, length);
 	}

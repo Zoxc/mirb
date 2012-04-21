@@ -15,3 +15,5 @@
 /cache
 cache/*
 /obj
+/CMakeFiles
+/CMakeCache.txt

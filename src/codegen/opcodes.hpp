@@ -173,10 +173,7 @@ namespace Mirb
 
 					case Handler:
 						return T<HandlerOp>::func(arg, (HandlerOp &)*this);
-						
-					case Flush:
-						return T<FlushOp>::func(arg, (FlushOp &)*this);
-						
+
 					case Unwind:
 						return T<UnwindOp>::func(arg, (UnwindOp &)*this);
 
@@ -199,9 +196,6 @@ namespace Mirb
 						mirb_debug_abort("Unknown opcode type");
 				};
 			}
-
-			template<typename T> void def(T def) { };
-			template<typename T> void use(T use) { };
 		};
 
 		template<Opcode::Type type> struct OpcodeWrapper:
@@ -216,9 +210,6 @@ namespace Mirb
 			var_t dst;
 			var_t src;
 
-			template<typename T> void def(T def) { def(dst); };
-			template<typename T> void use(T use) { use(src); };
-			
 			MoveOp(var_t dst, var_t src) : dst(dst), src(src) {}
 		};
 		
@@ -227,8 +218,6 @@ namespace Mirb
 		{
 			var_t var;
 			value_t imm;
-			
-			template<typename T> void def(T def) { def(var); };
 
 			LoadOp(var_t var, value_t imm) : var(var), imm(imm) {}
 		};
@@ -238,8 +227,6 @@ namespace Mirb
 		{
 			var_t var;
 			size_t arg;
-			
-			template<typename T> void def(T def) { def(var); };
 
 			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
 		};
@@ -295,19 +282,6 @@ namespace Mirb
 			Mirb::Block *block;
 			size_t argc;
 			var_t argv;
-			
-			template<typename T> void def(T def) { if(var) def(var); };
-			
-			template<typename T> void use(T use)
-			{
-				use(obj);
-				
-				if(argv)
-					use(argv);
-				
-				if(block_var)
-					use(block_var);
-			};
 
 			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
@@ -364,9 +338,6 @@ namespace Mirb
 			var_t var;
 			var_t heap;
 			var_t index;
-			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(heap); };
 
 			GetHeapVarOp(var_t var, var_t heap, var_t index) : var(var), heap(heap), index(index) {}
 		};
@@ -377,13 +348,7 @@ namespace Mirb
 			var_t heap;
 			var_t index;
 			var_t var;
-			
-			template<typename T> void use(T use)
-			{
-				use(heap);
-				use(var);
-			};
-			
+
 			SetHeapVarOp(var_t heap, var_t index, var_t var) : heap(heap), index(index), var(var) {}
 		};
 		
@@ -392,9 +357,6 @@ namespace Mirb
 		{
 			var_t var;
 			Symbol *name;
-			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(self); };
 
 			GetIVarOp(var_t var, Symbol *name) : var(var), name(name) {}
 		};
@@ -440,9 +402,7 @@ namespace Mirb
 			public BranchOpcode
 		{
 			var_t var;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			BranchIfOp(var_t var) : BranchOpcode(BranchIf), var(var) {}
 		};
 		
@@ -450,9 +410,7 @@ namespace Mirb
 			public BranchOpcode
 		{
 			var_t var;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			BranchIfZeroOp(var_t var) : BranchOpcode(BranchIfZero), var(var) {}
 		};
 		
@@ -460,9 +418,7 @@ namespace Mirb
 			public BranchOpcode
 		{
 			var_t var;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			BranchUnlessOp(var_t var) : BranchOpcode(BranchUnless), var(var) {}
 		};
 		
@@ -470,9 +426,7 @@ namespace Mirb
 			public BranchOpcode
 		{
 			var_t var;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			BranchUnlessZeroOp(var_t var) : BranchOpcode(BranchUnlessZero), var(var) {}
 		};
 		
@@ -508,9 +462,7 @@ namespace Mirb
 		{
 			var_t var;
 			Mirb::Block *code;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			UnwindReturnOp(var_t var, Mirb::Block *code) : var(var), code(code) {}
 		};
 		
@@ -520,9 +472,7 @@ namespace Mirb
 			var_t var;
 			Mirb::Block *code;
 			var_t parent_dst;
-			
-			template<typename T> void use(T use) { use(var); };
-			
+
 			UnwindBreakOp(var_t var, Mirb::Block *code, var_t parent_dst) : var(var), code(code), parent_dst(parent_dst) {}
 		};
 		
@@ -532,9 +482,6 @@ namespace Mirb
 			var_t var;
 			size_t argc;
 			var_t argv;
-			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(argv); };
 
 			ArrayOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};
@@ -544,8 +491,6 @@ namespace Mirb
 		{
 			var_t var;
 			const char_t *str;
-			
-			template<typename T> void def(T def) { def(var); };
 
 			StringOp(var_t var, const char_t *str) : var(var), str(str) {}
 		};
@@ -556,9 +501,6 @@ namespace Mirb
 			var_t var;
 			size_t argc;
 			var_t argv;
-			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(argv); };
 
 			InterpolateOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};

@@ -41,7 +41,7 @@ namespace Mirb
 	{
 		char_t buffer[15];
 
-		size_t length = sprintf((char *)buffer, "%d", fix_to_int(obj));
+		size_t length = sprintf((char *)buffer, "%d", (int)fix_to_int(obj));
 
 		return CharArray(buffer, length).to_string();
 	}

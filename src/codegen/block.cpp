@@ -32,8 +32,8 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
 			scope(scope),
 			memory_pool(memory_pool),
-			heap_var(no_var),
 			self_var(no_var),
+			heap_var(no_var),
 			var_count(scope->variable_list.size())
 		{
 			initialize();
@@ -55,7 +55,7 @@ namespace Mirb
 				size += (size_t)i().opcodes.tellp();
 
 			const char *opcodes = (const char *)malloc(size);
-			mirb_runtime_assert(opcodes);
+			mirb_runtime_assert(opcodes != 0);
 			size_t pos = 0;
 			
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
