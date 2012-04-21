@@ -112,7 +112,7 @@ namespace Mirb
 				mask = size - 1;
 
 				table = (Pair **)alloc_ref.alloc(size * sizeof(Pair *));
-				memset(table, 0, size * sizeof(V));
+				memset(table, 0, size * sizeof(Pair *));
 			}
 
 		public:
