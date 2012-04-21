@@ -19,7 +19,9 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		yield(block, 1, &obj);
+		if(yield(block, 1, &obj) == value_raise)
+			return value_raise;
+
 		return obj;
 	}
 	

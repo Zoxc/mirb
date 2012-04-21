@@ -78,7 +78,7 @@ namespace Mirb
 			return auto_cast(array);
 		}
 		
-		value_t define_string(const char *string)
+		value_t create_string(const char *string)
 		{
 			// TODO: Make sure string is not garbage collected. Replace it with something nicer.
 			return auto_cast(Collector::allocate<String>((const char_t *)string, std::strlen(string)));

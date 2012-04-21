@@ -39,8 +39,6 @@ namespace Mirb
 		
 		lexer.step();
 		
-		scope->gen_ident_vars();
-		
 		auto old_fragment = fragment;
 		auto old_scope = scope;
 		
@@ -153,8 +151,6 @@ namespace Mirb
 		lexer.step();
 		
 		auto result = new (fragment) Tree::SuperNode;
-		
-		scope->gen_ident_vars();
 		
 		bool parenthesis = false;
 		

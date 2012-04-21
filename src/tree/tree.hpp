@@ -202,6 +202,7 @@ namespace Mirb
 				 */
 				size_t break_id; // Which of the parent's break targets this block belongs to.
 				size_t break_targets; // Number of child blocks that can raise a break exception.
+				var_t break_dst; // The variable in the parent that the break will override.
 				
 				static const size_t no_break_id = (size_t)-1;
 
@@ -216,8 +217,6 @@ namespace Mirb
 				VariableMap variables; // A hash of the variables in this scope.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
-				NamedVariable *module_var; // Pointer to a module in which this method was found.
-				NamedVariable *name_var; // Pointer to a symbol which contains the name of the called method.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
@@ -279,8 +278,6 @@ namespace Mirb
 				void require_scope(Scope *scope);
 				void require_var(Scope *owner, Variable *var);
 
-				void gen_ident_vars();
-				
 				Scope *defined(Symbol *name, bool recursive);
 		};
 	};

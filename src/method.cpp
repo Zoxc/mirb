@@ -14,154 +14,47 @@
 
 namespace Mirb
 {
+	
 	namespace Arg
 	{
-		var_t Self::gen(MethodGen &g)
+		Self::type Self::apply(Frame &frame, size_t &index)
 		{
-			if(!g.self_arg)
-				g.self_arg = g.g->create_var();
-
-			return g.self_arg;
-		}
-	
-		var_t Block::gen(MethodGen &g)
-		{
-			if(!g.block_arg)
-				g.block_arg = g.g->create_var();
-
-			return g.block_arg;
-		}
-	
-		var_t Count::gen(MethodGen &g)
-		{
-			if(!g.argc_arg)
-				g.argc_arg = g.g->create_var();
-
-			return g.argc_arg;
-		}
-	
-		var_t Values::gen(MethodGen &g)
-		{
-			if(!g.argv_arg)
-				g.argv_arg = g.g->create_var();
-
-			return g.argv_arg;
-		}
-
-		var_t Value::gen(MethodGen &g)
-		{
-			var_t var = g.g->create_var();
-			g.g->gen<CodeGen::LookupOp>(var, Values::gen(g), g.argv_index++);
-			return var;
-		}
-	};
-	
-	
-	MethodGen::MethodGen(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count) :
-		flags(flags),
-		module(module),
-		name(name),
-		function(function),
-		arg_count(arg_count),
-		self_arg(0),
-		name_arg(0),
-		module_arg(0),
-		block_arg(0),
-		argc_arg(0),
-		argv_arg(0),
-		argv_index(0)
-	{
-		if((flags & Method::Static) == 0)
-		{
-			index = 1;
-			this->arg_count++;
-			args = new (memory_pool) var_t[this->arg_count];
-			args[0] = Arg::Self::gen(*this);
-		}
-		else
-		{
-			index = 0;
-			args = new (memory_pool) var_t[arg_count];
+			return frame.obj;
 		}
 		
-		g = new (memory_pool) CodeGen::ByteCodeGenerator(memory_pool);
-		block = g->create();
-		prolog = g->gen(g->create_block());
-		g->gen<CodeGen::ReturnOp>();
-		body = g->split(g->create_block());
+		Block::type Block::apply(Frame &frame, size_t &index)
+		{
+			return frame.block;
+		}
 
-		block->epilog = g->create_block();
-		block->epilog->next_block = 0;
-		body->next(block->epilog);
+		Count::type Count::apply(Frame &frame, size_t &index)
+		{
+			return frame.argc;
+		}
+
+		Values::type Values::apply(Frame &frame, size_t &index)
+		{
+			return frame.argv;
+		}
+
+		Value::type Value::apply(Frame &frame, size_t &index)
+		{
+			return frame.argv[index++];
+		}
 	}
 
-	Block *MethodGen::gen()
+	value_t wrapper(Frame &frame)
 	{
-		CodeGen::BasicBlock *raise = g->create_block();
-		body->branch(raise);
-		raise->next(block->epilog);
+		return ((value_t (*)())frame.code->opcodes)();
+	}
 
-		var_t return_var = g->create_var();
-		block->final->return_var = return_var;
-		/*
-		g->gen<CodeGen::StaticCallOp>(return_var, function, args, arg_count);
-		
-		 basic->branches.push(BasicBlock::BranchInfo(gen<BranchUnlessOp>(var), lfalse));
-		g->gen<CodeGen::BranchUnlessZeroOp>(block->epilog, return_var);
-		*/
-		g->gen(raise);
-		g->gen<CodeGen::RaiseOp>();
-		
-		g->gen(block->epilog);
-		g->gen<CodeGen::ReturnOp>();
+	Block *generate_block(size_t flags, value_t module, Symbol *name, Block::executor_t executor, void *function)
+	{
+		Block *result = Collector::allocate<Block>();
 
-		g->basic = prolog;
-		
-		#ifdef MIRB_DEBUG_BRIDGE
-			CodeGen::ByteCodePrinter printer(block);
-
-			std::cout << printer.print();
-			
-		#endif
-		
-		#ifdef MIRB_GRAPH_BRIDGE
-			CodeGen::DotPrinter dot_printer;
-			
-			std::system("mkdir bytecode");
-			
-			dot_printer.print_block(block, "bytecode/bytecode.dot");
-
-			std::stringstream path;
-				
-			path << "bytecode/bridge-" << name->get_string() << "-" << block->final;
-				
-			std::system(("mkdir \"" + path.str() + "\"").c_str());
-			std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
-				
-			for(auto i = block->variable_list.begin(); i != block->variable_list.end(); ++i)
-			{
-				if(i()->flags.get<Tree::Variable::FlushCallerSavedRegisters>())
-					continue;
-
-				dot_printer.highlight = *i;
-
-				dot_printer.print_block(block, "bytecode/bytecode.dot");
-					
-				std::stringstream result;
-
-				result << "dot -Tpng bytecode/bytecode.dot -o " << path.str() << "/var" << i()->index << ".png";
-
-				std::system(result.str().c_str());
-			}
-		#endif
-			
-		block->finalize();
-
-		Block *final = block->final;
-		
-		final->scope = 0;
-		final->name = name;
-		
+		result->opcodes = (const char *)function;
+		result->name = name;
+		result->executor = executor;
 		
 		if((flags & Method::Singleton) != 0)
 			module = singleton_class(module);
@@ -170,14 +63,13 @@ namespace Mirb
 			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";
 		#endif
 		
-		set_method(module, name, final);
-		
-		return block->final;
+		set_method(module, name, result);
+
+		return result;
 	}
-	
+
 	Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 0);
-		return gen.gen();
+		return generate_block(flags, module, name, wrapper, function);
 	}
 };

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "../generic/memory-pool.hpp"
 #include "block.hpp"
+#include "../vm.hpp"
 
 namespace Mirb
 {
@@ -76,14 +77,42 @@ namespace Mirb
 				}
 			}
 
+			for(auto i = exception_blocks.begin(); i != exception_blocks.end(); ++i)
+			{
+				if(i()->ensure_label.block)
+					i()->ensure_label.address = i()->ensure_label.block->pos;
+				else
+					i()->ensure_label.address = -1;
+
+				for(auto j = i()->handlers.begin(); j != i()->handlers.end(); ++j)
+				{
+					switch(j()->type)
+					{
+						case RuntimeException:
+						{
+							RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)*j;
+
+							handler->rescue_label.address = handler->rescue_label.block->pos;
+
+							break;
+						}
+
+						case ClassException:
+						case FilterException:
+						default:
+							break;
+					}
+				}
+			}
+
 			final->opcodes = opcodes;
 			final->var_words = var_count;
+			final->executor = &evaluate_block;
 		}
 		
 		void Block::initialize()
 		{
 			current_exception_block = 0;
-			current_exception_block_id = -1;
 			stack_heap = 0;
 			stack_heap_size = 0;
 

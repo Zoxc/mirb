@@ -69,8 +69,10 @@
     <ClInclude Include="..\..\src\tree\printer.hpp" />
     <ClInclude Include="..\..\src\tree\tree.hpp" />
     <ClInclude Include="..\..\src\value.hpp" />
+    <ClInclude Include="..\..\src\vm.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\block.cpp" />
     <ClCompile Include="..\..\src\char-array.cpp" />
     <ClCompile Include="..\..\src\classes\array.cpp" />
     <ClCompile Include="..\..\src\classes\class.cpp" />
@@ -118,6 +120,7 @@
     <ClCompile Include="..\..\src\tree\printer.cpp" />
     <ClCompile Include="..\..\src\tree\tree.cpp" />
     <ClCompile Include="..\..\src\value.cpp" />
+    <ClCompile Include="..\..\src\vm.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}</ProjectGuid>
@@ -156,7 +159,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\vendor\udis86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_GRAPH_BYTECODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_DEBUG_BRIDGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>

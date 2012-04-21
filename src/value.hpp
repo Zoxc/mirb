@@ -98,7 +98,7 @@ namespace Mirb
 	{
 		value_t value;
 			
-		auto_cast(size_t value) : value(value) {}
+		auto_cast(value_t value) : value(value) {}
 
 		auto_cast(bool value)
 		{

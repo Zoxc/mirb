@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "gc.hpp"
+#include "vm.hpp"
 #include "object-header.hpp"
 #include "generic/map.hpp"
 #include "generic/vector.hpp"
@@ -36,7 +37,7 @@ namespace Mirb
 	union BlockLabel
 	{
 		CodeGen::BasicBlock *block;
-		void *address;
+		size_t address;
 	};
 	
 	struct RuntimeExceptionHandler:
@@ -51,7 +52,6 @@ namespace Mirb
 	};
 
 	struct ExceptionBlock {
-		size_t parent_index;
 		ExceptionBlock *parent;
 		Vector<ExceptionHandler *> handlers;
 		BlockLabel ensure_label;
@@ -67,7 +67,8 @@ namespace Mirb
 		public:
 			Block();
 
-			Tree::Scope *scope;
+			typedef value_t (*executor_t)(Frame &frame);
+
 			Symbol *name; // The name of this block.
 			
 			var_t heap_array_var;
@@ -78,11 +79,10 @@ namespace Mirb
 			size_t var_words;
 
 			const char *opcodes;
-				
-			Vector<ExceptionBlock *> exception_blocks;
-			void **break_targets;
-			size_t ebp_offset;
-			void *epilog;
+
+			executor_t executor;
+			
+			var_t *break_targets;
 			
 			Vector<Block *> blocks; // A list of child blocks so the GC won't free them.
 	};

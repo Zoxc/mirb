@@ -180,7 +180,7 @@ namespace Mirb
 			
 			auto node = (Tree::IVarNode *)basic_node;
 			
-			gen<GetIVarOp>(var, self_var(), node->name);
+			gen<GetIVarOp>(var, node->name);
 		}
 		
 		void ByteCodeGenerator::convert_constant(Tree::Node *basic_node, var_t var)
@@ -346,7 +346,7 @@ namespace Mirb
 					
 					to_bytecode(node->right, temp);
 						
-					gen<SetIVarOp>(self_var(), variable->name, temp);
+					gen<SetIVarOp>(variable->name, temp);
 
 					if(is_var(var))
 						gen<MoveOp>(var, temp);
@@ -440,7 +440,7 @@ namespace Mirb
 			size_t argc;
 			var_t argv;
 
-			var_t closure = call_args(node->arguments, node->block ? node->block->scope : 0, argc, argv);
+			var_t closure = call_args(node->arguments, node->block ? node->block->scope : 0, argc, argv, var);
 			
 			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : 0, argc, argv);
 		}
@@ -451,7 +451,7 @@ namespace Mirb
 			
 			if(node->pass_args)
 			{
-				var_t closure = node->block ? block_arg(scope) : ref(scope->owner->block_parameter);
+				var_t closure = node->block ? block_arg(scope, var) : ref(scope->owner->block_parameter);
 				
 				// push arguments
 
@@ -462,16 +462,16 @@ namespace Mirb
 				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i)
 					gen<MoveOp>(group[param++], ref(*i));
 				
-				gen<SuperOp>(var, self_var(), ref(scope->module_var), ref(scope->name_var), closure, node->block ? node->block->scope->final : 0, group.size, group.use());
+				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : 0, group.size, group.use());
 			}
 			else
 			{
 				size_t argc;
 				var_t argv;
 
-				var_t closure = call_args(node->arguments, scope, argc, argv);
+				var_t closure = call_args(node->arguments, scope, argc, argv, var);
 				
-				gen<SuperOp>(var, self_var(), ref(scope->module_var), ref(scope->name_var), closure, node->block ? node->block->scope->final : 0, argc, argv);
+				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : 0, argc, argv);
 			}
 		}
 		
@@ -579,8 +579,10 @@ namespace Mirb
 			var_t temp = reuse(var);
 			
 			to_bytecode(node->value, temp);
+
+			mirb_debug_assert(scope->break_dst != no_var);
 			
-			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_id);
+			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_dst);
 		}
 		
 		void ByteCodeGenerator::convert_next(Tree::Node *basic_node, var_t var)
@@ -615,14 +617,20 @@ namespace Mirb
 			else
 				super = 0;
 			
-			gen<ClassOp>(var, self_var(), node->name, super, compile(node->scope));
+			gen<ClassOp>(self_var(), node->name, super, compile(node->scope));
+
+			if(is_var(var))
+				gen<LoadOp>(var, value_nil);
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::ModuleNode *)basic_node;
 			
-			gen<ModuleOp>(var, self_var(), node->name, compile(node->scope));
+			gen<ModuleOp>(self_var(), node->name, compile(node->scope));
+
+			if(is_var(var))
+				gen<LoadOp>(var, value_nil);
 		}
 		
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, var_t var)
@@ -645,10 +653,6 @@ namespace Mirb
 			 * Allocate and setup the new exception block
 			 */
 			ExceptionBlock *exception_block = new ExceptionBlock;
-			size_t index = block->final->exception_blocks.size();
-			size_t old_index = block->current_exception_block_id;
-			
-			exception_block->parent_index = old_index;
 			exception_block->parent = block->current_exception_block;
 			
 			/*
@@ -659,14 +663,13 @@ namespace Mirb
 			else
 				exception_block->ensure_label.block = 0;
 			
-			block->final->exception_blocks.push(exception_block);
+			block->exception_blocks.push(exception_block);
 			
 			/*
 			 * Use the new exception block
 			 */
 			block->current_exception_block = exception_block;
-			block->current_exception_block_id = index;
-			gen<HandlerOp>(index);
+			gen<HandlerOp>(exception_block);
 			
 			/*
 			 * Output the regular code
@@ -708,9 +711,8 @@ namespace Mirb
 			/*
 			 * Restore the old exception frame
 			 */
-			block->current_exception_block_id = old_index;
 			block->current_exception_block = exception_block->parent;
-			gen<HandlerOp>(old_index);
+			gen<HandlerOp>(block->current_exception_block);
 			
 			/*
 			 * Check for ensure node
@@ -776,7 +778,7 @@ namespace Mirb
 			if(scope->break_targets)
 			{
 				scope->require_exceptions = true;
-				block->final->break_targets = new void *[scope->break_targets];
+				block->final->break_targets = new var_t[scope->break_targets];
 			}
 			else
 				block->final->break_targets = 0;
@@ -798,25 +800,20 @@ namespace Mirb
 
 			basic = prolog;
 			
-			var_t argv = scope->parameters.empty() ? 0 : create_var();
+			size_t index = 0;
 
-			if(argv)
+			for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i, ++index)
 			{
-				size_t index = 0;
-
-				for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i, ++index)
+				if(i().type == Tree::Variable::Heap)
 				{
-					if(i().type == Tree::Variable::Heap)
-					{
-						var_t value = create_var();
+					var_t value = create_var();
 
-						gen<LookupOp>(value, argv, index);
+					gen<LoadArgOp>(value, index);
 
-						write_variable(*i, value);
-					}
-					else
-						gen<LookupOp>(ref(*i), argv, index);
+					write_variable(*i, value);
 				}
+				else
+					gen<LoadArgOp>(ref(*i), index);
 			}
 			
 			block->epilog->next_block = 0;
@@ -867,13 +864,16 @@ namespace Mirb
 			return block->var_count++;
 		}
 
-		var_t ByteCodeGenerator::block_arg(Tree::Scope *scope)
+		var_t ByteCodeGenerator::block_arg(Tree::Scope *scope, var_t break_dst)
 		{
 			var_t var = 0;
 			
 			if(scope)
 			{
 				var = create_var();
+
+				scope->break_dst = break_dst;
+
 				auto *block_attach = defer(scope);
 				
 				VariableGroup group(this, scope->referenced_scopes.size());
@@ -886,13 +886,16 @@ namespace Mirb
 						gen<LookupOp>(group[i], block->final->heap_array_var, scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
 				}
 
-				gen<ClosureOp>(var, self_var(), ref(this->scope->name_var), ref(this->scope->module_var), block_attach, group.size, group.use());
+				if(scope->break_id != Tree::Scope::no_break_id)
+					block->final->break_targets[scope->break_id] = break_dst;
+
+				gen<ClosureOp>(var, block_attach, group.size, group.use());
 			}
 			
 			return var;
 		}
 		
-		var_t ByteCodeGenerator::call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv)
+		var_t ByteCodeGenerator::call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst)
 		{
 			if(!arguments.empty())
 			{
@@ -909,10 +912,10 @@ namespace Mirb
 			else
 			{
 				argc = 0;
-				argv = 0;
+				argv = no_var;
 			}
 			
-			return block_arg(scope);
+			return block_arg(scope, break_dst);
 		}
 	};
 };

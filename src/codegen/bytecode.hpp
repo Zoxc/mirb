@@ -132,8 +132,8 @@ namespace Mirb
 					gen(create_block());
 				}
 				
-				var_t block_arg(Tree::Scope *scope);
-				var_t call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv);
+				var_t block_arg(Tree::Scope *scope, var_t break_dst);
+				var_t call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst);
 				
 			public:
 				ByteCodeGenerator(MemoryPool &memory_pool);

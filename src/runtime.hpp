@@ -11,6 +11,9 @@ namespace Mirb
 	class Exception;
 	
 	extern Exception *current_exception;
+	extern Frame *current_exception_frame_origin;
+
+	void set_current_exception(Exception *exception);
 
 	value_t class_of(value_t obj);
 	value_t real_class(value_t obj);

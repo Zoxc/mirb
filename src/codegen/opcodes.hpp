@@ -23,9 +23,7 @@ namespace Mirb
 		
 		struct MoveOp;
 		struct LoadOp;
-		struct LoadRawOp;
 		struct LoadArgOp;
-		struct GroupOp;
 		struct ClosureOp;
 		struct ClassOp;
 		struct ModuleOp;
@@ -67,7 +65,6 @@ namespace Mirb
 				Load,
 				LoadRaw,
 				LoadArg,
-				Group,
 				Closure,
 				Class,
 				Module,
@@ -95,9 +92,7 @@ namespace Mirb
 				Array,
 				String,
 				Interpolate,
-				StaticCall,
-				Raise,
-				SetupVars
+				Raise
 			};
 			
 			Type op;
@@ -114,14 +109,8 @@ namespace Mirb
 					case Load:
 						return T<LoadOp>::func(arg, (LoadOp &)*this);
 						
-					case LoadRaw:
-						return T<LoadRawOp>::func(arg, (LoadRawOp &)*this);
-						
 					case LoadArg:
 						return T<LoadArgOp>::func(arg, (LoadArgOp &)*this);
-
-					case Group:
-						return T<GroupOp>::func(arg, (GroupOp &)*this);
 
 					case Closure:
 						return T<ClosureOp>::func(arg, (ClosureOp &)*this);
@@ -254,17 +243,6 @@ namespace Mirb
 			LoadOp(var_t var, value_t imm) : var(var), imm(imm) {}
 		};
 		
-		struct LoadRawOp:
-			public OpcodeWrapper<Opcode::LoadRaw>
-		{
-			var_t var;
-			size_t imm;
-			
-			template<typename T> void def(T def) { def(var); };
-
-			LoadRawOp(var_t var, size_t imm) : var(var), imm(imm) {}
-		};
-		
 		struct LoadArgOp:
 			public OpcodeWrapper<Opcode::LoadArg>
 		{
@@ -276,74 +254,36 @@ namespace Mirb
 			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
 		};
 		
-		struct GroupOp:
-			public OpcodeWrapper<Opcode::Group>
-		{
-			var_t var;
-			size_t address;
-			
-			template<typename T> void def(T def) { def(var); };
-
-			GroupOp(var_t var, size_t address) : var(var), address(address) {}
-		};
-
 		struct ClosureOp:
 			public OpcodeWrapper<Opcode::Closure>
 		{
 			var_t var;
-			var_t self;
-			var_t name;
-			var_t module;
 			Mirb::Block *block;
 			size_t argc;
 			var_t argv;
 			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use)
-			{
-				use(self);
-				use(name);
-				use(module);
-				use(argv);
-			};
-
-			ClosureOp(var_t var, var_t self, var_t name, var_t module, Mirb::Block *block, size_t argc, var_t argv) : var(var), self(self), name(name), module(module), block(block), argc(argc), argv(argv) {}
+			ClosureOp(var_t var, Mirb::Block *block, size_t argc, var_t argv) : var(var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct ClassOp:
 			public OpcodeWrapper<Opcode::Class>
 		{
-			var_t var;
 			var_t self;
 			Symbol *name;
 			var_t super;
 			Mirb::Block *block;
 			
-			template<typename T> void def(T def) { if(var) def(var); };
-
-			template<typename T> void use(T use)
-			{
-				use(self);
-				
-				if(super)
-					use(super);
-			};
-
-			ClassOp(var_t var, var_t self, Symbol *name, var_t super, Mirb::Block *block) : var(var), self(self), name(name), super(super), block(block) {}
+			ClassOp(var_t self, Symbol *name, var_t super, Mirb::Block *block) : self(self), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
 			public OpcodeWrapper<Opcode::Module>
 		{
-			var_t var;
 			var_t self;
 			Symbol *name;
 			Mirb::Block *block;
 			
-			template<typename T> void def(T def) { if(var) def(var); };
-			template<typename T> void use(T use) { use(self); };
-
-			ModuleOp(var_t var, var_t self, Symbol *name, Mirb::Block *block) : var(var), self(self), name(name), block(block) {}
+			ModuleOp(var_t self, Symbol *name, Mirb::Block *block) : self(self), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
@@ -389,30 +329,12 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Super>
 		{
 			var_t var;
-			var_t self;
-			var_t module;
-			var_t method;
 			var_t block_var;
 			Mirb::Block *block;
 			size_t argc;
 			var_t argv;
 			
-			template<typename T> void def(T def) { if(var) def(var); };
-			
-			template<typename T> void use(T use)
-			{
-				use(self);
-				use(module);
-				use(method);
-
-				if(argv)
-					use(argv);
-
-				if(block_var)
-					use(block_var);
-			};
-
-			SuperOp(var_t var, var_t self, var_t module, var_t method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), self(self), module(module), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
+			SuperOp(var_t var, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), block_var(block_var), block(block), argc(argc), argv(argv) {}
 		};
 		
 		struct LookupOp:
@@ -471,29 +393,21 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::GetIVar>
 		{
 			var_t var;
-			var_t self;
 			Symbol *name;
 			
 			template<typename T> void def(T def) { def(var); };
 			template<typename T> void use(T use) { use(self); };
 
-			GetIVarOp(var_t var, var_t self, Symbol *name) : var(var), self(self), name(name) {}
+			GetIVarOp(var_t var, Symbol *name) : var(var), name(name) {}
 		};
 		
 		struct SetIVarOp:
 			public OpcodeWrapper<Opcode::SetIVar>
 		{
-			var_t self;
 			Symbol *name;
 			var_t var;
 			
-			template<typename T> void use(T use)
-			{
-				use(self);
-				use(var);
-			};
-			
-			SetIVarOp(var_t self, Symbol *name, var_t var) : self(self), name(name), var(var) {}
+			SetIVarOp(Symbol *name, var_t var) : name(name), var(var) {}
 		};
 		
 		struct GetConstOp:
@@ -503,9 +417,6 @@ namespace Mirb
 			var_t obj;
 			Symbol *name;
 			
-			template<typename T> void def(T def) { def(var); };
-			template<typename T> void use(T use) { use(obj); };
-
 			GetConstOp(var_t var, var_t obj, Symbol *name) : var(var), obj(obj), name(name) {}
 		};
 		
@@ -515,12 +426,6 @@ namespace Mirb
 			var_t obj;
 			Symbol *name;
 			var_t var;
-			
-			template<typename T> void use(T use)
-			{
-				use(obj);
-				use(var);
-			};
 			
 			SetConstOp(var_t obj, Symbol *name, var_t var) : obj(obj), name(name), var(var) {}
 		};
@@ -588,9 +493,9 @@ namespace Mirb
 		struct HandlerOp:
 			public OpcodeWrapper<Opcode::Handler>
 		{
-			size_t id;
+			ExceptionBlock *block;
 			
-			HandlerOp(size_t id) : id(id) {}
+			HandlerOp(ExceptionBlock *block) : block(block) {}
 		};
 		
 		struct UnwindOp:
@@ -614,11 +519,11 @@ namespace Mirb
 		{
 			var_t var;
 			Mirb::Block *code;
-			size_t index;
+			var_t parent_dst;
 			
 			template<typename T> void use(T use) { use(var); };
 			
-			UnwindBreakOp(var_t var, Mirb::Block *code, size_t index) : var(var), code(code), index(index) {}
+			UnwindBreakOp(var_t var, Mirb::Block *code, var_t parent_dst) : var(var), code(code), parent_dst(parent_dst) {}
 		};
 		
 		struct ArrayOp:
@@ -658,37 +563,9 @@ namespace Mirb
 			InterpolateOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
-		struct StaticCallOp:
-			public OpcodeWrapper<Opcode::StaticCall>
-		{
-			var_t var;
-			void *function;
-			var_t *args;
-			size_t arg_count;
-			
-			template<typename T> void def(T def) { def(var); };
-
-			template<typename T> void use(T use)
-			{
-				for(size_t i = 0; i < arg_count; ++i)
-					use(args[i]);
-			};
-
-			StaticCallOp(var_t var, void *function, var_t *args, size_t arg_count) : var(var), function(function), args(args), arg_count(arg_count) {}
-		};
-		
 		struct RaiseOp:
 			public OpcodeWrapper<Opcode::Raise>
 		{
-		};
-		
-		struct SetupVarsOp:
-			public OpcodeWrapper<Opcode::SetupVars>
-		{
-			var_t *args;
-			size_t arg_count;
-
-			SetupVarsOp(var_t *args, size_t arg_count) : args(args), arg_count(arg_count) {}
 		};
 	};
 };

@@ -78,7 +78,7 @@ namespace Mirb
 				 * Exception related fields
 				 */
 				ExceptionBlock *current_exception_block;
-				size_t current_exception_block_id;
+				Vector<ExceptionBlock *> exception_blocks;
 
 				size_t stack_vars;
 				size_t stack_heap_size;

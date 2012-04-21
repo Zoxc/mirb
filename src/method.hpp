@@ -32,7 +32,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static var_t gen(MethodGen &g);
+				static type apply(Frame &frame, size_t &index);
 		};
 
 		class Block
@@ -40,7 +40,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static var_t gen(MethodGen &g);
+				static type apply(Frame &frame, size_t &index);
 		};
 		
 		class Count
@@ -48,7 +48,7 @@ namespace Mirb
 			public:
 				typedef size_t type;
 
-				static var_t gen(MethodGen &g);
+				static type apply(Frame &frame, size_t &index);
 		};
 
 		class Values
@@ -56,7 +56,7 @@ namespace Mirb
 			public:
 				typedef value_t *type;
 
-				static var_t gen(MethodGen &g);
+				static type apply(Frame &frame, size_t &index);
 		};
 		
 		class Value
@@ -64,7 +64,7 @@ namespace Mirb
 			public:
 				typedef value_t type;
 
-				static var_t gen(MethodGen &g);
+				static type apply(Frame &frame, size_t &index);
 		};
 
 		template<typename T> void *cast_function(T *function)
@@ -118,79 +118,76 @@ namespace Mirb
 		}
 	};
 	
-	class MethodGen
-	{
-		private:
-			size_t flags;
-			value_t module;
-			Symbol *name;
-			void *function;
-			size_t arg_count;
-			size_t index;
-			MemoryPool memory_pool;
-			CodeGen::BasicBlock *prolog;
-			CodeGen::BasicBlock *body;
-			var_t *args;
-
-			void initalize(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
-		public:
-			var_t self_arg;
-			var_t name_arg;
-			var_t module_arg;
-			var_t block_arg;
-			var_t argc_arg;
-			var_t argv_arg;
-			size_t argv_index;
-
-			CodeGen::ByteCodeGenerator *g;
-			CodeGen::Block *block;
-
-			MethodGen(size_t flags, value_t module, Symbol *name, void *function, size_t arg_count);
-
-			template<class T> void apply()
-			{
-				args[index++] = T::gen(*this);
-			};
-
-			Block *gen();
-	};
+	Block *generate_block(size_t flags, value_t module, Symbol *name, Block::executor_t executor, void *function);
 	
+	value_t wrapper(Frame &frame);
+	
+	template<typename Arg1> value_t wrapper(Frame &frame)
+	{
+		size_t index = 0;
+		
+		typename Arg1::type arg1 = Arg1::apply(frame, index);
+
+		// if(index > info.argc) // TODO: Raise exception
+			
+		return ((value_t (*)(typename Arg1::type))frame.code->opcodes)(arg1);
+	}
+	
+	template<typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
+	{
+		size_t index = 0;
+		
+		typename Arg1::type arg1 = Arg1::apply(frame, index);
+		typename Arg2::type arg2 = Arg2::apply(frame, index);
+
+		return ((value_t (*)(typename Arg1::type, typename Arg2::type))frame.code->opcodes)(arg1, arg2);
+	}
+	
+	template<typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
+	{
+		size_t index = 0;
+		
+		typename Arg1::type arg1 = Arg1::apply(frame, index);
+		typename Arg2::type arg2 = Arg2::apply(frame, index);
+		typename Arg3::type arg3 = Arg3::apply(frame, index);
+
+		return ((value_t (*)(typename Arg1::type, typename Arg2::type, typename Arg3::type))frame.code->opcodes)(arg1, arg2, arg3);
+	}
+
+	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
+	{
+		size_t index = 0;
+		
+		typename Arg1::type arg1 = Arg1::apply(frame, index);
+		typename Arg2::type arg2 = Arg2::apply(frame, index);
+		typename Arg3::type arg3 = Arg3::apply(frame, index);
+		typename Arg4::type arg4 = Arg4::apply(frame, index);
+
+		return ((value_t (*)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type))frame.code->opcodes)(arg1, arg2, arg3, arg4);
+	}
+
 	Block *generate_method(size_t flags, value_t module, Symbol *name, void *function);
 	
 	template<typename Arg1> Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 1);
-		gen.apply<Arg1>();
-		return gen.gen();
+		return generate_block(flags, module, name, wrapper<Arg1>, function);
 	}
 	
 	template<typename Arg1, typename Arg2> Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 2);
-		gen.apply<Arg1>();
-		gen.apply<Arg2>();
-		return gen.gen();
+		return generate_block(flags, module, name, wrapper<Arg1, Arg2>, function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3> Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 3);
-		gen.apply<Arg1>();
-		gen.apply<Arg2>();
-		gen.apply<Arg3>();
-		return gen.gen();
+		return generate_block(flags, module, name, wrapper<Arg1, Arg2, Arg3>, function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
 	{
-		MethodGen gen(flags, module, name, function, 4);
-		gen.apply<Arg1>();
-		gen.apply<Arg2>();
-		gen.apply<Arg3>();
-		gen.apply<Arg4>();
-		return gen.gen();
+		return generate_block(flags, module, name, wrapper<Arg1, Arg2, Arg3, Arg4>, function);
 	}
-	
+	/*
 	template<class Object, value_t (Object::*function)(), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *) = &Arg::call_method<Object, function>; // TODO: Fix workaround for VC++ bug?
@@ -214,7 +211,7 @@ namespace Mirb
 		value_t (*stub)(Object *, typename Arg1::type, typename Arg2::type, typename Arg3::type) = &Arg::call_method<Object, typename Arg1::type, typename Arg2::type, typename Arg3::type, function>; // TODO: Fix workaround for VC++ bug?
 		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
 	}
-	
+	*/
 	template<typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)
 	{
 		return generate_method(Method::Static | flags, module, symbol_cast(name), Arg::cast_function(function));

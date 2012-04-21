@@ -48,10 +48,10 @@ namespace Mirb
 	{
 		Block *block = Collector::allocate<Block>();
 		
+		/*
 		block->scope = scope;
 
 		scope->final = block;
-		/*
 		size_t block_size = CodeGen::NativeGenerator::stub_size;
 
 		void *block_code = ExecutableHeap::alloc(block_size);

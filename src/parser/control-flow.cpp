@@ -21,10 +21,10 @@ namespace Mirb
 	{
 		auto range = new (fragment) Range(lexer.lexeme);
 		
-		lexer.step();
-		
 		if(scope->type != Tree::Scope::Closure)
 			error("Next outside of block.");
+		
+		lexer.step();
 		
 		if(is_expression())
 			return new (fragment) Tree::NextNode(range, parse_expression());
@@ -36,10 +36,10 @@ namespace Mirb
 	{
 		auto range = new (fragment) Range(lexer.lexeme);
 		
-		lexer.step();
-		
 		if(scope->type != Tree::Scope::Closure)
 			error("Redo outside of block.");
+		
+		lexer.step();
 		
 		return new (fragment) Tree::RedoNode(range);
 	}
@@ -48,8 +48,6 @@ namespace Mirb
 	{
 		auto range = new (fragment) Range(lexer.lexeme);
 		
-		lexer.step();
-		
 		if(scope->type == Tree::Scope::Closure)
 		{
 			if(scope->break_id == Tree::Scope::no_break_id)
@@ -57,6 +55,8 @@ namespace Mirb
 		}
 		else
 			error("Break outside of block.");
+		
+		lexer.step();
 		
 		if(is_expression())
 			return new (fragment) Tree::BreakNode(range, parse_expression());

@@ -28,6 +28,17 @@
 namespace Mirb
 {
 	Exception *current_exception;
+	Frame *current_exception_frame_origin;
+
+	void set_current_exception(Exception *exception)
+	{
+		current_exception = exception;
+
+		if(exception)
+			current_exception_frame_origin = current_frame;
+		else
+			current_exception_frame_origin = 0;
+	}
 
 	value_t class_of(value_t obj)
 	{
@@ -347,14 +358,14 @@ namespace Mirb
 	{
 		OnStack<2> os(exception_class, message);
 
-		current_exception = Collector::allocate<Exception>(exception_class, message.to_string(), backtrace().to_string());
+		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace().to_string()));
 		
 		return value_raise;
 	}
 
 	value_t raise(value_t exception)
 	{
-		current_exception = auto_cast(exception);
+		set_current_exception(auto_cast(exception));
 		return value_raise;
 	}
 	
@@ -460,7 +471,47 @@ namespace Mirb
 
 	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
 	{
-		return evaluate_block(code, obj, name, module, block, argc, argv);
+		Frame frame;
+
+		frame.code = code;
+		frame.obj = obj;
+		frame.name = name;
+		frame.module = module;
+		frame.block = block;
+		frame.argc = argc;
+		frame.argv = argv;
+		frame.prev = current_frame;
+
+		current_frame = &frame;
+
+		value_t result = code->executor(frame);
+		
+		#ifdef DEBUG
+			if(current_exception && result != value_raise)
+			{
+				Frame *current = frame.prev;
+
+				while(true)
+				{
+					if(current == current_exception_frame_origin)
+						goto exit;
+
+					if(!current)
+						break;
+
+					current = current->prev;
+				}
+
+				std::cout << "Function raised exception but didn't indicate it: " << backtrace().get_string() << std::endl;
+			}
+			else
+				current_exception_frame_origin = frame.prev;
+			exit:
+		#endif
+
+		current_frame = frame.prev;
+
+		return result;
 	};
 	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
@@ -477,7 +528,12 @@ namespace Mirb
 	
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])
 	{
-		mirb_debug_assert(Value::of_type<Proc>(obj));
+		if(!Value::of_type<Proc>(obj))
+		{
+			raise(LocalJumpError::class_ref, "No block given");
+			return value_raise;
+		}
+
 		return call(obj, "call", block, argc, argv);
 	}
 	
@@ -493,9 +549,23 @@ namespace Mirb
 	
 	CharArray backtrace()
 	{
-		// TODO: Fix
-		//return Arch::Support::backtrace();
-		return "";
+		Frame *current = current_frame;
+
+		CharArray result;
+
+		OnStack<1> os(result);
+
+		while(current)
+		{
+			if(result.size() != 0)
+				result += "\n";
+
+			result += current->inspect();
+
+			current = current->prev;
+		}
+
+		return result;
 	}
 	
 	String *enforce_string(value_t obj)

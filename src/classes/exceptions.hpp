@@ -45,8 +45,8 @@ namespace Mirb
 		public ReturnException
 	{
 		public:
-			BreakException(value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value, size_t id) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), id(id) {}
+			BreakException(value_t instance_of, value_t message, value_t backtrace, Block *target, value_t value, size_t id) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
 			
-			size_t id;
+			var_t dst;
 	};
 };

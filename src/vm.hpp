@@ -1,9 +1,29 @@
 #pragma once
 #include "common.hpp"
-#include "block.hpp"
+#include "value.hpp"
+#include "char-array.hpp"
 
 namespace Mirb
 {
-	value_t evaluate_block(Block *code, value_t self, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
+	class Block;
+
+	class Frame
+	{
+		public:
+			Block *code;
+			value_t obj;
+			Symbol *name;
+			value_t module;
+			value_t block;
+			size_t argc;
+			value_t *argv;
+			Frame *prev;
+
+			CharArray inspect();
+	};
+
+	extern Frame *current_frame;
+
+	value_t evaluate_block(Frame &frame);
 };
 

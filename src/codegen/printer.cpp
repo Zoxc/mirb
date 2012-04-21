@@ -170,15 +170,6 @@ namespace Mirb
 					return var(op->var) + " = " + imm(op->imm);
 				}
 				
-				case Opcode::LoadRaw:
-				{
-					auto op = (LoadRawOp *)opcode;
-
-					opcode += sizeof(LoadRawOp);
-					
-					return var(op->var) + " = " + raw(op->imm);
-				}
-				
 				case Opcode::LoadArg:
 				{
 					auto op = (LoadArgOp *)opcode;
@@ -188,22 +179,13 @@ namespace Mirb
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
 				
-				case Opcode::Group:
-				{
-					auto op = (GroupOp *)opcode;
-
-					opcode += sizeof(GroupOp);
-					
-					return var(op->var) + " = group " + raw(op->address);
-				}
-				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
 
 					opcode += sizeof(ClosureOp);
 					
-					return var(op->var) + " = closure " + var(op->self) + ", " + var(op->name) + ", " + var(op->module) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return var(op->var) + " = closure " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Class:
@@ -212,7 +194,7 @@ namespace Mirb
 
 					opcode += sizeof(ClassOp);
 					
-					return (op->var ? var(op->var) + " = " : "") + "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
+					return "class " + var(op->self) + ", " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Module:
@@ -221,7 +203,7 @@ namespace Mirb
 
 					opcode += sizeof(ModuleOp);
 					
-					return (op->var ? var(op->var) + " = " : "") + "module " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
+					return "module " + var(op->self) + ", " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
 				case Opcode::Method:
@@ -248,7 +230,7 @@ namespace Mirb
 
 					opcode += sizeof(SuperOp);
 					
-					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->self) + ", " + var(op->module) + ", " + var(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Lookup:
@@ -293,7 +275,7 @@ namespace Mirb
 
 					opcode += sizeof(GetIVarOp);
 					
-					return var(op->var) + " = ivar " + var(op->self) + ", " + imm(op->name);
+					return var(op->var) + " = ivar " + imm(op->name);
 				}
 				
 				case Opcode::SetIVar:
@@ -302,7 +284,7 @@ namespace Mirb
 
 					opcode += sizeof(SetIVarOp);
 					
-					return "ivar " + var(op->self) + ", " + imm(op->name) + " = " + var(op->var);
+					return "ivar " + imm(op->name) + " = " + var(op->var);
 				}
 				
 				case Opcode::GetConst:
@@ -393,7 +375,7 @@ namespace Mirb
 
 					opcode += sizeof(HandlerOp);
 					
-					return "handler " + (op->id == (size_t)-1 ? "nil" : raw(op->id));
+					return "handler " + (op->block ? raw((size_t)op->block) : "nil");
 				}
 				
 				case Opcode::Unwind:
@@ -418,7 +400,7 @@ namespace Mirb
 
 					opcode += sizeof(UnwindBreakOp);
 					
-					return "break " + var(op->var) + ", " + print_block(op->code) + ", " + raw(op->index);
+					return "break " + var(op->var) + ", " + print_block(op->code) + ", " + var(op->parent_dst);
 				}
 				
 				case Opcode::Array:
@@ -448,48 +430,11 @@ namespace Mirb
 					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc);
 				}
 
-				case Opcode::StaticCall:
-				{
-					auto op = (StaticCallOp *)opcode;
-
-					opcode += sizeof(StaticCallOp);
-					
-					std::stringstream result;
-					
-					result << var(op->var) << " = static_call 0x" << op->function;
-
-					for(size_t i = 0; i < op->arg_count; ++i)
-						result << ", " << var(op->args[i]);
-					
-					return result.str();
-				}
-				
 				case Opcode::Raise:
 				{
 					opcode += sizeof(RaiseOp);
 
 					return "raise";
-				}
-				
-				case Opcode::SetupVars:
-				{
-					auto op = (SetupVarsOp *)opcode;
-
-					opcode += sizeof(SetupVarsOp);
-					
-					std::stringstream result;
-					
-					result << "setup_vars";
-
-					for(size_t i = 0; i < op->arg_count; ++i)
-					{
-						result << " " << var(op->args[i]);
-
-						if(i < op->arg_count - 1)
-							result << ",";
-					}
-					
-					return result.str();
 				}
 				
 				default:
