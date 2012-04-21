@@ -69,7 +69,7 @@ namespace Mirb
 				size_t size = (this->mask + 1) << 1;
 				size_t mask = size - 1;
 
-				Pair **table = (Pair **)alloc_ref.alloc(size * sizeof(V));
+				Pair **table = (Pair **)alloc_ref.alloc(size * sizeof(Pair *));
 				std::memset(table, 0, size * sizeof(Pair *));
 
 				Pair **end = this->table + (this->mask + 1);
