@@ -72,7 +72,7 @@ namespace Mirb
 
 			for(auto i = basic_block->branches.begin(); i != basic_block->branches.end(); ++i)
 			{
-				if((*i).first == (opcode - data))
+				if((*i).first == (size_t)(opcode - data))
 				{
 					block = (*i).second;
 					break;

@@ -43,8 +43,19 @@ namespace Mirb
 		return result;
 	}
 
-#define Op(name) case CodeGen::Opcode::name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
-#define EndOp break; }
+#ifdef MIRB_THREADED
+	#define OpContinue goto *labels[(size_t)*ip]
+	#define OpPrologue static void *labels[] = {MIRB_OPCODES}; OpContinue;
+	#define OpEpilogue
+	#define Op(name) Op##name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
+	#define EndOp OpContinue; }
+#else
+	#define OpContinue goto execute_instruction
+	#define OpPrologue while(true) { execute_instruction: switch(*ip) {
+	#define OpEpilogue default: mirb_runtime_abort("Unknown opcode"); } }
+	#define Op(name) case CodeGen::Opcode::name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
+	#define EndOp break; }
+#endif
 
 	value_t evaluate_block(Frame &frame)
 	{
@@ -55,198 +66,206 @@ namespace Mirb
 		bool handling_exception = false;
 		ExceptionBlock *current_exception_block = nullptr;
 
+#ifdef __GNUC__
+		value_t storage[frame.code->var_words];
+		value_t *vars = storage;
+
+		auto finalize = [&] {};
+#else
 		value_t *vars = new value_t[frame.code->var_words];
-		
+
 		auto finalize = [&] {
 			delete[] vars;
 		};
+#endif
 
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
 
-		while(true)
-		{
-		execute_instruction:
-			switch(*ip)
+		OpPrologue
+
+		Op(LoadArg)
+			vars[op.var] = frame.argv[op.arg];
+		EndOp
+
+		Op(Move)
+			vars[op.dst] = vars[op.src];
+		EndOp
+
+		Op(Load)
+			vars[op.var] = op.imm;
+		EndOp
+
+		Op(Call)
+			value_t block = op.block ? vars[op.block_var] : value_nil;
+
+			value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);
+
+			if(result == value_raise)
+				goto handle_call_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		Op(Branch)
+			ip = ip_start + op.pos;
+		EndOp
+
+		Op(BranchUnless)
+			if(!Value::test(vars[op.var]))
+				ip = ip_start + op.pos;
+		EndOp
+
+		Op(BranchIf)
+			if(Value::test(vars[op.var]))
+				ip = ip_start + op.pos;
+		EndOp
+
+		Op(BranchIfZero)
+			if((size_t)vars[op.var] == 0)
+				ip = ip_start + op.pos;
+		EndOp
+
+		Op(BranchUnlessZero)
+			if((size_t)vars[op.var] != 0)
+				ip = ip_start + op.pos;
+		EndOp
+
+		Op(Closure)
+			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, (value_t **)&vars[op.argv]);
+		EndOp
+
+		Op(Class)
+			value_t super = op.super == no_var ? Object::class_ref : vars[op.super];
+
+			value_t self = Support::define_class(frame.obj, op.name, super);
+
+			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+
+			if(result == value_raise)
+				goto handle_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		Op(Module)
+			value_t self = Support::define_module(frame.obj, op.name);
+
+			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+
+			if(result == value_raise)
+				goto handle_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		Op(Super)
+			value_t block = op.block ? vars[op.block_var] : value_nil;
+
+			value_t module = frame.module;
+
+			Block *method = lookup_super(module, frame.name, &module);
+
+			if(mirb_unlikely(!method))
+				goto handle_exception;
+
+			value_t result = call_code(method, frame.obj, frame.name, module, block, op.argc, &vars[op.argv]);
+
+			if(result == value_raise)
+				goto handle_call_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		Op(Method)
+			Support::define_method(frame.obj, op.name, op.block);
+		EndOp
+
+		Op(Lookup)
+			vars[op.var] = (value_t)proc_frame.scopes[op.index];
+		EndOp
+
+		Op(Self)
+			vars[op.var] = frame.obj;
+		EndOp
+
+		Op(Block)
+			vars[op.var] = frame.block;
+		EndOp
+
+		Op(CreateHeap)
+			vars[op.var] = (value_t)Support::create_heap(op.vars * sizeof(var_t));
+		EndOp
+
+		Op(GetHeapVar)
+			vars[op.var] = ((value_t *)vars[op.heap])[op.index];
+		EndOp
+
+		Op(SetHeapVar)
+			((value_t *)vars[op.heap])[op.index] = vars[op.var];
+		EndOp
+
+		Op(GetIVar)
+			vars[op.var] = Support::get_ivar(frame.obj, op.name);
+		EndOp
+
+		Op(SetIVar)
+			Support::set_ivar(frame.obj, op.name,  vars[op.var]);
+		EndOp
+
+		Op(GetConst)
+			vars[op.var] = Support::get_const(frame.obj, op.name);
+		EndOp
+
+		Op(SetConst)
+			Support::set_const(frame.obj, op.name,  vars[op.var]);
+		EndOp
+
+		Op(Array)
+			vars[op.var] = Support::create_array(op.argc, &vars[op.argv]);
+		EndOp
+
+		Op(String)
+			vars[op.var] = Support::create_string((const char *)op.str);
+		EndOp
+
+		Op(Interpolate)
+			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv]);
+		EndOp
+
+		Op(Handler)
+			current_exception_block = op.block;
+		EndOp
+
+		Op(Unwind)
+			if(handling_exception)
 			{
-				Op(LoadArg)
-					vars[op.var] = frame.argv[op.arg];
-				EndOp
-
-				Op(Move)
-					vars[op.dst] = vars[op.src];
-				EndOp
-					
-				Op(Load)
-					vars[op.var] = op.imm;
-				EndOp
-					
-				Op(Call)
-					value_t block = op.block ? vars[op.block_var] : value_nil;
-
-					value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);
-
-					if(result == value_raise)
-						goto handle_call_exception;
-
-					if(op.var != no_var)
-						vars[op.var] = result;
-				EndOp
-					
-				Op(Branch)
-					ip = ip_start + op.pos;
-				EndOp
-					
-				Op(BranchUnless)
-					if(!Value::test(vars[op.var]))
-						ip = ip_start + op.pos;
-				EndOp
-
-				Op(BranchIf)
-					if(Value::test(vars[op.var]))
-						ip = ip_start + op.pos;
-				EndOp
-					
-				Op(Closure)
-					vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, (value_t **)&vars[op.argv]);
-				EndOp
-					
-				Op(Class)
-					value_t super = op.super == no_var ? Object::class_ref : vars[op.super];
-
-					value_t self = Support::define_class(frame.obj, op.name, super);
-
-					value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
-					
-					if(result == value_raise)
-						goto handle_exception;
-
-					if(op.var != no_var)
-						vars[op.var] = result;
-				EndOp
-					
-				Op(Module)
-					value_t self = Support::define_module(frame.obj, op.name);
-
-					value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
-					
-					if(result == value_raise)
-						goto handle_exception;
-					
-					if(op.var != no_var)
-						vars[op.var] = result;
-				EndOp
-					
-				Op(Super)
-					value_t block = op.block ? vars[op.block_var] : value_nil;
-
-					value_t module = frame.module;
-				
-					Block *method = lookup_super(module, frame.name, &module);
-
-					if(mirb_unlikely(!method))
-					{
-						finalize();
-						return value_raise;
-					}
-
-					value_t result = call_code(method, frame.obj, frame.name, module, block, op.argc, &vars[op.argv]);
-					
-					if(result == value_raise)
-						goto handle_call_exception;
-
-					if(op.var != no_var)
-						vars[op.var] = result;
-				EndOp
-					
-				Op(Method)
-					Support::define_method(frame.obj, op.name, op.block);
-				EndOp
-					
-				Op(Lookup)
-					vars[op.var] = (value_t)proc_frame.scopes[op.index];
-				EndOp
-					
-				Op(Self)
-					vars[op.var] = frame.obj;
-				EndOp
-
-				Op(Block)
-					vars[op.var] = frame.block;
-				EndOp
-
-				Op(CreateHeap)
-					vars[op.var] = (value_t)Support::create_heap(op.vars * sizeof(var_t));
-				EndOp
-					
-				Op(GetHeapVar)
-					vars[op.var] = ((value_t *)vars[op.heap])[op.index];
-				EndOp
-					
-				Op(SetHeapVar)
-					((value_t *)vars[op.heap])[op.index] = vars[op.var];
-				EndOp
-					
-				Op(GetIVar)
-					vars[op.var] = Support::get_ivar(frame.obj, op.name);
-				EndOp
-
-				Op(SetIVar)
-					Support::set_ivar(frame.obj, op.name,  vars[op.var]);
-				EndOp
-
-				Op(GetConst)
-					vars[op.var] = Support::get_const(frame.obj, op.name);
-				EndOp
-				
-				Op(SetConst)
-					Support::set_const(frame.obj, op.name,  vars[op.var]);
-				EndOp
-				
-				Op(Array)
-					vars[op.var] = Support::create_array(op.argc, &vars[op.argv]);
-				EndOp
-					
-				Op(String)
-					vars[op.var] = Support::create_string((const char *)op.str);
-				EndOp
-
-				Op(Interpolate)
-					vars[op.var] = Support::interpolate(op.argc, &vars[op.argv]);
-				EndOp
-				
-				Op(Handler)
-					current_exception_block = op.block;
-				EndOp
-					
-				Op(Unwind)
-					if(handling_exception)
-					{
-						handling_exception = false;
-						goto handle_exception;
-					}
-				EndOp
-
-				Op(UnwindReturn)
-					set_current_exception(new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
-					goto handle_exception;
-				EndOp
-					
-				Op(UnwindBreak)
-					set_current_exception(new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
-					goto handle_exception;
-				EndOp
-					
-				Op(Return)
-					value_t result = vars[op.var];
-					finalize();
-					return result;
-				EndOp
-
-			default:
-				mirb_runtime_abort("Unknown opcode");
+				handling_exception = false;
+				goto handle_exception;
 			}
-		}
+		EndOp
+
+		Op(UnwindReturn)
+			set_current_exception(new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
+			goto handle_exception;
+		EndOp
+
+		Op(UnwindBreak)
+			set_current_exception(new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
+			goto handle_exception;
+		EndOp
+
+		Op(Return)
+			value_t result = vars[op.var];
+			finalize();
+			return result;
+		EndOp
+
+		OpEpilogue
 
 handle_call_exception:
 		{
@@ -258,7 +277,7 @@ handle_call_exception:
 					vars[exception->dst] = exception->value;
 
 				set_current_exception(0);
-				goto execute_instruction;
+				OpContinue;
 			}
 		}
 
@@ -300,7 +319,7 @@ handle_exception:
 							current_exception_block = block->parent;
 							set_current_exception(0);
 							ip =  ip_start + ((RuntimeExceptionHandler *)i())->rescue_label.address;
-							goto execute_instruction; // Execute rescue block
+							OpContinue; // Execute rescue block
 						}
 
 						default:
@@ -315,7 +334,7 @@ handle_exception:
 			{
 				handling_exception = true;
 				ip =  ip_start + block->ensure_label.address;
-				goto execute_instruction; // Execute ensure block
+				OpContinue; // Execute ensure block
 			}
 			else
 				goto handle_exception; // Handle parent frame

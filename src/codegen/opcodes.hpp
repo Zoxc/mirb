@@ -61,7 +61,6 @@ namespace Mirb
 			{
 				Move,
 				Load,
-				LoadRaw,
 				LoadArg,
 				Closure,
 				Class,
@@ -93,7 +92,41 @@ namespace Mirb
 				String,
 				Interpolate
 			};
-			
+
+			#define MIRB_OPCODES \
+				&&OpMove, \
+				&&OpLoad, \
+				&&OpLoadArg, \
+				&&OpClosure, \
+				&&OpClass, \
+				&&OpModule, \
+				&&OpMethod, \
+				&&OpCall, \
+				&&OpSuper, \
+				&&OpLookup, \
+				&&OpSelf, \
+				&&OpBlock, \
+				&&OpCreateHeap, \
+				&&OpGetHeapVar, \
+				&&OpSetHeapVar, \
+				&&OpGetIVar, \
+				&&OpSetIVar, \
+				&&OpGetConst, \
+				&&OpSetConst, \
+				&&OpBranchIf, \
+				&&OpBranchIfZero, \
+				&&OpBranchUnless, \
+				&&OpBranchUnlessZero, \
+				&&OpBranch, \
+				&&OpReturn, \
+				&&OpHandler, \
+				&&OpUnwind, \
+				&&OpUnwindReturn, \
+				&&OpUnwindBreak, \
+				&&OpArray, \
+				&&OpString, \
+				&&OpInterpolate
+
 			Type op;
 
 			Opcode(Type op) : op(op) {}
