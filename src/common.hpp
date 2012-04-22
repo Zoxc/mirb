@@ -7,7 +7,7 @@
 	//#pragma warning(disable:4200) // TODO: Remove this
 #endif
 
-#include <Prelude\Internal\Common.hpp>
+#include <Prelude/Internal/Common.hpp>
 
 #ifdef WIN32
 	#ifndef NOMINMAX

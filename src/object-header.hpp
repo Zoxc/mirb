@@ -1,5 +1,5 @@
 #pragma once
-#include <Prelude\List.hpp>
+#include <Prelude/List.hpp>
 #include "value.hpp"
 
 namespace Mirb

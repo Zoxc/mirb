@@ -78,7 +78,7 @@ namespace Mirb
 	{
 		auto set_chars = [](char_t start, char_t stop, void (Lexer::*func)()) {
 			for(size_t c = start; c <= stop; ++c)
-				jump_table[c] = func;
+				jump_table[(size_t)c] = func;
 		};
 
 		// Unknown
@@ -90,15 +90,15 @@ namespace Mirb
 		// Identifiers
 		set_chars('a', 'z', &Lexer::ident);
 		set_chars('A', 'Z', &Lexer::ident);
-		jump_table['_'] = &Lexer::ident;
+		jump_table[(size_t)'_'] = &Lexer::ident;
 
 		// String
-		jump_table['"'] = &Lexer::string;
+		jump_table[(size_t)'"'] = &Lexer::string;
 
 
 		// Numbers
-		jump_table['0'] = &Lexer::zero;
-		jump_table['.'] = &Lexer::real;
+		jump_table[(size_t)'0'] = &Lexer::zero;
+		jump_table[(size_t)'.'] = &Lexer::real;
 		set_chars('1', '9', &Lexer::number);
 
 		// Whitespace
@@ -108,51 +108,51 @@ namespace Mirb
 		jump_table[12] = &Lexer::white;
 		
 		// Newlines
-		jump_table['\n'] = &Lexer::newline;
-		jump_table['\r'] = &Lexer::carrige_return;
+		jump_table[(size_t)'\n'] = &Lexer::newline;
+		jump_table[(size_t)'\r'] = &Lexer::carrige_return;
 		
 		// Arithmetic
-		jump_table['+'] = &Lexer::assign<Lexeme::ADD, Lexeme::ASSIGN_ADD>;
-		jump_table['-'] = &Lexer::assign<Lexeme::SUB, Lexeme::ASSIGN_SUB>;
-		jump_table['*'] = &Lexer::assign<Lexeme::MUL, Lexeme::ASSIGN_MUL, '*', Lexeme::POWER, Lexeme::ASSIGN_POWER>;
-		jump_table['/'] = &Lexer::assign<Lexeme::DIV, Lexeme::ASSIGN_DIV>;
-		jump_table['%'] = &Lexer::assign<Lexeme::MOD, Lexeme::ASSIGN_MOD>;
+		jump_table[(size_t)'+'] = &Lexer::assign<Lexeme::ADD, Lexeme::ASSIGN_ADD>;
+		jump_table[(size_t)'-'] = &Lexer::assign<Lexeme::SUB, Lexeme::ASSIGN_SUB>;
+		jump_table[(size_t)'*'] = &Lexer::assign<Lexeme::MUL, Lexeme::ASSIGN_MUL, '*', Lexeme::POWER, Lexeme::ASSIGN_POWER>;
+		jump_table[(size_t)'/'] = &Lexer::assign<Lexeme::DIV, Lexeme::ASSIGN_DIV>;
+		jump_table[(size_t)'%'] = &Lexer::assign<Lexeme::MOD, Lexeme::ASSIGN_MOD>;
 		
 		// Bitwise operators
-		jump_table['^'] = &Lexer::assign<Lexeme::BITWISE_XOR, Lexeme::ASSIGN_BITWISE_XOR>;
-		jump_table['&'] = &Lexer::assign<Lexeme::AMPERSAND, Lexeme::ASSIGN_BITWISE_AND, '&', Lexeme::LOGICAL_AND, Lexeme::ASSIGN_LOGICAL_AND>;
-		jump_table['|'] = &Lexer::assign<Lexeme::BITWISE_OR, Lexeme::ASSIGN_BITWISE_OR, '|', Lexeme::LOGICAL_OR, Lexeme::ASSIGN_LOGICAL_OR>;
-		jump_table['~'] = &Lexer::single<Lexeme::BITWISE_NOT>;
+		jump_table[(size_t)'^'] = &Lexer::assign<Lexeme::BITWISE_XOR, Lexeme::ASSIGN_BITWISE_XOR>;
+		jump_table[(size_t)'&'] = &Lexer::assign<Lexeme::AMPERSAND, Lexeme::ASSIGN_BITWISE_AND, '&', Lexeme::LOGICAL_AND, Lexeme::ASSIGN_LOGICAL_AND>;
+		jump_table[(size_t)'|'] = &Lexer::assign<Lexeme::BITWISE_OR, Lexeme::ASSIGN_BITWISE_OR, '|', Lexeme::LOGICAL_OR, Lexeme::ASSIGN_LOGICAL_OR>;
+		jump_table[(size_t)'~'] = &Lexer::single<Lexeme::BITWISE_NOT>;
 		
 		// Logical operators
-		jump_table['!'] = &Lexer::assign<Lexeme::LOGICAL_NOT, Lexeme::NO_EQUALITY>;
+		jump_table[(size_t)'!'] = &Lexer::assign<Lexeme::LOGICAL_NOT, Lexeme::NO_EQUALITY>;
 		
 		// Misc
-		jump_table['('] = &Lexer::single<Lexeme::PARENT_OPEN>;
-		jump_table[')'] = &Lexer::single<Lexeme::PARENT_CLOSE>;
+		jump_table[(size_t)'('] = &Lexer::single<Lexeme::PARENT_OPEN>;
+		jump_table[(size_t)')'] = &Lexer::single<Lexeme::PARENT_CLOSE>;
 		
-		jump_table['['] = &Lexer::single<Lexeme::SQUARE_OPEN>;
-		jump_table[']'] = &Lexer::single<Lexeme::SQUARE_CLOSE>;
+		jump_table[(size_t)'['] = &Lexer::single<Lexeme::SQUARE_OPEN>;
+		jump_table[(size_t)']'] = &Lexer::single<Lexeme::SQUARE_CLOSE>;
 		
-		jump_table[';'] = &Lexer::single<Lexeme::SEMICOLON>;
-		jump_table[','] = &Lexer::single<Lexeme::COMMA>;
-		jump_table['?'] = &Lexer::single<Lexeme::QUESTION>;
+		jump_table[(size_t)';'] = &Lexer::single<Lexeme::SEMICOLON>;
+		jump_table[(size_t)','] = &Lexer::single<Lexeme::COMMA>;
+		jump_table[(size_t)'?'] = &Lexer::single<Lexeme::QUESTION>;
 		
-		jump_table[':'] = &Lexer::assign<Lexeme::COLON, Lexeme::SCOPE>;
+		jump_table[(size_t)':'] = &Lexer::assign<Lexeme::COLON, Lexeme::SCOPE>;
 		
-		jump_table['='] = &Lexer::assign_equal;
+		jump_table[(size_t)'='] = &Lexer::assign_equal;
 		
-		jump_table['<'] = &Lexer::compare;
-		jump_table['>'] = &Lexer::assign<Lexeme::GREATER, Lexeme::GREATER_OR_EQUAL, '>', Lexeme::RIGHT_SHIFT, Lexeme::ASSIGN_RIGHT_SHIFT>;
+		jump_table[(size_t)'<'] = &Lexer::compare;
+		jump_table[(size_t)'>'] = &Lexer::assign<Lexeme::GREATER, Lexeme::GREATER_OR_EQUAL, '>', Lexeme::RIGHT_SHIFT, Lexeme::ASSIGN_RIGHT_SHIFT>;
 		
-		jump_table['{'] = &Lexer::curly_open;
-		jump_table['}'] = &Lexer::curly_close;
+		jump_table[(size_t)'{'] = &Lexer::curly_open;
+		jump_table[(size_t)'}'] = &Lexer::curly_close;
 		
-		jump_table['@'] = &Lexer::ivar;
-		jump_table['#'] = &Lexer::comment;
+		jump_table[(size_t)'@'] = &Lexer::ivar;
+		jump_table[(size_t)'#'] = &Lexer::comment;
 		
-		jump_table['\''] = &Lexer::simple_string;
-		jump_table['\"'] = &Lexer::string;
+		jump_table[(size_t)'\''] = &Lexer::simple_string;
+		jump_table[(size_t)'\"'] = &Lexer::string;
 	}
 	
 	void Lexer::report_null()
