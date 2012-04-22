@@ -2,9 +2,6 @@
 #include "../common.hpp"
 #include "../value.hpp"
 #include "../block.hpp"
-#include "../generic/simple-list.hpp"
-#include "../generic/simpler-list.hpp"
-#include "../generic/list.hpp"
 
 namespace Mirb
 {

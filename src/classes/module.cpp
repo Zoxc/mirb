@@ -8,7 +8,7 @@ namespace Mirb
 
 	BlockMap *Module::get_methods()
 	{
-		if(mirb_unlikely(!methods))
+		if(prelude_unlikely(!methods))
 			methods = new BlockMap(methods_initial); // TODO: Allocate with GC
 		
 		return methods;

@@ -209,7 +209,7 @@ namespace Mirb
 	}
 	
 	class ValueMapFunctions:
-		public Prelude::MapFunctions<value_t, value_t>
+		public MapFunctions<value_t, value_t>
 	{
 		public:
 			static value_t invalid_value()
@@ -218,6 +218,6 @@ namespace Mirb
 			}
 	};
 
-	typedef Prelude::Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
+	typedef Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
 };
 

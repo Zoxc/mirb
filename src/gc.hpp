@@ -5,7 +5,7 @@
 namespace Mirb
 {
 	class GC:
-		public Prelude::NoReferenceProvider<GC>
+		public NoReferenceProvider<GC>
 	{
 		public:			
 			GC() {}

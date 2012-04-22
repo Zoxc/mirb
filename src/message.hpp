@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "generic/simple-list.hpp"
+#include <Prelude/List.hpp>
 
 namespace Mirb
 {
@@ -25,7 +25,7 @@ namespace Mirb
 			Parser &parser;
 			Range &range;
 			Severity severity;
-			SimpleEntry<Message> entry;
+			ListEntry<Message> entry;
 
 			virtual std::string string() = 0;
 

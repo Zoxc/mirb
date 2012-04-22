@@ -1,16 +1,16 @@
 #pragma once
 #include <Prelude/Allocator.hpp>
+#include <Prelude/FastList.hpp>
 #include "../common.hpp"
-#include "simpler-list.hpp"
 
 namespace Mirb
 {
 	class MemoryPool:
-		public Prelude::WithReferenceProvider<MemoryPool>
+		public WithReferenceProvider<MemoryPool>
 	{
 		struct Page
 		{
-			SimpleEntry<Page> entry;
+			ListEntry<Page> entry;
 			#ifndef WIN32
 				size_t length;
 			#endif
@@ -22,7 +22,7 @@ namespace Mirb
 			char_t *current;
 			char_t *max;
 
-			SimplerList<Page> pages;
+			FastList<Page> pages;
 
 			char_t *allocate_page(size_t bytes = max_alloc);
 			void free_page(Page *page);

@@ -4,8 +4,6 @@
 #include "classes/symbol.hpp"
 #include "classes/exceptions.hpp"
 #include "generic/memory-pool.hpp"
-#include "generic/vector.hpp"
-#include "generic/simple-list.hpp"
 #include "codegen/opcodes.hpp"
 
 namespace Mirb
@@ -141,31 +139,31 @@ namespace Mirb
 
 		template<typename T> void *cast_function(T *function)
 		{
-			value_t (*test)() mirb_unused = function;
+			value_t (*test)() prelude_unused = function;
 			return (void *)function;
 		}
 		
 		template<typename Arg1, typename T> void *cast_function(T *function)
 		{
-			value_t (*test)(typename Arg1::type) mirb_unused = function;
+			value_t (*test)(typename Arg1::type) prelude_unused = function;
 			return (void *)function;
 		}
 		
 		template<typename Arg1, typename Arg2, typename T> void *cast_function(T *function)
 		{
-			value_t (*test)(typename Arg1::type, typename Arg2::type) mirb_unused = function;
+			value_t (*test)(typename Arg1::type, typename Arg2::type) prelude_unused = function;
 			return (void *)function;
 		}
 		
 		template<typename Arg1, typename Arg2, typename Arg3, typename T> void *cast_function(T *function)
 		{
-			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type) mirb_unused = function;
+			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type) prelude_unused = function;
 			return (void *)function;
 		}
 		
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename T> void *cast_function(T *function)
 		{
-			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type) mirb_unused = function;
+			value_t (*test)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type) prelude_unused = function;
 			return (void *)function;
 		}
 		

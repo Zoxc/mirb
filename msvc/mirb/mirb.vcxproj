@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\globals.hpp" />
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\char-array.hpp" />
     <ClInclude Include="..\..\src\classes\array.hpp" />
@@ -37,18 +36,11 @@
     <ClInclude Include="..\..\src\common.hpp" />
     <ClInclude Include="..\..\src\compiler.hpp" />
     <ClInclude Include="..\..\src\gc.hpp" />
-    <ClInclude Include="..\..\src\generic\allocator.hpp" />
     <ClInclude Include="..\..\src\generic\benchmark.hpp" />
-    <ClInclude Include="..\..\src\generic\counted-simple-list.hpp" />
-    <ClInclude Include="..\..\src\generic\hash-table.hpp" />
-    <ClInclude Include="..\..\src\generic\list.hpp" />
-    <ClInclude Include="..\..\src\generic\map.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
     <ClInclude Include="..\..\src\generic\mem_stream.hpp" />
     <ClInclude Include="..\..\src\generic\range.hpp" />
-    <ClInclude Include="..\..\src\generic\simple-list.hpp" />
     <ClInclude Include="..\..\src\generic\simple-set.hpp" />
-    <ClInclude Include="..\..\src\generic\simpler-list.hpp" />
     <ClInclude Include="..\..\src\generic\vector.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
@@ -155,7 +147,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\vendor\udis86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\vendor;$(SolutionDir)..\..\..\Prelude\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;NO_GC;MIRB_DEBUG_COMPILER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>

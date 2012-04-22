@@ -1,11 +1,11 @@
 #pragma once
 #include <Prelude/Map.hpp>
+#include <Prelude/Vector.hpp>
+#include <Prelude/List.hpp>
 #include "common.hpp"
 #include "gc.hpp"
 #include "vm.hpp"
 #include "object-header.hpp"
-#include "generic/vector.hpp"
-#include "generic/simple-list.hpp"
 
 struct exception_block;
 
@@ -83,7 +83,7 @@ namespace Mirb
 	};
 	
 	class BlockMapFunctions:
-		public Prelude::MapFunctions<Symbol *, Block *>
+		public MapFunctions<Symbol *, Block *>
 	{
 		public:
 			static Block *invalid_value()
@@ -92,5 +92,5 @@ namespace Mirb
 			}
 	};
 
-	typedef Prelude::Map<Symbol *, Block *, GC, BlockMapFunctions> BlockMap;
+	typedef Map<Symbol *, Block *, GC, BlockMapFunctions> BlockMap;
 };

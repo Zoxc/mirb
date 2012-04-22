@@ -1,8 +1,8 @@
 #pragma once
+#include <Prelude/List.hpp>
 #include "../common.hpp"
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
-#include "../generic/simpler-list.hpp"
 #include "node.hpp"
 
 namespace Mirb
@@ -83,7 +83,7 @@ namespace Mirb
 			Node *group;
 		};
 		
-		typedef SimpleList<InterpolatedPairNode, ListNode> InterpolatedPairList;
+		typedef List<InterpolatedPairNode, ListNode> InterpolatedPairList;
 		
 		struct InterpolatedStringNode:
 			public Node
@@ -223,7 +223,7 @@ namespace Mirb
 			Node *group;
 		};
 		
-		typedef SimpleList<RescueNode, ListNode>  RescueList;
+		typedef List<RescueNode, ListNode>  RescueList;
 		
 		struct HandlerNode:
 			public Node

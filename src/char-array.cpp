@@ -63,7 +63,7 @@ namespace Mirb
 
 	CharArray& CharArray::operator=(const CharArray &other)
 	{	
-		if(mirb_unlikely(this == &other))
+		if(prelude_unlikely(this == &other))
 			return *this;
 
 		length = other.length;
@@ -77,7 +77,7 @@ namespace Mirb
 	
 	CharArray& CharArray::operator=(CharArray &&other)
 	{	
-		if(mirb_unlikely(this == &other))
+		if(prelude_unlikely(this == &other))
 			return *this;
 
 		length = other.length;

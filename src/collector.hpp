@@ -1,4 +1,5 @@
 #pragma once
+#include <Prelude/FastList.hpp>
 #include "common.hpp"
 #include "object-header.hpp"
 
@@ -21,7 +22,7 @@ namespace Mirb
 				return object;
 			}
 
-			static SimplerList<ObjectHeader, ObjectHeader, &ObjectHeader::header_entry> object_list;
+			static FastList<ObjectHeader, ObjectHeader, &ObjectHeader::header_entry> object_list;
 
 		public:
 			template<class T> static T *allocate()

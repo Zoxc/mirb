@@ -101,7 +101,7 @@ namespace Mirb
 
 			value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);
 
-			if(result == value_raise)
+			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;
 
 			if(op.var != no_var)
@@ -143,7 +143,7 @@ namespace Mirb
 
 			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
 
-			if(result == value_raise)
+			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
 
 			if(op.var != no_var)
@@ -155,7 +155,7 @@ namespace Mirb
 
 			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
 
-			if(result == value_raise)
+			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
 
 			if(op.var != no_var)
@@ -169,12 +169,12 @@ namespace Mirb
 
 			Block *method = lookup_super(module, frame.name, &module);
 
-			if(mirb_unlikely(!method))
+			if(prelude_unlikely(!method))
 				goto handle_exception;
 
 			value_t result = call_code(method, frame.obj, frame.name, module, block, op.argc, &vars[op.argv]);
 
-			if(result == value_raise)
+			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;
 
 			if(op.var != no_var)
@@ -242,7 +242,7 @@ namespace Mirb
 		EndOp
 
 		Op(Unwind)
-			if(handling_exception)
+			if(prelude_unlikely(handling_exception))
 			{
 				handling_exception = false;
 				goto handle_exception;
@@ -271,7 +271,7 @@ handle_call_exception:
 		{
 			BreakException *exception = (BreakException *)current_exception;
 
-			if(exception->get_type() == Value::BreakException && exception->target == frame.code)
+			if(prelude_unlikely(exception->get_type() == Value::BreakException && exception->target == frame.code))
 			{
 				if(exception->dst != no_var)
 					vars[exception->dst] = exception->value;

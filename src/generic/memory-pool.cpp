@@ -58,7 +58,7 @@ namespace Mirb
 	
 	void *MemoryPool::get_page(size_t bytes)
 	{
-		if(mirb_unlikely(bytes > (max_alloc - sizeof(Page))))
+		if(prelude_unlikely(bytes > (max_alloc - sizeof(Page))))
 			return allocate_page(bytes + sizeof(Page));
 
 		char_t *result = allocate_page();
@@ -94,7 +94,7 @@ namespace Mirb
 
 			char_t *next = result + bytes;
 		
-			if(mirb_unlikely(next > max))
+			if(prelude_unlikely(next > max))
 				return get_page(bytes);
 
 			current = next;

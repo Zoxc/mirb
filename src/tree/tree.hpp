@@ -1,8 +1,8 @@
 #pragma once
 #include <Prelude/HashTable.hpp>
+#include <Prelude/Vector.hpp>
+#include <Prelude/FastList.hpp>
 #include "../common.hpp"
-#include "../generic/simpler-list.hpp"
-#include "../generic/vector.hpp"
 #include "../generic/simple-set.hpp"
 #include "nodes.hpp"
 
@@ -29,14 +29,14 @@ namespace Mirb
 				uint8_t *current;
 				uint8_t *end;
 				
-				SimpleEntry<Chunk> entry;
+				ListEntry<Chunk> entry;
 				
 				void *allocate(size_t bytes);
 		};
 		
 		class Fragment:
 			public ConstantHeader<Value::InternalFragment>,
-			public Prelude::WithReferenceProvider<Fragment>
+			public WithReferenceProvider<Fragment>
 		{
 			public:
 				static const bool can_free = false;
@@ -56,7 +56,7 @@ namespace Mirb
 				
 				Chunk *current;
 				
-				SimplerList<Chunk> chunks;
+				FastList<Chunk> chunks;
 		};
 		
 		struct Node;
@@ -108,11 +108,11 @@ namespace Mirb
 			public:
 				Parameter(Type type) : NamedVariable(type) {}
 				
-				SimpleEntry<Parameter> parameter_entry;
+				ListEntry<Parameter> parameter_entry;
 		};
 
 		class VariableMapFunctions:
-			public Prelude::HashTableFunctions<Symbol *, NamedVariable *, Fragment>
+			public HashTableFunctions<Symbol *, NamedVariable *, Fragment>
 		{
 			public:
 				static bool compare_key_value(Symbol *key, NamedVariable *value)
@@ -146,7 +146,7 @@ namespace Mirb
 				}
 		};
 		
-		typedef Prelude::HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
+		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
 		class Scope
 		{
@@ -194,7 +194,7 @@ namespace Mirb
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
 
-				CountedSimpleList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
+				CountedList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
 				
 				Vector<Scope *, Fragment> zsupers;
 				

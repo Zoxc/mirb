@@ -4,6 +4,7 @@
 #include "../tree/nodes.hpp"
 #include "../tree/tree.hpp"
 #include "../message.hpp"
+#include <Prelude/List.hpp>
 
 namespace Mirb
 {
@@ -15,7 +16,7 @@ namespace Mirb
 			
 			Lexer lexer;
 
-			SimpleList<Message> messages;
+			List<Message> messages;
 			CharArray filename;
 
 			MemoryPool &memory_pool;

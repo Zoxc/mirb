@@ -26,7 +26,7 @@ namespace Mirb
 		
 		value_t get_const(value_t obj, Symbol *name)
 		{
-			if(mirb_unlikely(obj == main))
+			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;
 
 			return Mirb::get_const(obj, name);
@@ -34,7 +34,7 @@ namespace Mirb
 
 		bool set_const(value_t obj, Symbol *name, value_t value)
 		{
-			if(mirb_unlikely(obj == main))
+			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;
 
 			return Mirb::set_const(obj, name, value);
@@ -58,10 +58,10 @@ namespace Mirb
 			{
 				value_t obj = argv[i];
 
-				if(mirb_unlikely(Value::type(obj) != Value::String))
+				if(prelude_unlikely(Value::type(obj) != Value::String))
 					obj = Mirb::call(obj, "to_s");
 
-				if(mirb_likely(Value::type(obj) == Value::String))
+				if(prelude_likely(Value::type(obj) == Value::String))
 					result += cast<String>(obj)->string;
 			}
 
@@ -86,7 +86,7 @@ namespace Mirb
 		
 		value_t define_class(value_t obj, Symbol *name, value_t super)
 		{
-			if(mirb_unlikely(obj == main))
+			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;
 			
 			return Mirb::define_class(obj, name, super);
@@ -94,7 +94,7 @@ namespace Mirb
 		
 		value_t define_module(value_t obj, Symbol *name)
 		{
-			if(mirb_unlikely(obj == main))
+			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;
 			
 			return Mirb::define_module(obj, name);
@@ -102,7 +102,7 @@ namespace Mirb
 		
 		void define_method(value_t obj, Symbol *name, Block *block)
 		{
-			if(mirb_unlikely(obj == main))
+			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;
 
 			set_method(obj, name, block);

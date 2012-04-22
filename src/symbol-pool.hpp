@@ -8,7 +8,7 @@
 namespace Mirb
 {
 	class SymbolPoolFunctions:
-		public Prelude::HashTableFunctions<const CharArray &, Symbol *>
+		public HashTableFunctions<const CharArray &, Symbol *>
 	{
 		public:
 			static bool compare_key_value(const CharArray &key, Symbol *value)
@@ -46,18 +46,18 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(Prelude::StandardAllocator::Ref::Type allocator, const CharArray &key)
+			static Symbol *create_value(StandardAllocator::Ref::Type allocator, const CharArray &key)
 			{
 				return new Symbol(key); // TODO: Allocate as root memory.
 			}
 			
-			static void free_value(Prelude::StandardAllocator::Ref::Type allocator, Symbol *value)
+			static void free_value(StandardAllocator::Ref::Type allocator, Symbol *value)
 			{
 				delete value;
 			}
 	};
 
-	typedef Prelude::HashTable<const CharArray &, Symbol *, SymbolPoolFunctions> SymbolPoolHashTable;
+	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions> SymbolPoolHashTable;
 
 	class SymbolPool:
 		public SymbolPoolHashTable

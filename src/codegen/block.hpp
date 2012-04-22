@@ -1,8 +1,8 @@
 #pragma once
+#include <Prelude/Vector.hpp>
+#include <Prelude/FastList.hpp>
 #include "../common.hpp"
 #include "../generic/memory-pool.hpp"
-#include "../generic/list.hpp"
-#include "../generic/vector.hpp"
 #include "opcodes.hpp"
 #include "../tree/tree.hpp"
 
@@ -34,7 +34,7 @@ namespace Mirb
 					size_t id;
 				#endif
 
-				Entry<BasicBlock> entry;
+				ListEntry<BasicBlock> entry;
 
 				std::stringstream opcodes;
 
@@ -87,7 +87,7 @@ namespace Mirb
 				Block(MemoryPool &memory_pool, Tree::Scope *scope);
 				Block(MemoryPool &memory_pool);
 				
-				List<BasicBlock> basic_blocks; // A linked list of basic blocks
+				FastList<BasicBlock> basic_blocks; // A linked list of basic blocks
 		};
 	};
 };

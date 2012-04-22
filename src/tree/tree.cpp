@@ -88,7 +88,7 @@ namespace Mirb
 		
 		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(*this), chunk_size(chunk_size)
 		{
-			if(mirb_likely(parent != 0))
+			if(prelude_likely(parent != 0))
 				parent->fragments.push(this);
 			
 			current = Chunk::create(chunk_size);
@@ -108,11 +108,11 @@ namespace Mirb
 		{
 			void *result = current->allocate(bytes);
 			
-			if(mirb_unlikely(!result))
+			if(prelude_unlikely(!result))
 			{
 				Chunk *chunk;
 				
-				if(mirb_unlikely(bytes > Chunk::allocation_limit))
+				if(prelude_unlikely(bytes > Chunk::allocation_limit))
 				{
 					chunk = Chunk::create(bytes);
 				}
@@ -159,7 +159,7 @@ namespace Mirb
 				
 				uint8_t *next = result + bytes;
 				
-				if(mirb_unlikely(next > end))
+				if(prelude_unlikely(next > end))
 					return 0;
 				
 				current = next;

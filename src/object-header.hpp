@@ -1,6 +1,6 @@
 #pragma once
+#include <Prelude\List.hpp>
 #include "value.hpp"
-#include "generic/simpler-list.hpp"
 
 namespace Mirb
 {
@@ -15,7 +15,7 @@ namespace Mirb
 
 			bool value;
 		public:
-			SimpleEntry<ObjectHeader> header_entry;
+			ListEntry<ObjectHeader> header_entry;
 
 			ObjectHeader(Value::Type type);
 			

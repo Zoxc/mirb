@@ -41,7 +41,7 @@ namespace Mirb
 
 	value_t class_of(value_t obj)
 	{
-		if(mirb_likely(Value::object_ref(obj)))
+		if(prelude_likely(Value::object_ref(obj)))
 			return cast<Object>(obj)->instance_of;
 		else
 			return Value::class_of_literal(obj);
@@ -64,7 +64,7 @@ namespace Mirb
 	{
 		value_t existing = get_const(under, auto_cast(name));
 
-		if(mirb_unlikely(existing != value_undef))
+		if(prelude_unlikely(existing != value_undef))
 			return existing;
 
 		value_t obj = class_create_unnamed(super);
@@ -88,7 +88,7 @@ namespace Mirb
 	{
 		value_t existing = get_const(under, name);
 
-		if(mirb_unlikely(existing != value_undef))
+		if(prelude_unlikely(existing != value_undef))
 			return existing;
 
 		value_t obj = module_create_bare();
@@ -163,7 +163,7 @@ namespace Mirb
 	{
 		value_t c = class_of(object);
 
-		if(mirb_likely(cast<Class>(c)->singleton))
+		if(prelude_likely(cast<Class>(c)->singleton))
 			return c;
 
 		return class_create_singleton(object, c);
@@ -253,7 +253,7 @@ namespace Mirb
 		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
 
-		if(mirb_likely(Value::type(result) == Value::String))
+		if(prelude_likely(Value::type(result) == Value::String))
 			return result;
 		else
 			return Object::to_s(obj);
@@ -266,12 +266,12 @@ namespace Mirb
 
 	ValueMap *get_vars(value_t obj)
 	{
-		if(mirb_unlikely(!Value::of_type<Object>(obj)))
+		if(prelude_unlikely(!Value::of_type<Object>(obj)))
 			mirb_runtime_abort("No value map on objects passed by value"); // TODO: Fix this
 
 		Object *object = auto_cast(obj);
 
-		if(mirb_unlikely(!object->vars))
+		if(prelude_unlikely(!object->vars))
 			object->vars = new ValueMap(Object::vars_initial); // TODO: Allocate with GC
 		
 		return object->vars;
@@ -314,7 +314,7 @@ namespace Mirb
 
 		value_t *old = vars->get_ref(auto_cast(name));
 
-		if(mirb_unlikely(old != 0))
+		if(prelude_unlikely(old != 0))
 		{
 			*old = value;
 			return true;
@@ -438,7 +438,7 @@ namespace Mirb
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
-		if(mirb_unlikely(!result))
+		if(prelude_unlikely(!result))
 			return 0;
 
 		return result;
@@ -448,7 +448,7 @@ namespace Mirb
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
-		if(mirb_unlikely(!result))
+		if(prelude_unlikely(!result))
 			return 0;
 
 		return result;
@@ -458,7 +458,7 @@ namespace Mirb
 	{
 		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
 
-		if(mirb_unlikely(!result))
+		if(prelude_unlikely(!result))
 		{
 			raise(NameError::class_ref, "Undefined method '" + name->string + "' for " + pretty_inspect(obj));
 			return 0;
@@ -471,7 +471,7 @@ namespace Mirb
 	{
 		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
 
-		if(mirb_unlikely(!result))
+		if(prelude_unlikely(!result))
 		{
 			raise(NameError::class_ref, "No superclass method '" + name->string + "' for " + pretty_inspect(module));
 			return 0;
@@ -536,7 +536,7 @@ namespace Mirb
 
 		Block *method = lookup(obj, name, &module);
 
-		if(mirb_unlikely(!method))
+		if(prelude_unlikely(!method))
 			return value_raise;
 
 		return call_code(method, obj, name, module, block, argc, argv);
@@ -586,12 +586,12 @@ namespace Mirb
 	
 	String *enforce_string(value_t obj)
 	{
-		if(mirb_likely(Value::type(obj) == Value::String))
+		if(prelude_likely(Value::type(obj) == Value::String))
 			return auto_cast(obj);
 		
 		obj = call(obj, "to_s");
 
-		if(mirb_unlikely(Value::type(obj) != Value::String))
+		if(prelude_unlikely(Value::type(obj) != Value::String))
 			return auto_cast(inspect(obj));
 
 		return auto_cast(obj);

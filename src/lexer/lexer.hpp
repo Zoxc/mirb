@@ -16,7 +16,7 @@ namespace Mirb
 		public:
 			Keywords(SymbolPool &pool);
 			
-			Prelude::Map<Symbol *, Lexeme::Type> mapping;
+			Map<Symbol *, Lexeme::Type> mapping;
 	};
 	
 	class Lexer

@@ -1,7 +1,6 @@
 #pragma once
+#include <Prelude/CountedList.hpp>
 #include "../common.hpp"
-#include "../generic/simple-list.hpp"
-#include "../generic/counted-simple-list.hpp"
 
 namespace Mirb
 {
@@ -58,7 +57,7 @@ namespace Mirb
 		struct ListNode:
 			public SimpleNode
 		{
-			SimpleEntry<ListNode> entry;
+			ListEntry<ListNode> entry;
 		};
 		
 		struct Node:
@@ -66,7 +65,7 @@ namespace Mirb
 		{
 		};
 		
-		typedef SimpleList<Node, ListNode> NodeList;
-		typedef CountedSimpleList<Node, ListNode> CountedNodeList;
+		typedef List<Node, ListNode> NodeList;
+		typedef CountedList<Node, ListNode> CountedNodeList;
 	};
 };
