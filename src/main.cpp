@@ -5,6 +5,7 @@
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
 #include "block.hpp"
+#include "document.hpp"
 #include <Prelude/Region.hpp>
 
 #ifdef DEBUG
@@ -27,12 +28,16 @@ int main()
 		
 		std::getline(std::cin, line);
 		
-		CharArray filename("Input");
-		
 		MemoryPool memory_pool;
-		Parser parser(symbol_pool, memory_pool, filename);
+		Document document;
 		
-		parser.load((const char_t *)line.c_str(), line.length());
+		document.data = (const char_t *)line.c_str();
+		document.length = line.length();
+		document.name = "Input";
+
+		Parser parser(symbol_pool, memory_pool, document);
+
+		parser.load();
 		
 		if(parser.lexeme() == Lexeme::END && parser.messages.empty())
 			break;

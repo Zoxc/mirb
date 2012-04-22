@@ -1,9 +1,10 @@
 #include "parser.hpp"
 #include "../compiler.hpp"
+#include "../document.hpp"
 
 namespace Mirb
 {
-	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, CharArray &filename) : lexer(symbol_pool, memory_pool, *this), filename(filename), memory_pool(memory_pool), fragment(0), scope(0)
+	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document &document) : lexer(symbol_pool, memory_pool, *this), document(document), memory_pool(memory_pool), fragment(0), scope(0)
 	{
 	}
 	
@@ -11,9 +12,11 @@ namespace Mirb
 	{
 	}
 	
-	void Parser::load(const char_t *input, size_t length)
+	void Parser::load()
 	{
-		lexer.load(input, length);
+		mirb_debug_assert(document.data[document.length] == 0);
+
+		lexer.load(document.data, document.length);
 	}
 	
 	void Parser::report(Range &range, std::string text, Message::Severity severity)

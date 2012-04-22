@@ -35,6 +35,7 @@
     <ClInclude Include="..\..\src\collector.hpp" />
     <ClInclude Include="..\..\src\common.hpp" />
     <ClInclude Include="..\..\src\compiler.hpp" />
+    <ClInclude Include="..\..\src\document.hpp" />
     <ClInclude Include="..\..\src\gc.hpp" />
     <ClInclude Include="..\..\src\generic\benchmark.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\collector.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
+    <ClCompile Include="..\..\src\document.cpp" />
     <ClCompile Include="..\..\src\gc.cpp" />
     <ClCompile Include="..\..\src\generic\benchmark.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />

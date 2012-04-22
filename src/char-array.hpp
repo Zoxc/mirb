@@ -29,6 +29,13 @@ namespace Mirb
 			CharArray& operator=(const CharArray &other);
 			CharArray& operator=(CharArray &&other);
 			
+			template<size_t length> CharArray &operator=(const char (&string)[length])
+			{
+				set_literal(string);
+
+				return *this;
+			}
+			
 			void localize();
 			void append(const CharArray &other);
 			

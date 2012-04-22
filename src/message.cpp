@@ -1,4 +1,5 @@
 #include "message.hpp"
+#include "document.hpp"
 #include "parser/parser.hpp"
 #include "generic/range.hpp"
 
@@ -29,7 +30,7 @@ namespace Mirb
 	{
 		std::stringstream result;
 
-		result << parser.filename.get_string() << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
+		result << parser.document.name.get_string() << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
 		
 		for(const char_t *i = range.line_start; i < range.start; ++i)
 		{

@@ -55,6 +55,7 @@ namespace Mirb
 	{
 		enum Type {
 			None,
+			Document,
 			InternalBlock,
 			InternalFragment,
 			Fixnum,

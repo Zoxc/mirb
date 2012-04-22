@@ -8,20 +8,22 @@
 
 namespace Mirb
 {
+	class Document;
+
 	class Parser
 	{
 		public:
-			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, CharArray &filename);
+			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document &document);
 			~Parser();
 			
 			Lexer lexer;
 
 			List<Message> messages;
-			CharArray filename;
+			Document &document;
 
 			MemoryPool &memory_pool;
 			
-			void load(const char_t *input, size_t length);
+			void load();
 			
 			void report(Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			

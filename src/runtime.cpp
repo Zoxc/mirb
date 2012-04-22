@@ -3,6 +3,7 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "compiler.hpp"
+#include "document.hpp"
 #include "classes/object.hpp"
 #include "classes/module.hpp"
 #include "classes/symbol.hpp"
@@ -384,12 +385,30 @@ namespace Mirb
 		return value_raise;
 	}
 	
-	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename)
+	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input)
 	{
 		MemoryPool memory_pool;
-		Parser parser(symbol_pool, memory_pool, filename);
+		Document &document = *Collector::allocate<Document>();
 
-		parser.load(input, length);
+		Parser parser(symbol_pool, memory_pool, document);
+
+		if(!free_input)
+		{
+			void *data = std::malloc(length + 1);
+
+			mirb_runtime_assert(document.data);
+
+			std::memcpy(data, input, length + 1);
+
+			document.data = (char_t *)data;
+		}
+		else
+			document.data = input;
+
+		document.length = length;
+		document.name = filename;
+
+		parser.load();
 		
  		Tree::Fragment fragment(0, Tree::Chunk::main_size);
 		Tree::Scope *scope = parser.parse_main(&fragment);
