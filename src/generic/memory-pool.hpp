@@ -1,12 +1,12 @@
 #pragma once
+#include <Prelude/Allocator.hpp>
 #include "../common.hpp"
-#include "allocator.hpp"
 #include "simpler-list.hpp"
 
 namespace Mirb
 {
 	class MemoryPool:
-			public Allocator
+		public Prelude::WithReferenceProvider<MemoryPool>
 	{
 		struct Page
 		{
@@ -28,15 +28,12 @@ namespace Mirb
 			void free_page(Page *page);
 			void *get_page(size_t bytes);
 		public:
-			typedef MemoryPool &Ref;
-			typedef Allocator::Wrap<MemoryPool &> Storage;
-
 			MemoryPool();
 			~MemoryPool();
 			
-			void *alloc(size_t bytes);
-			void *realloc(void *mem, size_t old_size, size_t new_size);
-			void free(void *mem)
+			void *allocate(size_t bytes);
+			void *reallocate(void *memory, size_t old_size, size_t new_size);
+			void free(void *memory)
 			{
 			}
 	};

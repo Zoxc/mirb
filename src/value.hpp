@@ -1,7 +1,7 @@
 #pragma once
+#include <Prelude/Map.hpp>
 #include "common.hpp"
 #include "gc.hpp"
-#include "generic/map.hpp"
 
 namespace Mirb
 {
@@ -209,7 +209,7 @@ namespace Mirb
 	}
 	
 	class ValueMapFunctions:
-		public MapFunctions<value_t, value_t>
+		public Prelude::MapFunctions<value_t, value_t>
 	{
 		public:
 			static value_t invalid_value()
@@ -218,6 +218,6 @@ namespace Mirb
 			}
 	};
 
-	typedef Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
+	typedef Prelude::Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
 };
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "../value.hpp"
 #include "../gc.hpp"
-#include "../generic/map.hpp"
 #include "../block.hpp"
 #include "../object-header.hpp"
 

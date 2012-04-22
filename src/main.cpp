@@ -5,6 +5,7 @@
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
 #include "block.hpp"
+#include <Prelude/Region.hpp>
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"

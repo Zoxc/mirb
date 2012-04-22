@@ -3,7 +3,6 @@
 #include "../common.hpp"
 #include "../value.hpp"
 #include "../char-array.hpp"
-#include "../generic/hash-table.hpp"
 #include "../gc.hpp"
 
 namespace Mirb

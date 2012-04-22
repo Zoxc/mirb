@@ -1,14 +1,14 @@
 #pragma once
-#include "allocator.hpp"
+#include <Prelude/Allocator.hpp>
 #include "../common.hpp"
 
 namespace Mirb
 {
-	template<class T, class A = StdLibAllocator> class Vector
+	template<class T, class A = Prelude::StandardAllocator> class Vector
 	{
 		protected:
 			T *table;
-			typename A::Storage alloc_ref;
+			typename A::Ref::Storage allocator;
 			size_t _size;
 			size_t _capacity;
 
@@ -28,7 +28,7 @@ namespace Mirb
 						}
 						while(_size + num > _capacity);
 
-						table = (T *)alloc_ref.realloc((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
+						table = (T *)allocator.reallocate((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
 					}
 					else
 					{
@@ -37,7 +37,7 @@ namespace Mirb
 						while(_size + num > _capacity)
 							_capacity <<= 1;
 						
-						table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+						table = (T *)allocator.allocate(sizeof(T) * _capacity);
 					}
 				}
 			}
@@ -49,7 +49,7 @@ namespace Mirb
 				
 				if(other.raw())
 				{
-					table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+					table = (T *)allocator.allocate(sizeof(T) * _capacity);
 
 					std::memcpy(table, other.raw(), sizeof(T) * _size);
 				}
@@ -60,30 +60,15 @@ namespace Mirb
 			}
 
 		public:
-			Vector(size_t initial) : alloc_ref(A::Storage::def_ref())
+			Vector(size_t initial, typename A::Ref::Type allocator = A::Ref::standard) : allocator(allocator)
 			{
 				_size = 0;
 				_capacity = 1 << initial;
 				
-				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+				table = (T *)this->allocator.allocate(sizeof(T) * _capacity);
 			}
 			
-			Vector(size_t initial, typename A::Ref alloc_ref) : alloc_ref(alloc_ref)
-			{
-				_size = 0;
-				_capacity = 1 << initial;
-				
-				table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
-			}
-			
-			Vector() : alloc_ref(A::Storage::def_ref())
-			{
-				_size = 0;
-				_capacity = 0;
-				table = 0;
-			}
-			
-			Vector(typename A::Ref alloc_ref) : alloc_ref(alloc_ref)
+			Vector(typename A::Ref::Type allocator = A::Ref::standard) : allocator(allocator)
 			{
 				_size = 0;
 				_capacity = 0;
@@ -91,13 +76,13 @@ namespace Mirb
 			}
 			
 			Vector(const Vector &vector) :
-				alloc_ref(vector.alloc_ref),
+				allocator(allocator),
 				_size(vector._size),
 				_capacity(vector._capacity)
 			{
 				if(vector.raw())
 				{
-					table = (T *)alloc_ref.alloc(sizeof(T) * _capacity);
+					table = (T *)allocator.allocate(sizeof(T) * _capacity);
 
 					std::memcpy(table, vector.table, sizeof(T) * _size);
 				}
@@ -107,12 +92,7 @@ namespace Mirb
 				}
 			}
 			
-			template<typename Aother> Vector(const Vector<T, Aother>& other)
-			{
-				initialize_copy(other);
-			}
-			
-			template<typename Aother> Vector(const Vector<T, Aother>& other, typename A::Ref alloc_ref) : alloc_ref(alloc_ref)
+			template<typename Aother> Vector(const Vector<T, Aother>& other, typename A::Ref::Type allocator = A::Ref::standard) : allocator(allocator)
 			{
 				initialize_copy(other);
 			}
@@ -120,7 +100,7 @@ namespace Mirb
 			~Vector()
 			{
 				if(table)
-					alloc_ref.free((void *)table);
+					allocator.free((void *)table);
 			}
 			
 			Vector &operator=(const Vector& other)
@@ -129,7 +109,7 @@ namespace Mirb
 					return *this;
 				
 				if(table)
-					alloc_ref.free((void *)table);
+					allocator.free((void *)table);
 				
 				initialize_copy(other);
 				
@@ -142,7 +122,7 @@ namespace Mirb
 					return *this;
 				
 				if(table)
-					alloc_ref.free((void *)table);
+					allocator.free((void *)table);
 				
 				initialize_copy(other);
 				

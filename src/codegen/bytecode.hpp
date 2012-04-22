@@ -99,22 +99,16 @@ namespace Mirb
 				void gen_if(BasicBlock *ltrue, var_t var)
 				{
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchIfOp>(var), ltrue));
-					
-					basic->branch(ltrue);
 				}
 				
 				void gen_unless(BasicBlock *lfalse, var_t var)
 				{
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchUnlessOp>(var), lfalse));
-					
-					basic->branch(lfalse);
 				}
 				
 				void gen_branch(BasicBlock *block)
 				{
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchOp>(), block));
-					
-					basic->next(block);
 				}
 				
 				BasicBlock *list(BasicBlock *block)
@@ -140,14 +134,6 @@ namespace Mirb
 
 				MemoryPool &memory_pool;
 				Block *block;
-				
-				BasicBlock *split(BasicBlock *block)
-				{
-					basic->next(block);
-					gen(block);
-
-					return block;
-				}
 				
 				BasicBlock *gen(BasicBlock *block)
 				{

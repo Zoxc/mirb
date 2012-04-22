@@ -1,7 +1,7 @@
 #pragma once
+#include <Prelude/Map.hpp>
 #include "../common.hpp"
 #include "../generic/range.hpp"
-#include "../generic/map.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
 
@@ -16,7 +16,7 @@ namespace Mirb
 		public:
 			Keywords(SymbolPool &pool);
 			
-			Map<Symbol *, Lexeme::Type> mapping;
+			Prelude::Map<Symbol *, Lexeme::Type> mapping;
 	};
 	
 	class Lexer

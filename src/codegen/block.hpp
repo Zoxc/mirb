@@ -24,7 +24,7 @@ namespace Mirb
 		class Block;
 		class BasicBlock;
 		class ByteCodeGenerator;
-
+		
 		class BasicBlock
 		{
 			public:
@@ -34,8 +34,6 @@ namespace Mirb
 					size_t id;
 				#endif
 
-				Block &block;
-
 				Entry<BasicBlock> entry;
 
 				std::stringstream opcodes;
@@ -44,20 +42,7 @@ namespace Mirb
 
 				Vector<BranchInfo> branches;
 				
-				BasicBlock *next_block;
-				BasicBlock *branch_block;
-
 				size_t pos;
-				
-				void next(BasicBlock *block)
-				{
-					next_block = block;
-				}
-
-				void branch(BasicBlock *block)
-				{
-					branch_block = block;
-				}
 		};
 		
 		class Block

@@ -225,13 +225,12 @@ namespace Mirb
 				
 				gen_if(label_true, temp);
 
-				split(label_false);
+				gen(label_false);
 				gen<LoadOp>(var, value_true);
 				gen_branch(label_end);
 
 				gen(label_true);
 				gen<LoadOp>(var, value_false);
-				label_true->next(label_end);
 				
 				gen(label_end);
 			}
@@ -264,19 +263,17 @@ namespace Mirb
 		{
 			auto node = (Tree::BinaryOpNode *)basic_node;
 			
-			var_t temp = reuse(var);
-			
-			to_bytecode(node->left, temp);
+			to_bytecode(node->left, var);
 			
 			BasicBlock *label_end = create_block();
 			BasicBlock *body = create_block();
 			
 			if(node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR)
-				gen_if(label_end, temp);
+				gen_if(label_end, var);
 			else
-				gen_unless(label_end, temp);
+				gen_unless(label_end, var);
 
-			split(body);
+			gen(body);
 			
 			to_bytecode(node->right, var);
 			
@@ -492,7 +489,7 @@ namespace Mirb
 			else
 				gen_unless(label_else, temp);
 			
-			split(body);
+			gen(body);
 			
 			if(is_var(var))
 			{
@@ -509,7 +506,7 @@ namespace Mirb
 				to_bytecode(node->right, result_right);
 				
 				gen<MoveOp>(var, result_right);
-				split(label_end);
+				gen(label_end);
 			}
 			else
 			{
@@ -521,7 +518,7 @@ namespace Mirb
 
 				to_bytecode(node->right, no_var);
 
-				split(label_end);
+				gen(label_end);
 			}
 		}
 		
@@ -711,7 +708,7 @@ namespace Mirb
 			 */
 			if(node->ensure_group)
 			{
-				split(exception_block->ensure_label.block);
+				gen(exception_block->ensure_label.block);
 				
 				//gen<FlushOp>(); Flush
 					
@@ -776,14 +773,14 @@ namespace Mirb
 			
 			gen(prolog);
 			
-			split(body);
+			gen(body);
 
 			if(scope->heap_vars)
 				block->heap_var = create_var();
 
 			to_bytecode(scope->group, block->return_var);
 			
-			split(block->epilog);
+			gen(block->epilog);
 
 			gen<ReturnOp>(block->return_var);
 
@@ -814,8 +811,6 @@ namespace Mirb
 					gen<LoadArgOp>(ref(*i), index++);
 			}
 			
-			block->epilog->next_block = 0;
-
 			return block;
 		}
 		

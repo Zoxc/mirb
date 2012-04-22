@@ -1,39 +1,26 @@
 #pragma once
+#include <Prelude/Allocator.hpp>
 #include "common.hpp"
-#include "generic/allocator.hpp"
 
 namespace Mirb
 {
 	class GC:
-		public Allocator
+		public Prelude::NoReferenceProvider<GC>
 	{
-		public:
-			typedef GC Ref;
-			typedef GC Storage;
-			
+		public:			
 			GC() {}
-			GC(bool dummy) {}
+			GC(Ref::Type reference) {}
+			GC(const GC &allocator) {}
 
-			static bool def_ref()
-			{
-				return true;
-			}
-			
-			void *alloc(size_t bytes);
-			void *realloc(void *mem, size_t old, size_t bytes);
+			void *allocate(size_t bytes);
+			void *reallocate(void *memory, size_t old, size_t bytes);
 
 			static const bool can_free = false;
 
-			void free(void *mem)
+			void free(void *memory)
 			{
 			}
 	};
 	
 	extern GC gc;
 };
-/*
-void *operator new(size_t bytes, Mirb::GC &gc) throw();
-void operator delete(void *, Mirb::GC &gc) throw();
-void *operator new[](size_t bytes, Mirb::GC &gc) throw();
-void operator delete[](void *, Mirb::GC &gc) throw();
-*/

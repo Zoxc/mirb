@@ -58,12 +58,6 @@ namespace Mirb
 
 			result << "</table>" << ">] [shape=plaintext];\n";
 
-			if(block->next_block)
-				result << print_link(block, block->next_block);
-				
-			if(block->branch_block)
-				result << print_link(block, block->branch_block, false);
-			
 			return result.str();
 		}
 

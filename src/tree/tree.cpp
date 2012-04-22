@@ -95,16 +95,16 @@ namespace Mirb
 			chunks.append(current);
 		}
 		
-		void *Fragment::realloc(void *mem, size_t old_size, size_t new_size)
+		void *Fragment::reallocate(void *memory, size_t old_size, size_t new_size)
 		{
-			void *result = alloc(new_size);
+			void *result = allocate(new_size);
 			
-			memcpy(result, mem, old_size);
+			memcpy(result, memory, old_size);
 			
 			return result;
 		}
 		
-		void *Fragment::alloc(size_t bytes)
+		void *Fragment::allocate(size_t bytes)
 		{
 			void *result = current->allocate(bytes);
 			
@@ -172,7 +172,7 @@ namespace Mirb
 
 void *operator new(size_t bytes, Mirb::Tree::Fragment *fragment) throw()
 {
-	return fragment->alloc(bytes);
+	return fragment->allocate(bytes);
 }
 
 void operator delete(void *, Mirb::Tree::Fragment *fragment) throw()
@@ -181,7 +181,7 @@ void operator delete(void *, Mirb::Tree::Fragment *fragment) throw()
 
 void *operator new[](size_t bytes, Mirb::Tree::Fragment *fragment) throw()
 {
-	return fragment->alloc(bytes);
+	return fragment->allocate(bytes);
 }
 
 void operator delete[](void *, Mirb::Tree::Fragment *fragment) throw()

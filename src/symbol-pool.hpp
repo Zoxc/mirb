@@ -1,6 +1,6 @@
 #pragma once
+#include <Prelude/HashTable.hpp>
 #include "common.hpp"
-#include "generic/hash-table.hpp"
 #include "gc.hpp"
 #include "collector.hpp"
 #include "classes/symbol.hpp"
@@ -8,7 +8,7 @@
 namespace Mirb
 {
 	class SymbolPoolFunctions:
-		public HashTableFunctions<const CharArray &, Symbol *, StdLibAllocator>
+		public Prelude::HashTableFunctions<const CharArray &, Symbol *>
 	{
 		public:
 			static bool compare_key_value(const CharArray &key, Symbol *value)
@@ -46,13 +46,18 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(StdLibAllocator::Ref alloc_ref, const CharArray &key)
+			static Symbol *create_value(Prelude::StandardAllocator::Ref::Type allocator, const CharArray &key)
 			{
 				return new Symbol(key); // TODO: Allocate as root memory.
 			}
+			
+			static void free_value(Prelude::StandardAllocator::Ref::Type allocator, Symbol *value)
+			{
+				delete value;
+			}
 	};
 
-	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions, StdLibAllocator> SymbolPoolHashTable;
+	typedef Prelude::HashTable<const CharArray &, Symbol *, SymbolPoolFunctions> SymbolPoolHashTable;
 
 	class SymbolPool:
 		public SymbolPoolHashTable

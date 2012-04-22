@@ -1,4 +1,5 @@
 #pragma once
+#include <Prelude/HashTable.hpp>
 #include "../common.hpp"
 #include "../generic/simpler-list.hpp"
 #include "../generic/vector.hpp"
@@ -34,19 +35,19 @@ namespace Mirb
 		};
 		
 		class Fragment:
-			public ConstantHeader<Value::InternalFragment>
+			public ConstantHeader<Value::InternalFragment>,
+			public Prelude::WithReferenceProvider<Fragment>
 		{
 			public:
-				typedef Fragment &Ref;
-				typedef Allocator::Wrap<Fragment &> Storage;
-				
+				static const bool can_free = false;
+
 				Fragment(Fragment *parent, size_t chunk_size);
 				
 				Vector<Fragment *, Fragment> fragments;
 				
-				void *alloc(size_t bytes);
-				void *realloc(void *mem, size_t old_size, size_t new_size);
-				void free(void *mem)
+				void *allocate(size_t bytes);
+				void *reallocate(void *memory, size_t old_size, size_t new_size);
+				void free(void *memory)
 				{
 				}
 				
@@ -111,7 +112,7 @@ namespace Mirb
 		};
 
 		class VariableMapFunctions:
-			public HashTableFunctions<Symbol *, NamedVariable *, Fragment>
+			public Prelude::HashTableFunctions<Symbol *, NamedVariable *, Fragment>
 		{
 			public:
 				static bool compare_key_value(Symbol *key, NamedVariable *value)
@@ -145,7 +146,7 @@ namespace Mirb
 				}
 		};
 		
-		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
+		typedef Prelude::HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
 		class Scope
 		{

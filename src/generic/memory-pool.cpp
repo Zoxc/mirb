@@ -72,16 +72,16 @@ namespace Mirb
 		return result;
 	}
 	
-	void *MemoryPool::realloc(void *mem, size_t old_size, size_t new_size)
+	void *MemoryPool::reallocate(void *memory, size_t old_size, size_t new_size)
 	{
-		void *result = alloc(new_size);
+		void *result = allocate(new_size);
 			
-		memcpy(result, mem, old_size);
+		memcpy(result, memory, old_size);
 			
 		return result;
 	}
 	
-	void *MemoryPool::alloc(size_t bytes)
+	void *MemoryPool::allocate(size_t bytes)
 	{
 		char_t *result;
 
@@ -106,7 +106,7 @@ namespace Mirb
 
 void *operator new(size_t bytes, Mirb::MemoryPool &memory_pool) throw()
 {
-	return memory_pool.alloc(bytes);
+	return memory_pool.allocate(bytes);
 }
 
 void operator delete(void *, Mirb::MemoryPool &memory_pool) throw()
@@ -115,7 +115,7 @@ void operator delete(void *, Mirb::MemoryPool &memory_pool) throw()
 
 void *operator new[](size_t bytes, Mirb::MemoryPool &memory_pool) throw()
 {
-	return memory_pool.alloc(bytes);
+	return memory_pool.allocate(bytes);
 }
 
 void operator delete[](void *, Mirb::MemoryPool &memory_pool) throw()

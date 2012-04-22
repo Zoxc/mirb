@@ -23,44 +23,25 @@ namespace Mirb
 
 	GC gc;
 
-	void *GC::alloc(size_t bytes)
+	void *GC::allocate(size_t bytes)
 	{
 		#ifdef VALGRIND
 			return std::malloc(bytes);
 		#elif NO_GC
-			return gc_heap.alloc(bytes);
+			return gc_heap.allocate(bytes);
 		#else
 			return GC_MALLOC(bytes);
 		#endif
 	}
 
-	void *GC::realloc(void *mem, size_t old, size_t bytes)
+	void *GC::reallocate(void *memory, size_t old, size_t bytes)
 	{
 		#ifdef VALGRIND
-			return std::realloc(mem, bytes);
+			return std::realloc(memory, bytes);
 		#elif NO_GC
-			return gc_heap.realloc(mem, old, bytes);
+			return gc_heap.reallocate(memory, old, bytes);
 		#else
-			return GC_REALLOC(mem, bytes);
+			return GC_REALLOC(memory, bytes);
 		#endif
 	}
-
 };
-
-void *operator new(size_t bytes, Mirb::GC &gc) throw()
-{
-	return gc.alloc(bytes);
-}
-
-void operator delete(void *, Mirb::GC &gc) throw()
-{
-}
-
-void *operator new[](size_t bytes, Mirb::GC &gc) throw()
-{
-	return gc.alloc(bytes);
-}
-
-void operator delete[](void *, Mirb::GC &gc) throw()
-{
-}
