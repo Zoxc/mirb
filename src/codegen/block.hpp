@@ -1,6 +1,6 @@
 #pragma once
 #include <Prelude/Vector.hpp>
-#include <Prelude/FastList.hpp>
+#include <Prelude/List.hpp>
 #include "../common.hpp"
 #include "../generic/memory-pool.hpp"
 #include "opcodes.hpp"
@@ -87,7 +87,7 @@ namespace Mirb
 				Block(MemoryPool &memory_pool, Tree::Scope *scope);
 				Block(MemoryPool &memory_pool);
 				
-				FastList<BasicBlock> basic_blocks; // A linked list of basic blocks
+				List<BasicBlock> basic_blocks; // A linked list of basic blocks
 		};
 	};
 };
