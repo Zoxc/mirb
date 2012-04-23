@@ -177,13 +177,19 @@ namespace Mirb
 			{
 				while(matches(Lexeme::LINE));
 			}
-			
+
+			Range *capture();
+
+			Range *parse_method_name(Symbol *&symbol);
+
 			bool is_expression()
 			{
 				switch(lexeme())
 				{
 					case Lexeme::IDENT:
 					case Lexeme::EXT_IDENT:
+					case Lexeme::UNARY_ADD:
+					case Lexeme::UNARY_SUB:
 					case Lexeme::IVAR:
 					case Lexeme::ADD:
 					case Lexeme::SUB:

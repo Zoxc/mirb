@@ -31,14 +31,14 @@ namespace Mirb
 		if(input == '=')
 		{
 			input++;
-			lexeme.stop = &input;
 			lexeme.type = assign_type;
 		}
 		else
 		{
-			lexeme.stop = &input;
 			lexeme.type = type;
 		}
+
+		lexeme.stop = &input;
 	}
 
 	template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void Lexer::assign()
@@ -52,26 +52,22 @@ namespace Mirb
 				if(input == '=')
 				{
 					input++;
-					lexeme.stop = &input;
 					lexeme.type = match_assign;
 				}
 				else
-				{
-					lexeme.stop = &input;
 					lexeme.type = match_type;
-				}
 				break;
 				
 			case '=':
 				input++;
-				lexeme.stop = &input;
 				lexeme.type = assign_type;
 				break;
 				
 			default:
-				lexeme.stop = &input;
 				lexeme.type = type;
 		}
+
+		lexeme.stop = &input;
 	}
 
 	void Lexer::setup_jump_table()
@@ -112,8 +108,8 @@ namespace Mirb
 		jump_table[(size_t)'\r'] = &Lexer::carrige_return;
 		
 		// Arithmetic
-		jump_table[(size_t)'+'] = &Lexer::assign<Lexeme::ADD, Lexeme::ASSIGN_ADD>;
-		jump_table[(size_t)'-'] = &Lexer::assign<Lexeme::SUB, Lexeme::ASSIGN_SUB>;
+		jump_table[(size_t)'+'] = &Lexer::add;
+		jump_table[(size_t)'-'] = &Lexer::sub;
 		jump_table[(size_t)'*'] = &Lexer::assign<Lexeme::MUL, Lexeme::ASSIGN_MUL, '*', Lexeme::POWER, Lexeme::ASSIGN_POWER>;
 		jump_table[(size_t)'/'] = &Lexer::assign<Lexeme::DIV, Lexeme::ASSIGN_DIV>;
 		jump_table[(size_t)'%'] = &Lexer::assign<Lexeme::MOD, Lexeme::ASSIGN_MOD>;

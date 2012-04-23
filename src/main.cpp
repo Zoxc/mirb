@@ -30,9 +30,9 @@ int main()
 		
 		MemoryPool memory_pool;
 		Document document;
+
+		document.copy((const char_t *)line.c_str(), line.length());
 		
-		document.data = (const char_t *)line.c_str();
-		document.length = line.length();
 		document.name = "Input";
 
 		Parser parser(symbol_pool, memory_pool, document);

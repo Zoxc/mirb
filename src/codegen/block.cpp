@@ -49,18 +49,22 @@ namespace Mirb
 
 		void Block::finalize()
 		{
-			size_t sourceinfo_size = 0;
+			mirb_debug_assert(final->opcodes == nullptr);
+			
 			size_t size = 0;
+			size_t ranges = 0;
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 			{
 				size += (size_t)i().opcodes.tellp();
-				sourceinfo_size += i().source_locs.size();
+				ranges = i().source_locs.size();
 			}
 
+			final->ranges = (Range *)malloc(ranges * sizeof(Range));
 			const char *opcodes = (const char *)malloc(size);
 			mirb_runtime_assert(opcodes != 0);
 			size_t pos = 0;
+			ranges = 0;
 			
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 			{
@@ -68,8 +72,12 @@ namespace Mirb
 
 				i().pos = pos;
 				
-				for(auto j = i().source_locs.begin(); j != i().source_locs.end(); ++j)
-					final->source_location.set(pos + j().first, j().second);
+				for(auto j = i().source_locs.begin(); j != i().source_locs.end(); ++j, ++ranges)
+				{
+					final->ranges[ranges] = *j().second;
+
+					final->source_location.set(pos + j().first, &final->ranges[ranges]);
+				}
 
 				memcpy((void *)&opcodes[pos], data.data(), data.size());
 

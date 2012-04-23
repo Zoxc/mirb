@@ -68,7 +68,7 @@ namespace Mirb
 		public ConstantHeader<Value::InternalBlock>
 	{
 		public:
-			Block(Document *document) : document(document), source_location(2) {}
+			Block(Document *document) : document(document), opcodes(nullptr), source_location(2) {}
 
 			typedef value_t (*executor_t)(Frame &frame);
 
@@ -81,6 +81,7 @@ namespace Mirb
 
 			const char *opcodes;
 
+			Range *ranges;
 			Map<size_t, Range *> source_location;
 
 			executor_t executor;

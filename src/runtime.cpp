@@ -425,19 +425,13 @@ namespace Mirb
 		Parser parser(symbol_pool, memory_pool, document);
 
 		if(!free_input)
-		{
-			void *data = std::malloc(length + 1);
-
-			mirb_runtime_assert(data);
-
-			std::memcpy(data, input, length + 1);
-
-			document.data = (char_t *)data;
-		}
+			document.copy(input, length);
 		else
+		{
 			document.data = input;
+			document.length = length;
+		}
 
-		document.length = length;
 		document.name = filename;
 
 		parser.load();

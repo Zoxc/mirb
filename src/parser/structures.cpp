@@ -4,10 +4,14 @@ namespace Mirb
 {
 	Tree::Node *Parser::parse_class()
 	{
+		auto range = capture();
+
 		lexer.step();
 
 		auto result = new (fragment) Tree::ClassNode;
 		
+		result->range = range;
+
 		if(require(Lexeme::IDENT))
 		{
 			result->name = lexer.lexeme.symbol;
@@ -26,6 +30,8 @@ namespace Mirb
 		else
 			result->super = 0;
 		
+		lexer.lexeme.prev_set(range);
+
 		parse_sep();
 		
 		
@@ -43,9 +49,13 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_module()
 	{
+		auto range = capture();
+
 		lexer.step();
 
 		auto result = new (fragment) Tree::ModuleNode;
+
+		result->range = range;
 		
 		if(require(Lexeme::IDENT))
 		{
@@ -55,6 +65,8 @@ namespace Mirb
 		}
 		else
 			result->name = 0;
+
+		lexer.lexeme.prev_set(range);
 
 		parse_sep();
 
@@ -126,24 +138,12 @@ namespace Mirb
 		lexer.lexeme.allow_keywords = true;
 		
 		auto result = new (fragment) Tree::MethodNode;
-		
-		switch(lexeme())
-		{
-			case Lexeme::IDENT:
-			case Lexeme::EXT_IDENT:
-				{
-					result->name = lexer.lexeme.symbol;
-					
-					lexer.step();
-				}
-				break;
 
-			default:
-				{
-					expected(Lexeme::IDENT);
-					result->name = 0;
-				}
-		}
+		Symbol *symbol;
+		
+		parse_method_name(symbol);
+
+		result->name = symbol;
 		
 		auto old_scope = scope;
 		

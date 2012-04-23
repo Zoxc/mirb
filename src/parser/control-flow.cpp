@@ -4,7 +4,7 @@ namespace Mirb
 {
 	Tree::Node *Parser::parse_return()
 	{
-		auto range = new (fragment) Range(lexer.lexeme);
+		auto range = capture();
 		
 		lexer.step();
 		
@@ -19,7 +19,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_next()
 	{
-		auto range = new (fragment) Range(lexer.lexeme);
+		auto range = capture();
 		
 		if(scope->type != Tree::Scope::Closure)
 			error("Next outside of block.");
@@ -34,7 +34,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_redo()
 	{
-		auto range = new (fragment) Range(lexer.lexeme);
+		auto range = capture();
 		
 		if(scope->type != Tree::Scope::Closure)
 			error("Redo outside of block.");
@@ -46,7 +46,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_break()
 	{
-		auto range = new (fragment) Range(lexer.lexeme);
+		auto range = capture();
 		
 		if(scope->type == Tree::Scope::Closure)
 		{

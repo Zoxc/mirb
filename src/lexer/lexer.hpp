@@ -60,6 +60,9 @@ namespace Mirb
 			
 			void curly_open();
 			void curly_close();
+
+			void add();
+			void sub();
 			
 			void ivar();
 			static bool is_ident(char_t c);

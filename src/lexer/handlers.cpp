@@ -262,6 +262,50 @@ namespace Mirb
 			unknown();
 	}
 	
+	void Lexer::add()
+	{
+		input++;
+		
+		if(input == '=')
+		{
+			input++;
+			lexeme.type = Lexeme::ASSIGN_ADD;
+		}
+		else if(input == '@')
+		{
+			input++;
+			lexeme.type = Lexeme::UNARY_ADD;
+		}
+		else
+		{
+			lexeme.type = Lexeme::ADD;
+		}
+
+		lexeme.stop = &input;
+	}
+	
+	void Lexer::sub()
+	{
+		input++;
+		
+		if(input == '=')
+		{
+			input++;
+			lexeme.type = Lexeme::ASSIGN_SUB;
+		}
+		else if(input == '@')
+		{
+			input++;
+			lexeme.type = Lexeme::UNARY_SUB;
+		}
+		else
+		{
+			lexeme.type = Lexeme::SUB;
+		}
+
+		lexeme.stop = &input;
+	}
+
 	void Lexer::ident()
 	{
 		input++;

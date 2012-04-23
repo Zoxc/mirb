@@ -461,6 +461,7 @@ namespace Mirb
 					gen<MoveOp>(group[param++], ref(*i));
 				
 				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, group.size, group.use());
+				location(node->range);
 			}
 			else
 			{
@@ -470,6 +471,7 @@ namespace Mirb
 				var_t closure = call_args(node->arguments, scope, argc, argv, var);
 				
 				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
+				location(node->range);
 			}
 		}
 		
@@ -619,6 +621,7 @@ namespace Mirb
 				super = no_var;
 			
 			gen<ClassOp>(var, node->name, super, compile(node->scope));
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, var_t var)
@@ -626,6 +629,7 @@ namespace Mirb
 			auto node = (Tree::ModuleNode *)basic_node;
 			
 			gen<ModuleOp>(var, node->name, compile(node->scope));
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, var_t var)

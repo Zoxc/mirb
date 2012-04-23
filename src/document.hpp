@@ -16,5 +16,7 @@ namespace Mirb
 			const char_t *data;
 			size_t length;
 			CharArray name;
+
+			void copy(const char_t *data, size_t length);
 	};
 };

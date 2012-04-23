@@ -152,6 +152,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_super()
 	{
+		auto range = capture();
 		lexer.step();
 		
 		auto result = new (fragment) Tree::SuperNode;
@@ -160,6 +161,9 @@ namespace Mirb
 		
 		if(has_arguments())
 			parse_arguments(result->arguments, &parenthesis);
+
+		lexer.lexeme.prev_set(range);
+		result->range = range;
 		
 		result->block = parse_block();
 		
@@ -178,7 +182,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_yield()
 	{
-		auto range = new (fragment) Range(lexer.lexeme);
+		auto range = capture();
 
 		lexer.step();
 
@@ -200,18 +204,7 @@ namespace Mirb
 		mirb_debug_assert((symbol && (range != 0)) || (!symbol && range == 0));
 
 		if(!symbol)
-		{
-			if(require_ident())
-			{
-				symbol = lexer.lexeme.symbol;
-
-				range = new (fragment) Range(lexer.lexeme);
-				
-				lexer.step();
-			}
-			else
-				range = 0;
-		}
+			range = parse_method_name(symbol);
 		
 		bool local = false;
 		
@@ -262,7 +255,7 @@ namespace Mirb
 					{
 						Symbol *symbol = lexer.lexeme.symbol;
 
-						auto range = new (fragment) Range(lexer.lexeme);
+						auto range = capture();
 
 						lexer.step();
 
@@ -289,12 +282,15 @@ namespace Mirb
 
 					lexer.lexeme.allow_keywords = true;
 
-					return parse_call(0, child, 0, false);
+					if(lexeme() == Lexeme::PARENT_OPEN)
+						return parse_call(symbol_pool.get("call"), child, capture(), false);
+					else
+						return parse_call(0, child, 0, false);
 				}
 
 			case Lexeme::SQUARE_OPEN:
 				{
-					auto range = new (fragment) Range(lexer.lexeme);
+					auto range = capture();
 
 					lexer.step();
 					

@@ -11,6 +11,11 @@ namespace Mirb
 	Parser::~Parser()
 	{
 	}
+
+	Range *Parser::capture()
+	{
+		return new (fragment) Range(lexer.lexeme);
+	}
 	
 	void Parser::load()
 	{
@@ -78,7 +83,103 @@ namespace Mirb
 				break;
 		}
 	}
-	
+
+	Range *Parser::parse_method_name(Symbol *&symbol)
+	{
+		Range *range = capture();
+
+		switch(lexeme())
+		{
+			case Lexeme::IDENT:
+			{
+				symbol = lexer.lexeme.symbol;
+
+				lexer.step();
+
+				if(lexeme() == Lexeme::EQUALITY && lexer.lexeme.whitespace == false)
+				{
+					symbol = symbol_pool.get(symbol->string + "=");
+
+					range->expand(lexer.lexeme);
+
+					lexer.step();
+				}
+
+				return range;
+			}
+			
+			case Lexeme::EXT_IDENT:
+			{
+				symbol = lexer.lexeme.symbol;
+
+				lexer.step();
+
+				return range;
+			}
+			
+			case Lexeme::POWER:
+			case Lexeme::MUL:
+			case Lexeme::DIV:
+			case Lexeme::MOD:
+			case Lexeme::ADD:
+			case Lexeme::SUB:
+			case Lexeme::LEFT_SHIFT:
+			case Lexeme::RIGHT_SHIFT:
+			case Lexeme::AMPERSAND:
+			case Lexeme::BITWISE_XOR:
+			case Lexeme::BITWISE_OR:
+			case Lexeme::COMPARE:
+			case Lexeme::EQUALITY:
+			case Lexeme::CASE_EQUALITY:
+			case Lexeme::MATCHES:
+			case Lexeme::NOT_MATCHES:
+			case Lexeme::BITWISE_NOT:
+			case Lexeme::LOGICAL_NOT:
+			case Lexeme::UNARY_ADD:
+			case Lexeme::UNARY_SUB:
+			{
+				symbol = symbol_pool.get(lexer.lexeme);
+
+				lexer.step();
+
+				return range;
+
+			}
+
+			case Lexeme::SQUARE_OPEN:
+			{
+				if(lexer.lexeme.whitespace == false && match(Lexeme::SQUARE_CLOSE))
+				{
+					lexer.step();
+
+					if(lexer.lexeme.whitespace == false && lexeme() == Lexeme::EQUALITY)
+					{
+						symbol = symbol_pool.get("[]=");
+
+						lexer.step();
+					}
+					else
+					{
+						symbol = symbol_pool.get("[]");
+					}
+
+					lexer.lexeme.prev_set(range);
+				}
+				else
+					symbol = 0;
+
+				return range;
+			}
+			
+			default:
+			{
+				expected(Lexeme::IDENT);
+					
+				return 0;
+			}
+		}
+	}
+				
 	Tree::Node *Parser::parse_variable(Symbol *symbol, Range *range)
 	{
 		if(is_constant(symbol))
@@ -164,6 +265,7 @@ namespace Mirb
 			result->left = variable;
 			result->right = binary_op;
 			binary_op->left = variable;
+			binary_op->range = capture();
 			binary_op->op = Lexeme::assign_to_operator(lexeme());
 			
 			lexer.step();
@@ -336,15 +438,24 @@ namespace Mirb
 			case Lexeme::IDENT:
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
-				auto range = new (fragment) Range(lexer.lexeme);
+				auto range = capture();
 
 				lexer.step();
 				
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}
-
+			
+			case Lexeme::UNARY_ADD:
+			case Lexeme::UNARY_SUB:
 			case Lexeme::EXT_IDENT:
-				return parse_call(0, new (fragment) Tree::SelfNode, 0, false);
+			{
+				auto symbol = symbol_pool.get(lexer.lexeme);
+				auto range = capture();
+
+				lexer.step();
+
+				return parse_call(symbol, new (fragment) Tree::SelfNode, range, false);
+			}
 
 			case Lexeme::PARENT_OPEN:
 			{
@@ -374,7 +485,7 @@ namespace Mirb
 		{
 			case Lexeme::LOGICAL_NOT:
 			{
-				auto range = new (fragment) Range(lexer.lexeme);
+				auto range = capture();
 
 				lexer.step();
 
@@ -455,6 +566,7 @@ namespace Mirb
 		while(true)
 		{
 			Lexeme::Type op = lexeme();
+			Range *range = capture();
 			
 			if(!is_precedence_operator(op))
 				break;
@@ -488,6 +600,7 @@ namespace Mirb
 			node->op = op;
 			node->left = left;
 			node->right = right;
+			node->range = range;
 
 			left = node;
 		}
@@ -521,6 +634,7 @@ namespace Mirb
 			result->left = left;
 			result->right = binary_op;
 			binary_op->left = left;
+			binary_op->range = capture();
 			binary_op->op = Lexeme::assign_to_operator(lexeme());
 			
 			lexer.step();
@@ -592,13 +706,14 @@ namespace Mirb
 						result->block = 0;
 
 						if(node->range)
-							result->range = new (fragment) Range(*node->range);
+							result->range = capture();
 						else
 							result->range = 0;
 						
 						auto binary_op = new (fragment) Tree::BinaryOpNode;
 						
 						binary_op->left = node;
+						binary_op->range = capture();
 						binary_op->op = Lexeme::assign_to_operator(lexeme());
 						
 						lexer.step();

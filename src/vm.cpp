@@ -13,7 +13,7 @@ namespace Mirb
 
 	CharArray Frame::inspect()
 	{
-		CharArray result = " - ";
+		CharArray result = "  in ";
 
 		OnStack<1> os(result);
 
