@@ -63,7 +63,7 @@ namespace Mirb
 
 	value_t define_class(value_t under, Symbol *name, value_t super)
 	{
-		value_t existing = get_const(under, auto_cast(name));
+		value_t existing = test_const(under, auto_cast(name));
 
 		if(prelude_unlikely(existing != value_undef))
 			return existing;
@@ -87,7 +87,7 @@ namespace Mirb
 
 	value_t define_module(value_t under, Symbol *name)
 	{
-		value_t existing = get_const(under, name);
+		value_t existing = test_const(under, name);
 
 		if(prelude_unlikely(existing != value_undef))
 			return existing;
@@ -278,9 +278,23 @@ namespace Mirb
 		return object->vars;
 	}
 	
-	value_t get_const(value_t obj, Symbol *name)
+	bool can_have_consts(value_t obj)
+	{
+		if(prelude_likely(Value::of_type<Module>(obj)))
+			return true;
+		else
+		{
+			raise(NameError::class_ref, "Object " + inspect_obj(obj) + " can not contain constants");
+
+			return false;
+		}
+	}
+	
+	value_t test_const(value_t obj, Symbol *name)
 	{
 		// TODO: Fix constant lookup
+
+		prelude_debug_assert(Value::of_type<Module>(obj));
 
 		auto lookup = [&](value_t obj) -> value_t {
 			while(obj)
@@ -305,12 +319,30 @@ namespace Mirb
 		result = lookup(Object::class_ref);
 		if(result != value_undef)
 			return result;
-
+		
 		return value_undef;
 	}
 
-	bool set_const(value_t obj, Symbol *name, value_t value)
+	value_t get_const(value_t obj, Symbol *name)
 	{
+		if(!can_have_consts(obj))
+			return value_raise;
+
+		value_t result = test_const(obj, name);
+
+		if(prelude_likely(result != value_undef))
+			return result;
+		
+		raise(NameError::class_ref, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
+
+		return value_raise;
+	}
+
+	value_t set_const(value_t obj, Symbol *name, value_t value)
+	{
+		if(!can_have_consts(obj))
+			return value_raise;
+
 		ValueMap *vars = get_vars(obj);
 
 		value_t *old = vars->get_ref(auto_cast(name));
@@ -318,12 +350,12 @@ namespace Mirb
 		if(prelude_unlikely(old != 0))
 		{
 			*old = value;
-			return true;
+			return value_true;
 		}
 		else
 		{
 			set_var(obj, name, value);
-			return false;
+			return value_false;
 		}
 	}
 	

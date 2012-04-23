@@ -79,14 +79,15 @@ namespace Mirb
 		}
 	}
 	
-	Tree::Node *Parser::parse_variable(Symbol *symbol, Tree::Node *left)
+	Tree::Node *Parser::parse_variable(Symbol *symbol, Range *range)
 	{
 		if(is_constant(symbol))
 		{
 			auto result = new (fragment) Tree::ConstantNode;
 			
-			result->obj = left;
+			result->obj = nullptr;
 			result->name = symbol;
+			result->range = range;
 			
 			return result;
 		}
@@ -555,7 +556,7 @@ namespace Mirb
 					break;
 				
 				if(node->can_be_var)
-					return build_assignment(parse_variable(node->method, 0));
+					return build_assignment(parse_variable(node->method, node->range));
 				else
 				{
 					Symbol *mutated = node->method;

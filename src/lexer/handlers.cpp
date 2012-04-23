@@ -127,7 +127,23 @@ namespace Mirb
 		
 		lexeme.stop = &input;
 	}
+	
+	void Lexer::colon()
+	{
+		input++;
 
+		if(input == ':')
+		{
+			input++;
+
+			lexeme.type = Lexeme::SCOPE;
+		}
+		else
+			lexeme.type = Lexeme::COLON;
+
+		lexeme.stop = &input;
+	}
+	
 	void Lexer::assign_equal()
 	{
 		input++;

@@ -58,8 +58,9 @@ namespace Mirb
 	
 	ValueMap *get_vars(value_t obj);
 
+	value_t test_const(value_t obj, Symbol *name);
 	value_t get_const(value_t obj, Symbol *name);
-	bool set_const(value_t obj, Symbol *name, value_t value);
+	value_t set_const(value_t obj, Symbol *name, value_t value);
 
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);

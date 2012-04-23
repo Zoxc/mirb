@@ -235,11 +235,18 @@ namespace Mirb
 		EndOp
 
 		DeepOp(GetConst)
-			vars[op.var] = Support::get_const(frame.obj, op.name);
+			value_t result = Support::get_const(vars[op.obj], op.name);
+		
+			if(prelude_unlikely(result == value_raise))
+				goto handle_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
 		EndOp
 
 		DeepOp(SetConst)
-			Support::set_const(frame.obj, op.name,  vars[op.var]);
+			if((prelude_unlikely(Support::set_const(vars[op.obj], op.name,  vars[op.var]) == value_raise)))
+				goto handle_exception;
 		EndOp
 
 		Op(Array)

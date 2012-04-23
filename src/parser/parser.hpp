@@ -47,7 +47,7 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
 			// expressions
-			Tree::Node *parse_variable(Symbol *symbol, Tree::Node *left = 0);
+			Tree::Node *parse_variable(Symbol *symbol, Range *range);
 			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();

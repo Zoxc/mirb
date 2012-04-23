@@ -138,7 +138,7 @@ namespace Mirb
 		jump_table[(size_t)','] = &Lexer::single<Lexeme::COMMA>;
 		jump_table[(size_t)'?'] = &Lexer::single<Lexeme::QUESTION>;
 		
-		jump_table[(size_t)':'] = &Lexer::assign<Lexeme::COLON, Lexeme::SCOPE>;
+		jump_table[(size_t)':'] = &Lexer::colon;
 		
 		jump_table[(size_t)'='] = &Lexer::assign_equal;
 		

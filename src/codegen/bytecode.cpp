@@ -192,10 +192,8 @@ namespace Mirb
 			else if(is_var(var))
 				gen<LoadOp>(var, Object::class_ref);
 			
-			if(!is_var(var))
-				return;
-				
 			gen<GetConstOp>(var, var, node->name);
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_unary_op(Tree::Node *basic_node, var_t var)
@@ -367,6 +365,7 @@ namespace Mirb
 					to_bytecode(node->right, value);
 					
 					gen<SetConstOp>(obj, variable->name, value);
+					location(variable->range);
 
 					if(is_var(var))
 						gen<MoveOp>(var, value);

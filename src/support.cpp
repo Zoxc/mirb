@@ -32,7 +32,7 @@ namespace Mirb
 			return Mirb::get_const(obj, name);
 		}
 
-		bool set_const(value_t obj, Symbol *name, value_t value)
+		value_t set_const(value_t obj, Symbol *name, value_t value)
 		{
 			if(prelude_unlikely(obj == main))
 				obj = Object::class_ref;

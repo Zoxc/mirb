@@ -139,7 +139,7 @@ namespace Mirb
 			Range *range;
 			
 			ConstantNode() {}
-			ConstantNode(Symbol *name) : obj(0), name(name)  {}
+			ConstantNode(Node *obj, Symbol *name, Range *range) : obj(obj), name(name), range(range)  {}
 		};
 
 		struct SelfNode:

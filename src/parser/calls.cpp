@@ -224,7 +224,7 @@ namespace Mirb
 		
 		if(can_be_var && !has_args && (local || constant)) // Variable or constant
 		{
-			return parse_variable(symbol);
+			return parse_variable(symbol, range);
 		}
 		else // Call
 		{
@@ -274,7 +274,7 @@ namespace Mirb
 						}
 						else
 						{
-							return new (fragment) Tree::ConstantNode(symbol);
+							return new (fragment) Tree::ConstantNode(child, symbol, range);
 						}
 					}
 					else
