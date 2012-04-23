@@ -57,10 +57,11 @@ namespace Mirb
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
 			{
 				size += (size_t)i().opcodes.tellp();
-				ranges = i().source_locs.size();
+				ranges += i().source_locs.size();
 			}
 
 			final->ranges = (Range *)malloc(ranges * sizeof(Range));
+			mirb_runtime_assert(final->ranges != 0);
 			const char *opcodes = (const char *)malloc(size);
 			mirb_runtime_assert(opcodes != 0);
 			size_t pos = 0;
