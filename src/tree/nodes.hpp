@@ -54,7 +54,7 @@ namespace Mirb
 			NodeType type() { return UnaryOp; }
 			
 			UnaryOpNode() {};
-			UnaryOpNode(Lexeme::Type op, Node *value) : op(op), value(value) {}
+			UnaryOpNode(Lexeme::Type op, Node *value, Range *range) : op(op), value(value), range(range) {}
 			
 			Lexeme::Type op;
 			Node *value;
@@ -67,7 +67,7 @@ namespace Mirb
 		{
 			NodeType type() { return BooleanNot; }
 			
-			BooleanNotNode(Node *value) : UnaryOpNode(Lexeme::LOGICAL_NOT, value) {}
+			BooleanNotNode(Node *value) : UnaryOpNode(Lexeme::LOGICAL_NOT, value, nullptr) {}
 		};
 		
 		struct StringNode:

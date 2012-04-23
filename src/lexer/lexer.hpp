@@ -1,6 +1,6 @@
 #pragma once
-#include <Prelude/Map.hpp>
 #include "../common.hpp"
+#include <Prelude/Map.hpp>
 #include "../generic/range.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"

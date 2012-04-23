@@ -207,6 +207,7 @@ namespace Mirb
 			to_bytecode(node->value, temp);
 			
 			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (Mirb::Block *)0, (size_t)0, no_var);
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_not(Tree::Node *basic_node, var_t var)

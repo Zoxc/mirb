@@ -373,9 +373,15 @@ namespace Mirb
 		{
 			case Lexeme::LOGICAL_NOT:
 			{
+				auto range = new (fragment) Range(lexer.lexeme);
+
 				lexer.step();
+
+				auto node = parse_lookup_chain();
+
+				lexer.lexeme.prev_set(range);
 				
-				return new (fragment) Tree::UnaryOpNode(Lexeme::LOGICAL_NOT, parse_lookup_chain());
+				return new (fragment) Tree::UnaryOpNode(Lexeme::LOGICAL_NOT, node, range);
 			}
 			
 			case Lexeme::ADD:
@@ -384,10 +390,13 @@ namespace Mirb
 				auto result = new (fragment) Tree::UnaryOpNode;
 				
 				result->op = Lexeme::operator_to_unary(lexeme());
+				result->range = new (fragment) Range(lexer.lexeme);
 				
 				lexer.step();
 				
 				result->value = parse_lookup_chain();
+
+				lexer.lexeme.prev_set(result->range);
 				
 				return result;
 			}

@@ -62,13 +62,13 @@ namespace Mirb
 	#define OpContinue goto *labels[(size_t)*ip]
 	#define OpPrologue static void *labels[] = {MIRB_OPCODES}; OpContinue;
 	#define OpEpilogue
-	#define Op(name) Op##name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
+	#define Op(name) Op##name: { auto &op prelude_unused = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
 	#define EndOp OpContinue; }
 #else
 	#define OpContinue goto execute_instruction
 	#define OpPrologue while(true) { execute_instruction: switch(*ip) {
 	#define OpEpilogue default: mirb_runtime_abort("Unknown opcode"); } }
-	#define Op(name) case CodeGen::Opcode::name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
+	#define Op(name) case CodeGen::Opcode::name: { auto &op prelude_unused = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
 	#define EndOp break; }
 #endif
 

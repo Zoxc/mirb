@@ -317,8 +317,6 @@ namespace Mirb
 				
 				case Opcode::Branch:
 				{
-					auto op = (BranchOp *)opcode;
-					
 					result = "branch " + label(opcode);
 
 					opcode += sizeof(BranchOp);

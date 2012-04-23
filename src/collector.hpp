@@ -1,6 +1,6 @@
 #pragma once
-#include <Prelude/FastList.hpp>
 #include "common.hpp"
+#include <Prelude/FastList.hpp>
 #include "object-header.hpp"
 
 namespace Mirb
