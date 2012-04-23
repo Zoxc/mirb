@@ -1,6 +1,6 @@
 #pragma once
-#include <Prelude/List.hpp>
 #include "../common.hpp"
+#include <Prelude/List.hpp>
 #include "../lexer/lexeme.hpp"
 #include "../symbol-pool.hpp"
 #include "node.hpp"

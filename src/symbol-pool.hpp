@@ -1,6 +1,6 @@
 #pragma once
-#include <Prelude/HashTable.hpp>
 #include "common.hpp"
+#include <Prelude/HashTable.hpp>
 #include "gc.hpp"
 #include "collector.hpp"
 #include "classes/symbol.hpp"

@@ -1,8 +1,8 @@
 #pragma once
+#include "../common.hpp"
 #include <Prelude/HashTable.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/FastList.hpp>
-#include "../common.hpp"
 #include "../generic/simple-set.hpp"
 #include "nodes.hpp"
 

@@ -2,8 +2,8 @@
 #ifdef _MSC_VER
 	#pragma warning(disable:4355)
 	#pragma warning(disable:4996)
+	#pragma warning(disable:4530)
 	//#pragma warning(disable:4731)
-	//#pragma warning(disable:4530)
 	//#pragma warning(disable:4200) // TODO: Remove this
 #endif
 

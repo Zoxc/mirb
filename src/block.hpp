@@ -1,8 +1,8 @@
 #pragma once
+#include "common.hpp"
 #include <Prelude/Map.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
-#include "common.hpp"
 #include "gc.hpp"
 #include "vm.hpp"
 #include "object-header.hpp"

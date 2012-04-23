@@ -1,7 +1,7 @@
 #pragma once
+#include "../common.hpp"
 #include <Prelude/Allocator.hpp>
 #include <Prelude/FastList.hpp>
-#include "../common.hpp"
 
 namespace Mirb
 {

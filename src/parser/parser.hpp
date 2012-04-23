@@ -1,4 +1,5 @@
 #pragma once
+#include "../common.hpp"
 #include "../gc.hpp"
 #include "../lexer/lexer.hpp"
 #include "../tree/nodes.hpp"

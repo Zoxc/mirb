@@ -1,6 +1,6 @@
 #pragma once
-#include <Prelude/CountedList.hpp>
 #include "../common.hpp"
+#include <Prelude/CountedList.hpp>
 #include "../generic/range.hpp"
 
 namespace Mirb

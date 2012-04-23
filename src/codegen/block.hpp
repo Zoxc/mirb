@@ -1,7 +1,7 @@
 #pragma once
+#include "../common.hpp"
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
-#include "../common.hpp"
 #include "../generic/memory-pool.hpp"
 #include "opcodes.hpp"
 #include "../tree/tree.hpp"
