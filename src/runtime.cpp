@@ -396,7 +396,7 @@ namespace Mirb
 		{
 			void *data = std::malloc(length + 1);
 
-			mirb_runtime_assert(document.data);
+			mirb_runtime_assert(data);
 
 			std::memcpy(data, input, length + 1);
 

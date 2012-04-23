@@ -200,11 +200,13 @@ namespace Mirb
 		lexeme.error = false;
 		lexeme.whitespace = whitespace;
 
-		mirb_debug_assert(lexeme.type = (Lexeme::Type)0xBAD);
+#ifdef DEBUG
+		lexeme.type = Lexeme::TYPES;
+#endif
 
 		(this->*jump_table[input])();
 
-		mirb_debug_assert(lexeme.stop >= lexeme.start);
-		mirb_debug_assert(lexeme.type != (Lexeme::Type)0xBAD);
+		mirb_debug_assert((size_t)lexeme.stop >= (size_t)lexeme.start);
+		mirb_debug_assert(lexeme.type != Lexeme::TYPES);
 	}
 };

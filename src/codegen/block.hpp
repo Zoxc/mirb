@@ -36,11 +36,14 @@ namespace Mirb
 
 				ListEntry<BasicBlock> entry;
 
-				std::stringstream opcodes;
-
+				std::stringstream opcodes; // TODO: Replace with own MemoryPool allocated structure
+				
 				typedef std::pair<size_t, BasicBlock *> BranchInfo;
-
-				Vector<BranchInfo> branches;
+				typedef std::pair<size_t, Range *> SourceInfo;
+				
+				Vector<BranchInfo, MemoryPool> branches;
+				
+				Vector<SourceInfo, MemoryPool> source_locs;
 				
 				size_t pos;
 		};

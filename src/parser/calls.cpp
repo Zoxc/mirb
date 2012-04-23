@@ -130,16 +130,20 @@ namespace Mirb
 		}
 	}
 
-	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args, bool can_be_var)
+	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, Range *range, bool has_args, bool can_be_var)
 	{
 		auto result = new (fragment) Tree::CallNode;
 		
 		result->object = object;
 		result->method = symbol;
 		result->can_be_var = can_be_var;
+		result->range = range;
 		
 		if(has_args)
+		{
 			parse_arguments(result->arguments, 0);
+			lexer.lexeme.prev_set(range);
+		}
 		
 		result->block = parse_block();
 		
@@ -174,6 +178,8 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_yield()
 	{
+		auto range = new (fragment) Range(lexer.lexeme);
+
 		lexer.step();
 
 		auto child = new (fragment) Tree::VariableNode;
@@ -186,19 +192,25 @@ namespace Mirb
 		
 		child->var = scope->block_parameter;
 		
-		return alloc_call_node(child, Symbol::from_literal("call"), has_arguments());
+		return alloc_call_node(child, Symbol::from_literal("call"), range, has_arguments());
 	}
 
-	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, bool default_var)
+	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, Range *range, bool default_var)
 	{
+		mirb_debug_assert((symbol && (range != 0)) || (!symbol && range == 0));
+
 		if(!symbol)
 		{
 			if(require_ident())
 			{
 				symbol = lexer.lexeme.symbol;
+
+				range = new (fragment) Range(lexer.lexeme);
 				
 				lexer.step();
 			}
+			else
+				range = 0;
 		}
 		
 		bool local = false;
@@ -216,7 +228,7 @@ namespace Mirb
 		}
 		else // Call
 		{
-			return alloc_call_node(child, symbol, has_args, can_be_var && !constant);
+			return alloc_call_node(child, symbol, range, has_args, can_be_var && !constant);
 		}
 	}
 
@@ -250,13 +262,15 @@ namespace Mirb
 					{
 						Symbol *symbol = lexer.lexeme.symbol;
 
+						auto range = new (fragment) Range(lexer.lexeme);
+
 						lexer.step();
 
 						bool has_args = has_arguments();
 
 						if(has_args || !is_constant(symbol))
 						{
-							return alloc_call_node(child, symbol, has_arguments());
+							return alloc_call_node(child, symbol, range, has_arguments());
 						}
 						else
 						{
@@ -275,16 +289,19 @@ namespace Mirb
 
 					lexer.lexeme.allow_keywords = true;
 
-					return parse_call(0, child, false);
+					return parse_call(0, child, 0, false);
 				}
 
 			case Lexeme::SQUARE_OPEN:
 				{
+					auto range = new (fragment) Range(lexer.lexeme);
+
 					lexer.step();
 					
 					auto result = new (fragment) Tree::CallNode;
 					
 					result->method = Symbol::from_literal("[]");
+					result->range = range; //TODO: Extend range back to child
 					
 					result->object = child;
 					

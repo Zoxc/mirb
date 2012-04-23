@@ -160,9 +160,10 @@ namespace Mirb
 					Closure
 				};
 				
-				Scope(Fragment &fragment, Scope *parent, Type type);
+				Scope(Document *document, Fragment &fragment, Scope *parent, Type type);
 				
 				CodeGen::Block *block;
+				Document *document;
 				Block *final;
 				Fragment *fragment;
 				Type type;

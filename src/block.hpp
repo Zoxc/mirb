@@ -61,19 +61,27 @@ namespace Mirb
 	
 	extern const var_t no_var;
 
+	class Range;
+	class Document;
+
 	class Block: // TODO: Pin or create a dummy class which references the real one. Blocks are currently hardcoded in generated assembly.
 		public ConstantHeader<Value::InternalBlock>
 	{
 		public:
+			Block(Document *document) : document(document), source_location(2) {}
+
 			typedef value_t (*executor_t)(Frame &frame);
 
 			Tree::Scope *scope;
+			Document *document;
 
 			Symbol *name; // The name of this block.
 			
 			size_t var_words;
 
 			const char *opcodes;
+
+			Map<size_t, Range *> source_location;
 
 			executor_t executor;
 			

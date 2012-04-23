@@ -175,6 +175,7 @@ namespace Mirb
 			
 			bool whitespace : 1;
 			bool allow_keywords : 1;
+			bool error : 1;
 			
 			Type type;
 			const char_t *prev;
@@ -189,7 +190,7 @@ namespace Mirb
 
 			Range &get_prev();
 
-			void prev_set(Range &range);
+			void prev_set(Range *range);
 			
 			static std::string names[TYPES];
 			

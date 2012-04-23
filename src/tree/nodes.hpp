@@ -30,6 +30,8 @@ namespace Mirb
 			Node *left;
 			Node *right;
 			Lexeme::Type op;
+			
+			Range *range;
 		};
 
 		struct VariableNode;
@@ -56,6 +58,8 @@ namespace Mirb
 			
 			Lexeme::Type op;
 			Node *value;
+			
+			Range *range;
 		};
 		
 		struct BooleanNotNode:
@@ -131,6 +135,8 @@ namespace Mirb
 	
 			Node *obj;
 			Symbol *name;
+
+			Range *range;
 			
 			ConstantNode() {}
 			ConstantNode(Symbol *name) : obj(0), name(name)  {}
@@ -183,6 +189,8 @@ namespace Mirb
 			
 			CountedNodeList arguments;
 			BlockNode *block; // can be zero
+
+			Range *range;
 		};
 		
 		struct CallNode:
@@ -291,6 +299,8 @@ namespace Mirb
 			
 			Symbol *name;
 			Scope *scope;
+
+			Range *range;
 		};
 		
 		struct ClassNode:

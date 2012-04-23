@@ -40,7 +40,7 @@ namespace Mirb
 			fragment = Collector::allocate<Tree::Fragment>(fragment, block_size);
 		}
 		
-		return scope = new (fragment) Tree::Scope(*fragment, scope, type);
+		return scope = new (fragment) Tree::Scope(&document, *fragment, scope, type);
 	}
 	
 	void Parser::error(std::string text)
@@ -335,14 +335,15 @@ namespace Mirb
 			case Lexeme::IDENT:
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
+				auto range = new (fragment) Range(lexer.lexeme);
 
 				lexer.step();
 				
-				return parse_call(symbol, new (fragment) Tree::SelfNode, true); // Function call, constant or local variable
+				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}
 
 			case Lexeme::EXT_IDENT:
-				return parse_call(0, new (fragment) Tree::SelfNode, false);
+				return parse_call(0, new (fragment) Tree::SelfNode, 0, false);
 
 			case Lexeme::PARENT_OPEN:
 			{
@@ -562,7 +563,12 @@ namespace Mirb
 						Tree::Node *argument = parse_expression();
 						
 						if(argument)
+						{
 							node->arguments.append(argument);
+
+							if(node->range)
+								lexer.lexeme.prev_set(node->range);
+						}
 
 						return input;
 					}
@@ -574,6 +580,11 @@ namespace Mirb
 						result->object = node->object;
 						result->method = mutated;
 						result->block = 0;
+
+						if(node->range)
+							result->range = new (fragment) Range(*node->range);
+						else
+							result->range = 0;
 						
 						auto binary_op = new (fragment) Tree::BinaryOpNode;
 						
@@ -583,6 +594,8 @@ namespace Mirb
 						lexer.step();
 						
 						binary_op->right = parse_expression();
+
+						lexer.lexeme.prev_set(result->range);
 						
 						result->arguments.append(binary_op);
 						

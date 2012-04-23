@@ -4,7 +4,8 @@ namespace Mirb
 {
 	namespace Tree
 	{
-		Scope::Scope(Fragment &fragment, Scope *parent, Type type) :
+		Scope::Scope(Document *document, Fragment &fragment, Scope *parent, Type type) :
+			document(document),
 			final(0),
 			fragment(&fragment),
 			type(type),

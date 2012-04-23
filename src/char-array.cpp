@@ -212,4 +212,14 @@ namespace Mirb
 
 		return CharArray(buffer, length);
 	}
+
+	CharArray operator *(CharArray lhs, size_t rhs)
+	{
+		CharArray result;
+
+		for(size_t i = 0; i < rhs; ++i)
+			result += lhs;
+
+		return result;
+	}
 };

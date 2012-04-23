@@ -17,6 +17,7 @@ namespace Mirb
 			value_t block;
 			size_t argc;
 			value_t *argv;
+			const char *ip;
 			Frame *prev;
 
 			CharArray inspect();

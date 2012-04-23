@@ -440,6 +440,7 @@ namespace Mirb
 			var_t closure = call_args(node->arguments, node->block ? node->block->scope : nullptr, argc, argv, var);
 			
 			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_super(Tree::Node *basic_node, var_t var)
@@ -557,11 +558,15 @@ namespace Mirb
 				//block_push(block, B_TEST_PROC, 0, 0, 0);
 				//block_push(block, B_JMPNE, label, 0, 0);
 				gen<UnwindReturnOp>(temp, scope->owner->block->final);
+				location(node->range);
 
 				//block_emmit_label(block, label);
 			}
 			else if(has_ensure_block(block))
+			{
 				gen<UnwindReturnOp>(temp, block->final);
+				location(node->range);
+			}
 			else
 			{
 				gen<MoveOp>(block->return_var, temp);
@@ -578,6 +583,7 @@ namespace Mirb
 			to_bytecode(node->value, temp);
 
 			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_dst);
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_next(Tree::Node *basic_node, var_t var)
@@ -730,7 +736,7 @@ namespace Mirb
 			scope = 0;
 
 			block = new (memory_pool) Block(memory_pool);
-			block->final = Collector::allocate<Mirb::Block>();
+			block->final = Collector::allocate<Mirb::Block>(scope->document);
 
 			return block;
 		}
@@ -745,7 +751,7 @@ namespace Mirb
 				block->final = scope->final;
 			else
 			{
-				block->final = Collector::allocate<Mirb::Block>();
+				block->final = Collector::allocate<Mirb::Block>(scope->document);
 				scope->final = block->final;
 			}
 			

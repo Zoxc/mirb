@@ -1,6 +1,8 @@
 #include "vm.hpp"
 #include "runtime.hpp"
 #include "support.hpp"
+#include "document.hpp"
+#include "generic/range.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"
 #include "classes/module.hpp"
@@ -38,7 +40,20 @@ namespace Mirb
 				result += ", ";
 		}
 			
-		result += ") at <unknown>";
+		result += ")";
+
+		if(code->executor == &evaluate_block)
+		{
+			Range *range = code->source_location.get((size_t)(ip - code->opcodes));
+
+			if(range)
+			{
+				CharArray prefix = code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
+				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
+			}
+			else
+				result += "\n" + code->document->name + ":unknown";
+		}
 
 		return result;
 	}
@@ -56,6 +71,8 @@ namespace Mirb
 	#define Op(name) case CodeGen::Opcode::name: { auto &op = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
 	#define EndOp break; }
 #endif
+
+#define DeepOp(name) Op(name) frame.ip = ip;
 
 	value_t evaluate_block(Frame &frame)
 	{
@@ -96,7 +113,7 @@ namespace Mirb
 			vars[op.var] = op.imm;
 		EndOp
 
-		Op(Call)
+		DeepOp(Call)
 			value_t block = op.block ? vars[op.block_var] : value_nil;
 
 			value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);
@@ -136,7 +153,7 @@ namespace Mirb
 			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, (value_t **)&vars[op.argv]);
 		EndOp
 
-		Op(Class)
+		DeepOp(Class)
 			value_t super = op.super == no_var ? Object::class_ref : vars[op.super];
 
 			value_t self = Support::define_class(frame.obj, op.name, super);
@@ -150,7 +167,7 @@ namespace Mirb
 				vars[op.var] = result;
 		EndOp
 
-		Op(Module)
+		DeepOp(Module)
 			value_t self = Support::define_module(frame.obj, op.name);
 
 			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
@@ -162,7 +179,7 @@ namespace Mirb
 				vars[op.var] = result;
 		EndOp
 
-		Op(Super)
+		DeepOp(Super)
 			value_t block = op.block ? vars[op.block_var] : value_nil;
 
 			value_t module = frame.module;
@@ -217,11 +234,11 @@ namespace Mirb
 			Support::set_ivar(frame.obj, op.name,  vars[op.var]);
 		EndOp
 
-		Op(GetConst)
+		DeepOp(GetConst)
 			vars[op.var] = Support::get_const(frame.obj, op.name);
 		EndOp
 
-		Op(SetConst)
+		DeepOp(SetConst)
 			Support::set_const(frame.obj, op.name,  vars[op.var]);
 		EndOp
 
@@ -249,12 +266,12 @@ namespace Mirb
 			}
 		EndOp
 
-		Op(UnwindReturn)
+		DeepOp(UnwindReturn)
 			set_current_exception(new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
-		Op(UnwindBreak)
+		DeepOp(UnwindBreak)
 			set_current_exception(new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
 			goto handle_exception;
 		EndOp

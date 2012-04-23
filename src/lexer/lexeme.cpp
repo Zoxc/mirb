@@ -135,6 +135,7 @@ namespace Mirb
 		lexer(lexeme.lexer),
 		whitespace(lexeme.whitespace),
 		allow_keywords(lexeme.allow_keywords),
+		error(lexeme.error),
 		type(lexeme.type),
 		prev(lexeme.prev),
 		curlies(lexeme.curlies),
@@ -151,6 +152,7 @@ namespace Mirb
 		
 		whitespace = other.whitespace;
 		allow_keywords = other.allow_keywords;
+		error = other.error;
 		type = other.type;
 		prev = other.prev;
 		curlies = other.curlies;
@@ -158,9 +160,9 @@ namespace Mirb
 		return *this;
 	}
 
-	void Lexeme::prev_set(Range &range)
+	void Lexeme::prev_set(Range *range)
 	{
-		range.stop = prev;
+		range->stop = prev;
 	}
 	
 	std::string Lexeme::describe(Range *range, Type type)

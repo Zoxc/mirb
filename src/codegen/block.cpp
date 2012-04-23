@@ -7,7 +7,7 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
-		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block)
+		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : branches(memory_pool), source_locs(memory_pool)
 		{
 			#ifdef DEBUG
 				id = block.basic_block_count++;
@@ -49,10 +49,14 @@ namespace Mirb
 
 		void Block::finalize()
 		{
+			size_t sourceinfo_size = 0;
 			size_t size = 0;
 
 			for(auto i = basic_blocks.begin(); i != basic_blocks.end(); ++i)
+			{
 				size += (size_t)i().opcodes.tellp();
+				sourceinfo_size += i().source_locs.size();
+			}
 
 			const char *opcodes = (const char *)malloc(size);
 			mirb_runtime_assert(opcodes != 0);
@@ -63,6 +67,9 @@ namespace Mirb
 				std::string data = i().opcodes.str();
 
 				i().pos = pos;
+				
+				for(auto j = i().source_locs.begin(); j != i().source_locs.end(); ++j)
+					final->source_location.set(pos + j().first, j().second);
 
 				memcpy((void *)&opcodes[pos], data.data(), data.size());
 

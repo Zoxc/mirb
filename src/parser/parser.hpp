@@ -101,8 +101,8 @@ namespace Mirb
 			Tree::Node *parse_lookup(Tree::Node *child);
 			Tree::BlockNode *parse_block();
 			void parse_arguments(Tree::CountedNodeList &arguments, bool *parenthesis);
-			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, bool has_args, bool can_be_var = false);
-			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, bool default_var);
+			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, Range *range, bool has_args, bool can_be_var = false);
+			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, Range *range, bool default_var);
 			Tree::Node *parse_lookup_chain();
 			Tree::Node *parse_yield();
 			Tree::Node *parse_super();

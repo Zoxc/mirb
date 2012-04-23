@@ -1,6 +1,7 @@
 #pragma once
 #include <Prelude/CountedList.hpp>
 #include "../common.hpp"
+#include "../generic/range.hpp"
 
 namespace Mirb
 {
@@ -50,7 +51,7 @@ namespace Mirb
 			};
 			
 			static std::string names[Types];
-			
+
 			virtual NodeType type() { return None; };
 		};
 		

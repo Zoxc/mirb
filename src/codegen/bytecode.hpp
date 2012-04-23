@@ -106,6 +106,11 @@ namespace Mirb
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchUnlessOp>(var), lfalse));
 				}
 				
+				void location(Range *range)
+				{
+					basic->source_locs.push(BasicBlock::SourceInfo((size_t)basic->opcodes.tellp(), range));
+				}
+				
 				void gen_branch(BasicBlock *block)
 				{
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchOp>(), block));
