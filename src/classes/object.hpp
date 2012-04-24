@@ -2,7 +2,7 @@
 #include "../value.hpp"
 #include "../gc.hpp"
 #include "../block.hpp"
-#include "../object-header.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

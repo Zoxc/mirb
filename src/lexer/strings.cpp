@@ -26,7 +26,7 @@ namespace Mirb
 							break;
 						
 						case 0:
-							if(process_null(input))
+							if(process_null(input, true))
 								goto done;
 
 						default:
@@ -36,7 +36,7 @@ namespace Mirb
 					break;
 				
 				case 0:
-					if(process_null(input))
+					if(process_null(input, true))
 						goto done;
 				
 				default:
@@ -44,7 +44,7 @@ namespace Mirb
 			}
 			
 		done:
-		assert((size_t)(writer - str) == length);
+		mirb_debug_assert((size_t)(writer - str) == length);
 		*writer = 0;
 	}
 
@@ -94,7 +94,7 @@ namespace Mirb
 							{
 								lexeme.stop = &input;
 								parser.report(lexeme.dup(memory_pool), "Unterminated string");
-								goto done;
+								goto error;
 							}
 							else
 								input++;
@@ -114,14 +114,17 @@ namespace Mirb
 					{
 						lexeme.stop = &input;
 						parser.report(lexeme.dup(memory_pool), "Unterminated string");
-						goto done;
+						goto error;
 					}
-					else
-						report_null();
 				
 				default:
 					input++;		
 			}
+
+		error:
+		lexeme.stop = &input;
+		lexeme.c_str = (const char_t *)"";
+		return;
 		
 		done:
 		lexeme.stop = &input;
@@ -229,7 +232,7 @@ namespace Mirb
 			}
 			
 		done:
-		assert((size_t)(writer - str) == length);
+		mirb_debug_assert((size_t)(writer - str) == length);
 		*writer = 0;
 	}
 
@@ -306,7 +309,7 @@ namespace Mirb
 								lexeme.stop = &input;
 
 								parser.report(lexeme.dup(memory_pool), "Unterminated string");
-								goto done;
+								goto error;
 							}
 							else
 								input++;
@@ -322,19 +325,22 @@ namespace Mirb
 					break;
 
 				case 0:
-					if(process_null(&input, true))
+					if(process_null(&input))
 					{
 						overhead -= 1;
 						lexeme.stop = &input;
 						parser.report(lexeme.dup(memory_pool), "Unterminated string");
-						goto done;
+						goto error;
 					}
-					else
-						report_null();
 				
 				default:
 					input++;		
 			}
+		
+		error:
+		lexeme.stop = &input;
+		lexeme.c_str = (const char_t *)"";
+		return;
 		
 		done:
 		lexeme.stop = &input;

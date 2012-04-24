@@ -36,7 +36,7 @@ namespace Mirb
 	{
 		bool result = (size_t)(input - input_str) >= length;
 		
-		if(result && !expected)
+		if(!result && !expected)
 			report_null();
 			
 		return result;

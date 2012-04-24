@@ -1,7 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "char-array.hpp" 
-#include "object-header.hpp" 
+#include "collector.hpp" 
 
 namespace Mirb
 {
@@ -11,7 +11,7 @@ namespace Mirb
 		public ObjectHeader
 	{
 		public:
-			Document() : ObjectHeader(Value::Document) {}
+			Document() : ObjectHeader(Value::InternalDocument) {}
 
 			const char_t *data;
 			size_t length;

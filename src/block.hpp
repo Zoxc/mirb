@@ -5,7 +5,7 @@
 #include <Prelude/List.hpp>
 #include "gc.hpp"
 #include "vm.hpp"
-#include "object-header.hpp"
+#include "collector.hpp"
 
 struct exception_block;
 
@@ -64,11 +64,11 @@ namespace Mirb
 	class Range;
 	class Document;
 
-	class Block: // TODO: Pin or create a dummy class which references the real one. Blocks are currently hardcoded in generated assembly.
-		public ConstantHeader<Value::InternalBlock>
+	class Block:
+		public PinnedHeader
 	{
 		public:
-			Block(Document *document) : document(document), opcodes(nullptr), source_location(2) {}
+			Block(Document *document) : PinnedHeader(Value::InternalBlock), document(document), opcodes(nullptr), source_location(2) {}
 
 			typedef value_t (*executor_t)(Frame &frame);
 

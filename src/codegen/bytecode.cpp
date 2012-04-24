@@ -256,6 +256,7 @@ namespace Mirb
 			to_bytecode(node->right, group[0]);
 			
 			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (Mirb::Block *)0, group.size, group.use());
+			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, var_t var)
@@ -559,7 +560,7 @@ namespace Mirb
 
 				//block_push(block, B_TEST_PROC, 0, 0, 0);
 				//block_push(block, B_JMPNE, label, 0, 0);
-				gen<UnwindReturnOp>(temp, scope->owner->block->final);
+				gen<UnwindReturnOp>(temp, scope->owner->final);
 				location(node->range);
 
 				//block_emmit_label(block, label);
@@ -740,7 +741,7 @@ namespace Mirb
 			scope = 0;
 
 			block = new (memory_pool) Block(memory_pool);
-			block->final = Collector::allocate<Mirb::Block>(scope->document);
+			block->final = Collector::allocate_pinned<Mirb::Block>(scope->document);
 
 			return block;
 		}
@@ -755,11 +756,9 @@ namespace Mirb
 				block->final = scope->final;
 			else
 			{
-				block->final = Collector::allocate<Mirb::Block>(scope->document);
+				block->final = Collector::allocate_pinned<Mirb::Block>(scope->document);
 				scope->final = block->final;
 			}
-			
-			scope->block = block;
 			
 			block->return_var = create_var();
 

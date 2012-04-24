@@ -42,10 +42,10 @@ namespace Mirb
 		{
 			const size_t block_size = Tree::Chunk::block_size; // TODO: Remove workaround for G++ bug?
 			
-			fragment = Collector::allocate<Tree::Fragment>(fragment, block_size);
+			fragment = new Tree::Fragment(fragment, block_size);
 		}
 		
-		return scope = new (fragment) Tree::Scope(&document, *fragment, scope, type);
+		return scope = Collector::allocate<Tree::Scope>(&document, *fragment, scope, type);
 	}
 	
 	void Parser::error(std::string text)

@@ -58,7 +58,7 @@ namespace Mirb
 
 	Block *Compiler::defer(Tree::Scope *scope)
 	{
-		Block *block = Collector::allocate<Block>(scope->document);
+		Block *block = Collector::allocate_pinned<Block>(scope->document);
 		
 		scope->final = block;
 		block->scope = scope;

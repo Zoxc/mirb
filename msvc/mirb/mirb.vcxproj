@@ -49,7 +49,6 @@
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\method.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
-    <ClInclude Include="..\..\src\object-header.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
@@ -97,7 +96,6 @@
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\method.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
-    <ClCompile Include="..\..\src\object-header.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />

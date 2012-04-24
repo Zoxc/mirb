@@ -35,7 +35,6 @@ namespace Mirb
 		};
 		
 		class Fragment:
-			public ConstantHeader<Value::InternalFragment>,
 			public WithReferenceProvider<Fragment>
 		{
 			public:
@@ -148,7 +147,8 @@ namespace Mirb
 		
 		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
-		class Scope
+		class Scope:
+			public ObjectHeader
 		{
 			public:
 				enum Type
@@ -162,7 +162,6 @@ namespace Mirb
 				
 				Scope(Document *document, Fragment &fragment, Scope *parent, Type type);
 				
-				CodeGen::Block *block;
 				Document *document;
 				Block *final;
 				Fragment *fragment;

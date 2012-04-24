@@ -49,7 +49,7 @@ namespace Mirb
 
 	Block *generate_block(size_t flags, value_t module, Symbol *name, Block::executor_t executor, void *function)
 	{
-		Block *result = Collector::allocate<Block>(nullptr);
+		Block *result = Collector::allocate_pinned<Block>(nullptr);
 
 		result->opcodes = (const char *)function;
 		result->name = name;

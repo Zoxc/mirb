@@ -1,30 +1,95 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/FastList.hpp>
-#include "object-header.hpp"
+#include "value.hpp"
 
 namespace Mirb
 {
+	class BasicObjectHeader
+	{
+		private:
+			#ifdef DEBUG
+				size_t magic;
+			#endif
+
+			const Value::Type type;
+			static bool inverted;
+
+			friend class Collector;
+		public:
+			ListEntry<BasicObjectHeader> header_entry;
+
+			BasicObjectHeader(Value::Type type);
+			
+			Value::Type get_type();
+	};
+
+	class ObjectHeader:
+		public BasicObjectHeader
+	{
+		private:
+		public:
+			ObjectHeader(Value::Type type) : BasicObjectHeader(type) {}
+	};
+
+	// PinnedHeader are objects with a fixed memory address
+
+	class PinnedHeader:
+		public BasicObjectHeader
+	{
+		public:
+			PinnedHeader(Value::Type type) : BasicObjectHeader(type) {}
+	};
+
 	class Collector
 	{
 		private:
 			template<class T> static void *allocate_object()
 			{
-				(void)static_cast<ObjectHeader *>((T *)0); // Make sure the object contains an header
+				allocated += sizeof(T);
+
+
+				if(allocated > 0x1000)
+					collect();
 
 				return std::malloc(sizeof(T));
 			}
-
+			
 			template<class T> static T *setup_object(T *object)
 			{
+				(void)static_cast<ObjectHeader *>((T *)0); // Make sure the object contains an header
+
 				object_list.append(object);
 
 				return object;
 			}
 
-			static FastList<ObjectHeader, ObjectHeader, &ObjectHeader::header_entry> object_list;
+			template<class T> static T *setup_pinned_object(T *object)
+			{
+				(void)static_cast<PinnedHeader *>((T *)0); // Make sure the object contains an header
+
+				pinned_object_list.append(object);
+
+				return object;
+			}
+			
+			static size_t allocated;
+			static FastList<ObjectHeader, BasicObjectHeader, &BasicObjectHeader::header_entry> object_list;
+			static FastList<PinnedHeader, BasicObjectHeader, &BasicObjectHeader::header_entry> pinned_object_list;
 
 		public:
+			static void collect();
+
+			template<class T> static T *allocate_pinned()
+			{
+				return setup_pinned_object<T>(new (allocate_object<T>()) T());
+			}
+			
+			template<class T, typename Arg1> static T *allocate_pinned(Arg1&& arg1)
+			{
+				return setup_pinned_object<T>(new (allocate_object<T>()) T(std::forward<Arg1>(arg1)));
+			}
+			
 			template<class T> static T *allocate()
 			{
 				return setup_object<T>(new (allocate_object<T>()) T());

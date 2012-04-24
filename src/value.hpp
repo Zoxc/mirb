@@ -5,6 +5,13 @@
 
 namespace Mirb
 {
+	namespace Tree
+	{
+		class Scope;
+	}
+
+	class Document;
+	class Block;
 	class Object;
 	class ObjectHeader;
 	class Module;
@@ -13,8 +20,9 @@ namespace Mirb
 	class String;
 	class Array;
 	class Exception;
+	class ReturnException;
+	class BreakException;
 	class Proc;
-	struct value_view;
 
 	/* Format for tagged pointers
 	 *
@@ -55,14 +63,13 @@ namespace Mirb
 	{
 		enum Type {
 			None,
-			Document,
+			InternalDocument,
 			InternalBlock,
-			InternalFragment,
+			InternalScope,
 			Fixnum,
 			True,
 			False,
 			Nil,
-			Main,
 			Class,
 			IClass,
 			Module,
@@ -76,28 +83,114 @@ namespace Mirb
 			BreakException,
 		};
 
+		template<Type type> struct TypeClass
+		{
+			typedef value_t Class;
+		};
+		
+		template<template<typename,Type> class T, class A, typename Arg> auto virtual_do(Type type, Arg arg) -> decltype(T<A, None>::func(arg))
+		{
+			switch(type)
+			{
+				case InternalDocument:
+					return T<A, InternalDocument>::func(arg);
+
+				case InternalBlock:
+					return T<A, InternalBlock>::func(arg);
+
+				case InternalScope:
+					return T<A, InternalScope>::func(arg);
+
+				case Fixnum:
+					return T<A, Fixnum>::func(arg);
+
+				case True:
+					return T<A, True>::func(arg);
+
+				case False:
+					return T<A, False>::func(arg);
+
+				case Nil:
+					return T<A, Nil>::func(arg);
+					
+				case Class:
+					return T<A, Class>::func(arg);
+
+				case IClass:
+					return T<A, IClass>::func(arg);
+
+				case Module:
+					return T<A, Module>::func(arg);
+
+				case Object:
+					return T<A, Object>::func(arg);
+
+				case Symbol:
+					return T<A, Symbol>::func(arg);
+
+				case String:
+					return T<A, String>::func(arg);
+
+				case Array:
+					return T<A, Array>::func(arg);
+
+				case Proc:
+					return T<A, Proc>::func(arg);
+
+				case Exception:
+					return T<A, Exception>::func(arg);
+
+				case ReturnException:
+					return T<A, ReturnException>::func(arg);
+
+				case BreakException:
+					return T<A, BreakException>::func(arg);
+
+				case None:
+				default:
+					mirb_debug_abort("Unknown value type");
+			};
+		}
+
+		template<> struct TypeClass<InternalDocument> { typedef Mirb::Document Class; };
+		template<> struct TypeClass<InternalBlock> { typedef Mirb::Block Class; };
+		template<> struct TypeClass<InternalScope> { typedef Mirb::Tree::Scope Class; };
+		template<> struct TypeClass<Class> { typedef Mirb::Class Class; };
+		template<> struct TypeClass<IClass> { typedef Mirb::Class Class; };
+		template<> struct TypeClass<Module> { typedef Mirb::Module Class; };
+		template<> struct TypeClass<Object> { typedef Mirb::Object Class; };
+		template<> struct TypeClass<Symbol> { typedef Mirb::Symbol Class; };
+		template<> struct TypeClass<String> { typedef Mirb::String Class; };
+		template<> struct TypeClass<Array> { typedef Mirb::Array Class; };
+		template<> struct TypeClass<Proc> { typedef Mirb::Proc Class; };
+		template<> struct TypeClass<Exception> { typedef Mirb::Exception Class; };
+		template<> struct TypeClass<ReturnException> { typedef Mirb::ReturnException Class; };
+		template<> struct TypeClass<BreakException> { typedef Mirb::BreakException Class; };
+
 		bool object_ref(value_t value);
 		
 		value_t class_of_literal(value_t value);
 
 		bool test(value_t value);
 
-		template<class T> bool of_type(value_t value)
+		template<class T> struct OfType
 		{
-			return false;
-		}
-		
-		template<> bool of_type<Mirb::Object>(value_t value);
-		template<> bool of_type<Mirb::Module>(value_t value);
-		template<> bool of_type<Mirb::Class>(value_t value);
-		template<> bool of_type<Mirb::Symbol>(value_t value);
-		template<> bool of_type<Mirb::String>(value_t value);
-		template<> bool of_type<Mirb::Array>(value_t value);
-		template<> bool of_type<Mirb::Exception>(value_t value);
-		template<> bool of_type<Mirb::Proc>(value_t value);
+			template<class A, Type type> struct Test
+			{
+				bool func(bool dummy)
+				{
+					return std::is_base_of<typename TypeClass<type>::Class, T>::value;
+				}
+			};
+		};
 
 		Type type(value_t value);
-
+		
+		template<class T> bool of_type(value_t value)
+		{
+			return virtual_do<OfType<T>::template Test, bool, bool>(type(value), true);
+		}
+		
 		void initialize();
 	};
 	

@@ -5,6 +5,7 @@ namespace Mirb
 	namespace Tree
 	{
 		Scope::Scope(Document *document, Fragment &fragment, Scope *parent, Type type) :
+			ObjectHeader(Value::InternalScope),
 			document(document),
 			final(0),
 			fragment(&fragment),
