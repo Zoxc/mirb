@@ -57,7 +57,7 @@ namespace Mirb
 			
 			template<class T> static T *setup_object(T *object)
 			{
-				(void)static_cast<ObjectHeader *>((T *)0); // Make sure the object contains an header
+				static_assert(std::is_base_of<ObjectHeader, T>::value, "T must be a ObjectHeader");
 
 				object_list.append(object);
 
@@ -66,7 +66,7 @@ namespace Mirb
 
 			template<class T> static T *setup_pinned_object(T *object)
 			{
-				(void)static_cast<PinnedHeader *>((T *)0); // Make sure the object contains an header
+				static_assert(std::is_base_of<PinnedHeader, T>::value, "T must be a PinnedHeader");
 
 				pinned_object_list.append(object);
 

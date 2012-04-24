@@ -83,112 +83,159 @@ namespace Mirb
 			BreakException,
 		};
 
-		template<Type type> struct TypeClass
-		{
-			typedef value_t Class;
-		};
-		
-		template<template<typename,Type> class T, class A, typename Arg> auto virtual_do(Type type, Arg arg) -> decltype(T<A, None>::func(arg))
-		{
-			switch(type)
-			{
-				case InternalDocument:
-					return T<A, InternalDocument>::func(arg);
-
-				case InternalBlock:
-					return T<A, InternalBlock>::func(arg);
-
-				case InternalScope:
-					return T<A, InternalScope>::func(arg);
-
-				case Fixnum:
-					return T<A, Fixnum>::func(arg);
-
-				case True:
-					return T<A, True>::func(arg);
-
-				case False:
-					return T<A, False>::func(arg);
-
-				case Nil:
-					return T<A, Nil>::func(arg);
-					
-				case Class:
-					return T<A, Class>::func(arg);
-
-				case IClass:
-					return T<A, IClass>::func(arg);
-
-				case Module:
-					return T<A, Module>::func(arg);
-
-				case Object:
-					return T<A, Object>::func(arg);
-
-				case Symbol:
-					return T<A, Symbol>::func(arg);
-
-				case String:
-					return T<A, String>::func(arg);
-
-				case Array:
-					return T<A, Array>::func(arg);
-
-				case Proc:
-					return T<A, Proc>::func(arg);
-
-				case Exception:
-					return T<A, Exception>::func(arg);
-
-				case ReturnException:
-					return T<A, ReturnException>::func(arg);
-
-				case BreakException:
-					return T<A, BreakException>::func(arg);
-
-				case None:
-				default:
-					mirb_debug_abort("Unknown value type");
-			};
-		}
-
-		template<> struct TypeClass<InternalDocument> { typedef Mirb::Document Class; };
-		template<> struct TypeClass<InternalBlock> { typedef Mirb::Block Class; };
-		template<> struct TypeClass<InternalScope> { typedef Mirb::Tree::Scope Class; };
-		template<> struct TypeClass<Class> { typedef Mirb::Class Class; };
-		template<> struct TypeClass<IClass> { typedef Mirb::Class Class; };
-		template<> struct TypeClass<Module> { typedef Mirb::Module Class; };
-		template<> struct TypeClass<Object> { typedef Mirb::Object Class; };
-		template<> struct TypeClass<Symbol> { typedef Mirb::Symbol Class; };
-		template<> struct TypeClass<String> { typedef Mirb::String Class; };
-		template<> struct TypeClass<Array> { typedef Mirb::Array Class; };
-		template<> struct TypeClass<Proc> { typedef Mirb::Proc Class; };
-		template<> struct TypeClass<Exception> { typedef Mirb::Exception Class; };
-		template<> struct TypeClass<ReturnException> { typedef Mirb::ReturnException Class; };
-		template<> struct TypeClass<BreakException> { typedef Mirb::BreakException Class; };
-
 		bool object_ref(value_t value);
 		
 		value_t class_of_literal(value_t value);
 
 		bool test(value_t value);
 
-		template<class T> struct OfType
+		Type type(value_t value);
+		
+		template<template<Type> class T, typename Arg> auto virtual_do(Type type, Arg &&arg) -> typename T<None>::Result
 		{
-			template<class A, Type type> struct Test
+			switch(type)
 			{
-				bool func(bool dummy)
+				case InternalDocument:
+					return T<InternalDocument>::func(std::forward<Arg>(arg));
+
+				case InternalBlock:
+					return T<InternalBlock>::func(std::forward<Arg>(arg));
+
+				case InternalScope:
+					return T<InternalScope>::func(std::forward<Arg>(arg));
+
+				case Fixnum:
+					return T<Fixnum>::func(std::forward<Arg>(arg));
+
+				case True:
+					return T<True>::func(std::forward<Arg>(arg));
+
+				case False:
+					return T<False>::func(std::forward<Arg>(arg));
+
+				case Nil:
+					return T<Nil>::func(std::forward<Arg>(arg));
+					
+				case Class:
+					return T<Class>::func(std::forward<Arg>(arg));
+
+				case IClass:
+					return T<IClass>::func(std::forward<Arg>(arg));
+
+				case Module:
+					return T<Module>::func(std::forward<Arg>(arg));
+
+				case Object:
+					return T<Object>::func(std::forward<Arg>(arg));
+
+				case Symbol:
+					return T<Symbol>::func(std::forward<Arg>(arg));
+
+				case String:
+					return T<String>::func(std::forward<Arg>(arg));
+
+				case Array:
+					return T<Array>::func(std::forward<Arg>(arg));
+
+				case Proc:
+					return T<Proc>::func(std::forward<Arg>(arg));
+
+				case Exception:
+					return T<Exception>::func(std::forward<Arg>(arg));
+
+				case ReturnException:
+					return T<ReturnException>::func(std::forward<Arg>(arg));
+
+				case BreakException:
+					return T<BreakException>::func(std::forward<Arg>(arg));
+
+				case None:
+				default:
+					mirb_debug_abort("Unknown value type");
+			};
+		}
+		
+		template<Type type> struct TypeClass {};
+		
+		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
+		
+		mirb_typeclass(InternalDocument, Document);
+		mirb_typeclass(InternalBlock, Block);
+		mirb_typeclass(InternalScope, Tree::Scope);
+		mirb_typeclass(Fixnum, value_t);
+		mirb_typeclass(True, value_t);
+		mirb_typeclass(False, value_t);
+		mirb_typeclass(Nil, value_t);
+		mirb_typeclass(Class, Class);
+		mirb_typeclass(IClass, Class);
+		mirb_typeclass(Module, Module);
+		mirb_typeclass(Object, Object);
+		mirb_typeclass(Symbol, Symbol);
+		mirb_typeclass(String, String);
+		mirb_typeclass(Array, Array);
+		mirb_typeclass(Proc, Proc);
+		mirb_typeclass(Exception, Exception);
+		mirb_typeclass(ReturnException, ReturnException);
+		mirb_typeclass(BreakException, BreakException);
+
+		template<class B, class D> struct DerivedFrom
+		{
+			static const bool value = false;
+		};
+
+		#define mirb_derived_from(base, super) template<> struct DerivedFrom<Mirb::base, Mirb::super> { static const bool value = true; }
+		
+		mirb_derived_from(Object, Object);
+		mirb_derived_from(Object, Module);
+		mirb_derived_from(Object, Class);
+		mirb_derived_from(Object, Array);
+		mirb_derived_from(Object, String);
+		mirb_derived_from(Object, Symbol);
+		mirb_derived_from(Object, Proc);
+		mirb_derived_from(Object, Exception);
+		mirb_derived_from(Object, ReturnException);
+		mirb_derived_from(Object, BreakException);
+		
+		mirb_derived_from(Module, Module);
+		mirb_derived_from(Module, Class);
+
+		mirb_derived_from(Class, Class);
+		
+		mirb_derived_from(String, String);
+		
+		mirb_derived_from(Symbol, Symbol);
+		
+		mirb_derived_from(Proc, Proc);
+		
+		mirb_derived_from(Exception, Exception);
+		mirb_derived_from(Exception, ReturnException);
+		mirb_derived_from(Exception, BreakException);
+
+		mirb_derived_from(ReturnException, ReturnException);
+		mirb_derived_from(ReturnException, BreakException);
+
+		mirb_derived_from(BreakException, BreakException);
+		
+		mirb_derived_from(Array, Array);
+
+		template<class Base> struct OfType
+		{
+			template<Type type> struct Test
+			{
+				typedef bool Result;
+
+				static bool func(bool dummy)
 				{
-					return std::is_base_of<typename TypeClass<type>::Class, T>::value;
+					return DerivedFrom<Base, typename TypeClass<type>::Class>::value;
 				}
 			};
 		};
 
-		Type type(value_t value);
-		
 		template<class T> bool of_type(value_t value)
 		{
-			return virtual_do<OfType<T>::template Test, bool, bool>(type(value), true);
+			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
+
+			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
 		}
 		
 		void initialize();
@@ -205,94 +252,21 @@ namespace Mirb
 			this->value = value ? value_true : value_false;
 		}
 		
-		auto_cast(Object *obj) : value((value_t)obj)
+		template<class T> auto_cast(T *obj) : value((value_t)obj)
 		{
-			mirb_debug_assert(Value::of_type<Object>(value));
-		}
+			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
 
-		auto_cast(Module *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Module>(value));
-		}
-
-		auto_cast(Class *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Class>(value));
-		}
-		
-		auto_cast(Symbol *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Symbol>(value));
-		}
-		
-		auto_cast(String *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<String>(value));
-		}
-
-		auto_cast(Array *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Array>(value));
-		}
-		
-		auto_cast(Exception *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Exception>(value));
-		}
-
-		auto_cast(Proc *obj) : value((value_t)obj)
-		{
-			mirb_debug_assert(Value::of_type<Proc>(value));
+			mirb_debug_assert(Value::of_type<T>(value));
 		}
 
 		operator value_t() { return value; }
 		
-		operator Object *()
+		template<class T> operator T *()
 		{
-			mirb_debug_assert(Value::of_type<Object>(value));
-			return (Object *)value;
-		}
+			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
 
-		operator Module *()
-		{
-			mirb_debug_assert(Value::of_type<Module>(value));
-			return (Module *)value;
-		}
-
-		operator Class *()
-		{
-			mirb_debug_assert(Value::of_type<Class>(value));
-			return (Class *)value;
-		}
-
-		operator Symbol *()
-		{
-			mirb_debug_assert(Value::of_type<Symbol>(value));
-			return (Symbol *)value;
-		}
-
-		operator String *()
-		{
-			mirb_debug_assert(Value::of_type<String>(value));
-			return (String *)value;
-		}
-		
-		operator Array *()
-		{
-			mirb_debug_assert(Value::of_type<Array>(value));
-			return (Array *)value;
-		}
-		
-		operator Exception *()
-		{
-			mirb_debug_assert(Value::of_type<Exception>(value));
-			return (Exception *)value;
-		}
-		
-		operator Proc *()
-		{
-			mirb_debug_assert(Value::of_type<Proc>(value));
-			return (Proc *)value;
+			mirb_debug_assert(Value::of_type<T>(value));
+			return (T *)value;
 		}
 	};
 
@@ -301,7 +275,7 @@ namespace Mirb
 		mirb_debug_assert(Value::of_type<T>(obj));
 		return (T *)obj;
 	}
-	
+
 	class ValueMapFunctions:
 		public MapFunctions<value_t, value_t>
 	{
@@ -314,4 +288,3 @@ namespace Mirb
 
 	typedef Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
 };
-
