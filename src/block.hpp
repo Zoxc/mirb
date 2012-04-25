@@ -4,6 +4,7 @@
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
 #include "vm.hpp"
+#include "allocator.hpp"
 #include "collector.hpp"
 
 struct exception_block;
@@ -87,7 +88,7 @@ namespace Mirb
 			
 			var_t *break_targets;
 			
-			Vector<Block *, Collector::Allocator> blocks; // A list of child blocks so the GC won't free them.
+			Vector<Block *, Allocator> blocks; // A list of child blocks so the GC won't free them.
 
 			template<typename F> void mark(F mark)
 			{

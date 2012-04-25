@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	value_t Symbol::class_ref;
-	
 	Symbol *Symbol::from_string(const char *string)
 	{
 		return symbol_pool.get(string);
@@ -40,8 +38,8 @@ namespace Mirb
 
 	void Symbol::initialize()
 	{
-		static_method<Arg::Self>(Symbol::class_ref, "to_s", &to_s);
-		static_method<Arg::Self>(Symbol::class_ref, "inspect", &inspect);
+		static_method<Arg::Self>(context->symbol_class, "to_s", &to_s);
+		static_method<Arg::Self>(context->symbol_class, "inspect", &inspect);
 	}
 };
 

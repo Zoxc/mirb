@@ -3,48 +3,6 @@
 
 namespace Mirb
 {
-	namespace StandardError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-	
-	namespace NameError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-
-	namespace TypeError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-
-	namespace ArgumentError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-	
-	namespace RuntimeError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-	
-	namespace LocalJumpError
-	{
-		extern value_t class_ref;
-
-		void initialize();
-	};
-
 	void initialize_exceptions();
 	
 	class ReturnException:

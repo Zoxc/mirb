@@ -16,11 +16,9 @@ namespace Mirb
 
 		public:
 			Array(value_t instance_of) : Object(Value::Array, instance_of) {}
-			Array() : Object(Value::Array, class_ref) {}
+			Array() : Object(Value::Array, context->array_class) {}
 
-			Vector<value_t, Collector::Allocator> vector;
-			
-			static value_t class_ref;
+			Vector<value_t, Allocator> vector;
 			
 			template<typename F> void mark(F mark)
 			{

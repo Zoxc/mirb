@@ -1,7 +1,7 @@
 #pragma once
 #include "../value.hpp"
 #include "../block.hpp"
-#include "../collector.hpp"
+#include "../allocator.hpp"
 
 namespace Mirb
 {
@@ -30,11 +30,9 @@ namespace Mirb
 			ValueMap *vars;
 
 			static const size_t vars_initial = 2;
-
-			static value_t class_ref;
-
-			static void initialize();
 			
+			static void initialize();
+
 			template<typename F> void mark(F mark)
 			{
 				mark(instance_of);
@@ -59,7 +57,7 @@ namespace Mirb
 		public:
 			ValueMap() : Value::Header(Value::InternalValueMap), map(Object::vars_initial) {}
 
-			Map<value_t, value_t, Collector::Allocator, ValueMapFunctions> map;
+			Map<value_t, value_t, Allocator, ValueMapFunctions> map;
 			
 			template<typename F> void mark(F mark)
 			{

@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	value_t Exception::class_ref;
-	
 	value_t Exception::allocate(value_t obj)
 	{
 		return auto_cast(Collector::allocate<Exception>(Value::Exception, obj, value_nil, value_nil));
@@ -30,13 +28,13 @@ namespace Mirb
 
 	void Exception::initialize()
 	{
-		Exception::class_ref = define_class(Object::class_ref, "Exception", Object::class_ref);
+		context->exception_class = define_class(context->object_class, "Exception", context->object_class);
 
-		singleton_method<Arg::Self>(Exception::class_ref, "allocate", &allocate);
+		singleton_method<Arg::Self>(context->exception_class, "allocate", &allocate);
 
-		static_method<Arg::Self, Arg::Value>(Exception::class_ref, "initialize", &method_initialize);
-		static_method<Arg::Self>(Exception::class_ref, "message", &to_s);
-		static_method<Arg::Self>(Exception::class_ref, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Value>(context->exception_class, "initialize", &method_initialize);
+		static_method<Arg::Self>(context->exception_class, "message", &to_s);
+		static_method<Arg::Self>(context->exception_class, "to_s", &to_s);
 	}
 };
 

@@ -38,7 +38,7 @@ namespace Mirb
 			{
 				if(!any && params != frame.argc)
 				{
-					Mirb::raise(ArgumentError::class_ref, "Wrong number of arguments " + CharArray::uint(params) + " expected, " + CharArray::uint(frame.argc) + " provided");
+					Mirb::raise(context->argument_error, "Wrong number of arguments " + CharArray::uint(params) + " expected, " + CharArray::uint(frame.argc) + " provided");
 					error = true;
 				}
 			}
@@ -108,7 +108,7 @@ namespace Mirb
 					if(!Mirb::Value::of_type<T>(result))
 					{
 						state.error = true;
-						type_error(result, T::class_ref);
+						type_error(result, value_nil);
 						return value_raise;
 					}
 					else
@@ -304,25 +304,25 @@ namespace Mirb
 	template<class Object, value_t (Object::*function)(), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *) = &Arg::call_method<Object, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
+		return generate_method(Method::Internal | flags, context->object_class, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, value_t (Object::*function)(typename Arg1::type arg1), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type) = &Arg::call_method<Object, typename Arg1::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
+		return generate_method<Arg1>(Method::Internal | flags, context->object_class, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, typename Arg2, value_t (Object::*function)(typename Arg1::type arg1, typename Arg2::type arg2), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type, typename Arg2::type) = &Arg::call_method<Object, typename Arg1::type, typename Arg2::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1, Arg2>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
+		return generate_method<Arg1, Arg2>(Method::Internal | flags, context->object_class, symbol_cast(name), (void *)stub);
 	}
 	
 	template<class Object, typename Arg1, typename Arg2, typename Arg3, value_t (Object::*function)(typename Arg1::type arg1, typename Arg2::type arg2, typename Arg3::type arg3), typename N> Block *method(N &&name, size_t flags = 0)
 	{
 		value_t (*stub)(Object *, typename Arg1::type, typename Arg2::type, typename Arg3::type) = &Arg::call_method<Object, typename Arg1::type, typename Arg2::type, typename Arg3::type, function>; // TODO: Fix workaround for VC++ bug?
-		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, Object::class_ref, symbol_cast(name), (void *)stub);
+		return generate_method<Arg1, Arg2, Arg3>(Method::Internal | flags, context->object_class, symbol_cast(name), (void *)stub);
 	}
 	*/
 	template<typename N, typename F> Block *static_method(value_t module, N &&name, F function, size_t flags = 0)

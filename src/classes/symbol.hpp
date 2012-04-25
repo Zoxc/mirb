@@ -16,7 +16,7 @@ namespace Mirb
 			static value_t inspect(value_t obj);
 
 		public:
-			Symbol(const CharArray &char_array) : Object(Value::Symbol, class_ref), string(char_array) {}
+			Symbol(const CharArray &char_array) : Object(Value::Symbol, context->symbol_class), string(char_array) {}
 
 			CharArray string;
 
@@ -47,8 +47,6 @@ namespace Mirb
 
 				return from_char_array(char_array);
 			}
-
-			static value_t class_ref;
 
 			static void initialize();
 	};

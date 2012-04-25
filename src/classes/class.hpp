@@ -19,8 +19,6 @@ namespace Mirb
 
 			bool singleton;
 
-			static value_t class_ref;
-			
 			template<typename F> void mark(F mark)
 			{
 				Module::mark(mark);

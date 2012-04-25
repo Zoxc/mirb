@@ -12,8 +12,6 @@ namespace Mirb
 		value_t mul(value_t obj, value_t other);
 		value_t div(value_t obj, value_t other);
 		
-		extern value_t class_ref;
-		
 		value_t from_size_t(size_t value);
 		size_t to_size_t(value_t obj);
 		

@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	value_t Fixnum::class_ref;
-	
 	static value_t int_to_fix(size_t imm)
 	{
 		return (value_t)((imm << 1) | 1);
@@ -78,13 +76,13 @@ namespace Mirb
 
 	void Fixnum::initialize()
 	{
-		static_method<Arg::Self>(Fixnum::class_ref, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Block>(Fixnum::class_ref, "times", &times);
+		static_method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
 
-		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "+", &add);
-		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "-", &sub);
-		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "*", &mul);
-		static_method<Arg::Self, Arg::Value>(Fixnum::class_ref, "/", &div);
+		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "+", &add);
+		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "-", &sub);
+		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "*", &mul);
+		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "/", &div);
 	}
 };
 

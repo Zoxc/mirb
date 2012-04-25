@@ -32,9 +32,11 @@
     <ClInclude Include="..\..\src\codegen\dot-printer.hpp" />
     <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
     <ClInclude Include="..\..\src\codegen\printer.hpp" />
+    <ClInclude Include="..\..\src\allocator.hpp" />
     <ClInclude Include="..\..\src\collector.hpp" />
     <ClInclude Include="..\..\src\common.hpp" />
     <ClInclude Include="..\..\src\compiler.hpp" />
+    <ClInclude Include="..\..\src\context.hpp" />
     <ClInclude Include="..\..\src\document.hpp" />
     <ClInclude Include="..\..\src\generic\benchmark.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
@@ -60,6 +62,7 @@
     <ClInclude Include="..\..\src\vm.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\allocator.cpp" />
     <ClCompile Include="..\..\src\block.cpp" />
     <ClCompile Include="..\..\src\char-array.cpp" />
     <ClCompile Include="..\..\src\classes\array.cpp" />
@@ -81,6 +84,7 @@
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\collector.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
+    <ClCompile Include="..\..\src\context.cpp" />
     <ClCompile Include="..\..\src\document.cpp" />
     <ClCompile Include="..\..\src\generic\benchmark.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />

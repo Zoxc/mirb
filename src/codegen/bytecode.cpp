@@ -190,7 +190,7 @@ namespace Mirb
 			if(node->obj)
 				to_bytecode(node->obj, var);
 			else if(is_var(var))
-				gen<LoadOp>(var, Object::class_ref);
+				gen<LoadOp>(var, context->object_class);
 			
 			gen<GetConstOp>(var, var, node->name);
 			location(node->range);
@@ -361,7 +361,7 @@ namespace Mirb
 					if(variable->obj)
 						to_bytecode(variable->obj, obj);
 					else
-						gen<LoadOp>(obj, Object::class_ref);
+						gen<LoadOp>(obj, context->object_class);
 					
 					to_bytecode(node->right, value);
 					

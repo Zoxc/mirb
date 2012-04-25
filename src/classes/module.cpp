@@ -4,8 +4,6 @@
 
 namespace Mirb
 {
-	value_t Module::class_ref;
-
 	ValueMap *Module::get_methods()
 	{
 		if(prelude_unlikely(!methods))
@@ -44,7 +42,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i],  Module::class_ref))
+			if(type_error(argv[i],  context->module_class))
 				return value_raise;
 
 			if(call(argv[i], "append_features", 1, &obj) == value_raise)
@@ -59,10 +57,10 @@ namespace Mirb
 	
 	void Module::initialize()
 	{
-		static_method<Arg::Self>(Module::class_ref, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Class<Module>>(Module::class_ref, "append_features", &append_features);
-		static_method<Arg::Self, Arg::Count, Arg::Values>(Module::class_ref, "include", &include);
-		static_method<Arg::Class<Module>>(Module::class_ref, "included", &included);
+		static_method<Arg::Self>(context->module_class, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "include", &include);
+		static_method<Arg::Class<Module>>(context->module_class, "included", &included);
 	}
 };
 

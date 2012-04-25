@@ -162,7 +162,5 @@ namespace Mirb
 	String *enforce_string(value_t obj);
 	
 	void setup_classes();
-	
-	extern value_t main;
 };
 

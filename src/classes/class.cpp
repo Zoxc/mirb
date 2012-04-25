@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	value_t Class::class_ref;
-
 	Class::Class(value_t module, value_t superclass) : Module(Value::IClass, module, superclass), singleton(false)
 	{
 		methods = cast<Module>(module)->get_methods();
@@ -66,8 +64,8 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		static_method<Arg::Self>(Class::class_ref, "to_s", &to_s);
-		static_method<Arg::Self>(Class::class_ref, "superclass", &method_superclass);
-		static_method<Arg::Self, Arg::Count, Arg::Values>(Class::class_ref, "new", &method_new);
+		static_method<Arg::Self>(context->class_class, "to_s", &to_s);
+		static_method<Arg::Self>(context->class_class, "superclass", &method_superclass);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(context->class_class, "new", &method_new);
 	}
 };

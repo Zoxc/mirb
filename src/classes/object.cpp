@@ -6,7 +6,6 @@
 
 namespace Mirb
 {
-	value_t Object::class_ref;
 	Block *Object::inspect_block;
 
 	value_t Object::allocate(value_t instance_of)
@@ -72,18 +71,18 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
-		static_method(Object::class_ref, "initialize", &dummy);
-		inspect_block = static_method<Arg::Self>(Object::class_ref, "inspect", &inspect);
-		static_method<Arg::Self>(Object::class_ref, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Block>(Object::class_ref, "tap", &tap);
-		static_method<Arg::Self, Arg::Value>(Object::class_ref, "equal?", &equal);
-		static_method<Arg::Self, Arg::Value>(Object::class_ref, "eql?", &equal);
-		static_method<Arg::Self, Arg::Value>(Object::class_ref, "==", &equal);
-		static_method<Arg::Self, Arg::Value>(Object::class_ref, "===", &equal);
-		static_method<Arg::Self, Arg::Value>(Object::class_ref, "!=", &not_equal);
-		static_method<Arg::Self>(Object::class_ref, "!", &method_not);
+		static_method(context->object_class, "initialize", &dummy);
+		inspect_block = static_method<Arg::Self>(context->object_class, "inspect", &inspect);
+		static_method<Arg::Self>(context->object_class, "to_s", &to_s);
+		static_method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
+		static_method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);
+		static_method<Arg::Self, Arg::Value>(context->object_class, "eql?", &equal);
+		static_method<Arg::Self, Arg::Value>(context->object_class, "==", &equal);
+		static_method<Arg::Self, Arg::Value>(context->object_class, "===", &equal);
+		static_method<Arg::Self, Arg::Value>(context->object_class, "!=", &not_equal);
+		static_method<Arg::Self>(context->object_class, "!", &method_not);
 
-		singleton_method<Arg::Self>(Object::class_ref, "allocate", &allocate);
+		singleton_method<Arg::Self>(context->object_class, "allocate", &allocate);
 	}
 };
 

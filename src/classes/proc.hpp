@@ -37,8 +37,6 @@ namespace Mirb
 				mark(&scopes);
 			}
 
-			static value_t class_ref;
-
 			static void initialize();
 	};
 };

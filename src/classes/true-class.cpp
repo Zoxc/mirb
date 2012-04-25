@@ -6,8 +6,6 @@
 
 namespace Mirb
 {
-	value_t TrueClass::class_ref;
-	
 	value_t TrueClass::to_s()
 	{
 		return String::from_literal("true");
@@ -15,9 +13,9 @@ namespace Mirb
 
 	void TrueClass::initialize()
 	{
-		static_method(TrueClass::class_ref, "to_s", &to_s);
+		static_method(context->true_class, "to_s", &to_s);
 
-		set_const(Object::class_ref, Symbol::from_literal("TRUE"), value_true);
+		set_const(context->object_class, Symbol::from_literal("TRUE"), value_true);
 	};
 };
 

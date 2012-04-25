@@ -113,7 +113,7 @@ namespace Mirb
 
 		data[length] = 0;
 
-		value_t result = eval(self, Symbol::from_char_array("in " + filename), class_of(main), (char_t *)data, length, filename);
+		value_t result = eval(self, Symbol::from_char_array("in " + filename), class_of(context->main), (char_t *)data, length, filename);
 
 		free(data);
 		fclose(file);
@@ -123,7 +123,7 @@ namespace Mirb
 	
 	value_t Kernel::load(value_t obj, value_t filename)
 	{
-		return run_file(main, cast<String>(filename)->string);
+		return run_file(context->main, cast<String>(filename)->string);
 	}
 	
 	value_t Kernel::print(size_t argc, value_t argv[])
@@ -174,7 +174,7 @@ namespace Mirb
 			i++;
 		}
 		else
-			instance_of = RuntimeError::class_ref;
+			instance_of = context->runtime_error;
 	
 		if(argc > i)
 		{
@@ -207,9 +207,9 @@ namespace Mirb
 
 	void Kernel::initialize()
 	{
-		Kernel::class_ref = define_module(Object::class_ref, "Kernel");
+		Kernel::class_ref = define_module(context->object_class, "Kernel");
 
-		include_module(Object::class_ref, Kernel::class_ref);
+		include_module(context->object_class, Kernel::class_ref);
 		
 		static_method<Arg::Block>(Kernel::class_ref, "proc", &proc);
 		static_method<Arg::Block>(Kernel::class_ref, "benchmark", &benchmark);

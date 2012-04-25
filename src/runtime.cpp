@@ -20,6 +20,7 @@
 #include "modules/kernel.hpp"
 #include "generic/benchmark.hpp"
 #include "vm.hpp"
+#include "context.hpp"
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -82,7 +83,7 @@ namespace Mirb
 	
 	value_t module_create_bare()
 	{
-		return auto_cast(Collector::allocate<Module>(Value::Module, Module::class_ref, nullptr));
+		return auto_cast(Collector::allocate<Module>(Value::Module, context->module_class, nullptr));
 	}
 
 	value_t define_module(value_t under, Symbol *name)
@@ -176,7 +177,7 @@ namespace Mirb
 
 		CharArray new_path;
 
-		if(under == Object::class_ref)
+		if(under == context->object_class)
 		{
 			new_path = name->string;
 		}
@@ -202,7 +203,7 @@ namespace Mirb
 
 	value_t class_create_bare(value_t super)
 	{
-		return auto_cast(Collector::allocate<Class>(Value::Class, Class::class_ref, super));
+		return auto_cast(Collector::allocate<Class>(Value::Class, context->class_class, super));
 	}
 
 	value_t class_create_singleton(value_t object, value_t super)
@@ -284,7 +285,7 @@ namespace Mirb
 			return true;
 		else
 		{
-			raise(NameError::class_ref, "Object " + inspect_obj(obj) + " can not contain constants");
+			raise(context->name_error, "Object " + inspect_obj(obj) + " can not contain constants");
 
 			return false;
 		}
@@ -316,7 +317,7 @@ namespace Mirb
 		if(result != value_raise)
 			return result;
 			
-		result = lookup(Object::class_ref);
+		result = lookup(context->object_class);
 		if(result != value_raise)
 			return result;
 		
@@ -333,7 +334,7 @@ namespace Mirb
 		if(prelude_likely(result != value_raise))
 			return result;
 		
-		raise(NameError::class_ref, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
+		raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
 
 		return value_raise;
 	}
@@ -395,7 +396,7 @@ namespace Mirb
 
 		if(klass != expected)
 		{
-			raise(TypeError::class_ref, inspect_obj(value) + " is of class " + inspect_obj(class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
+			raise(context->type_error, inspect_obj(value) + " is of class " + inspect_obj(class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
 			return true;
 		}
 		else
@@ -505,7 +506,7 @@ namespace Mirb
 
 		if(prelude_unlikely(!result))
 		{
-			raise(NameError::class_ref, "Undefined method '" + name->string + "' for " + pretty_inspect(obj));
+			raise(context->name_error, "Undefined method '" + name->string + "' for " + pretty_inspect(obj));
 			return 0;
 		}
 
@@ -518,7 +519,7 @@ namespace Mirb
 
 		if(prelude_unlikely(!result))
 		{
-			raise(NameError::class_ref, "No superclass method '" + name->string + "' for " + pretty_inspect(module));
+			raise(context->name_error, "No superclass method '" + name->string + "' for " + pretty_inspect(module));
 			return 0;
 		}
 
@@ -591,7 +592,7 @@ namespace Mirb
 	{
 		if(!Value::of_type<Proc>(obj))
 		{
-			raise(LocalJumpError::class_ref, "No block given");
+			raise(context->local_jump_error, "No block given");
 			return value_raise;
 		}
 
@@ -642,8 +643,6 @@ namespace Mirb
 		return auto_cast(obj);
 	}
 
-	value_t main;
-	
 	value_t main_to_s()
 	{
 		return String::from_literal("main");
@@ -651,48 +650,50 @@ namespace Mirb
 	
 	value_t main_include(size_t argc, value_t argv[])
 	{
-		return Module::include(Object::class_ref, argc, argv);
+		return Module::include(context->object_class, argc, argv);
 	}
 
 	void setup_classes()
 	{
-		Object::class_ref = class_create_bare(nullptr);
-		Module::class_ref = class_create_bare(Object::class_ref);
-		Class::class_ref = class_create_bare(Module::class_ref);
+		context->object_class = class_create_bare(nullptr);
+		context->module_class = class_create_bare(context->object_class);
+		context->class_class = class_create_bare(context->module_class);
 
 		value_t metaclass;
 
-		metaclass = class_create_singleton(Object::class_ref, Class::class_ref);
-		metaclass = class_create_singleton(Module::class_ref, metaclass);
-		class_create_singleton(Class::class_ref, metaclass);
+		metaclass = class_create_singleton(context->object_class, context->class_class);
+		metaclass = class_create_singleton(context->module_class, metaclass);
+		class_create_singleton(context->class_class, metaclass);
 
-		Symbol::class_ref = class_create_unnamed(Object::class_ref);
-		String::class_ref = class_create_unnamed(Object::class_ref);
+		context->symbol_class = class_create_unnamed(context->object_class);
+		context->string_class = class_create_unnamed(context->object_class);
 
-		class_name(Object::class_ref, Object::class_ref, Symbol::from_literal("Object"));
-		class_name(Module::class_ref, Object::class_ref, Symbol::from_literal("Module"));
-		class_name(Class::class_ref, Object::class_ref, Symbol::from_literal("Class"));
-		class_name(Symbol::class_ref, Object::class_ref, Symbol::from_literal("Symbol"));
-		class_name(String::class_ref, Object::class_ref, Symbol::from_literal("String"));
+		class_name(context->object_class, context->object_class, Symbol::from_literal("Object"));
+		class_name(context->module_class, context->object_class, Symbol::from_literal("Module"));
+		class_name(context->class_class, context->object_class, Symbol::from_literal("Class"));
+		class_name(context->symbol_class, context->object_class, Symbol::from_literal("Symbol"));
+		class_name(context->string_class, context->object_class, Symbol::from_literal("String"));
 		
 		// Setup variables required by Value::initialize()
 		
-		NilClass::class_ref = define_class(Object::class_ref, "NilClass", Object::class_ref);
-		FalseClass::class_ref = define_class(Object::class_ref, "FalseClass", Object::class_ref);
-		TrueClass::class_ref = define_class(Object::class_ref, "TrueClass", Object::class_ref);
-		Fixnum::class_ref = define_class(Object::class_ref, "Fixnum", Object::class_ref);
+		context->nil_class = define_class(context->object_class, "NilClass", context->object_class);
+		context->false_class = define_class(context->object_class, "FalseClass", context->object_class);
+		context->true_class = define_class(context->object_class, "TrueClass", context->object_class);
+		context->fixnum_class = define_class(context->object_class, "Fixnum", context->object_class);
 
 		Value::initialize();
 		
-		main = Object::allocate(Object::class_ref);
+		context->main = Object::allocate(context->object_class);
 
-		singleton_method(main, "to_s", &main_to_s);
-		singleton_method<Arg::Count, Arg::Values>(main, "include", &main_include);
+		singleton_method(context->main, "to_s", &main_to_s);
+		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);
 	}
 	
 	void initialize()
 	{
 		std::cout << "Initialized in " << benchmark([] {
+			context = new Context;
+
 			Collector::initialize();
 			Lexer::setup_jump_table();
 

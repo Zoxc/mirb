@@ -19,7 +19,7 @@ namespace Mirb
 				if(i & fixnum_mask)
 				{
 					type_table[i] = Fixnum;
-					class_of_table[i] = Mirb::Fixnum::class_ref;
+					class_of_table[i] = Mirb::context->fixnum_class;
 					continue;
 				}
 
@@ -28,21 +28,21 @@ namespace Mirb
 					case value_nil_num:
 					{
 						type_table[i] = Nil;
-						class_of_table[i] = NilClass::class_ref;
+						class_of_table[i] = context->nil_class;
 						break;
 					}
 
 					case value_false_num:
 					{
 						type_table[i] = False;
-						class_of_table[i] = FalseClass::class_ref;
+						class_of_table[i] = context->false_class;
 						break;
 					}
 
 					case value_true_num:
 					{
 						type_table[i] = True;
-						class_of_table[i] = TrueClass::class_ref;
+						class_of_table[i] = context->true_class;
 						break;
 					}
 
@@ -87,6 +87,11 @@ namespace Mirb
 				magic = header_magic;
 				size = 0;
 			#endif
+		}
+
+		bool Header::is_alive()
+		{
+			return alive;
 		}
 
 		bool Header::valid()

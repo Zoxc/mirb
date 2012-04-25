@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	value_t Array::class_ref;
-	
 	value_t Array::allocate(value_t obj)
 	{
 		return auto_cast(Collector::allocate<Array>(obj));
@@ -76,16 +74,16 @@ namespace Mirb
 
 	void Array::initialize()
 	{
-		Array::class_ref = define_class(Object::class_ref, "Array", Object::class_ref);
+		context->array_class= define_class(context->object_class, "Array", context->object_class);
 		
-		singleton_method<Arg::Self>(Array::class_ref, "allocate", &allocate);
+		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		
-		static_method<Arg::Self, Arg::Count, Arg::Values>(Array::class_ref, "push", &push);
-		static_method<Arg::Self, Arg::Count, Arg::Values>(Array::class_ref, "<<", &push);
-		static_method<Arg::Self>(Array::class_ref, "pop", &pop);
-		static_method<Arg::Self>(Array::class_ref, "length", &length);
-		static_method<Arg::Self>(Array::class_ref, "inspect", &inspect);
-		static_method<Arg::Self, Arg::Block>(Array::class_ref, "each", &each);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
+		static_method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
+		static_method<Arg::Self>(context->array_class, "pop", &pop);
+		static_method<Arg::Self>(context->array_class, "length", &length);
+		static_method<Arg::Self>(context->array_class, "inspect", &inspect);
+		static_method<Arg::Self, Arg::Block>(context->array_class, "each", &each);
 	}
 };
 

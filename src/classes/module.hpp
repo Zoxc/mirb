@@ -25,8 +25,6 @@ namespace Mirb
 
 			ValueMap *get_methods();
 
-			static value_t class_ref;
-			
 			template<typename F> void mark(F mark)
 			{
 				Object::mark(mark);

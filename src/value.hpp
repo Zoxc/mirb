@@ -11,7 +11,8 @@ namespace Mirb
 	{
 		class Scope;
 	}
-
+	
+	class Allocator;
 	class Collector;
 	class Document;
 	class Block;
@@ -104,8 +105,9 @@ namespace Mirb
 				Header(Type type);
 			
 				Type get_type();
-
+				
 				bool valid();
+				bool is_alive();
 
 			private:
 				value_t *data;
@@ -122,8 +124,9 @@ namespace Mirb
 				const Type type;
 				bool marked;
 				bool alive;
-
+				
 				friend class Mirb::Collector;
+				friend class Mirb::Allocator;
 		};
 
 		template<Type type> struct Immediate:
@@ -311,8 +314,9 @@ namespace Mirb
 		template<class T> bool of_type(value_t value)
 		{
 			static_assert(std::is_base_of<Header, T>::value, "T must be a Value::Header");
-
+			
 			mirb_debug_assert(value->valid());
+			//mirb_debug_assert(value->is_alive());
 
 			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
 		}
@@ -388,3 +392,5 @@ namespace Mirb
 		return static_cast<T *>(obj);
 	}
 };
+
+#include "context.hpp"

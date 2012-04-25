@@ -227,67 +227,8 @@ namespace Mirb
 			
 			static void initialize();
 
-			class Allocator:
-				public NoReferenceProvider<Allocator>
-			{
-				public:
-					Allocator() {}
-					Allocator(Ref::Type reference) {}
-					Allocator(const Allocator &allocator) {}
+			friend class Mirb::Allocator;
 
-					static void *allocate(size_t bytes)
-					{
-						bytes += sizeof(VariableBlock);
-						bytes = align(bytes, mirb_object_align);
-						
-						VariableBlock *result = new (allocate_simple(bytes)) VariableBlock(bytes);
-
-						#ifdef DEBUG		
-							result->size = bytes;
-						#endif
-
-						#ifdef VALGRIND
-							heap_list.append(result);
-						#endif
-
-						return result->data();
-					}
-
-					static void *reallocate(void *memory, size_t old_size, size_t bytes)
-					{
-						#ifdef DEBUG
-							if(memory)
-							{
-								auto &block = VariableBlock::from_memory(memory);
-								size_t old_block_size = block.bytes - sizeof(VariableBlock);
-
-								mirb_debug_assert(old_block_size >= old_size);
-							}
-						#endif
-
-						bytes += sizeof(VariableBlock);
-						bytes = align(bytes, mirb_object_align);
-						
-						VariableBlock *result = new (allocate_simple(bytes)) VariableBlock(bytes);
-
-						#ifdef DEBUG		
-							result->size = bytes;
-						#endif
-
-						#ifdef VALGRIND
-							heap_list.append(result);
-						#endif
-
-						memcpy(result->data(), memory, old_size);
-			
-						return result->data();
-					}
-
-					static const bool can_free = false;
-
-					static void free(void *memory) {}
-			};
-			
 			static Tuple &allocate_tuple(size_t entries)
 			{
 				size_t size = sizeof(Tuple) + entries * sizeof(value_t);

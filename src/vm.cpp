@@ -156,7 +156,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Class)
-			value_t super = op.super == no_var ? Object::class_ref : vars[op.super];
+			value_t super = op.super == no_var ? context->object_class : vars[op.super];
 
 			value_t self = Support::define_class(frame.obj, op.name, super);
 
@@ -285,12 +285,12 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(new ReturnException(Value::ReturnException, LocalJumpError::class_ref, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
+			set_current_exception(new ReturnException(Value::ReturnException, context->local_jump_error, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(new BreakException(LocalJumpError::class_ref, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
+			set_current_exception(new BreakException(context->local_jump_error, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
 			goto handle_exception;
 		EndOp
 
