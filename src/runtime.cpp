@@ -693,6 +693,7 @@ namespace Mirb
 	void initialize()
 	{
 		std::cout << "Initialized in " << benchmark([] {
+			Collector::initialize();
 			Lexer::setup_jump_table();
 
 			setup_classes();

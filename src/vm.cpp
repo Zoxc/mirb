@@ -67,7 +67,7 @@ namespace Mirb
 #else
 	#define OpContinue goto execute_instruction
 	#define OpPrologue while(true) { execute_instruction: switch(*ip) {
-	#define OpEpilogue default: mirb_runtime_abort("Unknown opcode"); } }
+	#define OpEpilogue default: mirb_debug_abort("Unknown opcode"); } }
 	#define Op(name) case CodeGen::Opcode::name: { auto &op prelude_unused = *(CodeGen::name##Op *)ip; ip += sizeof(CodeGen::name##Op);
 	#define EndOp break; }
 #endif
@@ -150,7 +150,7 @@ namespace Mirb
 		EndOp
 
 		Op(Closure)
-			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, (value_t **)&vars[op.argv]);
+			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, &vars[op.argv]);
 		EndOp
 
 		DeepOp(Class)
@@ -215,15 +215,24 @@ namespace Mirb
 		EndOp
 
 		Op(CreateHeap)
-			vars[op.var] = (value_t)Support::create_heap(op.vars * sizeof(var_t));
+			Tuple &heap = Collector::allocate_tuple(op.vars);
+
+			for(size_t i = 0; i < op.vars; ++i)
+				heap[i] = value_nil;
+
+			vars[op.var] = &heap;
 		EndOp
 
 		Op(GetHeapVar)
-			vars[op.var] = ((value_t *)vars[op.heap])[op.index];
+			Tuple &heap = *static_cast<Tuple *>(vars[op.heap]);
+
+			vars[op.var] = heap[op.index];
 		EndOp
 
 		Op(SetHeapVar)
-			((value_t *)vars[op.heap])[op.index] = vars[op.var];
+			Tuple &heap = *static_cast<Tuple *>(vars[op.heap]);
+
+			heap[op.index] = vars[op.var];
 		EndOp
 
 		Op(GetIVar)

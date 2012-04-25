@@ -10,7 +10,7 @@ namespace Mirb
 			static value_t call(value_t obj, value_t block, size_t argc, value_t argv[]);
 
 		public:
-			Proc(value_t instance_of, value_t self, Symbol *name, value_t module, Block *block, size_t scope_count, value_t **scopes) :
+			Proc(value_t instance_of, value_t self, Symbol *name, value_t module, Block *block, size_t scope_count, Tuple &scopes) :
 				Object(Value::Proc, instance_of),
 				self(self),
 				name(name),
@@ -26,7 +26,7 @@ namespace Mirb
 			value_t module;
 			Block *block;
 			size_t scope_count;
-			value_t **scopes;
+			Tuple &scopes;
 
 			static value_t class_ref;
 

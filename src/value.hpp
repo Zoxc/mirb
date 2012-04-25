@@ -13,6 +13,7 @@ namespace Mirb
 	class Document;
 	class Block;
 	class Object;
+	class Tuple;
 	class ObjectHeader;
 	class Module;
 	class Class;
@@ -63,6 +64,7 @@ namespace Mirb
 	{
 		enum Type {
 			None,
+			InternalTuple,
 			InternalDocument,
 			InternalBlock,
 			InternalScope,
@@ -95,6 +97,9 @@ namespace Mirb
 		{
 			switch(type)
 			{
+				case InternalTuple:
+					return T<InternalTuple>::func(std::forward<Arg>(arg));
+
 				case InternalDocument:
 					return T<InternalDocument>::func(std::forward<Arg>(arg));
 
@@ -159,6 +164,7 @@ namespace Mirb
 		
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
+		mirb_typeclass(InternalTuple, Tuple);
 		mirb_typeclass(InternalDocument, Document);
 		mirb_typeclass(InternalBlock, Block);
 		mirb_typeclass(InternalScope, Tree::Scope);

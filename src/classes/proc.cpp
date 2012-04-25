@@ -12,7 +12,7 @@ namespace Mirb
 
 		OnStack<1> os(self);
 		
-		ProcFrame frame;
+		ProcFrame frame(self->scopes);
 
 		frame.code = self->block;
 		frame.obj = self->self;
@@ -21,7 +21,6 @@ namespace Mirb
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
-		frame.scopes = self->scopes;
 
 		return call_frame(frame);
 	}

@@ -7,7 +7,14 @@ namespace Mirb
 {
 	class BasicObjectHeader
 	{
+		public:
+			BasicObjectHeader(Value::Type type);
+			
+			Value::Type get_type();
+
 		private:
+			value_t *data;
+
 			#ifdef DEBUG
 				size_t magic;
 			#endif
@@ -16,14 +23,8 @@ namespace Mirb
 			static bool inverted;
 
 			friend class Collector;
-		public:
-			ListEntry<BasicObjectHeader> header_entry;
-
-			BasicObjectHeader(Value::Type type);
-			
-			Value::Type get_type();
 	};
-
+	
 	class ObjectHeader:
 		public BasicObjectHeader
 	{
@@ -32,11 +33,32 @@ namespace Mirb
 			ObjectHeader(Value::Type type) : BasicObjectHeader(type) {}
 	};
 
+	class Tuple:
+		public ObjectHeader
+	{
+		private:
+		public:
+			Tuple(size_t entries) : ObjectHeader(Value::InternalTuple), entries(entries) {}
+
+			value_t &operator[](size_t index)
+			{
+				mirb_debug_assert(index < entries);
+
+				return ((value_t *)((size_t)this + sizeof(Tuple)))[index];
+			}
+			
+			size_t entries;
+	};
+
 	// PinnedHeader are objects with a fixed memory address
 
 	class PinnedHeader:
 		public BasicObjectHeader
 	{
+		private:
+			ListEntry<PinnedHeader> entry;
+
+			friend class Collector;
 		public:
 			PinnedHeader(Value::Type type) : BasicObjectHeader(type) {}
 	};
@@ -44,50 +66,95 @@ namespace Mirb
 	class Collector
 	{
 		private:
+			struct Region
+			{
+				ListEntry<Region> entry;
+				char_t *pos;
+				char_t *end;
+			};
+			
+			static FastList<Region> regions;
+			static const size_t page_size = 0x1000;
+			
+			static Region *current;
+			static size_t pages;
+			static FastList<PinnedHeader> pinned_object_list;
+
+			static void thread(value_t *node);
+			static void update(value_t node, value_t free);
+			static void move(value_t p, value_t new_p);
+			static void update_forward();
+			static void update_backward();
+			
+			static Region *allocate_region(size_t bytes);
+			static void free_region(Region *region);
+			static void *get_region(size_t bytes);
+
+			static void *allocate_simple(size_t bytes)
+			{
+				char_t *result;
+
+				#ifdef VALGRIND
+					result = (char_t *)std::malloc(bytes);
+			
+					mirb_runtime_assert(result != 0);
+				#else
+					result = current->pos;
+
+					char_t *next = result + bytes;
+		
+					if(prelude_unlikely(next > current->end))
+						return get_region(bytes);
+
+					current->pos = next;
+				#endif
+
+				return (void *)result;
+			}
+
 			template<class T> static void *allocate_object()
 			{
-				allocated += sizeof(T);
-
-
-				if(allocated > 0x1000)
-					collect();
-
-				return std::malloc(sizeof(T));
+				return allocate_simple(sizeof(T));
 			}
 			
 			template<class T> static T *setup_object(T *object)
 			{
 				static_assert(std::is_base_of<ObjectHeader, T>::value, "T must be a ObjectHeader");
-
-				object_list.append(object);
-
+				
 				return object;
 			}
-
+			
+			template<class T> static void *allocate_pinned_object()
+			{
+				return std::malloc(sizeof(T));
+			}
+			
 			template<class T> static T *setup_pinned_object(T *object)
 			{
 				static_assert(std::is_base_of<PinnedHeader, T>::value, "T must be a PinnedHeader");
 
-				pinned_object_list.append(object);
-
 				return object;
 			}
-			
-			static size_t allocated;
-			static FastList<ObjectHeader, BasicObjectHeader, &BasicObjectHeader::header_entry> object_list;
-			static FastList<PinnedHeader, BasicObjectHeader, &BasicObjectHeader::header_entry> pinned_object_list;
-
 		public:
 			static void collect();
+			
+			static void initialize();
+			
+			static Tuple &allocate_tuple(size_t entries)
+			{
+				void *result = allocate_simple(sizeof(Tuple) + entries * sizeof(value_t));
+
+				return *new (result) Tuple(entries);
+			}
 
 			template<class T> static T *allocate_pinned()
 			{
-				return setup_pinned_object<T>(new (allocate_object<T>()) T());
+				return setup_pinned_object<T>(new (allocate_pinned_object<T>()) T());
 			}
 			
 			template<class T, typename Arg1> static T *allocate_pinned(Arg1&& arg1)
 			{
-				return setup_pinned_object<T>(new (allocate_object<T>()) T(std::forward<Arg1>(arg1)));
+				return setup_pinned_object<T>(new (allocate_pinned_object<T>()) T(std::forward<Arg1>(arg1)));
 			}
 			
 			template<class T> static T *allocate()

@@ -42,7 +42,6 @@
     <ClInclude Include="..\..\src\generic\mem_stream.hpp" />
     <ClInclude Include="..\..\src\generic\range.hpp" />
     <ClInclude Include="..\..\src\generic\simple-set.hpp" />
-    <ClInclude Include="..\..\src\generic\vector.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />

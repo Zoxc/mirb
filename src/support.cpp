@@ -9,9 +9,9 @@ namespace Mirb
 {
 	namespace Support
 	{
-		value_t create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t *argv[])
+		value_t create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t argv[])
 		{
-			value_t **scopes = (value_t **)gc.allocate(sizeof(value_t *) * argc);
+			Tuple &scopes = Collector::allocate_tuple(argc);
 			
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
@@ -19,11 +19,6 @@ namespace Mirb
 			return auto_cast(Collector::allocate<Proc>(Proc::class_ref, self, name, module, block, argc, scopes));
 		}
 
-		value_t *create_heap(size_t bytes)
-		{
-			return (value_t *)gc.allocate(bytes);
-		}
-		
 		value_t get_const(value_t obj, Symbol *name)
 		{
 			if(prelude_unlikely(obj == main))

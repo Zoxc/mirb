@@ -27,7 +27,9 @@ namespace Mirb
 		public Frame
 	{
 		public:
-			value_t **scopes;
+			Tuple &scopes;
+
+			ProcFrame(Tuple &scopes) : scopes(scopes)  {}
 	};
 
 	extern Frame *current_frame;
