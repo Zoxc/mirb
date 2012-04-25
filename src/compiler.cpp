@@ -1,6 +1,5 @@
 #include "compiler.hpp"
 #include "symbol-pool.hpp"
-#include "gc.hpp"
 #include "block.hpp"
 #include "runtime.hpp"
 #include "codegen/bytecode.hpp"

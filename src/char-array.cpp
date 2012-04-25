@@ -1,6 +1,6 @@
 #include "char-array.hpp"
-#include "gc.hpp"
 #include "classes/string.hpp"
+#include "collector.hpp"
 
 namespace Mirb
 {
@@ -13,7 +13,7 @@ namespace Mirb
 	{
 		this->length = length;
 
-		data = (char_t *)gc.allocate(length);
+		data = (char_t *)Collector::Allocator::allocate(length);
 
 		memcpy(data, c_str, length);
 
@@ -39,7 +39,7 @@ namespace Mirb
 	{
 		length = std::strlen((const char *)c_str);
 
-		data = (char_t *)gc.allocate(length);
+		data = (char_t *)Collector::Allocator::allocate(length);
 
 		memcpy(data, c_str, length);
 
@@ -52,7 +52,7 @@ namespace Mirb
 	{
 		length = string.length();
 
-		data = (char_t *)gc.allocate(length);
+		data = (char_t *)Collector::Allocator::allocate(length);
 
 		memcpy(data, string.c_str(), length);
 
@@ -91,7 +91,7 @@ namespace Mirb
 	{
 		if(shared)
 		{
-			char_t *new_data = (char_t *)gc.allocate(length);
+			char_t *new_data = (char_t *)Collector::Allocator::allocate(length);
 
 			memcpy(new_data, data, length);
 
@@ -109,11 +109,11 @@ namespace Mirb
 
 		if(shared)
 		{
-			data = (char_t *)gc.allocate(length + other.length);
+			data = (char_t *)Collector::Allocator::allocate(length + other.length);
 			memcpy(data, this_data, length);
 		}
 		else
-			data = (char_t *)gc.reallocate(data, length, length + other.length);
+			data = (char_t *)Collector::Allocator::reallocate(data, length, length + other.length);
 		
 		memcpy(data + length, other_data, other.length);
 

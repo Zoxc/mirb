@@ -1,7 +1,6 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/HashTable.hpp>
-#include "gc.hpp"
 #include "collector.hpp"
 #include "classes/symbol.hpp"
 

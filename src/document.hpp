@@ -1,17 +1,17 @@
 #pragma once
 #include "common.hpp"
 #include "char-array.hpp" 
-#include "collector.hpp" 
+#include "value.hpp" 
 
 namespace Mirb
 {
 	class MemoryPool;
 
 	class Document:
-		public ObjectHeader
+		public Value::Header
 	{
 		public:
-			Document() : ObjectHeader(Value::InternalDocument) {}
+			Document() : Value::Header(Value::InternalDocument) {}
 
 			const char_t *data;
 			size_t length;

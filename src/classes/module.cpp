@@ -6,10 +6,10 @@ namespace Mirb
 {
 	value_t Module::class_ref;
 
-	BlockMap *Module::get_methods()
+	ValueMap *Module::get_methods()
 	{
 		if(prelude_unlikely(!methods))
-			methods = new BlockMap(methods_initial); // TODO: Allocate with GC
+			methods = Collector::allocate<ValueMap>();
 		
 		return methods;
 	}

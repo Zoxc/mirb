@@ -5,40 +5,25 @@
 
 namespace Mirb
 {
-	class BasicObjectHeader
+	// PinnedHeader are objects with a fixed memory address
+
+	class PinnedHeader:
+		public Value::Header
 	{
-		public:
-			BasicObjectHeader(Value::Type type);
-			
-			Value::Type get_type();
-
 		private:
-			value_t *data;
-
-			#ifdef DEBUG
-				size_t magic;
-			#endif
-
-			const Value::Type type;
-			static bool inverted;
+			ListEntry<PinnedHeader> entry;
 
 			friend class Collector;
-	};
-	
-	class ObjectHeader:
-		public BasicObjectHeader
-	{
-		private:
 		public:
-			ObjectHeader(Value::Type type) : BasicObjectHeader(type) {}
+			PinnedHeader(Value::Type type) : Value::Header(type) {}
 	};
 
 	class Tuple:
-		public ObjectHeader
+		public Value::Header
 	{
 		private:
 		public:
-			Tuple(size_t entries) : ObjectHeader(Value::InternalTuple), entries(entries) {}
+			Tuple(size_t entries) : Value::Header(Value::InternalTuple), entries(entries) {}
 
 			value_t &operator[](size_t index)
 			{
@@ -49,36 +34,45 @@ namespace Mirb
 			
 			size_t entries;
 	};
-
-	// PinnedHeader are objects with a fixed memory address
-
-	class PinnedHeader:
-		public BasicObjectHeader
+	
+	class VariableBlock:
+		public Value::Header
 	{
 		private:
-			ListEntry<PinnedHeader> entry;
-
-			friend class Collector;
 		public:
-			PinnedHeader(Value::Type type) : BasicObjectHeader(type) {}
-	};
+			VariableBlock(size_t bytes) : Value::Header(Value::InternalVariableBlock), bytes(bytes) {}
 
+			static VariableBlock &from_memory(void *memory)
+			{
+				return *(VariableBlock *)((char_t *)memory - sizeof(VariableBlock));
+			}
+
+			void *data()
+			{
+				return (void *)((size_t)this + sizeof(VariableBlock));
+			}
+			
+			size_t bytes;
+	};
+	
 	class Collector
 	{
 		private:
-			struct Region
+			prelude_align(mirb_object_align) struct Region
 			{
 				ListEntry<Region> entry;
 				char_t *pos;
 				char_t *end;
 			};
-			
+
 			static FastList<Region> regions;
 			static const size_t page_size = 0x1000;
 			
 			static Region *current;
 			static size_t pages;
 			static FastList<PinnedHeader> pinned_object_list;
+
+			void test_sizes();
 
 			static void thread(value_t *node);
 			static void update(value_t node, value_t free);
@@ -92,6 +86,8 @@ namespace Mirb
 
 			static void *allocate_simple(size_t bytes)
 			{
+				mirb_debug_assert((bytes & object_ref_mask) == 0);
+
 				char_t *result;
 
 				#ifdef VALGRIND
@@ -103,11 +99,15 @@ namespace Mirb
 
 					char_t *next = result + bytes;
 		
+					mirb_debug_assert(((size_t)next & object_ref_mask) == 0);
+
 					if(prelude_unlikely(next > current->end))
 						return get_region(bytes);
 
 					current->pos = next;
 				#endif
+
+				mirb_debug_assert(((size_t)result & object_ref_mask) == 0);
 
 				return (void *)result;
 			}
@@ -119,7 +119,7 @@ namespace Mirb
 			
 			template<class T> static T *setup_object(T *object)
 			{
-				static_assert(std::is_base_of<ObjectHeader, T>::value, "T must be a ObjectHeader");
+				static_assert(std::is_base_of<Value::Header, T>::value, "T must be a Value::Header");
 				
 				return object;
 			}
@@ -139,6 +139,40 @@ namespace Mirb
 			static void collect();
 			
 			static void initialize();
+
+			class Allocator:
+				public NoReferenceProvider<Allocator>
+			{
+				public:
+					Allocator() {}
+					Allocator(Ref::Type reference) {}
+					Allocator(const Allocator &allocator) {}
+
+					static void *allocate(size_t bytes)
+					{
+						bytes += sizeof(VariableBlock);
+
+						return (new (allocate_simple(align(bytes, mirb_object_align))) VariableBlock(bytes))->data();
+					}
+
+					static void *reallocate(void *memory, size_t old_size, size_t bytes)
+					{
+						if(memory)
+							mirb_debug_assert(VariableBlock::from_memory(memory).bytes - sizeof(VariableBlock) <= old_size);
+
+						bytes += sizeof(VariableBlock);
+
+						void *result = (new (allocate_simple(align(bytes, mirb_object_align))) VariableBlock(bytes))->data();
+
+						memcpy(result, memory, old_size);
+			
+						return result;
+					}
+
+					static const bool can_free = false;
+
+					static void free(void *memory) {}
+			};
 			
 			static Tuple &allocate_tuple(size_t entries)
 			{

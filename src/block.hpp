@@ -3,7 +3,6 @@
 #include <Prelude/Map.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
-#include "gc.hpp"
 #include "vm.hpp"
 #include "collector.hpp"
 
@@ -90,16 +89,4 @@ namespace Mirb
 			
 			Vector<Block *> blocks; // A list of child blocks so the GC won't free them.
 	};
-	
-	class BlockMapFunctions:
-		public MapFunctions<Symbol *, Block *>
-	{
-		public:
-			static Block *invalid_value()
-			{
-				return 0;
-			}
-	};
-
-	typedef Map<Symbol *, Block *, GC, BlockMapFunctions> BlockMap;
 };

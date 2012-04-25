@@ -74,9 +74,33 @@ namespace Mirb
 		Type type(value_t value)
 		{
 			if(object_ref(value))
-				return ((Mirb::Object *)value)->get_type(); // Do a simple cast here to avoid stack overflow when debugging is enabled
+				return value->get_type(); // Do a simple cast here to avoid stack overflow when debugging is enabled
 			else
 				return type_table[(size_t)value & literal_mask];
 		}
+		
+		const size_t header_magic = 12345;
+	
+		Header::Header(Type type) : data(nullptr), type(type)
+		{
+			#ifdef DEBUG
+				magic = header_magic;
+			#endif
+		}
+
+		bool Header::valid()
+		{
+		#ifdef DEBUG
+			return object_ref(this) && magic == header_magic;
+		#else
+			return object_ref(this);
+		#endif
+		}
+	
+		Type Header::get_type()
+		{
+			return type;
+		}
+	
 	};
 };

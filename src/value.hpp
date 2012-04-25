@@ -1,7 +1,6 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/Map.hpp>
-#include "gc.hpp"
 
 namespace Mirb
 {
@@ -10,11 +9,14 @@ namespace Mirb
 		class Scope;
 	}
 
+	class Collector;
 	class Document;
 	class Block;
 	class Object;
 	class Tuple;
 	class ObjectHeader;
+	class VariableBlock;
+	class ValueMap;
 	class Module;
 	class Class;
 	class Symbol;
@@ -40,15 +42,23 @@ namespace Mirb
 	 * 1110 - undef
 	 */
 	
-	typedef ObjectHeader *value_t;
+	namespace Value
+	{
+		class Header;
+	};
+
+	typedef Value::Header *value_t;
 
 	const size_t fixnum_mask = 1;
-	const size_t object_ref_mask = 3;
 	
+	#define mirb_object_align 4
+
+	const size_t object_ref_mask = mirb_object_align - 1;
+
 	const size_t literal_mask = 0xF;
 	const size_t literal_count = (literal_mask + 1);
 	
-	const value_t value_raise = 0; // Used to indicate that an exception is raised to native code.
+	const value_t value_raise = 0; // Used to indicate that an exception is raised. Also invalid returns from maps.
 	
 	const size_t value_nil_num = 2;
 	const size_t value_false_num = 6;
@@ -57,14 +67,16 @@ namespace Mirb
 	const value_t value_nil = (value_t)value_nil_num;
 	const value_t value_false = (value_t)value_false_num;
 	const value_t value_true = (value_t)value_true_num;
-	const value_t value_undef = (value_t)14;
-	const value_t value_highest = value_undef;
+	//const value_t value_undef = (value_t)14;
+	//const value_t value_highest = value_undef;
 
 	namespace Value
 	{
 		enum Type {
 			None,
+			InternalValueMap,
 			InternalTuple,
+			InternalVariableBlock,
 			InternalDocument,
 			InternalBlock,
 			InternalScope,
@@ -84,7 +96,28 @@ namespace Mirb
 			ReturnException,
 			BreakException,
 		};
+		
+		class Header
+		{
+			public:
+				Header(Type type);
+			
+				Type get_type();
 
+				bool valid();
+
+			private:
+				value_t *data;
+
+				#ifdef DEBUG
+					size_t magic;
+				#endif
+
+				const Type type;
+
+				friend class Mirb::Collector;
+		};
+	
 		bool object_ref(value_t value);
 		
 		value_t class_of_literal(value_t value);
@@ -93,12 +126,18 @@ namespace Mirb
 
 		Type type(value_t value);
 		
-		template<template<Type> class T, typename Arg> auto virtual_do(Type type, Arg &&arg) -> typename T<None>::Result
+		template<template<Type> class T, typename Arg> auto virtual_do(Type type, Arg &&arg) -> typename T<Nil>::Result
 		{
 			switch(type)
 			{
+				case InternalValueMap:
+					return T<InternalValueMap>::func(std::forward<Arg>(arg));
+					
 				case InternalTuple:
 					return T<InternalTuple>::func(std::forward<Arg>(arg));
+					
+				case InternalVariableBlock:
+					return T<InternalVariableBlock>::func(std::forward<Arg>(arg));
 
 				case InternalDocument:
 					return T<InternalDocument>::func(std::forward<Arg>(arg));
@@ -164,7 +203,9 @@ namespace Mirb
 		
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
+		mirb_typeclass(InternalValueMap, ValueMap);
 		mirb_typeclass(InternalTuple, Tuple);
+		mirb_typeclass(InternalVariableBlock, VariableBlock);
 		mirb_typeclass(InternalDocument, Document);
 		mirb_typeclass(InternalBlock, Block);
 		mirb_typeclass(InternalScope, Tree::Scope);
@@ -191,6 +232,8 @@ namespace Mirb
 
 		#define mirb_derived_from(base, super) template<> struct DerivedFrom<Mirb::base, Mirb::super> { static const bool value = true; }
 		
+		mirb_derived_from(Block, Block);
+
 		mirb_derived_from(Object, Object);
 		mirb_derived_from(Object, Module);
 		mirb_derived_from(Object, Class);
@@ -239,7 +282,9 @@ namespace Mirb
 
 		template<class T> bool of_type(value_t value)
 		{
-			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
+			static_assert(std::is_base_of<Header, T>::value, "T must be a Value::Header");
+
+			mirb_debug_assert(value->valid());
 
 			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
 		}
@@ -247,21 +292,22 @@ namespace Mirb
 		void initialize();
 	};
 	
-	union auto_cast
+	struct auto_cast
 	{
 		value_t value;
 			
-		auto_cast(value_t value) : value(value) {}
+		auto_cast(value_t value) : value(value)
+		{
+			mirb_debug_assert(value->valid());
+		}
 
 		auto_cast(bool value)
 		{
 			this->value = value ? value_true : value_false;
 		}
 		
-		template<class T> auto_cast(T *obj) : value((value_t)obj)
+		template<class T> auto_cast(T *obj) : value(static_cast<value_t>(obj))
 		{
-			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
-
 			mirb_debug_assert(Value::of_type<T>(value));
 		}
 
@@ -269,28 +315,48 @@ namespace Mirb
 		
 		template<class T> operator T *()
 		{
-			static_assert(std::is_base_of<Mirb::Object, T>::value, "T must be a Object");
-
 			mirb_debug_assert(Value::of_type<T>(value));
-			return (T *)value;
+			return static_cast<T *>(value);
 		}
 	};
+	
+	struct auto_cast_null
+	{
+		value_t value;
+			
+		auto_cast_null(value_t value) : value(value)
+		{
+			mirb_debug_assert(value == value_raise || value->valid());
+		}
+		
+		auto_cast_null(bool value)
+		{
+			this->value = value ? value_true : value_false;
+		}
+		
+		template<class T> auto_cast_null(T *obj) : value(static_cast<value_t>(obj))
+		{
+			mirb_debug_assert(value == value_raise || Value::of_type<T>(obj));
+		}
+
+		operator value_t() { return value; }
+		
+		template<class T> operator T *()
+		{
+			mirb_debug_assert(value == value_raise || Value::of_type<T>(value));
+			return static_cast<T *>(value);
+		}
+	};
+	
+	template<typename T> T *cast_null(value_t obj)
+	{
+		mirb_debug_assert(obj == value_raise || Value::of_type<T>(obj));
+		return static_cast<T *>(obj);
+	}
 
 	template<typename T> T *cast(value_t obj)
 	{
 		mirb_debug_assert(Value::of_type<T>(obj));
-		return (T *)obj;
+		return static_cast<T *>(obj);
 	}
-
-	class ValueMapFunctions:
-		public MapFunctions<value_t, value_t>
-	{
-		public:
-			static value_t invalid_value()
-			{
-				return value_undef;
-			}
-	};
-
-	typedef Map<value_t, value_t, GC, ValueMapFunctions> ValueMap;
 };

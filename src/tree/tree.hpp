@@ -148,7 +148,7 @@ namespace Mirb
 		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
 		class Scope:
-			public ObjectHeader
+			public Value::Header
 		{
 			public:
 				enum Type

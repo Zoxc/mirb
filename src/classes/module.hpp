@@ -14,7 +14,7 @@ namespace Mirb
 			static value_t included(value_t obj);
 			
 		protected:
-			BlockMap *methods;
+			ValueMap *methods;
 
 		public:
 			Module(Value::Type type, value_t instance_of, value_t superclass) : Object(type, instance_of), methods(0), superclass(superclass) {}
@@ -23,9 +23,7 @@ namespace Mirb
 
 			static value_t include(value_t obj, size_t argc, value_t argv[]);
 
-			static const size_t methods_initial = 1;
-			
-			BlockMap *get_methods();
+			ValueMap *get_methods();
 
 			static value_t class_ref;
 

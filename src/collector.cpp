@@ -1,26 +1,44 @@
 #include "collector.hpp"
-#include "classes/object.hpp"
+#include "classes/array.hpp"
+#include "classes/class.hpp"
+#include "classes/string.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "classes/exceptions.hpp"
+#include "document.hpp"
+#include "tree/tree.hpp"
 
 namespace Mirb
 {
-	const size_t header_magic = 12345;
-	
 	size_t Collector::pages = 16;
 	Collector::Region *Collector::current;
 	FastList<Collector::Region> Collector::regions;
 
 	FastList<PinnedHeader> Collector::pinned_object_list;
-
-	BasicObjectHeader::BasicObjectHeader(Value::Type type) : data(nullptr), type(type)
-	{
-		#ifdef DEBUG
-			magic = header_magic;
-		#endif
-	}
 	
-	Value::Type BasicObjectHeader::get_type()
+	template<class T> struct Aligned
 	{
-		return type;
+		template<size_t size> struct Test
+		{
+			static_assert((size & object_ref_mask) == 0, "Wrong size for class T");
+		};
+
+		typedef Test<sizeof(T)> Run;
+	};
+
+	template<Value::Type type> struct TestSize
+	{
+		typedef void Result;
+		typedef Aligned<typename Value::TypeClass<type>::Class> Run;
+
+		static void func(bool dummy) {}
+	};
+	
+	void Collector::test_sizes()
+	{
+		typedef Aligned<Region> Run;
+
+		Value::virtual_do<TestSize, bool>(Value::None, true);
 	}
 	
 	bool marked(value_t p)

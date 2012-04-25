@@ -18,7 +18,7 @@ namespace Mirb
 			Array(value_t instance_of) : Object(Value::Array, instance_of) {}
 			Array() : Object(Value::Array, class_ref) {}
 
-			Vector<value_t, GC> vector;
+			Vector<value_t, Collector::Allocator> vector;
 			
 			static value_t class_ref;
 

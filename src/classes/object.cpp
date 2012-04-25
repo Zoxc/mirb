@@ -2,7 +2,6 @@
 #include "class.hpp"
 #include "symbol.hpp"
 #include "string.hpp"
-#include "../gc.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb

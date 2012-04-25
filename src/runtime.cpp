@@ -65,7 +65,7 @@ namespace Mirb
 	{
 		value_t existing = test_const(under, auto_cast(name));
 
-		if(prelude_unlikely(existing != value_undef))
+		if(prelude_unlikely(existing != value_raise))
 			return existing;
 
 		value_t obj = class_create_unnamed(super);
@@ -89,7 +89,7 @@ namespace Mirb
 	{
 		value_t existing = test_const(under, name);
 
-		if(prelude_unlikely(existing != value_undef))
+		if(prelude_unlikely(existing != value_raise))
 			return existing;
 
 		value_t obj = module_create_bare();
@@ -273,7 +273,7 @@ namespace Mirb
 		Object *object = auto_cast(obj);
 
 		if(prelude_unlikely(!object->vars))
-			object->vars = new ValueMap(Object::vars_initial); // TODO: Allocate with GC
+			object->vars = Collector::allocate<ValueMap>();
 		
 		return object->vars;
 	}
@@ -301,26 +301,26 @@ namespace Mirb
 			{
 				ValueMap *vars = get_vars(obj);
 
-				value_t value = vars->get(auto_cast(name));
+				value_t value = vars->map.get(auto_cast(name));
 
-				if(value != value_undef)
+				if(value != value_raise)
 					return value;
 
 				obj = cast<Module>(obj)->superclass;
 			}
 
-			return value_undef;
+			return value_raise;
 		};
 
 		value_t result = lookup(obj);
-		if(result != value_undef)
+		if(result != value_raise)
 			return result;
 			
 		result = lookup(Object::class_ref);
-		if(result != value_undef)
+		if(result != value_raise)
 			return result;
 		
-		return value_undef;
+		return value_raise;
 	}
 
 	value_t get_const(value_t obj, Symbol *name)
@@ -330,7 +330,7 @@ namespace Mirb
 
 		value_t result = test_const(obj, name);
 
-		if(prelude_likely(result != value_undef))
+		if(prelude_likely(result != value_raise))
 			return result;
 		
 		raise(NameError::class_ref, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
@@ -345,7 +345,7 @@ namespace Mirb
 
 		ValueMap *vars = get_vars(obj);
 
-		value_t *old = vars->get_ref(auto_cast(name));
+		value_t *old = vars->map.get_ref(auto_cast(name));
 
 		if(prelude_unlikely(old != 0))
 		{
@@ -371,22 +371,22 @@ namespace Mirb
 
 	value_t get_var(value_t obj, Symbol *name)
 	{
-		return get_vars(obj)->try_get(auto_cast(name), []{ return value_nil; });
+		return get_vars(obj)->map.try_get(auto_cast(name), []{ return value_nil; });
 	}
 
 	void set_var(value_t obj, Symbol *name, value_t value)
 	{
-		get_vars(obj)->set(auto_cast(name), value);
+		get_vars(obj)->map.set(auto_cast(name), value);
 	}
 	
 	Block *get_method(value_t obj, Symbol *name)
 	{
-		return cast<Module>(obj)->get_methods()->get(name);
+		return auto_cast_null(cast<Module>(obj)->get_methods()->map.get(name));
 	}
 
 	void set_method(value_t obj, Symbol *name, Block *method)
 	{
-		return cast<Module>(obj)->get_methods()->set(name, method);
+		return cast<Module>(obj)->get_methods()->map.set(name, auto_cast_null(method));
 	}
 
 	bool type_error(value_t value, value_t expected)
