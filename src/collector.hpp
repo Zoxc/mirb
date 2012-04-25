@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/FastList.hpp>
+#include <Prelude/Allocator.hpp>
 #include "value.hpp"
 #include "char-array.hpp"
 
@@ -134,6 +135,10 @@ namespace Mirb
 			static size_t pages;
 			static FastList<PinnedHeader> pinned_object_list;
 
+			#ifdef VALGRIND
+				static LinkedList<Value::Header> heap_list;
+			#endif
+
 			static size_t size_of_value(value_t value);
 
 			void test_sizes();
@@ -191,6 +196,10 @@ namespace Mirb
 					object->size = sizeof(T);
 				#endif
 
+				#ifdef VALGRIND
+					heap_list.append(object);
+				#endif
+
 				return object;
 			}
 			
@@ -205,6 +214,10 @@ namespace Mirb
 				
 				#ifdef DEBUG		
 					object->size = sizeof(T);
+				#endif
+
+				#ifdef VALGRIND
+					heap_list.append(object);
 				#endif
 
 				return object;
@@ -233,6 +246,10 @@ namespace Mirb
 							result->size = bytes;
 						#endif
 
+						#ifdef VALGRIND
+							heap_list.append(result);
+						#endif
+
 						return result->data();
 					}
 
@@ -257,6 +274,10 @@ namespace Mirb
 							result->size = bytes;
 						#endif
 
+						#ifdef VALGRIND
+							heap_list.append(result);
+						#endif
+
 						memcpy(result->data(), memory, old_size);
 			
 						return result->data();
@@ -275,6 +296,10 @@ namespace Mirb
 				
 				#ifdef DEBUG		
 					tuple->size = size;
+				#endif
+
+				#ifdef VALGRIND
+					heap_list.append(tuple);
 				#endif
 
 				return *tuple;

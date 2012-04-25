@@ -16,7 +16,11 @@ namespace Mirb
 	FastList<Collector::Region> Collector::regions;
 
 	FastList<PinnedHeader> Collector::pinned_object_list;
-	
+
+	#ifdef VALGRIND
+		LinkedList<Value::Header> Collector::heap_list;
+	#endif
+
 	template<class T> struct Aligned
 	{
 		template<size_t size> struct Test
@@ -139,6 +143,22 @@ namespace Mirb
 	
 	void Collector::flag()
 	{
+	#ifdef VALGRIND
+		for(value_t obj = heap_list.first; obj;)
+		{
+			value_t next = obj->entry.next;
+
+			mirb_debug_assert(obj->valid());
+
+			obj->alive = obj->marked;
+			obj->marked = false;
+
+			if(!obj->alive)
+				heap_list.remove(obj);
+
+			obj = next;
+		}
+	#else
 		for(auto i = regions.begin(); i != regions.end(); ++i)
 		{
 			value_t obj = i().data();
@@ -153,6 +173,7 @@ namespace Mirb
 				obj = (value_t)((size_t)obj + size_of_value(obj));
 			}
 		}
+	#endif
 	}
 	
 	struct ThreadFunc

@@ -1,6 +1,9 @@
 #pragma once
 #include "common.hpp"
-#include <Prelude/Map.hpp>
+
+#ifdef VALGRIND
+	#include <Prelude/LinkedList.hpp>
+#endif
 
 namespace Mirb
 {
@@ -110,6 +113,10 @@ namespace Mirb
 				#ifdef DEBUG
 					size_t size;
 					size_t magic;
+				#endif
+
+				#ifdef VALGRIND
+					LinkedListEntry<Header> entry;
 				#endif
 
 				const Type type;
