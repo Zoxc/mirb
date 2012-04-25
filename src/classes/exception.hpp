@@ -19,6 +19,14 @@ namespace Mirb
 			value_t backtrace;
 
 			static value_t class_ref;
+			
+			template<typename F> void mark(F mark)
+			{
+				Object::mark(mark);
+
+				mark(message);
+				mark(backtrace);
+			}
 
 			static void initialize();
 	};

@@ -16,7 +16,7 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
 
-			return auto_cast(Collector::allocate<Proc>(Proc::class_ref, self, name, module, block, argc, scopes));
+			return auto_cast(Collector::allocate<Proc>(Proc::class_ref, self, name, module, block, scopes));
 		}
 
 		value_t get_const(value_t obj, Symbol *name)

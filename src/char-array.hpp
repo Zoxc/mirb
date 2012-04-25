@@ -10,7 +10,9 @@ namespace Mirb
 			size_t length;
 			char_t *data;
 			mutable bool shared;
-
+			
+			friend class Collector;
+			friend struct ThreadFunc;
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
 			CharArray(const char_t *c_str);

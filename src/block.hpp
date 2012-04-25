@@ -87,6 +87,13 @@ namespace Mirb
 			
 			var_t *break_targets;
 			
-			Vector<Block *> blocks; // A list of child blocks so the GC won't free them.
+			Vector<Block *, Collector::Allocator> blocks; // A list of child blocks so the GC won't free them.
+
+			template<typename F> void mark(F mark)
+			{
+				mark(scope);
+				mark(name);
+				mark(document);
+			}
 	};
 };

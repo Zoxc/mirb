@@ -11,7 +11,7 @@ namespace Mirb
 	{
 		Type type_table[literal_count];
 		value_t class_of_table[literal_count];
-
+		
 		void initialize()
 		{
 			for(size_t i = 0; i < literal_count; ++i)
@@ -81,19 +81,20 @@ namespace Mirb
 		
 		const size_t header_magic = 12345;
 	
-		Header::Header(Type type) : data(nullptr), type(type)
+		Header::Header(Type type) : data(nullptr), type(type), marked(false), alive(true)
 		{
 			#ifdef DEBUG
 				magic = header_magic;
+				size = 0;
 			#endif
 		}
 
 		bool Header::valid()
 		{
 		#ifdef DEBUG
-			return object_ref(this) && magic == header_magic;
+			return object_ref(this) ? (magic == header_magic) && (type != None) : true;
 		#else
-			return object_ref(this);
+			return true;
 		#endif
 		}
 	

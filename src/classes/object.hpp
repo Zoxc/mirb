@@ -34,6 +34,12 @@ namespace Mirb
 			static value_t class_ref;
 
 			static void initialize();
+			
+			template<typename F> void mark(F mark)
+			{
+				mark(instance_of);
+				mark(vars);
+			}
 	};
 
 	class ValueMapFunctions:
@@ -54,6 +60,10 @@ namespace Mirb
 			ValueMap() : Value::Header(Value::InternalValueMap), map(Object::vars_initial) {}
 
 			Map<value_t, value_t, Collector::Allocator, ValueMapFunctions> map;
+			
+			template<typename F> void mark(F mark)
+			{
+			}
 	};
 
 };

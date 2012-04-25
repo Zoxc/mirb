@@ -55,6 +55,14 @@ namespace Mirb
 			
 			Block *target;
 			value_t value;
+			
+			template<typename F> void mark(F mark)
+			{
+				Exception::mark(mark);
+
+				mark(target);
+				mark(value);
+			}
 	};
 	
 	class BreakException:

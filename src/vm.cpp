@@ -96,6 +96,8 @@ namespace Mirb
 		};
 #endif
 
+		frame.vars = vars;
+
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
 

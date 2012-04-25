@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include <Prelude/FastList.hpp>
 #include "value.hpp"
+#include "char-array.hpp"
 
 namespace Mirb
 {
@@ -33,6 +34,12 @@ namespace Mirb
 			}
 			
 			size_t entries;
+
+			template<typename F> void mark(F mark)
+			{
+				for(size_t i = 0; i < entries; ++i)
+					mark((*this)[i]);
+			}
 	};
 	
 	class VariableBlock:
@@ -42,9 +49,9 @@ namespace Mirb
 		public:
 			VariableBlock(size_t bytes) : Value::Header(Value::InternalVariableBlock), bytes(bytes) {}
 
-			static VariableBlock &from_memory(void *memory)
+			static VariableBlock &from_memory(const void *memory)
 			{
-				return *(VariableBlock *)((char_t *)memory - sizeof(VariableBlock));
+				return *(VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
 			}
 
 			void *data()
@@ -53,6 +60,10 @@ namespace Mirb
 			}
 			
 			size_t bytes;
+
+			template<typename F> void mark(F mark)
+			{
+			}
 	};
 	
 	class Collector
@@ -63,7 +74,58 @@ namespace Mirb
 				ListEntry<Region> entry;
 				char_t *pos;
 				char_t *end;
+
+				value_t data()
+				{
+					return (value_t)((size_t)this + sizeof(Region));
+				}
 			};
+			
+			struct MarkFunc
+			{
+				void operator()(const value_t &value)
+				{
+					Collector::mark_value(value);
+				};
+
+				void operator()(const CharArray &string)
+				{
+					if(string.data)
+						Collector::mark_pointer(&VariableBlock::from_memory(string.data));
+				};
+				
+				template<class T> void operator()(const T *&value)
+				{
+					Collector::mark_pointer(value);
+				};
+			};
+	
+			template<Value::Type type> struct MarkClass
+			{
+				typedef void Result;
+				typedef typename Value::TypeClass<type>::Class Class;
+
+				static void func(value_t value)
+				{
+					MarkFunc func;
+
+					if(!Value::immediate(type) && !value->marked)
+						static_cast<Class *>(value)->template mark<MarkFunc>(func);
+				}
+			};
+
+			static value_t mark_list;
+			
+			static void flag_value(value_t obj);
+			static void flag_pointer(value_t obj);
+			static void flag();
+			
+			static void mark_value(value_t obj);
+			static void mark_pointer(value_t obj);
+			static void mark();
+
+			friend struct MarkFunc;
+			friend struct ThreadFunc;
 
 			static FastList<Region> regions;
 			static const size_t page_size = 0x1000;
@@ -72,8 +134,10 @@ namespace Mirb
 			static size_t pages;
 			static FastList<PinnedHeader> pinned_object_list;
 
-			void test_sizes();
+			static size_t size_of_value(value_t value);
 
+			void test_sizes();
+			
 			static void thread(value_t *node);
 			static void update(value_t node, value_t free);
 			static void move(value_t p, value_t new_p);
@@ -87,6 +151,8 @@ namespace Mirb
 			static void *allocate_simple(size_t bytes)
 			{
 				mirb_debug_assert((bytes & object_ref_mask) == 0);
+
+				collect();
 
 				char_t *result;
 
@@ -121,6 +187,10 @@ namespace Mirb
 			{
 				static_assert(std::is_base_of<Value::Header, T>::value, "T must be a Value::Header");
 				
+				#ifdef DEBUG		
+					object->size = sizeof(T);
+				#endif
+
 				return object;
 			}
 			
@@ -132,6 +202,10 @@ namespace Mirb
 			template<class T> static T *setup_pinned_object(T *object)
 			{
 				static_assert(std::is_base_of<PinnedHeader, T>::value, "T must be a PinnedHeader");
+				
+				#ifdef DEBUG		
+					object->size = sizeof(T);
+				#endif
 
 				return object;
 			}
@@ -151,22 +225,41 @@ namespace Mirb
 					static void *allocate(size_t bytes)
 					{
 						bytes += sizeof(VariableBlock);
+						bytes = align(bytes, mirb_object_align);
+						
+						VariableBlock *result = new (allocate_simple(bytes)) VariableBlock(bytes);
 
-						return (new (allocate_simple(align(bytes, mirb_object_align))) VariableBlock(bytes))->data();
+						#ifdef DEBUG		
+							result->size = bytes;
+						#endif
+
+						return result->data();
 					}
 
 					static void *reallocate(void *memory, size_t old_size, size_t bytes)
 					{
-						if(memory)
-							mirb_debug_assert(VariableBlock::from_memory(memory).bytes - sizeof(VariableBlock) <= old_size);
+						#ifdef DEBUG
+							if(memory)
+							{
+								auto &block = VariableBlock::from_memory(memory);
+								size_t old_block_size = block.bytes - sizeof(VariableBlock);
+
+								mirb_debug_assert(old_block_size >= old_size);
+							}
+						#endif
 
 						bytes += sizeof(VariableBlock);
+						bytes = align(bytes, mirb_object_align);
+						
+						VariableBlock *result = new (allocate_simple(bytes)) VariableBlock(bytes);
 
-						void *result = (new (allocate_simple(align(bytes, mirb_object_align))) VariableBlock(bytes))->data();
+						#ifdef DEBUG		
+							result->size = bytes;
+						#endif
 
-						memcpy(result, memory, old_size);
+						memcpy(result->data(), memory, old_size);
 			
-						return result;
+						return result->data();
 					}
 
 					static const bool can_free = false;
@@ -176,9 +269,15 @@ namespace Mirb
 			
 			static Tuple &allocate_tuple(size_t entries)
 			{
-				void *result = allocate_simple(sizeof(Tuple) + entries * sizeof(value_t));
+				size_t size = sizeof(Tuple) + entries * sizeof(value_t);
 
-				return *new (result) Tuple(entries);
+				auto tuple = new (allocate_simple(size)) Tuple(entries);
+				
+				#ifdef DEBUG		
+					tuple->size = size;
+				#endif
+
+				return *tuple;
 			}
 
 			template<class T> static T *allocate_pinned()
@@ -236,4 +335,5 @@ namespace Mirb
 				return setup_object<T>(new (allocate_object<T>()) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8)));
 			}
 	};
+	
 };

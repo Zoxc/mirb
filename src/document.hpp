@@ -18,5 +18,10 @@ namespace Mirb
 			CharArray name;
 
 			void copy(const char_t *data, size_t length);
+
+			template<typename F> void mark(F mark)
+			{
+				mark(name);
+			}
 	};
 };

@@ -34,6 +34,13 @@ namespace Mirb
 			static Symbol *from_string(const std::string &string);
 			static Symbol *from_char_array(const CharArray &char_array);
 			
+			template<typename F> void mark(F mark)
+			{
+				Object::mark(mark);
+
+				mark(string);
+			}
+
 			template<size_t length> static Symbol *from_literal(const char (&string)[length])
 			{
 				CharArray char_array(string);

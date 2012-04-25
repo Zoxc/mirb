@@ -31,9 +31,14 @@ namespace Mirb
 			}
 			
 			CharArray string;
-			char_t *c_str;
-			size_t length;
 			
+			template<typename F> void mark(F mark)
+			{
+				Object::mark(mark);
+
+				mark(string);
+			}
+
 			static value_t from_symbol(Symbol *symbol);
 			static value_t from_string(const char *c_str);
 			

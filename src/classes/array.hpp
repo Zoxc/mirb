@@ -21,6 +21,11 @@ namespace Mirb
 			Vector<value_t, Collector::Allocator> vector;
 			
 			static value_t class_ref;
+			
+			template<typename F> void mark(F mark)
+			{
+				vector.mark(mark);
+			}
 
 			static void initialize();
 	};

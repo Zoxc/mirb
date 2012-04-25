@@ -54,6 +54,11 @@ namespace Mirb
 			{
 				delete value;
 			}
+			
+			template<typename F> static void mark_value(Symbol *value, F mark)
+			{
+				mark(value);
+			}
 	};
 
 	typedef HashTable<const CharArray &, Symbol *, SymbolPoolFunctions> SymbolPoolHashTable;

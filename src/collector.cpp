@@ -10,6 +10,7 @@
 
 namespace Mirb
 {
+	value_t Collector::mark_list;
 	size_t Collector::pages = 16;
 	Collector::Region *Collector::current;
 	FastList<Collector::Region> Collector::regions;
@@ -40,11 +41,150 @@ namespace Mirb
 
 		Value::virtual_do<TestSize, bool>(Value::None, true);
 	}
-	
-	bool marked(value_t p)
+
+	template<Value::Type type> struct SizeOf
 	{
-		return true;
+		typedef size_t Result;
+		typedef typename Value::TypeClass<type>::Class Class;
+
+		static size_t func(value_t obj)
+		{
+			return sizeof(Class);
+		}
+	};
+	
+	template<> struct SizeOf<Value::InternalTuple>
+	{
+		typedef size_t Result;
+
+		static size_t func(value_t obj)
+		{
+			return static_cast<Tuple *>(obj)->entries * sizeof(value_t) + sizeof(Tuple);
+		}
+	};
+
+	template<> struct SizeOf<Value::InternalVariableBlock>
+	{
+		typedef size_t Result;
+
+		static size_t func(value_t obj)
+		{
+			return static_cast<VariableBlock *>(obj)->bytes;
+		}
+	};
+
+	size_t Collector::size_of_value(value_t value)
+	{
+		return Value::virtual_do<SizeOf>(value->type, value);
 	}
+	
+	template<typename F> void each_root(F func)
+	{
+		Frame *frame = current_frame;
+
+		while(frame)
+		{
+			if(frame->code->executor == &evaluate_block)
+			{
+				for(size_t i = 0; i < frame->code->var_words; ++i)
+				{
+					func(frame->vars[i]);
+				}
+			}
+
+			frame = frame->prev;
+		}
+	}
+
+	void Collector::mark_pointer(value_t obj)
+	{
+		mirb_debug_assert(obj->valid());
+
+		if(!obj->marked)
+		{
+			obj->marked = true;
+
+			obj->data = (value_t *)mark_list;
+			mark_list = obj;
+		}
+	}
+	
+	void Collector::mark_value(value_t obj)
+	{
+		if(Value::object_ref(obj))
+			mark_pointer(obj);
+	}
+
+	void Collector::mark()
+	{
+		each_root([&](value_t root) {
+			Collector * __this; // TODO: Remove Visual C++ bug workaround
+			(void)__this;
+
+			Collector::mark_value(root);
+		});
+
+		MarkFunc func;
+
+		symbol_pool.mark(func);
+
+		while(mark_list)
+		{
+			value_t current = mark_list;
+			mark_list = (value_t)mark_list->data;
+
+			Value::virtual_do<MarkClass>(Value::type(current), current);
+		}
+	}
+	
+	void Collector::flag()
+	{
+		for(auto i = regions.begin(); i != regions.end(); ++i)
+		{
+			value_t obj = i().data();
+
+			while((size_t)obj < (size_t)i().pos)
+			{
+				mirb_debug_assert(obj->valid());
+
+				obj->alive = obj->marked;
+				obj->marked = false;
+
+				obj = (value_t)((size_t)obj + size_of_value(obj));
+			}
+		}
+	}
+	
+	struct ThreadFunc
+	{
+		void operator()(const value_t &value)
+		{
+			Collector::thread(const_cast<value_t *>(&value));
+		};
+
+		void operator()(const CharArray &string)
+		{
+			Collector::thread(reinterpret_cast<value_t *>(&const_cast<CharArray *>(&string)->data));
+		};
+
+		template<class T> void operator()(const T *&value)
+		{
+			Collector::thread(reinterpret_cast<value_t *>(&value));
+		};
+	};
+	
+	template<Value::Type type> struct ThreadClass
+	{
+		typedef void Result;
+		typedef typename Value::TypeClass<type>::Class Class;
+
+		static void func(value_t value)
+		{
+			ThreadFunc func;
+
+			static_cast<Class *>(value)->template mark<ThreadFunc>(func);
+		}
+	};
 
 	void Collector::thread(value_t *node)
 	{
@@ -59,6 +199,9 @@ namespace Mirb
 
 	void Collector::update(value_t node, value_t free)
 	{
+		if(node->type == Value::InternalVariableBlock)
+			free = (value_t)((size_t)free + sizeof(VariableBlock));
+
 		value_t *current = node->data;
 
 		while(current)
@@ -80,17 +223,20 @@ namespace Mirb
 		value_t bottom;
 		value_t top;
 
-		//for each root: thread(node);
+		each_root([=](value_t &obj) {
+			thread(&obj);
+		});
 
 		value_t free = bottom;
 		value_t p = bottom;
 
 		while(p < top)
 		{
-			if(marked(p))
+			if(p->marked)
 			{
 				Collector::update(p, free);
-				//for each child pointer: thread(child);
+
+				Value::virtual_do<ThreadClass>(Value::type(p), p);
 
 				free += sizeof(Object);
 			}
@@ -109,7 +255,7 @@ namespace Mirb
 
 		while(p < top)
 		{
-			if(marked(p))
+			if(p->marked)
 			{
 				update(p, free);
 				move(p, free);
@@ -123,6 +269,8 @@ namespace Mirb
 
 	void Collector::collect()
 	{
+		mark();
+		flag();
 	}
 
 	Collector::Region *Collector::allocate_region(size_t bytes)
@@ -172,6 +320,10 @@ namespace Mirb
 			region->pos = region->end;
 
 			return result;
+		}
+		else
+		{
+			collect();
 		}
 
 		region = allocate_region(pages * page_size);

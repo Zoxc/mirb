@@ -198,6 +198,14 @@ namespace Mirb
 				
 				Vector<Scope *, Fragment> zsupers;
 				
+				template<typename F> void mark(F mark)
+				{
+					mark(final);
+					mark(document);
+					mark(parent);
+					mark(owner);
+				}
+
 				template<class T> T *alloc_var(Variable::Type type = Variable::Local)
 				{
 					T *result = new (fragment) T(type);

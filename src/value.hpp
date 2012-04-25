@@ -67,12 +67,10 @@ namespace Mirb
 	const value_t value_nil = (value_t)value_nil_num;
 	const value_t value_false = (value_t)value_false_num;
 	const value_t value_true = (value_t)value_true_num;
-	//const value_t value_undef = (value_t)14;
-	//const value_t value_highest = value_undef;
 
 	namespace Value
 	{
-		enum Type {
+		enum Type: char_t {
 			None,
 			InternalValueMap,
 			InternalTuple,
@@ -110,19 +108,42 @@ namespace Mirb
 				value_t *data;
 
 				#ifdef DEBUG
+					size_t size;
 					size_t magic;
 				#endif
 
 				const Type type;
+				bool marked;
+				bool alive;
 
 				friend class Mirb::Collector;
+		};
+
+		template<Type type> struct Immediate:
+			public Value::Header
+		{
+			template<typename F> void mark(F mark) {}
 		};
 	
 		bool object_ref(value_t value);
 		
 		value_t class_of_literal(value_t value);
-
+		
 		bool test(value_t value);
+
+		static inline bool immediate(Type type)
+		{
+			switch(type)
+			{
+				case Fixnum:
+				case True:
+				case False:
+				case Nil:
+					return true;
+				default:
+					return false;
+			}
+		}
 
 		Type type(value_t value);
 		
@@ -209,10 +230,10 @@ namespace Mirb
 		mirb_typeclass(InternalDocument, Document);
 		mirb_typeclass(InternalBlock, Block);
 		mirb_typeclass(InternalScope, Tree::Scope);
-		mirb_typeclass(Fixnum, value_t);
-		mirb_typeclass(True, value_t);
-		mirb_typeclass(False, value_t);
-		mirb_typeclass(Nil, value_t);
+		mirb_typeclass(Fixnum, Value::Immediate<Fixnum>);
+		mirb_typeclass(True, Value::Immediate<True>);
+		mirb_typeclass(False, Value::Immediate<False>);
+		mirb_typeclass(Nil, Value::Immediate<Nil>);
 		mirb_typeclass(Class, Class);
 		mirb_typeclass(IClass, Class);
 		mirb_typeclass(Module, Module);
