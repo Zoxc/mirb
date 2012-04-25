@@ -243,7 +243,7 @@ namespace Mirb
 			MoveOp(var_t dst, var_t src) : dst(dst), src(src) {}
 		};
 		
-		struct LoadOp:
+		struct LoadOp: // TODO: Split into true, false and nil ops
 			public OpcodeWrapper<Opcode::Load>
 		{
 			var_t var;
