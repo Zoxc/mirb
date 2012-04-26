@@ -45,7 +45,7 @@ namespace Mirb
 			fragment = new Tree::Fragment(fragment, block_size);
 		}
 		
-		return scope = Collector::allocate<Tree::Scope>(&document, fragment, scope, type);
+		return scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
 	}
 	
 	void Parser::error(std::string text)

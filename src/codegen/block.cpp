@@ -125,6 +125,8 @@ namespace Mirb
 				}
 			}
 
+			scope->children.clear();
+
 			final->scope = nullptr;
 			final->opcodes = opcodes;
 			final->var_words = var_count;

@@ -288,6 +288,11 @@ namespace Mirb
 				return setup_pinned_object<T>(new (allocate_pinned_object<T>()) T(std::forward<Arg1>(arg1)));
 			}
 			
+			template<class T, typename Arg1, typename Arg2, typename Arg3, typename Arg4> static T *allocate_pinned(Arg1&& arg1, Arg2&& arg2, Arg3&& arg3, Arg4&& arg4)
+			{
+				return setup_pinned_object<T>(new (allocate_pinned_object<T>()) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4)));
+			}
+			
 			template<class T> static T *allocate()
 			{
 				return setup_object<T>(new (allocate_object<T>()) T());

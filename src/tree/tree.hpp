@@ -4,6 +4,7 @@
 #include <Prelude/Vector.hpp>
 #include <Prelude/FastList.hpp>
 #include "../generic/simple-set.hpp"
+#include "../collector.hpp"
 #include "nodes.hpp"
 
 namespace Mirb
@@ -148,7 +149,7 @@ namespace Mirb
 		typedef HashTable<Symbol *, NamedVariable *, VariableMapFunctions, Fragment> VariableMap;
 		
 		class Scope:
-			public Value::Header
+			public PinnedHeader
 		{
 			public:
 				enum Type
@@ -191,6 +192,8 @@ namespace Mirb
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
 				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
+
+				Vector<Scope *, Fragment> children; // A list of all the immediate children. To keep them alive...
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
 
@@ -204,6 +207,7 @@ namespace Mirb
 					mark(document);
 					
 					referenced_scopes.mark_content(mark);
+					children.mark_content(mark);
 					zsupers.mark_content(mark);
 
 					if(parent)

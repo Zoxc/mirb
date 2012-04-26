@@ -5,7 +5,7 @@ namespace Mirb
 	namespace Tree
 	{
 		Scope::Scope(Document *document, Fragment *fragment, Scope *parent, Type type) :
-			Value::Header(Value::InternalScope),
+			PinnedHeader(Value::InternalScope),
 			document(document),
 			final(0),
 			fragment(fragment),
@@ -19,10 +19,17 @@ namespace Mirb
 			heap_vars(0),
 			block_parameter(0),
 			referenced_scopes(fragment),
+			children(fragment),
 			variable_list(2, fragment),
 			zsupers(fragment)
 		{
-			owner = parent ? parent->owner : 0;
+			if(parent)
+			{
+				parent->children.push(this);
+				owner = parent->owner;
+			}
+			else
+				owner = 0;
 		}
 
 		void Scope::require_scope(Scope *scope)

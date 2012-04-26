@@ -450,7 +450,7 @@ namespace Mirb
 			
 			if(node->pass_args)
 			{
-				var_t closure = node->block ? block_arg(scope, var) : ref(scope->owner->block_parameter);
+				var_t closure = node->block ? block_arg(node->block->scope, var) : ref(scope->owner->block_parameter);
 				
 				// push arguments
 
@@ -748,6 +748,8 @@ namespace Mirb
 		
 		Block *ByteCodeGenerator::to_bytecode(Tree::Scope *scope)
 		{
+			Value::assert_valid(scope);
+
 			this->scope = scope;
 
 			block = new (memory_pool) Block(memory_pool, scope);
@@ -907,6 +909,9 @@ namespace Mirb
 		
 		var_t ByteCodeGenerator::call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst)
 		{
+			if(scope)
+				Value::assert_valid(scope);
+
 			if(!arguments.empty())
 			{
 				VariableGroup group(this, arguments.size);
