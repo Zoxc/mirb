@@ -160,7 +160,7 @@ namespace Mirb
 					Closure
 				};
 				
-				Scope(Document *document, Fragment &fragment, Scope *parent, Type type);
+				Scope(Document *document, Fragment *fragment, Scope *parent, Type type);
 				
 				Document *document;
 				Block *final;
@@ -202,7 +202,10 @@ namespace Mirb
 				{
 					mark(final);
 					mark(document);
-					mark(parent);
+
+					if(parent)
+						mark(parent);
+					
 					mark(owner);
 				}
 

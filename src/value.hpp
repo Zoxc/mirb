@@ -26,6 +26,7 @@ namespace Mirb
 	class Symbol;
 	class String;
 	class Array;
+	class StackFrame;
 	class Exception;
 	class ReturnException;
 	class BreakException;
@@ -77,6 +78,7 @@ namespace Mirb
 		enum Type: char_t {
 			None,
 			InternalValueMap,
+			InternalStackFrame,
 			InternalTuple,
 			InternalVariableBlock,
 			InternalDocument,
@@ -106,25 +108,25 @@ namespace Mirb
 			
 				Type get_type();
 				
-				bool valid();
-				bool is_alive();
-
-			private:
-				value_t *data;
+				static const size_t magic_value;
+				
+				const Type type;
+				bool alive;
+				
 
 				#ifdef DEBUG
 					size_t size;
 					size_t magic;
 				#endif
 
+			private:
+				value_t *data;
+
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
 				#endif
 
-				const Type type;
 				bool marked;
-				bool alive;
-				
 				friend class Mirb::Collector;
 				friend class Mirb::Allocator;
 		};
@@ -163,6 +165,9 @@ namespace Mirb
 			{
 				case InternalValueMap:
 					return T<InternalValueMap>::func(std::forward<Arg>(arg));
+					
+				case InternalStackFrame:
+					return T<InternalStackFrame>::func(std::forward<Arg>(arg));
 					
 				case InternalTuple:
 					return T<InternalTuple>::func(std::forward<Arg>(arg));
@@ -235,6 +240,7 @@ namespace Mirb
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
 		mirb_typeclass(InternalValueMap, ValueMap);
+		mirb_typeclass(InternalStackFrame, StackFrame);
 		mirb_typeclass(InternalTuple, Tuple);
 		mirb_typeclass(InternalVariableBlock, VariableBlock);
 		mirb_typeclass(InternalDocument, Document);
@@ -263,6 +269,8 @@ namespace Mirb
 
 		#define mirb_derived_from(base, super) template<> struct DerivedFrom<Mirb::base, Mirb::super> { static const bool value = true; }
 		
+		mirb_derived_from(StackFrame, StackFrame);
+
 		mirb_derived_from(Block, Block);
 
 		mirb_derived_from(Object, Object);
@@ -310,11 +318,33 @@ namespace Mirb
 				}
 			};
 		};
+		
+		static inline void assert_valid_internal(value_t obj)
+		{
+			#ifdef DEBUG
+				if(object_ref(obj))
+				{
+					mirb_debug_assert(obj->magic == Header::magic_value);
+					mirb_debug_assert(obj->type != None);
+				}
+			#endif
+		}
+
+		static inline void assert_valid(value_t obj)
+		{
+			assert_valid_internal(obj);
+
+			#ifdef DEBUG
+				if(object_ref(obj))
+				{
+					mirb_debug_assert(obj->alive || obj->type == Symbol || obj->type == InternalBlock);
+				}
+			#endif
+		}
 
 		template<class T> bool of_type(value_t value)
 		{
-			mirb_debug_assert(value->valid());
-			mirb_debug_assert(value->is_alive());
+			Value::assert_valid(value);
 
 			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
 		}
@@ -329,7 +359,7 @@ namespace Mirb
 			
 		auto_cast(value_t value) : value(value)
 		{
-			mirb_debug_assert(value->valid());
+			Value::assert_valid(value);
 		}
 
 		auto_cast(bool value)
@@ -357,7 +387,8 @@ namespace Mirb
 			
 		auto_cast_null(value_t value) : value(value)
 		{
-			mirb_debug_assert(value == value_raise || value->valid());
+			if(value != value_raise)
+				Value::assert_valid(value);
 		}
 		
 		auto_cast_null(bool value)

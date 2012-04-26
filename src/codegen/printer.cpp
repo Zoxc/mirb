@@ -1,5 +1,6 @@
 #include "../tree/tree.hpp"
 #include "../runtime.hpp"
+#include "../classes/fixnum.hpp"
 #include "printer.hpp"
 #include "opcodes.hpp"
 #include "block.hpp"
@@ -21,7 +22,12 @@ namespace Mirb
 				return result.str();
 			}
 		}
-
+		
+		std::string ByteCodePrinter::imm(Symbol *imm)
+		{
+			return imm->get_string();
+		};
+				
 		std::string ByteCodePrinter::var(var_t var)
 		{
 			if(var == no_var)
@@ -41,11 +47,6 @@ namespace Mirb
 			result << imm;
 			
 			return result.str();
-		}
-		
-		std::string ByteCodePrinter::imm(value_t imm)
-		{
-			return inspect_object(imm);
 		}
 		
 		std::string ByteCodePrinter::label(BasicBlock *label)
@@ -109,13 +110,49 @@ namespace Mirb
 					return var(op->dst) + " = " + var(op->src);
 				}
 				
-				case Opcode::Load:
+				case Opcode::LoadFixnum:
 				{
-					auto op = (LoadOp *)opcode;
+					auto op = (LoadFixnumOp *)opcode;
 
-					opcode += sizeof(LoadOp);
+					opcode += sizeof(LoadFixnumOp);
 					
-					return var(op->var) + " = " + imm(op->imm);
+					return var(op->var) + " = " + raw(Fixnum::to_size_t(op->num));
+				}
+				
+				case Opcode::LoadTrue:
+				{
+					auto op = (LoadTrueOp *)opcode;
+
+					opcode += sizeof(LoadTrueOp);
+					
+					return var(op->var) + " = true";
+				}
+				
+				case Opcode::LoadFalse:
+				{
+					auto op = (LoadFalseOp *)opcode;
+
+					opcode += sizeof(LoadFalseOp);
+					
+					return var(op->var) + " = false";
+				}
+				
+				case Opcode::LoadNil:
+				{
+					auto op = (LoadNilOp *)opcode;
+
+					opcode += sizeof(LoadNilOp);
+					
+					return var(op->var) + " = nil";
+				}
+				
+				case Opcode::LoadObject:
+				{
+					auto op = (LoadObjectOp *)opcode;
+
+					opcode += sizeof(LoadObjectOp);
+					
+					return var(op->var) + " = Object";
 				}
 				
 				case Opcode::LoadArg:

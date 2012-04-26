@@ -24,6 +24,8 @@ int main()
 	
 	while(1)
 	{
+		Collector::collect();
+
 		std::string line;
 		
 		std::getline(std::cin, line);
@@ -62,13 +64,18 @@ int main()
 		#endif
 		
 		Block *block = Compiler::compile(scope, memory_pool);
-
+		
 		value_t result = call_code(block, context->main, Symbol::from_literal("main"), class_of(context->main), value_nil, 0, 0);
+		
+		OnStack<1> os1(result);
 
 		if(result == value_raise)
 		{
 			Exception *exception = current_exception;
-			std::cout << inspect_object(real_class_of(auto_cast(exception))) << ": " << enforce_string(exception->message)->string.get_string() << "\n" << enforce_string(exception->backtrace)->string.get_string() << "\n";
+
+			OnStack<1> os2(exception);
+
+			std::cout << inspect_object(real_class_of(auto_cast(exception))) << ": " << enforce_string(exception->message)->string.get_string() << "\n" << StackFrame::get_backtrace(exception->backtrace).get_string() << "\n";
 		}
 		else
 			std::cout << "=> " << inspect_object(result) << "\n";

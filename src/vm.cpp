@@ -11,55 +11,6 @@ namespace Mirb
 {
 	Frame *current_frame = 0;
 
-	CharArray Frame::inspect()
-	{
-		CharArray result = "  in ";
-
-		OnStackString<1> os1(result);
-
-		result += inspect_obj(obj) + ".";
-
-		value_t module = auto_cast(this->module);
-
-		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->instance_of;
-		
-		OnStack<1> os2(module);
-
-		result += inspect_obj(module);
-
-		value_t class_of = real_class_of(obj);
-
-		if(class_of != module)
-			result += "(" + inspect_obj(class_of) + ")";
-
-		result += "#" + name->string  + "(";
-
-		for(size_t i = 0; i < argc; ++i)
-		{
-			result += inspect_obj(argv[i]);
-			if(i < argc - 1)
-				result += ", ";
-		}
-			
-		result += ")";
-
-		if(code->executor == &evaluate_block)
-		{
-			Range *range = code->source_location.get((size_t)(ip - code->opcodes));
-
-			if(range)
-			{
-				CharArray prefix = code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
-				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
-			}
-			else
-				result += "\n" + code->document->name + ":unknown";
-		}
-
-		return result;
-	}
-
 #ifdef MIRB_THREADED
 	#define OpContinue goto *labels[(size_t)*ip]
 	#define OpPrologue static void *labels[] = {MIRB_OPCODES}; OpContinue;
@@ -78,7 +29,6 @@ namespace Mirb
 
 	value_t evaluate_block(Frame &frame)
 	{
-		auto &proc_frame = *(ProcFrame *)&frame;
 		const char *ip_start = frame.code->opcodes;
 		const char *ip = ip_start;
 
@@ -103,8 +53,6 @@ namespace Mirb
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
 
-		Collector::check();
-
 		OpPrologue
 
 		Op(LoadArg)
@@ -114,9 +62,21 @@ namespace Mirb
 		Op(Move)
 			vars[op.dst] = vars[op.src];
 		EndOp
+			
+		Op(LoadNil)
+			vars[op.var] = value_nil;
+		EndOp
 
-		Op(Load)
-			vars[op.var] = op.imm;
+		Op(LoadTrue)
+			vars[op.var] = value_true;
+		EndOp
+
+		Op(LoadFalse)
+			vars[op.var] = value_false;
+		EndOp
+			
+		Op(LoadFixnum)
+			vars[op.var] = op.num;
 		EndOp
 
 		DeepOp(Call)
@@ -159,6 +119,10 @@ namespace Mirb
 
 		Op(Closure)
 			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, &vars[op.argv]);
+		EndOp
+			
+		Op(LoadObject)
+			vars[op.var] = auto_cast(context->object_class);
 		EndOp
 
 		DeepOp(Class)
@@ -211,7 +175,7 @@ namespace Mirb
 		EndOp
 
 		Op(Lookup)
-			vars[op.var] = (value_t)(*proc_frame.scopes)[op.index];
+			vars[op.var] = (value_t)(*frame.scopes)[op.index];
 		EndOp
 
 		Op(Self)
@@ -291,12 +255,12 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(new ReturnException(Value::ReturnException, auto_cast(context->local_jump_error), String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
+			set_current_exception(new ReturnException(Value::ReturnException, auto_cast(context->local_jump_error), String::from_literal("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(new BreakException(auto_cast(context->local_jump_error), String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
+			set_current_exception(new BreakException(auto_cast(context->local_jump_error), String::from_literal("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
 			goto handle_exception;
 		EndOp
 

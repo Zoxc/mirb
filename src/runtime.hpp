@@ -152,9 +152,9 @@ namespace Mirb
 	value_t yield(value_t obj);
 	
 	/*
-	 * backtrace (calls Ruby code)
+	 * backtrace
 	 */
-	CharArray backtrace();
+	Tuple *backtrace();
 	
 	/*
 	 * enforce_string (calls Ruby code)

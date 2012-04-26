@@ -68,15 +68,13 @@ namespace Mirb
 		public PinnedHeader
 	{
 		public:
-			Block(Document *document) : PinnedHeader(Value::InternalBlock), document(document), opcodes(nullptr), source_location(2) {}
+			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), source_location(2) {}
 
 			typedef value_t (*executor_t)(Frame &frame);
 
 			Tree::Scope *scope;
 			Document *document;
 
-			Symbol *name; // The name of this block.
-			
 			size_t var_words;
 
 			const char *opcodes;
@@ -92,9 +90,11 @@ namespace Mirb
 
 			template<typename F> void mark(F mark)
 			{
-				mark(scope);
-				mark(name);
-				mark(document);
+				if(scope)
+					mark(scope);
+
+				if(document)
+					mark(document);
 			}
 	};
 };

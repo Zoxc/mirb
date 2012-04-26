@@ -283,6 +283,8 @@ namespace Mirb
 
 	ValueMap *get_vars(value_t obj)
 	{
+		Value::assert_valid(obj);
+
 		if(prelude_unlikely(!Value::of_type<Object>(obj)))
 			mirb_runtime_abort("No value map on objects passed by value"); // TODO: Fix this
 
@@ -308,6 +310,8 @@ namespace Mirb
 	
 	value_t test_const(value_t obj, Symbol *name)
 	{
+		Value::assert_valid(name);
+
 		// TODO: Fix constant lookup
 
 		prelude_debug_assert(Value::of_type<Module>(obj));
@@ -356,9 +360,11 @@ namespace Mirb
 
 	value_t set_const(value_t obj, Symbol *name, value_t value)
 	{
+		Value::assert_valid(value);
+
 		if(!can_have_consts(obj))
 			return value_raise;
-
+		
 		ValueMap *vars = get_vars(obj);
 
 		value_t *old = vars->map.get_ref(auto_cast(name));
@@ -392,6 +398,8 @@ namespace Mirb
 
 	void set_var(value_t obj, Symbol *name, value_t value)
 	{
+		Value::assert_valid(value);
+
 		get_vars(obj)->map.set(auto_cast(name), value);
 	}
 	
@@ -420,12 +428,7 @@ namespace Mirb
 
 	value_t raise(Class *exception_class, const CharArray &message)
 	{
-		OnStack<1> os1(exception_class);
-		OnStackString<1> os2(message);
-
-		value_t backtrace_string = backtrace().to_string();
-
-		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace_string));
+		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace()));
 		
 		return value_raise;
 	}
@@ -433,30 +436,31 @@ namespace Mirb
 	value_t raise(value_t exception)
 	{
 		set_current_exception(auto_cast(exception));
+
 		return value_raise;
 	}
 	
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input)
 	{
 		MemoryPool memory_pool;
-		Document &document = *Collector::allocate<Document>();
+		Document *document = Collector::allocate<Document>();
 
-		Parser parser(symbol_pool, memory_pool, document);
+		Parser parser(symbol_pool, memory_pool, *document);
 
 		if(!free_input)
-			document.copy(input, length);
+			document->copy(input, length);
 		else
 		{
-			document.data = input;
-			document.length = length;
+			document->data = input;
+			document->length = length;
 		}
 
-		document.name = filename;
+		document->name = filename;
 
 		parser.load();
 		
- 		Tree::Fragment fragment(0, Tree::Chunk::main_size);
-		Tree::Scope *scope = parser.parse_main(&fragment);
+ 		auto fragment = new Tree::Fragment(0, Tree::Chunk::main_size);
+		Tree::Scope *scope = parser.parse_main(fragment);
 	
 		if(!parser.messages.empty())
 		{
@@ -465,6 +469,8 @@ namespace Mirb
 
 			return value_nil;
 		}
+
+		OnStack<2> os(scope, document);
 		
 		#ifdef MIRB_DEBUG_COMPILER
 			DebugPrinter printer;
@@ -549,9 +555,17 @@ namespace Mirb
 		frame.prev = current_frame;
 		current_frame = &frame;
 
+		frame.vars = nullptr;
+		Collector::check();
+
 		value_t result = frame.code->executor(frame);
 		
 		#ifdef DEBUG
+			OnStack<1> os(result);
+
+			if(result != value_raise)
+				Value::assert_valid(result);
+
 			if(current_exception && result != value_raise)
 			{
 				Frame *current = frame.prev;
@@ -567,7 +581,7 @@ namespace Mirb
 					current = current->prev;
 				}
 
-				std::cout << "Function raised exception but didn't indicate it:\n" << backtrace().get_string() << std::endl;
+				std::cerr << "Function raised exception but didn't indicate it:\n" << StackFrame::get_backtrace(backtrace()).get_string() << std::endl;
 			}
 			else
 				current_exception_frame_origin = frame.prev;
@@ -590,6 +604,7 @@ namespace Mirb
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
+		frame.scopes = nullptr;
 
 		return call_frame(frame);
 	};
@@ -627,25 +642,33 @@ namespace Mirb
 		return yield(obj, value_nil, 0, 0);
 	}
 	
-	CharArray backtrace()
+	Tuple *backtrace()
 	{
+		size_t index = 0;
+
 		Frame *current = current_frame;
-
-		CharArray result;
-
-		OnStackString<1> os(result);
-
+		
 		while(current)
 		{
-			if(result.size() != 0)
-				result += "\n";
-
-			result += current->inspect();
+			index++;
 
 			current = current->prev;
 		}
 
-		return result;
+		Tuple &result = Collector::allocate_tuple(index);
+		
+		current = current_frame;
+		index = 0;
+
+		while(current)
+		{
+			StackFrame *frame = Collector::allocate<StackFrame>(current);
+
+			result[index++] = frame;
+			current = current->prev;
+		}
+
+		return &result;
 	}
 	
 	String *enforce_string(value_t obj)

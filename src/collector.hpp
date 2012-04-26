@@ -70,6 +70,12 @@ namespace Mirb
 	class Collector
 	{
 		public:
+			template<class F> static void mark_void(void *&data, F func)
+			{
+				if(data)
+					func(&VariableBlock::from_memory(string.data));
+			};
+
 			template<class F> static void mark_string(const CharArray &string, F func)
 			{
 				if(string.data && !string.static_data)
@@ -91,7 +97,7 @@ namespace Mirb
 			
 			struct MarkFunc
 			{
-				template<class T> void mark(T *&value)
+				template<class T> void mark(T *value)
 				{
 					Collector::mark_pointer(value);
 				};
@@ -103,7 +109,7 @@ namespace Mirb
 					});
 				};
 				
-				template<class T> void operator()(T *&value)
+				template<class T> void operator()(T *value)
 				{
 					mark(value);
 				};
@@ -323,5 +329,6 @@ namespace Mirb
 			}
 	};
 	
-	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *&value);
+	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *value);
+	template<> void Collector::MarkFunc::mark<void>(void *value);
 };

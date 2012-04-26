@@ -63,6 +63,7 @@ namespace Mirb
 			
 			template<typename F> void mark(F mark)
 			{
+				map.mark(mark);
 			}
 	};
 

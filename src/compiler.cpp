@@ -14,10 +14,12 @@ namespace Mirb
 {
 	Block *Compiler::compile(Tree::Scope *scope, MemoryPool &memory_pool)
 	{
+		Value::assert_valid(scope);
+
 		CodeGen::ByteCodeGenerator generator(memory_pool);
 		
 		CodeGen::Block *block = generator.to_bytecode(scope);
-		
+
 		#ifdef MIRB_DEBUG_COMPILER
 			CodeGen::ByteCodePrinter printer(block);
 

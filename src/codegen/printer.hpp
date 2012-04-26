@@ -27,13 +27,7 @@ namespace Mirb
 				BasicBlock *basic_block;
 				const char *data;
 
-				std::string imm(value_t imm);
-				
-				std::string imm(Symbol *imm)
-				{
-					return this->imm((value_t)auto_cast(imm));
-				};
-				
+				std::string imm(Symbol *imm);
 				std::string label(const char *opcode);
 				std::string label(BasicBlock *label);
 				std::string raw(size_t imm);

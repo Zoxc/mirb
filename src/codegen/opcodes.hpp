@@ -19,7 +19,11 @@ namespace Mirb
 		class BasicBlock;
 		
 		struct MoveOp;
-		struct LoadOp;
+		struct LoadFixnumOp;
+		struct LoadTrueOp;
+		struct LoadFalseOp;
+		struct LoadNilOp;
+		struct LoadObjectOp;
 		struct LoadArgOp;
 		struct ClosureOp;
 		struct ClassOp;
@@ -57,7 +61,11 @@ namespace Mirb
 			enum Type
 			{
 				Move,
-				Load,
+				LoadFixnum,
+				LoadTrue,
+				LoadFalse,
+				LoadNil,
+				LoadObject,
 				LoadArg,
 				Closure,
 				Class,
@@ -92,7 +100,11 @@ namespace Mirb
 
 			#define MIRB_OPCODES \
 				&&OpMove, \
-				&&OpLoad, \
+				&&OpLoadFixnum, \
+				&&OpLoadTrue, \
+				&&OpLoadFalse, \
+				&&OpLoadNil, \
+				&&OpLoadObject, \
 				&&OpLoadArg, \
 				&&OpClosure, \
 				&&OpClass, \
@@ -243,13 +255,45 @@ namespace Mirb
 			MoveOp(var_t dst, var_t src) : dst(dst), src(src) {}
 		};
 		
-		struct LoadOp: // TODO: Split into true, false and nil ops
-			public OpcodeWrapper<Opcode::Load>
+		struct LoadFixnumOp:
+			public OpcodeWrapper<Opcode::LoadFixnum>
 		{
 			var_t var;
-			value_t imm;
+			value_t num;
 
-			LoadOp(var_t var, value_t imm) : var(var), imm(imm) {}
+			LoadFixnumOp(var_t var, value_t num) : var(var), num(num) {}
+		};
+		
+		struct LoadTrueOp:
+			public OpcodeWrapper<Opcode::LoadTrue>
+		{
+			var_t var;
+
+			LoadTrueOp(var_t var) : var(var) {}
+		};
+		
+		struct LoadFalseOp:
+			public OpcodeWrapper<Opcode::LoadFalse>
+		{
+			var_t var;
+
+			LoadFalseOp(var_t var) : var(var) {}
+		};
+		
+		struct LoadNilOp:
+			public OpcodeWrapper<Opcode::LoadNil>
+		{
+			var_t var;
+
+			LoadNilOp(var_t var) : var(var) {}
+		};
+		
+		struct LoadObjectOp:
+			public OpcodeWrapper<Opcode::LoadObject>
+		{
+			var_t var;
+
+			LoadObjectOp(var_t var) : var(var) {}
 		};
 		
 		struct LoadArgOp:

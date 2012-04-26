@@ -113,30 +113,16 @@ namespace Mirb
 				return type_table[(size_t)value & literal_mask];
 		}
 		
-		const size_t header_magic = 12345;
+		const size_t Header::magic_value = 12345;
 	
 		Header::Header(Type type) : data(nullptr), type(type), marked(false), alive(true)
 		{
 			#ifdef DEBUG
-				magic = header_magic;
+				magic = magic_value;
 				size = 0;
 			#endif
 		}
 
-		bool Header::is_alive()
-		{
-			return object_ref(this) ? alive || type == Symbol : true;
-		}
-
-		bool Header::valid()
-		{
-		#ifdef DEBUG
-			return object_ref(this) ? (magic == header_magic) && (type != None) : true;
-		#else
-			return true;
-		#endif
-		}
-	
 		Type Header::get_type()
 		{
 			return type;

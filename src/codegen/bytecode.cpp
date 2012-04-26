@@ -134,7 +134,7 @@ namespace Mirb
 			{
 				auto node = (Tree::IntegerNode *)basic_node;
 				
-				gen<LoadOp>(var, Fixnum::from_int(node->value));
+				gen<LoadFixnumOp>(var, Fixnum::from_int(node->value));
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Mirb
 			if(node->obj)
 				to_bytecode(node->obj, var);
 			else if(is_var(var))
-				gen<LoadOp>(var, auto_cast(auto_cast(context->object_class)));
+				gen<LoadObjectOp>(var);
 			
 			gen<GetConstOp>(var, var, node->name);
 			location(node->range);
@@ -225,11 +225,11 @@ namespace Mirb
 				gen_if(label_true, temp);
 
 				gen(label_false);
-				gen<LoadOp>(var, value_true);
+				gen<LoadTrueOp>(var);
 				gen_branch(label_end);
 
 				gen(label_true);
-				gen<LoadOp>(var, value_false);
+				gen<LoadFalseOp>(var);
 				
 				gen(label_end);
 			}
@@ -361,7 +361,7 @@ namespace Mirb
 					if(variable->obj)
 						to_bytecode(variable->obj, obj);
 					else
-						gen<LoadOp>(obj, auto_cast(context->object_class));
+						gen<LoadObjectOp>(obj);
 					
 					to_bytecode(node->right, value);
 					
@@ -388,19 +388,19 @@ namespace Mirb
 		void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, var_t var)
 		{
 			if(is_var(var))
-				gen<LoadOp>(var, value_nil);
+				gen<LoadNilOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_true(Tree::Node *basic_node, var_t var)
 		{
 			if(is_var(var))
-				gen<LoadOp>(var, value_true);
+				gen<LoadTrueOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_false(Tree::Node *basic_node, var_t var)
 		{
 			if(is_var(var))
-				gen<LoadOp>(var, value_false);
+				gen<LoadFalseOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, var_t var)
@@ -533,7 +533,7 @@ namespace Mirb
 			if(node->statements.empty())
 			{
 				if (is_var(var))
-					gen<LoadOp>(var, value_nil);
+					gen<LoadNilOp>(var);
 				
 				return;
 			}
@@ -640,7 +640,7 @@ namespace Mirb
 			gen<MethodOp>(node->name, defer(node->scope));
 			
 			if(is_var(var))
-				gen<LoadOp>(var, value_nil);
+				gen<LoadNilOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_handler(Tree::Node *basic_node, var_t var)

@@ -3,8 +3,8 @@
 
 namespace Mirb
 {
-	OnStackBlock<false> *OnStackBlock<false>::current = nullptr;
-	OnStackBlock<true> *OnStackBlock<true>::current = nullptr;
+	template<> OnStackBlock<false> *OnStackBlock<false>::current = nullptr;
+	template<> OnStackBlock<true> *OnStackBlock<true>::current = nullptr;
 	
 	value_t **OnStackBase<false>::get_refs()
 	{

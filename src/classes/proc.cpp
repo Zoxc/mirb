@@ -9,9 +9,7 @@ namespace Mirb
 	{
 		auto self = cast<Proc>(obj);
 
-		OnStack<1> os(self);
-		
-		ProcFrame frame;
+		Frame frame;
 
 		frame.code = self->block;
 		frame.obj = self->self;

@@ -162,7 +162,6 @@ namespace Mirb
 	{
 		value_t instance_of;
 		value_t message;
-		value_t backtrace;
 
 		size_t i = 0;
 
@@ -182,25 +181,14 @@ namespace Mirb
 		else
 			message = value_nil;
 
-		if(argc > i)
-		{
-			backtrace = argv[i];
-			i++;
-		}
-		else
-		{
-			OnStack<2> os(instance_of, message);
-			backtrace = Mirb::backtrace().to_string();
-		}
-
-		Exception *exception = Collector::allocate<Exception>(auto_cast(instance_of), message, backtrace);
+		Exception *exception = Collector::allocate<Exception>(auto_cast(instance_of), message, Mirb::backtrace());
 
 		return raise(auto_cast(exception));
 	}
 
 	value_t Kernel::backtrace()
 	{
-		return Mirb::backtrace().to_string();
+		return StackFrame::get_backtrace(Mirb::backtrace()).to_string();
 	}
 
 	void Kernel::initialize()

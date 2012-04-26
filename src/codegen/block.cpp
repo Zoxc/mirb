@@ -123,6 +123,7 @@ namespace Mirb
 				}
 			}
 
+			final->scope = nullptr;
 			final->opcodes = opcodes;
 			final->var_words = var_count;
 			final->executor = &evaluate_block;

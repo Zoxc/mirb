@@ -13,6 +13,7 @@
 #include "classes/proc.hpp"
 #include "classes/symbol.hpp"
 #include "document.hpp"
+#include "runtime.hpp"
 #include "tree/tree.hpp"
 #include "on-stack.hpp"
 
@@ -130,11 +131,28 @@ namespace Mirb
 			}
 		}
 
+		if(current_exception)
+			mark(current_exception);
+
 		Frame *frame = current_frame;
 
 		while(frame)
 		{
-			if(frame->code->executor == &evaluate_block)
+			mark(frame->code);
+			mark(frame->obj);
+			mark(frame->name);
+			mark(frame->module);
+			mark(frame->block);
+
+			if(frame->scopes)
+				mark(frame->scopes);
+			
+			for(size_t i = 0; i < frame->argc; ++i)
+			{
+				mark(frame->argv[i]);
+			}
+
+			if(frame->code->executor == &evaluate_block && frame->vars)
 			{
 				for(size_t i = 0; i < frame->code->var_words; ++i)
 				{
@@ -146,14 +164,19 @@ namespace Mirb
 		}
 	}
 	
-	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *&value)
+	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *value)
 	{
 		Collector::mark_value(value);
 	};
 	
+	template<> void Collector::MarkFunc::mark<void>(void *value)
+	{
+		Collector::mark_pointer(&VariableBlock::from_memory(value));
+	};
+	
 	bool Collector::mark_pointer(value_t obj)
 	{
-		mirb_debug_assert(obj->valid());
+		Value::assert_valid(obj);
 
 		if(!obj->marked)
 		{
@@ -219,7 +242,7 @@ namespace Mirb
 
 			while((size_t)obj < (size_t)i().pos)
 			{
-				mirb_debug_assert(obj->valid());
+				Value::assert_valid_internal(obj); // TODO: Replace with Value::assert when compaction is implemented
 
 				obj->alive = obj->marked;
 				obj->marked = false;
@@ -236,19 +259,29 @@ namespace Mirb
 		{
 			Collector::thread(const_cast<value_t *>(&value));
 		};
+		
+		void operator()(value_t &value)
+		{
+			Collector::thread(&value);
+		};
 
 		void operator()(const CharArray &string)
 		{
 			if(string.data && !string.static_data)
 				Collector::thread(reinterpret_cast<value_t *>(&const_cast<CharArray *>(&string)->data));
 		};
-
-		template<class T> void operator()(const T *&value)
+		
+		template<class T> void operator()(T *&value)
 		{
 			Collector::thread(reinterpret_cast<value_t *>(&value));
 		};
+
+		template<class T> void operator()(const T *&value)
+		{
+			Collector::thread(reinterpret_cast<value_t *>(const_cast<void **>(&value)));
+		};
 	};
-	
+
 	template<Value::Type type> struct ThreadClass
 	{
 		typedef void Result;

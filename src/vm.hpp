@@ -20,15 +20,9 @@ namespace Mirb
 			value_t *vars;
 			const char *ip;
 			Frame *prev;
+			Tuple *scopes;
 
 			CharArray inspect();
-	};
-
-	class ProcFrame: // TODO: Mark scopes
-		public Frame
-	{
-		public:
-			Tuple *scopes;
 	};
 
 	extern Frame *current_frame;

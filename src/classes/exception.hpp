@@ -3,6 +3,39 @@
 
 namespace Mirb
 {
+	class Frame;
+
+	class StackFrame:
+		public Value::Header
+	{
+		private:
+			Block *code;
+			value_t obj;
+			Symbol *name;
+			value_t module;
+			value_t block;
+
+			Tuple *args;
+
+			const char *ip;
+		public:
+			StackFrame(Frame *frame);
+		
+			template<typename F> void mark(F mark)
+			{
+				mark(code);
+				mark(obj);
+				mark(name);
+				mark(module);
+				mark(block);
+				mark(args);
+			}
+			
+			static CharArray get_backtrace(Tuple *backtrace);
+
+			CharArray inspect();
+	};
+
 	class Exception:
 		public Object
 	{
@@ -12,11 +45,11 @@ namespace Mirb
 			static value_t method_initialize(value_t obj, value_t message);
 
 		public:
-			Exception(Value::Type type, Module *instance_of, value_t message, value_t backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(Module *instance_of, value_t message, value_t backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Value::Type type, Module *instance_of, value_t message, Tuple *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Module *instance_of, value_t message, Tuple *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
 			value_t message;
-			value_t backtrace;
+			Tuple *backtrace;
 
 			template<typename F> void mark(F mark)
 			{

@@ -52,7 +52,6 @@ namespace Mirb
 		Block *result = Collector::allocate_pinned<Block>(nullptr);
 
 		result->opcodes = (const char *)function;
-		result->name = name;
 		result->executor = executor;
 		
 		if((flags & Method::Singleton) != 0)
