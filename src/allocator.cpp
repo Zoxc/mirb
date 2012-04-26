@@ -27,6 +27,9 @@ namespace Mirb
 			if(memory)
 			{
 				auto &block = VariableBlock::from_memory(memory);
+
+				Value::assert_valid(&block);
+
 				size_t old_block_size = block.bytes - sizeof(VariableBlock);
 
 				mirb_debug_assert(old_block_size >= old_size);

@@ -184,7 +184,10 @@ namespace Mirb
 
 	bool Collector::mark_pointer(value_t obj)
 	{
-		mirb_debug_assert(obj->magic == Value::Header::magic_value);
+		#ifdef DEBUG
+			mirb_debug_assert(obj->magic == Value::Header::magic_value);
+		#endif
+
 		mirb_debug_assert(obj->type != Value::None);
 		mirb_debug_assert(obj->alive);
 
@@ -242,7 +245,10 @@ namespace Mirb
 	void Collector::flag()
 	{
 		auto unmark = [&](value_t obj) {
-			mirb_debug_assert(obj->magic == Value::Header::magic_value);
+			#ifdef DEBUG
+				mirb_debug_assert(obj->magic == Value::Header::magic_value);
+			#endif
+
 			mirb_debug_assert(obj->type != Value::None);
 			
 			// Enable with compaction - mirb_debug_assert(obj->alive);

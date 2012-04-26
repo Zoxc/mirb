@@ -49,6 +49,8 @@ namespace Mirb
 		{
 			CharArray result;
 
+			OnStackString<1> os(result);
+
 			for(size_t i = 0; i < argc; ++i)
 			{
 				value_t obj = argv[i];
