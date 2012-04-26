@@ -6,8 +6,13 @@ namespace Mirb
 
 	Context::Context()
 	{
-		mark_fields([&](Class *&entry) {
-			entry = nullptr;
-		});
+		auto start = &object_class;
+
+		while(start != &terminator)
+		{
+			*start = nullptr;
+
+			start++;
+		}
 	}
 }

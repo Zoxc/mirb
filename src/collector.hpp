@@ -241,8 +241,10 @@ namespace Mirb
 			}
 		public:
 			static void collect();
-			
+
 			static void initialize();
+
+			static void free();
 
 			static void check()
 			{

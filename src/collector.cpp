@@ -258,7 +258,10 @@ namespace Mirb
 			unmark(obj);
 
 			if(!obj->alive)
+			{
 				heap_list.remove(obj);
+				std::free((void *)obj);
+			}
 
 			obj = next;
 		}
@@ -477,5 +480,28 @@ namespace Mirb
 	void Collector::initialize()
 	{
 		current = allocate_region(pages * page_size);
+	}
+
+	void Collector::free()
+	{
+		for(auto obj = heap_list.first; obj;)
+		{
+			auto next = obj->entry.next;
+
+			std::free((void *)obj);
+
+			obj = next;
+		}
+
+	#ifndef VALGRIND
+		for(auto region = regions.first; region;)
+		{
+			auto next = region->entry.next;
+
+			free_region(region);
+
+			region = next;
+		}
+	#endif
 	}
 };

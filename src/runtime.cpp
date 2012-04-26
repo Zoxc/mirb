@@ -778,6 +778,7 @@ namespace Mirb
 
 	void finalize()
 	{
+		Collector::free();
 	}
 };
 

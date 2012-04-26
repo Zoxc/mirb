@@ -48,12 +48,12 @@ namespace Mirb
 		length = std::strlen((const char *)c_str);
 
 		data = (char_t *)Allocator::allocate(length);
-		update_ref();
 
 		memcpy(data, c_str, length);
 
 		shared = false;
 		static_data = false;
+		update_ref();
 
 		return *this;
 	}
@@ -63,12 +63,12 @@ namespace Mirb
 		length = string.length();
 
 		data = (char_t *)Allocator::allocate(length);
-		update_ref();
 
 		memcpy(data, string.c_str(), length);
 
 		shared = false;
 		static_data = false;
+		update_ref();
 
 		return *this;
 	}
@@ -81,10 +81,10 @@ namespace Mirb
 		length = other.length;
 		data = other.data;
 		static_data = other.static_data;
-		update_ref();
 
 		shared = true;
 		other.shared = true;
+		update_ref();
 
 		return *this;
 	}

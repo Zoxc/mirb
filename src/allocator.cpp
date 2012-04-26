@@ -15,7 +15,7 @@ namespace Mirb
 		#endif
 
 		#ifdef VALGRIND
-			heap_list.append(result);
+			Collector::heap_list.append(result);
 		#endif
 
 		return result->data();
@@ -43,7 +43,7 @@ namespace Mirb
 		#endif
 
 		#ifdef VALGRIND
-			heap_list.append(result);
+			Collector::heap_list.append(result);
 		#endif
 
 		memcpy(result->data(), memory, old_size);
