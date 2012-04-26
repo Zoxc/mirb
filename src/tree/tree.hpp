@@ -203,7 +203,9 @@ namespace Mirb
 				
 				template<typename F> void mark(F mark)
 				{
-					mark(final);
+					if(final)
+						mark(final);
+
 					mark(document);
 					
 					referenced_scopes.mark_content(mark);
