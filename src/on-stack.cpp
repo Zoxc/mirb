@@ -1,54 +1,33 @@
 #include "on-stack.hpp"
+#include "char-array.hpp"
 
 namespace Mirb
 {
-	size_t *on_stack_reference(Object *&arg)
+	OnStackBlock<false> *OnStackBlock<false>::current = nullptr;
+	OnStackBlock<true> *OnStackBlock<true>::current = nullptr;
+	
+	value_t **OnStackBase<false>::get_refs()
 	{
-		return (size_t *)&arg;
+		return &static_cast<OnStack<1> *>(this)->refs[0];
 	}
 	
-	size_t *on_stack_reference(Module *&arg)
+	CharArray **OnStackBase<true>::get_refs()
 	{
-		return (size_t *)&arg;
+		return &static_cast<OnStackString<1> *>(this)->refs[0];
+	}
+	
+	void OnStackBase<false>::push(value_t &arg, size_t &index)
+	{
+		get_refs()[index++] = &arg;
+	}
+	
+	void OnStackBase<true>::push(CharArray &arg, size_t &index)
+	{
+		get_refs()[index++] = &arg;
 	}
 
-	size_t *on_stack_reference(Class *&arg)
+	void OnStackBase<true>::push(const CharArray &arg, size_t &index)
 	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(Symbol *&arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(String *&arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(Array *&arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(Exception *&arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(Proc *&arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(value_t &arg)
-	{
-		return (size_t *)&arg;
-	}
-
-	size_t *on_stack_reference(const CharArray &value)
-	{
-		return 0;
+		get_refs()[index++] = const_cast<CharArray *>(&arg);
 	}
 };

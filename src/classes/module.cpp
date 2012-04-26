@@ -26,7 +26,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		include_module(mod, obj);
+		include_module(auto_cast(mod), auto_cast(obj));
 
 		return obj;
 	}

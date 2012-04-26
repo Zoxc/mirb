@@ -24,7 +24,7 @@ namespace Mirb
 
 	class MethodGen;
 
-	value_t raise(value_t exception_class, const CharArray &message);
+	value_t raise(Class *exception_class, const CharArray &message);
 	bool type_error(value_t value, value_t expected);
 
 	namespace Arg

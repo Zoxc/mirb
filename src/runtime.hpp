@@ -19,22 +19,22 @@ namespace Mirb
 	value_t real_class(value_t obj);
 	value_t real_class_of(value_t obj);
 
-	value_t singleton_class(value_t object);
+	Class *singleton_class(Object *object);
 	
-	value_t define_class(value_t under, Symbol *name, value_t super);
-	value_t define_class(value_t under, std::string name, value_t super);
-	value_t define_module(value_t under, Symbol *name);
-	value_t define_module(value_t under, std::string name);
+	Class *define_class(Module *under, Symbol *name, Class *super);
+	Class *define_class(Module *under, std::string name, Class *super);
+	Module *define_module(Module *under, Symbol *name);
+	Module *define_module(Module *under, std::string name);
 
 	/*
 	 * include_module (calls Ruby code)
 	 */
-	void include_module(value_t obj, value_t module);
+	void include_module(Module *obj, Module *module);
 	
-	void class_name(value_t obj, value_t under, Symbol *name);
-	value_t class_create_unnamed(value_t super);
-	value_t class_create_bare(value_t super);
-	value_t class_create_singleton(value_t object, value_t super);
+	void class_name(value_t obj, Module *under, Symbol *name);
+	Class *class_create_unnamed(Class *super);
+	Class *class_create_bare(Class *super);
+	Class *class_create_singleton(Object *object, Class *super);
 	
 	/*
 	 * inspect_object (calls Ruby code)
@@ -77,7 +77,7 @@ namespace Mirb
 	 * raise (calls Ruby code)
 	 */
 	bool type_error(value_t value, value_t expected);
-	value_t raise(value_t exception_class, const CharArray &message);
+	value_t raise(Class *exception_class, const CharArray &message);
 
 	value_t raise(value_t exception);
 	

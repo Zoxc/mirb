@@ -10,8 +10,6 @@
 
 namespace Mirb
 {
-	value_t Kernel::class_ref;
-	
 	value_t Kernel::proc(value_t block)
 	{
 		if(block)
@@ -195,7 +193,7 @@ namespace Mirb
 			backtrace = Mirb::backtrace().to_string();
 		}
 
-		Exception *exception = Collector::allocate<Exception>(instance_of, message, backtrace);
+		Exception *exception = Collector::allocate<Exception>(auto_cast(instance_of), message, backtrace);
 
 		return raise(auto_cast(exception));
 	}
@@ -207,19 +205,19 @@ namespace Mirb
 
 	void Kernel::initialize()
 	{
-		Kernel::class_ref = define_module(context->object_class, "Kernel");
+		context->kernel_module = define_module(context->object_class, "Kernel");
 
-		include_module(context->object_class, Kernel::class_ref);
+		include_module(auto_cast(context->object_class), auto_cast(context->kernel_module));
 		
-		static_method<Arg::Block>(Kernel::class_ref, "proc", &proc);
-		static_method<Arg::Block>(Kernel::class_ref, "benchmark", &benchmark);
-		static_method(Kernel::class_ref, "backtrace", &backtrace);
-		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "eval", &eval);
-		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "print", &print);
-		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "puts", &puts);
-		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "load", &load);
-		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require", &load);
-		static_method<Arg::Self, Arg::Value>(Kernel::class_ref, "require_relative", &load);
-		static_method<Arg::Count, Arg::Values>(Kernel::class_ref, "raise", &raise);
+		static_method<Arg::Block>(context->kernel_module, "proc", &proc);
+		static_method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
+		static_method(context->kernel_module, "backtrace", &backtrace);
+		static_method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
+		static_method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
+		static_method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
+		static_method<Arg::Self, Arg::Value>(context->kernel_module, "load", &load);
+		static_method<Arg::Self, Arg::Value>(context->kernel_module, "require", &load);
+		static_method<Arg::Self, Arg::Value>(context->kernel_module, "require_relative", &load);
+		static_method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
 	}
 };

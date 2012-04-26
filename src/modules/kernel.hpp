@@ -14,8 +14,6 @@ namespace Mirb
 		value_t puts(size_t argc, value_t argv[]);
 		value_t raise(size_t argc, value_t argv[]);
 
-		extern value_t class_ref;
-		
 		void initialize();
 	};
 };

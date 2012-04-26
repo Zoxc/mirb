@@ -313,15 +313,14 @@ namespace Mirb
 
 		template<class T> bool of_type(value_t value)
 		{
-			static_assert(std::is_base_of<Header, T>::value, "T must be a Value::Header");
-			
 			mirb_debug_assert(value->valid());
-			//mirb_debug_assert(value->is_alive());
+			mirb_debug_assert(value->is_alive());
 
 			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
 		}
 		
-		void initialize();
+		void initialize_type_table();
+		void initialize_class_table();
 	};
 	
 	struct auto_cast
@@ -338,7 +337,7 @@ namespace Mirb
 			this->value = value ? value_true : value_false;
 		}
 		
-		template<class T> auto_cast(T *obj) : value(static_cast<value_t>(obj))
+		template<class T> auto_cast(T *obj) : value(reinterpret_cast<value_t>(obj))
 		{
 			mirb_debug_assert(Value::of_type<T>(value));
 		}
@@ -348,7 +347,7 @@ namespace Mirb
 		template<class T> operator T *()
 		{
 			mirb_debug_assert(Value::of_type<T>(value));
-			return static_cast<T *>(value);
+			return reinterpret_cast<T *>(value);
 		}
 	};
 	
@@ -376,20 +375,20 @@ namespace Mirb
 		template<class T> operator T *()
 		{
 			mirb_debug_assert(value == value_raise || Value::of_type<T>(value));
-			return static_cast<T *>(value);
+			return reinterpret_cast<T *>(value);
 		}
 	};
 	
 	template<typename T> T *cast_null(value_t obj)
 	{
 		mirb_debug_assert(obj == value_raise || Value::of_type<T>(obj));
-		return static_cast<T *>(obj);
+		return reinterpret_cast<T *>(obj);
 	}
 
 	template<typename T> T *cast(value_t obj)
 	{
 		mirb_debug_assert(Value::of_type<T>(obj));
-		return static_cast<T *>(obj);
+		return reinterpret_cast<T *>(obj);
 	}
 };
 

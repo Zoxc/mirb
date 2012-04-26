@@ -5,9 +5,9 @@
 
 namespace Mirb
 {
-	Class::Class(value_t module, value_t superclass) : Module(Value::IClass, module, superclass), singleton(false)
+	Class::Class(Module *module, Class *superclass) : Module(Value::IClass, module, superclass), singleton(false)
 	{
-		methods = cast<Module>(module)->get_methods();
+		methods = module->get_methods();
 		vars = get_vars(module);
 	}
 

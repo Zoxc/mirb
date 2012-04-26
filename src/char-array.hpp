@@ -10,9 +10,11 @@ namespace Mirb
 			size_t length;
 			char_t *data;
 			mutable bool shared;
+			bool static_data;
 			
 			friend class Collector;
 			friend struct ThreadFunc;
+			template<bool> friend struct OnStackBlockBase;
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
 			CharArray(const char_t *c_str);
@@ -66,7 +68,7 @@ namespace Mirb
 			const char *c_str_ref() const;
 			size_t c_str_length() const;
 
-			const char_t *str_ref() const;
+			char_t * const&str_ref() const;
 			size_t str_length() const;
 
 			CharArray c_str() const;
@@ -76,6 +78,7 @@ namespace Mirb
 				data = (char_t *)&string;
 				length = string_length - 1;
 				shared = true;
+				static_data = true;
 			}
 			
 			bool operator ==(CharArray &other) const

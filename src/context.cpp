@@ -6,8 +6,8 @@ namespace Mirb
 
 	Context::Context()
 	{
-		mark([&](value_t &entry) {
-			entry = value_nil;
+		mark_fields([&](Class *&entry) {
+			entry = nullptr;
 		});
 	}
 }

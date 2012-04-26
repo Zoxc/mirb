@@ -1,5 +1,6 @@
 #include "proc.hpp"
 #include "symbol.hpp"
+#include "class.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -10,7 +11,7 @@ namespace Mirb
 
 		OnStack<1> os(self);
 		
-		ProcFrame frame(self->scopes);
+		ProcFrame frame;
 
 		frame.code = self->block;
 		frame.obj = self->self;
@@ -19,6 +20,7 @@ namespace Mirb
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
+		frame.scopes = self->scopes;
 
 		return call_frame(frame);
 	}

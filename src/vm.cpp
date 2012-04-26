@@ -15,7 +15,7 @@ namespace Mirb
 	{
 		CharArray result = "  in ";
 
-		OnStack<1> os(result);
+		OnStackString<1> os1(result);
 
 		result += inspect_obj(obj) + ".";
 
@@ -23,6 +23,8 @@ namespace Mirb
 
 		if(Value::type(module) == Value::IClass)
 			module = cast<Module>(module)->instance_of;
+		
+		OnStack<1> os2(module);
 
 		result += inspect_obj(module);
 
@@ -101,6 +103,8 @@ namespace Mirb
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
 
+		Collector::check();
+
 		OpPrologue
 
 		Op(LoadArg)
@@ -125,6 +129,8 @@ namespace Mirb
 
 			if(op.var != no_var)
 				vars[op.var] = result;
+
+			Collector::check();
 		EndOp
 
 		Op(Branch)
@@ -205,7 +211,7 @@ namespace Mirb
 		EndOp
 
 		Op(Lookup)
-			vars[op.var] = (value_t)proc_frame.scopes[op.index];
+			vars[op.var] = (value_t)(*proc_frame.scopes)[op.index];
 		EndOp
 
 		Op(Self)
@@ -285,12 +291,12 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(new ReturnException(Value::ReturnException, context->local_jump_error, String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
+			set_current_exception(new ReturnException(Value::ReturnException, auto_cast(context->local_jump_error), String::from_literal("Unhandled return from block"), backtrace().to_string(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(new BreakException(context->local_jump_error, String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
+			set_current_exception(new BreakException(auto_cast(context->local_jump_error), String::from_literal("Unhandled break from block"), backtrace().to_string(), op.code, vars[op.var], op.parent_dst));
 			goto handle_exception;
 		EndOp
 

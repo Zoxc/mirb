@@ -1,5 +1,5 @@
 #pragma once
-#include "object.hpp"
+#include "class.hpp"
 #include "../common.hpp"
 #include "../value.hpp"
 #include "../char-array.hpp"

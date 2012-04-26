@@ -18,6 +18,7 @@ namespace Mirb
 		memcpy(data, c_str, length);
 
 		shared = false;
+		static_data = false;
 	}
 
 	CharArray::CharArray(const std::string &string)
@@ -44,6 +45,7 @@ namespace Mirb
 		memcpy(data, c_str, length);
 
 		shared = false;
+		static_data = false;
 
 		return *this;
 	}
@@ -57,6 +59,7 @@ namespace Mirb
 		memcpy(data, string.c_str(), length);
 
 		shared = false;
+		static_data = false;
 
 		return *this;
 	}
@@ -68,6 +71,7 @@ namespace Mirb
 
 		length = other.length;
 		data = other.data;
+		static_data = other.static_data;
 
 		shared = true;
 		other.shared = true;
@@ -83,6 +87,7 @@ namespace Mirb
 		length = other.length;
 		data = other.data;
 		shared = other.shared;
+		static_data = other.static_data;
 
 		return *this;
 	}
@@ -97,6 +102,7 @@ namespace Mirb
 
 			data = new_data;
 			shared = false;
+			static_data = false;
 		}
 	}
 
@@ -115,6 +121,9 @@ namespace Mirb
 		else
 			data = (char_t *)Allocator::reallocate(data, length, length + other.length);
 		
+		shared = false;
+		static_data = false;
+
 		memcpy(data + length, other_data, other.length);
 
 		length += other.length;
@@ -147,7 +156,7 @@ namespace Mirb
 		return length - 1;
 	}
 
-	const char_t *CharArray::str_ref() const
+	char_t *const &CharArray::str_ref() const
 	{
 		return data;
 	}

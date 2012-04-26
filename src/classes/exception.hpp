@@ -12,8 +12,8 @@ namespace Mirb
 			static value_t method_initialize(value_t obj, value_t message);
 
 		public:
-			Exception(Value::Type type, value_t instance_of, value_t message, value_t backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(value_t instance_of, value_t message, value_t backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Value::Type type, Module *instance_of, value_t message, value_t backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Module *instance_of, value_t message, value_t backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
 			value_t message;
 			value_t backtrace;

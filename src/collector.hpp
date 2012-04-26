@@ -69,6 +69,13 @@ namespace Mirb
 	
 	class Collector
 	{
+		public:
+			template<class F> static void mark_string(const CharArray &string, F func)
+			{
+				if(string.data && !string.static_data)
+					func(&VariableBlock::from_memory(string.data));
+			};
+
 		private:
 			prelude_align(mirb_object_align) struct Region
 			{
@@ -84,23 +91,24 @@ namespace Mirb
 			
 			struct MarkFunc
 			{
-				void operator()(const value_t &value)
-				{
-					Collector::mark_value(value);
-				};
-
-				void operator()(const CharArray &string)
-				{
-					if(string.data)
-						Collector::mark_pointer(&VariableBlock::from_memory(string.data));
-				};
-				
-				template<class T> void operator()(const T *&value)
+				template<class T> void mark(T *&value)
 				{
 					Collector::mark_pointer(value);
 				};
+				
+				void operator()(const CharArray &string)
+				{
+					mark_string(string, [&](value_t data) {
+						Collector::mark_pointer(data);
+					});
+				};
+				
+				template<class T> void operator()(T *&value)
+				{
+					mark(value);
+				};
 			};
-	
+
 			template<Value::Type type> struct MarkClass
 			{
 				typedef void Result;
@@ -110,19 +118,21 @@ namespace Mirb
 				{
 					MarkFunc func;
 
-					if(!Value::immediate(type) && !value->marked)
+					if(!Value::immediate(type))
 						static_cast<Class *>(value)->template mark<MarkFunc>(func);
 				}
 			};
 
 			static value_t mark_list;
+
+			static bool pending;
 			
 			static void flag_value(value_t obj);
 			static void flag_pointer(value_t obj);
 			static void flag();
 			
-			static void mark_value(value_t obj);
-			static void mark_pointer(value_t obj);
+			static bool mark_value(value_t obj);
+			static bool mark_pointer(value_t obj);
 			static void mark();
 
 			friend struct MarkFunc;
@@ -156,8 +166,6 @@ namespace Mirb
 			static void *allocate_simple(size_t bytes)
 			{
 				mirb_debug_assert((bytes & object_ref_mask) == 0);
-
-				collect();
 
 				char_t *result;
 
@@ -227,8 +235,21 @@ namespace Mirb
 			
 			static void initialize();
 
+			static void check()
+			{
+				#ifdef DEBUG
+					collect();
+				#else
+					if(prelude_unlikely(pending))
+					{
+						pending = false;
+						collect();
+					}
+				#endif
+			}
+			
 			friend class Mirb::Allocator;
-
+			
 			static Tuple &allocate_tuple(size_t entries)
 			{
 				size_t size = sizeof(Tuple) + entries * sizeof(value_t);
@@ -302,4 +323,5 @@ namespace Mirb
 			}
 	};
 	
+	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *&value);
 };

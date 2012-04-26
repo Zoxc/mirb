@@ -16,7 +16,7 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
 
-			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, module, block, scopes));
+			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, module, block, &scopes));
 		}
 
 		value_t get_const(value_t obj, Symbol *name)
@@ -84,7 +84,7 @@ namespace Mirb
 			if(prelude_unlikely(obj == context->main))
 				obj = context->object_class;
 			
-			return Mirb::define_class(obj, name, super);
+			return Mirb::define_class(auto_cast(obj), name, auto_cast(super));
 		}
 		
 		value_t define_module(value_t obj, Symbol *name)
@@ -92,7 +92,7 @@ namespace Mirb
 			if(prelude_unlikely(obj == context->main))
 				obj = context->object_class;
 			
-			return Mirb::define_module(obj, name);
+			return Mirb::define_module(auto_cast(obj), name);
 		}
 		
 		void define_method(value_t obj, Symbol *name, Block *block)

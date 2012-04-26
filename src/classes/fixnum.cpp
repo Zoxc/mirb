@@ -1,5 +1,5 @@
 #include "fixnum.hpp"
-#include "object.hpp"
+#include "class.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
 

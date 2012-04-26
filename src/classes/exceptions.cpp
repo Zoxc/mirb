@@ -1,5 +1,6 @@
 #include "exceptions.hpp"
 #include "../runtime.hpp"
+#include "class.hpp"
 
 namespace Mirb
 {

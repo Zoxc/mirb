@@ -106,4 +106,6 @@ namespace Mirb
 	};
 
 	extern SymbolPool symbol_pool;
+
+	void fix_symbol_pool();
 };

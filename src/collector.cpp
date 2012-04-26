@@ -14,9 +14,11 @@
 #include "classes/symbol.hpp"
 #include "document.hpp"
 #include "tree/tree.hpp"
+#include "on-stack.hpp"
 
 namespace Mirb
 {
+	bool Collector::pending = false;
 	value_t Collector::mark_list;
 	size_t Collector::pages = 16;
 	Collector::Region *Collector::current;
@@ -93,6 +95,41 @@ namespace Mirb
 	{
 		context->mark(mark);
 
+		{
+			OnStackBlock<false> *on_stack = OnStackBlock<false>::current;
+		
+			while(on_stack)
+			{
+				value_t **refs = on_stack->get_refs();
+
+				for(size_t i = 0; i < on_stack->size; ++i)
+				{
+					if(*refs[i] != nullptr)
+						mark(*refs[i]);
+				}
+
+				on_stack = on_stack->prev;
+			}
+		}
+		
+		{
+			OnStackBlock<true> *on_stack = OnStackBlock<true>::current;
+		
+			while(on_stack)
+			{
+				CharArray **refs = on_stack->get_refs();
+
+				for(size_t i = 0; i < on_stack->size; ++i)
+				{
+					Collector::mark_string(*refs[i], [&](value_t data) {
+						mark(data);
+					});
+				}
+
+				on_stack = on_stack->prev;
+			}
+		}
+
 		Frame *frame = current_frame;
 
 		while(frame)
@@ -108,8 +145,13 @@ namespace Mirb
 			frame = frame->prev;
 		}
 	}
-
-	void Collector::mark_pointer(value_t obj)
+	
+	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *&value)
+	{
+		Collector::mark_value(value);
+	};
+	
+	bool Collector::mark_pointer(value_t obj)
 	{
 		mirb_debug_assert(obj->valid());
 
@@ -119,35 +161,38 @@ namespace Mirb
 
 			obj->data = (value_t *)mark_list;
 			mark_list = obj;
+
+			return true;
 		}
+		else
+			return false;
 	}
 	
-	void Collector::mark_value(value_t obj)
+	bool Collector::mark_value(value_t obj)
 	{
 		if(Value::object_ref(obj))
-			mark_pointer(obj);
+			return mark_pointer(obj);
+		else
+			return false;
 	}
-
+	
 	void Collector::mark()
 	{
 		each_root([&](value_t root) {
 			Collector * __this; // TODO: Remove Visual C++ bug workaround
 			(void)__this;
 
-			Collector::mark_value(root);
+			if(Collector::mark_value(root))
+			{
+				while(mark_list)
+				{
+					value_t current = mark_list;
+					mark_list = (value_t)mark_list->data;
+
+					Value::virtual_do<MarkClass>(Value::type(current), current);
+				}
+			}
 		});
-
-		MarkFunc func;
-
-		symbol_pool.mark(func);
-
-		while(mark_list)
-		{
-			value_t current = mark_list;
-			mark_list = (value_t)mark_list->data;
-
-			Value::virtual_do<MarkClass>(Value::type(current), current);
-		}
 	}
 	
 	void Collector::flag()
@@ -194,7 +239,8 @@ namespace Mirb
 
 		void operator()(const CharArray &string)
 		{
-			Collector::thread(reinterpret_cast<value_t *>(&const_cast<CharArray *>(&string)->data));
+			if(string.data && !string.static_data)
+				Collector::thread(reinterpret_cast<value_t *>(&const_cast<CharArray *>(&string)->data));
 		};
 
 		template<class T> void operator()(const T *&value)
@@ -252,11 +298,11 @@ namespace Mirb
 	{
 		value_t bottom;
 		value_t top;
-
+		/*
 		each_root([=](value_t &obj) {
 			thread(&obj);
 		});
-
+		*/
 		value_t free = bottom;
 		value_t p = bottom;
 
@@ -352,9 +398,7 @@ namespace Mirb
 			return result;
 		}
 		else
-		{
-			collect();
-		}
+			pending = true;
 
 		region = allocate_region(pages * page_size);
 		pages += max_page_alloc;

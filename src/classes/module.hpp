@@ -17,9 +17,9 @@ namespace Mirb
 			ValueMap *methods;
 
 		public:
-			Module(Value::Type type, value_t instance_of, value_t superclass) : Object(type, instance_of), methods(0), superclass(superclass) {}
+			Module(Value::Type type, Module *instance_of, Class *superclass) : Object(type, instance_of), methods(nullptr), superclass(superclass) {}
 
-			value_t superclass;
+			Class *superclass;
 
 			static value_t include(value_t obj, size_t argc, value_t argv[]);
 
@@ -29,7 +29,11 @@ namespace Mirb
 			{
 				Object::mark(mark);
 				
-				mark(superclass);
+				if(superclass)
+					mark(superclass);
+
+				if(methods)
+					mark(methods);
 			}
 
 			static void initialize();

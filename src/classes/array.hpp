@@ -15,8 +15,8 @@ namespace Mirb
 			static value_t each(value_t obj, value_t block);
 
 		public:
-			Array(value_t instance_of) : Object(Value::Array, instance_of) {}
-			Array() : Object(Value::Array, context->array_class) {}
+			Array(value_t instance_of) : Object(Value::Array, auto_cast(instance_of)) {}
+			Array() : Object(Value::Array, auto_cast(context->array_class)) {}
 
 			Vector<value_t, Allocator> vector;
 			

@@ -56,7 +56,7 @@ namespace Mirb
 		result->executor = executor;
 		
 		if((flags & Method::Singleton) != 0)
-			module = singleton_class(module);
+			module = auto_cast(singleton_class(auto_cast(module)));
 
 		#ifdef DEBUG
 			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";

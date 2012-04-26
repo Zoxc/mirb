@@ -62,71 +62,89 @@ namespace Mirb
 		return real_class(class_of(obj));
 	}
 
-	value_t define_class(value_t under, Symbol *name, value_t super)
+	Class *define_class(Module *under, Symbol *name, Class *super)
 	{
 		value_t existing = test_const(under, auto_cast(name));
-
+		
 		if(prelude_unlikely(existing != value_raise))
-			return existing;
+		{
+			if(type(existing) != Value::Class)
+			{
+				raise(context->standard_error,  "Constant exists already");
 
-		value_t obj = class_create_unnamed(super);
+				return nullptr;
+			}
+			else
+				return auto_cast(existing);
+		}
+
+		Class *obj = class_create_unnamed(auto_cast(super));
 		
 		class_name(obj, under, name);
 
 		return obj;
 	}
 
-	value_t define_class(value_t under, std::string name, value_t super)
+	Class *define_class(Module *under, std::string name, Class *super)
 	{
 		return define_class(under, auto_cast(symbol_pool.get(name)), super);
 	}
 	
-	value_t module_create_bare()
+	Module *module_create_bare()
 	{
-		return auto_cast(Collector::allocate<Module>(Value::Module, context->module_class, nullptr));
+		return Collector::allocate<Module>(Value::Module, context->module_class, nullptr);
 	}
 
-	value_t define_module(value_t under, Symbol *name)
+	Module *define_module(Module *under, Symbol *name)
 	{
 		value_t existing = test_const(under, name);
 
 		if(prelude_unlikely(existing != value_raise))
-			return existing;
+		{
+			if(type(existing) != Value::Module)
+			{
+				raise(context->standard_error,  "Constant exists already");
 
-		value_t obj = module_create_bare();
+				return nullptr;
+			}
+			else
+				return auto_cast(existing);
+		}
+
+		Module *obj = module_create_bare();
 		
 		class_name(obj, under, name);
 
 		return obj;
 	}
 
-	value_t define_module(value_t under, std::string name)
+	Module *define_module(Module *under, std::string name)
 	{
-		return define_module(under, auto_cast(symbol_pool.get(name)));
+		return define_module(under, cast<Symbol>(symbol_pool.get(name)));
 	}
 	
-	value_t create_include_class(value_t module, value_t super)
+	Class *create_include_class(Module *module, Class *super)
 	{
 		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->instance_of;
+			module = module->instance_of;
 
-		return auto_cast(Collector::allocate<Class>(module, super));
+		return Collector::allocate<Class>(module, super);
 	}
 
-	void include_module(value_t obj, value_t module)
+	void include_module(Module *obj, Module *module)
 	{
-		value_t c = obj;
+		Module *c = obj;
 
 		while(module)
 		{
 			bool found_superclass = false;
 
-			for (value_t i = cast<Module>(obj)->superclass; i; i = cast<Module>(i)->superclass)
+			for (Class *i = obj->superclass; i; i = i->superclass)
 			{
 				switch(Value::type(i))
 				{
 					case Value::IClass:
-						if(cast<Module>(i)->vars == cast<Module>(module)->vars)
+						if(i->vars == module->vars)
 						{
 							if(!found_superclass)
 								c = i;
@@ -146,37 +164,35 @@ namespace Mirb
 
 			#ifdef DEBUG
 				{
-					OnStack<3> os(module, c, obj);
-					
-					value_t including = Value::type(module) == Value::IClass ? cast<Module>(module)->instance_of : module;
+					value_t including = Value::type(module) == Value::IClass ? module->instance_of : module;
 
 					std::cout << "Including module " << inspect_object(including) << " in " << inspect_object(obj) << "\n";
 				}
 			#endif
 
-			c = cast<Module>(c)->superclass = create_include_class(module, cast<Module>(c)->superclass);
+			c = c->superclass = create_include_class(module, c->superclass);
 
 			skip:
-				module = cast<Module>(module)->superclass;
+				module = module->superclass;
 		}
 	}
 	
-	value_t singleton_class(value_t object)
+	Class *singleton_class(Object *object)
 	{
-		value_t c = class_of(object);
+		Class *c = auto_cast(class_of(object));
 
-		if(prelude_likely(cast<Class>(c)->singleton))
+		if(prelude_likely(c->singleton))
 			return c;
 
 		return class_create_singleton(object, c);
 	}
 
-	void class_name(value_t obj, value_t under, Symbol *name)
+	void class_name(value_t  obj, Module *under, Symbol *name)
 	{
-		value_t under_path = get_var(under, Symbol::from_literal("__classpath__"));
-
+		value_t under_path = get_var(under, context->syms.classpath);
+		
 		CharArray new_path;
-
+		
 		if(under == context->object_class)
 		{
 			new_path = name->string;
@@ -186,47 +202,46 @@ namespace Mirb
 			new_path = cast<String>(under_path)->string + "::" + name->string;
 		}
 
-		set_var(obj, Symbol::from_literal("__classname__"), String::from_symbol(name));
-		set_var(obj, Symbol::from_literal("__classpath__"), new_path.to_string());
+		set_var(obj, context->syms.classname, String::from_symbol(name));
+		set_var(obj, context->syms.classpath, new_path.to_string());
 
 		set_const(under, name, obj);
 	}
 
-	value_t class_create_unnamed(value_t super)
+	Class *class_create_unnamed(Class *super)
 	{
-		value_t obj = class_create_bare(super);
-
-		class_create_singleton(obj, cast<Object>(super)->instance_of);
+		Class *obj = class_create_bare(super);
+		
+		class_create_singleton(obj, auto_cast(super->instance_of));
 
 		return obj;
 	}
 
-	value_t class_create_bare(value_t super)
+	Class *class_create_bare(Class *super)
 	{
-		return auto_cast(Collector::allocate<Class>(Value::Class, context->class_class, super));
+		return Collector::allocate<Class>(Value::Class, context->class_class, super);
 	}
 
-	value_t class_create_singleton(value_t object, value_t super)
+	Class *class_create_singleton(Object *object, Class *super)
 	{
-		value_t singleton = class_create_bare(super);
-		Class *singleton_class = cast<Class>(singleton);
-
+		Class *singleton_class = class_create_bare(super);
+		
 		singleton_class->singleton = true;
 
-		cast<Object>(object)->instance_of = singleton; // TODO: Fix the case when object is not a instance of Object
+		object->instance_of = singleton_class; // TODO: Fix the case when object is not a instance of Object
 
-		set_var(singleton, Symbol::from_literal("__attached__"), object);
+		set_var(singleton_class, context->syms.attached, object);
 
-		if(cast<Object>(object)->get_type() == Value::Class)
+		if(object->get_type() == Value::Class)
 		{
-			singleton_class->instance_of = singleton;
+			singleton_class->instance_of = singleton_class;
 
 			// TODO: Find out what this is about
 			//if (RT_COMMON(object)->flags & RT_CLASS_SINGLETON)
 			//	RT_CLASS(singleton)->super = rt_class_real(RT_CLASS(object)->super)->class_of;
 		}
 
-		return singleton;
+		return singleton_class;
 	}
 
 	CharArray inspect_obj(value_t obj)
@@ -403,11 +418,14 @@ namespace Mirb
 			return false;
 	}
 
-	value_t raise(value_t exception_class, const CharArray &message)
+	value_t raise(Class *exception_class, const CharArray &message)
 	{
-		OnStack<2> os(exception_class, message);
+		OnStack<1> os1(exception_class);
+		OnStackString<1> os2(message);
 
-		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace().to_string()));
+		value_t backtrace_string = backtrace().to_string();
+
+		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace_string));
 		
 		return value_raise;
 	}
@@ -615,7 +633,7 @@ namespace Mirb
 
 		CharArray result;
 
-		OnStack<1> os(result);
+		OnStackString<1> os(result);
 
 		while(current)
 		{
@@ -658,16 +676,23 @@ namespace Mirb
 		context->object_class = class_create_bare(nullptr);
 		context->module_class = class_create_bare(context->object_class);
 		context->class_class = class_create_bare(context->module_class);
+		
+		context->syms.classpath = Symbol::from_literal("__classpath__");
+		context->syms.classname = Symbol::from_literal("__classname__");
+		context->syms.attached =  Symbol::from_literal("__attached__");
 
-		value_t metaclass;
+		Class *metaclass;
 
-		metaclass = class_create_singleton(context->object_class, context->class_class);
-		metaclass = class_create_singleton(context->module_class, metaclass);
-		class_create_singleton(context->class_class, metaclass);
+		metaclass = class_create_singleton(auto_cast(context->object_class), auto_cast(context->class_class));
+		metaclass = class_create_singleton(auto_cast(context->module_class), metaclass);
+		class_create_singleton(auto_cast(context->class_class), metaclass);
 
 		context->symbol_class = class_create_unnamed(context->object_class);
-		context->string_class = class_create_unnamed(context->object_class);
 
+		fix_symbol_pool();
+
+		context->string_class = class_create_unnamed(context->object_class);
+		
 		class_name(context->object_class, context->object_class, Symbol::from_literal("Object"));
 		class_name(context->module_class, context->object_class, Symbol::from_literal("Module"));
 		class_name(context->class_class, context->object_class, Symbol::from_literal("Class"));
@@ -681,9 +706,9 @@ namespace Mirb
 		context->true_class = define_class(context->object_class, "TrueClass", context->object_class);
 		context->fixnum_class = define_class(context->object_class, "Fixnum", context->object_class);
 
-		Value::initialize();
+		Value::initialize_class_table();
 		
-		context->main = Object::allocate(context->object_class);
+		context->main = auto_cast(Object::allocate(context->object_class));
 
 		singleton_method(context->main, "to_s", &main_to_s);
 		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);
@@ -693,7 +718,9 @@ namespace Mirb
 	{
 		std::cout << "Initialized in " << benchmark([] {
 			context = new Context;
-
+				
+			Value::initialize_type_table();
+		
 			Collector::initialize();
 			Lexer::setup_jump_table();
 
@@ -716,6 +743,10 @@ namespace Mirb
 			Array::initialize();
 			Exception::initialize();
 			initialize_exceptions();
+
+			#ifdef DEBUG
+				Collector::collect();
+			#endif
 		}).format() << "\n";
 	}
 

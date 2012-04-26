@@ -24,13 +24,11 @@ namespace Mirb
 			CharArray inspect();
 	};
 
-	class ProcFrame:
+	class ProcFrame: // TODO: Mark scopes
 		public Frame
 	{
 		public:
-			Tuple &scopes;
-
-			ProcFrame(Tuple &scopes) : scopes(scopes)  {}
+			Tuple *scopes;
 	};
 
 	extern Frame *current_frame;

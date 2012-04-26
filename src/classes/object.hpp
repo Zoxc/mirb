@@ -18,15 +18,15 @@ namespace Mirb
 			static value_t not_equal(value_t obj, value_t other);
 			static value_t method_not(value_t obj);
 		public:
-			Object(Value::Type type, value_t instance_of) : Value::Header(type), instance_of(instance_of), vars(0) {}
-			Object(value_t instance_of) : Value::Header(Value::Object), instance_of(instance_of), vars(0) {}
+			Object(Value::Type type, Module *instance_of) : Value::Header(type), instance_of(instance_of), vars(0) {}
+			Object(Module *instance_of) : Value::Header(Value::Object), instance_of(instance_of), vars(0) {}
 			
 			static value_t allocate(value_t instance_of);
 			static value_t to_s(value_t obj);
 
 			static Block *inspect_block;
 			
-			value_t instance_of;
+			Module *instance_of;
 			ValueMap *vars;
 
 			static const size_t vars_initial = 2;
@@ -36,7 +36,9 @@ namespace Mirb
 			template<typename F> void mark(F mark)
 			{
 				mark(instance_of);
-				mark(vars);
+
+				if(vars)
+					mark(vars);
 			}
 	};
 

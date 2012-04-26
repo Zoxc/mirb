@@ -36,7 +36,8 @@ namespace Mirb
 
 		CharArray result = "[";
 
-		OnStack<2> os(self, result);
+		OnStack<2> os1(self);
+		OnStackString<1> os2(result);
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
@@ -74,7 +75,7 @@ namespace Mirb
 
 	void Array::initialize()
 	{
-		context->array_class= define_class(context->object_class, "Array", context->object_class);
+		context->array_class = define_class(context->object_class, "Array", context->object_class);
 		
 		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		

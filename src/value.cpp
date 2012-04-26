@@ -10,16 +10,14 @@ namespace Mirb
 	namespace Value
 	{
 		Type type_table[literal_count];
-		value_t class_of_table[literal_count];
 		
-		void initialize()
+		void initialize_type_table()
 		{
 			for(size_t i = 0; i < literal_count; ++i)
 			{
 				if(i & fixnum_mask)
 				{
 					type_table[i] = Fixnum;
-					class_of_table[i] = Mirb::context->fixnum_class;
 					continue;
 				}
 
@@ -28,28 +26,64 @@ namespace Mirb
 					case value_nil_num:
 					{
 						type_table[i] = Nil;
-						class_of_table[i] = context->nil_class;
 						break;
 					}
 
 					case value_false_num:
 					{
 						type_table[i] = False;
-						class_of_table[i] = context->false_class;
 						break;
 					}
 
 					case value_true_num:
 					{
 						type_table[i] = True;
-						class_of_table[i] = context->true_class;
 						break;
 					}
 
 					default:
 					{
 						type_table[i] = None;
-						class_of_table[i] = 0;
+						break;
+					}
+				}
+			}
+		}
+
+		void initialize_class_table()
+		{
+			for(size_t i = 0; i < literal_count; ++i)
+			{
+				if(i & fixnum_mask)
+				{
+					context->class_of_table[i] = Mirb::context->fixnum_class;
+					continue;
+				}
+
+				switch(i)
+				{
+					case value_nil_num:
+					{
+						context->class_of_table[i] = context->nil_class;
+						break;
+					}
+
+					case value_false_num:
+					{
+						context->class_of_table[i] = context->false_class;
+						break;
+					}
+
+					case value_true_num:
+					{
+						type_table[i] = True;
+						context->class_of_table[i] = context->true_class;
+						break;
+					}
+
+					default:
+					{
+						context->class_of_table[i] = nullptr;
 						break;
 					}
 				}
@@ -68,7 +102,7 @@ namespace Mirb
 		
 		value_t class_of_literal(value_t value)
 		{
-			return class_of_table[(size_t)value & literal_mask];
+			return auto_cast(context->class_of_table[(size_t)value & literal_mask]);
 		}
 
 		Type type(value_t value)
@@ -91,7 +125,7 @@ namespace Mirb
 
 		bool Header::is_alive()
 		{
-			return alive;
+			return object_ref(this) ? alive || type == Symbol : true;
 		}
 
 		bool Header::valid()
