@@ -92,7 +92,7 @@ namespace Mirb
 			if(prelude_unlikely(obj == context->main))
 				obj = context->object_class;
 			
-			return Mirb::define_module(auto_cast(obj), name);
+ 			return Mirb::define_module(auto_cast(obj), name);
 		}
 		
 		void define_method(value_t obj, Symbol *name, Block *block)

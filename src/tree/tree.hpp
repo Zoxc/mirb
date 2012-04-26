@@ -202,6 +202,9 @@ namespace Mirb
 				{
 					mark(final);
 					mark(document);
+					
+					referenced_scopes.mark_content(mark);
+					zsupers.mark_content(mark);
 
 					if(parent)
 						mark(parent);

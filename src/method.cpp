@@ -57,6 +57,8 @@ namespace Mirb
 		if((flags & Method::Singleton) != 0)
 			module = auto_cast(singleton_class(auto_cast(module)));
 
+		OnStack<3> os(module, name, result);
+
 		#ifdef DEBUG
 			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";
 		#endif

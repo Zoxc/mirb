@@ -111,12 +111,13 @@ namespace Mirb
 				static const size_t magic_value;
 				
 				const Type type;
+				bool marked;
 				bool alive;
 				
-
 				#ifdef DEBUG
 					size_t size;
 					size_t magic;
+					value_t refs;
 				#endif
 
 			private:
@@ -126,7 +127,6 @@ namespace Mirb
 					LinkedListEntry<Header> entry;
 				#endif
 
-				bool marked;
 				friend class Mirb::Collector;
 				friend class Mirb::Allocator;
 		};
@@ -319,25 +319,15 @@ namespace Mirb
 			};
 		};
 		
-		static inline void assert_valid_internal(value_t obj)
+		static inline void assert_valid(value_t obj)
 		{
 			#ifdef DEBUG
 				if(object_ref(obj))
 				{
 					mirb_debug_assert(obj->magic == Header::magic_value);
 					mirb_debug_assert(obj->type != None);
-				}
-			#endif
-		}
-
-		static inline void assert_valid(value_t obj)
-		{
-			assert_valid_internal(obj);
-
-			#ifdef DEBUG
-				if(object_ref(obj))
-				{
-					mirb_debug_assert(obj->alive || obj->type == Symbol || obj->type == InternalBlock);
+					mirb_debug_assert(obj->marked == false);
+					mirb_debug_assert(obj->alive);
 				}
 			#endif
 		}

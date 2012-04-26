@@ -36,7 +36,7 @@ namespace Mirb
 
 		CharArray result = "[";
 
-		OnStack<2> os1(self);
+		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
 		for(size_t i = 0; i < self->vector.size(); ++i)

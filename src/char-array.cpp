@@ -36,11 +36,19 @@ namespace Mirb
 		*this = char_array;
 	}
 	
+	void CharArray::update_ref()
+	{
+		#ifdef DEBUG
+			ref = static_data ? value_nil : &VariableBlock::from_memory(data);
+		#endif
+	}
+	
 	CharArray& CharArray::operator=(const char_t *c_str)
 	{
 		length = std::strlen((const char *)c_str);
 
 		data = (char_t *)Allocator::allocate(length);
+		update_ref();
 
 		memcpy(data, c_str, length);
 
@@ -55,6 +63,7 @@ namespace Mirb
 		length = string.length();
 
 		data = (char_t *)Allocator::allocate(length);
+		update_ref();
 
 		memcpy(data, string.c_str(), length);
 
@@ -72,6 +81,7 @@ namespace Mirb
 		length = other.length;
 		data = other.data;
 		static_data = other.static_data;
+		update_ref();
 
 		shared = true;
 		other.shared = true;
@@ -88,6 +98,7 @@ namespace Mirb
 		data = other.data;
 		shared = other.shared;
 		static_data = other.static_data;
+		update_ref();
 
 		return *this;
 	}
@@ -103,6 +114,7 @@ namespace Mirb
 			data = new_data;
 			shared = false;
 			static_data = false;
+			update_ref();
 		}
 	}
 
@@ -123,6 +135,7 @@ namespace Mirb
 		
 		shared = false;
 		static_data = false;
+		update_ref();
 
 		memcpy(data + length, other_data, other.length);
 

@@ -21,14 +21,15 @@ namespace Mirb
 {
 	bool Collector::pending = false;
 	value_t Collector::mark_list;
+	value_t Collector::mark_parent;
 	size_t Collector::pages = 16;
 	Collector::Region *Collector::current;
 	FastList<Collector::Region> Collector::regions;
 
-	FastList<PinnedHeader> Collector::pinned_object_list;
-
 	#ifdef VALGRIND
 		LinkedList<Value::Header> Collector::heap_list;
+	#else
+		LinkedList<PinnedHeader> Collector::heap_list;
 	#endif
 
 	template<class T> struct Aligned
@@ -162,25 +163,38 @@ namespace Mirb
 
 			frame = frame->prev;
 		}
+
+		symbol_pool.mark_content(mark);
+	}
+
+	void Collector::dummy()
+	{
 	}
 	
-	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *value)
+	template<> bool Collector::template_mark<Value::Header>(Value::Header *value)
 	{
-		Collector::mark_value(value);
-	};
-	
-	template<> void Collector::MarkFunc::mark<void>(void *value)
+		return Collector::mark_value(value);
+	}
+
+	template<> bool Collector::template_mark<void>(void *value)
 	{
-		Collector::mark_pointer(&VariableBlock::from_memory(value));
-	};
-	
+		return Collector::mark_pointer(&VariableBlock::from_memory(value));
+	}
+
+
 	bool Collector::mark_pointer(value_t obj)
 	{
-		Value::assert_valid(obj);
+		mirb_debug_assert(obj->magic == Value::Header::magic_value);
+		mirb_debug_assert(obj->type != Value::None);
+		mirb_debug_assert(obj->alive);
 
 		if(!obj->marked)
 		{
 			obj->marked = true;
+			
+			#ifdef DEBUG
+				obj->refs = mark_parent;
+			#endif
 
 			obj->data = (value_t *)mark_list;
 			mark_list = obj;
@@ -199,58 +213,74 @@ namespace Mirb
 			return false;
 	}
 	
+	void Collector::mark_children()
+	{
+		#ifdef DEBUG
+			mark_parent = nullptr;
+		#endif
+
+		while(mark_list)
+		{
+			value_t current = mark_list;
+			mark_list = (value_t)mark_list->data;
+
+			#ifdef DEBUG
+				mark_parent = current;
+			#endif
+
+			Value::virtual_do<MarkClass>(Value::type(current), current);
+		}
+	}
+
 	void Collector::mark()
 	{
-		each_root([&](value_t root) {
-			Collector * __this; // TODO: Remove Visual C++ bug workaround
-			(void)__this;
+		MarkFunc<&mark_children> func;
 
-			if(Collector::mark_value(root))
-			{
-				while(mark_list)
-				{
-					value_t current = mark_list;
-					mark_list = (value_t)mark_list->data;
-
-					Value::virtual_do<MarkClass>(Value::type(current), current);
-				}
-			}
-		});
+		each_root(func);
 	}
 	
 	void Collector::flag()
 	{
-	#ifdef VALGRIND
-		for(value_t obj = heap_list.first; obj;)
-		{
-			value_t next = obj->entry.next;
-
-			mirb_debug_assert(obj->valid());
+		auto unmark = [&](value_t obj) {
+			mirb_debug_assert(obj->magic == Value::Header::magic_value);
+			mirb_debug_assert(obj->type != Value::None);
+			
+			// Enable with compaction - mirb_debug_assert(obj->alive);
 
 			obj->alive = obj->marked;
 			obj->marked = false;
+		};
+
+		for(auto obj = heap_list.first; obj;)
+		{
+			auto next = obj->entry.next;
+			
+			unmark(obj);
 
 			if(!obj->alive)
 				heap_list.remove(obj);
 
 			obj = next;
 		}
-	#else
+		
+	#ifndef VALGRIND
 		for(auto i = regions.begin(); i != regions.end(); ++i)
 		{
 			value_t obj = i().data();
 
 			while((size_t)obj < (size_t)i().pos)
 			{
-				Value::assert_valid_internal(obj); // TODO: Replace with Value::assert when compaction is implemented
-
-				obj->alive = obj->marked;
-				obj->marked = false;
+				unmark(obj);
 
 				obj = (value_t)((size_t)obj + size_of_value(obj));
 			}
 		}
 	#endif
+
+		symbol_pool.each_value([&](Symbol *symbol) {
+			symbol->marked = false;
+			symbol->alive = true;
+		});
 	}
 	
 	struct ThreadFunc

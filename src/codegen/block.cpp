@@ -36,6 +36,8 @@ namespace Mirb
 			heap_var(no_var),
 			var_count(scope->variable_list.size())
 		{
+			Value::assert_valid(scope);
+
 			initialize();
 		}
 		

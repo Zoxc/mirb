@@ -89,8 +89,6 @@ namespace Mirb
 
 			if(op.var != no_var)
 				vars[op.var] = result;
-
-			Collector::check();
 		EndOp
 
 		Op(Branch)

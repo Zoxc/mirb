@@ -93,6 +93,8 @@ namespace Mirb
 				if(scope)
 					mark(scope);
 
+				blocks.mark(mark);
+
 				if(document)
 					mark(document);
 			}

@@ -825,12 +825,20 @@ namespace Mirb
 		
 		Mirb::Block *ByteCodeGenerator::compile(Tree::Scope *scope)
 		{
-			return Compiler::compile(scope, memory_pool);
+			Mirb::Block *result = Compiler::compile(scope, memory_pool);
+			
+			block->final->blocks.push(result);
+
+			return result;
 		}
 
 		Mirb::Block *ByteCodeGenerator::defer(Tree::Scope *scope)
 		{
-			return Compiler::defer(scope);
+			Mirb::Block *result = Compiler::defer(scope);
+
+			block->final->blocks.push(result);
+
+			return result;
 		}
 
 		bool ByteCodeGenerator::has_ensure_block(Block *block)

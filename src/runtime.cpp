@@ -552,6 +552,9 @@ namespace Mirb
 
 	value_t call_frame(Frame &frame)
 	{
+		if(frame.code->scope)
+			Value::assert_valid(frame.code->scope);
+
 		frame.prev = current_frame;
 		current_frame = &frame;
 

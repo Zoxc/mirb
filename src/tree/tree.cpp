@@ -54,7 +54,7 @@ namespace Mirb
 			}
 			
 			/*
-			 * Make sure the block owning the varaible is required by the current block and parents.
+			 * Make sure the block owning the variable is required by the current block and parents.
 			 */
 			
 			Scope *current = this;

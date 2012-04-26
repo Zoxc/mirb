@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/FastList.hpp>
+#include <Prelude/LinkedList.hpp>
 #include <Prelude/Allocator.hpp>
 #include "value.hpp"
 #include "char-array.hpp"
@@ -13,7 +14,9 @@ namespace Mirb
 		public Value::Header
 	{
 		private:
-			ListEntry<PinnedHeader> entry;
+			#ifndef VALGRIND
+				LinkedListEntry<PinnedHeader> entry;
+			#endif
 
 			friend class Collector;
 		public:
@@ -70,12 +73,6 @@ namespace Mirb
 	class Collector
 	{
 		public:
-			template<class F> static void mark_void(void *&data, F func)
-			{
-				if(data)
-					func(&VariableBlock::from_memory(string.data));
-			};
-
 			template<class F> static void mark_string(const CharArray &string, F func)
 			{
 				if(string.data && !string.static_data)
@@ -95,25 +92,29 @@ namespace Mirb
 				}
 			};
 			
-			struct MarkFunc
+			template<class T> static bool template_mark(T *value)
 			{
-				template<class T> void mark(T *value)
-				{
-					Collector::mark_pointer(value);
-				};
-				
+				return mark_pointer(value);
+			};
+			
+			template<void(*callback)()> struct MarkFunc
+			{
 				void operator()(const CharArray &string)
 				{
 					mark_string(string, [&](value_t data) {
-						Collector::mark_pointer(data);
+						if(Collector::mark_pointer(data))
+							callback();
 					});
 				};
 				
 				template<class T> void operator()(T *value)
 				{
-					mark(value);
+					if(template_mark(value))
+						callback();
 				};
 			};
+			
+			static void dummy();
 
 			template<Value::Type type> struct MarkClass
 			{
@@ -122,14 +123,15 @@ namespace Mirb
 
 				static void func(value_t value)
 				{
-					MarkFunc func;
+					MarkFunc<&dummy> func;
 
 					if(!Value::immediate(type))
-						static_cast<Class *>(value)->template mark<MarkFunc>(func);
+						static_cast<Class *>(value)->mark(func);
 				}
 			};
-
+			
 			static value_t mark_list;
+			static value_t mark_parent;
 
 			static bool pending;
 			
@@ -140,8 +142,10 @@ namespace Mirb
 			static bool mark_value(value_t obj);
 			static bool mark_pointer(value_t obj);
 			static void mark();
+			static void mark_children();
 
-			friend struct MarkFunc;
+			template<void(*callback)()> friend struct MarkFunc;
+			friend struct MarkRootFunc;
 			friend struct ThreadFunc;
 
 			static FastList<Region> regions;
@@ -149,10 +153,11 @@ namespace Mirb
 			
 			static Region *current;
 			static size_t pages;
-			static FastList<PinnedHeader> pinned_object_list;
 
 			#ifdef VALGRIND
 				static LinkedList<Value::Header> heap_list;
+			#else
+				static LinkedList<PinnedHeader> heap_list;
 			#endif
 
 			static size_t size_of_value(value_t value);
@@ -230,9 +235,7 @@ namespace Mirb
 					object->size = sizeof(T);
 				#endif
 
-				#ifdef VALGRIND
-					heap_list.append(object);
-				#endif
+				heap_list.append(object);
 
 				return object;
 			}
@@ -329,6 +332,6 @@ namespace Mirb
 			}
 	};
 	
-	template<> void Collector::MarkFunc::mark<Value::Header>(Value::Header *value);
-	template<> void Collector::MarkFunc::mark<void>(void *value);
+	template<> bool Collector::template_mark<Value::Header>(Value::Header *value);
+	template<> bool Collector::template_mark<void>(void *value);
 };

@@ -9,6 +9,13 @@ namespace Mirb
 		private:
 			size_t length;
 			char_t *data;
+
+			#ifdef DEBUG
+				value_t ref;
+			#endif
+
+			void update_ref();
+
 			mutable bool shared;
 			bool static_data;
 			
@@ -79,6 +86,7 @@ namespace Mirb
 				length = string_length - 1;
 				shared = true;
 				static_data = true;
+				update_ref();
 			}
 			
 			bool operator ==(CharArray &other) const

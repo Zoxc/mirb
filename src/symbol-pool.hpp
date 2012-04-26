@@ -55,9 +55,21 @@ namespace Mirb
 				delete value;
 			}
 			
-			template<typename F> static void mark_value(Symbol *value, F mark)
+			template<typename F> static void mark_value(Symbol *&value, F mark)
 			{
 				mark(value);
+
+				Symbol *current = value;
+
+				while(current)
+				{
+					Symbol *next = current->next;
+
+					if(next)
+						mark(current->next);
+						
+					current = next;
+				}
 			}
 	};
 

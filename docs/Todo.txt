@@ -25,6 +25,6 @@
 [ ] Write a new precise garbage collector
 [X] Steal Rubinius' tagging scheme (almost)
 [ ] Use user defined literals from symbols ("to_s"intern) or some other way of passing string literals to templates (this might not be possible...)
-[ ] Remove implict arguments from opcodes
 [ ] Fix &&=
 [ ] Check if redo triggers ensure blocks
+[ ] Check if marking child object in containers works with Jonkers'
