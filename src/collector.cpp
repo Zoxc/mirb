@@ -175,21 +175,15 @@ namespace Mirb
 	{
 		return Collector::mark_value(value);
 	}
-
+	
 	template<> bool Collector::template_mark<void>(void *value)
 	{
 		return Collector::mark_pointer(&VariableBlock::from_memory(value));
 	}
 
-
 	bool Collector::mark_pointer(value_t obj)
 	{
-		#ifdef DEBUG
-			mirb_debug_assert(obj->magic == Value::Header::magic_value);
-		#endif
-
-		mirb_debug_assert(obj->type != Value::None);
-		mirb_debug_assert(obj->alive);
+		assert_valid_skip_mark(obj);
 
 		if(!obj->marked)
 		{
@@ -251,7 +245,7 @@ namespace Mirb
 
 			mirb_debug_assert(obj->type != Value::None);
 			
-			// Enable with compaction - mirb_debug_assert(obj->alive);
+			// Enable with compaction - assert_valid_skip_mark(obj->alive);
 
 			obj->alive = obj->marked;
 			obj->marked = false;

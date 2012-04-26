@@ -21,6 +21,7 @@ namespace Mirb
 	class ObjectHeader;
 	class VariableBlock;
 	class ValueMap;
+	class ValueMapPair;
 	class Module;
 	class Class;
 	class Symbol;
@@ -78,6 +79,7 @@ namespace Mirb
 		enum Type: char_t {
 			None,
 			InternalValueMap,
+			InternalValueMapPair,
 			InternalStackFrame,
 			InternalTuple,
 			InternalVariableBlock,
@@ -165,6 +167,9 @@ namespace Mirb
 			{
 				case InternalValueMap:
 					return T<InternalValueMap>::func(std::forward<Arg>(arg));
+
+				case InternalValueMapPair:
+					return T<InternalValueMapPair>::func(std::forward<Arg>(arg));
 					
 				case InternalStackFrame:
 					return T<InternalStackFrame>::func(std::forward<Arg>(arg));
@@ -240,6 +245,7 @@ namespace Mirb
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
 		mirb_typeclass(InternalValueMap, ValueMap);
+		mirb_typeclass(InternalValueMapPair, ValueMapPair);
 		mirb_typeclass(InternalStackFrame, StackFrame);
 		mirb_typeclass(InternalTuple, Tuple);
 		mirb_typeclass(InternalVariableBlock, VariableBlock);
@@ -319,15 +325,26 @@ namespace Mirb
 			};
 		};
 		
-		static inline void assert_valid(value_t obj)
+		static inline void assert_valid_skip_mark(value_t obj)
 		{
 			#ifdef DEBUG
 				if(object_ref(obj))
 				{
 					mirb_debug_assert(obj->magic == Header::magic_value);
 					mirb_debug_assert(obj->type != None);
-					mirb_debug_assert(obj->marked == false);
 					mirb_debug_assert(obj->alive);
+				}
+			#endif
+		}
+
+		static inline void assert_valid(value_t obj)
+		{
+			assert_valid_skip_mark(obj);
+
+			#ifdef DEBUG
+				if(object_ref(obj))
+				{
+					mirb_debug_assert(obj->marked == false);
 				}
 			#endif
 		}

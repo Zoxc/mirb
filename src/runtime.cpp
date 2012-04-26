@@ -445,7 +445,7 @@ namespace Mirb
 		MemoryPool memory_pool;
 		Document *document = Collector::allocate<Document>();
 
-		Parser parser(symbol_pool, memory_pool, *document);
+		Parser parser(symbol_pool, memory_pool, document);
 
 		if(!free_input)
 			document->copy(input, length);

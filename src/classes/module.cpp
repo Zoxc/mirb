@@ -1,6 +1,7 @@
 #include "class.hpp"
 #include "symbol.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

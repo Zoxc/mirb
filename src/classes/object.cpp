@@ -3,11 +3,12 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {
 	Block *Object::inspect_block;
-
+	
 	value_t Object::allocate(value_t instance_of)
 	{
 		return auto_cast(Collector::allocate<Object>(auto_cast(instance_of)));

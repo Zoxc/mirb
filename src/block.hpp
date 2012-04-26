@@ -5,7 +5,6 @@
 #include <Prelude/List.hpp>
 #include "vm.hpp"
 #include "allocator.hpp"
-#include "collector.hpp"
 
 struct exception_block;
 

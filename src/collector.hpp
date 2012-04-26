@@ -4,25 +4,12 @@
 #include <Prelude/LinkedList.hpp>
 #include <Prelude/Allocator.hpp>
 #include "value.hpp"
+#include "value-map.hpp"
 #include "char-array.hpp"
+#include "classes/object.hpp"
 
 namespace Mirb
 {
-	// PinnedHeader are objects with a fixed memory address
-
-	class PinnedHeader:
-		public Value::Header
-	{
-		private:
-			#ifndef VALGRIND
-				LinkedListEntry<PinnedHeader> entry;
-			#endif
-
-			friend class Collector;
-		public:
-			PinnedHeader(Value::Type type) : Value::Header(type) {}
-	};
-
 	class Tuple:
 		public Value::Header
 	{
@@ -55,7 +42,12 @@ namespace Mirb
 
 			static VariableBlock &from_memory(const void *memory)
 			{
-				return *(VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
+				auto result = (VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
+
+				Value::assert_valid_skip_mark(result);
+				mirb_debug_assert(result->get_type() == Value::InternalVariableBlock);
+
+				return *result;
 			}
 
 			void *data()

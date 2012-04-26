@@ -1,9 +1,26 @@
 #pragma once
 #include "common.hpp"
 #include <Prelude/Allocator.hpp>
+#include <Prelude/LinkedList.hpp>
+#include "value.hpp"
 
 namespace Mirb
 {
+	// PinnedHeader are objects with a fixed memory address
+
+	class PinnedHeader:
+		public Value::Header
+	{
+		private:
+			#ifndef VALGRIND
+				LinkedListEntry<PinnedHeader> entry;
+			#endif
+
+			friend class Collector;
+		public:
+			PinnedHeader(Value::Type type) : Value::Header(type) {}
+	};
+
 	class Allocator:
 		public NoReferenceProvider<Allocator>
 	{

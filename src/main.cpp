@@ -31,11 +31,11 @@ int main()
 		std::getline(std::cin, line);
 		
 		MemoryPool memory_pool;
-		Document document;
+		Document *document = Collector::allocate<Document>();
 
-		document.copy((const char_t *)line.c_str(), line.length());
+		document->copy((const char_t *)line.c_str(), line.length());
 		
-		document.name = "Input";
+		document->name = "Input";
 
 		Parser parser(symbol_pool, memory_pool, document);
 

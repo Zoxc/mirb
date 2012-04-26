@@ -13,7 +13,7 @@ namespace Mirb
 	class Parser
 	{
 		public:
-			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document &document);
+			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document *document);
 			~Parser();
 			
 			Lexer lexer;

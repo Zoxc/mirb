@@ -29,8 +29,6 @@ namespace Mirb
 			Module *instance_of;
 			ValueMap *vars;
 
-			static const size_t vars_initial = 2;
-			
 			static void initialize();
 
 			template<typename F> void mark(F mark)
@@ -41,31 +39,5 @@ namespace Mirb
 					mark(vars);
 			}
 	};
-
-	class ValueMapFunctions:
-		public MapFunctions<value_t, value_t>
-	{
-		public:
-			static value_t invalid_value()
-			{
-				return value_raise;
-			}
-	};
-
-	class ValueMap:
-		public Value::Header
-	{
-		private:
-		public:
-			ValueMap() : Value::Header(Value::InternalValueMap), map(Object::vars_initial) {}
-
-			Map<value_t, value_t, Allocator, ValueMapFunctions> map;
-			
-			template<typename F> void mark(F mark)
-			{
-				map.mark(mark);
-			}
-	};
-
 };
 
