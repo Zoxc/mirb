@@ -4,6 +4,11 @@
 
 namespace Mirb
 {
+	namespace Accesser
+	{
+		struct CharArray;
+	};
+
 	class CharArray
 	{
 		private:
@@ -19,9 +24,7 @@ namespace Mirb
 			mutable bool shared;
 			bool static_data;
 			
-			friend class Collector;
-			friend struct ThreadFunc;
-			template<bool> friend struct OnStackBlockBase;
+			friend struct Accesser::CharArray;
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
 			CharArray(const char_t *c_str);

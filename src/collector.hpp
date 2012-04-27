@@ -10,6 +10,8 @@
 
 namespace Mirb
 {
+	struct RegionWalker;
+
 	class Tuple:
 		public Value::Header
 	{
@@ -33,44 +35,8 @@ namespace Mirb
 			}
 	};
 	
-	class VariableBlock:
-		public Value::Header
-	{
-		private:
-		public:
-			VariableBlock(size_t bytes) : Value::Header(Value::InternalVariableBlock), bytes(bytes) {}
-
-			static VariableBlock &from_memory(const void *memory)
-			{
-				auto result = (VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
-
-				Value::assert_valid_skip_mark(result);
-				mirb_debug_assert(result->get_type() == Value::InternalVariableBlock);
-
-				return *result;
-			}
-
-			void *data()
-			{
-				return (void *)((size_t)this + sizeof(VariableBlock));
-			}
-			
-			size_t bytes;
-
-			template<typename F> void mark(F mark)
-			{
-			}
-	};
-	
 	class Collector
 	{
-		public:
-			template<class F> static void mark_string(const CharArray &string, F func)
-			{
-				if(string.data && !string.static_data)
-					func(&VariableBlock::from_memory(string.data));
-			};
-
 		private:
 			prelude_align(mirb_object_align) struct Region
 			{
@@ -84,64 +50,19 @@ namespace Mirb
 				}
 			};
 			
-			template<class T> static bool template_mark(T *value)
-			{
-				return mark_pointer(value);
-			};
-			
-			template<void(*callback)()> struct MarkFunc
-			{
-				void operator()(const CharArray &string)
-				{
-					mark_string(string, [&](value_t data) {
-						if(Collector::mark_pointer(data))
-							callback();
-					});
-				};
-				
-				template<class T> void operator()(T *value)
-				{
-					if(template_mark(value))
-						callback();
-				};
-			};
-			
-			static void dummy();
-
-			template<Value::Type type> struct MarkClass
-			{
-				typedef void Result;
-				typedef typename Value::TypeClass<type>::Class Class;
-
-				static void func(value_t value)
-				{
-					MarkFunc<&dummy> func;
-
-					if(!Value::immediate(type))
-						static_cast<Class *>(value)->mark(func);
-				}
-			};
-			
-			static value_t mark_list;
-			static value_t mark_parent;
-
 			static bool pending;
 			
-			static void flag_value(value_t obj);
-			static void flag_pointer(value_t obj);
-			static void flag();
-			
-			static bool mark_value(value_t obj);
-			static bool mark_pointer(value_t obj);
+			static void sweep();
+			static void compact();
 			static void mark();
-			static void mark_children();
 
-			template<void(*callback)()> friend struct MarkFunc;
 			friend struct MarkRootFunc;
 			friend struct ThreadFunc;
 
 			static FastList<Region> regions;
 			static const size_t page_size = 0x1000;
+
+			friend struct RegionWalker;
 			
 			static Region *current;
 			static size_t pages;
@@ -152,16 +73,8 @@ namespace Mirb
 				static LinkedList<PinnedHeader> heap_list;
 			#endif
 
-			static size_t size_of_value(value_t value);
-
 			void test_sizes();
-			
-			static void thread(value_t *node);
-			static void update(value_t node, value_t free);
-			static void move(value_t p, value_t new_p);
-			static void update_forward();
-			static void update_backward();
-			
+						
 			static Region *allocate_region(size_t bytes);
 			static void free_region(Region *region);
 			static void *get_region(size_t bytes);
@@ -233,9 +146,7 @@ namespace Mirb
 			}
 		public:
 			static void collect();
-
 			static void initialize();
-
 			static void free();
 
 			static void check()
@@ -330,7 +241,4 @@ namespace Mirb
 				return setup_object<T>(new (allocate_object<T>()) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2), std::forward<Arg3>(arg3), std::forward<Arg4>(arg4), std::forward<Arg5>(arg5), std::forward<Arg6>(arg6), std::forward<Arg7>(arg7), std::forward<Arg8>(arg8)));
 			}
 	};
-	
-	template<> bool Collector::template_mark<Value::Header>(Value::Header *value);
-	template<> bool Collector::template_mark<void>(void *value);
 };

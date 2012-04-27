@@ -122,15 +122,11 @@ namespace Mirb
 					value_t refs;
 				#endif
 
-			private:
 				value_t *data;
 
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
 				#endif
-
-				friend class Mirb::Collector;
-				friend class Mirb::Allocator;
 		};
 
 		template<Type type> struct Immediate:
@@ -345,6 +341,7 @@ namespace Mirb
 				if(object_ref(obj))
 				{
 					mirb_debug_assert(obj->marked == false);
+					mirb_debug_assert(obj->data == nullptr);
 				}
 			#endif
 		}

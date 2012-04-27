@@ -1,0 +1,72 @@
+#include "collector.hpp"
+#include "classes/array.hpp"
+#include "classes/class.hpp"
+#include "classes/string.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "classes/exceptions.hpp"
+#include "classes/nil-class.hpp"
+#include "classes/false-class.hpp"
+#include "classes/true-class.hpp"
+#include "classes/fixnum.hpp"
+#include "classes/method.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "document.hpp"
+#include "runtime.hpp"
+#include "tree/tree.hpp"
+#include "on-stack.hpp"
+#include "collector-common.hpp"
+
+namespace Mirb
+{
+	void Collector::sweep()
+	{
+		auto unmark = [&](value_t obj) {
+			#ifdef DEBUG
+				mirb_debug_assert(obj->magic == Value::Header::magic_value);
+			#endif
+
+			mirb_debug_assert(obj->type != Value::None);
+			
+			// Enable with compaction - assert_valid_skip_mark(obj->alive);
+
+			obj->alive = obj->marked;
+			obj->marked = false;
+		};
+
+		for(auto obj = heap_list.first; obj;)
+		{
+			auto next = obj->entry.next;
+			
+			unmark(obj);
+
+			if(!obj->alive)
+			{
+				heap_list.remove(obj);
+				std::free((void *)obj);
+			}
+
+			obj = next;
+		}
+		
+	#ifndef VALGRIND
+		for(auto i = regions.begin(); i != regions.end(); ++i)
+		{
+			value_t obj = i().data();
+
+			while((size_t)obj < (size_t)i().pos)
+			{
+				unmark(obj);
+
+				obj = (value_t)((size_t)obj + size_of_value(obj));
+			}
+		}
+	#endif
+
+		symbol_pool.each_value([&](Symbol *symbol) {
+			symbol->marked = false;
+			symbol->alive = true;
+		});
+	}
+};

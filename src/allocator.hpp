@@ -20,7 +20,36 @@ namespace Mirb
 		public:
 			PinnedHeader(Value::Type type) : Value::Header(type) {}
 	};
+	
+	class VariableBlock:
+		public Value::Header
+	{
+		private:
+		public:
+			VariableBlock(size_t bytes) : Value::Header(Value::InternalVariableBlock), bytes(bytes) {}
 
+			static VariableBlock &from_memory(const void *memory)
+			{
+				auto result = (VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
+
+				Value::assert_valid_skip_mark(result);
+				mirb_debug_assert(result->get_type() == Value::InternalVariableBlock);
+
+				return *result;
+			}
+
+			void *data()
+			{
+				return (void *)((size_t)this + sizeof(VariableBlock));
+			}
+			
+			size_t bytes;
+
+			template<typename F> void mark(F mark)
+			{
+			}
+	};
+	
 	class Allocator:
 		public NoReferenceProvider<Allocator>
 	{
