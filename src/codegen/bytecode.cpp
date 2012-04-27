@@ -732,7 +732,7 @@ namespace Mirb
 			}
 		}
 		
-		ByteCodeGenerator::ByteCodeGenerator(MemoryPool &memory_pool) : memory_pool(memory_pool) 
+		ByteCodeGenerator::ByteCodeGenerator(MemoryPool memory_pool) : memory_pool(memory_pool) 
 		{
 		}
 

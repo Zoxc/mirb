@@ -6,7 +6,7 @@
 
 namespace Mirb
 {
-	MemoryPool::~MemoryPool()
+	MemoryPoolImplementation::~MemoryPoolImplementation()
 	{
 		auto page = pages.begin();
 
@@ -18,13 +18,13 @@ namespace Mirb
 		};
 	}
 	
-	MemoryPool::MemoryPool()
+	MemoryPoolImplementation::MemoryPoolImplementation()
 		: current(0),
 		max(0)
 	{
 	}
 		
-	char_t *MemoryPool::allocate_page(size_t bytes)
+	char_t *MemoryPoolImplementation::allocate_page(size_t bytes)
 	{
 		char_t *result;
 		
@@ -47,7 +47,7 @@ namespace Mirb
 		return result + sizeof(Page);
 	}
 	
-	void MemoryPool::free_page(Page *page)
+	void MemoryPoolImplementation::free_page(Page *page)
 	{
 		#ifdef WIN32
 			VirtualFree((void *)page, 0, MEM_RELEASE);
@@ -56,7 +56,7 @@ namespace Mirb
 		#endif
 	}
 	
-	void *MemoryPool::get_page(size_t bytes)
+	void *MemoryPoolImplementation::get_page(size_t bytes)
 	{
 		if(prelude_unlikely(bytes > (max_alloc - sizeof(Page))))
 			return allocate_page(bytes + sizeof(Page));
@@ -72,7 +72,7 @@ namespace Mirb
 		return result;
 	}
 	
-	void *MemoryPool::reallocate(void *memory, size_t old_size, size_t new_size)
+	void *MemoryPoolImplementation::reallocate(void *memory, size_t old_size, size_t new_size)
 	{
 		void *result = allocate(new_size);
 			
@@ -81,7 +81,7 @@ namespace Mirb
 		return result;
 	}
 	
-	void *MemoryPool::allocate(size_t bytes)
+	void *MemoryPoolImplementation::allocate(size_t bytes)
 	{
 		char_t *result;
 

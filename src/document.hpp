@@ -5,8 +5,6 @@
 
 namespace Mirb
 {
-	class MemoryPool;
-
 	class Document:
 		public Value::Header
 	{

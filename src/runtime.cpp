@@ -442,7 +442,7 @@ namespace Mirb
 	
 	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input)
 	{
-		MemoryPool memory_pool;
+		MemoryPool::Base memory_pool;
 		Document *document = Collector::allocate<Document>();
 
 		Parser parser(symbol_pool, memory_pool, document);

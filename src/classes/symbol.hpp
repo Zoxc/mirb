@@ -39,6 +39,9 @@ namespace Mirb
 				Object::mark(mark);
 
 				mark(string);
+
+				if(next)
+					mark(next);
 			}
 
 			template<size_t length> static Symbol *from_literal(const char (&string)[length])

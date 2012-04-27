@@ -165,7 +165,7 @@ namespace Mirb
 			static const Type keyword_end = KW_END;
 			static const Type values_end = NONE;
 
-			Lexeme(Lexer &lexer, MemoryPool &memory_pool) : lexer(lexer), curlies(memory_pool) {}
+			Lexeme(Lexer &lexer, MemoryPool::Reference memory_pool) : lexer(lexer), curlies(memory_pool) {}
 			
 			Lexeme(const Lexeme &lexeme);
 			

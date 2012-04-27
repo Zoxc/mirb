@@ -28,7 +28,7 @@ namespace Mirb
 		class BasicBlock
 		{
 			public:
-				BasicBlock(MemoryPool &memory_pool, Block &block);
+				BasicBlock(MemoryPool memory_pool, Block &block);
 
 				#ifdef DEBUG
 					size_t id;

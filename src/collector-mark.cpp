@@ -33,6 +33,12 @@ namespace Mirb
 
 	template<void(*callback)()> struct MarkFunc
 	{
+		template<class A> void operator()(typename Allocator<A, AllocatorBase>::Storage storage)
+		{
+			if(template_mark(storage.array))
+				callback();
+		}
+
 		void operator()(const CharArray &string)
 		{
 			char_t *data = Accesser::CharArray::data(string);
@@ -40,13 +46,13 @@ namespace Mirb
 			if(data && !Accesser::CharArray::static_data(string))
 				if(mark_pointer(&VariableBlock::from_memory((const void *)data)))
 					callback();
-		};
+		}
 		
 		template<class T> void operator()(T *value)
 		{
 			if(template_mark(value))
 				callback();
-		};
+		}
 	};
 
 	template<Value::Type type> struct MarkClass
@@ -119,6 +125,10 @@ namespace Mirb
 			#endif
 
 			Value::virtual_do<MarkClass>(Value::type(current), current);
+			
+			#ifdef DEBUG
+				current->refs = 0;
+			#endif
 		}
 	}
 

@@ -13,7 +13,7 @@ namespace Mirb
 	{
 		this->length = length;
 
-		data = (char_t *)Allocator::allocate(length);
+		data = (char_t *)Collector::allocate(length);
 
 		memcpy(data, c_str, length);
 
@@ -47,7 +47,7 @@ namespace Mirb
 	{
 		length = std::strlen((const char *)c_str);
 
-		data = (char_t *)Allocator::allocate(length);
+		data = (char_t *)Collector::allocate(length);
 
 		memcpy(data, c_str, length);
 
@@ -62,7 +62,7 @@ namespace Mirb
 	{
 		length = string.length();
 
-		data = (char_t *)Allocator::allocate(length);
+		data = (char_t *)Collector::allocate(length);
 
 		memcpy(data, string.c_str(), length);
 
@@ -107,7 +107,7 @@ namespace Mirb
 	{
 		if(shared)
 		{
-			char_t *new_data = (char_t *)Allocator::allocate(length);
+			char_t *new_data = (char_t *)Collector::allocate(length);
 
 			memcpy(new_data, data, length);
 
@@ -127,11 +127,11 @@ namespace Mirb
 
 		if(shared)
 		{
-			data = (char_t *)Allocator::allocate(length + other.length);
+			data = (char_t *)Collector::allocate(length + other.length);
 			memcpy(data, this_data, length);
 		}
 		else
-			data = (char_t *)Allocator::reallocate(data, length, length + other.length);
+			data = (char_t *)Collector::reallocate(data, length, length + other.length);
 		
 		shared = false;
 		static_data = false;

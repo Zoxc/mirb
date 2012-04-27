@@ -115,7 +115,7 @@ namespace Mirb
 		
 		const size_t Header::magic_value = 12345;
 	
-		Header::Header(Type type) : type(type), marked(false), alive(true), data(nullptr)
+		Header::Header(Type type) : type(type), marked(false), alive(true), data(nullptr), data2(nullptr)
 		{
 			#ifdef DEBUG
 				magic = magic_value;

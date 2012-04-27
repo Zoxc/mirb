@@ -7,7 +7,7 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
-		BasicBlock::BasicBlock(MemoryPool &memory_pool, Block &block) : branches(memory_pool), source_locs(memory_pool)
+		BasicBlock::BasicBlock(MemoryPool memory_pool, Block &block) : branches(memory_pool), source_locs(memory_pool)
 		{
 			#ifdef DEBUG
 				id = block.basic_block_count++;

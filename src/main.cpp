@@ -30,7 +30,7 @@ int main()
 		
 		std::getline(std::cin, line);
 		
-		MemoryPool memory_pool;
+		MemoryPool::Base memory_pool;
 		Document *document = Collector::allocate<Document>();
 
 		document->copy((const char_t *)line.c_str(), line.length());

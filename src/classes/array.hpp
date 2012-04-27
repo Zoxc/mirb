@@ -18,7 +18,7 @@ namespace Mirb
 			Array(value_t instance_of) : Object(Value::Array, auto_cast(instance_of)) {}
 			Array() : Object(Value::Array, auto_cast(context->array_class)) {}
 
-			Vector<value_t, Allocator> vector;
+			Vector<value_t, AllocatorBase, Allocator> vector;
 			
 			template<typename F> void mark(F mark)
 			{

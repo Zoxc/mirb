@@ -1,5 +1,6 @@
 #pragma once
 #include "value.hpp"
+#include "allocator.hpp"
 #include <Prelude/Map.hpp>
 
 namespace Mirb
@@ -25,7 +26,7 @@ namespace Mirb
 	};
 
 	class ValueMapFunctions:
-		public MapFunctions<value_t, value_t, Allocator>
+		public MapFunctions<value_t, value_t>
 	{
 		public:
 			typedef ValueMapPair Pair;
@@ -37,9 +38,13 @@ namespace Mirb
 
 			static Pair *allocate_pair();
 
-			static Pair *allocate_pair(NoReferenceProvider<Allocator> *allocator)
+			static Pair *allocate_pair(Allocator<Pair, AllocatorBase>::Reference allocator)
 			{
 				return allocate_pair();
+			}
+
+			template<typename Allocator> static void free_pair(typename Allocator::Reference ref, Pair *pair)
+			{
 			}
 	};
 
@@ -52,7 +57,7 @@ namespace Mirb
 		public:
 			ValueMap() : Value::Header(Value::InternalValueMap), map(vars_initial) {}
 
-			Map<value_t, value_t, Allocator, ValueMapFunctions> map;
+			Map<value_t, value_t, ValueMapFunctions, Prelude::Allocator::Standard, Allocator> map;
 			
 			template<typename F> void mark(F mark)
 			{

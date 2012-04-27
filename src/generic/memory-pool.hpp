@@ -5,8 +5,7 @@
 
 namespace Mirb
 {
-	class MemoryPool:
-		public WithReferenceProvider<MemoryPool>
+	class MemoryPoolImplementation
 	{
 		struct Page
 		{
@@ -28,8 +27,10 @@ namespace Mirb
 			void free_page(Page *page);
 			void *get_page(size_t bytes);
 		public:
-			MemoryPool();
-			~MemoryPool();
+			MemoryPoolImplementation();
+			~MemoryPoolImplementation();
+			
+			static const bool can_free = false;
 			
 			void *allocate(size_t bytes);
 			void *reallocate(void *memory, size_t old_size, size_t new_size);
@@ -37,6 +38,8 @@ namespace Mirb
 			{
 			}
 	};
+	
+	typedef Prelude::Allocator::ReferenceTemplate<MemoryPoolImplementation> MemoryPool;
 };
 
 void *operator new(size_t bytes, Mirb::MemoryPool &memory_pool) throw();

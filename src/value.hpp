@@ -12,7 +12,6 @@ namespace Mirb
 		class Scope;
 	}
 	
-	class Allocator;
 	class Collector;
 	class Document;
 	class Block;
@@ -121,8 +120,9 @@ namespace Mirb
 					size_t magic;
 					value_t refs;
 				#endif
-
+					
 				value_t *data;
+				value_t *data2;
 
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
@@ -342,6 +342,7 @@ namespace Mirb
 				{
 					mirb_debug_assert(obj->marked == false);
 					mirb_debug_assert(obj->data == nullptr);
+					mirb_debug_assert(obj->data2 == nullptr);
 				}
 			#endif
 		}

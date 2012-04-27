@@ -45,12 +45,12 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(StandardAllocator::Ref::Type allocator, const CharArray &key)
+			static Symbol *create_value(Prelude::Allocator::Standard::Reference allocator, const CharArray &key)
 			{
 				return new Symbol(key); // TODO: Allocate as root memory.
 			}
 			
-			static void free_value(StandardAllocator::Ref::Type allocator, Symbol *value)
+			static void free_value(Prelude::Allocator::Standard::Reference allocator, Symbol *value)
 			{
 				delete value;
 			}
@@ -58,18 +58,6 @@ namespace Mirb
 			template<typename F> static void mark_value(Symbol *&value, F mark)
 			{
 				mark(value);
-
-				Symbol *current = value;
-
-				while(current)
-				{
-					Symbol *next = current->next;
-
-					if(next)
-						mark(current->next);
-						
-					current = next;
-				}
 			}
 	};
 

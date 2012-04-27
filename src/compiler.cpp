@@ -49,7 +49,7 @@ namespace Mirb
 	value_t deferred_block(Frame &frame)
 	{
 		{
-			MemoryPool memory_pool;
+			MemoryPool::Base memory_pool;
 
 			Compiler::compile(frame.code->scope, memory_pool);
 		}

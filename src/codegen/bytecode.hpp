@@ -10,8 +10,6 @@ namespace Mirb
 		class Scope;
 	};
 	
-	class MemoryPool;
-	
 	namespace CodeGen
 	{
 		class ByteCodeGenerator;
@@ -135,9 +133,9 @@ namespace Mirb
 				var_t call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst);
 				
 			public:
-				ByteCodeGenerator(MemoryPool &memory_pool);
+				ByteCodeGenerator(MemoryPool memory_pool);
 
-				MemoryPool &memory_pool;
+				MemoryPool memory_pool;
 				Block *block;
 				
 				BasicBlock *gen(BasicBlock *block)

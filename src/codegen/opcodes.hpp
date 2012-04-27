@@ -5,7 +5,6 @@
 
 namespace Mirb
 {
-	class MemoryPool;
 	class Symbol;
 	class Block;
 	

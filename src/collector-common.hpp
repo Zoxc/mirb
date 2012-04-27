@@ -63,6 +63,8 @@ namespace Mirb
 
 		while(frame)
 		{
+			Block *code = frame->code;
+
 			mark(frame->code);
 			mark(frame->obj);
 			mark(frame->name);
@@ -77,7 +79,7 @@ namespace Mirb
 				mark(frame->argv[i]);
 			}
 
-			if(frame->code->executor == &evaluate_block && frame->vars)
+			if(code->executor == &evaluate_block && frame->vars)
 			{
 				for(size_t i = 0; i < frame->code->var_words; ++i)
 				{
@@ -123,4 +125,7 @@ namespace Mirb
 	};
 
 	size_t size_of_value(value_t value);
+	
+	typedef Allocator<ValueMapPair *, AllocatorBase>::Storage ValueMapPairStorage;
+	typedef Allocator<value_t, AllocatorBase>::Storage ValueStorage;
 };

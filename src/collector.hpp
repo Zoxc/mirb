@@ -7,34 +7,12 @@
 #include "value-map.hpp"
 #include "char-array.hpp"
 #include "classes/object.hpp"
+#include "allocator.hpp"
 
 namespace Mirb
 {
 	struct RegionWalker;
 
-	class Tuple:
-		public Value::Header
-	{
-		private:
-		public:
-			Tuple(size_t entries) : Value::Header(Value::InternalTuple), entries(entries) {}
-
-			value_t &operator[](size_t index)
-			{
-				mirb_debug_assert(index < entries);
-
-				return ((value_t *)((size_t)this + sizeof(Tuple)))[index];
-			}
-			
-			size_t entries;
-
-			template<typename F> void mark(F mark)
-			{
-				for(size_t i = 0; i < entries; ++i)
-					mark((*this)[i]);
-			}
-	};
-	
 	class Collector
 	{
 		private:
@@ -162,8 +140,9 @@ namespace Mirb
 				#endif
 			}
 			
-			friend class Mirb::Allocator;
-			
+			static void *allocate(size_t bytes);
+			static void *reallocate(void *memory, size_t old_size, size_t bytes);
+
 			static Tuple &allocate_tuple(size_t entries)
 			{
 				size_t size = sizeof(Tuple) + entries * sizeof(value_t);

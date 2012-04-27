@@ -33,6 +33,7 @@
     <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
     <ClInclude Include="..\..\src\codegen\printer.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
+    <ClInclude Include="..\..\src\collector-common.hpp" />
     <ClInclude Include="..\..\src\collector.hpp" />
     <ClInclude Include="..\..\src\common.hpp" />
     <ClInclude Include="..\..\src\compiler.hpp" />
@@ -83,6 +84,9 @@
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
+    <ClCompile Include="..\..\src\collector-compact.cpp" />
+    <ClCompile Include="..\..\src\collector-mark.cpp" />
+    <ClCompile Include="..\..\src\collector-sweep.cpp" />
     <ClCompile Include="..\..\src\collector.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\context.cpp" />

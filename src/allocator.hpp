@@ -50,18 +50,117 @@ namespace Mirb
 			}
 	};
 	
-	class Allocator:
-		public NoReferenceProvider<Allocator>
+	class Tuple:
+		public Value::Header
+	{
+		private:
+		public:
+			Tuple(size_t entries) : Value::Header(Value::InternalTuple), entries(entries) {}
+
+			value_t &operator[](size_t index)
+			{
+				mirb_debug_assert(index < entries);
+
+				return ((value_t *)((size_t)this + sizeof(Tuple)))[index];
+			}
+			
+			size_t entries;
+
+			template<typename F> void mark(F mark)
+			{
+				for(size_t i = 0; i < entries; ++i)
+					mark((*this)[i]);
+			}
+	};
+	
+	typedef Prelude::Allocator::Standard AllocatorBase;
+	
+	class AllocatorPrivate
+	{
+		static Tuple *allocate_tuple(size_t size);
+
+		template<class A, class BaseAllocator> friend class Allocator;
+	};
+
+	template<class A, class BaseAllocator> class Allocator:
+			public BaseAllocator::ReferenceBase
 	{
 		public:
-			Allocator() {}
-			Allocator(Ref::Type reference) {}
-			Allocator(const Allocator &allocator) {}
+			typedef BaseAllocator Base;
 			
-			static void *allocate(size_t bytes);
-			static void *reallocate(void *memory, size_t old_size, size_t bytes);
-			static void free(void *memory) {}
+			typename Base::Reference reference()
+			{
+				return Base::default_reference;
+			}
+			
+			class Storage
+			{
+				private:
+					Tuple *array;
+					
+					Storage(Tuple *array) : array(array) {}
+					
+					friend class Allocator;
+					friend struct ThreadFunc;
+					template<void(*callback)()> friend struct MarkFunc;
+				public:			
+				
+					static const bool null_references = true;
+					
+					Storage()
+					{
+						#ifdef DEBUG
+							array = nullptr;
+						#endif
+					}
+					
+					Storage &operator =(decltype(nullptr) null)
+					{
+						mirb_debug_assert(null == nullptr);
+						
+						array = nullptr;
 
-			static const bool can_free = false;
+						return *this;
+					}
+					
+					Storage &operator =(const Storage &other)
+					{
+						array = other.array;
+
+						return *this;
+					}
+					
+					operator bool() const
+					{
+						return array != 0;
+					}
+					
+					A &operator [](size_t index) const
+					{
+						mirb_debug_assert(array);
+						
+						return *(A *)(&(*array)[index]);
+					}
+			};
+			
+			Allocator(typename Base::Reference allocator = Base::default_reference) {}
+			Allocator(const Allocator &array_allocator) {}
+				
+			Storage allocate(size_t size)
+			{
+				return Storage(AllocatorPrivate::allocate_tuple(size));
+			}
+			
+			Storage reallocate(const Storage &old, size_t old_size, size_t new_size)
+			{
+				Tuple &result = *AllocatorPrivate::allocate_tuple(new_size);
+
+				for(size_t i = 0; i < old_size; ++i)
+					result[i] = (*old.array)[i];
+
+				return Storage(&result);
+			}
+
+			void free(const Storage &array)	{}
 	};
 };

@@ -17,6 +17,8 @@
 #include "tree/tree.hpp"
 #include "on-stack.hpp"
 #include "collector-common.hpp"
+#include <set>
+
 
 namespace Mirb
 {
@@ -25,7 +27,7 @@ namespace Mirb
 
 	template<class T> static void template_thread(T *&value)
 	{
-		thread_pointer(reinterpret_cast<value_t *>(const_cast<T **>(&value)));
+		thread_pointer(reinterpret_cast<value_t *>(&value));
 	};
 	
 	template<> void template_thread<Value::Header>(Value::Header *&value)
@@ -35,23 +37,35 @@ namespace Mirb
 	
 	template<> void template_thread<void>(void *&value)
 	{
-		thread_pointer(reinterpret_cast<value_t *>(const_cast<void **>(&value)));
+		thread_pointer(reinterpret_cast<value_t *>(&value));
 	}
 
 	struct ThreadFunc
 	{
+		void operator()(const ValueStorage &storage)
+		{
+			if(storage)
+				template_thread(*const_cast<Tuple **>(&storage.array));
+		}
+
+		void operator()(const ValueMapPairStorage &storage)
+		{
+			if(storage)
+				template_thread(*const_cast<Tuple **>(&storage.array));
+		}
+
 		void operator()(const CharArray &string)
 		{
 			char_t * const&data = Accesser::CharArray::data(string);
 
 			if(data && !Accesser::CharArray::static_data(string))
 				template_thread(*(void **)&data);
-		};
+		}
 		
 		template<class T> void operator()(T *value)
 		{
 			template_thread(value);
-		};
+		}
 	};
 
 	template<Value::Type type> struct ThreadClass
@@ -69,24 +83,28 @@ namespace Mirb
 	
 	void thread_value(value_t *node)
 	{
-		value_t temp = *node;
+		if(Value::object_ref(*node))
+			thread_pointer(node);
+	}
 
-		if(Value::object_ref(temp))
-		{
-			*node = (value_t)temp->data;
-			temp->data = node;
-		}
+	std::set<value_t *> locs;
+	
+	void thread_data(value_t *node, value_t temp)
+	{
+		mirb_debug_assert(temp->data == nullptr);
+
+		*node = (value_t)temp->data2;
+		temp->data2 = node;
 	}
 
 	void thread_pointer(value_t *node)
 	{
+		mirb_debug_assert(locs.find(node) == locs.end());
+		locs.insert(node);
+		
 		value_t temp = *node;
 
-		if(Value::object_ref(temp))
-		{
-			*node = (value_t)temp->data;
-			temp->data = node;
-		}
+		thread_data(node, temp);
 	}
 
 	void update(value_t node, value_t free)
@@ -94,7 +112,7 @@ namespace Mirb
 		if(node->type == Value::InternalVariableBlock)
 			free = (value_t)((size_t)free + sizeof(VariableBlock));
 
-		value_t *current = node->data;
+		value_t *current = node->data2;
 
 		while(current)
 		{
@@ -177,6 +195,8 @@ namespace Mirb
 
 	void update_forward()
 	{
+		locs.clear();
+
 		ThreadFunc func;
 
 		each_root(func);
