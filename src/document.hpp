@@ -15,7 +15,7 @@ namespace Mirb
 			size_t length;
 			CharArray name;
 
-			void copy(const char_t *data, size_t length);
+			void copy(const char_t *data, size_t length) prelude_nonnull(2);
 
 			template<typename F> void mark(F mark)
 			{

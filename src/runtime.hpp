@@ -15,8 +15,8 @@ namespace Mirb
 
 	void set_current_exception(Exception *exception);
 
-	value_t class_of(value_t obj);
-	value_t real_class(value_t obj);
+	value_t class_of(value_t obj) prelude_nonnull(1);
+	value_t real_class(value_t obj) prelude_nonnull(1);
 	value_t real_class_of(value_t obj);
 
 	Class *singleton_class(Object *object);

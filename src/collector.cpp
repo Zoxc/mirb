@@ -28,7 +28,7 @@ namespace Mirb
 	#ifdef VALGRIND
 		LinkedList<Value::Header> Collector::heap_list;
 	#else
-		LinkedList<PinnedHeader> Collector::heap_list;
+		LinkedList<PinnedHeader, PinnedHeader, &PinnedHeader::entry> Collector::heap_list;
 	#endif
 
 	void *Collector::allocate(size_t bytes)
@@ -77,7 +77,8 @@ namespace Mirb
 			Collector::heap_list.append(result);
 		#endif
 
-		memcpy(result->data(), memory, old_size);
+		if(memory)
+			memcpy(result->data(), memory, old_size);
 			
 		return result->data();
 	}
@@ -90,7 +91,7 @@ namespace Mirb
 	{
 		size_t size = Value::virtual_do<SizeOf>(value->type, value);
 
-		mirb_debug_assert(size = value->size);
+		mirb_debug_assert(size == value->size);
 
 		return size;
 	}

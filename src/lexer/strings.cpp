@@ -327,7 +327,6 @@ namespace Mirb
 				case 0:
 					if(process_null(&input))
 					{
-						overhead -= 1;
 						lexeme.stop = &input;
 						parser.report(lexeme.dup(memory_pool), "Unterminated string");
 						goto error;

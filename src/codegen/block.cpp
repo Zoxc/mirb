@@ -62,8 +62,11 @@ namespace Mirb
 				ranges += i().source_locs.size();
 			}
 
-			final->ranges = (Range *)malloc(ranges * sizeof(Range));
-			mirb_runtime_assert(final->ranges != 0);
+			if(ranges)
+				final->ranges = (Range *)malloc(ranges * sizeof(Range));
+			else
+				final->ranges = nullptr;
+
 			const char *opcodes = (const char *)malloc(size);
 			mirb_runtime_assert(opcodes != 0);
 			size_t pos = 0;
@@ -74,13 +77,14 @@ namespace Mirb
 				std::string data = i().opcodes.str();
 
 				i().pos = pos;
-				
-				for(auto j = i().source_locs.begin(); j != i().source_locs.end(); ++j, ++ranges)
-				{
-					final->ranges[ranges] = *j().second;
 
-					final->source_location.set(pos + j().first, &final->ranges[ranges]);
-				}
+				if(final->ranges)
+					for(auto j = i().source_locs.begin(); j != i().source_locs.end(); ++j, ++ranges)
+					{
+						final->ranges[ranges] = *j().second;
+
+						final->source_location.set(pos + j().first, &final->ranges[ranges]);
+					}
 
 				memcpy((void *)&opcodes[pos], data.data(), data.size());
 

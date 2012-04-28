@@ -48,7 +48,7 @@ namespace Mirb
 			#ifdef VALGRIND
 				static LinkedList<Value::Header> heap_list;
 			#else
-				static LinkedList<PinnedHeader> heap_list;
+				static LinkedList<PinnedHeader, PinnedHeader, &PinnedHeader::entry> heap_list;
 			#endif
 
 			void test_sizes();

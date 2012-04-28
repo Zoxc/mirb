@@ -345,19 +345,22 @@ namespace Mirb
 			};
 		};
 		
-		static inline void assert_valid_base(value_t obj)
+		inline void assert_valid_base(value_t obj) prelude_nonnull(1);
+		inline void assert_valid_base(value_t obj)
 		{
 			mirb_debug_assert(obj->magic == Header::magic_value);
 			mirb_debug_assert(obj->type != None);
 		}
 
-		static inline void assert_alive(value_t obj)
+		inline void assert_alive(value_t obj) prelude_nonnull(1);
+		inline void assert_alive(value_t obj)
 		{
 			assert_valid_base(obj);
 			mirb_debug_assert(obj->alive);
 		}
 
-		static inline void assert_valid(value_t obj)
+		inline void assert_valid(value_t obj) prelude_nonnull(1);
+		inline void assert_valid(value_t obj)
 		{
 			if(object_ref(obj))
 			{
@@ -367,6 +370,8 @@ namespace Mirb
 				mirb_debug_assert((obj->*Header::thread_list) == nullptr);
 			}
 		}
+
+		template<class T> bool of_type(value_t value) prelude_nonnull(1);
 
 		template<class T> bool of_type(value_t value)
 		{
