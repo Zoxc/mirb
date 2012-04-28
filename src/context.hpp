@@ -35,6 +35,7 @@ namespace Mirb
 			Class *argument_error;
 			Class *runtime_error;
 			Class *local_jump_error;
+			Class *load_error;
 			Class *fixnum_class;
 
 			Module *kernel_module;

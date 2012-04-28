@@ -89,7 +89,7 @@ namespace Mirb
 		FILE* file = open_file(filename);
 
 		if(!file)
-			return value_nil;
+			return raise(context->load_error, "Unable to load file '" + filename + "'");
 
 		fseek(file, 0, SEEK_END);
 
@@ -99,6 +99,9 @@ namespace Mirb
 
 		char *data = (char *)malloc(length + 1);
 
+		if(!data)
+			return raise(context->load_error, "Unable to allocate memory for file content '" + filename + "' (" + CharArray::uint(length) + " bytes)");
+
 		mirb_runtime_assert(data != 0);
 
 		if(fread(data, 1, length, file) != length)
@@ -106,7 +109,7 @@ namespace Mirb
 			free(data);
 			fclose(file);
 
-			return value_nil;
+			return raise(context->load_error, "Unable to read content of file '" + filename + "'");
 		}
 
 		data[length] = 0;

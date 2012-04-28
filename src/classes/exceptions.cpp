@@ -12,6 +12,7 @@ namespace Mirb
 		context->argument_error = define_class(context->object_class, "ArgumentError", context->standard_error);
 		context->runtime_error = define_class(context->object_class, "RuntimeError", context->standard_error);
 		context->local_jump_error = define_class(context->object_class, "LocalJumpError", context->standard_error);
+		context->load_error = define_class(context->object_class, "LoadError", context->standard_error);
 	}
 };
 
