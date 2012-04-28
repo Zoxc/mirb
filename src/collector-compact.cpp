@@ -132,7 +132,7 @@ namespace Mirb
 	{
 	}
 
-	struct RegionWalker
+	template<bool backward, bool free> struct RegionWalker
 	{
 		Collector::Region *region;
 		value_t pos;
@@ -141,6 +141,16 @@ namespace Mirb
 		{
 			region = Collector::regions.first;
 			pos = (value_t)region->data();
+			test(pos);
+		}
+
+		void test(value_t obj)
+		{
+			if(!free)
+			{
+				Value::assert_valid_base(pos);
+				mirb_debug_assert((pos->*Value::Header::mark_list) == nullptr);
+			}
 		}
 
 		value_t operator()()
@@ -148,18 +158,30 @@ namespace Mirb
 			return pos;
 		}
 
-		bool step_region()
+		bool step_region(size_t size)
 		{
+			if(backward)
+				update();
+
 			region = region->entry.next;
 
 			if(region)
 			{
 				pos = (value_t)region->data();
+				test(pos);
 
-				return true;
+				if(free)
+					return step(size);
+				else
+					return true;
 			}
 			else
+			{
+				if(free)
+					mirb_debug_abort("Ran out of free space!");
+
 				return false;
+			}
 		}
 
 		void update()
@@ -167,29 +189,17 @@ namespace Mirb
 			//region->pos = (char_t *)pos; TODO: Enable with compaction
 		}
 		
-		template<bool free, bool backward> bool step(size_t size)
+		bool step(size_t size)
 		{
 			value_t next = (value_t)((size_t)pos + size);
 
 			mirb_debug_assert((size_t)next <= (size_t)region->pos);
 
 			if((size_t)next == (size_t)region->pos)
-			{
-				if(free && backward)
-					update();
-				
-				if(step_region())
-					return step<free, backward>(size);
-				else
-					return false;
-			}
+				return step_region(size);
 			else
 			{
-				if(!free)
-				{
-					Value::assert_valid_base(next);
-					mirb_debug_assert((next->*Value::Header::mark_list) == nullptr);
-				}
+				test(next);
 
 				pos = next;
 				
@@ -206,8 +216,8 @@ namespace Mirb
 
 		each_root(func);
 		
-		RegionWalker free;
-		RegionWalker pos;
+		RegionWalker<false, true> free;
+		RegionWalker<false, false> pos;
 
 		size_t size;
 
@@ -222,10 +232,10 @@ namespace Mirb
 
 				Value::virtual_do<ThreadClass>(Value::type(i), i);
 
-				free.step<true, false>(size);
+				free.step(size);
 			}
 		}
-		while(pos.step<false, false>(size));
+		while(pos.step(size));
 
 		for(auto i = heap_list.begin(); i != heap_list.end(); ++i)
 		{
@@ -242,8 +252,8 @@ namespace Mirb
 	
 	void Collector::update_backward()
 	{
-		RegionWalker free;
-		RegionWalker pos;
+		RegionWalker<true, true>  free;
+		RegionWalker<true, false> pos;
 
 		size_t size;
 
@@ -257,7 +267,7 @@ namespace Mirb
 				update<true>(i, i);
 				move(i, i);
 
-				free.step<true, true>(size);
+				free.step(size);
 			}
 #ifdef DEBUG
 			else
@@ -267,7 +277,7 @@ namespace Mirb
 			}
 #endif
 		}
-		while(pos.step<false, true>(size));
+		while(pos.step(size));
 		
 		free.update();
 		

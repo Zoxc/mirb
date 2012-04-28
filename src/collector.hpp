@@ -11,8 +11,6 @@
 
 namespace Mirb
 {
-	struct RegionWalker;
-
 	class Collector
 	{
 		private:
@@ -43,7 +41,7 @@ namespace Mirb
 			static FastList<Region> regions;
 			static const size_t page_size = 0x1000;
 
-			friend struct RegionWalker;
+			template<bool free, bool backward> friend struct RegionWalker;
 			
 			static Region *current;
 			static size_t pages;
