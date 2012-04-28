@@ -97,6 +97,8 @@ namespace Mirb
 		
 		FragmentBase::FragmentBase(size_t chunk_size) : chunk_size(chunk_size)
 		{
+			mirb_debug_assert(chunk_size >= Chunk::allocation_limit);
+
 			current = Chunk::create(chunk_size);
 			chunks.append(current);
 		}
@@ -112,6 +114,8 @@ namespace Mirb
 		
 		void *FragmentBase::allocate(size_t bytes)
 		{
+			mirb_debug_assert(chunk_size >= Chunk::allocation_limit);
+
 			void *result = current->allocate(bytes);
 			
 			if(prelude_unlikely(!result))
@@ -132,7 +136,7 @@ namespace Mirb
 				
 				result = chunk->allocate(bytes);
 				
-				assert(result);
+				mirb_debug_assert(result);
 			}
 			
 			return result;
@@ -142,7 +146,7 @@ namespace Mirb
 		{
 			uint8_t *memory = (uint8_t *)malloc(sizeof(Chunk) + size);
 			
-			assert(memory);
+			mirb_runtime_assert(memory);
 			
 			Chunk *result = new (memory) Chunk;
 			

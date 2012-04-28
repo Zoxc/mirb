@@ -125,9 +125,22 @@ namespace Mirb
 		template<typename T> static Tuple<T> *allocate_tuple(size_t size);
 
 		template<class A, class BaseAllocator> friend class Allocator;
+		
+		template<class T> struct Null
+		{
+			static const T value;
+		}; 
+
+	
+	};
+	
+	template<> struct AllocatorPrivate::Null<value_t>
+	{
+		static const value_t value;
 	};
 
-
+	template<class T> const T AllocatorPrivate::Null<T>::value = nullptr;
+	
 	template<class A, class BaseAllocator> class Allocator:
 			public BaseAllocator::ReferenceBase
 	{
@@ -138,6 +151,8 @@ namespace Mirb
 			{
 				return Base::default_reference;
 			}
+			
+			static const bool null_references = true;
 
 			typedef typename std::iterator_traits<A>::value_type ArrayBase;
 			typedef Tuple<ArrayBase> TupleObj;
@@ -151,8 +166,6 @@ namespace Mirb
 				public:
 					TupleObj *array;
 
-					static const bool null_references = true;
-					
 					Storage()
 					{
 						#ifdef DEBUG
@@ -192,9 +205,19 @@ namespace Mirb
 			Allocator(typename Base::Reference allocator = Base::default_reference) {}
 			Allocator(const Allocator &array_allocator) {}
 				
+			void null(A &ref)
+			{
+				ref = AllocatorPrivate::Null<A>::value;
+			}
+			
 			Storage allocate(size_t size)
 			{
-				return Storage(TupleObj::allocate(size));
+				TupleObj &result = *TupleObj::allocate(size);
+
+				for(size_t i = 0; i < size; ++i)
+					result[i] = AllocatorPrivate::Null<A>::value;
+
+				return Storage(&result);
 			}
 			
 			Storage reallocate(const Storage &old, size_t old_size, size_t new_size)
@@ -203,6 +226,9 @@ namespace Mirb
 
 				for(size_t i = 0; i < old_size; ++i)
 					result[i] = (*old.array)[i];
+				
+				for(size_t i = old_size; i < new_size; ++i)
+					result[i] = AllocatorPrivate::Null<A>::value;
 
 				return Storage(&result);
 			}

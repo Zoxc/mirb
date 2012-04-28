@@ -80,6 +80,9 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Call)
+			for(size_t i = 0; i < frame.code->var_words; ++i)
+				assert(vars[i] != nullptr);
+
 			value_t block = op.block ? vars[op.block_var] : value_nil;
 
 			value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);

@@ -145,9 +145,6 @@ namespace Mirb
 
 		value_t operator()()
 		{
-			Value::assert_valid_base(pos);
-			mirb_debug_assert((pos->*Value::Header::mark_list) == nullptr);
-
 			return pos;
 		}
 
@@ -188,8 +185,14 @@ namespace Mirb
 			}
 			else
 			{
-				pos = (value_t)next;
+				if(!free)
+				{
+					Value::assert_valid_base(next);
+					mirb_debug_assert((next->*Value::Header::mark_list) == nullptr);
+				}
 
+				pos = next;
+				
 				return true;
 			}
 		}

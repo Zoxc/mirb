@@ -23,7 +23,7 @@ namespace Mirb
 		#ifdef MIRB_DEBUG_COMPILER
 			CodeGen::ByteCodePrinter printer(block);
 
-			std::cout << printer.print();
+			std::cout << printer.print() << std::endl;
 		#endif
 		
 		#ifdef MIRB_GRAPH_BYTECODE

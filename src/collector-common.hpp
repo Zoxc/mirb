@@ -77,14 +77,9 @@ namespace Mirb
 			if(frame->scopes)
 				mark(frame->scopes);
 			
-			for(size_t i = 0; i < frame->argc; ++i)
-			{
-				mark(frame->argv[i]);
-			}
-
 			if(code->executor == &evaluate_block && frame->vars)
 			{
-				for(size_t i = 0; i < frame->code->var_words; ++i)
+				for(size_t i = 0; i < code->var_words; ++i)
 				{
 					mark(frame->vars[i]);
 				}

@@ -459,8 +459,7 @@ namespace Mirb
 
 		parser.load();
 		
-		auto fragment = new Tree::Fragment::Base(Tree::Chunk::main_size);
-		Tree::Scope *scope = parser.parse_main(*fragment);
+		Tree::Scope *scope = parser.parse_main();
 	
 		if(!parser.messages.empty())
 		{

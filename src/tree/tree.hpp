@@ -39,6 +39,7 @@ namespace Mirb
 		{
 			public:
 				static const bool can_free = false;
+				static const bool null_references = false;
 
 				FragmentBase(size_t chunk_size);
 				
@@ -49,7 +50,7 @@ namespace Mirb
 				}
 				
 			private:
-				size_t chunk_size;
+				const size_t chunk_size;
 				
 				Chunk *current;
 				
@@ -219,7 +220,7 @@ namespace Mirb
 
 				template<class T> T *alloc_var(Variable::Type type = Variable::Local)
 				{
-					T *result = new (fragment) T(type);
+					T *result = new (Fragment(*fragment)) T(type);
 					
 					result->loc = variable_list.size();
 					

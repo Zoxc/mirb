@@ -35,7 +35,21 @@ namespace Mirb
 			
 			void error(std::string text);
 			
-			Tree::Scope *allocate_scope(Tree::Scope::Type type);
+			template<typename F> void allocate_scope(Tree::Scope::Type type, F func)
+			{
+				Tree::Scope *current_scope = scope;
+				Tree::Fragment current_fragment = fragment;
+
+				if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
+					fragment = *new Tree::FragmentBase(Tree::Chunk::block_size);
+		
+				scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
+				
+				func();
+				
+				scope = current_scope;
+				fragment = current_fragment;
+			}
 			
 			static bool is_constant(Symbol *symbol);
 						
@@ -76,7 +90,7 @@ namespace Mirb
 			void parse_sep();
 			void parse_statements(Tree::NodeList &list);
 			
-			Tree::Scope *parse_main(Tree::Fragment fragment);
+			Tree::Scope *parse_main();
 			
 			// control flow
 			Tree::Node *parse_if_tail();

@@ -31,6 +31,7 @@ namespace Mirb
 			~MemoryPoolImplementation();
 			
 			static const bool can_free = false;
+			static const bool null_references = false;
 			
 			void *allocate(size_t bytes);
 			void *reallocate(void *memory, size_t old_size, size_t new_size);

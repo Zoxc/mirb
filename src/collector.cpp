@@ -132,10 +132,19 @@ namespace Mirb
 		#endif
 
 		#ifdef DEBUG
-			symbol_pool.each_value([&](Symbol *symbol) {
-				symbol->marked = false;
-				symbol->alive = true;
-			});
+		{
+			Frame *frame = current_frame;
+
+			while(frame)
+			{
+				for(size_t i = 0; i < frame->argc; ++i)
+				{
+					Value::assert_valid(frame->argv[i]);
+				}
+
+				frame = frame->prev;
+			}
+		}
 		#endif
 	}
 

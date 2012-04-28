@@ -26,7 +26,7 @@ namespace Mirb
 	
 	value_t Object::inspect(value_t obj)
 	{
-		return call(obj, "to_s", 0, 0);
+		return call(obj, "to_s");
 	}
 	
 	value_t Object::to_s(value_t obj)

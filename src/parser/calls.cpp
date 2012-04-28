@@ -39,28 +39,24 @@ namespace Mirb
 		
 		lexer.step();
 		
-		auto old_fragment = fragment;
-		auto old_scope = scope;
-		
 		auto result = new (fragment) Tree::BlockNode;
 		
-		result->scope = allocate_scope(Tree::Scope::Closure);
-		
-		skip_lines();
-		
-		if(lexeme() == Lexeme::BITWISE_OR)
-		{
-			lexer.step();
+		allocate_scope(Tree::Scope::Closure, [&] {
+			result->scope = scope;
 			
-			parse_parameters();
+			skip_lines();
+		
+			if(lexeme() == Lexeme::BITWISE_OR)
+			{
+				lexer.step();
 			
-			match(Lexeme::BITWISE_OR);
-		}
+				parse_parameters();
+			
+				match(Lexeme::BITWISE_OR);
+			}
 		
-		result->scope->group = parse_group();
-		
-		fragment = old_fragment;
-		scope = old_scope;
+			result->scope->group = parse_group();
+		});
 		
 		match(curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
 		

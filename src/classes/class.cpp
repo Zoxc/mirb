@@ -53,7 +53,7 @@ namespace Mirb
 
 	value_t Class::method_new(value_t obj, size_t argc, value_t argv[])
 	{
-		value_t result = call(obj, "allocate", 0, 0);
+		value_t result = call(obj, "allocate");
 
 		OnStack<1> os(result);
 

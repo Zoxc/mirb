@@ -36,18 +36,6 @@ namespace Mirb
 		return c >= 'A' && c <= 'Z';
 	}
 	
-	Tree::Scope *Parser::allocate_scope(Tree::Scope::Type type)
-	{
-		if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
-		{
-			const size_t block_size = Tree::Chunk::block_size; // TODO: Remove workaround for G++ bug?
-			
-			fragment = *new Tree::FragmentBase(block_size);
-		}
-		
-		return scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
-	}
-	
 	void Parser::error(std::string text)
 	{
 		report(lexer.lexeme.dup(memory_pool), text);
@@ -821,18 +809,20 @@ namespace Mirb
 		}
 	}
 
-	Tree::Scope *Parser::parse_main(Tree::Fragment fragment)
+	Tree::Scope *Parser::parse_main()
 	{
-		this->fragment = fragment;
+		fragment = *new Tree::Fragment::Base(Tree::Chunk::main_size);
 		
-		Tree::Scope *scope = allocate_scope(Tree::Scope::Top);
+		Tree::Scope *result;
 		
-		scope->owner = scope;
-		
-		scope->group = parse_group();
+		allocate_scope(Tree::Scope::Top, [&] {
+			result = scope;
+			scope->owner = scope;
+			scope->group = parse_group();
+		});
 		
 		match(Lexeme::END);
 		
-		return scope;
+		return result;
 	}
 };

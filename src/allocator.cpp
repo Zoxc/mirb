@@ -3,6 +3,8 @@
 
 namespace Mirb
 {
+	const value_t AllocatorPrivate::Null<value_t>::value = value_undef;
+
 	Tuple<Object> *TupleBase::allocate_tuple(size_t size)
 	{
 		return &Collector::allocate_tuple<Object>(size);

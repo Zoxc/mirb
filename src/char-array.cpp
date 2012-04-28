@@ -19,6 +19,7 @@ namespace Mirb
 
 		shared = false;
 		static_data = false;
+		update_ref();
 	}
 
 	CharArray::CharArray(const std::string &string)

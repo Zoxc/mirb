@@ -77,6 +77,7 @@ namespace Mirb
 	const value_t value_nil = (value_t)value_nil_num;
 	const value_t value_false = (value_t)value_false_num;
 	const value_t value_true = (value_t)value_true_num;
+	const value_t value_undef = (value_t)14; // Used to mark words in vectors containing no references.
 
 	namespace Value
 	{
