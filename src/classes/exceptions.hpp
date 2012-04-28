@@ -9,7 +9,7 @@ namespace Mirb
 		public Exception
 	{
 		public:
-			ReturnException(Value::Type type, Module *instance_of, value_t message, Tuple *backtrace, Block *target, value_t value) : Exception(type, instance_of, message, backtrace), target(target), value(value) {}
+			ReturnException(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value) : Exception(type, instance_of, message, backtrace), target(target), value(value) {}
 			
 			Block *target;
 			value_t value;
@@ -27,7 +27,7 @@ namespace Mirb
 		public ReturnException
 	{
 		public:
-			BreakException(Module *instance_of, value_t message, Tuple *backtrace, Block *target, value_t value, var_t dst) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
+			BreakException(Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value, var_t dst) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
 			
 			var_t dst;
 	};

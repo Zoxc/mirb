@@ -11,7 +11,7 @@ namespace Mirb
 	{
 		value_t create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t argv[])
 		{
-			Tuple &scopes = Collector::allocate_tuple(argc);
+			auto &scopes = *Tuple<>::allocate(argc);
 			
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];

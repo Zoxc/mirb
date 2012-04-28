@@ -19,7 +19,7 @@ namespace Mirb
 		block(frame->block),
 		ip(frame->ip)
 	{
-		args = &Collector::allocate_tuple(frame->argc);
+		args = Tuple<>::allocate(frame->argc);
 
 		for(size_t i = 0; i < frame->argc; ++i)
 			(*args)[i] = frame->argv[i];
@@ -74,7 +74,7 @@ namespace Mirb
 		return result;
 	}
 	
-	CharArray StackFrame::get_backtrace(Tuple *backtrace)
+	CharArray StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
 	{
 		CharArray result;
 

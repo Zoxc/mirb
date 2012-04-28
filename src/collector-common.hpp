@@ -10,6 +10,9 @@ namespace Mirb
 		{
 			static inline char_t *const &data(const Mirb::CharArray &input)
 			{
+				if(input.data && !input.static_data)
+					mirb_debug_assert(&VariableBlock::from_memory(input.data) == input.ref);
+
 				return input.data;
 			}
 
@@ -104,13 +107,23 @@ namespace Mirb
 		}
 	};
 	
+	template<> struct SizeOf<Value::InternalValueTuple>
+	{
+		typedef size_t Result;
+
+		static size_t func(value_t obj)
+		{
+			return static_cast<Tuple<> *>(obj)->entries * sizeof(value_t) + sizeof(Tuple<>);
+		}
+	};
+
 	template<> struct SizeOf<Value::InternalTuple>
 	{
 		typedef size_t Result;
 
 		static size_t func(value_t obj)
 		{
-			return static_cast<Tuple *>(obj)->entries * sizeof(value_t) + sizeof(Tuple);
+			return static_cast<Tuple<Object> *>(obj)->entries * sizeof(Object *) + sizeof(Tuple<Object>);
 		}
 	};
 

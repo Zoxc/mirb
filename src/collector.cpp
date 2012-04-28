@@ -88,7 +88,11 @@ namespace Mirb
 	
 	size_t size_of_value(value_t value)
 	{
-		return Value::virtual_do<SizeOf>(value->type, value);
+		size_t size = Value::virtual_do<SizeOf>(value->type, value);
+
+		mirb_debug_assert(size = value->size);
+
+		return size;
 	}
 
 	template<class T> struct Aligned

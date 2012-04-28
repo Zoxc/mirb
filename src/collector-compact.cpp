@@ -24,6 +24,7 @@ namespace Mirb
 {
 	void thread_value(value_t *node);
 	void thread_pointer(value_t *node);
+	void thread_data(value_t *node, value_t temp);
 
 	template<class T> static void template_thread(T *&value)
 	{
@@ -40,13 +41,13 @@ namespace Mirb
 		void operator()(const ValueStorage &storage)
 		{
 			if(storage)
-				template_thread(*const_cast<Tuple **>(&storage.array));
+				template_thread(*const_cast<decltype(storage.array) *>(&storage.array));
 		}
 
 		void operator()(const ValueMapPairStorage &storage)
 		{
 			if(storage)
-				template_thread(*const_cast<Tuple **>(&storage.array));
+				template_thread(*const_cast<decltype(storage.array) *>(&storage.array));
 		}
 
 		void operator()(const CharArray &string)
@@ -54,10 +55,10 @@ namespace Mirb
 			char_t * const&data = Accesser::CharArray::data(string);
 
 			if(data && !Accesser::CharArray::static_data(string))
-				template_thread(*(void **)&data);
+				thread_data((value_t *)&data, &VariableBlock::from_memory(data));
 		}
 		
-		template<class T> void operator()(T *value)
+		template<class T> void operator()(T *&value)
 		{
 			template_thread(value);
 		}
@@ -86,10 +87,13 @@ namespace Mirb
 	
 	void thread_data(value_t *node, value_t temp)
 	{
-		mirb_debug_assert(temp->data == nullptr);
+		Value::assert_alive(temp);
+		mirb_debug_assert((temp->*Value::Header::mark_list) == nullptr);
+		mirb_debug_assert(temp->marked == true);
+		mirb_debug_assert((temp->*Value::Header::mark_list) == nullptr);
 
-		*node = (value_t)temp->data2;
-		temp->data2 = node;
+		*node = (value_t)(temp->*Value::Header::thread_list);
+		temp->*Value::Header::thread_list = node;
 	}
 
 	void thread_pointer(value_t *node)
@@ -107,7 +111,7 @@ namespace Mirb
 		if(node->type == Value::InternalVariableBlock)
 			free = (value_t)((size_t)free + sizeof(VariableBlock));
 
-		value_t *current = node->data2;
+		value_t *current = (node->*Value::Header::thread_list);
 
 		while(current)
 		{
@@ -116,7 +120,7 @@ namespace Mirb
 			current = temp;
 		}
 
-		node->data = nullptr;
+		(node->*Value::Header::thread_list) = nullptr;
 	}
 	
 	void move(value_t p, value_t new_p)
@@ -126,17 +130,20 @@ namespace Mirb
 	struct RegionWalker
 	{
 		Collector::Region *region;
-		size_t pos;
+		value_t pos;
 
 		RegionWalker()
 		{
 			region = Collector::regions.first;
-			pos = (size_t)region->data();
+			pos = (value_t)region->data();
 		}
 
 		value_t operator()()
 		{
-			return (value_t)pos;
+			Value::assert_valid_base(pos);
+			mirb_debug_assert((pos->*Value::Header::mark_list) == nullptr);
+
+			return pos;
 		}
 
 		bool step_region()
@@ -145,7 +152,7 @@ namespace Mirb
 
 			if(region)
 			{
-				pos = (size_t)region->data();
+				pos = (value_t)region->data();
 
 				return true;
 			}
@@ -165,9 +172,9 @@ namespace Mirb
 
 		template<bool free, bool backward> bool step(size_t size)
 		{
-			size_t next = pos + size;
+			size_t next = (size_t)pos + size;
 
-			if(pos >= (size_t)region->end)
+			if(next >= (size_t)region->end)
 			{
 				if(free)
 					update();
@@ -181,7 +188,7 @@ namespace Mirb
 			}
 			else
 			{
-				pos = next;
+				pos = (value_t)next;
 
 				return true;
 			}

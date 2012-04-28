@@ -28,3 +28,4 @@
 [ ] Fix &&=
 [ ] Check if redo triggers ensure blocks
 [ ] Check if marking child object in containers works with Jonkers'
+[ ] Make sure vectors clear dead references

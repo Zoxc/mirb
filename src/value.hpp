@@ -10,15 +10,20 @@ namespace Mirb
 	namespace Tree
 	{
 		class Scope;
-	}
+	};
+	
+	namespace Value
+	{
+		class Header;
+	};
 	
 	class Collector;
 	class Document;
 	class Block;
 	class Object;
-	class Tuple;
 	class ObjectHeader;
 	class VariableBlock;
+	template<class T = Value::Header> class Tuple;
 	class ValueMap;
 	class ValueMapPair;
 	class Module;
@@ -81,6 +86,7 @@ namespace Mirb
 			InternalValueMapPair,
 			InternalStackFrame,
 			InternalTuple,
+			InternalValueTuple,
 			InternalVariableBlock,
 			InternalDocument,
 			InternalBlock,
@@ -104,6 +110,13 @@ namespace Mirb
 		
 		class Header
 		{
+			private:
+				#ifdef DEBUG
+					value_t *mark_data;
+					value_t *thread_data;
+				#else
+					value_t *data;
+				#endif
 			public:
 				Header(Type type);
 			
@@ -120,10 +133,17 @@ namespace Mirb
 					size_t magic;
 					value_t refs;
 				#endif
-					
-				value_t *data;
-				value_t *data2;
 
+				typedef value_t *Header::*data_field;
+				
+				#ifdef DEBUG
+					static const data_field mark_list;
+					static const data_field thread_list;
+				#else
+					static const data_field mark_list;
+					static const data_field thread_list;
+				#endif
+				
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
 				#endif
@@ -172,6 +192,9 @@ namespace Mirb
 					
 				case InternalTuple:
 					return T<InternalTuple>::func(std::forward<Arg>(arg));
+					
+				case InternalValueTuple:
+					return T<InternalValueTuple>::func(std::forward<Arg>(arg));
 					
 				case InternalVariableBlock:
 					return T<InternalVariableBlock>::func(std::forward<Arg>(arg));
@@ -243,7 +266,8 @@ namespace Mirb
 		mirb_typeclass(InternalValueMap, ValueMap);
 		mirb_typeclass(InternalValueMapPair, ValueMapPair);
 		mirb_typeclass(InternalStackFrame, StackFrame);
-		mirb_typeclass(InternalTuple, Tuple);
+		mirb_typeclass(InternalTuple, Tuple<Mirb::Object>);
+		mirb_typeclass(InternalValueTuple, Tuple<Value::Header>);
 		mirb_typeclass(InternalVariableBlock, VariableBlock);
 		mirb_typeclass(InternalDocument, Document);
 		mirb_typeclass(InternalBlock, Block);
@@ -321,30 +345,27 @@ namespace Mirb
 			};
 		};
 		
-		static inline void assert_valid_skip_mark(value_t obj)
+		static inline void assert_valid_base(value_t obj)
 		{
-			#ifdef DEBUG
-				if(object_ref(obj))
-				{
-					mirb_debug_assert(obj->magic == Header::magic_value);
-					mirb_debug_assert(obj->type != None);
-					mirb_debug_assert(obj->alive);
-				}
-			#endif
+			mirb_debug_assert(obj->magic == Header::magic_value);
+			mirb_debug_assert(obj->type != None);
+		}
+
+		static inline void assert_alive(value_t obj)
+		{
+			assert_valid_base(obj);
+			mirb_debug_assert(obj->alive);
 		}
 
 		static inline void assert_valid(value_t obj)
 		{
-			assert_valid_skip_mark(obj);
-
-			#ifdef DEBUG
-				if(object_ref(obj))
-				{
-					mirb_debug_assert(obj->marked == false);
-					mirb_debug_assert(obj->data == nullptr);
-					mirb_debug_assert(obj->data2 == nullptr);
-				}
-			#endif
+			if(object_ref(obj))
+			{
+				assert_alive(obj);
+				mirb_debug_assert(obj->marked == false);
+				mirb_debug_assert((obj->*Header::mark_list) == nullptr);
+				mirb_debug_assert((obj->*Header::thread_list) == nullptr);
+			}
 		}
 
 		template<class T> bool of_type(value_t value)

@@ -15,7 +15,7 @@ namespace Mirb
 			value_t module;
 			value_t block;
 
-			Tuple *args;
+			Tuple<> *args;
 
 			const char *ip;
 		public:
@@ -31,7 +31,7 @@ namespace Mirb
 				mark(args);
 			}
 			
-			static CharArray get_backtrace(Tuple *backtrace);
+			static CharArray get_backtrace(Tuple<StackFrame> *backtrace);
 
 			CharArray inspect();
 	};
@@ -45,11 +45,11 @@ namespace Mirb
 			static value_t method_initialize(value_t obj, value_t message);
 
 		public:
-			Exception(Value::Type type, Module *instance_of, value_t message, Tuple *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(Module *instance_of, value_t message, Tuple *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Module *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
 			value_t message;
-			Tuple *backtrace;
+			Tuple<StackFrame> *backtrace;
 
 			template<typename F> void mark(F mark)
 			{

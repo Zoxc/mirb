@@ -50,7 +50,7 @@ namespace Mirb
 
 			Context();
 			
-			template<typename F> void mark_fields(F mark)
+			template<typename F> void mark(F mark)
 			{
 				auto start = &object_class;
 
@@ -61,11 +61,6 @@ namespace Mirb
 
 					start++;
 				}
-			}
-
-			template<typename F> void mark(F mark)
-			{
-				mark_fields(mark);
 			}
 	};
 

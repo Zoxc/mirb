@@ -154,7 +154,7 @@ namespace Mirb
 	/*
 	 * backtrace
 	 */
-	Tuple *backtrace();
+	Tuple<StackFrame> *backtrace();
 	
 	/*
 	 * enforce_string (calls Ruby code)

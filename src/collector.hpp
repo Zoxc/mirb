@@ -143,11 +143,11 @@ namespace Mirb
 			static void *allocate(size_t bytes);
 			static void *reallocate(void *memory, size_t old_size, size_t bytes);
 
-			static Tuple &allocate_tuple(size_t entries)
+			template<class T> static Tuple<T> &allocate_tuple(size_t entries)
 			{
-				size_t size = sizeof(Tuple) + entries * sizeof(value_t);
+				size_t size = sizeof(Tuple<T>) + entries * sizeof(T *);
 
-				auto tuple = new (allocate_simple(size)) Tuple(entries);
+				auto tuple = new (allocate_simple(size)) Tuple<T>(entries);
 				
 				#ifdef DEBUG		
 					tuple->size = size;

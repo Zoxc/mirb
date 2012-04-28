@@ -31,8 +31,9 @@ namespace Mirb
 			static VariableBlock &from_memory(const void *memory)
 			{
 				auto result = (VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
+				
+				Value::assert_alive(result);
 
-				Value::assert_valid_skip_mark(result);
 				mirb_debug_assert(result->get_type() == Value::InternalVariableBlock);
 
 				return *result;
@@ -49,19 +50,58 @@ namespace Mirb
 			{
 			}
 	};
+
+	class TupleBase
+	{
+		static Tuple<Value::Header> *allocate_value_tuple(size_t size);
+		static Tuple<Object> *allocate_tuple(size_t size);
+
+		template<class T> friend struct TupleUtil;
+	};
+
+	template<class T> struct TupleUtil
+	{
+		static const Value::Type type = Value::InternalTuple;
+
+		template<typename F> static void mark(F mark, T *&field)
+		{
+			if(field)
+				mark(field);
+		}
+
+		static Tuple<T> *allocate(size_t size)
+		{
+			return (Tuple<T> *)TupleBase::allocate_tuple(size);
+		}
+	}; 
+
+	template<> struct TupleUtil<Value::Header>
+	{
+		static const Value::Type type = Value::InternalValueTuple;
+
+		template<typename F> static void mark(F mark, Value::Header *&field)
+		{
+			mark(field);
+		}
+
+		static Tuple<> *allocate(size_t size)
+		{
+			return TupleBase::allocate_value_tuple(size);
+		}
+	};
 	
-	class Tuple:
+	template<class T> class Tuple:
 		public Value::Header
 	{
 		private:
 		public:
-			Tuple(size_t entries) : Value::Header(Value::InternalTuple), entries(entries) {}
+			Tuple(size_t entries) : Value::Header(TupleUtil<T>::type), entries(entries) {}
 
-			value_t &operator[](size_t index)
+			T *&operator[](size_t index)
 			{
 				mirb_debug_assert(index < entries);
 
-				return ((value_t *)((size_t)this + sizeof(Tuple)))[index];
+				return ((T **)((size_t)this + sizeof(Tuple)))[index];
 			}
 			
 			size_t entries;
@@ -69,7 +109,12 @@ namespace Mirb
 			template<typename F> void mark(F mark)
 			{
 				for(size_t i = 0; i < entries; ++i)
-					mark((*this)[i]);
+					TupleUtil<T>::mark(mark, (*this)[i]);
+			}
+
+			static Tuple *allocate(size_t size)
+			{
+				return TupleUtil<T>::allocate(size);
 			}
 	};
 	
@@ -77,7 +122,7 @@ namespace Mirb
 	
 	class AllocatorPrivate
 	{
-		static Tuple *allocate_tuple(size_t size);
+		template<typename T> static Tuple<T> *allocate_tuple(size_t size);
 
 		template<class A, class BaseAllocator> friend class Allocator;
 	};
@@ -93,15 +138,18 @@ namespace Mirb
 			{
 				return Base::default_reference;
 			}
-			
+
+			typedef typename std::iterator_traits<A>::value_type ArrayBase;
+			typedef Tuple<ArrayBase> TupleObj;
+
 			class Storage
 			{
 				private:
-					Storage(Tuple *array) : array(array) {}
+					Storage(TupleObj *array) : array(array) {}
 					
 					friend class Allocator;
 				public:
-					Tuple *array;
+					TupleObj *array;
 
 					static const bool null_references = true;
 					
@@ -137,7 +185,7 @@ namespace Mirb
 					{
 						mirb_debug_assert(array);
 						
-						return *(A *)(&(*array)[index]);
+						return (*array)[index];
 					}
 			};
 			
@@ -146,12 +194,12 @@ namespace Mirb
 				
 			Storage allocate(size_t size)
 			{
-				return Storage(AllocatorPrivate::allocate_tuple(size));
+				return Storage(TupleObj::allocate(size));
 			}
 			
 			Storage reallocate(const Storage &old, size_t old_size, size_t new_size)
 			{
-				Tuple &result = *AllocatorPrivate::allocate_tuple(new_size);
+				TupleObj &result = *TupleObj::allocate(new_size);
 
 				for(size_t i = 0; i < old_size; ++i)
 					result[i] = (*old.array)[i];

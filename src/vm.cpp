@@ -173,7 +173,7 @@ namespace Mirb
 		EndOp
 
 		Op(Lookup)
-			vars[op.var] = (value_t)(*frame.scopes)[op.index];
+			vars[op.var] = (*frame.scopes)[op.index];
 		EndOp
 
 		Op(Self)
@@ -185,7 +185,7 @@ namespace Mirb
 		EndOp
 
 		Op(CreateHeap)
-			Tuple &heap = Collector::allocate_tuple(op.vars);
+			Tuple<> &heap = *Tuple<>::allocate(op.vars);
 
 			for(size_t i = 0; i < op.vars; ++i)
 				heap[i] = value_nil;
@@ -194,13 +194,13 @@ namespace Mirb
 		EndOp
 
 		Op(GetHeapVar)
-			Tuple &heap = *static_cast<Tuple *>(vars[op.heap]);
+			Tuple<> &heap = *static_cast<Tuple<> *>(vars[op.heap]);
 
 			vars[op.var] = heap[op.index];
 		EndOp
 
 		Op(SetHeapVar)
-			Tuple &heap = *static_cast<Tuple *>(vars[op.heap]);
+			Tuple<> &heap = *static_cast<Tuple<> *>(vars[op.heap]);
 
 			heap[op.index] = vars[op.var];
 		EndOp

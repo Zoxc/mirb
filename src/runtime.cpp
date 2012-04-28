@@ -645,7 +645,7 @@ namespace Mirb
 		return yield(obj, value_nil, 0, 0);
 	}
 	
-	Tuple *backtrace()
+	Tuple<StackFrame> *backtrace()
 	{
 		size_t index = 0;
 
@@ -658,7 +658,7 @@ namespace Mirb
 			current = current->prev;
 		}
 
-		Tuple &result = Collector::allocate_tuple(index);
+		auto &result = *Tuple<StackFrame>::allocate(index);
 		
 		current = current_frame;
 		index = 0;

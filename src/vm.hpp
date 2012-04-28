@@ -20,7 +20,7 @@ namespace Mirb
 			value_t *vars;
 			const char *ip;
 			Frame *prev;
-			Tuple *scopes;
+			Tuple<> *scopes;
 
 			CharArray inspect();
 	};

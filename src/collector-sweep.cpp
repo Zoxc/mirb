@@ -23,14 +23,9 @@ namespace Mirb
 	void Collector::sweep()
 	{
 		auto unmark = [&](value_t obj) {
-			#ifdef DEBUG
-				mirb_debug_assert(obj->magic == Value::Header::magic_value);
-			#endif
-
-			mirb_debug_assert(obj->type != Value::None);
+			Value::assert_valid_base(obj);
+			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
 			
-			// Enable with compaction - assert_valid_skip_mark(obj->alive);
-
 			obj->alive = obj->marked;
 			obj->marked = false;
 		};
