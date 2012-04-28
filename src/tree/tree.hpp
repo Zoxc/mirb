@@ -275,7 +275,7 @@ namespace Mirb
 	};
 };
 
-void *operator new(size_t bytes, Mirb::Tree::Fragment *fragment) throw();
-void operator delete(void *, Mirb::Tree::Fragment *fragment) throw();
-void *operator new[](size_t bytes, Mirb::Tree::Fragment *fragment) throw();
-void operator delete[](void *, Mirb::Tree::Fragment *fragment) throw();
+void *operator new(size_t bytes, Mirb::Tree::Fragment fragment) throw();
+void operator delete(void *, Mirb::Tree::Fragment fragment) throw();
+void *operator new[](size_t bytes, Mirb::Tree::Fragment fragment) throw();
+void operator delete[](void *, Mirb::Tree::Fragment fragment) throw();
