@@ -4,11 +4,11 @@ namespace Mirb
 {
 	namespace Tree
 	{
-		Scope::Scope(Document *document, Fragment *fragment, Scope *parent, Type type) :
+		Scope::Scope(Document *document, Fragment fragment, Scope *parent, Type type) :
 			PinnedHeader(Value::InternalScope),
 			document(document),
 			final(0),
-			fragment(fragment),
+			fragment(fragment.base()),
 			type(type),
 			parent(parent),
 			break_id(no_break_id),
@@ -95,16 +95,13 @@ namespace Mirb
 			return 0;
 		}
 		
-		Fragment::Fragment(Fragment *parent, size_t chunk_size) : fragments(*this), chunk_size(chunk_size)
+		FragmentBase::FragmentBase(size_t chunk_size) : chunk_size(chunk_size)
 		{
-			if(prelude_likely(parent != 0))
-				parent->fragments.push(this);
-			
 			current = Chunk::create(chunk_size);
 			chunks.append(current);
 		}
 		
-		void *Fragment::reallocate(void *memory, size_t old_size, size_t new_size)
+		void *FragmentBase::reallocate(void *memory, size_t old_size, size_t new_size)
 		{
 			void *result = allocate(new_size);
 			
@@ -113,7 +110,7 @@ namespace Mirb
 			return result;
 		}
 		
-		void *Fragment::allocate(size_t bytes)
+		void *FragmentBase::allocate(size_t bytes)
 		{
 			void *result = current->allocate(bytes);
 			

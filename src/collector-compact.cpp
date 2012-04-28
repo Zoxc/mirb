@@ -34,11 +34,6 @@ namespace Mirb
 	{
 		thread_value(&value);
 	}
-	
-	template<> void template_thread<void>(void *&value)
-	{
-		thread_pointer(reinterpret_cast<value_t *>(&value));
-	}
 
 	struct ThreadFunc
 	{

@@ -16,7 +16,7 @@ namespace Mirb
 	class Collector
 	{
 		private:
-			prelude_align(mirb_object_align) struct Region
+			prelude_align(struct, Region, mirb_object_align)
 			{
 				ListEntry<Region> entry;
 				char_t *pos;

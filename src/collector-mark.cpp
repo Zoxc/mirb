@@ -33,7 +33,13 @@ namespace Mirb
 
 	template<void(*callback)()> struct MarkFunc
 	{
-		template<class A> void operator()(typename Allocator<A, AllocatorBase>::Storage storage)
+		void operator()(const ValueMapPairStorage &storage)
+		{
+			if(template_mark(storage.array))
+				callback();
+		}
+
+		void operator()(const ValueStorage &storage)
 		{
 			if(template_mark(storage.array))
 				callback();
@@ -72,11 +78,6 @@ namespace Mirb
 	template<> bool template_mark<Value::Header>(Value::Header *value)
 	{
 		return mark_value(value);
-	}
-	
-	template<> bool template_mark<void>(void *value)
-	{
-		return mark_pointer(&VariableBlock::from_memory(value));
 	}
 
 	bool mark_pointer(value_t obj)

@@ -160,7 +160,7 @@ namespace Mirb
 		lexeme.start = start;
 	}
 
-	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool)
+	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool)
 	{
 	}
 	

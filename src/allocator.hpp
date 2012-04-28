@@ -82,6 +82,7 @@ namespace Mirb
 		template<class A, class BaseAllocator> friend class Allocator;
 	};
 
+
 	template<class A, class BaseAllocator> class Allocator:
 			public BaseAllocator::ReferenceBase
 	{
@@ -96,15 +97,12 @@ namespace Mirb
 			class Storage
 			{
 				private:
-					Tuple *array;
-					
 					Storage(Tuple *array) : array(array) {}
 					
 					friend class Allocator;
-					friend struct ThreadFunc;
-					template<void(*callback)()> friend struct MarkFunc;
-				public:			
-				
+				public:
+					Tuple *array;
+
 					static const bool null_references = true;
 					
 					Storage()

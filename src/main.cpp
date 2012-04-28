@@ -6,7 +6,6 @@
 #include "classes/string.hpp"
 #include "block.hpp"
 #include "document.hpp"
-#include <Prelude/Region.hpp>
 
 #ifdef DEBUG
 	#include "tree/printer.hpp"
@@ -44,8 +43,8 @@ int main()
 		if(parser.lexeme() == Lexeme::END && parser.messages.empty())
 			break;
 		
-		Tree::Fragment fragment(0, Tree::Chunk::main_size);
-		Tree::Scope *scope = parser.parse_main(&fragment);
+		auto fragment = new Tree::Fragment::Base(Tree::Chunk::main_size);
+		Tree::Scope *scope = parser.parse_main(*fragment);
 		
 		if(!parser.messages.empty())
 		{

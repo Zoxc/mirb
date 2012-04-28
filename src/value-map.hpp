@@ -38,7 +38,7 @@ namespace Mirb
 
 			static Pair *allocate_pair();
 
-			static Pair *allocate_pair(Allocator<Pair, AllocatorBase>::Reference allocator)
+			template<typename Allocator> static Pair *allocate_pair(typename Allocator::Reference ref)
 			{
 				return allocate_pair();
 			}

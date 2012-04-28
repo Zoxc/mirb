@@ -12,7 +12,7 @@
 
 namespace Mirb
 {
-	Block *Compiler::compile(Tree::Scope *scope, MemoryPool &memory_pool)
+	Block *Compiler::compile(Tree::Scope *scope, MemoryPool memory_pool)
 	{
 		Value::assert_valid(scope);
 

@@ -4,7 +4,7 @@
 
 namespace Mirb
 {
-	Parser::Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document *document) : lexer(symbol_pool, memory_pool, *this), document(*document), memory_pool(memory_pool), fragment(0), scope(0)
+	Parser::Parser(SymbolPool &symbol_pool, MemoryPool memory_pool, Document *document) : lexer(symbol_pool, memory_pool, *this), document(*document), memory_pool(memory_pool), fragment(0), scope(0)
 	{
 	}
 	
@@ -42,7 +42,7 @@ namespace Mirb
 		{
 			const size_t block_size = Tree::Chunk::block_size; // TODO: Remove workaround for G++ bug?
 			
-			fragment = new Tree::Fragment(fragment, block_size);
+			fragment = *new Tree::FragmentBase(block_size);
 		}
 		
 		return scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
@@ -821,7 +821,7 @@ namespace Mirb
 		}
 	}
 
-	Tree::Scope *Parser::parse_main(Tree::Fragment *fragment)
+	Tree::Scope *Parser::parse_main(Tree::Fragment fragment)
 	{
 		this->fragment = fragment;
 		

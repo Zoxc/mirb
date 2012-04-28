@@ -13,7 +13,7 @@ namespace Mirb
 	class Parser
 	{
 		public:
-			Parser(SymbolPool &symbol_pool, MemoryPool &memory_pool, Document *document);
+			Parser(SymbolPool &symbol_pool, MemoryPool memory_pool, Document *document);
 			~Parser();
 			
 			Lexer lexer;
@@ -21,13 +21,13 @@ namespace Mirb
 			List<Message> messages;
 			Document &document;
 
-			MemoryPool &memory_pool;
+			MemoryPool memory_pool;
 			
 			void load();
 			
 			void report(Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
-			Tree::Fragment *fragment;
+			Tree::Fragment fragment;
 			Tree::Scope *scope;
 			
 			void unexpected(bool skip = true);
@@ -76,7 +76,7 @@ namespace Mirb
 			void parse_sep();
 			void parse_statements(Tree::NodeList &list);
 			
-			Tree::Scope *parse_main(Tree::Fragment *fragment);
+			Tree::Scope *parse_main(Tree::Fragment fragment);
 			
 			// control flow
 			Tree::Node *parse_if_tail();

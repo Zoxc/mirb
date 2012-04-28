@@ -91,9 +91,9 @@ namespace Mirb
 			
 			static void setup_jump_table();
 
-			Lexer(SymbolPool &symbol_pool, MemoryPool &memory_pool, Parser &parser);
+			Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser);
 			
-			MemoryPool &memory_pool;
+			MemoryPool memory_pool;
 			Keywords keywords;
 			
 			Lexeme lexeme;

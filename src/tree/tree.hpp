@@ -35,12 +35,12 @@ namespace Mirb
 				void *allocate(size_t bytes);
 		};
 		
-		class FragmentImplementation
+		class FragmentBase
 		{
 			public:
 				static const bool can_free = false;
 
-				FragmentImplementation(FragmentImplementation *parent, size_t chunk_size);
+				FragmentBase(size_t chunk_size);
 				
 				void *allocate(size_t bytes);
 				void *reallocate(void *memory, size_t old_size, size_t new_size);
@@ -56,7 +56,7 @@ namespace Mirb
 				FastList<Chunk> chunks;
 		};
 
-		typedef Prelude::Allocator::ReferenceTemplate<FragmentImplementation> Fragment;
+		typedef Prelude::Allocator::ReferenceTemplate<FragmentBase> Fragment;
 		
 		struct Node;
 		
@@ -160,11 +160,11 @@ namespace Mirb
 					Closure
 				};
 				
-				Scope(Document *document, FragmentImplementation *fragment, Scope *parent, Type type);
+				Scope(Document *document, Fragment fragment, Scope *parent, Type type);
 				
 				Document *document;
 				Block *final;
-				FragmentImplementation *fragment;
+				FragmentBase *fragment;
 				Type type;
 				Scope *parent; // The scope enclosing this one
 				Scope *owner; // The first parent that isn't a closure. This field can point to itself.
