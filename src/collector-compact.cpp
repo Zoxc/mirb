@@ -192,8 +192,14 @@ namespace Mirb
 		bool step(size_t size)
 		{
 			value_t next = (value_t)((size_t)pos + size);
-
-			mirb_debug_assert((size_t)next <= (size_t)region->pos);
+			
+			#ifdef DEBUG
+				if(!free)
+				{
+					mirb_debug_assert((size_t)next <= (size_t)region->pos);
+					mirb_debug_assert(size == size_of_value(pos));
+				}
+			#endif
 
 			if((size_t)next == (size_t)region->pos)
 				return step_region(size);
