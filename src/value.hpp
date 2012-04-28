@@ -349,7 +349,7 @@ namespace Mirb
 		inline void assert_valid_base(value_t obj) prelude_nonnull(1);
 		inline void assert_valid_base(value_t obj)
 		{
-			mirb_debug_assert(obj->magic == Header::magic_value);
+			mirb_debug(mirb_debug_assert(obj->magic == Header::magic_value));
 			mirb_debug_assert(obj->type != None);
 		}
 

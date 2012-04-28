@@ -769,9 +769,7 @@ namespace Mirb
 			Exception::initialize();
 			initialize_exceptions();
 
-			#ifdef DEBUG
-				Collector::collect();
-			#endif
+			mirb_debug(Collector::collect());
 		}).format() << "\n";
 	}
 

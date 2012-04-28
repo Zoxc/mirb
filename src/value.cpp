@@ -119,8 +119,8 @@ namespace Mirb
 			const Header::data_field Header::mark_list = &Header::mark_data;
 			const Header::data_field Header::thread_list = &Header::thread_data;
 		#else
-			const Header::data_field Header::mark_list = &data;
-			const Header::data_field Header::thread_list = &data;
+			const Header::data_field Header::mark_list = &Header::data;
+			const Header::data_field Header::thread_list = &Header::data;
 		#endif
 				
 		Header::Header(Type type) : type(type), marked(false), alive(true)

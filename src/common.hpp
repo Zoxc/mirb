@@ -40,7 +40,13 @@ namespace Mirb
 	using namespace Prelude;
 
 	typedef uint8_t char_t;
-	
+
+	#ifdef DEBUG
+		#define mirb_debug(expression)  expression
+	#else
+		#define mirb_debug(expression)
+	#endif
+
 	#define mirb_runtime_assert(expression) prelude_runtime_assert(expression)
 	#define mirb_runtime_abort(message) prelude_runtime_abort(message)
 

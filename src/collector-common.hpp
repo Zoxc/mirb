@@ -10,8 +10,10 @@ namespace Mirb
 		{
 			static inline char_t *const &data(const Mirb::CharArray &input)
 			{
-				if(input.data && !input.static_data)
-					mirb_debug_assert(&VariableBlock::from_memory(input.data) == input.ref);
+				#ifdef DEBUG
+					if(input.data && !input.static_data)
+						mirb_debug_assert(&VariableBlock::from_memory(input.data) == input.ref);
+				#endif
 
 				return input.data;
 			}

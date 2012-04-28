@@ -19,7 +19,7 @@ int main()
 	
 	while(1)
 	{
-		Collector::collect();
+		mirb_debug(Collector::collect());
 
 		std::string line;
 		

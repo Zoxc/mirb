@@ -21,7 +21,7 @@
 namespace Mirb
 {
 	bool Collector::pending = false;
-	size_t Collector::pages = 16;
+	size_t Collector::pages = 32;
 	Collector::Region *Collector::current;
 	FastList<Collector::Region> Collector::regions;
 	
@@ -91,7 +91,7 @@ namespace Mirb
 	{
 		size_t size = Value::virtual_do<SizeOf>(value->type, value);
 
-		mirb_debug_assert(size == value->size);
+		mirb_debug(mirb_debug_assert(size == value->size));
 
 		return size;
 	}
