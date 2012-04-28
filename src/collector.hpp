@@ -33,6 +33,9 @@ namespace Mirb
 			static void sweep();
 			static void compact();
 			static void mark();
+			
+			static void update_forward();
+			static void update_backward();
 
 			friend struct MarkRootFunc;
 			friend struct ThreadFunc;

@@ -1,6 +1,7 @@
 #pragma once
 #include "class.hpp"
 #include "../common.hpp"
+#include <Prelude/LinkedList.hpp>
 #include "../value.hpp"
 #include "../char-array.hpp"
 
@@ -21,6 +22,8 @@ namespace Mirb
 			CharArray string;
 
 			Symbol *next;
+
+			LinkedListEntry<Symbol> entry;
 
 			std::string get_string()
 			{

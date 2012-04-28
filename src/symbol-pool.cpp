@@ -4,6 +4,7 @@
 namespace Mirb
 {
 	SymbolPool symbol_pool;
+	LinkedList<Symbol> symbol_pool_list;
 
 	Symbol *SymbolPool::get(Range &range)
 	{

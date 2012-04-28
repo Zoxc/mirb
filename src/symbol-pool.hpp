@@ -6,6 +6,8 @@
 
 namespace Mirb
 {
+	extern LinkedList<Symbol> symbol_pool_list;
+
 	class SymbolPoolFunctions:
 		public HashTableFunctions<const CharArray &, Symbol *>
 	{
@@ -47,11 +49,17 @@ namespace Mirb
 
 			static Symbol *create_value(Prelude::Allocator::Standard::Reference allocator, const CharArray &key)
 			{
-				return new Symbol(key); // TODO: Allocate as root memory.
+				Symbol *result = new Symbol(key); // TODO: Allocate as root memory.
+
+				symbol_pool_list.append(result);
+
+				return result;
 			}
 			
 			static void free_value(Prelude::Allocator::Standard::Reference allocator, Symbol *value)
 			{
+				symbol_pool_list.remove(value);
+
 				delete value;
 			}
 			
@@ -104,7 +112,7 @@ namespace Mirb
 				return SymbolPoolHashTable::get(key);
 			}
 	};
-
+	
 	extern SymbolPool symbol_pool;
 
 	void fix_symbol_pool();

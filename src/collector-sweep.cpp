@@ -45,23 +45,10 @@ namespace Mirb
 			obj = next;
 		}
 		
-	#ifndef VALGRIND
-		for(auto i = regions.begin(); i != regions.end(); ++i)
+		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
 		{
-			value_t obj = i().data();
-
-			while((size_t)obj < (size_t)i().pos)
-			{
-				unmark(obj);
-
-				obj = (value_t)((size_t)obj + size_of_value(obj));
-			}
+			i().marked = false;
+			i().alive = true;
 		}
-	#endif
-
-		symbol_pool.each_value([&](Symbol *symbol) {
-			symbol->marked = false;
-			symbol->alive = true;
-		});
 	}
 };

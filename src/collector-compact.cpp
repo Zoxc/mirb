@@ -106,7 +106,7 @@ namespace Mirb
 		thread_data(node, temp);
 	}
 
-	void update(value_t node, value_t free)
+	template<bool second> void update(value_t node, value_t free)
 	{
 		if(node->type == Value::InternalVariableBlock)
 			free = (value_t)((size_t)free + sizeof(VariableBlock));
@@ -115,12 +115,17 @@ namespace Mirb
 
 		while(current)
 		{
+			mirb_debug_assert(((value_t)current != *current) && "Infinite loop detected!");
+
 			value_t *temp = (value_t *)*current;
 			*current = free;
 			current = temp;
 		}
 
 		(node->*Value::Header::thread_list) = nullptr;
+
+		if(second)
+			node->marked = false;
 	}
 	
 	void move(value_t p, value_t new_p)
@@ -162,24 +167,19 @@ namespace Mirb
 
 		void update()
 		{
-			region->pos = (char_t *)pos;
+			//region->pos = (char_t *)pos; TODO: Enable with compaction
 		}
 		
-		void verify()
-		{
-			mirb_debug_assert(region->pos == (char_t *)pos);
-		}
-
 		template<bool free, bool backward> bool step(size_t size)
 		{
-			size_t next = (size_t)pos + size;
+			value_t next = (value_t)((size_t)pos + size);
 
-			if(next >= (size_t)region->end)
+			mirb_debug_assert((size_t)next <= (size_t)region->pos);
+
+			if((size_t)next == (size_t)region->pos)
 			{
-				if(free)
+				if(free && backward)
 					update();
-				else if(free && backward)
-					verify();
 				
 				if(step_region())
 					return step<free, backward>(size);
@@ -195,7 +195,7 @@ namespace Mirb
 		}
 	};
 
-	void update_forward()
+	void Collector::update_forward()
 	{
 		locs.clear();
 
@@ -215,7 +215,7 @@ namespace Mirb
 
 			if(i->marked)
 			{
-				update(i, i);
+				update<false>(i, i);
 
 				Value::virtual_do<ThreadClass>(Value::type(i), i);
 
@@ -224,14 +224,20 @@ namespace Mirb
 		}
 		while(pos.step<false, false>(size));
 
-		free.update();
+		for(auto i = heap_list.begin(); i != heap_list.end(); ++i)
+		{
+			Value::assert_valid_base(*i);
+			mirb_debug_assert(((*i)->*Value::Header::mark_list) == nullptr);
 
-		symbol_pool.each_value([&](Symbol *symbol) {
-			update(symbol, symbol);
-		});
+			if(i().marked)
+				update<false>(*i, *i);
+		}
+
+		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
+			update<false>(*i, *i);
 	}
 	
-	void update_backward()
+	void Collector::update_backward()
 	{
 		RegionWalker free;
 		RegionWalker pos;
@@ -245,19 +251,43 @@ namespace Mirb
 
 			if(i->marked)
 			{
-				update(i, i);
+				update<true>(i, i);
 				move(i, i);
 
 				free.step<true, true>(size);
 			}
+#ifdef DEBUG
+			else
+			{
+				// mirb_debug_assert(i->alive == true); TODO: Enable with compaction
+				i->alive = false;
+			}
+#endif
 		}
 		while(pos.step<false, true>(size));
+		
+		free.update();
+		
+		for(auto obj = heap_list.first; obj;)
+		{
+			auto next = obj->entry.next;
+			
+			Value::assert_valid_base(obj);
+			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
 
-		free.verify();
+			if(obj->marked)
+				update<true>(obj, obj);
+			else
+			{
+				heap_list.remove(obj);
+				std::free((void *)obj);
+			}
 
-		symbol_pool.each_value([&](Symbol *symbol) {
-			update(symbol, symbol);
-		});
+			obj = next;
+		}
+		
+		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
+			update<true>(*i, *i);
 	}
 	
 	void Collector::compact()
