@@ -15,10 +15,6 @@ using namespace Mirb;
 
 int main()
 {
-	#ifndef NO_GC
-		GC_INIT();
-	#endif
-
 	Mirb::initialize();
 	
 	while(1)

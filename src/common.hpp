@@ -35,12 +35,6 @@
 #include <cstring>
 #include <cassert>
 
-#ifdef VALGRIND
-	#ifndef NO_GC
-		#define NO_GC
-	#endif
-#endif
-
 namespace Mirb
 {
 	using namespace Prelude;
