@@ -67,10 +67,10 @@ namespace Mirb
 		
 		OnStack<2> os(self, block);
 
-		for(auto i = self->vector.begin(); i != self->vector.end(); ++i)
-			yield(block, 1, &i());
+		for(size_t i = 0; i < self->vector.size(); ++i)
+			yield(block, 1, &self->vector[i]);
 
-		return auto_cast(self);
+		return self;
 	}
 
 	void Array::initialize()
