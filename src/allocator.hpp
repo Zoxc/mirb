@@ -46,7 +46,7 @@ namespace Mirb
 			
 			size_t bytes;
 
-			template<typename F> void mark(F mark)
+			template<typename F> void mark(F)
 			{
 			}
 	};
@@ -201,7 +201,7 @@ namespace Mirb
 					}
 			};
 			
-			Allocator(typename Base::Reference allocator = Base::default_reference) {}
+			Allocator(typename Base::Reference = Base::default_reference) {}
 			Allocator(const Allocator &array_allocator) {}
 				
 			void null(A &ref)
@@ -232,6 +232,6 @@ namespace Mirb
 				return Storage(&result);
 			}
 
-			void free(const Storage &array)	{}
+			void free(const Storage &) {}
 	};
 };

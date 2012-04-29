@@ -13,7 +13,7 @@ namespace Mirb
 
 	void FalseClass::initialize()
 	{
-		static_method(context->false_class, "to_s", &to_s);
+		method(context->false_class, "to_s", &to_s);
 
 		set_const(context->object_class, Symbol::from_literal("FALSE"), value_false);
 	};

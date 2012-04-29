@@ -49,7 +49,7 @@ namespace Mirb
 			return "<null_symbol>";
 	}
 	
-	std::string Printer::wrap(Tree::SimpleNode *node, std::string result)
+	std::string Printer::wrap(Tree::SimpleNode *, std::string result)
 	{
 		return result;
 	}

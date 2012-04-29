@@ -27,6 +27,9 @@ namespace Mirb
 
 			real = call(real, "inspect");
 
+			if(!real)
+				return 0;
+
 			String *real_string = cast<String>(real);
 
 			CharArray result = "#<Class:" + real_string->string + ">";
@@ -55,17 +58,21 @@ namespace Mirb
 	{
 		value_t result = call(obj, "allocate");
 
+		if(!result)
+			return 0;
+
 		OnStack<1> os(result);
 
-		call(result, "initialize", argc, argv);
+		if(!call(result, "initialize", argc, argv))
+			return 0;
 
 		return result;
 	}
 
 	void Class::initialize()
 	{
-		static_method<Arg::Self>(context->class_class, "to_s", &to_s);
-		static_method<Arg::Self>(context->class_class, "superclass", &method_superclass);
-		static_method<Arg::Self, Arg::Count, Arg::Values>(context->class_class, "new", &method_new);
+		method<Arg::Self>(context->class_class, "to_s", &to_s);
+		method<Arg::Self>(context->class_class, "superclass", &method_superclass);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->class_class, "new", &method_new);
 	}
 };

@@ -45,7 +45,7 @@ namespace Mirb
 				
 				void *allocate(size_t bytes);
 				void *reallocate(void *memory, size_t old_size, size_t new_size);
-				void free(void *memory)
+				void free(void *)
 				{
 				}
 				
@@ -133,7 +133,7 @@ namespace Mirb
 					return (size_t)key;
 				}
 				
-				static bool valid_key(Symbol *key)
+				static bool valid_key(Symbol *)
 				{
 					return true;
 				}
@@ -270,6 +270,4 @@ namespace Mirb
 };
 
 void *operator new(size_t bytes, Mirb::Tree::Fragment fragment) throw();
-void operator delete(void *, Mirb::Tree::Fragment fragment) throw();
 void *operator new[](size_t bytes, Mirb::Tree::Fragment fragment) throw();
-void operator delete[](void *, Mirb::Tree::Fragment fragment) throw();

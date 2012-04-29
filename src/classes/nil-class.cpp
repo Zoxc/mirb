@@ -18,8 +18,8 @@ namespace Mirb
 	
 	void NilClass::initialize()
 	{
-		static_method(context->nil_class, "to_s", &to_s);
-		static_method(context->nil_class, "inspect", &inspect);
+		method(context->nil_class, "to_s", &to_s);
+		method(context->nil_class, "inspect", &inspect);
 
 		set_const(context->object_class, Symbol::from_literal("NIL"), value_nil);
 	};

@@ -43,7 +43,7 @@ namespace Mirb
 				return input;
 			}
 
-			operator const char_t()
+			operator char_t()
 			{
 				return *input;
 			}

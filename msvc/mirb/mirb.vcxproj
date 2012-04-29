@@ -29,7 +29,6 @@
     <ClInclude Include="..\..\src\classes\true-class.hpp" />
     <ClInclude Include="..\..\src\codegen\block.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
-    <ClInclude Include="..\..\src\codegen\dot-printer.hpp" />
     <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
     <ClInclude Include="..\..\src\codegen\printer.hpp" />
     <ClInclude Include="..\..\src\allocator.hpp" />
@@ -52,6 +51,7 @@
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
+    <ClInclude Include="..\..\src\platform\platform.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
     <ClInclude Include="..\..\src\support.hpp" />
     <ClInclude Include="..\..\src\symbol-pool.hpp" />
@@ -82,7 +82,6 @@
     <ClCompile Include="..\..\src\classes\true-class.cpp" />
     <ClCompile Include="..\..\src\codegen\block.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
-    <ClCompile Include="..\..\src\codegen\dot-printer.cpp" />
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\collector-compact.cpp" />
     <ClCompile Include="..\..\src\collector-mark.cpp" />
@@ -108,6 +107,8 @@
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
     <ClCompile Include="..\..\src\parser\parser.cpp" />
     <ClCompile Include="..\..\src\parser\structures.cpp" />
+    <ClCompile Include="..\..\src\platform\posix.cpp" />
+    <ClCompile Include="..\..\src\platform\winapi.cpp" />
     <ClCompile Include="..\..\src\runtime.cpp" />
     <ClCompile Include="..\..\src\support.cpp" />
     <ClCompile Include="..\..\src\symbol-pool.cpp" />
@@ -163,6 +164,7 @@
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

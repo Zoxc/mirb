@@ -13,7 +13,7 @@ namespace Mirb
 
 	void TrueClass::initialize()
 	{
-		static_method(context->true_class, "to_s", &to_s);
+		method(context->true_class, "to_s", &to_s);
 
 		set_const(context->object_class, Symbol::from_literal("TRUE"), value_true);
 	};

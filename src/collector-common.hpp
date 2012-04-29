@@ -91,7 +91,7 @@ namespace Mirb
 		typedef size_t Result;
 		typedef typename Value::TypeClass<type>::Class Class;
 
-		static size_t func(value_t obj)
+		static size_t func(value_t)
 		{
 			return sizeof(Class);
 		}

@@ -276,6 +276,7 @@ namespace Mirb
 
 		Op(Return)
 			value_t result = vars[op.var];
+			validate_return(result);
 			finalize();
 			return result;
 		EndOp

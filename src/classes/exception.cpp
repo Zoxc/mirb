@@ -33,8 +33,6 @@ namespace Mirb
 
 		OnStackString<1> os2(result);
 
-		result += inspect_obj(self->obj) + ".";
-
 		value_t module = auto_cast(self->module);
 
 		if(Value::type(module) == Value::IClass)
@@ -129,9 +127,9 @@ namespace Mirb
 
 		singleton_method<Arg::Self>(context->exception_class, "allocate", &allocate);
 
-		static_method<Arg::Self, Arg::Value>(context->exception_class, "initialize", &method_initialize);
-		static_method<Arg::Self>(context->exception_class, "message", &to_s);
-		static_method<Arg::Self>(context->exception_class, "to_s", &to_s);
+		method<Arg::Self, Arg::Value>(context->exception_class, "initialize", &method_initialize);
+		method<Arg::Self>(context->exception_class, "message", &to_s);
+		method<Arg::Self>(context->exception_class, "to_s", &to_s);
 	}
 };
 

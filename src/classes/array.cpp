@@ -43,6 +43,9 @@ namespace Mirb
 		{
 			String *desc = cast<String>(call(self->vector[i], "inspect"));
 
+			if(!desc)
+				return 0;
+
 			result += desc->string;
 
 			if(i != self->vector.size() - 1)
@@ -68,7 +71,10 @@ namespace Mirb
 		OnStack<2> os(self, block);
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
-			yield(block, 1, &self->vector[i]);
+		{
+			if(!yield(block, 1, &self->vector[i]))
+				return 0;
+		}
 
 		return self;
 	}
@@ -79,12 +85,12 @@ namespace Mirb
 		
 		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		
-		static_method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
-		static_method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
-		static_method<Arg::Self>(context->array_class, "pop", &pop);
-		static_method<Arg::Self>(context->array_class, "length", &length);
-		static_method<Arg::Self>(context->array_class, "inspect", &inspect);
-		static_method<Arg::Self, Arg::Block>(context->array_class, "each", &each);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
+		method<Arg::Self>(context->array_class, "pop", &pop);
+		method<Arg::Self>(context->array_class, "length", &length);
+		method<Arg::Self>(context->array_class, "inspect", &inspect);
+		method<Arg::Self, Arg::Block>(context->array_class, "each", &each);
 	}
 };
 

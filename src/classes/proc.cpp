@@ -27,7 +27,7 @@ namespace Mirb
 	{
 		context->proc_class = define_class(context->object_class, "Proc", context->object_class);
 
-		static_method<Arg::Self, Arg::Block, Arg::Count, Arg::Values>(context->proc_class, "call", &call);
+		method<Arg::Self, Arg::Block, Arg::Count, Arg::Values>(context->proc_class, "call", &call);
 	}
 };
 

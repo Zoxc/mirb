@@ -232,8 +232,6 @@ namespace Mirb
 		{
 			update();
 
-			Collector::Region *prev = region;
-
 			region = region->entry.next;
 
 			if(region)

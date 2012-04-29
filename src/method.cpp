@@ -16,22 +16,22 @@ namespace Mirb
 	
 	namespace Arg
 	{
-		Self::type Self::apply(Frame &frame, State &state)
+		Self::type Self::apply(Frame &frame, State &)
 		{
 			return frame.obj;
 		}
 		
-		Block::type Block::apply(Frame &frame, State &state)
+		Block::type Block::apply(Frame &frame, State &)
 		{
 			return frame.block;
 		}
 
-		Count::type Count::apply(Frame &frame, State &state)
+		Count::type Count::apply(Frame &frame, State &)
 		{
 			return frame.argc;
 		}
 
-		Values::type Values::apply(Frame &frame, State &state)
+		Values::type Values::apply(Frame &frame, State &)
 		{
 			return frame.argv;
 		}

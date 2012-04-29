@@ -72,16 +72,16 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
-		static_method(context->object_class, "initialize", &dummy);
-		inspect_block = static_method<Arg::Self>(context->object_class, "inspect", &inspect);
-		static_method<Arg::Self>(context->object_class, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
-		static_method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);
-		static_method<Arg::Self, Arg::Value>(context->object_class, "eql?", &equal);
-		static_method<Arg::Self, Arg::Value>(context->object_class, "==", &equal);
-		static_method<Arg::Self, Arg::Value>(context->object_class, "===", &equal);
-		static_method<Arg::Self, Arg::Value>(context->object_class, "!=", &not_equal);
-		static_method<Arg::Self>(context->object_class, "!", &method_not);
+		method(context->object_class, "initialize", &dummy);
+		inspect_block = method<Arg::Self>(context->object_class, "inspect", &inspect);
+		method<Arg::Self>(context->object_class, "to_s", &to_s);
+		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
+		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);
+		method<Arg::Self, Arg::Value>(context->object_class, "eql?", &equal);
+		method<Arg::Self, Arg::Value>(context->object_class, "==", &equal);
+		method<Arg::Self, Arg::Value>(context->object_class, "===", &equal);
+		method<Arg::Self, Arg::Value>(context->object_class, "!=", &not_equal);
+		method<Arg::Self>(context->object_class, "!", &method_not);
 
 		singleton_method<Arg::Self>(context->object_class, "allocate", &allocate);
 	}

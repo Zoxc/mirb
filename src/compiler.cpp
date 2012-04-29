@@ -7,7 +7,6 @@
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "codegen/printer.hpp"
-	#include "codegen/dot-printer.hpp"
 #endif
 
 namespace Mirb
@@ -26,21 +25,6 @@ namespace Mirb
 			std::cout << printer.print() << std::endl;
 		#endif
 		
-		#ifdef MIRB_GRAPH_BYTECODE
-			CodeGen::DotPrinter dot_printer;
-			
-			std::system("mkdir bytecode");
-				
-			dot_printer.print_block(block, "bytecode/bytecode.dot");
-
-			std::stringstream path;
-				
-			path << "bytecode/block-" << block->final;
-				
-			std::system(("mkdir \"" + path.str() + "\"").c_str());
-			std::system(("dot -Tpng bytecode/bytecode.dot -o " + path.str() + ".png").c_str());
-		#endif
-
 		block->finalize();
 
 		return block->final;

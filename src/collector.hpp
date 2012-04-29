@@ -49,6 +49,8 @@ namespace Mirb
 			
 			friend struct RegionWalker;
 			template<bool backward> friend struct RegionAllocator;
+
+			template<typename F> friend void each_root(F mark);
 			
 			static Region *current;
 			static size_t pages;
@@ -137,19 +139,26 @@ namespace Mirb
 			static size_t region_count;
 			static unsigned long long memory;
 
-			static void collect();
+			/*
+				signal is callable from other threads
+			*/
+			static void signal();
+
+			static bool collect();
 			static void initialize();
 			static void free();
 
-			static void check()
+			static bool check()
 			{
 				mirb_debug(collect());
 
 				if(prelude_unlikely(pending))
 				{
 					pending = false;
-					collect();
+					return collect();
 				}
+				else
+					return false;
 			}
 			
 			static void *allocate(size_t bytes);

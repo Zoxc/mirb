@@ -37,7 +37,7 @@ namespace Mirb
 				return key.hash();
 			}
 			
-			static bool valid_key(const CharArray &key)
+			static bool valid_key(const CharArray &)
 			{
 				return true;
 			}
@@ -47,7 +47,7 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(Prelude::Allocator::Standard::Reference allocator, const CharArray &key)
+			static Symbol *create_value(Prelude::Allocator::Standard::Reference, const CharArray &key)
 			{
 				Symbol *result = new Symbol(key); // TODO: Allocate as root memory.
 
@@ -56,7 +56,7 @@ namespace Mirb
 				return result;
 			}
 			
-			static void free_value(Prelude::Allocator::Standard::Reference allocator, Symbol *value)
+			static void free_value(Prelude::Allocator::Standard::Reference, Symbol *value)
 			{
 				symbol_pool_list.remove(value);
 

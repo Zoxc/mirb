@@ -1,4 +1,5 @@
 #include "platform.hpp"
+#include "../collector.hpp"
 
 #ifdef WIN32
 
@@ -15,13 +16,28 @@ namespace Mirb
 			return result;
 		}
 	
-		void free_region(void *region, size_t bytes)
+		void free_region(void *region, size_t)
 		{
 			VirtualFree(region, 0, MEM_RELEASE);
 		}
-
+		
+		BOOL __stdcall ctrl_handler(DWORD ctrl_type) 
+		{ 
+			switch(ctrl_type) 
+			{ 
+				case CTRL_C_EVENT: 
+					Collector::signal();
+					return TRUE; 
+ 
+				default: 
+					return FALSE; 
+			} 
+		} 
+ 
 		void initialize()
 		{
+			if(!SetConsoleCtrlHandler(ctrl_handler, TRUE)) 
+				std::cerr << "Unable to register console handler" << std::endl; 
 		}
 	};
 };

@@ -18,6 +18,7 @@
 #include "on-stack.hpp"
 #include "collector-common.hpp"
 #include "platform/platform.hpp"
+#include <atomic>
 
 namespace Mirb
 {
@@ -28,12 +29,23 @@ namespace Mirb
 	size_t Collector::pages = 32;
 	Collector::Region *Collector::current;
 	FastList<Collector::Region> Collector::regions;
+
+	std::atomic_bool pending_exception;
 	
 	#ifdef VALGRIND
 		LinkedList<Value::Header> Collector::heap_list;
 	#else
 		LinkedList<PinnedHeader, PinnedHeader, &PinnedHeader::entry> Collector::heap_list;
 	#endif
+		
+	void Collector::signal()
+	{
+		pending_exception.store(true);
+
+		prelude_memory_barrier();
+
+		pending = true;
+	}
 
 	void *Collector::allocate(size_t bytes)
 	{
@@ -115,7 +127,7 @@ namespace Mirb
 		typedef void Result;
 		typedef Aligned<typename Value::TypeClass<type>::Class> Run;
 
-		static void func(bool dummy) {}
+		static void func(bool) {}
 	};
 	
 	void Collector::test_sizes()
@@ -125,8 +137,17 @@ namespace Mirb
 		Value::virtual_do<TestSize, bool>(Value::None, true);
 	}
 
-	void Collector::collect()
+	bool Collector::collect()
 	{
+		bool expected = true;
+
+		if(pending_exception.compare_exchange_strong(expected, false) && expected)
+		{
+			raise(context->interrupt_class, "Aborted");
+
+			return true;
+		}
+
 		mark();
 
 		#ifdef VALGRIND
@@ -152,6 +173,8 @@ namespace Mirb
 		#endif
 
 		collections++;
+
+		return false;
 	}
 
 	Collector::Region *Collector::allocate_region(size_t bytes)

@@ -51,7 +51,8 @@ namespace Mirb
 		OnStack<2> os(obj, block);
 
 		while(times--)
-			yield(block);
+			if(!yield(block))
+				return 0;
 
 		return obj;
 	}
@@ -78,13 +79,13 @@ namespace Mirb
 
 	void Fixnum::initialize()
 	{
-		static_method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
+		method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
+		method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
 
-		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "+", &add);
-		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "-", &sub);
-		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "*", &mul);
-		static_method<Arg::Self, Arg::Value>(context->fixnum_class, "/", &div);
+		method<Arg::Self, Arg::Value>(context->fixnum_class, "+", &add);
+		method<Arg::Self, Arg::Value>(context->fixnum_class, "-", &sub);
+		method<Arg::Self, Arg::Value>(context->fixnum_class, "*", &mul);
+		method<Arg::Self, Arg::Value>(context->fixnum_class, "/", &div);
 	}
 };
 

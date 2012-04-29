@@ -78,7 +78,7 @@ namespace Mirb
 					(this->*jump_table[node->type()])(node, var);
 				}
 				
-				var_t reuse(var_t var)
+				var_t reuse(var_t)
 				{
 					// TODO: Make sure no code stores results in the returned variable
 					return create_var();

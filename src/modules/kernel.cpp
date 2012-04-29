@@ -24,11 +24,14 @@ namespace Mirb
 		
 		OnStackString<1> os(result);
 
+		bool exception = false;
+
 		result = Mirb::benchmark([&] {
-			yield(block);
+			if(!yield(block))
+				exception = true;
 		}).format();
 
-		return result.to_string();
+		return exception ? 0 : result.to_string();
 	}
 	
 	value_t Kernel::eval(value_t obj, value_t code)
@@ -126,7 +129,7 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t Kernel::load(value_t obj, value_t filename)
+	value_t Kernel::load(value_t filename)
 	{
 		return run_file(context->main, cast<String>(filename)->string);
 	}
@@ -139,6 +142,9 @@ namespace Mirb
 
 			if(Value::type(arg) != Value::String)
 				arg = call(arg, "to_s");
+
+			if(!arg)
+				return 0;
 			
 			if(Value::type(arg) == Value::String)
 				std::cout << cast<String>(arg)->string.get_string();
@@ -155,6 +161,9 @@ namespace Mirb
 
 			if(Value::type(arg) != Value::String)
 				arg = call(arg, "to_s");
+			
+			if(!arg)
+				return 0;
 			
 			if(Value::type(arg) == Value::String)
 				std::cout << cast<String>(arg)->string.get_string();
@@ -204,15 +213,15 @@ namespace Mirb
 
 		include_module(auto_cast(context->object_class), auto_cast(context->kernel_module));
 		
-		static_method<Arg::Block>(context->kernel_module, "proc", &proc);
-		static_method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
-		static_method(context->kernel_module, "backtrace", &backtrace);
-		static_method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
-		static_method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
-		static_method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
-		static_method<Arg::Self, Arg::Value>(context->kernel_module, "load", &load);
-		static_method<Arg::Self, Arg::Value>(context->kernel_module, "require", &load);
-		static_method<Arg::Self, Arg::Value>(context->kernel_module, "require_relative", &load);
-		static_method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
+		method<Arg::Block>(context->kernel_module, "proc", &proc);
+		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
+		method(context->kernel_module, "backtrace", &backtrace);
+		method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
+		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
+		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
+		method<Arg::Value>(context->kernel_module, "load", &load);
+		method<Arg::Value>(context->kernel_module, "require", &load);
+		method<Arg::Value>(context->kernel_module, "require_relative", &load);
+		method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
 	}
 };

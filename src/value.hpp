@@ -154,7 +154,7 @@ namespace Mirb
 		template<Type type> struct Immediate:
 			public Value::Header
 		{
-			template<typename F> void mark(F mark) {}
+			template<typename F> void mark(F) {}
 		};
 	
 		bool object_ref(value_t value);
@@ -340,7 +340,7 @@ namespace Mirb
 			{
 				typedef bool Result;
 
-				static bool func(bool dummy)
+				static bool func(bool)
 				{
 					return DerivedFrom<Base, typename TypeClass<type>::Class>::value;
 				}

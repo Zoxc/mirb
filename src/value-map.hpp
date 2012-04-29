@@ -38,12 +38,12 @@ namespace Mirb
 
 			static Pair *allocate_pair();
 
-			template<typename Allocator> static Pair *allocate_pair(typename Allocator::Reference ref)
+			template<typename Allocator> static Pair *allocate_pair(typename Allocator::Reference)
 			{
 				return allocate_pair();
 			}
 
-			template<typename Allocator> static void free_pair(typename Allocator::Reference ref, Pair *pair)
+			template<typename Allocator> static void free_pair(typename Allocator::Reference, Pair *)
 			{
 			}
 	};

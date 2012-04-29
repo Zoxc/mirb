@@ -19,6 +19,7 @@
 #include "classes/exceptions.hpp"
 #include "modules/kernel.hpp"
 #include "generic/benchmark.hpp"
+#include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
 
@@ -173,6 +174,8 @@ namespace Mirb
 					OnStack<4> os(obj, c, module, including);
 
 					std::cout << "Including module " << inspect_object(including) << " in " << inspect_object(obj) << "\n";
+
+					swallow_exception();
 				}
 			#endif
 
@@ -275,6 +278,9 @@ namespace Mirb
 
 		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
+
+		if(!result)
+			return 0;
 
 		if(prelude_likely(Value::type(result) == Value::String))
 			return result;
@@ -489,7 +495,7 @@ namespace Mirb
 	
 		Block *block = Compiler::compile(scope, memory_pool);
 
-		return call_code(block, self, auto_cast(method_name), method_module, value_nil, 0, 0);
+		return call_code(block, self, method_name, method_module, value_nil, 0, 0);
 	}
 	
 	Block *lookup_method(value_t module, Symbol *name, value_t *result_module)
@@ -557,6 +563,36 @@ namespace Mirb
 		return result;
 	}
 
+	bool validate_return(value_t &result)
+	{
+		OnStack<1> os(result);
+
+		if(result != value_raise)
+			Value::assert_valid(result);
+
+		if(current_exception && result != value_raise)
+		{
+			Frame *current = current_frame->prev;
+
+			while(true)
+			{
+				if(current == current_exception_frame_origin)
+					return true;
+
+				if(!current)
+					break;
+
+				current = current->prev;
+			}
+
+			std::cerr << "Function raised exception but didn't indicate it:\n" << StackFrame::get_backtrace(backtrace()).get_string() << std::endl;
+
+			result = value_raise;
+		}
+
+		return false;
+	}
+
 	value_t call_frame(Frame &frame)
 	{
 		if(frame.code->scope)
@@ -566,36 +602,23 @@ namespace Mirb
 		current_frame = &frame;
 
 		frame.vars = nullptr;
-		Collector::check();
+
+		if(prelude_unlikely(Collector::check()))
+		{
+			current_frame = frame.prev;
+
+			#ifdef DEBUG
+				current_exception_frame_origin = current_frame;
+			#endif
+
+			return value_raise;
+		}
 
 		value_t result = frame.code->executor(frame);
 		
 		#ifdef DEBUG
-			OnStack<1> os(result);
-
-			if(result != value_raise)
-				Value::assert_valid(result);
-
-			if(current_exception && result != value_raise)
-			{
-				Frame *current = frame.prev;
-
-				while(true)
-				{
-					if(current == current_exception_frame_origin)
-						goto exit;
-
-					if(!current)
-						break;
-
-					current = current->prev;
-				}
-
-				std::cerr << "Function raised exception but didn't indicate it:\n" << StackFrame::get_backtrace(backtrace()).get_string() << std::endl;
-			}
-			else
+			if(!validate_return(result))
 				current_exception_frame_origin = frame.prev;
-			exit:
 		#endif
 
 		current_frame = frame.prev;
@@ -703,6 +726,11 @@ namespace Mirb
 
 		return &result;
 	}
+
+	void swallow_exception()
+	{
+		set_current_exception(nullptr);
+	}
 	
 	String *enforce_string(value_t obj)
 	{
@@ -710,6 +738,9 @@ namespace Mirb
 			return auto_cast(obj);
 		
 		obj = call(obj, "to_s");
+
+		if(!obj)
+			swallow_exception();
 
 		if(prelude_unlikely(Value::type(obj) != Value::String))
 			return auto_cast(inspect(obj));
@@ -777,6 +808,8 @@ namespace Mirb
 				
 			Value::initialize_type_table();
 		
+			Platform::initialize();
+
 			Collector::initialize();
 			Lexer::setup_jump_table();
 

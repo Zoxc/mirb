@@ -33,15 +33,11 @@ namespace Mirb
 			
 			void *allocate(size_t bytes);
 			void *reallocate(void *memory, size_t old_size, size_t new_size);
-			void free(void *memory)
-			{
-			}
+			void free(void *) {}
 	};
 	
 	typedef Prelude::Allocator::ReferenceTemplate<MemoryPoolImplementation> MemoryPool;
 };
 
 void *operator new(size_t bytes, Mirb::MemoryPool &memory_pool) throw();
-void operator delete(void *, Mirb::MemoryPool &memory_pool) throw();
 void *operator new[](size_t bytes, Mirb::MemoryPool &memory_pool) throw();
-void operator delete[](void *, Mirb::MemoryPool &memory_pool) throw();

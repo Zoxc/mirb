@@ -27,8 +27,13 @@ namespace Mirb
 			Class *true_class;
 			Class *false_class;
 			Class *module_class;
-			Class *exception_class;
 			Class *method_class;
+
+			Class *exception_class;
+
+			Class *signal_exception;
+			Class *interrupt_class;
+
 			Class *standard_error;
 			Class *name_error;
 			Class *type_error;

@@ -40,11 +40,11 @@ namespace Mirb
 
 	void String::initialize()
 	{
-		static_method<Arg::Self>(context->string_class, "inspect", &inspect);
-		static_method<Arg::Self>(context->string_class, "to_s", &to_s);
-		static_method<Arg::Self, Arg::Value>(context->string_class, "concat", &concat);
-		static_method<Arg::Self, Arg::Value>(context->string_class, "<<", &concat);
-		static_method<Arg::Self, Arg::Value>(context->string_class, "+", &concat);
+		method<Arg::Self>(context->string_class, "inspect", &inspect);
+		method<Arg::Self>(context->string_class, "to_s", &to_s);
+		method<Arg::Self, Arg::Value>(context->string_class, "concat", &concat);
+		method<Arg::Self, Arg::Value>(context->string_class, "<<", &concat);
+		method<Arg::Self, Arg::Value>(context->string_class, "+", &concat);
 	}
 };
 

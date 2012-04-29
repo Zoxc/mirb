@@ -377,25 +377,25 @@ namespace Mirb
 			}
 		}
 		
-		void ByteCodeGenerator::convert_self(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_self(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
 				gen<MoveOp>(var, self_var());
 		}
 		
-		void ByteCodeGenerator::convert_nil(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_nil(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
 				gen<LoadNilOp>(var);
 		}
 		
-		void ByteCodeGenerator::convert_true(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_true(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
 				gen<LoadTrueOp>(var);
 		}
 		
-		void ByteCodeGenerator::convert_false(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_false(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
 				gen<LoadFalseOp>(var);
@@ -599,7 +599,7 @@ namespace Mirb
 			branch(block->epilog);
 		}
 		
-		void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_redo(Tree::Node *, var_t)
 		{
 			branch(body);
 		}

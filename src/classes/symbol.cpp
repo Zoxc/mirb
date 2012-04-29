@@ -38,8 +38,8 @@ namespace Mirb
 
 	void Symbol::initialize()
 	{
-		static_method<Arg::Self>(context->symbol_class, "to_s", &to_s);
-		static_method<Arg::Self>(context->symbol_class, "inspect", &inspect);
+		method<Arg::Self>(context->symbol_class, "to_s", &to_s);
+		method<Arg::Self>(context->symbol_class, "inspect", &inspect);
 	}
 };
 

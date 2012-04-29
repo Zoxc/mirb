@@ -74,27 +74,31 @@ namespace Mirb
 	void finalize();
 	
 	/*
-	 * raise (calls Ruby code)
+	 * raise
 	 */
 	bool type_error(value_t value, value_t expected);
 	value_t raise(Class *exception_class, const CharArray &message);
 
 	value_t raise(value_t exception);
+
+	void swallow_exception();
+
+	bool validate_return(value_t &result);
 	
 	/*
 	 * eval (calls Ruby code)
 	 */
-	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input = false);
+	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input = false) prelude_use_result;
 	
 	Block *lookup_method(value_t module, Symbol *name, value_t *result_module);
 
 	/*
-	 * lookup (calls Ruby code)
+	 * lookup
 	 */
 	Block *lookup(value_t obj, Symbol *name, value_t *result_module);
 
 	/*
-	 * lookup_super (calls Ruby code)
+	 * lookup_super
 	 */
 	Block *lookup_super(value_t module, Symbol *name, value_t *result_module);
 
@@ -104,17 +108,18 @@ namespace Mirb
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]);
-	value_t call_frame(Frame &frame);
+	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call_frame(Frame &frame) prelude_use_result;
 	
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
+	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 	
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
+	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[]) prelude_use_result;
 	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[])
 	{
 		return call(obj, symbol_cast(name), block, argc, argv);
@@ -123,6 +128,7 @@ namespace Mirb
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
+	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[]) prelude_use_result;
 	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[])
 	{
 		return call(obj, symbol_cast(name), value_nil, argc, argv);
@@ -131,6 +137,7 @@ namespace Mirb
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
+	template<typename T> value_t call(value_t obj, T&& name) prelude_use_result;
 	template<typename T> value_t call(value_t obj, T&& name)
 	{
 		return call(obj, symbol_cast(name), value_nil, 0, 0);
@@ -139,17 +146,17 @@ namespace Mirb
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]);
+	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj, size_t argc, value_t argv[]);
+	value_t yield(value_t obj, size_t argc, value_t argv[]) prelude_use_result;
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj);
+	value_t yield(value_t obj) prelude_use_result;
 	
 	/*
 	 * backtrace
