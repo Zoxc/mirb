@@ -416,6 +416,8 @@ namespace Mirb
 
 	void set_method(value_t obj, Symbol *name, Block *method)
 	{
+		Value::assert_valid(method);
+
 		return cast<Module>(obj)->get_methods()->map.set(name, auto_cast_null(method));
 	}
 
@@ -753,7 +755,7 @@ namespace Mirb
 		class_name(context->symbol_class, context->object_class, Symbol::from_literal("Symbol"));
 		class_name(context->string_class, context->object_class, Symbol::from_literal("String"));
 		
-		// Setup variables required by Value::initialize()
+		// Setup variables required by Value::initialize_class_table()
 		
 		context->nil_class = define_class(context->object_class, "NilClass", context->object_class);
 		context->false_class = define_class(context->object_class, "FalseClass", context->object_class);
@@ -762,7 +764,7 @@ namespace Mirb
 
 		Value::initialize_class_table();
 		
-		context->main = auto_cast(Object::allocate(context->object_class));
+		context->main = Collector::allocate<Object>(context->object_class);
 
 		singleton_method(context->main, "to_s", &main_to_s);
 		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);

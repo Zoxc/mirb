@@ -83,11 +83,11 @@ namespace Mirb
 	bool mark_pointer(value_t obj)
 	{
 		Value::assert_alive(obj);
-		mirb_debug_assert((obj->*Value::Header::thread_list) == nullptr);
+		mirb_debug_assert((obj->*Value::Header::thread_list) == Value::Header::list_end);
 
 		if(!obj->marked)
 		{
-			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
+			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
 
 			obj->marked = true;
 			
@@ -118,11 +118,11 @@ namespace Mirb
 			mark_parent = nullptr;
 		#endif
 
-		while(mark_list)
+		while(mark_list != (value_t)Value::Header::list_end)
 		{
 			value_t current = mark_list;
 			mark_list = (value_t)(mark_list->*Value::Header::mark_list);
-			(current->*Value::Header::mark_list) = nullptr;
+			(current->*Value::Header::mark_list) = Value::Header::list_end;
 
 			#ifdef DEBUG
 				mark_parent = current;

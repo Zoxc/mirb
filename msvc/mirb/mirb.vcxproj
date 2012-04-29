@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\src\codegen\printer.cpp" />
     <ClCompile Include="..\..\src\collector-compact.cpp" />
     <ClCompile Include="..\..\src\collector-mark.cpp" />
+    <ClCompile Include="..\..\src\collector-naive-mark.cpp" />
     <ClCompile Include="..\..\src\collector-sweep.cpp" />
     <ClCompile Include="..\..\src\collector.cpp" />
     <ClCompile Include="..\..\src\compiler.cpp" />

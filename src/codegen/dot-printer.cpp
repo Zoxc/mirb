@@ -36,7 +36,7 @@ namespace Mirb
 
 			result << "<tr><td bgcolor='gray22' port='header'><font color='gray81'>block ";
 			
-			#ifdef DEBUG
+			#ifdef MIRB_COMPILER_DEBUG
 				result << block->id;
 			#else
 				result << block;

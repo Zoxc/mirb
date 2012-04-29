@@ -79,17 +79,10 @@ namespace Mirb
 				
 				Variable(Type type)
 					: type(type)
-					#ifdef DEBUG
-						, group(0)
-					#endif
 				{
 				}
 
 				size_t loc;
-
-				#ifdef DEBUG
-					Variable *group;
-				#endif
 		};
 
 		class NamedVariable:

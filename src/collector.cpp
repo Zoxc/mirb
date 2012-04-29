@@ -148,9 +148,6 @@ namespace Mirb
 				frame = frame->prev;
 			}
 		}
-		
-		mark();
-		compact();
 		#endif
 
 		collections++;

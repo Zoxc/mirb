@@ -58,7 +58,7 @@ namespace Mirb
 
 			result << "#";
 			
-			#ifdef DEBUG
+			#ifdef MIRB_DEBUG_COMPILER
 				result << label->id;
 			#else
 				result << label;

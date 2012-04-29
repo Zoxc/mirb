@@ -124,6 +124,7 @@ namespace Mirb
 				Type get_type();
 				
 				static const size_t magic_value;
+				static value_t * const list_end;
 				
 				const Type type;
 				bool marked;
@@ -367,8 +368,8 @@ namespace Mirb
 			{
 				assert_alive(obj);
 				mirb_debug_assert(obj->marked == false);
-				mirb_debug_assert((obj->*Header::mark_list) == nullptr);
-				mirb_debug_assert((obj->*Header::thread_list) == nullptr);
+				mirb_debug_assert((obj->*Header::mark_list) == Value::Header::list_end);
+				mirb_debug_assert((obj->*Header::thread_list) == Value::Header::list_end);
 			}
 		}
 

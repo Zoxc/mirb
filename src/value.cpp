@@ -114,15 +114,17 @@ namespace Mirb
 		}
 		
 		const size_t Header::magic_value = 12345;
-	
+		
 		#ifdef DEBUG
 			const Header::data_field Header::mark_list = &Header::mark_data;
 			const Header::data_field Header::thread_list = &Header::thread_data;
+			value_t * const Header::list_end = (value_t *)0xF0;
 		#else
 			const Header::data_field Header::mark_list = &Header::data;
 			const Header::data_field Header::thread_list = &Header::data;
+			value_t * const Header::list_end = nullptr;
 		#endif
-				
+		
 		Header::Header(Type type) : type(type), marked(false)
 		{
 			#ifdef DEBUG
@@ -130,10 +132,10 @@ namespace Mirb
 				magic = magic_value;
 				size = 0;
 				refs = nullptr;
-				mark_data = nullptr;
-				thread_data = nullptr;
+				mark_data = list_end;
+				thread_data = list_end;
 			#else
-				data = nullptr;
+				data = list_end;
 			#endif
 		}
 
