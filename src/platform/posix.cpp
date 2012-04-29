@@ -1,4 +1,6 @@
 #include "platform.hpp"
+#include "../collector.hpp"
+#include <signal.h>
 
 #ifndef WIN32
 
@@ -29,8 +31,14 @@ namespace Mirb
 			munmap(region, bytes);
 		}
 
+		void signal_handler(int)
+		{
+			Collector::signal();
+		}
+
 		void initialize()
 		{
+			signal(SIGINT, signal_handler);
 		}
 	};
 };
