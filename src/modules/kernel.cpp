@@ -69,16 +69,17 @@ namespace Mirb
 		if(is_dir || !file)
 		{
 			is_dir = false;
-
-			CharArray filename_rb = (filename + ".rb").c_str();
+			
+			CharArray filename_rb = filename + ".rb";
+			CharArray filename_rb_cstr = filename_rb.c_str();
 			
 			#ifndef WIN32
-				if(stat(filename_rb.c_str_ref(), &buf) != -1)
+				if(stat(filename_rb_cstr.c_str_ref(), &buf) != -1)
 					is_dir = S_ISDIR(buf.st_mode);
 			#endif
 
 			if(!is_dir)
-				file = fopen(filename_rb.c_str_ref(), "rb");
+				file = fopen(filename_rb_cstr.c_str_ref(), "rb");
 
 			if(is_dir || !file)
 				return 0;

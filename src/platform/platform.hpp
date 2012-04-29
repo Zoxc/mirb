@@ -4,6 +4,14 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		enum Color
+		{
+			Green,
+			White,
+			Red,
+			Gray
+		};
+
 		void *allocate_region(size_t bytes);
 		void free_region(void *region, size_t bytes);
 

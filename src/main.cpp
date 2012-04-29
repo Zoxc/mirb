@@ -4,6 +4,7 @@
 #include "parser/parser.hpp"
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
+#include "platform/platform.hpp"
 #include "block.hpp"
 #include "document.hpp"
 
@@ -69,16 +70,26 @@ int main()
 
 			OnStack<1> os2(exception);
 
-			std::cout << inspect_object(real_class_of(auto_cast(exception))) << ": " << enforce_string(exception->message)->string.get_string() << "\n" << StackFrame::get_backtrace(exception->backtrace).get_string() << "\n";
+			Platform::color<Platform::Red>([&] {
+				std::cerr << inspect_object(real_class_of(auto_cast(exception)));
+			});
+			
+			Platform::color<Platform::White>([&] {
+				std::cerr  << ": " << enforce_string(exception->message)->string.get_string() << "\n";
+			});
+
+			StackFrame::print_backtrace(exception->backtrace);
+
+			std::cerr << "\n";
 		}
 		else
 			std::cout << "=> " << inspect_object(result) << "\n";
 	}
 	
-	std::cout << "Exiting gracefully...";
-	std::cout << "Number of collections: " << Collector::collections << std::endl;
+	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;
 	std::cout << "Memory allocated: " << (Collector::memory / 1024) <<  " KiB" << std::endl;
 	std::cout << "Regions allocated: " << Collector::region_count << std::endl;
+	std::cout << "Exiting gracefully..." << std::endl;
 	
 	Mirb::finalize();
 	

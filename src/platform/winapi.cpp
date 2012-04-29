@@ -45,6 +45,8 @@ namespace Mirb
  
 		void initialize()
 		{
+			SetConsoleTitle("mirb");
+
 			if(!SetConsoleCtrlHandler(ctrl_handler, TRUE)) 
 				std::cerr << "Unable to register console handler" << std::endl; 
 		}

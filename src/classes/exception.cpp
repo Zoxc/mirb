@@ -6,6 +6,7 @@
 #include "../block.hpp"
 #include "../document.hpp"
 #include "../generic/range.hpp"
+#include "../platform/platform.hpp"
 #include "../vm.hpp"
 
 namespace Mirb
@@ -23,6 +24,64 @@ namespace Mirb
 
 		for(size_t i = 0; i < frame->argc; ++i)
 			(*args)[i] = frame->argv[i];
+	}
+	
+	void StackFrame::print(StackFrame *self)
+	{
+		OnStack<1> os(self);
+
+		Platform::color<Platform::Gray>([&] {
+			std::cerr << "  in ";
+
+			value_t module = auto_cast(self->module);
+
+			if(Value::type(module) == Value::IClass)
+				module = cast<Module>(module)->instance_of;
+		
+			OnStack<1> os3(module);
+
+			std::cerr << inspect_object(module);
+
+			value_t class_of = real_class_of(self->obj);
+
+			if(class_of != module)
+				std::cerr << "(" << inspect_object(class_of) << ")";
+
+			std::cerr << "#";
+		});
+
+		std::cerr << self->name->get_string()  << "(";
+
+		for(size_t i = 0; i < self->args->entries; ++i)
+		{
+			std::cerr << inspect_object((*self->args)[i]);
+			if(i < self->args->entries - 1)
+				std::cerr << ", ";
+		}
+			
+		std::cerr <<  ")";
+
+		if(self->code->executor == &evaluate_block)
+		{
+			Range *range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+
+			if(range)
+			{
+				CharArray prefix = self->code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
+				
+				Platform::color<Platform::Gray>([&] {
+					std::cerr << "\n" << prefix.get_string();
+				});
+
+				std::cerr << range->get_line() << "\n";
+				
+				Platform::color<Platform::Green>([&] {
+					std::cerr << (CharArray(" ") * prefix.size() + range->indicator()).get_string();
+				});
+			}
+			else
+				std::cerr << ("\n" + self->code->document->name + ":unknown").get_string();
+		}
 	}
 	
 	CharArray StackFrame::inspect_implementation(StackFrame *self)
@@ -98,6 +157,22 @@ namespace Mirb
 		}
 
 		return result;
+	}
+	
+	void StackFrame::print_backtrace(Tuple<StackFrame> *backtrace)
+	{
+		if(!backtrace)
+			return;
+		
+		OnStack<1> os1(backtrace);
+		
+		for(size_t i = 0; i < backtrace->entries; ++i)
+		{
+			if(i != 0)
+				std::cerr << "\n";
+
+			print((*backtrace)[i]);
+		}
 	}
 	
 	value_t Exception::allocate(value_t obj)

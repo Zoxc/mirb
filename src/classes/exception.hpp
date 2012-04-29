@@ -18,8 +18,9 @@ namespace Mirb
 			Tuple<> *args;
 
 			const char *ip;
-
+			
 			static CharArray inspect_implementation(StackFrame *self);
+			static void print(StackFrame *self);
 		public:
 			StackFrame(Frame *frame);
 		
@@ -34,6 +35,7 @@ namespace Mirb
 			}
 			
 			static CharArray get_backtrace(Tuple<StackFrame> *backtrace);
+			static void print_backtrace(Tuple<StackFrame> *backtrace);
 
 			CharArray inspect();
 	};
