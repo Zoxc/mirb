@@ -5,7 +5,7 @@
 #include "codegen/bytecode.hpp"
 #include "classes/exceptions.hpp"
 
-#ifdef DEBUG
+#ifdef MIRB_DEBUG_COMPILER
 	#include "codegen/printer.hpp"
 	#include "codegen/dot-printer.hpp"
 #endif

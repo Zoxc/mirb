@@ -7,7 +7,7 @@
 #include "block.hpp"
 #include "document.hpp"
 
-#ifdef DEBUG
+#ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
 #endif
 

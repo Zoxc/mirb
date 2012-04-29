@@ -115,10 +115,10 @@ namespace Mirb
 			*current = free;
 			current = temp;
 		}
+		
+		(node->*Value::Header::thread_list) = nullptr;
 
 		#ifdef DEBUG
-			(node->*Value::Header::thread_list) = nullptr;
-
 			if(second)
 				node->marked = false;
 		#endif
