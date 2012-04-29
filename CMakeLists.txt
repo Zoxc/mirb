@@ -7,6 +7,7 @@ include_directories("${mirb_SOURCE_DIR}/../Prelude/include")
 file(GLOB MIRB_SOURCES
     "src/*.cpp"
     "src/classes/*.cpp"
+    "src/platform/*.cpp"
     "src/codegen/*.cpp"
     "src/generic/*.cpp"
     "src/lexer/*.cpp"
