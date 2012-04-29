@@ -1,4 +1,5 @@
 #include "../common.hpp"
+#include "../char-array.hpp"
 
 namespace Mirb
 {
@@ -7,7 +8,7 @@ namespace Mirb
 		enum Color
 		{
 			Green,
-			White,
+			Bold,
 			Red,
 			Gray
 		};

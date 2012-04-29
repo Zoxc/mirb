@@ -10,7 +10,7 @@ namespace Mirb
 				std::string format();
 		};
 		
-		template<Color input, typename T> void color(T func)
+		template<Color input> void color(const CharArray &string)
 		{
 			WORD flags;
 			
@@ -41,10 +41,8 @@ namespace Mirb
 
 			SetConsoleTextAttribute(console, flags | (info.wAttributes & ~(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY)));
 			
-			std::cerr << std::flush;
+			std::cerr << std::flush << string.get_string();
 
-			func();
-			
 			SetConsoleTextAttribute(console, info.wAttributes);
 			
 			std::cerr << std::flush;

@@ -30,25 +30,23 @@ namespace Mirb
 	{
 		OnStack<1> os(self);
 
-		Platform::color<Platform::Gray>([&] {
-			std::cerr << "  in ";
+		Platform::color<Platform::Gray>("  in ");
 
-			value_t module = auto_cast(self->module);
+		value_t module = auto_cast(self->module);
 
-			if(Value::type(module) == Value::IClass)
-				module = cast<Module>(module)->instance_of;
-		
-			OnStack<1> os3(module);
+		if(Value::type(module) == Value::IClass)
+			module = cast<Module>(module)->instance_of;
 
-			std::cerr << inspect_object(module);
+		OnStack<1> os3(module);
 
-			value_t class_of = real_class_of(self->obj);
+		Platform::color<Platform::Gray>(inspect_obj(module));
 
-			if(class_of != module)
-				std::cerr << "(" << inspect_object(class_of) << ")";
+		value_t class_of = real_class_of(self->obj);
 
-			std::cerr << "#";
-		});
+		if(class_of != module)
+			Platform::color<Platform::Gray>("(" + inspect_object(class_of) + ")");
+
+		Platform::color<Platform::Gray>("#");
 
 		std::cerr << self->name->get_string()  << "(";
 
@@ -69,15 +67,11 @@ namespace Mirb
 			{
 				CharArray prefix = self->code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
 				
-				Platform::color<Platform::Gray>([&] {
-					std::cerr << "\n" << prefix.get_string();
-				});
+				Platform::color<Platform::Bold>("\n" + prefix);
 
 				std::cerr << range->get_line() << "\n";
 				
-				Platform::color<Platform::Green>([&] {
-					std::cerr << (CharArray(" ") * prefix.size() + range->indicator()).get_string();
-				});
+				Platform::color<Platform::Green>(CharArray(" ") * prefix.size() + range->indicator());
 			}
 			else
 				std::cerr << ("\n" + self->code->document->name + ":unknown").get_string();

@@ -70,13 +70,9 @@ int main()
 
 			OnStack<1> os2(exception);
 
-			Platform::color<Platform::Red>([&] {
-				std::cerr << inspect_object(real_class_of(auto_cast(exception)));
-			});
+			Platform::color<Platform::Red>(inspect_obj(real_class_of(auto_cast(exception))));
 			
-			Platform::color<Platform::White>([&] {
-				std::cerr  << ": " << enforce_string(exception->message)->string.get_string() << "\n";
-			});
+			Platform::color<Platform::Bold>(": " + enforce_string(exception->message)->string.get_string() + "\n");
 
 			StackFrame::print_backtrace(exception->backtrace);
 

@@ -4,6 +4,28 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		template<Color input> void color(const CharArray &string)
+		{
+			switch(input)
+			{
+				case Red:
+					std::cerr << ("\033[1;31m" + string + "\033[0m").get_string();
+					break;
+
+				case Green:
+					std::cerr << ("\033[1;32m" + string + "\033[0m").get_string();
+					break;
+
+				case Bold:
+					std::cerr << ("\033[1m" + string + "\033[0m").get_string();
+					break;
+
+				default:
+					std::cerr << string.get_string();
+					return;
+			};
+		};
+
 		class BenchmarkResult
 		{
 			public:
