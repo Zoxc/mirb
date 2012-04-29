@@ -10,14 +10,9 @@ namespace Mirb
 		{
 			static inline char_t *const &data(const Mirb::CharArray &input)
 			{
-				#ifdef DEBUG
-					if(input.data && !input.static_data)
-						mirb_debug_assert(&VariableBlock::from_memory(input.data) == input.ref);
-				#endif
-
 				return input.data;
 			}
-
+			
 			static inline bool static_data(const Mirb::CharArray &input)
 			{
 				return input.static_data;
@@ -89,8 +84,6 @@ namespace Mirb
 
 			frame = frame->prev;
 		}
-
-		symbol_pool.mark_content(mark);
 	}
 	
 	template<Value::Type type> struct SizeOf

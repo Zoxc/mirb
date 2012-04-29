@@ -108,12 +108,12 @@ namespace Mirb
 	value_t call_frame(Frame &frame);
 	
 	/*
-	 * call (calls Ruby code)
+	 * call (calls Ruby code, argv does not need to be marked)
 	 */
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	
 	/*
-	 * call (calls Ruby code)
+	 * call (calls Ruby code, argv does not need to be marked)
 	 */
 	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[])
 	{
@@ -121,7 +121,7 @@ namespace Mirb
 	}
 	
 	/*
-	 * call (calls Ruby code)
+	 * call (calls Ruby code, argv does not need to be marked)
 	 */
 	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[])
 	{
@@ -129,7 +129,7 @@ namespace Mirb
 	}
 	
 	/*
-	 * call (calls Ruby code)
+	 * call (calls Ruby code, argv does not need to be marked)
 	 */
 	template<typename T> value_t call(value_t obj, T&& name)
 	{
@@ -137,17 +137,17 @@ namespace Mirb
 	}
 	
 	/*
-	 * yield (calls Ruby code)
+	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]);
 
 	/*
-	 * yield (calls Ruby code)
+	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
 	value_t yield(value_t obj, size_t argc, value_t argv[]);
 
 	/*
-	 * yield (calls Ruby code)
+	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
 	value_t yield(value_t obj);
 	

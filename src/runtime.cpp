@@ -43,6 +43,8 @@ namespace Mirb
 
 	value_t class_of(value_t obj)
 	{
+		Value::assert_valid(obj);
+
 		if(prelude_likely(Value::object_ref(obj)))
 			return cast<Object>(obj)->instance_of;
 		else
@@ -51,6 +53,8 @@ namespace Mirb
 
 	value_t real_class(value_t obj)
 	{
+		Value::assert_valid(obj);
+
 		while(obj && (cast<Class>(obj)->singleton || cast<Class>(obj)->get_type() == Value::IClass))
 			obj = cast<Class>(obj)->superclass;
 
@@ -166,6 +170,8 @@ namespace Mirb
 				{
 					value_t including = Value::type(module) == Value::IClass ? module->instance_of : module;
 
+					OnStack<4> os(obj, c, module, including);
+
 					std::cout << "Including module " << inspect_object(including) << " in " << inspect_object(obj) << "\n";
 				}
 			#endif
@@ -260,12 +266,12 @@ namespace Mirb
 
 	value_t inspect(value_t obj)
 	{
+		OnStack<1> os(obj);
+
 		value_t dummy;
 		Block *inspect = lookup_method(class_of(obj), Symbol::from_string("inspect"), &dummy);
 
 		value_t result = value_nil;
-
-		OnStack<1> os(obj);
 
 		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
@@ -610,7 +616,7 @@ namespace Mirb
 
 		return call_frame(frame);
 	};
-	
+
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
 		value_t module;
@@ -620,7 +626,30 @@ namespace Mirb
 		if(prelude_unlikely(!method))
 			return value_raise;
 
-		return call_code(method, obj, name, module, block, argc, argv);
+		void *stack_memory = std::malloc(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
+
+		if(prelude_unlikely(!stack_memory))
+			return raise(context->exception_class);
+
+		OnStackBlock<false> *os = new (stack_memory) OnStackBlock<false>();
+
+		os->size = argc;
+
+		value_t *os_array = (value_t *)(os + 1);
+
+		for(size_t i = 0; i < argc; ++i)
+		{
+			os_array[i] = (value_t)&os_array[argc + i];
+			os_array[argc + i] = argv[i];
+		}
+
+		value_t result = call_code(method, obj, name, module, block, argc, &os_array[argc]);
+
+		os->~OnStackBlock<false>();
+
+		std::free(stack_memory);
+
+		return result;
 	}
 	
 	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])

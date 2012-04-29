@@ -15,18 +15,13 @@ namespace Mirb
 			size_t length;
 			char_t *data;
 
-			#ifdef DEBUG
-				value_t ref;
-			#endif
-
-			void update_ref();
-
 			mutable bool shared;
 			bool static_data;
 			
 			friend struct Accesser::CharArray;
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
+
 			CharArray(const char_t *c_str);
 			CharArray(const std::string &string);
 			CharArray(const char_t *c_str, size_t length);
@@ -89,7 +84,6 @@ namespace Mirb
 				length = string_length - 1;
 				shared = true;
 				static_data = true;
-				update_ref();
 			}
 			
 			bool operator ==(CharArray &other) const

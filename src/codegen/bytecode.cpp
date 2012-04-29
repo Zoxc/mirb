@@ -9,8 +9,6 @@ namespace Mirb
 {
 	namespace CodeGen
 	{
-		// TODO: Fix - This code assumes the stack grows downwards.
-
 		VariableGroup::VariableGroup(ByteCodeGenerator *bcg, size_t size) : bcg(bcg), size(size)
 		{
 			if(size)

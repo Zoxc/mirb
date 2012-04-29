@@ -18,6 +18,8 @@ namespace Mirb
 			Tuple<> *args;
 
 			const char *ip;
+
+			static CharArray inspect_implementation(StackFrame *self);
 		public:
 			StackFrame(Frame *frame);
 		

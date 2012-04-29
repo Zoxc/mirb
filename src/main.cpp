@@ -76,6 +76,9 @@ int main()
 	}
 	
 	std::cout << "Exiting gracefully...";
+	std::cout << "Number of collections: " << Collector::collections << std::endl;
+	std::cout << "Memory allocated: " << (Collector::memory / 1024) <<  " KiB" << std::endl;
+	std::cout << "Regions allocated: " << Collector::region_count << std::endl;
 	
 	Mirb::finalize();
 	

@@ -84,8 +84,17 @@ namespace Mirb
 				assert(vars[i] != nullptr);
 
 			value_t block = op.block ? vars[op.block_var] : value_nil;
+			value_t obj = vars[op.obj];
+			Symbol *name = op.method;
+			
+			value_t module;
 
-			value_t result = call(vars[op.obj], op.method, block, op.argc, &vars[op.argv]);
+			Block *method = lookup(obj, name, &module);
+
+			if(prelude_unlikely(!method))
+				goto handle_call_exception;
+
+			value_t result = call_code(method, obj, name, module, block, op.argc, &vars[op.argv]);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;

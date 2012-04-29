@@ -40,8 +40,9 @@ namespace Mirb
 
 			static FastList<Region> regions;
 			static const size_t page_size = 0x1000;
-
-			template<bool free, bool backward> friend struct RegionWalker;
+			
+			friend struct RegionWalker;
+			template<bool backward> friend struct RegionAllocator;
 			
 			static Region *current;
 			static size_t pages;
@@ -61,6 +62,8 @@ namespace Mirb
 			static void *allocate_simple(size_t bytes)
 			{
 				mirb_debug_assert((bytes & object_ref_mask) == 0);
+				
+				memory += bytes;
 
 				char_t *result;
 
@@ -124,6 +127,10 @@ namespace Mirb
 				return object;
 			}
 		public:
+			static size_t collections;
+			static size_t region_count;
+			static unsigned long long memory;
+
 			static void collect();
 			static void initialize();
 			static void free();

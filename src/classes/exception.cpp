@@ -24,54 +24,61 @@ namespace Mirb
 		for(size_t i = 0; i < frame->argc; ++i)
 			(*args)[i] = frame->argv[i];
 	}
-
-	CharArray StackFrame::inspect()
+	
+	CharArray StackFrame::inspect_implementation(StackFrame *self)
 	{
+		OnStack<1> os(self);
+
 		CharArray result = "  in ";
 
-		OnStackString<1> os1(result);
+		OnStackString<1> os2(result);
 
-		result += inspect_obj(obj) + ".";
+		result += inspect_obj(self->obj) + ".";
 
-		value_t module = auto_cast(this->module);
+		value_t module = auto_cast(self->module);
 
 		if(Value::type(module) == Value::IClass)
 			module = cast<Module>(module)->instance_of;
 		
-		OnStack<1> os2(module);
+		OnStack<1> os3(module);
 
 		result += inspect_obj(module);
 
-		value_t class_of = real_class_of(obj);
+		value_t class_of = real_class_of(self->obj);
 
 		if(class_of != module)
 			result += "(" + inspect_obj(class_of) + ")";
 
-		result += "#" + name->string  + "(";
+		result += "#" + self->name->string  + "(";
 
-		for(size_t i = 0; i < args->entries; ++i)
+		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			result += inspect_obj((*args)[i]);
-			if(i < args->entries - 1)
+			result += inspect_obj((*self->args)[i]);
+			if(i < self->args->entries - 1)
 				result += ", ";
 		}
 			
 		result += ")";
 
-		if(code->executor == &evaluate_block)
+		if(self->code->executor == &evaluate_block)
 		{
-			Range *range = code->source_location.get((size_t)(ip - code->opcodes));
+			Range *range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
 
 			if(range)
 			{
-				CharArray prefix = code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
+				CharArray prefix = self->code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
 				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
 			}
 			else
-				result += "\n" + code->document->name + ":unknown";
+				result += "\n" + self->code->document->name + ":unknown";
 		}
 
 		return result;
+	}
+	
+	CharArray StackFrame::inspect()
+	{
+		return inspect_implementation(this);
 	}
 	
 	CharArray StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
@@ -89,7 +96,7 @@ namespace Mirb
 			if(i != 0)
 				result += "\n";
 
-			result += cast<StackFrame>((*backtrace)[i])->inspect();
+			result += (*backtrace)[i]->inspect();
 		}
 
 		return result;

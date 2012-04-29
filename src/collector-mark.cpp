@@ -141,5 +141,7 @@ namespace Mirb
 		MarkFunc<&mark_children> func;
 
 		each_root(func);
+
+		symbol_pool.mark_content(func);
 	}
 };

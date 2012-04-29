@@ -20,6 +20,9 @@
 
 namespace Mirb
 {
+	size_t Collector::collections = 0;
+	size_t Collector::region_count = 0;
+	unsigned long long Collector::memory = 0;
 	bool Collector::pending = false;
 	size_t Collector::pages = 32;
 	Collector::Region *Collector::current;
@@ -145,7 +148,12 @@ namespace Mirb
 				frame = frame->prev;
 			}
 		}
+		
+		mark();
+		compact();
 		#endif
+
+		collections++;
 	}
 
 	Collector::Region *Collector::allocate_region(size_t bytes)
@@ -164,6 +172,8 @@ namespace Mirb
 		
 		region->pos = result + sizeof(Region);
 		region->end = result + bytes;
+
+		region_count++;
 
 		regions.append(region);
 

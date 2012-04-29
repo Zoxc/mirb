@@ -7,7 +7,7 @@ namespace Mirb
 {
 	value_t Array::allocate(value_t obj)
 	{
-		return auto_cast(Collector::allocate<Array>(obj));
+		return auto_cast(Collector::allocate<Array>(auto_cast(obj)));
 	}
 
 	value_t Array::push(value_t obj, size_t argc, value_t argv[])
@@ -65,10 +65,10 @@ namespace Mirb
 	{
 		auto self = cast<Array>(obj);
 		
-		OnStack<1> os(self);
+		OnStack<2> os(self, block);
 
 		for(auto i = self->vector.begin(); i != self->vector.end(); ++i)
-			yield(block, 1, &(*i));
+			yield(block, 1, &i());
 
 		return auto_cast(self);
 	}

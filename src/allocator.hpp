@@ -99,7 +99,8 @@ namespace Mirb
 
 			T *&operator[](size_t index)
 			{
-				mirb_debug_assert(index < entries);
+				if(this)
+					mirb_debug_assert(index < entries);
 
 				return ((T **)((size_t)this + sizeof(Tuple)))[index];
 			}
@@ -196,8 +197,6 @@ namespace Mirb
 					
 					A &operator [](size_t index) const
 					{
-						mirb_debug_assert(array);
-						
 						return (*array)[index];
 					}
 			};
