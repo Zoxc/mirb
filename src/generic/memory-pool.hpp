@@ -10,9 +10,7 @@ namespace Mirb
 		struct Page
 		{
 			ListEntry<Page> entry;
-			#ifndef WIN32
-				size_t length;
-			#endif
+			size_t length;
 		};
 
 		static const unsigned int max_alloc = 0x1000 * 4;

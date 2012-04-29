@@ -1,4 +1,5 @@
 #include "memory-pool.hpp"
+#include "../platform/platform.hpp"
 
 #ifdef VALGRIND
 	#include <cstring>
@@ -26,21 +27,11 @@ namespace Mirb
 		
 	char_t *MemoryPoolImplementation::allocate_page(size_t bytes)
 	{
-		char_t *result;
-		
-		#ifdef WIN32
-			result = (char_t *)VirtualAlloc(0, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-		#else	
-			result = (char_t *)mmap(0, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-		#endif
-		
-		mirb_runtime_assert(result != 0);
+		char_t *result = (char_t *)Platform::allocate_region(bytes);
 
 		Page *page = new ((void *)result) Page;
 
-		#ifndef WIN32
-			page->length = bytes;
-		#endif
+		page->length = bytes;
 
 		pages.append(page);
 
@@ -49,11 +40,7 @@ namespace Mirb
 	
 	void MemoryPoolImplementation::free_page(Page *page)
 	{
-		#ifdef WIN32
-			VirtualFree((void *)page, 0, MEM_RELEASE);
-		#else
-			munmap((void *)page, page->length);
-		#endif
+		Platform::free_region((void *)page, page->length);
 	}
 	
 	void *MemoryPoolImplementation::get_page(size_t bytes)

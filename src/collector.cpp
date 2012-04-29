@@ -17,6 +17,7 @@
 #include "tree/tree.hpp"
 #include "on-stack.hpp"
 #include "collector-common.hpp"
+#include "platform/platform.hpp"
 
 namespace Mirb
 {
@@ -155,15 +156,7 @@ namespace Mirb
 
 	Collector::Region *Collector::allocate_region(size_t bytes)
 	{
-		char_t *result;
-		
-		#ifdef WIN32
-			result = (char_t *)VirtualAlloc(0, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-		#else	
-			result = (char_t *)mmap(0, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-		#endif
-		
-		mirb_runtime_assert(result != 0);
+		char_t *result = (char_t *)Platform::allocate_region(bytes);
 
 		Region *region = new ((void *)result) Region;
 		
@@ -179,11 +172,7 @@ namespace Mirb
 	
 	void Collector::free_region(Region *region)
 	{
-		#ifdef WIN32
-			VirtualFree((void *)region, 0, MEM_RELEASE);
-		#else
-			munmap((void *)region, (size_t)region->end - (size_t)region);
-		#endif
+		Platform::free_region((void *)region, (size_t)region->end - (size_t)region);
 	}
 	
 	void *Collector::get_region(size_t bytes)
