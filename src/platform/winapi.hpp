@@ -35,7 +35,7 @@ namespace Mirb
 					break;
 
 				default:
-					func();
+					std::cerr << string.get_string();
 					return;
 			};
 
