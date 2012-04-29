@@ -140,14 +140,24 @@ namespace Mirb
 		RegionWalker()
 		{
 			region = Collector::regions.first;
-			pos = (value_t)region->data();
-			test(pos);
 		}
 
 		void test(value_t obj)
 		{
-			Value::assert_valid_base(obj);
+			Value::assert_alive(obj);
 			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
+		}
+		
+		bool load()
+		{
+			pos = (value_t)region->data();
+
+			if(pos == (value_t)region->pos)
+				return step_region();
+
+			test(pos);
+
+			return true;
 		}
 
 		bool step_region()
@@ -157,6 +167,10 @@ namespace Mirb
 			if(region)
 			{
 				pos = (value_t)region->data();
+
+				if(pos == (value_t)region->pos)
+					return step_region();
+
 				test(pos);
 
 				return true;
@@ -167,13 +181,19 @@ namespace Mirb
 
 		bool step(size_t size)
 		{
+			mirb_debug_assert(region->contains(pos));
+
 			value_t next = (value_t)((size_t)pos + size);
+
+			mirb_debug_assert(region->contains(next));
 			
 			if((size_t)next == (size_t)region->pos)
 				return step_region();
 			else
 			{
 				test(next);
+				
+				mirb_debug_assert(((size_t)next > (size_t)region) && ((size_t)next <= (size_t)region->pos));
 
 				pos = next;
 				
@@ -195,37 +215,44 @@ namespace Mirb
 
 		void update()
 		{
-			region->pos = (char_t *)pos;
+			if(backward)
+				region->pos = (char_t *)pos;
 		}
 		
-		void allocate_region(size_t size)
+		value_t allocate_region(size_t size)
 		{
-			if(backward)
-				update();
+			update();
+
+			Collector::Region *prev = region;
 
 			region = region->entry.next;
 
 			if(region)
 			{
 				pos = (value_t)region->data();
-				test(pos);
 
-				allocate(size);
+				return allocate(size);
 			}
 			else
-			{
-				mirb_debug_assert(region && "Ran out of free space!");
-			}
+				mirb_debug_abort("Ran out of free space!");
 		}
 
-		void allocate(size_t size)
+		value_t allocate(size_t size)
 		{
-			value_t next = (value_t)((size_t)pos + size);
+			value_t result = pos;
 			
-			if((size_t)next > (size_t)region->pos)
-				allocate_region(size);
+			mirb_debug_assert(region->contains(pos));
+			
+			value_t next = (value_t)((size_t)pos + size);
 
+			if((size_t)next > (size_t)region->pos) // TODO: Allocate to region->end
+				return allocate_region(size);
+			
+			mirb_debug_assert(region->contains(next));
+			
 			pos = next;
+
+			return result;
 		}
 	};
 
@@ -239,19 +266,24 @@ namespace Mirb
 		RegionWalker obj;
 
 		size_t size;
+		
+		obj.load();
 
 		do
 		{
 			value_t i = obj.pos;
 			size = size_of_value(i);
 
+			mirb_debug_assert((obj.pos >= free.pos) || obj.region != free.region);
+
 			if(i->marked)
 			{
-				update<false>(i, free.pos);
+				value_t pos = free.allocate(size);
+
+				update<false>(i, pos);
 
 				Value::virtual_do<ThreadClass>(Value::type(i), i);
 
-				free.allocate(size);
 			}
 		}
 		while(obj.step(size));
@@ -282,6 +314,8 @@ namespace Mirb
 
 		size_t size;
 
+		obj.load();
+
 		do
 		{
 			value_t i = obj.pos;
@@ -289,10 +323,10 @@ namespace Mirb
 			
 			if(i->marked)
 			{
-				update<true>(i, free.pos);
-				move(i, free.pos, size);
-
-				free.allocate(size);
+				value_t pos = free.allocate(size);
+				
+				update<true>(i, pos);
+				move(i, pos, size);
 			}
 #ifdef DEBUG
 			else
@@ -303,8 +337,18 @@ namespace Mirb
 #endif
 		}
 		while(obj.step(size));
-		
+
 		free.update();
+
+		{
+			Region *current = free.region->entry.next;
+
+			while(current)
+			{
+				current->pos = (char_t *)current->data();
+				current = current->entry.next;
+			}
+		}
 		
 		for(auto obj = heap_list.first; obj;)
 		{
@@ -332,5 +376,17 @@ namespace Mirb
 	{
 		update_forward();
 		update_backward();
+		
+		RegionWalker obj;
+
+		if(!obj.load())
+			return;
+
+		do
+		{
+			Value::assert_valid(obj.pos);
+		}
+		while(obj.step(size_of_value(obj.pos)));
+
 	};
 };

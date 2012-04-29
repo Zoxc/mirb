@@ -24,6 +24,11 @@ namespace Mirb
 				{
 					return (value_t)((size_t)this + sizeof(Region));
 				}
+
+				bool contains(value_t obj)
+				{
+					return ((size_t)obj >= (size_t)data()) && ((size_t)obj <= (size_t)pos);
+				}
 			};
 			
 			static bool pending;
@@ -137,15 +142,13 @@ namespace Mirb
 
 			static void check()
 			{
-				#ifdef DEBUG
+				mirb_debug(collect());
+
+				if(prelude_unlikely(pending))
+				{
+					pending = false;
 					collect();
-				#else
-					if(prelude_unlikely(pending))
-					{
-						pending = false;
-						collect();
-					}
-				#endif
+				}
 			}
 			
 			static void *allocate(size_t bytes);

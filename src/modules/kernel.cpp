@@ -20,7 +20,11 @@ namespace Mirb
 	
 	value_t Kernel::benchmark(value_t block)
 	{
-		CharArray result = Mirb::benchmark([&] {
+		CharArray result;
+		
+		OnStackString<1> os(result);
+
+		result = Mirb::benchmark([&] {
 			yield(block);
 		}).format();
 

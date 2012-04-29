@@ -194,7 +194,7 @@ namespace Mirb
 		Region *region;
 		char_t *result;
 
-		size_t max_page_alloc = pages >> 3;
+		size_t max_page_alloc = 1;// pages >> 3;
 
 		if(prelude_unlikely(bytes > max_page_alloc * page_size))
 		{

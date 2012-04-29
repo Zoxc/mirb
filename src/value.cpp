@@ -123,9 +123,10 @@ namespace Mirb
 			const Header::data_field Header::thread_list = &Header::data;
 		#endif
 				
-		Header::Header(Type type) : type(type), marked(false), alive(true)
+		Header::Header(Type type) : type(type), marked(false)
 		{
 			#ifdef DEBUG
+				alive = true;
 				magic = magic_value;
 				size = 0;
 				refs = nullptr;

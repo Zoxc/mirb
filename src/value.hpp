@@ -127,9 +127,9 @@ namespace Mirb
 				
 				const Type type;
 				bool marked;
-				bool alive;
 				
 				#ifdef DEBUG
+					bool alive;
 					size_t size;
 					size_t magic;
 					value_t refs;
@@ -357,7 +357,7 @@ namespace Mirb
 		inline void assert_alive(value_t obj)
 		{
 			assert_valid_base(obj);
-			mirb_debug_assert(obj->alive);
+			mirb_debug(mirb_debug_assert(obj->alive));
 		}
 
 		inline void assert_valid(value_t obj) prelude_nonnull(1);

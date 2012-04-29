@@ -48,6 +48,8 @@ namespace Mirb
 	{
 		size_t times = to_size_t(obj);
 
+		OnStack<2> os(obj, block);
+
 		while(times--)
 			yield(block);
 

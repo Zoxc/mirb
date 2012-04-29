@@ -22,25 +22,22 @@ namespace Mirb
 {
 	void Collector::sweep()
 	{
-		auto unmark = [&](value_t obj) {
-			Value::assert_valid_base(obj);
-			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
-			
-			obj->alive = obj->marked;
-			obj->marked = false;
-		};
-
 		for(auto obj = heap_list.first; obj;)
 		{
 			auto next = obj->entry.next;
 			
-			unmark(obj);
+			Value::assert_valid_base(obj);
+			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
+			
+			mirb_debug(obj->alive = obj->marked);
 
-			if(!obj->alive)
+			if(!obj->marked)
 			{
 				heap_list.remove(obj);
 				std::free((void *)obj);
 			}
+			else
+				obj->marked = false;
 
 			obj = next;
 		}
@@ -48,7 +45,7 @@ namespace Mirb
 		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
 		{
 			i().marked = false;
-			i().alive = true;
+			mirb_debug(i().alive = true);
 		}
 	}
 };

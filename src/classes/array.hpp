@@ -22,6 +22,8 @@ namespace Mirb
 			
 			template<typename F> void mark(F mark)
 			{
+				Object::mark(mark);
+
 				vector.mark(mark);
 			}
 
