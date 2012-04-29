@@ -27,7 +27,7 @@ namespace Mirb
 			auto next = obj->entry.next;
 			
 			Value::assert_valid_base(obj);
-			mirb_debug_assert((obj->*Value::Header::mark_list) == nullptr);
+			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
 			
 			mirb_debug(obj->alive = obj->marked);
 

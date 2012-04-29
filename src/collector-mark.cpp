@@ -20,7 +20,7 @@
 
 namespace Mirb
 {
-	value_t mark_list;
+	value_t mark_list = (value_t)Value::Header::list_end;
 	value_t mark_parent;
 	
 	bool mark_value(value_t obj);

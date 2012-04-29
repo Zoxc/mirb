@@ -30,7 +30,7 @@ namespace Mirb
 			public:
 				BasicBlock(MemoryPool memory_pool, Block &block);
 
-				#ifdef MIRB_COMPILER_DEBUG
+				#ifdef MIRB_DEBUG_COMPILER
 					size_t id;
 				#endif
 
@@ -81,7 +81,7 @@ namespace Mirb
 				size_t stack_alloc(size_t size);
 				void stack_free(size_t address);
 				
-				#ifdef MIRB_COMPILER_DEBUG
+				#ifdef MIRB_DEBUG_COMPILER
 					size_t basic_block_count; // Nicer basic block labeling...
 				#endif
 				

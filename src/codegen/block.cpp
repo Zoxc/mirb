@@ -9,7 +9,7 @@ namespace Mirb
 	{
 		BasicBlock::BasicBlock(MemoryPool memory_pool, Block &block) : branches(memory_pool), source_locs(memory_pool)
 		{
-			#ifdef MIRB_COMPILER_DEBUG
+			#ifdef MIRB_DEBUG_COMPILER
 				id = block.basic_block_count++;
 			#endif
 		}
@@ -143,7 +143,7 @@ namespace Mirb
 			stack_heap = 0;
 			stack_heap_size = 0;
 
-			#ifdef MIRB_COMPILER_DEBUG
+			#ifdef MIRB_DEBUG_COMPILER
 				basic_block_count = 0;
 			#endif
 		}
