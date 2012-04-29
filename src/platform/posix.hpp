@@ -1,3 +1,5 @@
+#include <sys/time.h>
+
 namespace Mirb
 {
 	namespace Platform
