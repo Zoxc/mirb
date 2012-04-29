@@ -3,7 +3,6 @@
 #include <Prelude/HashTable.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/FastList.hpp>
-#include "../generic/simple-set.hpp"
 #include "../collector.hpp"
 #include "nodes.hpp"
 

@@ -38,11 +38,8 @@
     <ClInclude Include="..\..\src\compiler.hpp" />
     <ClInclude Include="..\..\src\context.hpp" />
     <ClInclude Include="..\..\src\document.hpp" />
-    <ClInclude Include="..\..\src\generic\benchmark.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
-    <ClInclude Include="..\..\src\generic\mem_stream.hpp" />
     <ClInclude Include="..\..\src\generic\range.hpp" />
-    <ClInclude Include="..\..\src\generic\simple-set.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
@@ -52,6 +49,8 @@
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\platform\platform.hpp" />
+    <ClInclude Include="..\..\src\platform\posix.hpp" />
+    <ClInclude Include="..\..\src\platform\winapi.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
     <ClInclude Include="..\..\src\support.hpp" />
     <ClInclude Include="..\..\src\symbol-pool.hpp" />
@@ -91,7 +90,6 @@
     <ClCompile Include="..\..\src\compiler.cpp" />
     <ClCompile Include="..\..\src\context.cpp" />
     <ClCompile Include="..\..\src\document.cpp" />
-    <ClCompile Include="..\..\src\generic\benchmark.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />

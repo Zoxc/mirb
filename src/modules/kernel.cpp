@@ -4,7 +4,7 @@
 #include "../classes/symbol.hpp"
 #include "../classes/exception.hpp"
 #include "../classes/exceptions.hpp"
-#include "../generic/benchmark.hpp"
+#include "../platform/platform.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
 
@@ -26,7 +26,7 @@ namespace Mirb
 
 		bool exception = false;
 
-		result = Mirb::benchmark([&] {
+		result = Mirb::Platform::benchmark([&] {
 			if(!yield(block))
 				exception = true;
 		}).format();

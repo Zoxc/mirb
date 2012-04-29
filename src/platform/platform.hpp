@@ -10,3 +10,9 @@ namespace Mirb
 		void initialize();
 	};
 };
+
+#ifdef WIN32
+	#include "winapi.hpp"
+#else
+	#include "posix.hpp"
+#endif

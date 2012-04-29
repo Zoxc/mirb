@@ -18,7 +18,6 @@
 #include "classes/exception.hpp"
 #include "classes/exceptions.hpp"
 #include "modules/kernel.hpp"
-#include "generic/benchmark.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
@@ -803,7 +802,7 @@ namespace Mirb
 	
 	void initialize()
 	{
-		std::cout << "Initialized in " << benchmark([] {
+		std::cout << "Initialized in " << Platform::benchmark([] {
 			context = new Context;
 				
 			Value::initialize_type_table();
