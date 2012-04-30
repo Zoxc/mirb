@@ -62,7 +62,9 @@ namespace Mirb
 		public:
 			ValueMap() : Value::Header(Value::InternalValueMap), map(vars_initial) {}
 
-			Map<value_t, value_t, ValueMapFunctions, Prelude::Allocator::Standard, Allocator> map;
+			typedef Map<value_t, value_t, ValueMapFunctions, Prelude::Allocator::Standard, Allocator> MapType;
+
+			MapType map;
 			
 			template<typename F> void mark(F mark)
 			{

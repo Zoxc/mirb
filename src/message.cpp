@@ -2,6 +2,7 @@
 #include "document.hpp"
 #include "parser/parser.hpp"
 #include "generic/range.hpp"
+#include "platform/platform.hpp"
 
 namespace Mirb
 {
@@ -26,6 +27,16 @@ namespace Mirb
 		i.insert(this);
 	}
 	
+	void Message::print()
+	{
+		Platform::color<Platform::Bold>(parser.document.name + "[" + CharArray::uint(range.line + 1) + "]: ");
+		Platform::color<Platform::Red>(severity_names[severity]);
+		Platform::color<Platform::Bold>(": " + string() + "\n");
+		std::cerr << range.get_line() << "\n";
+		Platform::color<Platform::Green>(range.indicator());
+		std::cerr << std::endl;
+	}
+
 	std::string Message::format()
 	{
 		std::stringstream result;

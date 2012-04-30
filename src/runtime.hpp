@@ -45,6 +45,7 @@ namespace Mirb
 	 * inspect_obj (calls Ruby code)
 	 */
 	CharArray inspect_obj(value_t obj);
+	bool append_inspect(CharArray &result, value_t obj);
 
 	/*
 	 * inspect (calls Ruby code)

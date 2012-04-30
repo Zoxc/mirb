@@ -20,6 +20,7 @@ namespace Mirb
 			Class *object_class;
 			Class *class_class;
 			Class *array_class;
+			Class *hash_class;
 			Class *string_class;
 			Class *proc_class;
 			Class *symbol_class;

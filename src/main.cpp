@@ -48,7 +48,7 @@ int main()
 			if(!parser.messages.empty())
 			{
 				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-					std::cout << i().format() << "\n";
+					i().print();
 				
 				continue;
 			}

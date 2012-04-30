@@ -28,8 +28,9 @@ namespace Mirb
 			ListEntry<Message> entry;
 
 			virtual std::string string() = 0;
-
+			
 			std::string format();
+			void print();
 	};
 	
 	class StringMessage:

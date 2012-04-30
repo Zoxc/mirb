@@ -294,12 +294,14 @@ namespace Mirb
 					
 					result->method = Symbol::from_literal("[]");
 					result->range = range; //TODO: Extend range back to child
+					result->subscript = true;
 					
 					result->object = child;
-					
-					parse_arguments(result->arguments);
-					
-					result->block = parse_block();
+
+					if(lexeme() != Lexeme::SQUARE_CLOSE)
+						parse_arguments(result->arguments);
+
+					result->block = nullptr;
 
 					match(Lexeme::SQUARE_CLOSE);
 

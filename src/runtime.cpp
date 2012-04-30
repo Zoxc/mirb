@@ -8,6 +8,7 @@
 #include "classes/module.hpp"
 #include "classes/symbol.hpp"
 #include "classes/class.hpp"
+#include "classes/hash.hpp"
 #include "classes/fixnum.hpp"
 #include "classes/true-class.hpp"
 #include "classes/false-class.hpp"
@@ -33,6 +34,9 @@ namespace Mirb
 
 	void set_current_exception(Exception *exception)
 	{
+		if(exception)
+			Value::assert_valid(exception->instance_of);
+
 		current_exception = exception;
 
 		if(exception)
@@ -259,6 +263,20 @@ namespace Mirb
 		return cast<String>(str)->string;
 	}
 	
+	bool append_inspect(CharArray &result, value_t obj)
+	{
+		value_t str = inspect(obj);
+
+		if(str)
+		{
+			result += cast<String>(str)->string;
+
+			return true;
+		}
+		else
+			return false;
+	}
+	
 	std::string inspect_object(value_t obj)
 	{
 		value_t str = inspect(obj);
@@ -477,7 +495,7 @@ namespace Mirb
 		if(!parser.messages.empty())
 		{
 			for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-				std::cout << i().format() << "\n";
+				i().print();
 
 			return value_nil;
 		}
@@ -829,8 +847,11 @@ namespace Mirb
 			Fixnum::initialize();
 			Proc::initialize();
 			Array::initialize();
+			Hash::initialize();
 			Exception::initialize();
 			initialize_exceptions();
+
+			Collector::enable_interrupts = true;
 
 			mirb_debug(Collector::collect());
 		}).format() << "\n";

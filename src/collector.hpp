@@ -148,6 +148,7 @@ namespace Mirb
 			static size_t region_count;
 			static size_t region_free_count;
 			static unsigned long long memory;
+			static bool enable_interrupts;
 
 			/*
 				signal is callable from other threads

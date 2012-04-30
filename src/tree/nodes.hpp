@@ -202,6 +202,9 @@ namespace Mirb
 			Node *object;
 			Symbol *method;
 			bool can_be_var;
+			bool subscript;
+
+			CallNode() : can_be_var(false), subscript(false) {}
 		};
 		
 		struct SuperNode:

@@ -5,6 +5,7 @@
 #include "classes/false-class.hpp"
 #include "classes/true-class.hpp"
 #include "classes/array.hpp"
+#include "classes/hash.hpp"
 #include "classes/class.hpp"
 #include "classes/string.hpp"
 #include "classes/proc.hpp"

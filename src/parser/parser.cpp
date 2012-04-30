@@ -84,7 +84,7 @@ namespace Mirb
 
 				lexer.step();
 
-				if(lexeme() == Lexeme::EQUALITY && lexer.lexeme.whitespace == false)
+				if(lexeme() == Lexeme::ASSIGN && lexer.lexeme.whitespace == false)
 				{
 					symbol = symbol_pool.get(symbol->string + "=");
 
@@ -136,11 +136,11 @@ namespace Mirb
 
 			case Lexeme::SQUARE_OPEN:
 			{
+				lexer.step();
+
 				if(lexer.lexeme.whitespace == false && match(Lexeme::SQUARE_CLOSE))
 				{
-					lexer.step();
-
-					if(lexer.lexeme.whitespace == false && lexeme() == Lexeme::EQUALITY)
+					if(lexer.lexeme.whitespace == false && lexeme() == Lexeme::ASSIGN)
 					{
 						symbol = symbol_pool.get("[]=");
 
@@ -652,7 +652,10 @@ namespace Mirb
 	Tree::Node *Parser::process_assignment(Tree::Node *input)
 	{
 		if(!input)
-			return 0;
+		{
+			lexer.step();
+			return parse_expression();
+		}
 
 		switch(input->type())
 		{
@@ -660,8 +663,9 @@ namespace Mirb
 			{
 				auto node = (Tree::CallNode *)input;
 					
-				if(!node->arguments.empty() || node->block)
-					break;
+				if(!node->subscript)
+					if(!node->arguments.empty() || node->block)
+						break;
 				
 				if(node->can_be_var)
 					return build_assignment(parse_variable(node->method, node->range));

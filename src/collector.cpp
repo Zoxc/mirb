@@ -27,6 +27,7 @@ namespace Mirb
 	size_t Collector::region_free_count = 0;
 	unsigned long long Collector::memory = 0;
 	bool Collector::pending = false;
+	bool Collector::enable_interrupts = false;
 	size_t Collector::pages = 32;
 	Collector::Region *Collector::current;
 	List<Collector::Region> Collector::regions;
@@ -141,13 +142,16 @@ namespace Mirb
 
 	bool Collector::collect()
 	{
-		bool expected = true;
-
-		if(pending_exception.compare_exchange_strong(expected, false) && expected)
+		if(enable_interrupts)
 		{
-			raise(context->interrupt_class, "Aborted");
+			bool expected = true;
+		
+			if(pending_exception.compare_exchange_strong(expected, false) && expected)
+			{
+				raise(context->interrupt_class, "Aborted");
 
-			return true;
+				return true;
+			}
 		}
 
 		mark();

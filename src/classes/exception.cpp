@@ -65,7 +65,7 @@ namespace Mirb
 
 			if(range)
 			{
-				CharArray prefix = self->code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
+				CharArray prefix = self->code->document->name + "[" + CharArray::uint(range->line + 1) + "]: ";
 				
 				Platform::color<Platform::Bold>("\n" + prefix);
 
@@ -117,7 +117,7 @@ namespace Mirb
 
 			if(range)
 			{
-				CharArray prefix = self->code->document->name + ":" + CharArray::uint(range->line + 1) + ": ";
+				CharArray prefix = self->code->document->name + "[" + CharArray::uint(range->line + 1) + "]: ";
 				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
 			}
 			else

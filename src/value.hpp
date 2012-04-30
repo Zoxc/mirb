@@ -32,6 +32,7 @@ namespace Mirb
 	class Symbol;
 	class String;
 	class Array;
+	class Hash;
 	class StackFrame;
 	class Exception;
 	class ReturnException;
@@ -107,6 +108,7 @@ namespace Mirb
 			Symbol,
 			String,
 			Array,
+			Hash,
 			Proc,
 			Exception,
 			ReturnException,
@@ -140,6 +142,7 @@ namespace Mirb
 				Type type : type_bits;
 				bool marked : 1;
 				bool hashed : 1;
+				bool flag : 1; // Usable by subclasses
 				
 				#ifdef DEBUG
 					bool alive : 1;
@@ -265,6 +268,9 @@ namespace Mirb
 				case Array:
 					return T<Array>::func(std::forward<Arg>(arg));
 
+				case Hash:
+					return T<Hash>::func(std::forward<Arg>(arg));
+
 				case Proc:
 					return T<Proc>::func(std::forward<Arg>(arg));
 
@@ -316,6 +322,7 @@ namespace Mirb
 		mirb_typeclass(Symbol, Symbol);
 		mirb_typeclass(String, String);
 		mirb_typeclass(Array, Array);
+		mirb_typeclass(Hash, Hash);
 		mirb_typeclass(Proc, Proc);
 		mirb_typeclass(Exception, Exception);
 		mirb_typeclass(ReturnException, ReturnException);
@@ -339,6 +346,7 @@ namespace Mirb
 		mirb_derived_from(Object, Module);
 		mirb_derived_from(Object, Class);
 		mirb_derived_from(Object, Array);
+		mirb_derived_from(Object, Hash);
 		mirb_derived_from(Object, String);
 		mirb_derived_from(Object, Symbol);
 		mirb_derived_from(Object, Proc);
@@ -354,6 +362,8 @@ namespace Mirb
 		mirb_derived_from(String, String);
 		
 		mirb_derived_from(Symbol, Symbol);
+
+		mirb_derived_from(Hash, Hash);
 		
 		mirb_derived_from(Proc, Proc);
 		
