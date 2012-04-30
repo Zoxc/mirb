@@ -92,21 +92,21 @@ namespace Mirb
 			{
 				auto target = (Tree::StringNode *)node;
 
-				return std::string((const char *)target->string);
+				return std::string((const char *)target->string.data, target->string.length);
 			}
 			
 			case Tree::SimpleNode::InterpolatedPair:
 			{
 				auto target = (Tree::InterpolatedPairNode *)node;
 				
-				return std::string((const char *)target->string) + "#{" + print_node(target->group);
+				return std::string((const char *)target->string.data, target->string.length) + "#{" + print_node(target->group);
 			}
 			
 			case Tree::SimpleNode::InterpolatedString:
 			{
 				auto target = (Tree::InterpolatedStringNode *)node;
 				
-				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->tail) + "\"";
+				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->tail.data, target->tail.length) + "\"";
 			}
 			
 			case Tree::SimpleNode::Integer:

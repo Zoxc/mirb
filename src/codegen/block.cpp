@@ -32,6 +32,7 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool, Tree::Scope *scope) :
 			scope(scope),
 			memory_pool(memory_pool),
+			strings(memory_pool),
 			self_var(no_var),
 			heap_var(no_var),
 			var_count(scope->variable_list.size())
@@ -44,6 +45,7 @@ namespace Mirb
 		Block::Block(MemoryPool &memory_pool) :
 			scope(0),
 			memory_pool(memory_pool),
+			strings(memory_pool),
 			var_count(0)
 		{
 			initialize();
@@ -60,6 +62,14 @@ namespace Mirb
 			{
 				size += (size_t)i().opcodes.tellp();
 				ranges += i().source_locs.size();
+			}
+
+			if(strings.size())
+			{
+				final->strings = new const char_t *[strings.size()];
+
+				for(size_t i = 0; i < strings.size(); ++i)
+					final->strings[i] = strings[i];
 			}
 
 			if(ranges)

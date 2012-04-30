@@ -99,13 +99,13 @@ namespace Mirb
 
 			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
 			{
-				if(strlen((const char *)i().string))
+				if(i().string.length)
 					param_count++;
 				
 				param_count++;
 			}
 			
-			if(strlen((const char *)node->tail))
+			if(node->tail.length)
 				param_count++;
 			
 			VariableGroup group(this, param_count);
@@ -114,13 +114,13 @@ namespace Mirb
 			
 			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
 			{
-				if(strlen((const char *)i().string))
+				if(i().string.length)
 					gen<StringOp>(group[param++], i().string);
 				
 				to_bytecode(i().group, group[param++]);
 			}
 			
-			if(strlen((const char *)node->tail))
+			if(node->tail.length)
 				gen<StringOp>(group[param++], node->tail);
 			
 			gen<InterpolateOp>(var, group.size, group.use());

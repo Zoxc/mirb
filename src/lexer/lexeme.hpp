@@ -7,6 +7,12 @@
 namespace Mirb
 {
 	class Lexer;
+	
+	struct StringData
+	{
+		const char_t *data;
+		size_t length;
+	};
 
 	class Lexeme:
 		public Range
@@ -173,20 +179,18 @@ namespace Mirb
 			
 			Lexer &lexer;
 			
-			bool whitespace : 1;
-			bool allow_keywords : 1;
-			bool error : 1;
+			bool whitespace;
+			bool allow_keywords;
+			bool error;
 			
 			Type type;
 			const char_t *prev;
 			
 			Vector<bool, MemoryPool> curlies;
 			
-			union
-			{
-				Symbol *symbol;
-				const char_t *c_str;
-			};
+			Symbol *symbol;
+
+			StringData str;
 
 			Range &get_prev();
 

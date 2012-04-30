@@ -75,12 +75,6 @@ namespace Mirb
 			return auto_cast(array);
 		}
 		
-		value_t create_string(const char *string)
-		{
-			// TODO: Make sure string is not garbage collected. Replace it with something nicer.
-			return auto_cast(Collector::allocate<String>((const char_t *)string, std::strlen(string)));
-		}
-		
 		value_t define_class(value_t obj, Symbol *name, value_t super)
 		{
 			if(prelude_unlikely(obj == context->main))

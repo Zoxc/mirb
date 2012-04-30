@@ -67,7 +67,7 @@ namespace Mirb
 		public PinnedHeader
 	{
 		public:
-			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), ranges(nullptr), source_location(2) {}
+			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), strings(nullptr), ranges(nullptr), source_location(2) {}
 			
 			~Block()
 			{
@@ -79,6 +79,14 @@ namespace Mirb
 
 				if(executor == evaluate_block)
 					std::free((void *)opcodes);
+
+				if(strings)
+				{
+					for(size_t i = 0; i < string_count; ++i)
+						delete[] strings[i];
+
+					delete[] strings;
+				}
 			};
 
 			typedef value_t (*executor_t)(Frame &frame);
@@ -89,6 +97,9 @@ namespace Mirb
 			size_t var_words;
 
 			const char *opcodes;
+
+			const char_t **strings;
+			size_t string_count;
 
 			Range *ranges;
 			Map<size_t, Range *> source_location;

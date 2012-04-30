@@ -419,7 +419,7 @@ namespace Mirb
 
 					opcode += sizeof(StringOp);
 					
-					return var(op->var) + " = string '" + (const char *)op->str + "'";
+					return var(op->var) + " = string '" + std::string((const char *)op->str.data, op->str.length) + "'";
 				}
 				
 				case Opcode::Interpolate:

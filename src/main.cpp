@@ -25,40 +25,44 @@ int main()
 		std::string line;
 		
 		std::getline(std::cin, line);
-		
-		MemoryPool::Base memory_pool;
-		Document *document = Collector::allocate_pinned<Document>();
 
-		document->copy((const char_t *)line.c_str(), line.length());
-		
-		document->name = "Input";
+		Block *block;
 
-		Parser parser(symbol_pool, memory_pool, document);
-
-		parser.load();
-		
-		if(parser.lexeme() == Lexeme::END && parser.messages.empty())
-			break;
-		
-		Tree::Scope *scope = parser.parse_main();
-		
-		if(!parser.messages.empty())
 		{
-			for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-				std::cout << i().format() << "\n";
-				
-			continue;
-		}
-	
-		#ifdef MIRB_DEBUG_COMPILER
-			DebugPrinter printer;
-			
-			std::cout << "Parsing done.\n-----\n";
-			std::cout << printer.print_node(scope->group);
-			std::cout << "\n-----\n";
-		#endif
+			MemoryPool::Base memory_pool;
+			Document *document = Collector::allocate_pinned<Document>();
+
+			document->copy((const char_t *)line.c_str(), line.length());
 		
-		Block *block = Compiler::compile(scope, memory_pool);
+			document->name = "Input";
+
+			Parser parser(symbol_pool, memory_pool, document);
+
+			parser.load();
+		
+			if(parser.lexeme() == Lexeme::END && parser.messages.empty())
+				break;
+		
+			Tree::Scope *scope = parser.parse_main();
+		
+			if(!parser.messages.empty())
+			{
+				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
+					std::cout << i().format() << "\n";
+				
+				continue;
+			}
+	
+			#ifdef MIRB_DEBUG_COMPILER
+				DebugPrinter printer;
+			
+				std::cout << "Parsing done.\n-----\n";
+				std::cout << printer.print_node(scope->group);
+				std::cout << "\n-----\n";
+			#endif
+		
+			block = Compiler::compile(scope, memory_pool);
+		}
 		
 		value_t result = call_code(block, context->main, Symbol::from_literal("main"), class_of(context->main), value_nil, 0, 0);
 		

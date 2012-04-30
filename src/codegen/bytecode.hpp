@@ -93,7 +93,13 @@ namespace Mirb
 				}
 				
 				var_t self_var();
-
+				
+				void gen_string(var_t var, const StringData &data)
+				{
+					block->strings.push(data.data);
+					gen<StringOp>(var, data);
+				}
+				
 				void gen_if(BasicBlock *ltrue, var_t var)
 				{
 					basic->branches.push(BasicBlock::BranchInfo(gen<BranchIfOp>(var), ltrue));

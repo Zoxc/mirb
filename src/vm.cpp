@@ -245,7 +245,7 @@ namespace Mirb
 		EndOp
 
 		Op(String)
-			vars[op.var] = Support::create_string((const char *)op.str);
+			vars[op.var] = CharArray(op.str.data, op.str.length).to_string();
 		EndOp
 
 		Op(Interpolate)

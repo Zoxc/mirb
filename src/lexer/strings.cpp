@@ -45,7 +45,6 @@ namespace Mirb
 			
 		done:
 		mirb_debug_assert((size_t)(writer - str) == length);
-		*writer = 0;
 	}
 
 	void Lexer::simple_string()
@@ -123,18 +122,20 @@ namespace Mirb
 
 		error:
 		lexeme.stop = &input;
-		lexeme.c_str = (const char_t *)"";
+		lexeme.str.data = (const char_t *)"";
+		lexeme.str.length = 0;
 		return;
 		
 		done:
 		lexeme.stop = &input;
 		
 		size_t str_length = lexeme.length() - overhead;
-		char_t *str = new char_t[str_length + 1]; //TODO: Fix memory leak
+		char_t *str = new char_t[str_length];
 		
 		build_simple_string(lexeme.start + 1, str, str_length);
 		
-		lexeme.c_str = str;
+		lexeme.str.data = str;
+		lexeme.str.length = str_length;
 	}
 	
 	void Lexer::build_string(const char_t *start, char_t *str, size_t length prelude_unused)
@@ -233,7 +234,6 @@ namespace Mirb
 			
 		done:
 		mirb_debug_assert((size_t)(writer - str) == length);
-		*writer = 0;
 	}
 
 	void Lexer::parse_string(bool initial)
@@ -338,7 +338,8 @@ namespace Mirb
 		
 		error:
 		lexeme.stop = &input;
-		lexeme.c_str = (const char_t *)"";
+		lexeme.str.data = (const char_t *)"";
+		lexeme.str.length = 0;
 		return;
 		
 		done:
@@ -352,7 +353,8 @@ namespace Mirb
 		
 		build_string(lexeme.start + 1, str, str_length);
 		
-		lexeme.c_str = str;
+		lexeme.str.data = str;
+		lexeme.str.length = str_length;
 	}
 	
 	void Lexer::curly_close()

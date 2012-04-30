@@ -26,7 +26,7 @@ namespace Mirb
 	
 	void Parser::report(Range &range, std::string text, Message::Severity severity)
 	{
-		new StringMessage(*this, range, severity, text);
+		new (memory_pool) StringMessage(*this, range, severity, text);
 	}
 
 	bool Parser::is_constant(Symbol *symbol)
@@ -336,7 +336,7 @@ namespace Mirb
 			{
 				auto result = new (fragment) Tree::StringNode;
 
-				result->string = lexer.lexeme.c_str;
+				result->string = lexer.lexeme.str;
 
 				lexer.step();
 
@@ -351,7 +351,7 @@ namespace Mirb
 				{
 					auto pair = new (fragment) Tree::InterpolatedPairNode;
 					
-					pair->string = lexer.lexeme.c_str;
+					pair->string = lexer.lexeme.str;
 					
 					lexer.step();
 					
@@ -363,12 +363,12 @@ namespace Mirb
 				
 				if(require(Lexeme::STRING_END))
 				{
-					result->tail = lexer.lexeme.c_str;
+					result->tail = lexer.lexeme.str;
 
 					lexer.step();
 				}
 				else
-					result->tail = 0;
+					result->tail.length = 0;
 
 				return result;
 			}

@@ -74,8 +74,8 @@ namespace Mirb
 			public Node
 		{
 			NodeType type() { return String; }
-			
-			const char_t *string;
+
+			StringData string;
 		};
 		
 		struct InterpolatedPairNode:
@@ -83,7 +83,8 @@ namespace Mirb
 		{
 			NodeType type() { return InterpolatedPair; }
 			
-			const char_t *string;
+			StringData string;
+
 			Node *group;
 		};
 		
@@ -96,7 +97,7 @@ namespace Mirb
 			
 			InterpolatedPairList pairs;
 			
-			const char_t *tail; // TODO: Replace with a nicer type
+			StringData tail;
 		};
 		
 		struct IntegerNode:

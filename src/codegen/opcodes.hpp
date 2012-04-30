@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include "../value.hpp"
 #include "../block.hpp"
+#include "../lexer/lexeme.hpp"
 
 namespace Mirb
 {
@@ -464,9 +465,9 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::String>
 		{
 			var_t var;
-			const char_t *str;
+			StringData str;
 
-			StringOp(var_t var, const char_t *str) : var(var), str(str) {}
+			StringOp(var_t var, const StringData &str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:

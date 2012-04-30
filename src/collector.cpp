@@ -243,8 +243,8 @@ namespace Mirb
 		for(auto obj = heap_list.first; obj;)
 		{
 			auto next = obj->entry.next;
-
-			std::free((void *)obj);
+			
+			Value::virtual_do<FreeClass>(Value::type(obj), obj);
 
 			obj = next;
 		}

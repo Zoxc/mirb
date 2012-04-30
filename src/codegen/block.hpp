@@ -70,6 +70,8 @@ namespace Mirb
 				size_t stack_vars;
 				size_t stack_heap_size;
 				
+				Vector<const char_t  *, MemoryPool> strings;
+				
 				var_t self_var;
 				var_t return_var;
 				var_t heap_var;
