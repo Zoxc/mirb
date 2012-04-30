@@ -336,7 +336,7 @@ namespace Mirb
 			{
 				auto result = new (fragment) Tree::StringNode;
 
-				result->string = lexer.lexeme.str;
+				result->string = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
 
 				lexer.step();
 
@@ -351,7 +351,7 @@ namespace Mirb
 				{
 					auto pair = new (fragment) Tree::InterpolatedPairNode;
 					
-					pair->string = lexer.lexeme.str;
+					pair->string = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
 					
 					lexer.step();
 					
@@ -363,7 +363,7 @@ namespace Mirb
 				
 				if(require(Lexeme::STRING_END))
 				{
-					result->tail = lexer.lexeme.str;
+					result->tail = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
 
 					lexer.step();
 				}

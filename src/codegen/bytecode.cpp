@@ -91,7 +91,7 @@ namespace Mirb
 			{
 				auto node = (Tree::StringNode *)basic_node;
 				
-				gen<StringOp>(var, node->string);
+				gen_string(var, node->string);
 			}
 		}
 		
@@ -119,13 +119,13 @@ namespace Mirb
 			for(auto i = node->pairs.begin(); i != node->pairs.end(); ++i)
 			{
 				if(i().string.length)
-					gen<StringOp>(group[param++], i().string);
+					gen_string(group[param++], i().string);
 				
 				to_bytecode(i().group, group[param++]);
 			}
 			
 			if(node->tail.length)
-				gen<StringOp>(group[param++], node->tail);
+				gen_string(group[param++], node->tail);
 			
 			gen<InterpolateOp>(var, group.size, group.use());
 		}
@@ -738,9 +738,11 @@ namespace Mirb
 		{
 			if(strings.size())
 			{
-				final->strings = new const char_t *[strings.size()];
+				final->string_count = strings.size();
 
-				for(size_t i = 0; i < strings.size(); ++i)
+				final->strings = new const char_t *[final->string_count];
+
+				for(size_t i = 0; i < final->string_count; ++i)
 					final->strings[i] = strings[i];
 			}
 			
@@ -809,16 +811,16 @@ namespace Mirb
 
 		ByteCodeGenerator::ByteCodeGenerator(MemoryPool memory_pool, Tree::Scope *scope) :
 			scope(scope),
-			memory_pool(memory_pool),
+			current_exception_block(0),
 			exception_blocks(memory_pool),
 			strings(memory_pool),
 			opcode(memory_pool),
+			branches(memory_pool),
+			source_locs(memory_pool),
 			self_var(no_var),
 			heap_var(no_var),
 			var_count(scope->variable_list.size()),
-			current_exception_block(0),
-			branches(memory_pool),
-			source_locs(memory_pool)
+			memory_pool(memory_pool)
 		{
 			Value::assert_valid(scope);
 

@@ -141,8 +141,9 @@ namespace Mirb
 						return no_var;
 				}
 				
-				void gen_string(var_t var, const StringData &data)
+				void gen_string(var_t var, StringData data)
 				{
+					data = data.copy<Prelude::Allocator::Standard>();
 					strings.push(data.data);
 					gen<StringOp>(var, data);
 				}

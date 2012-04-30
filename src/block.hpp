@@ -93,7 +93,7 @@ namespace Mirb
 				if(strings)
 				{
 					for(size_t i = 0; i < string_count; ++i)
-						delete[] strings[i];
+						std::free((void *)strings[i]);
 
 					delete[] strings;
 				}

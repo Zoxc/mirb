@@ -72,6 +72,8 @@ int main()
 		{
 			Exception *exception = current_exception;
 
+			swallow_exception();
+
 			OnStack<1> os2(exception);
 
 			Platform::color<Platform::Red>(inspect_obj(real_class_of(auto_cast(exception))));
