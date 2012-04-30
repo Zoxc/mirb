@@ -430,8 +430,6 @@ namespace Mirb
 				
 				case Opcode::UnwindRedo:
 				{
-					auto op = (UnwindRedoOp *)opcode;
-
 					opcode += sizeof(UnwindBreakOp);
 					
 					return "redo " + label(opcode);
