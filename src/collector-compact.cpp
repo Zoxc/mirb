@@ -270,7 +270,7 @@ namespace Mirb
 			
 			value_t next = (value_t)((size_t)pos + size);
 
-			if((size_t)next > (size_t)region->pos) // TODO: Allocate to region->end
+			if((size_t)next > (size_t)region->end)
 				return allocate_region(size);
 			
 			mirb_debug_assert(region->contains(next));
@@ -407,13 +407,20 @@ namespace Mirb
 
 		free.update();
 
+		Collector::current = free.region;
+
 		{
-			Region *current = free.region->entry.next;
+			Region *current = Collector::current->entry.next;
+
+			Collector::current->entry.next = nullptr;
 
 			while(current)
 			{
-				current->pos = (char_t *)current->data();
-				current = current->entry.next;
+				Region *next = current->entry.next;
+
+				free_region(current);
+
+				current = next;
 			}
 		}
 		
