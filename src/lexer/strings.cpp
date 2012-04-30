@@ -130,7 +130,7 @@ namespace Mirb
 		lexeme.stop = &input;
 		
 		size_t str_length = lexeme.length() - overhead;
-		char_t *str = new char_t[str_length];
+		char_t *str = new (memory_pool) char_t[str_length];
 		
 		build_simple_string(lexeme.start + 1, str, str_length);
 		
@@ -349,7 +349,7 @@ namespace Mirb
 			lexeme.type = (Lexeme::Type)((int)lexeme.type + 1);
 		
 		size_t str_length = lexeme.length() - overhead;
-		char_t *str = new char_t[str_length + 1]; //TODO: Fix memory leak
+		char_t *str = new (memory_pool) char_t[str_length + 1]; //TODO: Fix memory leak
 		
 		build_string(lexeme.start + 1, str, str_length);
 		

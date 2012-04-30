@@ -12,6 +12,17 @@ namespace Mirb
 	{
 		const char_t *data;
 		size_t length;
+
+		template<typename A> StringData copy(typename A::Reference ref = A::default_reference)
+		{
+			StringData result;
+
+			result.data = (const char_t *)A(ref).allocate(length);
+			std::memcpy((void *)result.data, data, length);
+			result.length = length;
+
+			return result;
+		}
 	};
 
 	class Lexeme:
