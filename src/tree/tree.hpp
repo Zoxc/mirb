@@ -116,7 +116,7 @@ namespace Mirb
 			public HashTableFunctions<Symbol *, NamedVariable *, Fragment>
 		{
 			public:
-				static bool compare_key_value(Symbol *key, NamedVariable *value)
+				static bool compare_key_value(Symbol *key, size_t, NamedVariable *value)
 				{
 					return key == value->name;
 				}

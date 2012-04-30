@@ -112,7 +112,8 @@ namespace Mirb
 			ReturnException,
 			BreakException,
 			NextException,
-			RedoException
+			RedoException,
+			Types
 		};
 		
 		class Header
@@ -128,15 +129,20 @@ namespace Mirb
 				Header(Type type);
 			
 				Type get_type();
+
+				static const size_t type_bits = 5;
+
+				static_assert(((1 << type_bits) - 1) >= (size_t)Types, "Too few bits for type field");
 				
 				static const size_t magic_value;
 				static value_t * const list_end;
 				
-				const Type type;
-				bool marked;
+				Type type : type_bits;
+				bool marked : 1;
+				bool hashed : 1;
 				
 				#ifdef DEBUG
-					bool alive;
+					bool alive : 1;
 					size_t size;
 					size_t magic;
 					value_t refs;
@@ -155,12 +161,22 @@ namespace Mirb
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
 				#endif
+
+				size_t hash()
+				{
+					mirb_runtime_abort("No hash function defined for object");
+				}
 		};
 
 		template<Type type> struct Immediate:
 			public Value::Header
 		{
 			template<typename F> void mark(F) {}
+
+			size_t hash()
+			{
+				return hash_number((size_t)this); // Note: First bit is constant
+			}
 		};
 	
 		bool object_ref(value_t value);
@@ -397,8 +413,10 @@ namespace Mirb
 		{
 			Value::assert_valid(value);
 
-			return virtual_do<OfType<T>::template Test, bool>(type(value), true);
+			return virtual_do<OfType<T>::template Test>(type(value), true);
 		}
+		
+		size_t hash(value_t value);
 		
 		void initialize_type_table();
 		void initialize_class_table();

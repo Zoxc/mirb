@@ -17,7 +17,13 @@ namespace Mirb
 			static value_t inspect(value_t obj);
 
 		public:
-			Symbol(const CharArray &char_array) : Object(Value::Symbol, context->symbol_class), string(char_array) {}
+			Symbol(const CharArray &char_array, size_t hash) : Object(Value::Symbol, context->symbol_class), string(char_array)
+			{
+				mirb_debug_assert(hash == char_array.hash());
+
+				hash_value = hash;
+				hashed = true;
+			}
 
 			CharArray string;
 

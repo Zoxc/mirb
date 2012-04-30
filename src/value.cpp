@@ -4,6 +4,17 @@
 #include "classes/nil-class.hpp"
 #include "classes/false-class.hpp"
 #include "classes/true-class.hpp"
+#include "classes/array.hpp"
+#include "classes/class.hpp"
+#include "classes/string.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "classes/exceptions.hpp"
+#include "classes/method.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "document.hpp"
+#include "tree/tree.hpp"
 
 namespace Mirb
 {
@@ -143,6 +154,23 @@ namespace Mirb
 		{
 			return type;
 		}
-	
+
+		template<Type type> struct HashValue
+		{
+			typedef size_t Result;
+			typedef typename TypeClass<type>::Class Class;
+
+			static size_t func(value_t value)
+			{
+				return static_cast<Class *>(value)->hash();
+			}
+		};
+
+		size_t hash(value_t value)
+		{
+			Value::assert_valid(value);
+
+			return virtual_do<HashValue>(type(value), value);
+		}
 	};
 };

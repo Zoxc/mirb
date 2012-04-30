@@ -12,8 +12,11 @@ namespace Mirb
 		public HashTableFunctions<const CharArray &, Symbol *>
 	{
 		public:
-			static bool compare_key_value(const CharArray &key, Symbol *value)
+			static bool compare_key_value(const CharArray &key, size_t hash, Symbol *value)
 			{
+				if(hash != value->hash_value)
+					return false;
+
 				return key == value->string;
 			}
 
@@ -47,9 +50,9 @@ namespace Mirb
 				return true;
 			}
 
-			static Symbol *create_value(Prelude::Allocator::Standard::Reference, const CharArray &key)
+			static Symbol *create_value(Prelude::Allocator::Standard::Reference, const CharArray &key, size_t hash)
 			{
-				Symbol *result = new Symbol(key); // TODO: Allocate as root memory.
+				Symbol *result = new Symbol(key, hash); // TODO: Allocate as root memory.
 
 				symbol_pool_list.append(result);
 

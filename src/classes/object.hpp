@@ -17,6 +17,8 @@ namespace Mirb
 			static value_t equal(value_t obj, value_t other);
 			static value_t not_equal(value_t obj, value_t other);
 			static value_t method_not(value_t obj);
+			
+			void generate_hash();
 		public:
 			Object(Value::Type type, Module *instance_of) : Value::Header(type), instance_of(instance_of), vars(0) {}
 			Object(Module *instance_of) : Value::Header(Value::Object), instance_of(instance_of), vars(0) {}
@@ -28,6 +30,7 @@ namespace Mirb
 			
 			Module *instance_of;
 			ValueMap *vars;
+			size_t hash_value;
 
 			static void initialize();
 
@@ -37,6 +40,14 @@ namespace Mirb
 
 				if(vars)
 					mark(vars);
+			}
+			
+			size_t hash()
+			{
+				if(!hashed)
+					generate_hash();
+
+				return hash_value;
 			}
 	};
 };

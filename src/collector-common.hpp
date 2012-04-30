@@ -1,4 +1,17 @@
 #include "collector.hpp"
+#include "classes/array.hpp"
+#include "classes/class.hpp"
+#include "classes/string.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
+#include "classes/exceptions.hpp"
+#include "classes/nil-class.hpp"
+#include "classes/false-class.hpp"
+#include "classes/true-class.hpp"
+#include "classes/fixnum.hpp"
+#include "classes/method.hpp"
+#include "classes/proc.hpp"
+#include "classes/symbol.hpp"
 
 namespace Mirb
 {

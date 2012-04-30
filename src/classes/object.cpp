@@ -8,6 +8,12 @@
 namespace Mirb
 {
 	Block *Object::inspect_block;
+
+	void Object::generate_hash()
+	{
+		hash_value = hash_number((size_t)this); // Note: The first two bits are constant
+		this->hashed = true;
+	}
 	
 	value_t Object::allocate(value_t instance_of)
 	{

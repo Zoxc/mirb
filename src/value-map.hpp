@@ -30,6 +30,11 @@ namespace Mirb
 	{
 		public:
 			typedef ValueMapPair Pair;
+			
+			static size_t hash_key(value_t key)
+			{
+				return Value::hash(key);
+			}
 
 			static value_t invalid_value()
 			{
