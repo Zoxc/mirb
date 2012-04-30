@@ -10,11 +10,6 @@ namespace Mirb
 {
 	class Block;
 
-	namespace CodeGen
-	{
-		class Block;
-	};
-	
 	namespace Tree
 	{
 		class Chunk
@@ -196,6 +191,9 @@ namespace Mirb
 				 * Exception related fields
 				 */
 				bool require_exceptions;
+
+				
+				bool require_self;
 
 				/*
 				 * Variable related fields

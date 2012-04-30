@@ -14,7 +14,7 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
-		class BasicBlock;
+		class Label;
 		struct BreakTargetOp;
 	};
 
@@ -35,7 +35,7 @@ namespace Mirb
 	
 	union BlockLabel
 	{
-		CodeGen::BasicBlock *block;
+		CodeGen::Label *label;
 		size_t address;
 	};
 	
@@ -67,7 +67,17 @@ namespace Mirb
 		public PinnedHeader
 	{
 		public:
-			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), strings(nullptr), ranges(nullptr), source_location(2) {}
+			Block(Document *document) :
+				PinnedHeader(Value::InternalBlock),
+				scope(nullptr),
+				document(document),
+				opcodes(nullptr),
+				strings(nullptr),
+				ranges(nullptr),
+				source_location(2),
+				break_targets(nullptr)
+			{
+			}
 			
 			~Block()
 			{

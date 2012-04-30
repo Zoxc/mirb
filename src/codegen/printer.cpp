@@ -3,7 +3,7 @@
 #include "../classes/fixnum.hpp"
 #include "printer.hpp"
 #include "opcodes.hpp"
-#include "block.hpp"
+#include "bytecode.hpp"
 
 namespace Mirb
 {
@@ -49,7 +49,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::label(BasicBlock *label)
+		std::string ByteCodePrinter::label(Label *label)
 		{
 			if(!label)
 				return "error_label";
@@ -67,20 +67,22 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::label(const char *opcode)
+		Label *ByteCodePrinter::get_label(const char *opcode)
 		{
-			BasicBlock *block = 0;
-
-			for(auto i = basic_block->branches.begin(); i != basic_block->branches.end(); ++i)
+			for(auto i = bcg->branches.begin(); i != bcg->branches.end(); ++i)
 			{
 				if((*i).first == (size_t)(opcode - data))
 				{
-					block = (*i).second;
-					break;
+					return (*i).second;
 				}
 			}
 
-			return label(block);
+			return nullptr;
+		}
+		
+		std::string ByteCodePrinter::label(const char *opcode)
+		{
+			return label(get_label(opcode));
 		}
 		
 		std::string ByteCodePrinter::print_block(Mirb::Block *block)
@@ -438,29 +440,27 @@ namespace Mirb
 			return result;
 		}
 		
-		std::string ByteCodePrinter::print_basic_block(BasicBlock *block)
-		{
-			std::stringstream result;
-			result << label(block) << ":\n";
-
-			std::string code = block->opcodes.str();
-
-			basic_block = block;
-			data = code.data();
-			
-			for(const char *c = code.data(); c != code.data() + code.size();)
-				result << opcode(c) << "\n";
-			
-			return result.str();
-		}
-
 		std::string ByteCodePrinter::print()
 		{
 			std::stringstream result;
-			result << ";\n; " << print_block(block->final) << "\n;\n";
 			
-			for(auto i = block->basic_blocks.begin(); i != block->basic_blocks.end(); ++i)
-				result << print_basic_block(*i) << "\n";
+			result << ";\n; " << print_block(bcg->final) << "\n;\n";
+
+			char *opcodes = (char *)bcg->opcode.compact<Prelude::Allocator::Standard>();
+			
+			data = opcodes;
+			
+			for(const char *c = opcodes; c != opcodes + bcg->opcode.size();)
+			{
+				Label *l = get_label(c);
+
+				if(l)
+					result << label(l) << ":\n";
+
+				result << opcode(c) << "\n";
+			}
+			
+			Prelude::Allocator::Standard::free(opcodes);
 			
 			return result.str();
 		}

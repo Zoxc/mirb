@@ -12,7 +12,6 @@ namespace Mirb
 	
 	namespace CodeGen
 	{
-		class Block;
 		class BasicBlock;
 		class ByteCodeGenerator;
 	};

@@ -376,6 +376,8 @@ namespace Mirb
 			case Lexeme::KW_SELF:
 			{
 				lexer.step();
+				
+				scope->require_self = true;
 
 				return new (fragment) Tree::SelfNode;
 			}
@@ -430,6 +432,8 @@ namespace Mirb
 
 				lexer.step();
 				
+				scope->require_self = true;
+
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}
 			
@@ -441,6 +445,8 @@ namespace Mirb
 				auto range = capture();
 
 				lexer.step();
+				
+				scope->require_self = true;
 
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, false);
 			}

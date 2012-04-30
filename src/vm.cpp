@@ -346,7 +346,7 @@ handle_exception:
 
 			current_exception_block = block->parent;
 
-			if(block->ensure_label.block)
+			if(block->ensure_label.address != (size_t)-1)
 			{
 				handling_exception = true;
 				ip =  ip_start + block->ensure_label.address;

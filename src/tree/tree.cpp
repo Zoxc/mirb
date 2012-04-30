@@ -15,6 +15,7 @@ namespace Mirb
 			break_targets(0),
 			break_dst(no_var),
 			require_exceptions(false),
+			require_self(false),
 			variables(2, fragment),
 			heap_vars(0),
 			block_parameter(0),

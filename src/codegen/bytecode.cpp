@@ -5,6 +5,10 @@
 #include "../block.hpp"
 #include "../classes/fixnum.hpp"
 
+#ifdef MIRB_DEBUG_COMPILER
+	#include "printer.hpp"
+#endif
+
 namespace Mirb
 {
 	namespace CodeGen
@@ -13,8 +17,8 @@ namespace Mirb
 		{
 			if(size)
 			{
-				var = bcg->block->var_count;
-				bcg->block->var_count += size;
+				var = bcg->var_count;
+				bcg->var_count += size;
 			}
 		}
 
@@ -149,7 +153,7 @@ namespace Mirb
 					gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->heap_var;
+					heap = heap_var;
 
 				var_t result = create_var();
 
@@ -216,9 +220,9 @@ namespace Mirb
 				
 				to_bytecode(node->value, temp);
 				
-				BasicBlock *label_true = create_block();
-				BasicBlock *label_end = create_block();
-				BasicBlock *label_false = create_block();
+				Label *label_true = create_label();
+				Label *label_end = create_label();
+				Label *label_false = create_label();
 				
 				gen_if(label_true, temp);
 
@@ -263,8 +267,8 @@ namespace Mirb
 			
 			to_bytecode(node->left, var);
 			
-			BasicBlock *label_end = create_block();
-			BasicBlock *body = create_block();
+			Label *label_end = create_label();
+			Label *body = create_label();
 			
 			if(node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR)
 				gen_if(label_end, var);
@@ -291,7 +295,7 @@ namespace Mirb
 					gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
 				}
 				else
-					heap = block->heap_var;
+					heap = heap_var;
 
 				gen<SetHeapVarOp>(heap, var->loc, value);
 			}
@@ -380,7 +384,7 @@ namespace Mirb
 		void ByteCodeGenerator::convert_self(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
-				gen<MoveOp>(var, self_var());
+				gen<MoveOp>(var, self_var);
 		}
 		
 		void ByteCodeGenerator::convert_nil(Tree::Node *, var_t var)
@@ -480,9 +484,9 @@ namespace Mirb
 			
 			var_t temp = reuse(var);
 
-			BasicBlock *label_else = create_block();
-			BasicBlock *label_end = create_block();
-			BasicBlock *body = create_block();
+			Label *label_else = create_label();
+			Label *label_end = create_label();
+			Label *body = create_label();
 			
 			to_bytecode(node->left, temp);
 			
@@ -563,15 +567,15 @@ namespace Mirb
 
 				//block_emmit_label(block, label);
 			}
-			else if(has_ensure_block(block))
+			else if(in_ensure_block())
 			{
-				gen<UnwindReturnOp>(temp, block->final);
+				gen<UnwindReturnOp>(temp, final);
 				location(node->range);
 			}
 			else
 			{
-				gen<MoveOp>(block->return_var, temp);
-				branch(block->epilog);
+				gen<MoveOp>(return_var, temp);
+				branch(epilog);
 			}
 		}
 		
@@ -595,8 +599,8 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<MoveOp>(block->return_var, temp);
-			branch(block->epilog);
+			gen<MoveOp>(return_var, temp);
+			branch(epilog);
 		}
 		
 		void ByteCodeGenerator::convert_redo(Tree::Node *, var_t)
@@ -651,22 +655,22 @@ namespace Mirb
 			 * Allocate and setup the new exception block
 			 */
 			ExceptionBlock *exception_block = new ExceptionBlock;
-			exception_block->parent = block->current_exception_block;
+			exception_block->parent = current_exception_block;
 			
 			/*
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
-				exception_block->ensure_label.block = create_block();
+				exception_block->ensure_label.label = create_label();
 			else
-				exception_block->ensure_label.block = 0;
+				exception_block->ensure_label.label = 0;
 			
-			block->exception_blocks.push(exception_block);
+			exception_blocks.push(exception_block);
 			
 			/*
 			 * Use the new exception block
 			 */
-			block->current_exception_block = exception_block;
+			current_exception_block = exception_block;
 			gen<HandlerOp>(exception_block);
 			
 			/*
@@ -679,7 +683,7 @@ namespace Mirb
 				/*
 				 * Skip the rescue block
 				 */
-				BasicBlock *ok_label = create_block();
+				Label *ok_label = create_label();
 				gen<HandlerOp>(exception_block->parent);
 				gen_branch(ok_label);
 				
@@ -691,9 +695,9 @@ namespace Mirb
 					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler;
 					handler->type = RuntimeException;
 
-					BasicBlock *handler_body = gen(create_block());
+					Label *handler_body = gen(create_label());
 
-					handler->rescue_label.block = handler_body;
+					handler->rescue_label.label = handler_body;
 
 					exception_block->handlers.push(handler);
 					
@@ -710,14 +714,14 @@ namespace Mirb
 			/*
 			 * Restore the old exception frame
 			 */
-			block->current_exception_block = exception_block->parent;
+			current_exception_block = exception_block->parent;
 			
 			/*
 			 * Check for ensure node
 			 */
 			if(node->ensure_group)
 			{
-				gen(exception_block->ensure_label.block);
+				gen(exception_block->ensure_label.label);
 				
 				//gen<FlushOp>(); Flush
 					
@@ -730,76 +734,142 @@ namespace Mirb
 			}
 		}
 		
-		ByteCodeGenerator::ByteCodeGenerator(MemoryPool memory_pool) : memory_pool(memory_pool) 
+		void ByteCodeGenerator::finalize()
 		{
+			if(strings.size())
+			{
+				final->strings = new const char_t *[strings.size()];
+
+				for(size_t i = 0; i < strings.size(); ++i)
+					final->strings[i] = strings[i];
+			}
+			
+			size_t ranges = source_locs.size();
+			
+			if(ranges)
+			{
+				final->ranges = (Range *)std::malloc(ranges * sizeof(Range));
+
+				ranges = 0;
+				
+				for(auto i = source_locs.begin(); i != source_locs.end(); ++i, ++ranges)
+				{
+					final->ranges[ranges] = *i().second;
+
+					final->source_location.set(i().first, &final->ranges[ranges]);
+				}
+			}
+			else
+				final->ranges = nullptr;
+
+			const char *opcodes = (const char *)opcode.compact<Prelude::Allocator::Standard>();
+
+			for(auto i = branches.begin(); i != branches.end(); ++i)
+			{
+				BranchOp *op = (BranchOp *)&opcodes[(*i).first];
+
+				op->pos = (*i).second->pos;
+			}
+
+			for(auto i = exception_blocks.begin(); i != exception_blocks.end(); ++i)
+			{
+				if(i()->ensure_label.label)
+					i()->ensure_label.address = i()->ensure_label.label->pos;
+				else
+					i()->ensure_label.address = -1;
+
+				for(auto j = i()->handlers.begin(); j != i()->handlers.end(); ++j)
+				{
+					switch(j()->type)
+					{
+						case RuntimeException:
+						{
+							RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)*j;
+
+							handler->rescue_label.address = handler->rescue_label.label->pos;
+
+							break;
+						}
+
+						case ClassException:
+						case FilterException:
+						default:
+							break;
+					}
+				}
+			}
+
+			scope->children.clear();
+
+			final->scope = nullptr;
+			final->opcodes = opcodes;
+			final->var_words = var_count;
+			final->executor = &evaluate_block;
 		}
 
-		Block *ByteCodeGenerator::create()
-		{
-			scope = 0;
-
-			block = new (memory_pool) Block(memory_pool);
-			block->final = Collector::allocate_pinned<Mirb::Block>(scope->document);
-
-			return block;
-		}
-		
-		Block *ByteCodeGenerator::to_bytecode(Tree::Scope *scope)
+		ByteCodeGenerator::ByteCodeGenerator(MemoryPool memory_pool, Tree::Scope *scope) :
+			scope(scope),
+			memory_pool(memory_pool),
+			exception_blocks(memory_pool),
+			strings(memory_pool),
+			opcode(memory_pool),
+			self_var(no_var),
+			heap_var(no_var),
+			var_count(scope->variable_list.size()),
+			current_exception_block(0),
+			branches(memory_pool),
+			source_locs(memory_pool)
 		{
 			Value::assert_valid(scope);
 
-			this->scope = scope;
+			#ifdef MIRB_DEBUG_COMPILER
+				label_count = 0;
+			#endif
+		}
 
-			block = new (memory_pool) Block(memory_pool, scope);
+		Block *ByteCodeGenerator::generate()
+		{
+			Value::assert_valid(scope);
 
 			if(scope->final)
-				block->final = scope->final;
+				final = scope->final;
 			else
 			{
-				block->final = Collector::allocate_pinned<Mirb::Block>(scope->document);
-				scope->final = block->final;
+				final = Collector::allocate_pinned<Mirb::Block>(scope->document);
+				scope->final = final;
 			}
 			
-			block->return_var = create_var();
+			return_var = create_var();
 
 			for(auto i = scope->zsupers.begin(); i != scope->zsupers.end(); ++i)
 			{
 				scope->require_args(*i);
 			}
 
-			body = create_block();
-			block->epilog = create_block();
-			
+			body = create_label();
+			epilog = create_label();
+
 			if(scope->break_targets)
 			{
 				scope->require_exceptions = true;
-				block->final->break_targets = new var_t[scope->break_targets];
+				final->break_targets = new var_t[scope->break_targets];
 			}
 			else
-				block->final->break_targets = 0;
+				final->break_targets = 0;
 			
-			BasicBlock *prolog = create_block();
-			
-			gen(prolog);
-			
-			gen(body);
-
 			if(scope->heap_vars)
-				block->heap_var = create_var();
+			{
+				heap_var = create_var();
+				
+				gen<CreateHeapOp>(heap_var, scope->heap_vars);
+			}
 
-			to_bytecode(scope->group, block->return_var);
-			
-			gen(block->epilog);
+			if(scope->require_self)
+			{
+				self_var = create_var();
 
-			gen<ReturnOp>(block->return_var);
-
-			basic = prolog;
-			
-			if(is_var(block->self_var))
-				gen<SelfOp>(block->self_var);
-
-			if(scope->heap_vars)
-				gen<CreateHeapOp>(block->heap_var, block->scope->heap_vars);
+				gen<SelfOp>(self_var);
+			}
 			
 			if(scope->block_parameter)
 				gen<BlockOp>(ref(scope->block_parameter));
@@ -820,14 +890,30 @@ namespace Mirb
 					gen<LoadArgOp>(ref(*i), index++);
 			}
 			
-			return block;
+			gen(body);
+
+			to_bytecode(scope->group, return_var);
+
+			gen(epilog);
+
+			gen<ReturnOp>(return_var);
+
+			#ifdef MIRB_DEBUG_COMPILER
+				CodeGen::ByteCodePrinter printer(this);
+
+				std::cout << printer.print() << std::endl;
+			#endif
+			
+			finalize();
+
+			return final;
 		}
 		
 		Mirb::Block *ByteCodeGenerator::compile(Tree::Scope *scope)
 		{
 			Mirb::Block *result = Compiler::compile(scope, memory_pool);
 			
-			block->final->blocks.push(result);
+			final->blocks.push(result);
 
 			return result;
 		}
@@ -836,18 +922,18 @@ namespace Mirb
 		{
 			Mirb::Block *result = Compiler::defer(scope);
 
-			block->final->blocks.push(result);
+			final->blocks.push(result);
 
 			return result;
 		}
 
-		bool ByteCodeGenerator::has_ensure_block(Block *block)
+		bool ByteCodeGenerator::in_ensure_block()
 		{
-			ExceptionBlock *exception_block = block->current_exception_block;
+			ExceptionBlock *exception_block = current_exception_block;
 			
 			while(exception_block)
 			{
-				if(exception_block->ensure_label.block != 0)
+				if(exception_block->ensure_label.label != 0)
 					return true;
 
 				exception_block = exception_block->parent;
@@ -856,22 +942,18 @@ namespace Mirb
 			return false;
 		}
 		
-		BasicBlock *ByteCodeGenerator::create_block()
+		Label *ByteCodeGenerator::create_label()
 		{
-			return new (memory_pool) BasicBlock(memory_pool, *block);
-		}
-		
-		var_t ByteCodeGenerator::self_var()
-		{
-			if(!is_var(block->self_var))
-				block->self_var = create_var();
-			
-			return block->self_var;
+			#ifdef MIRB_DEBUG_COMPILER
+				return new (memory_pool) Label(label_count++);
+			#else
+				return new (memory_pool) Label;
+			#endif
 		}
 		
 		var_t ByteCodeGenerator::create_var()
 		{
-			return block->var_count++;
+			return var_count++;
 		}
 
 		var_t ByteCodeGenerator::block_arg(Tree::Scope *scope, var_t break_dst)
@@ -891,13 +973,13 @@ namespace Mirb
 				for(size_t i = 0; i < scope->referenced_scopes.size(); ++i)
 				{
 					if(scope->referenced_scopes[i] == this->scope)
-						gen<MoveOp>(group[i], block->heap_var);
+						gen<MoveOp>(group[i], heap_var);
 					else
 						gen<LookupOp>(group[i], scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
 				}
 
 				if(scope->break_id != Tree::Scope::no_break_id)
-					block->final->break_targets[scope->break_id] = break_dst;
+					final->break_targets[scope->break_id] = break_dst;
 
 				gen<ClosureOp>(var, block_attach, group.size, group.use());
 			}
