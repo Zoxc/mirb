@@ -179,38 +179,48 @@ namespace Mirb
 							input++;
 							break;
 						
-						case 'a':
-							*writer++ = 7;
-							input++;
-							break;
-						
-						case 'b':
-							*writer++ = 8;
-							input++;
-							break;
-						
-						case 'f':
-							*writer++ = 12;
-							input++;
-							break;
-						
 						case 'n':
-							*writer++ = 10;
-							input++;
-							break;
-						
-						case 'r':
-							*writer++ = 13;
+							*writer++ = 0xA;
 							input++;
 							break;
 						
 						case 't':
-							*writer++ = 9;
+							*writer++ = 0x9;
+							input++;
+							break;
+						
+						case 'r':
+							*writer++ = 0xD;
+							input++;
+							break;
+						
+						case 'f':
+							*writer++ = 0xC;
 							input++;
 							break;
 						
 						case 'v':
-							*writer++ = 11;
+							*writer++ = 0xB;
+							input++;
+							break;
+						
+						case 'a':
+							*writer++ = 0x7;
+							input++;
+							break;
+						
+						case 'e':
+							*writer++ = 0x1B;
+							input++;
+							break;
+						
+						case 'b':
+							*writer++ = 0x8;
+							input++;
+							break;
+						
+						case 's':
+							*writer++ = 0x20;
 							input++;
 							break;
 						
@@ -292,13 +302,15 @@ namespace Mirb
 						case '\"':
 						case '\\':
 						case '0':
-						case 'a':
-						case 'b':
-						case 'f':
 						case 'n':
-						case 'r':
 						case 't':
+						case 'r':
+						case 'f':
 						case 'v':
+						case 'a':
+						case 'e':
+						case 'b':
+						case 's':
 							overhead++;
 							input++;
 							break;
