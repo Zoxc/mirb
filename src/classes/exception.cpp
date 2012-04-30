@@ -74,7 +74,7 @@ namespace Mirb
 				Platform::color<Platform::Green>(CharArray(" ") * prefix.size() + range->indicator());
 			}
 			else
-				std::cerr << ("\n" + self->code->document->name + ":unknown").get_string();
+				Platform::color<Platform::Bold>("\n" + self->code->document->name + "[?]: Unknown");
 		}
 	}
 	
@@ -121,7 +121,7 @@ namespace Mirb
 				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
 			}
 			else
-				result += "\n" + self->code->document->name + ":unknown";
+				result += "\n" + self->code->document->name + "[?]: Unknown";
 		}
 
 		return result;

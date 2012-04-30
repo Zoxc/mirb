@@ -259,6 +259,12 @@ namespace Mirb
 	CharArray inspect_obj(value_t obj)
 	{
 		value_t str = inspect(obj);
+		
+		if(!str)
+		{
+			swallow_exception();
+			return  "";
+		}
 
 		return cast<String>(str)->string;
 	}
@@ -280,6 +286,12 @@ namespace Mirb
 	std::string inspect_object(value_t obj)
 	{
 		value_t str = inspect(obj);
+
+		if(!str)
+		{
+			swallow_exception();
+			return  "";
+		}
 
 		return cast<String>(str)->get_string();
 	}
