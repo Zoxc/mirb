@@ -27,7 +27,7 @@ int main()
 		std::getline(std::cin, line);
 		
 		MemoryPool::Base memory_pool;
-		Document *document = Collector::allocate<Document>();
+		Document *document = Collector::allocate_pinned<Document>();
 
 		document->copy((const char_t *)line.c_str(), line.length());
 		
@@ -85,6 +85,7 @@ int main()
 	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;
 	std::cout << "Memory allocated: " << (Collector::memory / 1024) <<  " KiB" << std::endl;
 	std::cout << "Regions allocated: " << Collector::region_count << std::endl;
+	std::cout << "Regions freed: " << Collector::region_free_count << std::endl;
 	std::cout << "Exiting gracefully..." << std::endl;
 	
 	Mirb::finalize();

@@ -24,11 +24,12 @@ namespace Mirb
 {
 	size_t Collector::collections = 0;
 	size_t Collector::region_count = 0;
+	size_t Collector::region_free_count = 0;
 	unsigned long long Collector::memory = 0;
 	bool Collector::pending = false;
 	size_t Collector::pages = 32;
 	Collector::Region *Collector::current;
-	FastList<Collector::Region> Collector::regions;
+	List<Collector::Region> Collector::regions;
 
 	std::atomic_bool pending_exception;
 	
@@ -196,6 +197,8 @@ namespace Mirb
 	
 	void Collector::free_region(Region *region)
 	{
+		region_free_count++;
+		
 		Platform::free_region((void *)region, (size_t)region->end - (size_t)region);
 	}
 	

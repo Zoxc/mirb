@@ -63,11 +63,11 @@ namespace Mirb
 			}
 
 			if(ranges)
-				final->ranges = (Range *)malloc(ranges * sizeof(Range));
+				final->ranges = (Range *)std::malloc(ranges * sizeof(Range));
 			else
 				final->ranges = nullptr;
 
-			const char *opcodes = (const char *)malloc(size);
+			const char *opcodes = (const char *)std::malloc(size);
 			mirb_runtime_assert(opcodes != 0);
 			size_t pos = 0;
 			ranges = 0;

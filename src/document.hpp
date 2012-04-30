@@ -1,15 +1,20 @@
 #pragma once
 #include "common.hpp"
 #include "char-array.hpp" 
-#include "value.hpp" 
+#include "allocator.hpp" 
 
 namespace Mirb
 {
 	class Document:
-		public Value::Header
+		public PinnedHeader
 	{
 		public:
-			Document() : Value::Header(Value::InternalDocument) {}
+			Document() : PinnedHeader(Value::InternalDocument) {}
+			
+			~Document()
+			{
+				std::free((void *)data);
+			};
 
 			const char_t *data;
 			size_t length;

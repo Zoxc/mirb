@@ -53,7 +53,7 @@ namespace Mirb
 			friend struct MarkRootFunc;
 			friend struct ThreadFunc;
 
-			static FastList<Region> regions;
+			static List<Region> regions;
 			static const size_t page_size = 0x1000;
 			
 			friend struct RegionWalker;
@@ -146,6 +146,7 @@ namespace Mirb
 		public:
 			static size_t collections;
 			static size_t region_count;
+			static size_t region_free_count;
 			static unsigned long long memory;
 
 			/*

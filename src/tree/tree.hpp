@@ -42,6 +42,20 @@ namespace Mirb
 
 				FragmentBase(size_t chunk_size);
 				
+				~FragmentBase()
+				{
+					Chunk *c = chunks.first;
+			
+					while(c)
+					{
+						Chunk *next = c->entry.next;
+
+						std::free(c);
+
+						c = next;
+					}
+				}
+				
 				void *allocate(size_t bytes);
 				void *reallocate(void *memory, size_t old_size, size_t new_size);
 				void free(void *)
@@ -154,6 +168,12 @@ namespace Mirb
 				};
 				
 				Scope(Document *document, Fragment fragment, Scope *parent, Type type);
+
+				~Scope()
+				{
+					if(type == Tree::Scope::Closure || type == Tree::Scope::Method || type == Tree::Scope::Top)
+						delete fragment;
+				}
 				
 				Document *document;
 				Block *final;

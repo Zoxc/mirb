@@ -409,10 +409,13 @@ namespace Mirb
 
 		Collector::current = free.region;
 
+		// Free regions and reset default page allocation count
+
 		{
 			Region *current = Collector::current->entry.next;
-
+			
 			Collector::current->entry.next = nullptr;
+			Collector::regions.last = Collector::current;
 
 			while(current)
 			{
@@ -423,6 +426,8 @@ namespace Mirb
 				current = next;
 			}
 		}
+
+		pages = ((size_t)Collector::current->end - (size_t)Collector::current) / page_size;
 		
 		for(auto obj = heap_list.first; obj;)
 		{
@@ -436,6 +441,7 @@ namespace Mirb
 			else
 			{
 				heap_list.remove(obj);
+				Value::virtual_do<FreeClass>(Value::type(obj), obj);
 				std::free((void *)obj);
 			}
 

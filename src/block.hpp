@@ -67,7 +67,19 @@ namespace Mirb
 		public PinnedHeader
 	{
 		public:
-			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), source_location(2) {}
+			Block(Document *document) : PinnedHeader(Value::InternalBlock), scope(nullptr), document(document), opcodes(nullptr), ranges(nullptr), source_location(2) {}
+			
+			~Block()
+			{
+				if(ranges)
+					std::free(ranges);
+
+				if(break_targets)
+					delete[] break_targets;
+
+				if(executor == evaluate_block)
+					std::free((void *)opcodes);
+			};
 
 			typedef value_t (*executor_t)(Frame &frame);
 
