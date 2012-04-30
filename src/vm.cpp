@@ -265,12 +265,22 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(Collector::allocate<ReturnException>(Value::ReturnException, auto_cast(context->local_jump_error), String::from_literal("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
+			set_current_exception(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::from_literal("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(Collector::allocate<BreakException>(auto_cast(context->local_jump_error), String::from_literal("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
+			set_current_exception(Collector::allocate<BreakException>(context->local_jump_error, String::from_literal("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
+			goto handle_exception;
+		EndOp
+			
+		Op(UnwindNext)
+			set_current_exception(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, value_nil, nullptr, vars[op.var]));
+			goto handle_exception;
+		EndOp
+
+		Op(UnwindRedo)
+			set_current_exception(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, value_nil, nullptr, op.pos));
 			goto handle_exception;
 		EndOp
 
@@ -305,19 +315,49 @@ handle_exception:
 
 			if(!current_exception_block)
 			{
-				finalize();
-
-				if(exception->get_type() == Value::ReturnException)
+				switch(exception->get_type())
 				{
-					auto error = (ReturnException *)exception;
-
-					if(error->target == frame.code)
+					case Value::RedoException:
 					{
+						auto error = (RedoException *)exception;
+
+						set_current_exception(0);
+
+						ip =  ip_start + error->pos;
+						OpContinue; // Restart block
+					}
+					break;
+
+					case Value::NextException:
+					{
+						auto error = (NextException *)exception;
+
 						value_t result = error->value;
 						set_current_exception(0);
+						finalize();
 						return result;
 					}
+					break;
+
+					case Value::ReturnException:
+					{
+						auto error = (ReturnException *)exception;
+
+						if(error->target == frame.code)
+						{
+							value_t result = error->value;
+							set_current_exception(0);
+							finalize();
+							return result;
+						}
+					}
+					break;
+
+					default:
+						break;
 				}
+
+				finalize();
 
 				return value_raise;
 			}

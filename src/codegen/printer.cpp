@@ -67,7 +67,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		Label *ByteCodePrinter::get_label(const char *opcode)
+		Label *ByteCodePrinter::get_label_reverse(const char *opcode)
 		{
 			for(auto i = bcg->branches.begin(); i != bcg->branches.end(); ++i)
 			{
@@ -80,9 +80,22 @@ namespace Mirb
 			return nullptr;
 		}
 		
+		Label *ByteCodePrinter::get_label(const char *opcode)
+		{
+			for(auto i = bcg->branches.begin(); i != bcg->branches.end(); ++i)
+			{
+				if((*i).second->pos == (size_t)(opcode - data))
+				{
+					return (*i).second;
+				}
+			}
+
+			return nullptr;
+		}
+		
 		std::string ByteCodePrinter::label(const char *opcode)
 		{
-			return label(get_label(opcode));
+			return label(get_label_reverse(opcode));
 		}
 		
 		std::string ByteCodePrinter::print_block(Mirb::Block *block)
@@ -406,6 +419,24 @@ namespace Mirb
 					return "break " + var(op->var) + ", " + print_block(op->code) + ", " + var(op->parent_dst);
 				}
 				
+				case Opcode::UnwindNext:
+				{
+					auto op = (UnwindNextOp *)opcode;
+
+					opcode += sizeof(UnwindNextOp);
+					
+					return "next " + var(op->var);
+				}
+				
+				case Opcode::UnwindRedo:
+				{
+					auto op = (UnwindRedoOp *)opcode;
+
+					opcode += sizeof(UnwindBreakOp);
+					
+					return "redo " + label(opcode);
+				}
+				
 				case Opcode::Array:
 				{
 					auto op = (ArrayOp *)opcode;
@@ -455,7 +486,7 @@ namespace Mirb
 				Label *l = get_label(c);
 
 				if(l)
-					result << label(l) << ":\n";
+					result<< "\n" << label(l) << ":\n";
 
 				result << opcode(c) << "\n";
 			}

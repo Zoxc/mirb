@@ -21,6 +21,18 @@ test "Next skips code", 1 do
 	a
 end
 
+test "Next triggers ensure block", 7 do
+	a = 1
+	tap do
+		begin
+			next 4
+		ensure
+			a = 7
+		end
+	end
+	a
+end
+
 test "Redo restarts block", 2 do
 	a = 1
 	pass = 0
@@ -30,6 +42,21 @@ test "Redo restarts block", 2 do
 		a = 2 if pass == 2
 
 		redo if pass != 2
+	end.call
+	a
+end
+
+test "Redo trigger ensure block", 2 do
+	a = 1
+	pass = 0
+	proc do
+		pass += 1
+		
+		begin
+			redo if pass != 2
+		ensure
+			a = 2
+		end
 	end.call
 	a
 end

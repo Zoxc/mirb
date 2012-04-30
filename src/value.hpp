@@ -36,6 +36,8 @@ namespace Mirb
 	class Exception;
 	class ReturnException;
 	class BreakException;
+	class NextException;
+	class RedoException;
 	class Proc;
 
 	/* Format for tagged pointers
@@ -109,6 +111,8 @@ namespace Mirb
 			Exception,
 			ReturnException,
 			BreakException,
+			NextException,
+			RedoException
 		};
 		
 		class Header
@@ -257,6 +261,12 @@ namespace Mirb
 				case BreakException:
 					return T<BreakException>::func(std::forward<Arg>(arg));
 					
+				case RedoException:
+					return T<RedoException>::func(std::forward<Arg>(arg));
+					
+				case NextException:
+					return T<NextException>::func(std::forward<Arg>(arg));
+					
 				case FreeBlock:
 					return T<FreeBlock>::func(std::forward<Arg>(arg));
 					
@@ -294,6 +304,8 @@ namespace Mirb
 		mirb_typeclass(Exception, Exception);
 		mirb_typeclass(ReturnException, ReturnException);
 		mirb_typeclass(BreakException, BreakException);
+		mirb_typeclass(RedoException, RedoException);
+		mirb_typeclass(NextException, NextException);
 		mirb_typeclass(FreeBlock, FreeBlock);
 
 		template<class B, class D> struct DerivedFrom

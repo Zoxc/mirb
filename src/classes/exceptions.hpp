@@ -5,21 +5,44 @@ namespace Mirb
 {
 	void initialize_exceptions();
 	
-	class ReturnException:
+	class NextException:
 		public Exception
 	{
 		public:
-			ReturnException(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value) : Exception(type, instance_of, message, backtrace), target(target), value(value) {}
+			NextException(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, value_t value) : Exception(type, instance_of, message, backtrace), value(value) {}
 			
-			Block *target;
 			value_t value;
 			
 			template<typename F> void mark(F mark)
 			{
 				Exception::mark(mark);
 
-				mark(target);
 				mark(value);
+			}
+	};
+	
+	class RedoException:
+		public Exception
+	{
+		public:
+			RedoException(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, size_t pos) : Exception(type, instance_of, message, backtrace), pos(pos) {}
+			
+			size_t pos;
+	};
+	
+	class ReturnException:
+		public NextException
+	{
+		public:
+			ReturnException(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value) : NextException(type, instance_of, message, backtrace, value), target(target) {}
+			
+			Block *target;
+			
+			template<typename F> void mark(F mark)
+			{
+				NextException::mark(mark);
+
+				mark(target);
 			}
 	};
 	

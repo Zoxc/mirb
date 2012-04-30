@@ -596,16 +596,25 @@ namespace Mirb
 			auto node = (Tree::NextNode *)basic_node;
 			
 			var_t temp = reuse(var);
+
 			
-			to_bytecode(node->value, temp);
+			if(in_ensure_block())
+				gen<UnwindNextOp>(return_var);
+			else
+			{
+				to_bytecode(node->value, temp);
 			
-			gen<MoveOp>(return_var, temp);
-			branch(epilog);
+				gen<MoveOp>(return_var, temp);
+				branch(epilog);
+			}
 		}
 		
 		void ByteCodeGenerator::convert_redo(Tree::Node *, var_t)
 		{
-			branch(body);
+			if(in_ensure_block())
+				gen_unwind_redo(body);
+			else
+				branch(body);
 		}
 		
 		void ByteCodeGenerator::convert_class(Tree::Node *basic_node, var_t var)

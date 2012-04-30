@@ -153,6 +153,11 @@ namespace Mirb
 					branches.push(BranchInfo(gen<BranchIfOp>(var), ltrue));
 				}
 				
+				void gen_unwind_redo(Label *body)
+				{
+					branches.push(BranchInfo(gen<UnwindRedoOp>(), body));
+				}
+				
 				void gen_unless(Label *lfalse, var_t var)
 				{
 					branches.push(BranchInfo(gen<BranchUnlessOp>(var), lfalse));

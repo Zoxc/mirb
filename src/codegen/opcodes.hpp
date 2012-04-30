@@ -18,44 +18,6 @@ namespace Mirb
 	{
 		class BasicBlock;
 		
-		struct MoveOp;
-		struct LoadFixnumOp;
-		struct LoadTrueOp;
-		struct LoadFalseOp;
-		struct LoadNilOp;
-		struct LoadObjectOp;
-		struct LoadArgOp;
-		struct ClosureOp;
-		struct ClassOp;
-		struct ModuleOp;
-		struct MethodOp;
-		struct CallOp;
-		struct SuperOp;
-		struct LookupOp;
-		struct SelfOp;
-		struct BlockOp;
-		struct CreateHeapOp;
-		struct GetHeapVarOp;
-		struct SetHeapVarOp;
-		struct GetIVarOp;
-		struct SetIVarOp;
-		struct GetConstOp;
-		struct SetConstOp;
-		struct BranchIfOp;
-		struct BranchIfZeroOp;
-		struct BranchUnlessOp;
-		struct BranchUnlessZeroOp;
-		struct BranchOp;
-		struct ReturnOp;
-		struct HandlerOp;
-		struct UnwindOp;
-		struct UnwindReturnOp;
-		struct UnwindBreakOp;
-		struct BreakTargetOp;
-		struct ArrayOp;
-		struct StringOp;
-		struct InterpolateOp;
-		
 		struct Opcode
 		{
 			enum Type
@@ -93,6 +55,8 @@ namespace Mirb
 				Unwind,
 				UnwindReturn,
 				UnwindBreak,
+				UnwindRedo,
+				UnwindNext,
 				Array,
 				String,
 				Interpolate
@@ -132,6 +96,8 @@ namespace Mirb
 				&&OpUnwind, \
 				&&OpUnwindReturn, \
 				&&OpUnwindBreak, \
+				&&OpUnwindRedo, \
+				&&OpUnwindNext, \
 				&&OpArray, \
 				&&OpString, \
 				&&OpInterpolate
@@ -439,6 +405,20 @@ namespace Mirb
 			Mirb::Block *code;
 
 			UnwindReturnOp(var_t var, Mirb::Block *code) : var(var), code(code) {}
+		};
+		
+		struct UnwindNextOp:
+			public OpcodeWrapper<Opcode::UnwindNext>
+		{
+			var_t var;
+
+			UnwindNextOp(var_t var) : var(var) {}
+		};
+		
+		struct UnwindRedoOp:
+			public BranchOpcode
+		{
+			UnwindRedoOp() : BranchOpcode(UnwindRedo) {}
 		};
 		
 		struct UnwindBreakOp:

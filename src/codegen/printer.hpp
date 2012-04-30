@@ -29,6 +29,7 @@ namespace Mirb
 				std::string label(const char *opcode);
 				std::string label(Label *label);
 				Label *get_label(const char *opcode);
+				Label *get_label_reverse(const char *opcode);
 				std::string raw(size_t imm);
 				std::string print_block(Mirb::Block *block);
 			public:
