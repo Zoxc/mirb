@@ -54,6 +54,12 @@ namespace Mirb
 		ExceptionBlock *parent;
 		Vector<ExceptionHandler *> handlers;
 		BlockLabel ensure_label;
+
+		~ExceptionBlock()
+		{
+			for(auto handler: handlers)
+				delete handler;
+		}
 	};
 	
 	typedef size_t var_t;
@@ -72,6 +78,7 @@ namespace Mirb
 				scope(nullptr),
 				document(document),
 				opcodes(nullptr),
+				exception_blocks(nullptr),
 				strings(nullptr),
 				ranges(nullptr),
 				source_location(2),
@@ -97,6 +104,14 @@ namespace Mirb
 
 					delete[] strings;
 				}
+
+				if(exception_blocks)
+				{
+					for(size_t i = 0; i < exception_block_count; ++i)
+						delete exception_blocks[i];
+
+					delete[] exception_blocks;
+				}
 			};
 
 			typedef value_t (*executor_t)(Frame &frame);
@@ -107,6 +122,9 @@ namespace Mirb
 			size_t var_words;
 
 			const char *opcodes;
+
+			ExceptionBlock **exception_blocks;
+			size_t exception_block_count;
 
 			const char_t **strings;
 			size_t string_count;

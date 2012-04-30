@@ -771,30 +771,40 @@ namespace Mirb
 				op->pos = (*i).second->pos;
 			}
 
-			for(auto i = exception_blocks.begin(); i != exception_blocks.end(); ++i)
+			if(exception_blocks.size())
 			{
-				if(i()->ensure_label.label)
-					i()->ensure_label.address = i()->ensure_label.label->pos;
-				else
-					i()->ensure_label.address = -1;
+				final->exception_blocks = new ExceptionBlock *[exception_blocks.size()];
+				final->exception_block_count = exception_blocks.size();
 
-				for(auto j = i()->handlers.begin(); j != i()->handlers.end(); ++j)
+				for(size_t i = 0; i < final->exception_block_count; ++i)
 				{
-					switch(j()->type)
+					ExceptionBlock *block = exception_blocks[i];
+					
+					final->exception_blocks[i] = block;
+
+					if(block->ensure_label.label)
+						block->ensure_label.address = block->ensure_label.label->pos;
+					else
+						block->ensure_label.address = -1;
+
+					for(auto i: block->handlers)
 					{
-						case RuntimeException:
+						switch(i->type)
 						{
-							RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)*j;
+							case RuntimeException:
+							{
+								RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)i;
 
-							handler->rescue_label.address = handler->rescue_label.label->pos;
+								handler->rescue_label.address = handler->rescue_label.label->pos;
 
-							break;
+								break;
+							}
+
+							case ClassException:
+							case FilterException:
+							default:
+								break;
 						}
-
-						case ClassException:
-						case FilterException:
-						default:
-							break;
 					}
 				}
 			}
