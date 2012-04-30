@@ -18,6 +18,7 @@ namespace Mirb
 	};
 	
 	class Collector;
+	class FreeBlock;
 	class Document;
 	class Block;
 	class Object;
@@ -83,6 +84,7 @@ namespace Mirb
 	{
 		enum Type: char_t {
 			None,
+			FreeBlock,
 			InternalValueMap,
 			InternalValueMapPair,
 			InternalStackFrame,
@@ -251,10 +253,13 @@ namespace Mirb
 
 				case ReturnException:
 					return T<ReturnException>::func(std::forward<Arg>(arg));
-
+					
 				case BreakException:
 					return T<BreakException>::func(std::forward<Arg>(arg));
-
+					
+				case FreeBlock:
+					return T<FreeBlock>::func(std::forward<Arg>(arg));
+					
 				case None:
 				default:
 					mirb_debug_abort("Unknown value type");
@@ -289,6 +294,7 @@ namespace Mirb
 		mirb_typeclass(Exception, Exception);
 		mirb_typeclass(ReturnException, ReturnException);
 		mirb_typeclass(BreakException, BreakException);
+		mirb_typeclass(FreeBlock, FreeBlock);
 
 		template<class B, class D> struct DerivedFrom
 		{
@@ -348,10 +354,10 @@ namespace Mirb
 		};
 		
 		inline void assert_valid_base(value_t obj) prelude_nonnull(1);
-		inline void assert_valid_base(value_t obj)
+		inline void assert_valid_base(value_t obj  prelude_unused)
 		{
 			mirb_debug(mirb_debug_assert(obj->magic == Header::magic_value));
-			mirb_debug_assert(obj->type != None);
+			mirb_debug_assert(obj->type != None && obj->type != FreeBlock);
 		}
 
 		inline void assert_alive(value_t obj) prelude_nonnull(1);

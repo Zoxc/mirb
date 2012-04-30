@@ -99,8 +99,10 @@ namespace Mirb
 
 			T *&operator[](size_t index)
 			{
-				if(this)
-					mirb_debug_assert(index < entries);
+				#ifdef DEBUG
+					if(this)
+						mirb_debug_assert(index < entries);
+				#endif
 
 				return ((T **)((size_t)this + sizeof(Tuple)))[index];
 			}
@@ -174,7 +176,7 @@ namespace Mirb
 						#endif
 					}
 					
-					Storage &operator =(decltype(nullptr) null)
+					Storage &operator =(decltype(nullptr) null prelude_unused)
 					{
 						mirb_debug_assert(null == nullptr);
 						

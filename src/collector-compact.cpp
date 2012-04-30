@@ -151,9 +151,11 @@ namespace Mirb
 			region = Collector::regions.first;
 		}
 
-		void test(value_t obj)
+		void test(value_t obj prelude_unused)
 		{
-			Value::assert_alive(obj);
+			mirb_debug(mirb_debug_assert(obj->magic == Value::Header::magic_value));
+			mirb_debug_assert(obj->type != Value::None);
+			mirb_debug(mirb_debug_assert(obj->alive));
 			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
 		}
 		
@@ -186,6 +188,22 @@ namespace Mirb
 			}
 			else
 				return false;
+		}
+
+		bool jump(value_t target, Collector::Region *region)
+		{
+			if(!region)
+				return false;
+
+			this->region = region;
+			this->pos = target;
+			
+			mirb_debug_assert(pos != (value_t)region->pos);
+			mirb_debug_assert(region->contains(pos));
+
+			test(pos);
+			
+			return true;
 		}
 
 		bool step(size_t size)
@@ -273,6 +291,10 @@ namespace Mirb
 		RegionWalker obj;
 
 		size_t size;
+#ifdef MIRB_GC_SKIP_BLOCKS
+		value_t prev = nullptr;
+#endif
+		bool more;
 		
 		obj.load();
 
@@ -283,6 +305,8 @@ namespace Mirb
 
 			mirb_debug_assert((obj.pos >= free.pos) || obj.region != free.region);
 
+			more = obj.step(size);
+
 			if(i->marked)
 			{
 				value_t pos = free.allocate(size);
@@ -290,9 +314,34 @@ namespace Mirb
 				update<false>(i, pos);
 
 				thread_children(i);
+				
+#ifdef MIRB_GC_SKIP_BLOCKS
+				prev = nullptr;
+#endif
 			}
+#ifdef MIRB_GC_SKIP_BLOCKS
+			else
+			{
+				if(prev)
+				{
+					*const_cast<Value::Type *>(&prev->type) = Value::FreeBlock;
+					
+					#ifdef DEBUG
+						prev->size = sizeof(FreeBlock);
+					#endif
+
+					((FreeBlock *)prev)->next = (void *)obj.region;
+					prev->*Value::Header::thread_list = (value_t *)obj.pos;
+				}
+				else
+				{
+					prev = i;
+				}
+			}
+#endif
+
 		}
-		while(obj.step(size));
+		while(more);
 
 		for(auto i = heap_list.begin(); i != heap_list.end(); ++i)
 		{
@@ -324,23 +373,35 @@ namespace Mirb
 
 		do
 		{
+		start:
 			value_t i = obj.pos;
 			size = size_of_value(i);
-			
+
 			if(i->marked)
 			{
 				value_t pos = free.allocate(size);
 				
 				update<true>(i, pos);
 				move(i, pos, size);
+
 			}
-#ifdef DEBUG
 			else
 			{
-				mirb_debug_assert(i->alive == true);
-				i->alive = false;
-			}
+				#ifdef DEBUG
+					mirb_debug_assert(i->alive == true);
+					i->alive = false;
+				#endif
+			
+#ifdef MIRB_GC_SKIP_BLOCKS
+				if(i->type == Value::FreeBlock)
+				{
+					if(prelude_unlikely(!obj.jump((value_t)(i->*Value::Header::thread_list), (Region *)((FreeBlock *)i)->next)))
+						break;
+					else
+						goto start;
+				}
 #endif
+			}
 		}
 		while(obj.step(size));
 

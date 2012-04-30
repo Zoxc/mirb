@@ -58,7 +58,7 @@ namespace Mirb
 		public:
 			value_t *refs[num_args];
 			
-			void setup(size_t index)
+			void setup(size_t index prelude_unused)
 			{
 				size = num_args;
 
@@ -109,7 +109,7 @@ namespace Mirb
 		public:
 			CharArray *refs[num_args];
 			
-			void setup(size_t index)
+			void setup(size_t index prelude_unused)
 			{
 				size = num_args;
 

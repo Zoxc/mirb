@@ -4,7 +4,7 @@
 
 namespace Mirb
 {
-	void Lexer::build_simple_string(const char_t *start, char_t *str, size_t length)
+	void Lexer::build_simple_string(const char_t *start, char_t *str, size_t length prelude_unused)
 	{
 		char_t *writer = str;
 		const char_t *input = start;
@@ -137,7 +137,7 @@ namespace Mirb
 		lexeme.c_str = str;
 	}
 	
-	void Lexer::build_string(const char_t *start, char_t *str, size_t length)
+	void Lexer::build_string(const char_t *start, char_t *str, size_t length prelude_unused)
 	{
 		char_t *writer = str;
 		const char_t *input = start;

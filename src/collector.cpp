@@ -117,6 +117,7 @@ namespace Mirb
 		template<size_t size> struct Test
 		{
 			static_assert((size & object_ref_mask) == 0, "Wrong size for class T");
+			static_assert(size >= sizeof(FreeBlock), "Too small size for class T");
 		};
 
 		typedef Test<sizeof(T)> Run;

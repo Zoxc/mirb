@@ -11,6 +11,15 @@
 
 namespace Mirb
 {
+	class FreeBlock:
+		public Value::Header
+	{
+		public:
+			void *next;
+
+			template<typename F> void mark(F) {}
+	};
+
 	class Collector
 	{
 		private:
