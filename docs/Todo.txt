@@ -12,7 +12,7 @@
 [X] Instance variables
 [ ] Singleton class of variable syntax
 [ ] Class variables
-[ ] Global variables
+[X] Global variables
 [X] Super
 [X] Exception handling
 [X] Garbage collection
