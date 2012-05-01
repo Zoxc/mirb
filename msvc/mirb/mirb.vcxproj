@@ -19,6 +19,7 @@
     <ClInclude Include="..\..\src\classes\exceptions.hpp" />
     <ClInclude Include="..\..\src\classes\false-class.hpp" />
     <ClInclude Include="..\..\src\classes\fixnum.hpp" />
+    <ClInclude Include="..\..\src\classes\hash.hpp" />
     <ClInclude Include="..\..\src\classes\method.hpp" />
     <ClInclude Include="..\..\src\classes\module.hpp" />
     <ClInclude Include="..\..\src\classes\nil-class.hpp" />
@@ -71,6 +72,7 @@
     <ClCompile Include="..\..\src\classes\exceptions.cpp" />
     <ClCompile Include="..\..\src\classes\false-class.cpp" />
     <ClCompile Include="..\..\src\classes\fixnum.cpp" />
+    <ClCompile Include="..\..\src\classes\hash.cpp" />
     <ClCompile Include="..\..\src\classes\module.cpp" />
     <ClCompile Include="..\..\src\classes\nil-class.cpp" />
     <ClCompile Include="..\..\src\classes\object.cpp" />

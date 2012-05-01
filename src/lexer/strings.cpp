@@ -116,14 +116,15 @@ namespace Mirb
 						goto error;
 					}
 				
+					// Fallthrough
+
 				default:
 					input++;		
 			}
 
 		error:
 		lexeme.stop = &input;
-		lexeme.str.data = (const char_t *)"";
-		lexeme.str.length = 0;
+		lexeme.str = new (memory_pool) StringData(memory_pool);
 		return;
 		
 		done:
@@ -134,122 +135,27 @@ namespace Mirb
 		
 		build_simple_string(lexeme.start + 1, str, str_length);
 		
-		lexeme.str.data = str;
-		lexeme.str.length = str_length;
+		lexeme.str = new (memory_pool) StringData(memory_pool);
+		lexeme.str->tail.data = str;
+		lexeme.str->tail.length = str_length;
 	}
 	
-	void Lexer::build_string(const char_t *start, char_t *str, size_t length prelude_unused)
-	{
-		char_t *writer = str;
-		const char_t *input = start;
-		
-		while(true)
-			switch(*input)
-			{
-				case '#':
-				{
-					input++;
-					
-					if(*input == '{')
-					{
-						goto done;
-					}
-					else
-						*writer++ = '#';
-					
-					break;
-				}
-				
-				case '"':
-					goto done;
-				
-				case '\\':
-					input++;
-
-					switch(*input)
-					{
-						case '\'':
-						case '\"':
-						case '\\':
-							*writer++ = *input++;
-							break;
-						
-						case '0':
-							*writer++ = 0;
-							input++;
-							break;
-						
-						case 'n':
-							*writer++ = 0xA;
-							input++;
-							break;
-						
-						case 't':
-							*writer++ = 0x9;
-							input++;
-							break;
-						
-						case 'r':
-							*writer++ = 0xD;
-							input++;
-							break;
-						
-						case 'f':
-							*writer++ = 0xC;
-							input++;
-							break;
-						
-						case 'v':
-							*writer++ = 0xB;
-							input++;
-							break;
-						
-						case 'a':
-							*writer++ = 0x7;
-							input++;
-							break;
-						
-						case 'e':
-							*writer++ = 0x1B;
-							input++;
-							break;
-						
-						case 'b':
-							*writer++ = 0x8;
-							input++;
-							break;
-						
-						case 's':
-							*writer++ = 0x20;
-							input++;
-							break;
-						
-						case 0:
-							if(process_null(input))
-								goto done;
-
-						default:
-							*writer++ = '\\';
-							*writer++ = *input++;
-					}
-					break;
-					
-				case 0:
-					if(process_null(input))
-						goto done;
-
-				default:
-					*writer++ = *input++;
-			}
-			
-		done:
-		mirb_debug_assert((size_t)(writer - str) == length);
-	}
-
 	void Lexer::parse_string(bool initial)
 	{
 		lexeme.type = Lexeme::STRING;
-		size_t overhead = 2;
+		std::string result;
+		StringData *data = new (memory_pool) StringData(memory_pool);
+		
+		const char_t *start = lexeme.start;
+
+		auto push = [&] {
+			auto entry = new (memory_pool) StringData::AdvancedEntry;
+			entry->set<MemoryPool>(result, memory_pool);
+			entry->type = lexeme.type;
+			entry->symbol = lexeme.symbol;
+			result = "";
+			data->entries.push(entry);
+		};
 		
 		while(true)
 			switch(input)
@@ -257,18 +163,28 @@ namespace Mirb
 				case '#':
 				{
 					input++;
-					
-					if(input == '{')
-					{
-						input++;
-						
-						lexeme.curlies.push(true);
-						
-						lexeme.type = Lexeme::STRING_START;
-						
-						overhead += 1;
 
-						goto done;
+					switch(input)
+					{
+						case '{':
+							input++;
+							lexeme.curlies.push(true);
+							lexeme.type = Lexeme::STRING_START;
+							goto done;
+
+						case '@':
+							lexeme.start = &input;
+							ivar(false);
+
+							if(lexeme.type != Lexeme::NONE)
+								push();
+							
+							lexeme.type = Lexeme::STRING;
+							break;
+
+						default:
+							result += '#';
+							break;
 					}
 					break;
 				}
@@ -278,17 +194,17 @@ namespace Mirb
 					goto done;
 
 				case '\n':
-					input++;
+					result += input++;
 					lexeme.line++;
 					lexeme.line_start = &input;
 					break;
 						
 				case '\r':
-					input++;
+					result += input++;
 					lexeme.line++;
 
 					if(input == '\n')
-						input++;
+						result += input++;
 
 					lexeme.line_start = &input;
 					break;
@@ -301,17 +217,56 @@ namespace Mirb
 						case '\'':
 						case '\"':
 						case '\\':
+							result += input++;
+							break;
+							
 						case '0':
+							result += (char)0;
+							input++;
+							break;
+						
 						case 'n':
+							result += (char)0xA;
+							input++;
+							break;
+						
 						case 't':
+							result += (char)0x9;
+							input++;
+							break;
+						
 						case 'r':
+							result += (char)0xD;
+							input++;
+							break;
+						
 						case 'f':
+							result += (char)0xC;
+							input++;
+							break;
+						
 						case 'v':
+							result += (char)0xB;
+							input++;
+							break;
+						
 						case 'a':
+							result += (char)0x7;
+							input++;
+							break;
+						
 						case 'e':
+							result += (char)0x1B;
+							input++;
+							break;
+						
 						case 'b':
+							result += (char)0x8;
+							input++;
+							break;
+						
 						case 's':
-							overhead++;
+							result += (char)0x20;
 							input++;
 							break;
 						
@@ -323,9 +278,8 @@ namespace Mirb
 								parser.report(lexeme.dup(memory_pool), "Unterminated string");
 								goto error;
 							}
-							else
-								input++;
-							break;
+
+							// Fallthrough
 							
 						default:
 							const char_t *start = lexeme.start;
@@ -343,30 +297,29 @@ namespace Mirb
 						parser.report(lexeme.dup(memory_pool), "Unterminated string");
 						goto error;
 					}
+
+					// Fallthrough
 				
 				default:
-					input++;		
+					result += input++;
 			}
 		
 		error:
+		lexeme.start = start;
 		lexeme.stop = &input;
-		lexeme.str.data = (const char_t *)"";
-		lexeme.str.length = 0;
+		lexeme.str = new (memory_pool) StringData(memory_pool);
 		return;
 		
 		done:
+		lexeme.start = start;
 		lexeme.stop = &input;
 		
 		if(!initial)
 			lexeme.type = (Lexeme::Type)((int)lexeme.type + 1);
-		
-		size_t str_length = lexeme.length() - overhead;
-		char_t *str = new (memory_pool) char_t[str_length + 1]; //TODO: Fix memory leak
-		
-		build_string(lexeme.start + 1, str, str_length);
-		
-		lexeme.str.data = str;
-		lexeme.str.length = str_length;
+
+		lexeme.str = data;
+
+		data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
 	void Lexer::curly_close()

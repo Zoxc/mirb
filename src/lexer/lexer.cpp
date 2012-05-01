@@ -78,7 +78,7 @@ namespace Mirb
 		};
 
 		// Unknown
-		set_chars(0, 255, &Lexer::unknown);
+		set_chars(0, 255, &Lexer::unknown_trampoline);
 		
 		// Stop please
 		jump_table[0] = &Lexer::null;
@@ -144,7 +144,7 @@ namespace Mirb
 		jump_table[(size_t)'{'] = &Lexer::curly_open;
 		jump_table[(size_t)'}'] = &Lexer::curly_close;
 		
-		jump_table[(size_t)'@'] = &Lexer::ivar;
+		jump_table[(size_t)'@'] = &Lexer::ivar_trampoline;
 		jump_table[(size_t)'#'] = &Lexer::comment;
 		
 		jump_table[(size_t)'\''] = &Lexer::simple_string;

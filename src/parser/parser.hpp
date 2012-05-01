@@ -59,6 +59,8 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator();
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
+			void process_string_entries(Tree::InterpolatedStringNode *root, StringData::Entry &tail);
+
 			// expressions
 			Tree::Node *parse_variable(Symbol *symbol, Range *range);
 			bool is_assignment_op();

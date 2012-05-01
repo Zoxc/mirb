@@ -141,7 +141,7 @@ namespace Mirb
 						return no_var;
 				}
 				
-				void gen_string(var_t var, StringData data)
+				void gen_string(var_t var, StringData::Entry data)
 				{
 					data = data.copy<Prelude::Allocator::Standard>();
 					strings.push(data.data);

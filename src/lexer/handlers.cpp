@@ -14,11 +14,11 @@ namespace Mirb
 		restep(true);
 	}
 
-	void Lexer::unknown()
+	void Lexer::unknown(bool restep)
 	{
 		input++;
 		
-		while(jump_table[input] == &Lexer::unknown)
+		while(jump_table[input] == &Lexer::unknown_trampoline)
 			input++;
 
 		lexeme.stop = &input;
@@ -29,7 +29,13 @@ namespace Mirb
 		else
 			parser.report(lexeme.dup(memory_pool), "Invalid characters '" + lexeme.string() + "'");
 
-		restep();
+		if(restep)
+			this->restep();
+	}
+	
+	void Lexer::unknown_trampoline()
+	{
+		unknown(true);
 	}
 	
 	bool Lexer::process_null(const char_t *input, bool expected)
@@ -244,7 +250,7 @@ namespace Mirb
 			input++;
 	}
 	
-	void Lexer::ivar()
+	void Lexer::ivar(bool restep)
 	{
 		const char_t *ptr = &input;
 		
@@ -259,7 +265,14 @@ namespace Mirb
 			lexeme.symbol = symbol_pool.get(lexeme);
 		}
 		else
-			unknown();
+		{
+			unknown(restep);
+		}
+	}
+	
+	void Lexer::ivar_trampoline()
+	{
+		ivar(true);
 	}
 	
 	void Lexer::add()

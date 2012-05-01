@@ -139,8 +139,7 @@ namespace Mirb
 		type(lexeme.type),
 		prev(lexeme.prev),
 		curlies(lexeme.curlies),
-		symbol(lexeme.symbol),
-		str(lexeme.str)
+		symbol(lexeme.symbol)
 	{
 	}
 	

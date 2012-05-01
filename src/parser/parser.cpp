@@ -286,6 +286,31 @@ namespace Mirb
 		return result;
 	}
 
+	void Parser::process_string_entries(Tree::InterpolatedStringNode *root, StringData::Entry &tail)
+	{
+		auto &entries = lexer.lexeme.str->entries;
+
+		for(auto entry: entries)
+		{
+			auto pair = new (fragment) Tree::InterpolatedPairNode;
+			pair->string = entry->copy<Tree::Fragment>(fragment);
+
+			switch(entry->type)
+			{
+				case Lexeme::IVAR:
+					pair->group = new (fragment) Tree::IVarNode(entry->symbol);
+					break;
+
+				default:
+					mirb_debug_abort("Unknown string type");
+			}
+
+			root->pairs.append(pair);
+		}
+
+		tail = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
+	}
+
 	Tree::Node *Parser::parse_factor()
 	{
 		switch (lexeme())
@@ -334,13 +359,30 @@ namespace Mirb
 
 			case Lexeme::STRING:
 			{
-				auto result = new (fragment) Tree::StringNode;
+				auto data = lexer.lexeme.str;
 
-				result->string = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
+				if(data->entries.size())
+				{
+					auto result = new (fragment) Tree::InterpolatedStringNode;
 
-				lexer.step();
+					process_string_entries(result, result->tail);
 
-				return result;
+					result->tail = data->tail.copy<Tree::Fragment>(fragment);
+
+					lexer.step();
+
+					return result;
+				}
+				else
+				{
+					auto result = new (fragment) Tree::StringNode;
+
+					result->string = data->tail.copy<Tree::Fragment>(fragment);
+					
+					lexer.step();
+
+					return result;
+				}
 			}
 
 			case Lexeme::STRING_START:
@@ -350,9 +392,9 @@ namespace Mirb
 				do
 				{
 					auto pair = new (fragment) Tree::InterpolatedPairNode;
-					
-					pair->string = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
-					
+
+					process_string_entries(result, pair->string);
+
 					lexer.step();
 					
 					pair->group = parse_group();
@@ -363,7 +405,9 @@ namespace Mirb
 				
 				if(require(Lexeme::STRING_END))
 				{
-					result->tail = lexer.lexeme.str.copy<Tree::Fragment>(fragment);
+					process_string_entries(result, result->tail);
+
+					result->tail = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
 
 					lexer.step();
 				}
