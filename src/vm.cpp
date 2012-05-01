@@ -78,6 +78,13 @@ namespace Mirb
 		Op(LoadFixnum)
 			vars[op.var] = op.num;
 		EndOp
+			
+		Op(Return)
+			value_t result = vars[op.var];
+			validate_return(result);
+			finalize();
+			return result;
+		EndOp
 
 		DeepOp(Call)
 			for(size_t i = 0; i < frame.code->var_words; ++i)
@@ -291,12 +298,13 @@ namespace Mirb
 			set_current_exception(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, value_nil, nullptr, op.pos));
 			goto handle_exception;
 		EndOp
+			
+		Op(GetGlobal)
+			vars[op.var] = context->globals.try_get(op.name, [&] { return value_nil; });
+		EndOp
 
-		Op(Return)
-			value_t result = vars[op.var];
-			validate_return(result);
-			finalize();
-			return result;
+		Op(SetGlobal)
+			context->globals.set(op.name, vars[op.var]);
 		EndOp
 
 		OpEpilogue

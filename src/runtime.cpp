@@ -833,13 +833,14 @@ namespace Mirb
 	void initialize()
 	{
 		std::cout << "Initialized in " << Platform::benchmark([] {
+			Collector::initialize();
+
 			context = new Context;
 				
 			Value::initialize_type_table();
 		
 			Platform::initialize();
 
-			Collector::initialize();
 			Lexer::setup_jump_table();
 
 			setup_classes();

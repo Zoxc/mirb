@@ -45,8 +45,7 @@ namespace Mirb
 
 			void eol();
 			void white();
-			void unknown(bool restep = true);
-			void unknown_trampoline();
+			void unknown();
 			void null();
 			void newline();
 			void carrige_return();
@@ -65,8 +64,8 @@ namespace Mirb
 			void add();
 			void sub();
 			
-			void ivar(bool restep);
-			void ivar_trampoline();
+			void ivar();
+			void global();
 			static bool is_ident(char_t c);
 			static bool is_start_ident(char_t c);
 			void skip_ident();

@@ -78,7 +78,7 @@ namespace Mirb
 		};
 
 		// Unknown
-		set_chars(0, 255, &Lexer::unknown_trampoline);
+		set_chars(0, 255, &Lexer::unknown);
 		
 		// Stop please
 		jump_table[0] = &Lexer::null;
@@ -90,7 +90,6 @@ namespace Mirb
 
 		// String
 		jump_table[(size_t)'"'] = &Lexer::string;
-
 
 		// Numbers
 		jump_table[(size_t)'0'] = &Lexer::zero;
@@ -142,9 +141,12 @@ namespace Mirb
 		jump_table[(size_t)'>'] = &Lexer::assign<Lexeme::GREATER, Lexeme::GREATER_OR_EQUAL, '>', Lexeme::RIGHT_SHIFT, Lexeme::ASSIGN_RIGHT_SHIFT>;
 		
 		jump_table[(size_t)'{'] = &Lexer::curly_open;
+
 		jump_table[(size_t)'}'] = &Lexer::curly_close;
+
+		jump_table[(size_t)'$'] = &Lexer::global;
 		
-		jump_table[(size_t)'@'] = &Lexer::ivar_trampoline;
+		jump_table[(size_t)'@'] = &Lexer::ivar;
 		jump_table[(size_t)'#'] = &Lexer::comment;
 		
 		jump_table[(size_t)'\''] = &Lexer::simple_string;

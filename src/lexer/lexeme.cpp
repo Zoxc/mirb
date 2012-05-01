@@ -14,6 +14,8 @@ namespace Mirb
 		"real",
 		"hex",
 		"instance variable",
+		"class variable",
+		"global variable",
 		"symbol",
 		"identifier",
 		"extended identifier",

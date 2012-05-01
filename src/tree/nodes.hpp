@@ -129,6 +129,16 @@ namespace Mirb
 			IVarNode(Mirb::Symbol *name) : name(name) {}
 		};
 		
+		struct GlobalNode:
+			public Node
+		{
+			NodeType type() { return Global; }
+			
+			Mirb::Symbol *name;
+			
+			GlobalNode(Mirb::Symbol *name) : name(name) {}
+		};
+		
 		struct ConstantNode:
 			public Node
 		{

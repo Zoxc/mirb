@@ -501,5 +501,3 @@ namespace Mirb
 		return reinterpret_cast<T *>(obj);
 	}
 };
-
-#include "context.hpp"

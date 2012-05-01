@@ -1,6 +1,7 @@
 #pragma once
 #include "../char-array.hpp"
 #include "../collector.hpp"
+#include "../context.hpp"
 #include "class.hpp"
 
 namespace Mirb

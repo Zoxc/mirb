@@ -1,10 +1,11 @@
 #include "context.hpp"
+#include "collector.hpp"
 
 namespace Mirb
 {
 	Context *context;
 
-	Context::Context()
+	Context::Context() : globals(0)
 	{
 		auto start = &object_class;
 

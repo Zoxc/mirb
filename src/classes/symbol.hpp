@@ -1,9 +1,10 @@
 #pragma once
-#include "class.hpp"
 #include "../common.hpp"
+#include "class.hpp"
 #include <Prelude/LinkedList.hpp>
 #include "../value.hpp"
 #include "../char-array.hpp"
+#include "../context.hpp"
 
 namespace Mirb
 {

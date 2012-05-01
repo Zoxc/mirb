@@ -314,6 +314,24 @@ namespace Mirb
 					return "ivar " + imm(op->name) + " = " + var(op->var);
 				}
 				
+				case Opcode::GetGlobal:
+				{
+					auto op = (GetGlobalOp *)opcode;
+
+					opcode += sizeof(GetGlobalOp);
+					
+					return var(op->var) + " = global " + imm(op->name);
+				}
+				
+				case Opcode::SetGlobal:
+				{
+					auto op = (SetGlobalOp *)opcode;
+
+					opcode += sizeof(SetGlobalOp);
+					
+					return "global " + imm(op->name) + " = " + var(op->var);
+				}
+				
 				case Opcode::GetConst:
 				{
 					auto op = (GetConstOp *)opcode;

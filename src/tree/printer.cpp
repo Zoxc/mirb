@@ -151,6 +151,13 @@ namespace Mirb
 				return print_symbol(target->name);
 			};
 				
+			case Tree::SimpleNode::Global:
+			{
+				auto target = (Tree::IVarNode *)node;
+				
+				return print_symbol(target->name);
+			};
+				
 			case Tree::SimpleNode::Constant:
 			{
 				auto target = (Tree::ConstantNode *)node;

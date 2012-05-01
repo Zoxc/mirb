@@ -187,13 +187,28 @@ namespace Mirb
 								lexeme.curlies.push(state);
 							}
 							goto done;
+							
+						case '$':
+							{
+								lexeme.start = &input;
+								Lexeme::Type old_type = lexeme.type;
+
+								global();
+
+								if(lexeme.type != Lexeme::NONE)
+									push();
+
+								lexeme.start = start;
+								lexeme.type = old_type;
+							}
+							break;
 
 						case '@':
 							{
 								lexeme.start = &input;
 								Lexeme::Type old_type = lexeme.type;
 
-								ivar(false);
+								ivar();
 
 								if(lexeme.type != Lexeme::NONE)
 									push();

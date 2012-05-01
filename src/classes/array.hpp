@@ -1,5 +1,6 @@
 #pragma once
 #include "class.hpp"
+#include "../context.hpp"
 
 namespace Mirb
 {

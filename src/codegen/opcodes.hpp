@@ -44,6 +44,8 @@ namespace Mirb
 				SetHeapVar,
 				GetIVar,
 				SetIVar,
+				GetGlobal,
+				SetGlobal,
 				GetConst,
 				SetConst,
 				BranchIf,
@@ -87,6 +89,8 @@ namespace Mirb
 				&&OpSetHeapVar, \
 				&&OpGetIVar, \
 				&&OpSetIVar, \
+				&&OpGetGlobal, \
+				&&OpSetGlobal, \
 				&&OpGetConst, \
 				&&OpSetConst, \
 				&&OpBranchIf, \
@@ -322,6 +326,24 @@ namespace Mirb
 			var_t var;
 			
 			SetIVarOp(Symbol *name, var_t var) : name(name), var(var) {}
+		};
+		
+		struct GetGlobalOp:
+			public OpcodeWrapper<Opcode::GetGlobal>
+		{
+			var_t var;
+			Symbol *name;
+
+			GetGlobalOp(var_t var, Symbol *name) : var(var), name(name) {}
+		};
+		
+		struct SetGlobalOp:
+			public OpcodeWrapper<Opcode::SetGlobal>
+		{
+			Symbol *name;
+			var_t var;
+			
+			SetGlobalOp(Symbol *name, var_t var) : name(name), var(var) {}
 		};
 		
 		struct GetConstOp:

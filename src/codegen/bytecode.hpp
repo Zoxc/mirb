@@ -51,6 +51,7 @@ namespace Mirb
 				void convert_integer(Tree::Node *basic_node, var_t var);
 				void convert_variable(Tree::Node *basic_node, var_t var);
 				void convert_ivar(Tree::Node *basic_node, var_t var);
+				void convert_global(Tree::Node *basic_node, var_t var);
 				void convert_constant(Tree::Node *basic_node, var_t var);
 				void convert_unary_op(Tree::Node *basic_node, var_t var);
 				void convert_boolean_not(Tree::Node *basic_node, var_t var);

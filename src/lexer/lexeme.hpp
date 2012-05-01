@@ -31,6 +31,8 @@ namespace Mirb
 				REAL,
 				HEX,
 				IVAR,
+				CVAR,
+				GLOBAL,
 				SYMBOL,
 				IDENT,
 				EXT_IDENT,

@@ -72,7 +72,6 @@ namespace Mirb
 			Tree::Node *parse_power();
 			Tree::Node *build_assignment(Tree::Node *left);
 			Tree::Node *process_assignment(Tree::Node *input);
-			Tree::Node *parse_assignment(Tree::Node *variable);
 			Tree::Node *parse_array();
 			Tree::Node *parse_unary();
 			Tree::Node *parse_boolean_unary();
@@ -209,6 +208,7 @@ namespace Mirb
 					case Lexeme::UNARY_ADD:
 					case Lexeme::UNARY_SUB:
 					case Lexeme::IVAR:
+					case Lexeme::GLOBAL:
 					case Lexeme::ADD:
 					case Lexeme::SUB:
 					case Lexeme::INTEGER:

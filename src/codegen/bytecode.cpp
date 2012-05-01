@@ -56,6 +56,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_integer,
 			&ByteCodeGenerator::convert_variable,
 			&ByteCodeGenerator::convert_ivar,
+			&ByteCodeGenerator::convert_global,
 			&ByteCodeGenerator::convert_constant,
 			&ByteCodeGenerator::convert_unary_op,
 			&ByteCodeGenerator::convert_boolean_not,
@@ -188,6 +189,16 @@ namespace Mirb
 			auto node = (Tree::IVarNode *)basic_node;
 			
 			gen<GetIVarOp>(var, node->name);
+		}
+		
+		void ByteCodeGenerator::convert_global(Tree::Node *basic_node, var_t var)
+		{
+			if(!is_var(var))
+				return;
+			
+			auto node = (Tree::GlobalNode *)basic_node;
+			
+			gen<GetGlobalOp>(var, node->name);
 		}
 		
 		void ByteCodeGenerator::convert_constant(Tree::Node *basic_node, var_t var)
@@ -351,6 +362,22 @@ namespace Mirb
 					to_bytecode(node->right, temp);
 						
 					gen<SetIVarOp>(variable->name, temp);
+
+					if(is_var(var))
+						gen<MoveOp>(var, temp);
+					
+					return;
+				}
+				
+				case Tree::SimpleNode::Global:
+				{
+					auto variable = (Tree::GlobalNode *)node->left;
+					
+					var_t temp = reuse(var);
+					
+					to_bytecode(node->right, temp);
+						
+					gen<SetGlobalOp>(variable->name, temp);
 
 					if(is_var(var))
 						gen<MoveOp>(var, temp);

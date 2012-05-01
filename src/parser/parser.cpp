@@ -227,43 +227,6 @@ namespace Mirb
 		}
 	}
 	
-	Tree::Node *Parser::parse_assignment(Tree::Node *variable)
-	{
-		if(lexeme() == Lexeme::ASSIGN)
-		{
-			auto result = new (fragment) Tree::AssignmentNode;
-			
-			lexer.step();
-			
-			result->op = Lexeme::ASSIGN;
-			
-			result->left = variable;
-			
-			result->right = parse_expression();
-			
-			return result;
-		}
-		else
-		{
-			auto result = new (fragment) Tree::AssignmentNode;
-			auto binary_op = new (fragment) Tree::BinaryOpNode;
-
-			result->op = Lexeme::ASSIGN;
-			
-			result->left = variable;
-			result->right = binary_op;
-			binary_op->left = variable;
-			binary_op->range = capture();
-			binary_op->op = Lexeme::assign_to_operator(lexeme());
-			
-			lexer.step();
-			
-			binary_op->right = parse_expression();
-			
-			return result;
-		}
-	}
-	
 	Tree::Node *Parser::parse_hash()
 	{
 		auto result = new (fragment) Tree::HashNode;
@@ -410,6 +373,10 @@ namespace Mirb
 					pair->group = new (fragment) Tree::IVarNode(entry->symbol);
 					break;
 
+				case Lexeme::GLOBAL:
+					pair->group = new (fragment) Tree::GlobalNode(entry->symbol);
+					break;
+
 				default:
 					mirb_debug_abort("Unknown string type");
 			}
@@ -547,7 +514,7 @@ namespace Mirb
 					
 				return result;
 			}
-
+			
 			case Lexeme::IVAR:
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
@@ -555,6 +522,15 @@ namespace Mirb
 				lexer.step();
 				
 				return new (fragment) Tree::IVarNode(symbol);
+			}
+
+			case Lexeme::GLOBAL:
+			{
+				Symbol *symbol = lexer.lexeme.symbol;
+					
+				lexer.step();
+				
+				return new (fragment) Tree::GlobalNode(symbol);
 			}
 
 			case Lexeme::IDENT:
@@ -885,7 +861,8 @@ namespace Mirb
 
 				break;
 			};
-
+			
+			case Tree::Node::Global:
 			case Tree::Node::Variable:
 			case Tree::Node::Constant: //TODO: Make sure constant's object is not re-evaluated
 			case Tree::Node::IVar:

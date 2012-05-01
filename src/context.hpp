@@ -1,7 +1,7 @@
 #pragma once
 #include "allocator.hpp"
 #include <Prelude/Vector.hpp>
-#include "value.hpp"
+#include "value-map.hpp"
 
 namespace Mirb
 {
@@ -51,9 +51,10 @@ namespace Mirb
 			Class *class_of_table[literal_count];
 
 			Object *main;
-
+			
 			Class *terminator;
-
+			
+			ValueMap::MapType globals;
 
 			Context();
 			
@@ -68,6 +69,8 @@ namespace Mirb
 
 					start++;
 				}
+
+				globals.mark(mark);
 			}
 	};
 

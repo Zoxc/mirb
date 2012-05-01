@@ -20,6 +20,7 @@ namespace Mirb
 				Integer,
 				Variable,
 				IVar,
+				Global,
 				Constant,
 				UnaryOp,
 				BooleanNot,

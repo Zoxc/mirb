@@ -14,11 +14,11 @@ namespace Mirb
 		restep(true);
 	}
 
-	void Lexer::unknown(bool restep)
+	void Lexer::unknown()
 	{
 		input++;
 		
-		while(jump_table[input] == &Lexer::unknown_trampoline)
+		while(jump_table[input] == &Lexer::unknown)
 			input++;
 
 		lexeme.stop = &input;
@@ -29,13 +29,7 @@ namespace Mirb
 		else
 			parser.report(lexeme.dup(memory_pool), "Invalid characters '" + lexeme.string() + "'");
 
-		if(restep)
-			this->restep();
-	}
-	
-	void Lexer::unknown_trampoline()
-	{
-		unknown(true);
+		restep();
 	}
 	
 	bool Lexer::process_null(const char_t *input, bool expected)
@@ -95,7 +89,7 @@ namespace Mirb
 	{
 		input++;
 		
-		lexeme.curlies.push(false);
+		lexeme.curlies.push(nullptr);
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::CURLY_OPEN;
@@ -274,11 +268,11 @@ namespace Mirb
 			input++;
 	}
 	
-	void Lexer::ivar(bool restep)
+	void Lexer::ivar()
 	{
-		const char_t *ptr = &input;
+		input++;
 		
-		if(is_ident(ptr[1]))
+		if(is_ident(input))
 		{
 			input++;
 
@@ -291,17 +285,71 @@ namespace Mirb
 			lexeme.symbol = symbol_pool.get(lexeme);
 
 			if(error)
-				parser.report(lexeme.dup(memory_pool), "Instance variables cannot start with a number");
+				parser.report(lexeme.dup(memory_pool), "Instance variable names cannot start with a number");
+		}
+		else if(input == '@')
+		{
+			input++;
+
+			if(is_ident(input))
+			{
+				input++;
+
+				bool error = !is_start_ident(input);
+			
+				skip_ident();
+			
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::CVAR;
+				lexeme.symbol = symbol_pool.get(lexeme);
+
+				if(error)
+					parser.report(lexeme.dup(memory_pool), "Class variable names cannot start with a number");
+			}
+			else
+			{
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::CVAR;
+				lexeme.symbol = symbol_pool.get(lexeme);
+
+				parser.report(lexeme.dup(memory_pool), "Expected a class variable name");
+			}
 		}
 		else
 		{
-			unknown(restep);
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::IVAR;
+			lexeme.symbol = symbol_pool.get(lexeme);
+
+			parser.report(lexeme.dup(memory_pool), "Expected a instance variable name");
 		}
 	}
 	
-	void Lexer::ivar_trampoline()
+	void Lexer::global()
 	{
-		ivar(true);
+		input++;
+
+		if(!is_ident(input))
+		{
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::GLOBAL;
+			lexeme.symbol = symbol_pool.get(lexeme);
+
+			parser.report(lexeme.dup(memory_pool), "Expected a global variable name");
+
+			return;
+		}
+
+		bool error = !is_start_ident(input);
+		
+		skip_ident();
+			
+		lexeme.stop = &input;
+		lexeme.type = Lexeme::GLOBAL;
+		lexeme.symbol = symbol_pool.get(lexeme);
+
+		if(error)
+			parser.report(lexeme.dup(memory_pool), "Global variable names cannot start with a number");
 	}
 	
 	void Lexer::add()
