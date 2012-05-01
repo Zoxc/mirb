@@ -8,6 +8,11 @@ namespace Mirb
 	{
 		*this = c_str;
 	}
+
+	CharArray::CharArray(const char *c_str)
+	{
+		*this = (const char_t *)c_str;
+	}
 	
 	CharArray::CharArray(const char_t *c_str, size_t length)
 	{
