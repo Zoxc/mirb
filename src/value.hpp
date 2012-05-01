@@ -85,7 +85,7 @@ namespace Mirb
 
 	namespace Value
 	{
-		enum Type: char_t {
+		enum Type {
 			None,
 			FreeBlock,
 			InternalValueMap,
