@@ -179,6 +179,15 @@ namespace Mirb
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
 				
+				case Opcode::LoadSymbol:
+				{
+					auto op = (LoadSymbolOp *)opcode;
+
+					opcode += sizeof(LoadSymbolOp);
+					
+					return var(op->var) + " = :" + imm(op->symbol);
+				}
+				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
@@ -444,6 +453,15 @@ namespace Mirb
 					return var(op->var) + " = array " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
+				case Opcode::Hash:
+				{
+					auto op = (HashOp *)opcode;
+
+					opcode += sizeof(HashOp);
+					
+					return var(op->var) + " = hash " + var(op->argv) + ", " + raw(op->argc);
+				}
+				
 				case Opcode::String:
 				{
 					auto op = (StringOp *)opcode;
@@ -459,7 +477,7 @@ namespace Mirb
 
 					opcode += sizeof(InterpolateOp);
 					
-					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc);
+					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc) + ", " + raw(op->result);
 				}
 
 				default:

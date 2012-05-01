@@ -10,6 +10,11 @@ namespace Mirb
 	
 	struct StringData;
 
+	struct InterpolatedState
+	{
+		Range *start;
+	};
+
 	class Lexeme:
 		public Range
 	{
@@ -26,11 +31,13 @@ namespace Mirb
 				REAL,
 				HEX,
 				IVAR,
+				SYMBOL,
 				IDENT,
-				EXT_IDENT,				
+				EXT_IDENT,
 				
 				NONE,
 				
+				ASSOC,
 				POWER,
 				
 				// order contiguous binary operators
@@ -182,7 +189,7 @@ namespace Mirb
 			Type type;
 			const char_t *prev;
 			
-			Vector<bool, MemoryPool> curlies;
+			Vector<InterpolatedState *, MemoryPool> curlies;
 			
 			union
 			{

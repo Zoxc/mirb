@@ -102,11 +102,11 @@ namespace Mirb
 				return std::string((const char *)target->string.data, target->string.length) + "#{" + print_node(target->group);
 			}
 			
-			case Tree::SimpleNode::InterpolatedString:
+			case Tree::SimpleNode::Interpolated:
 			{
-				auto target = (Tree::InterpolatedStringNode *)node;
+				auto target = (Tree::InterpolatedNode *)node;
 				
-				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->tail.data, target->tail.length) + "\"";
+				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->string.data, target->string.length) + "\"";
 			}
 			
 			case Tree::SimpleNode::Integer:
@@ -178,6 +178,13 @@ namespace Mirb
 				return "false";
 			}
 			
+			case Tree::SimpleNode::Symbol:
+			{
+				auto target = (Tree::SymbolNode *)node;
+				
+				return print_symbol(target->symbol);
+			}
+			
 			case Tree::SimpleNode::Group:
 			{
 				auto target = (Tree::GroupNode *)node;
@@ -195,6 +202,13 @@ namespace Mirb
 				auto target = (Tree::ArrayNode *)node;
 				
 				return "[" + join(target->entries, ", ") + "]";
+			}
+			
+			case Tree::SimpleNode::Hash:
+			{
+				auto target = (Tree::HashNode *)node;
+				
+				return "{" + join(target->entries, ", ") + "}";
 			}
 			
 			case Tree::SimpleNode::Block:

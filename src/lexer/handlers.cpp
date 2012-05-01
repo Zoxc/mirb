@@ -145,7 +145,18 @@ namespace Mirb
 			lexeme.type = Lexeme::SCOPE;
 		}
 		else
-			lexeme.type = Lexeme::COLON;
+		{
+			if(is_start_ident(input))
+			{
+				skip_ident();
+			
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::SYMBOL;
+				lexeme.symbol = symbol_pool.get(lexeme);
+			}
+			else
+				lexeme.type = Lexeme::COLON;
+		}
 
 		lexeme.stop = &input;
 	}
@@ -168,6 +179,14 @@ namespace Mirb
 				}
 				else			
 					lexeme.type = Lexeme::EQUALITY;
+				
+				break;
+			}
+			
+			case '>':
+			{
+				input++;
+				lexeme.type = Lexeme::ASSOC;
 				
 				break;
 			}
@@ -239,9 +258,14 @@ namespace Mirb
 		restep();
 	}
 	
+	bool Lexer::is_start_ident(char_t c)
+	{
+		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z') || c == '_';
+	}
+	
 	bool Lexer::is_ident(char_t c)
 	{
-		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z') || Input::char_in(c, '0', '9') || c == '_';
+		return is_start_ident(c)  || Input::char_in(c, '0', '9');
 	}
 	
 	void Lexer::skip_ident()
@@ -257,12 +281,17 @@ namespace Mirb
 		if(is_ident(ptr[1]))
 		{
 			input++;
+
+			bool error = !is_start_ident(input);
 			
 			skip_ident();
 			
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::IVAR;
 			lexeme.symbol = symbol_pool.get(lexeme);
+
+			if(error)
+				parser.report(lexeme.dup(memory_pool), "Instance variables cannot start with a number");
 		}
 		else
 		{

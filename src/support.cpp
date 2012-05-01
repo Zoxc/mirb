@@ -3,6 +3,7 @@
 #include "classes/proc.hpp"
 #include "classes/array.hpp"
 #include "classes/string.hpp"
+#include "classes/hash.hpp"
 #include "runtime.hpp"
 
 namespace Mirb
@@ -45,7 +46,7 @@ namespace Mirb
 			set_var(obj, name, value);
 		}
 
-		value_t interpolate(size_t argc, value_t argv[])
+		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
 		{
 			CharArray result;
 
@@ -62,7 +63,10 @@ namespace Mirb
 					result += cast<String>(obj)->string;
 			}
 
-			return result.to_string();
+			if(type == Value::String)
+				return result.to_string();
+			else
+				return symbol_pool.get(result);
 		}
 		
 		value_t create_array(size_t argc, value_t argv[])
@@ -72,7 +76,17 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 				array->vector.push(argv[i]);
 
-			return auto_cast(array);
+			return array;
+		}
+		
+		value_t create_hash(size_t argc, value_t argv[])
+		{
+			Hash *hash = Collector::allocate<Hash>(context->hash_class);
+			
+			for(size_t i = 0; i < argc; i += 2)
+				hash->map.set(argv[i],  argv[i + 1]);
+
+			return hash;
 		}
 		
 		value_t define_class(value_t obj, Symbol *name, value_t super)

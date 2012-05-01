@@ -140,7 +140,7 @@ namespace Mirb
 		lexeme.str->tail.length = str_length;
 	}
 	
-	void Lexer::parse_string(bool initial)
+	void Lexer::parse_string(InterpolatedState *state)
 	{
 		lexeme.type = Lexeme::STRING;
 		std::string result;
@@ -156,6 +156,8 @@ namespace Mirb
 			result = "";
 			data->entries.push(entry);
 		};
+
+		lexeme.type = state ? Lexeme::STRING_END : Lexeme::STRING;
 		
 		while(true)
 			switch(input)
@@ -168,18 +170,37 @@ namespace Mirb
 					{
 						case '{':
 							input++;
-							lexeme.curlies.push(true);
-							lexeme.type = Lexeme::STRING_START;
+
+							{
+								lexeme.type = state ? Lexeme::STRING_CONTINUE : Lexeme::STRING_START;
+
+								if(!state)
+								{
+									state = new (memory_pool) InterpolatedState;
+
+									lexeme.start = start;
+									lexeme.stop = &input;
+
+									state->start = new (memory_pool) Range(lexeme);
+								}
+
+								lexeme.curlies.push(state);
+							}
 							goto done;
 
 						case '@':
-							lexeme.start = &input;
-							ivar(false);
+							{
+								lexeme.start = &input;
+								Lexeme::Type old_type = lexeme.type;
 
-							if(lexeme.type != Lexeme::NONE)
-								push();
-							
-							lexeme.type = Lexeme::STRING;
+								ivar(false);
+
+								if(lexeme.type != Lexeme::NONE)
+									push();
+
+								lexeme.start = start;
+								lexeme.type = old_type;
+							}
 							break;
 
 						default:
@@ -305,18 +326,13 @@ namespace Mirb
 			}
 		
 		error:
-		lexeme.start = start;
 		lexeme.stop = &input;
 		lexeme.str = new (memory_pool) StringData(memory_pool);
 		return;
 		
 		done:
-		lexeme.start = start;
 		lexeme.stop = &input;
 		
-		if(!initial)
-			lexeme.type = (Lexeme::Type)((int)lexeme.type + 1);
-
 		lexeme.str = data;
 
 		data->tail.set<MemoryPool>(result, memory_pool);
@@ -331,18 +347,18 @@ namespace Mirb
 		if(lexeme.curlies.size() == 0)
 			return;
 		
-		bool string = lexeme.curlies.pop();
+		InterpolatedState *state = lexeme.curlies.pop();
 		
-		if(!string)
+		if(!state)
 			return;
 		
-		parse_string(false);
+		parse_string(state);
 	}
 
 	void Lexer::string()
 	{
 		input++;
 		
-		parse_string(true);
+		parse_string(nullptr);
 	}
 };

@@ -264,6 +264,49 @@ namespace Mirb
 		}
 	}
 	
+	Tree::Node *Parser::parse_hash()
+	{
+		auto result = new (fragment) Tree::HashNode;
+		
+		lexer.step();
+		
+		if(lexeme() != Lexeme::CURLY_CLOSE)
+		{
+			do
+			{
+				if(lexeme() == Lexeme::IDENT)
+				{
+					auto key = new (fragment) Tree::SymbolNode;
+
+					key->symbol = lexer.lexeme.symbol;
+
+					result->entries.append(key);
+
+					lexer.step();
+
+					match(Lexeme::COLON);
+				}
+				else
+				{
+					auto key = parse_expression();
+					
+					result->entries.append(key);
+
+					match(Lexeme::ASSOC);
+				}
+
+				auto value = parse_expression();
+				
+				result->entries.append(value);
+			}
+			while(matches(Lexeme::COMMA));
+		}
+		
+		match(Lexeme::CURLY_CLOSE);
+		
+		return result;
+	}
+
 	Tree::Node *Parser::parse_array()
 	{
 		auto result = new (fragment) Tree::ArrayNode;
@@ -286,7 +329,73 @@ namespace Mirb
 		return result;
 	}
 
-	void Parser::process_string_entries(Tree::InterpolatedStringNode *root, StringData::Entry &tail)
+	Tree::StringNode *Parser::parse_string(Value::Type type)
+	{
+		if(lexeme() == Lexeme::STRING)
+		{
+			auto data = lexer.lexeme.str;
+
+			if(data->entries.size())
+			{
+				auto result = new (fragment) Tree::InterpolatedNode;
+
+				result->result_type = type;
+
+				process_string_entries(result, result->string);
+
+				result->string = data->tail.copy<Tree::Fragment>(fragment);
+
+				lexer.step();
+
+				return result;
+			}
+			else
+			{
+				auto result = new (fragment) Tree::StringNode;
+				
+				result->result_type = type;
+
+				result->string = data->tail.copy<Tree::Fragment>(fragment);
+					
+				lexer.step();
+
+				return result;
+			}
+		}
+		else
+		{
+			auto result = new (fragment) Tree::InterpolatedNode;
+				
+			result->result_type = type;
+
+			do
+			{
+				auto pair = new (fragment) Tree::InterpolatedPairNode;
+
+				process_string_entries(result, pair->string);
+
+				lexer.step();
+					
+				pair->group = parse_group();
+					
+				result->pairs.append(pair);
+			}
+			while(lexeme() == Lexeme::STRING_CONTINUE);
+				
+			if(require(Lexeme::STRING_END))
+			{
+				process_string_entries(result, result->string);
+
+				result->string = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
+
+				lexer.step();
+			}
+
+			return result;
+		}
+	}
+
+	void Parser::process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail)
 	{
 		auto &entries = lexer.lexeme.str->entries;
 
@@ -356,66 +465,45 @@ namespace Mirb
 
 			case Lexeme::SQUARE_OPEN:
 				return parse_array();
-
-			case Lexeme::STRING:
-			{
-				auto data = lexer.lexeme.str;
-
-				if(data->entries.size())
-				{
-					auto result = new (fragment) Tree::InterpolatedStringNode;
-
-					process_string_entries(result, result->tail);
-
-					result->tail = data->tail.copy<Tree::Fragment>(fragment);
-
-					lexer.step();
-
-					return result;
-				}
-				else
-				{
-					auto result = new (fragment) Tree::StringNode;
-
-					result->string = data->tail.copy<Tree::Fragment>(fragment);
-					
-					lexer.step();
-
-					return result;
-				}
-			}
-
-			case Lexeme::STRING_START:
-			{
-				auto result = new (fragment) Tree::InterpolatedStringNode;
 				
-				do
-				{
-					auto pair = new (fragment) Tree::InterpolatedPairNode;
-
-					process_string_entries(result, pair->string);
-
-					lexer.step();
-					
-					pair->group = parse_group();
-					
-					result->pairs.append(pair);
-				}
-				while(lexeme() == Lexeme::STRING_CONTINUE);
+			case Lexeme::CURLY_OPEN:
+				return parse_hash();
 				
-				if(require(Lexeme::STRING_END))
-				{
-					process_string_entries(result, result->tail);
+			case Lexeme::SYMBOL:
+			{
+				auto result = new (fragment) Tree::SymbolNode;
 
-					result->tail = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
+				result->symbol = lexer.lexeme.symbol;
 
-					lexer.step();
-				}
-				else
-					result->tail.length = 0;
+				lexer.step();
 
 				return result;
 			}
+
+			case Lexeme::COLON:
+			{
+				auto range = capture();
+
+				lexer.step();
+
+				if(lexeme() == Lexeme::STRING || lexeme() == Lexeme::STRING_START)
+				{
+					if(lexer.lexeme.whitespace)
+						report(*range, "No whitespace between ':' and the string literal is allowed symbol string literals");
+
+					return parse_string(Value::Symbol);
+				}
+				else
+				{
+					report(*range, "Expected a symbol string literal, but found " + lexer.lexeme.describe());
+
+					return 0;
+				}
+			}
+
+			case Lexeme::STRING:
+			case Lexeme::STRING_START:
+				return parse_string(Value::String);
 
 			case Lexeme::KW_SELF:
 			{
@@ -509,29 +597,54 @@ namespace Mirb
 			default:
 			{
 				error("Expected expression but found " + lexer.lexeme.describe());
-					
+				
 				lexer.step();
 					
 				return 0;
 			}
 		}
 	}
+	
+	Tree::Node *Parser::parse_power()
+	{
+		Tree::Node *result = parse_lookup_chain();
+		
+		while(lexeme() == Lexeme::POWER)
+		{
+			auto node = new (fragment) Tree::BooleanOpNode;
+			
+			node->op = Lexeme::POWER;
+			node->left = result;
+			
+			lexer.step();
+			
+			node->right = parse_lookup_chain();
+			
+			result = node;
+		}
+		
+		return result;
+	}
 
 	Tree::Node *Parser::parse_unary()
 	{
 		switch(lexeme())
 		{
+			case Lexeme::BITWISE_NOT:
 			case Lexeme::LOGICAL_NOT:
 			{
-				auto range = capture();
+				auto result = new (fragment) Tree::UnaryOpNode;
+
+				result->range = capture();
+				result->op = lexeme();
 
 				lexer.step();
 
-				auto node = parse_lookup_chain();
+				result->value = parse_power();
 
-				lexer.lexeme.prev_set(range);
+				lexer.lexeme.prev_set(result->range);
 				
-				return new (fragment) Tree::UnaryOpNode(Lexeme::LOGICAL_NOT, node, range);
+				return result;
 			}
 			
 			case Lexeme::ADD:
@@ -540,11 +653,11 @@ namespace Mirb
 				auto result = new (fragment) Tree::UnaryOpNode;
 				
 				result->op = Lexeme::operator_to_unary(lexeme());
-				result->range = new (fragment) Range(lexer.lexeme);
+				result->range = capture();
 				
 				lexer.step();
 				
-				result->value = parse_lookup_chain();
+				result->value = parse_power();
 
 				lexer.lexeme.prev_set(result->range);
 				
@@ -552,7 +665,7 @@ namespace Mirb
 			}
 
 			default:
-				return parse_lookup_chain();
+				return parse_power();
 		}
 	}
 

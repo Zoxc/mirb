@@ -47,7 +47,7 @@ namespace Mirb
 		{
 			private:
 				void convert_string(Tree::Node *basic_node, var_t var);
-				void convert_interpolated_string(Tree::Node *basic_node, var_t var);
+				void convert_interpolated(Tree::Node *basic_node, var_t var);
 				void convert_integer(Tree::Node *basic_node, var_t var);
 				void convert_variable(Tree::Node *basic_node, var_t var);
 				void convert_ivar(Tree::Node *basic_node, var_t var);
@@ -61,7 +61,9 @@ namespace Mirb
 				void convert_nil(Tree::Node *basic_node, var_t var);
 				void convert_true(Tree::Node *basic_node, var_t var);
 				void convert_false(Tree::Node *basic_node, var_t var);
+				void convert_symbol(Tree::Node *basic_node, var_t var);
 				void convert_array(Tree::Node *basic_node, var_t var);
+				void convert_hash(Tree::Node *basic_node, var_t var);
 				void convert_call(Tree::Node *basic_node, var_t var);
 				void convert_super(Tree::Node *basic_node, var_t var);
 				void convert_if(Tree::Node *basic_node, var_t var);

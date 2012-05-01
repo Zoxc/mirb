@@ -191,6 +191,10 @@ namespace Mirb
 		Op(Self)
 			vars[op.var] = frame.obj;
 		EndOp
+			
+		Op(LoadSymbol)
+			vars[op.var] = op.symbol;
+		EndOp
 
 		Op(Block)
 			vars[op.var] = frame.block;
@@ -239,9 +243,13 @@ namespace Mirb
 			if((prelude_unlikely(Support::set_const(vars[op.obj], op.name,  vars[op.var]) == value_raise)))
 				goto handle_exception;
 		EndOp
-
+			
 		Op(Array)
 			vars[op.var] = Support::create_array(op.argc, &vars[op.argv]);
+		EndOp
+
+		Op(Hash)
+			vars[op.var] = Support::create_hash(op.argc, &vars[op.argv]);
 		EndOp
 
 		Op(String)
@@ -249,7 +257,7 @@ namespace Mirb
 		EndOp
 
 		Op(Interpolate)
-			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv]);
+			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv], op.result);
 		EndOp
 
 		Op(Handler)

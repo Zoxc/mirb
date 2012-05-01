@@ -13,12 +13,14 @@ namespace Mirb
 		"octal",
 		"real",
 		"hex",
-		"Instance variable",
+		"instance variable",
+		"symbol",
 		"identifier",
 		"extended identifier",
 		
 		"None",
 		
+		"=>",
 		"**",
 		
 		// order contiguous binary operators

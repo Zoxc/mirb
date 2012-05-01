@@ -37,7 +37,7 @@ namespace Mirb
 			
 			void report_null();
 			
-			void parse_string(bool initial);
+			void parse_string(InterpolatedState *state);
 			
 			template<Lexeme::Type type> void single();
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
@@ -68,6 +68,7 @@ namespace Mirb
 			void ivar(bool restep);
 			void ivar_trampoline();
 			static bool is_ident(char_t c);
+			static bool is_start_ident(char_t c);
 			void skip_ident();
 			
 			void zero();

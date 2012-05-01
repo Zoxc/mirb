@@ -132,7 +132,7 @@ namespace Mirb
 			
 				Type get_type();
 
-				static const size_t type_bits = 5;
+				static const size_t type_bits = 6;
 
 				static_assert(((1 << type_bits) - 1) >= (size_t)Types, "Too few bits for type field");
 				

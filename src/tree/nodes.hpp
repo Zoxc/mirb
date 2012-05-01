@@ -74,7 +74,9 @@ namespace Mirb
 			public Node
 		{
 			NodeType type() { return String; }
-
+			
+			Value::Type result_type;
+			
 			StringData::Entry string;
 		};
 		
@@ -90,14 +92,12 @@ namespace Mirb
 		
 		typedef List<InterpolatedPairNode, ListNode> InterpolatedPairList;
 		
-		struct InterpolatedStringNode:
-			public Node
+		struct InterpolatedNode:
+			public StringNode
 		{
-			NodeType type() { return InterpolatedString; }
+			NodeType type() { return Interpolated; }
 			
 			InterpolatedPairList pairs;
-			
-			StringData::Entry tail;
 		};
 		
 		struct IntegerNode:
@@ -124,9 +124,9 @@ namespace Mirb
 		{
 			NodeType type() { return IVar; }
 			
-			Symbol *name;
+			Mirb::Symbol *name;
 			
-			IVarNode(Symbol *name) : name(name) {}
+			IVarNode(Mirb::Symbol *name) : name(name) {}
 		};
 		
 		struct ConstantNode:
@@ -135,12 +135,12 @@ namespace Mirb
 			NodeType type() { return Constant; }
 	
 			Node *obj;
-			Symbol *name;
+			Mirb::Symbol *name;
 
 			Range *range;
 			
 			ConstantNode() {}
-			ConstantNode(Node *obj, Symbol *name, Range *range) : obj(obj), name(name), range(range)  {}
+			ConstantNode(Node *obj, Mirb::Symbol *name, Range *range) : obj(obj), name(name), range(range)  {}
 		};
 
 		struct SelfNode:
@@ -167,10 +167,26 @@ namespace Mirb
 			NodeType type() { return False; }
 		};
 		
+		struct SymbolNode:
+			public Node
+		{
+			NodeType type() { return Symbol; }
+			
+			Mirb::Symbol *symbol;
+		};
+		
 		struct ArrayNode:
 			public Node
 		{
 			NodeType type() { return Array; }
+			
+			CountedNodeList entries;
+		};
+		
+		struct HashNode:
+			public Node
+		{
+			NodeType type() { return Hash; }
 			
 			CountedNodeList entries;
 		};
@@ -200,7 +216,7 @@ namespace Mirb
 			NodeType type() { return Call; }
 			
 			Node *object;
-			Symbol *method;
+			Mirb::Symbol *method;
 			bool can_be_var;
 			bool subscript;
 
@@ -301,7 +317,7 @@ namespace Mirb
 		{
 			NodeType type() { return Module; }
 			
-			Symbol *name;
+			Mirb::Symbol *name;
 			Scope *scope;
 
 			Range *range;
@@ -320,7 +336,7 @@ namespace Mirb
 		{
 			NodeType type() { return Method; }
 			
-			Symbol *name;
+			Mirb::Symbol *name;
 			Scope *scope;
 		};
 	};

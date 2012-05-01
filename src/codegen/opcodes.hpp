@@ -29,6 +29,7 @@ namespace Mirb
 				LoadNil,
 				LoadObject,
 				LoadArg,
+				LoadSymbol,
 				Closure,
 				Class,
 				Module,
@@ -58,6 +59,7 @@ namespace Mirb
 				UnwindRedo,
 				UnwindNext,
 				Array,
+				Hash,
 				String,
 				Interpolate
 			};
@@ -70,6 +72,7 @@ namespace Mirb
 				&&OpLoadNil, \
 				&&OpLoadObject, \
 				&&OpLoadArg, \
+				&&OpLoadSymbol, \
 				&&OpClosure, \
 				&&OpClass, \
 				&&OpModule, \
@@ -99,6 +102,7 @@ namespace Mirb
 				&&OpUnwindRedo, \
 				&&OpUnwindNext, \
 				&&OpArray, \
+				&&OpHash, \
 				&&OpString, \
 				&&OpInterpolate
 
@@ -170,6 +174,15 @@ namespace Mirb
 			size_t arg;
 
 			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
+		};
+		
+		struct LoadSymbolOp:
+			public OpcodeWrapper<Opcode::LoadSymbol>
+		{
+			var_t var;
+			Symbol *symbol;
+
+			LoadSymbolOp(var_t var, Symbol *symbol) : var(var), symbol(symbol) {}
 		};
 		
 		struct ClosureOp:
@@ -441,6 +454,16 @@ namespace Mirb
 			ArrayOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
 		};
 		
+		struct HashOp:
+			public OpcodeWrapper<Opcode::Hash>
+		{
+			var_t var;
+			size_t argc;
+			var_t argv;
+
+			HashOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
+		};
+		
 		struct StringOp:
 			public OpcodeWrapper<Opcode::String>
 		{
@@ -456,8 +479,9 @@ namespace Mirb
 			var_t var;
 			size_t argc;
 			var_t argv;
+			Value::Type result;
 
-			InterpolateOp(var_t var, size_t argc, var_t argv) : var(var), argc(argc), argv(argv) {}
+			InterpolateOp(var_t var, size_t argc, var_t argv, Value::Type result) : var(var), argc(argc), argv(argv), result(result) {}
 		};
 	};
 };

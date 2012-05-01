@@ -59,7 +59,7 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator();
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
-			void process_string_entries(Tree::InterpolatedStringNode *root, StringData::Entry &tail);
+			void process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail);
 
 			// expressions
 			Tree::Node *parse_variable(Symbol *symbol, Range *range);
@@ -67,6 +67,9 @@ namespace Mirb
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
+			Tree::Node *parse_hash();
+			Tree::StringNode *parse_string(Value::Type type);
+			Tree::Node *parse_power();
 			Tree::Node *build_assignment(Tree::Node *left);
 			Tree::Node *process_assignment(Tree::Node *input);
 			Tree::Node *parse_assignment(Tree::Node *variable);
@@ -232,6 +235,8 @@ namespace Mirb
 					case Lexeme::KW_NEXT:
 					case Lexeme::PARENT_OPEN:
 					case Lexeme::SQUARE_OPEN:
+					case Lexeme::CURLY_OPEN:
+					case Lexeme::COLON:
 						return true;
 
 					default:

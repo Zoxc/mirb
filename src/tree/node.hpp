@@ -15,7 +15,7 @@ namespace Mirb
 			{
 				None,
 				String,
-				InterpolatedString,
+				Interpolated,
 				InterpolatedPair,
 				Integer,
 				Variable,
@@ -30,7 +30,9 @@ namespace Mirb
 				Nil,
 				True,
 				False,
+				Symbol,
 				Array,
+				Hash,
 				Block,
 				Invoke,
 				Call,

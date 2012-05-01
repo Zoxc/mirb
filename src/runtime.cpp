@@ -263,7 +263,7 @@ namespace Mirb
 		if(!str)
 		{
 			swallow_exception();
-			return "";
+			return CharArray("");
 		}
 
 		return cast<String>(str)->string;
