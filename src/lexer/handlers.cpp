@@ -274,10 +274,10 @@ namespace Mirb
 		
 		if(is_ident(input))
 		{
-			input++;
-
 			bool error = !is_start_ident(input);
 			
+			input++;
+
 			skip_ident();
 			
 			lexeme.stop = &input;
@@ -293,10 +293,10 @@ namespace Mirb
 
 			if(is_ident(input))
 			{
-				input++;
-
 				bool error = !is_start_ident(input);
 			
+				input++;
+
 				skip_ident();
 			
 				lexeme.stop = &input;
