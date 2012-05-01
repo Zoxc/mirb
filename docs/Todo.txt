@@ -5,7 +5,8 @@
 [X] Strings
 [X] String interpolation
 [X] Arrays
-[ ] Hashes
+[X] Hashes
+[ ] Loops
 [ ] Ranges
 [X] Class inheritance
 [X] Instance variables
