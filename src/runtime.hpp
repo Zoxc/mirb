@@ -19,7 +19,7 @@ namespace Mirb
 	value_t real_class(value_t obj) prelude_nonnull(1);
 	value_t real_class_of(value_t obj);
 
-	Class *singleton_class(Object *object);
+	Class *singleton_class(value_t object);
 	
 	Class *define_class(Module *under, Symbol *name, Class *super);
 	Class *define_class(Module *under, std::string name, Class *super);
@@ -34,7 +34,7 @@ namespace Mirb
 	void class_name(value_t obj, Module *under, Symbol *name);
 	Class *class_create_unnamed(Class *super);
 	Class *class_create_bare(Class *super);
-	Class *class_create_singleton(Object *object, Class *super);
+	Class *class_create_singleton(value_t object, Class *super);
 	
 	/*
 	 * inspect_object (calls Ruby code)

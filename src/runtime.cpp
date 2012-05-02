@@ -189,7 +189,7 @@ namespace Mirb
 		}
 	}
 	
-	Class *singleton_class(Object *object)
+	Class *singleton_class(value_t object)
 	{
 		Class *c = auto_cast(class_of(object));
 
@@ -234,8 +234,16 @@ namespace Mirb
 		return Collector::allocate<Class>(Value::Class, context->class_class, super);
 	}
 
-	Class *class_create_singleton(Object *object, Class *super)
+	Class *class_create_singleton(value_t obj, Class *super)
 	{
+		if(!Value::object_ref(obj))
+		{
+			raise(context->type_error, "Unable to create singleton classes on immediate values.");
+			return nullptr;
+		}
+
+		Object *object = auto_cast(obj);
+
 		Class *singleton_class = class_create_bare(super);
 		
 		singleton_class->singleton = true;

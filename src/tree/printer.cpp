@@ -44,7 +44,10 @@ namespace Mirb
 	std::string Printer::print_symbol(Symbol *symbol)
 	{
 		if(symbol)
+		{
+			Value::assert_valid(symbol);
 			return symbol->get_string();
+		}
 		else
 			return "<null_symbol>";
 	}
@@ -324,7 +327,7 @@ namespace Mirb
 			{
 				auto target = (Tree::MethodNode *)node;
 				
-				return "def " + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
+				return "def " + (target->singleton ? print_node(target->singleton) + "." : "") + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
 			default:

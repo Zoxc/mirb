@@ -711,8 +711,18 @@ namespace Mirb
 		void ByteCodeGenerator::convert_method(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::MethodNode *)basic_node;
-			
-			gen<MethodOp>(node->name, defer(node->scope));
+
+			if(node->singleton)
+			{
+				var_t temp = reuse(var);
+
+				to_bytecode(node->singleton, temp);
+
+				gen<SingletonMethodOp>(temp, node->name, defer(node->scope));
+				location(node->range);
+			}
+			else
+				gen<MethodOp>(node->name, defer(node->scope));
 			
 			if(is_var(var))
 				gen<LoadNilOp>(var);

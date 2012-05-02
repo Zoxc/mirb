@@ -224,6 +224,15 @@ namespace Mirb
 					return "method " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
+				case Opcode::SingletonMethod:
+				{
+					auto op = (SingletonMethodOp *)opcode;
+
+					opcode += sizeof(SingletonMethodOp);
+					
+					return "singleton_method " + var(op->singleton)+ ", " + imm(op->name) + ", " + print_block(op->block);
+				}
+				
 				case Opcode::Call:
 				{
 					auto op = (CallOp *)opcode;
@@ -457,7 +466,7 @@ namespace Mirb
 				
 				case Opcode::UnwindRedo:
 				{
-					opcode += sizeof(UnwindBreakOp);
+					opcode += sizeof(UnwindRedoOp);
 					
 					return "redo " + label(opcode);
 				}

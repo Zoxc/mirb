@@ -346,8 +346,10 @@ namespace Mirb
 		{
 			NodeType type() { return Method; }
 			
+			Node *singleton;
 			Mirb::Symbol *name;
 			Scope *scope;
+			Range *range;
 		};
 	};
 };

@@ -134,12 +134,77 @@ namespace Mirb
 		
 		auto result = new (fragment) Tree::MethodNode;
 
+		result->range = capture();
+
 		Symbol *symbol;
 		
+		switch(lexeme())
+		{
+			case Lexeme::PARENT_OPEN:
+			{
+				lexer.step();
+					
+				if(lexeme() == Lexeme::PARENT_CLOSE)
+					error("Expected expression");
+				else
+					result->singleton = parse_expression();
+			
+				match(Lexeme::PARENT_CLOSE);
+
+				match(Lexeme::DOT);
+			}
+			break;
+			
+			case Lexeme::IVAR:
+			{
+				result->singleton = new (fragment) Tree::IVarNode(lexer.lexeme.symbol);
+			
+				lexer.step();
+
+				match(Lexeme::DOT);
+			}
+			break;
+
+			case Lexeme::GLOBAL:
+			{
+				result->singleton = new (fragment) Tree::GlobalNode(lexer.lexeme.symbol);
+			
+				lexer.step();
+
+				match(Lexeme::DOT);
+			}
+			break;
+
+			case Lexeme::IDENT:
+			{
+				Range *range = parse_method_name(symbol);
+
+				if(lexeme() == Lexeme::DOT)
+				{
+					result->singleton = parse_variable(symbol, range);
+
+					lexer.step();
+				}
+				else
+				{
+					result->singleton = nullptr;
+					goto skip_name;
+				}
+			}
+			break;
+
+			default:
+				result->singleton = nullptr;
+				break;
+		}
+		
 		parse_method_name(symbol);
+skip_name:
 
 		result->name = symbol;
-		
+
+		lexer.lexeme.prev_set(result->range);
+
 		allocate_scope(Tree::Scope::Method, [&] {
 			result->scope = scope;
 			scope->owner = scope;

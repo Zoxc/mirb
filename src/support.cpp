@@ -112,6 +112,17 @@ namespace Mirb
 
 			set_method(obj, name, block);
 		}
+
+		bool define_singleton_method(value_t obj, Symbol *name, Block *block)
+		{
+			Class *klass = singleton_class(obj);
+
+			if(!klass)
+				return false;
+
+			set_method(klass, name, block);
+			return true;
+		}
 	};
 };
 

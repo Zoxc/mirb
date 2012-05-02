@@ -34,6 +34,7 @@ namespace Mirb
 				Class,
 				Module,
 				Method,
+				SingletonMethod,
 				Call,
 				Super,
 				Lookup,
@@ -79,6 +80,7 @@ namespace Mirb
 				&&OpClass, \
 				&&OpModule, \
 				&&OpMethod, \
+				&&OpSingletonMethod, \
 				&&OpCall, \
 				&&OpSuper, \
 				&&OpLookup, \
@@ -230,6 +232,16 @@ namespace Mirb
 			MethodOp(Symbol *name, Mirb::Block *block) : name(name), block(block) {}
 		};
 		
+		struct SingletonMethodOp:
+			public OpcodeWrapper<Opcode::SingletonMethod>
+		{
+			var_t singleton;
+			Symbol *name;
+			Mirb::Block *block;
+			
+			SingletonMethodOp(var_t singleton, Symbol *name, Mirb::Block *block) : singleton(singleton), name(name), block(block) {}
+		};
+		
 		struct CallOp:
 			public OpcodeWrapper<Opcode::Call>
 		{
@@ -241,7 +253,10 @@ namespace Mirb
 			size_t argc;
 			var_t argv;
 
-			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv) {}
+			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv)
+			{
+				Value::assert_valid(method);
+			}
 		};
 		
 		struct SuperOp:

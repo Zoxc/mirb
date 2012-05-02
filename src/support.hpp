@@ -21,5 +21,6 @@ namespace Mirb
 		value_t define_class(value_t obj, Symbol *name, value_t super);
 		value_t define_module(value_t obj, Symbol *name);
 		void define_method(value_t obj, Symbol *name, Block *block);
+		bool define_singleton_method(value_t obj, Symbol *name, Block *block);
 	};
 };

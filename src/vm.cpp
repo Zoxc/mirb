@@ -186,9 +186,14 @@ namespace Mirb
 			if(op.var != no_var)
 				vars[op.var] = result;
 		EndOp
-
+			
 		Op(Method)
 			Support::define_method(frame.obj, op.name, op.block);
+		EndOp
+
+		DeepOp(SingletonMethod)
+			if(prelude_unlikely(!Support::define_singleton_method(vars[op.singleton], op.name, op.block)))
+				goto handle_exception;
 		EndOp
 
 		Op(Lookup)
