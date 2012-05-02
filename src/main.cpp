@@ -4,6 +4,7 @@
 #include "parser/parser.hpp"
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
+#include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "block.hpp"
 #include "document.hpp"
@@ -14,9 +15,44 @@
 
 using namespace Mirb;
 
-int main()
+void report_exception()
+{
+	Exception *exception = current_exception;
+
+	swallow_exception();
+
+	OnStack<1> os2(exception);
+
+	Platform::color<Platform::Red>(inspect_obj(real_class_of(auto_cast(exception))));
+			
+	Platform::color<Platform::Bold>(": " + enforce_string(exception->message)->string.get_string() + "\n");
+
+	StackFrame::print_backtrace(exception->backtrace);
+}
+
+int main(int argc, const char *argv[])
 {
 	Mirb::initialize();
+
+	if(argc > 1)
+	{
+		for(int i = 1; i < argc; ++i)
+		{
+			if(strcmp(argv[i], "-v") == 0)
+			{
+				std::cout << "mirb 0.1 (2012-05-02) [i386-mingw32]";
+				return 0;
+			}
+
+			if(!Kernel::load(CharArray((const char_t *)argv[i]).to_string()))
+			{
+				report_exception();
+				return 1;
+			}
+		}
+
+		return 0;
+	}
 	
 	while(1)
 	{
@@ -70,18 +106,7 @@ int main()
 
 		if(result == value_raise)
 		{
-			Exception *exception = current_exception;
-
-			swallow_exception();
-
-			OnStack<1> os2(exception);
-
-			Platform::color<Platform::Red>(inspect_obj(real_class_of(auto_cast(exception))));
-			
-			Platform::color<Platform::Bold>(": " + enforce_string(exception->message)->string.get_string() + "\n");
-
-			StackFrame::print_backtrace(exception->backtrace);
-
+			report_exception();
 			std::cerr << "\n";
 		}
 		else
