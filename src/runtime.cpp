@@ -840,42 +840,43 @@ namespace Mirb
 	
 	void initialize()
 	{
-		std::cout << "Initialized in " << Platform::benchmark([] {
-			Collector::initialize();
+		Collector::initialize();
 
-			context = new Context;
+		context = new Context;
 				
-			Value::initialize_type_table();
+		Value::initialize_type_table();
 		
-			Platform::initialize();
+		Platform::initialize();
 
-			Lexer::setup_jump_table();
+		Lexer::setup_jump_table();
 
-			setup_classes();
+		setup_classes();
 
-			Class::initialize();
-			Object::initialize();
-			Module::initialize();
+		Class::initialize();
+		Object::initialize();
+		Module::initialize();
 		
-			Kernel::initialize();
+		Kernel::initialize();
 		
-			TrueClass::initialize();
-			FalseClass::initialize();
-			NilClass::initialize();
+		TrueClass::initialize();
+		FalseClass::initialize();
+		NilClass::initialize();
 
-			Symbol::initialize();
-			String::initialize();
-			Fixnum::initialize();
-			Proc::initialize();
-			Array::initialize();
-			Hash::initialize();
-			Exception::initialize();
-			initialize_exceptions();
+		Symbol::initialize();
+		String::initialize();
+		Fixnum::initialize();
+		Proc::initialize();
+		Array::initialize();
+		Hash::initialize();
+		Exception::initialize();
+		initialize_exceptions();
 
-			Collector::enable_interrupts = true;
+		Collector::enable_interrupts = true;
+		
+		set_const(context->object_class, Symbol::from_literal("RUBY_ENGINE"), String::from_literal("mirb"));
+		set_const(context->object_class, Symbol::from_literal("RUBY_VERSION"), String::from_literal("1.9"));
 
-			mirb_debug(Collector::collect());
-		}).format() << "\n";
+		mirb_debug(Collector::collect());
 	}
 
 	void finalize()
