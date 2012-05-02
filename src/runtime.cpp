@@ -491,7 +491,7 @@ namespace Mirb
 		return value_raise;
 	}
 	
-	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, CharArray &filename, bool free_input)
+	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input)
 	{
 		MemoryPool::Base memory_pool;
 		Document *document = Collector::allocate_pinned<Document>();
