@@ -144,10 +144,13 @@ namespace Mirb
 
 		DeepOp(Class)
 			value_t super = op.super == no_var ? context->object_class : vars[op.super];
-		
-			Module *self = define_class(frame.scope->last(), op.name, auto_cast(super));
 
-			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_append(self), value_nil, 0, nullptr);
+			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, auto_cast(super));
+			
+			if(prelude_unlikely(self == nullptr))
+				goto handle_exception;
+
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
@@ -157,9 +160,12 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Module)
-			Module *self = define_module(frame.scope->last(), op.name);
+			Module *self = define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name);
+		
+			if(prelude_unlikely(self == nullptr))
+				goto handle_exception;
 
-			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_append(self), value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
@@ -171,7 +177,7 @@ namespace Mirb
 		DeepOp(Super)
 			value_t block = op.block ? vars[op.block_var] : value_nil;
 			
-			Method *method = lookup_super(frame.scope->last(), frame.name);
+			Method *method = lookup_super(frame.scope->first(), frame.name);
 
 			if(prelude_unlikely(!method))
 				goto handle_exception;
@@ -238,9 +244,24 @@ namespace Mirb
 		Op(SetIVar)
 			set_var(frame.obj, op.name,  vars[op.var]);
 		EndOp
+			
+		DeepOp(GetScopedConst)
+			value_t result = get_scoped_const(vars[op.obj], op.name);
+		
+			if(prelude_unlikely(result == value_raise))
+				goto handle_exception;
 
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		DeepOp(SetScopedConst)
+			if((prelude_unlikely(set_const(vars[op.obj], op.name,  vars[op.var]) == value_raise)))
+				goto handle_exception;
+		EndOp
+			
 		DeepOp(GetConst)
-			value_t result = get_const(vars[op.obj], op.name);
+			value_t result = get_const(frame.scope, op.name);
 		
 			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
@@ -250,7 +271,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(SetConst)
-			if((prelude_unlikely(set_const(vars[op.obj], op.name,  vars[op.var]) == value_raise)))
+			if((prelude_unlikely(set_const(frame.scope->first(), op.name,  vars[op.var]) == value_raise)))
 				goto handle_exception;
 		EndOp
 			

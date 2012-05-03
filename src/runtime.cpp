@@ -70,15 +70,21 @@ namespace Mirb
 		return real_class(class_of(obj));
 	}
 
-	Class *define_class(Module *under, Symbol *name, Class *super)
+	Class *define_class(value_t under, Symbol *name, Class *super)
 	{
-		value_t existing = test_const(under, auto_cast(name));
+		if(prelude_unlikely(!Value::of_type<Module>(under)))
+		{
+			raise(context->type_error, "Invalid constant scope '" + inspect_obj(under) + "'");
+			return nullptr;
+		}
+
+		value_t existing = get_vars(under)->map.get(auto_cast(name));
 		
 		if(prelude_unlikely(existing != value_raise))
 		{
 			if(type(existing) != Value::Class)
 			{
-				raise(context->standard_error,  "Constant exists already");
+				raise(context->type_error,  "Constant already exists with type " + inspect_obj(real_class_of(existing)));
 
 				return nullptr;
 			}
@@ -88,30 +94,31 @@ namespace Mirb
 
 		Class *obj = class_create_unnamed(auto_cast(super));
 		
-		class_name(obj, under, name);
+		class_name(obj, auto_cast(under), name);
 
 		return obj;
 	}
 
-	Class *define_class(Module *under, std::string name, Class *super)
-	{
-		return define_class(under, auto_cast(symbol_pool.get(name)), super);
-	}
-	
 	Module *module_create_bare()
 	{
 		return Collector::allocate<Module>(Value::Module, context->module_class, nullptr);
 	}
 
-	Module *define_module(Module *under, Symbol *name)
+	Module *define_module(value_t under, Symbol *name)
 	{
-		value_t existing = test_const(under, name);
+		if(prelude_unlikely(!Value::of_type<Module>(under)))
+		{
+			raise(context->type_error, "Invalid constant scope '" + inspect_obj(under) + "'");
+			return nullptr;
+		}
+
+		value_t existing = get_vars(under)->map.get(auto_cast(name));
 
 		if(prelude_unlikely(existing != value_raise))
 		{
 			if(type(existing) != Value::Module)
 			{
-				raise(context->standard_error,  "Constant exists already");
+				raise(context->type_error,  "Constant already exists with type " + inspect_obj(real_class_of(existing)));
 
 				return nullptr;
 			}
@@ -121,14 +128,19 @@ namespace Mirb
 
 		Module *obj = module_create_bare();
 		
-		class_name(obj, under, name);
+		class_name(obj, auto_cast(under), name);
 
 		return obj;
 	}
-
-	Module *define_module(Module *under, std::string name)
+	
+	Class *define_class(const CharArray &name, Class *super)
 	{
-		return define_module(under, cast<Symbol>(symbol_pool.get(name)));
+		return define_class(context->object_class, symbol_pool.get(name), super);
+	}
+	
+	Module *define_module(const CharArray &name)
+	{
+		return define_module(context->object_class, symbol_pool.get(name));
 	}
 	
 	void include_module(Module *obj, Module *module)
@@ -347,53 +359,79 @@ namespace Mirb
 			return false;
 		}
 	}
-	
-	value_t test_const(value_t obj, Symbol *name)
+
+	CharArray scope_path(Tuple<Module> *scope)
 	{
-		Value::assert_valid(name);
+		CharArray result;
 
-		// TODO: Fix constant lookup
+		for(int i = scope->entries - 1; i >= 0; --i)
+		{
+			result += inspect_obj((*scope)[i]) = "::";
+		}
 
-		prelude_debug_assert(Value::of_type<Module>(obj));
+		return result;
+	}
+	
+	value_t lookup_const(Module *module, Symbol *name)
+	{
+		module = module->superclass;
 
-		auto lookup = [&](value_t obj) -> value_t {
-			while(obj)
-			{
-				ValueMap *vars = get_vars(obj);
+		while(module)
+		{
+			value_t value = get_vars(module)->map.get(auto_cast(name));
 
-				value_t value = vars->map.get(auto_cast(name));
+			if(value != value_raise)
+				return value;
 
-				if(value != value_raise)
-					return value;
-
-				obj = cast<Module>(obj)->superclass;
-			}
-
-			return value_raise;
-		};
-
-		value_t result = lookup(obj);
-		if(result != value_raise)
-			return result;
-			
-		result = lookup(context->object_class);
-		if(result != value_raise)
-			return result;
+			module = module->superclass;
+		}
 		
 		return value_raise;
 	}
+	
+	value_t test_const(Tuple<Module> *scope, Symbol *name)
+	{
+		Value::assert_valid(name);
+		
+		for(size_t i = 0; i < scope->entries; ++i)
+		{
+			value_t value = get_vars((*scope)[i])->map.get(auto_cast(name));
 
-	value_t get_const(value_t obj, Symbol *name)
+			if(value != value_raise)
+				return value;
+		}
+
+		return lookup_const(scope->first(), name);
+	}
+	
+	value_t get_scoped_const(value_t obj, Symbol *name)
 	{
 		if(!can_have_consts(obj))
 			return value_raise;
 
-		value_t result = test_const(obj, name);
+		value_t value = get_vars(obj)->map.get(auto_cast(name));
+
+		if(value)
+			return value;
+
+		value = lookup_const(auto_cast(obj), name);
+		
+		if(prelude_likely(value != nullptr))
+			return value;
+
+		raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
+
+		return value_raise;
+	}
+
+	value_t get_const(Tuple<Module> *scope, Symbol *name)
+	{
+		value_t result = test_const(scope, name);
 
 		if(prelude_likely(result != value_raise))
 			return result;
 		
-		raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
+		raise(context->name_error, "Uninitialized constant " + scope_path(scope) + name->string);
 
 		return value_raise;
 	}
@@ -768,12 +806,14 @@ namespace Mirb
 		class_name(context->symbol_class, context->object_class, Symbol::from_literal("Symbol"));
 		class_name(context->string_class, context->object_class, Symbol::from_literal("String"));
 		
+		context->setup(); // Required by simple define_class
+
 		// Setup variables required by Value::initialize_class_table()
 		
-		context->nil_class = define_class(context->object_class, "NilClass", context->object_class);
-		context->false_class = define_class(context->object_class, "FalseClass", context->object_class);
-		context->true_class = define_class(context->object_class, "TrueClass", context->object_class);
-		context->fixnum_class = define_class(context->object_class, "Fixnum", context->object_class);
+		context->nil_class = define_class("NilClass", context->object_class);
+		context->false_class = define_class("FalseClass", context->object_class);
+		context->true_class = define_class("TrueClass", context->object_class);
+		context->fixnum_class = define_class("Fixnum", context->object_class);
 
 		Value::initialize_class_table();
 	}
@@ -823,8 +863,6 @@ namespace Mirb
 		Collector::enable_interrupts = true;
 		
 		setup_main();
-
-		context->setup();
 
 		set_const(context->object_class, Symbol::from_literal("RUBY_ENGINE"), String::from_literal("mirb"));
 		set_const(context->object_class, Symbol::from_literal("RUBY_VERSION"), String::from_literal("1.9"));

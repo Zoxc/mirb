@@ -32,7 +32,7 @@ namespace Mirb
 
 		Platform::color<Platform::Gray>("  in ");
 
-		Module *module = self->scope->last();
+		Module *module = self->scope->first();
 
 		if(Value::type(module) == Value::IClass)
 			module = module->original_module;
@@ -86,7 +86,7 @@ namespace Mirb
 
 		OnStackString<1> os2(result);
 		
-		Module *module = self->scope->last();
+		Module *module = self->scope->first();
 
 		if(Value::type(module) == Value::IClass)
 			module = module->original_module;
@@ -192,7 +192,7 @@ namespace Mirb
 
 	void Exception::initialize()
 	{
-		context->exception_class = define_class(context->object_class, "Exception", context->object_class);
+		context->exception_class = define_class("Exception", context->object_class);
 
 		singleton_method<Arg::Self>(context->exception_class, "allocate", &allocate);
 

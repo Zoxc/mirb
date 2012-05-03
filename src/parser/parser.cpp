@@ -172,13 +172,7 @@ namespace Mirb
 	{
 		if(is_constant(symbol))
 		{
-			auto result = new (fragment) Tree::ConstantNode;
-			
-			result->obj = nullptr;
-			result->name = symbol;
-			result->range = range;
-			
-			return result;
+			return new (fragment) Tree::ConstantNode(nullptr, symbol, range);
 		}
 		else
 		{
@@ -515,6 +509,52 @@ namespace Mirb
 				return result;
 			}
 			
+			case Lexeme::SCOPE:
+			{
+				auto range = capture();
+
+				lexer.step();
+
+				if(require(Lexeme::IDENT))
+				{
+					range->expand(lexer.lexeme);
+
+					Symbol *symbol = lexer.lexeme.symbol;
+
+					if(is_constant(symbol))
+					{
+						Tree::Node *result = new (fragment) Tree::ConstantNode(nullptr, symbol, range, true);
+
+						lexer.step();
+
+						while(is_lookup())
+						{
+							Tree::Node *node = parse_lookup(result);
+
+							result = node;
+						}
+
+						return result;
+					}
+					else
+					{
+						Tree::Node *call_node = parse_call(0, new (fragment) Tree::SelfNode, 0, false); // Try to parse it as a method or local variable
+
+						if(call_node->type() == Tree::Node::Call)
+							range->expand(*((Tree::CallNode *)call_node)->range);
+
+						report(*range, "Can only reference constants when leaving out the lookup expression (Use ::Object to access non-constants)");
+
+						return call_node;
+					}
+				}
+			
+				Symbol *symbol = lexer.lexeme.symbol;
+					
+				
+				return new (fragment) Tree::IVarNode(symbol);
+			}
+
 			case Lexeme::IVAR:
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
@@ -540,7 +580,7 @@ namespace Mirb
 
 				lexer.step();
 				
-				scope->require_self = true;
+				scope->require_self = true; // TODO: Reduce this to self calls only
 
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}

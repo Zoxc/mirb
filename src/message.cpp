@@ -7,9 +7,9 @@
 namespace Mirb
 {
 	std::string Message::severity_names[SEVERITIES] = {
-		"Hint",
-		"Warning",
-		"Error"
+		"Parsing Hint",
+		"Parsing Warning",
+		"Parsing Error"
 	};
 	
 	Message::Message(Parser &parser, Range &range, Severity severity) : parser(parser), range(range), severity(severity)
@@ -29,11 +29,15 @@ namespace Mirb
 	
 	void Message::print()
 	{
-		Platform::color<Platform::Bold>(parser.document.name + "[" + CharArray::uint(range.line + 1) + "]: ");
 		Platform::color<Platform::Red>(severity_names[severity]);
 		Platform::color<Platform::Bold>(": " + string() + "\n");
+
+		CharArray prefix = parser.document.name + "[" + CharArray::uint(range.line + 1) + "]: ";
+
+		Platform::color<Platform::Bold>(prefix);
+
 		std::cerr << range.get_line() << "\n";
-		Platform::color<Platform::Green>(range.indicator());
+		Platform::color<Platform::Green>(CharArray(" ") * prefix.size() + range.indicator());
 		std::cerr << std::endl;
 	}
 

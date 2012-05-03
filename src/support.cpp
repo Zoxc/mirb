@@ -65,7 +65,7 @@ namespace Mirb
 		
 		void define_method(Tuple<Module> *scope, Symbol *name, Block *block)
 		{
-			scope->last()->set_method(name, Collector::allocate<Method>(block, scope));
+			scope->first()->set_method(name, Collector::allocate<Method>(block, scope));
 		}
 
 		bool define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block)

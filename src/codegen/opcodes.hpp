@@ -47,6 +47,8 @@ namespace Mirb
 				SetIVar,
 				GetGlobal,
 				SetGlobal,
+				GetScopedConst,
+				SetScopedConst,
 				GetConst,
 				SetConst,
 				BranchIf,
@@ -93,6 +95,8 @@ namespace Mirb
 				&&OpSetIVar, \
 				&&OpGetGlobal, \
 				&&OpSetGlobal, \
+				&&OpGetScopedConst, \
+				&&OpSetScopedConst, \
 				&&OpGetConst, \
 				&&OpSetConst, \
 				&&OpBranchIf, \
@@ -206,21 +210,23 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::Class>
 		{
 			var_t var;
+			var_t scope;
 			Symbol *name;
 			var_t super;
 			Mirb::Block *block;
 			
-			ClassOp(var_t var, Symbol *name, var_t super, Mirb::Block *block) : var(var), name(name), super(super), block(block) {}
+			ClassOp(var_t var, var_t scope, Symbol *name, var_t super, Mirb::Block *block) : var(var), scope(scope), name(name), super(super), block(block) {}
 		};
 		
 		struct ModuleOp:
 			public OpcodeWrapper<Opcode::Module>
 		{
 			var_t var;
+			var_t scope;
 			Symbol *name;
 			Mirb::Block *block;
 			
-			ModuleOp(var_t var, Symbol *name, Mirb::Block *block) : var(var), name(name), block(block) {}
+			ModuleOp(var_t var, var_t scope, Symbol *name, Mirb::Block *block) : var(var), scope(scope), name(name), block(block) {}
 		};
 		
 		struct MethodOp:
@@ -361,24 +367,42 @@ namespace Mirb
 			SetGlobalOp(Symbol *name, var_t var) : name(name), var(var) {}
 		};
 		
-		struct GetConstOp:
-			public OpcodeWrapper<Opcode::GetConst>
+		struct GetScopedConstOp:
+			public OpcodeWrapper<Opcode::GetScopedConst>
 		{
 			var_t var;
 			var_t obj;
 			Symbol *name;
 			
-			GetConstOp(var_t var, var_t obj, Symbol *name) : var(var), obj(obj), name(name) {}
+			GetScopedConstOp(var_t var, var_t obj, Symbol *name) : var(var), obj(obj), name(name) {}
+		};
+		
+		struct SetScopedConstOp:
+			public OpcodeWrapper<Opcode::SetScopedConst>
+		{
+			var_t obj;
+			Symbol *name;
+			var_t var;
+			
+			SetScopedConstOp(var_t obj, Symbol *name, var_t var) : obj(obj), name(name), var(var) {}
+		};
+		
+		struct GetConstOp:
+			public OpcodeWrapper<Opcode::GetConst>
+		{
+			var_t var;
+			Symbol *name;
+			
+			GetConstOp(var_t var, Symbol *name) : var(var), name(name) {}
 		};
 		
 		struct SetConstOp:
 			public OpcodeWrapper<Opcode::SetConst>
 		{
-			var_t obj;
 			Symbol *name;
 			var_t var;
 			
-			SetConstOp(var_t obj, Symbol *name, var_t var) : obj(obj), name(name), var(var) {}
+			SetConstOp(Symbol *name, var_t var) : name(name), var(var) {}
 		};
 		
 		struct BranchOpcode:

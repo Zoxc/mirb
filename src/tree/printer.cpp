@@ -165,7 +165,7 @@ namespace Mirb
 			{
 				auto target = (Tree::ConstantNode *)node;
 				
-				return print_symbol(target->name);
+				return (target->obj ? print_node(target->obj) + "::" : (target->top_scope ? "::" : "")) + print_symbol(target->name);
 			};
 			
 			case Tree::SimpleNode::Self:
@@ -313,14 +313,14 @@ namespace Mirb
 			{
 				auto target = (Tree::ModuleNode *)node;
 				
-				return "module " + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
+				return "module " + (target->scoped ? print_node(target->scoped) + "::" : (target->top_scope ? "::" : "")) + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
 			case Tree::SimpleNode::Class:
 			{
 				auto target = (Tree::ClassNode *)node;
 				
-				return "class " + print_symbol(target->name) + " < " + print_node(target->super) + "\n" + print_node(target->scope->group) + "end\n";
+				return "class " + (target->scoped ? print_node(target->scoped) + "::" : (target->top_scope ? "::" : "")) + print_symbol(target->name) + " < " + print_node(target->super) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
 			case Tree::SimpleNode::Method:

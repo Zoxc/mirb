@@ -11,6 +11,7 @@ namespace Mirb
 			struct Symbols
 			{
 				Symbol *classpath;
+				Symbol *class_scope;
 				Symbol *classname;
 				Symbol *attached;
 

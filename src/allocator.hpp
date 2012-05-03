@@ -115,25 +115,32 @@ namespace Mirb
 					TupleUtil<T>::mark(mark, (*this)[i]);
 			}
 			
-			Tuple *copy_and_append(T *value)
+			Tuple *copy_and_prepend(T *value)
 			{
 				Tuple *result = allocate(entries + 1);
 				
 				for(size_t i = 0; i < entries; ++i)
-					(*result)[i] = (*this)[i];
+					(*result)[i + 1] = (*this)[i];
 
-				(*result)[entries] = value;
+				(*result)[0] = value;
 
 				return result;
 			}
 
+			T *first()
+			{
+				mirb_debug_assert(entries > 0);
+
+				return (*this)[0];
+			}
+			/*
 			T *last()
 			{
 				mirb_debug_assert(entries > 0);
 
 				return (*this)[entries - 1];
 			}
-
+			*/
 			static Tuple *allocate(size_t size)
 			{
 				return TupleUtil<T>::allocate(size);

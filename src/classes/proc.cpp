@@ -32,7 +32,7 @@ namespace Mirb
 
 	void Proc::initialize()
 	{
-		context->proc_class = define_class(context->object_class, "Proc", context->object_class);
+		context->proc_class = define_class("Proc", context->object_class);
 
 		method<Arg::Self, Arg::Block, Arg::Count, Arg::Values>(context->proc_class, "call", &call);
 	}

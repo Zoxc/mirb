@@ -20,10 +20,14 @@ namespace Mirb
 
 	Class *singleton_class(value_t object);
 	
-	Class *define_class(Module *under, Symbol *name, Class *super);
-	Class *define_class(Module *under, std::string name, Class *super);
-	Module *define_module(Module *under, Symbol *name);
-	Module *define_module(Module *under, std::string name);
+	Class *define_class(value_t under, Symbol *name, Class *super);
+	Module *define_module(value_t under, Symbol *name);
+	
+	Class *define_scoped_class(value_t obj, Symbol *name, Class *super);
+	Module *define_scoped_module(value_t obj, Symbol *name);
+	
+	Class *define_class(const CharArray &name, Class *super);
+	Module *define_module(const CharArray &name);
 
 	/*
 	 * include_module (calls Ruby code)
@@ -57,9 +61,15 @@ namespace Mirb
 	CharArray pretty_inspect(value_t obj);
 	
 	ValueMap *get_vars(value_t obj);
+	
+	/*
+	 * scope_path (calls Ruby code)
+	 */
+	CharArray scope_path(Tuple<Module> *scope);
 
-	value_t test_const(value_t obj, Symbol *name);
-	value_t get_const(value_t obj, Symbol *name);
+	value_t test_const(Tuple<Module> *scope, Symbol *name);
+	value_t get_scoped_const(value_t obj, Symbol *name);
+	value_t get_const(Tuple<Module> *scope, Symbol *name);
 	value_t set_const(value_t obj, Symbol *name, value_t value);
 
 	value_t get_var(value_t obj, Symbol *name);

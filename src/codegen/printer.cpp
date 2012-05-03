@@ -203,7 +203,7 @@ namespace Mirb
 
 					opcode += sizeof(ClassOp);
 					
-					return (op->var != no_var ? var(op->var) + " = " : "") + "class " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "class " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block) + (op->scope != no_var ? ", " + var(op->scope) : "");
 				}
 				
 				case Opcode::Module:
@@ -212,7 +212,7 @@ namespace Mirb
 
 					opcode += sizeof(ModuleOp);
 					
-					return (op->var != no_var ? var(op->var) + " = " : "") + "module " + imm(op->name) + ", " + print_block(op->block);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "module " + imm(op->name) + ", " + print_block(op->block) + (op->scope != no_var ? ", " + var(op->scope) : "");
 				}
 				
 				case Opcode::Method:
@@ -341,13 +341,31 @@ namespace Mirb
 					return "global " + imm(op->name) + " = " + var(op->var);
 				}
 				
+				case Opcode::GetScopedConst:
+				{
+					auto op = (GetScopedConstOp *)opcode;
+
+					opcode += sizeof(GetScopedConstOp);
+					
+					return var(op->var) + " = const " + var(op->obj) + ", " + imm(op->name);
+				}
+				
+				case Opcode::SetScopedConst:
+				{
+					auto op = (SetScopedConstOp *)opcode;
+
+					opcode += sizeof(SetScopedConstOp);
+					
+					return "const " + var(op->obj) + ", " + imm(op->name) + " = " + var(op->var);
+				}
+				
 				case Opcode::GetConst:
 				{
 					auto op = (GetConstOp *)opcode;
 
 					opcode += sizeof(GetConstOp);
 					
-					return var(op->var) + " = const " + var(op->obj) + ", " + imm(op->name);
+					return var(op->var) + " = const " + imm(op->name);
 				}
 				
 				case Opcode::SetConst:
@@ -356,7 +374,7 @@ namespace Mirb
 
 					opcode += sizeof(SetConstOp);
 					
-					return "const " + var(op->obj) + ", " + imm(op->name) + " = " + var(op->var);
+					return "const " + imm(op->name) + " = " + var(op->var);
 				}
 				
 				case Opcode::BranchIf:

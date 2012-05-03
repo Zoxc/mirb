@@ -61,7 +61,7 @@ namespace Mirb
 	
 	void Hash::initialize()
 	{
-		context->hash_class = define_class(context->object_class, "Hash", context->object_class);
+		context->hash_class = define_class("Hash", context->object_class);
 		
 		singleton_method<Arg::Self>(context->hash_class, "allocate", &allocate);
 

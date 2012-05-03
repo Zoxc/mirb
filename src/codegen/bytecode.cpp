@@ -206,11 +206,20 @@ namespace Mirb
 			auto node = (Tree::ConstantNode *)basic_node;
 			
 			if(node->obj)
+			{
 				to_bytecode(node->obj, var);
-			else if(is_var(var))
+				gen<GetScopedConstOp>(var, var, node->name);
+			}
+			else if(node->top_scope)
+			{
 				gen<LoadObjectOp>(var);
-			
-			gen<GetConstOp>(var, var, node->name);
+				gen<GetScopedConstOp>(var, var, node->name);
+			}
+			else
+			{
+				gen<GetConstOp>(var, node->name);
+			}
+
 			location(node->range);
 		}
 		
@@ -390,16 +399,26 @@ namespace Mirb
 					auto variable = (Tree::ConstantNode *)node->left;
 					
 					var_t value = reuse(var);
-					var_t obj = create_var();
+					var_t obj = no_var;
 					
 					if(variable->obj)
+					{
+						obj = create_var();
 						to_bytecode(variable->obj, obj);
-					else
+					}
+					else if(variable->top_scope)
+					{
+						obj = create_var();
 						gen<LoadObjectOp>(obj);
-					
+					}
+
 					to_bytecode(node->right, value);
-					
-					gen<SetConstOp>(obj, variable->name, value);
+
+					if(obj == no_var)
+						gen<SetConstOp>(variable->name, value);
+					else
+						gen<SetScopedConstOp>(obj, variable->name, value);
+
 					location(variable->range);
 
 					if(is_var(var))
@@ -696,15 +715,41 @@ namespace Mirb
 			else
 				super = no_var;
 			
-			gen<ClassOp>(var, node->name, super, compile(node->scope));
+			var_t temp = no_var;
+
+			if(node->scoped)
+			{
+				temp = create_var();
+				to_bytecode(node->scoped, temp);
+			}
+			else if(node->top_scope)
+			{
+				temp = create_var();
+				gen<LoadObjectOp>(temp);
+			}
+
+			gen<ClassOp>(var, temp, node->name, super, compile(node->scope));
 			location(node->range);
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::ModuleNode *)basic_node;
+
+			var_t temp = no_var;
 			
-			gen<ModuleOp>(var, node->name, compile(node->scope));
+			if(node->scoped)
+			{
+				temp = reuse(var);
+				to_bytecode(node->scoped, temp);
+			}
+			else if(node->top_scope)
+			{
+				temp = reuse(var);
+				gen<LoadObjectOp>(temp);
+			}
+
+			gen<ModuleOp>(var, temp, node->name, compile(node->scope));
 			location(node->range);
 		}
 		

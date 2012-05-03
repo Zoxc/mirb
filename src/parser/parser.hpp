@@ -131,7 +131,7 @@ namespace Mirb
 			Tree::Node *parse_class();
 			Tree::Node *parse_module();
 			Tree::Node *parse_method();
-			
+			void parse_module_name(Tree::ModuleNode &node);
 			
 			Lexeme::Type lexeme()
 			{
@@ -237,6 +237,7 @@ namespace Mirb
 					case Lexeme::SQUARE_OPEN:
 					case Lexeme::CURLY_OPEN:
 					case Lexeme::COLON:
+					case Lexeme::SCOPE:
 						return true;
 
 					default:

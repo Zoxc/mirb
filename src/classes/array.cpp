@@ -81,7 +81,7 @@ namespace Mirb
 
 	void Array::initialize()
 	{
-		context->array_class = define_class(context->object_class, "Array", context->object_class);
+		context->array_class = define_class("Array", context->object_class);
 		
 		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		

@@ -70,6 +70,7 @@ namespace Mirb
 			switch(lexeme())
 			{
 				case Lexeme::SQUARE_OPEN:
+				case Lexeme::SCOPE:
 					return lexer.lexeme.whitespace;
 
 				case Lexeme::ADD:

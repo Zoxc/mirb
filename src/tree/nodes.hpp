@@ -143,6 +143,8 @@ namespace Mirb
 			public Node
 		{
 			NodeType type() { return Constant; }
+
+			bool top_scope;
 	
 			Node *obj;
 			Mirb::Symbol *name;
@@ -150,7 +152,7 @@ namespace Mirb
 			Range *range;
 			
 			ConstantNode() {}
-			ConstantNode(Node *obj, Mirb::Symbol *name, Range *range) : obj(obj), name(name), range(range)  {}
+			ConstantNode(Node *obj, Mirb::Symbol *name, Range *range, bool top_scope = false) : top_scope(top_scope), obj(obj), name(name), range(range) {}
 		};
 
 		struct SelfNode:
@@ -225,10 +227,11 @@ namespace Mirb
 		{
 			NodeType type() { return Call; }
 			
-			Node *object;
-			Mirb::Symbol *method;
 			bool can_be_var;
 			bool subscript;
+
+			Node *object;
+			Mirb::Symbol *method;
 
 			CallNode() : can_be_var(false), subscript(false) {}
 		};
@@ -327,6 +330,9 @@ namespace Mirb
 		{
 			NodeType type() { return Module; }
 			
+			bool top_scope;
+	
+			Node *scoped;
 			Mirb::Symbol *name;
 			Scope *scope;
 

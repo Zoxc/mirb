@@ -177,14 +177,14 @@ namespace Mirb
 	
 	value_t Kernel::raise(size_t argc, value_t argv[])
 	{
-		value_t instance_of;
+		Class *instance_of;
 		value_t message;
 
 		size_t i = 0;
 
 		if((argc > i) && (Value::type(argv[i]) == Value::Class))
 		{
-			instance_of = argv[i];
+			instance_of = auto_cast(argv[i]);
 			i++;
 		}
 		else
@@ -198,9 +198,9 @@ namespace Mirb
 		else
 			message = value_nil;
 
-		Exception *exception = Collector::allocate<Exception>(auto_cast(instance_of), message, Mirb::backtrace());
+		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 
-		return raise(auto_cast(exception));
+		return raise(exception);
 	}
 
 	value_t Kernel::backtrace()
@@ -210,9 +210,9 @@ namespace Mirb
 
 	void Kernel::initialize()
 	{
-		context->kernel_module = define_module(context->object_class, "Kernel");
+		context->kernel_module = define_module("Kernel");
 
-		include_module(auto_cast(context->object_class), auto_cast(context->kernel_module));
+		include_module(context->object_class, context->kernel_module);
 		
 		method<Arg::Block>(context->kernel_module, "proc", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);

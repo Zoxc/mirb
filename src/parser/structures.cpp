@@ -12,15 +12,8 @@ namespace Mirb
 		
 		result->range = range;
 
-		if(require(Lexeme::IDENT))
-		{
-			result->name = lexer.lexeme.symbol;
-		
-			lexer.step();
-		}
-		else
-			result->name = 0;
-		
+		parse_module_name(*result);
+
 		if(lexeme() == Lexeme::LESS)
 		{
 			lexer.step();
@@ -43,6 +36,34 @@ namespace Mirb
 		
 		return result;
 	}
+	
+	void Parser::parse_module_name(Tree::ModuleNode &node)
+	{
+		auto range = capture();
+
+		Tree::Node *result = parse_expression();
+
+		lexer.lexeme.prev_set(range);
+		
+		node.name = nullptr;
+		node.scoped = nullptr;
+
+		if(!result)
+			return;
+
+		if(result->type() != Tree::Node::Constant)
+		{
+			report(*range, "Expected a constant");
+
+			return;
+		}
+		
+		auto constant = (Tree::ConstantNode *)result;
+
+		node.top_scope = constant->top_scope;
+		node.scoped = constant->obj;
+		node.name = constant->name;
+	}
 
 	Tree::Node *Parser::parse_module()
 	{
@@ -53,19 +74,10 @@ namespace Mirb
 		auto result = new (fragment) Tree::ModuleNode;
 
 		result->range = range;
+
+		parse_module_name(*result);
 		
-		if(require(Lexeme::IDENT))
-		{
-			result->name = lexer.lexeme.symbol;
-
-			lexer.step();
-		}
-		else
-			result->name = 0;
-
 		lexer.lexeme.prev_set(range);
-
-		parse_sep();
 
 		allocate_scope(Tree::Scope::Module, [&]  {
 			result->scope = scope;

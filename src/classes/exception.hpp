@@ -29,7 +29,10 @@ namespace Mirb
 				mark(code);
 				mark(obj);
 				mark(name);
-				mark(scope);
+
+				if(scope)
+					mark(scope);
+
 				mark(block);
 				mark(args);
 			}
