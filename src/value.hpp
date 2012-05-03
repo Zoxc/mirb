@@ -435,7 +435,7 @@ namespace Mirb
 			return virtual_do<OfType<T>::template Test>(type(value), true);
 		}
 		
-		template<class T> void verify(T *value)
+		template<class T> void verify(T *value prelude_unused)
 		{
 			mirb_debug_assert(Value::of_type<T>((value_t)value));
 		}
