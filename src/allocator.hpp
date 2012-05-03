@@ -114,6 +114,25 @@ namespace Mirb
 				for(size_t i = 0; i < entries; ++i)
 					TupleUtil<T>::mark(mark, (*this)[i]);
 			}
+			
+			Tuple *copy_and_append(T *value)
+			{
+				Tuple *result = allocate(entries + 1);
+				
+				for(size_t i = 0; i < entries; ++i)
+					(*result)[i] = (*this)[i];
+
+				(*result)[entries] = value;
+
+				return result;
+			}
+
+			T *last()
+			{
+				mirb_debug_assert(entries > 0);
+
+				return (*this)[entries - 1];
+			}
 
 			static Tuple *allocate(size_t size)
 			{
@@ -132,9 +151,7 @@ namespace Mirb
 		template<class T> struct Null
 		{
 			static const T value;
-		}; 
-
-	
+		};
 	};
 	
 	template<> struct AllocatorPrivate::Null<value_t>

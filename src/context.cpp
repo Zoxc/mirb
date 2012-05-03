@@ -1,5 +1,6 @@
 #include "context.hpp"
 #include "collector.hpp"
+#include "classes/class.hpp"
 
 namespace Mirb
 {
@@ -15,5 +16,11 @@ namespace Mirb
 
 			start++;
 		}
+	}
+
+	void Context::setup()
+	{
+		object_scope = Tuple<Module>::allocate(1);
+		(*object_scope)[0] = object_class;
 	}
 }

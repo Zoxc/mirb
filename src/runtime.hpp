@@ -83,24 +83,24 @@ namespace Mirb
 	/*
 	 * eval (calls Ruby code)
 	 */
-	value_t eval(value_t self, Symbol *method_name, Module *method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input = false) prelude_use_result;
+	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input = false) prelude_use_result;
 	
-	Method *lookup_method(Module *module, Symbol *name, Module **result_module);
+	Method *lookup_method(Module *module, Symbol *name);
 
 	/*
 	 * lookup
 	 */
-	Method *lookup(value_t obj, Symbol *name, Module **result_module);
+	Method *lookup(value_t obj, Symbol *name);
 
 	/*
 	 * lookup_super
 	 */
-	Method *lookup_super(Module *module, Symbol *name, Module **result_module);
+	Method *lookup_super(Module *module, Symbol *name);
 	
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block *code, value_t obj, Symbol *name, Module *module, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 	value_t call_frame(Frame &frame) prelude_use_result;
 	
 	/*

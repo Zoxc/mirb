@@ -77,7 +77,7 @@ namespace Mirb
 		return auto_cast(!Value::test(obj));
 	}
 
-	value_t Object::instance_eval(value_t obj, size_t argc, value_t argv[], value_t block, Module *module)
+	value_t Object::instance_eval(value_t obj, size_t argc, value_t argv[], value_t block)
 	{
 		if(argc > 1)
 			return raise(context->argument_error, "Too many arguments.");
@@ -85,7 +85,7 @@ namespace Mirb
 		if(argc == 0)
 		{
 			if(Value::type(block) == Value::Proc)
-				return Proc::call_with_self(obj, block, value_nil, 0, nullptr);
+				return Proc::call_with_options(obj, current_frame->prev->scope, block, value_nil, 0, nullptr);
 			else
 				return raise(context->type_error, "Expected block to evaluate");
 		}
@@ -95,7 +95,7 @@ namespace Mirb
 			{
 				CharArray code = cast<String>(argv[0])->string.c_str();
 
-				return eval(obj, Symbol::from_literal("in eval"), module, code.str_ref(), code.str_length(), "(eval)");
+				return eval(obj, Symbol::from_literal("in eval"), current_frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
 			}
 			else
 				return raise(context->type_error, "Expected string");
@@ -114,7 +114,7 @@ namespace Mirb
 		method<Arg::Self, Arg::Value>(context->object_class, "===", &equal);
 		method<Arg::Self, Arg::Value>(context->object_class, "!=", &not_equal);
 		method<Arg::Self>(context->object_class, "!", &method_not);
-		method<Arg::Self, Arg::Count, Arg::Values, Arg::Block, Arg::Module>(context->object_class, "instance_eval", &instance_eval);
+		method<Arg::Self, Arg::Count, Arg::Values, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
 
 		singleton_method<Arg::Self>(context->object_class, "allocate", &allocate);
 	}

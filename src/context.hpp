@@ -45,6 +45,8 @@ namespace Mirb
 			Class *fixnum_class;
 
 			Module *kernel_module;
+			
+			Tuple<Module> *object_scope;
 
 			Symbols syms;
 
@@ -72,6 +74,8 @@ namespace Mirb
 
 				globals.mark(mark);
 			}
+
+			void setup();
 	};
 
 	extern Context *context;

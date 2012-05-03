@@ -10,14 +10,14 @@ namespace Mirb
 {
 	namespace Support
 	{
-		value_t create_closure(Block *block, value_t self, Symbol *name, Module *module, size_t argc, value_t argv[])
+		value_t create_closure(Block *block, value_t self, Symbol *name, Tuple<Module> *scope, size_t argc, value_t argv[])
 		{
 			auto &scopes = *Tuple<>::allocate(argc);
 			
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
 
-			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, module, block, &scopes));
+			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, scope, block, &scopes));
 		}
 
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
@@ -63,19 +63,19 @@ namespace Mirb
 			return hash;
 		}
 		
-		void define_method(Module *module, Symbol *name, Block *block)
+		void define_method(Tuple<Module> *scope, Symbol *name, Block *block)
 		{
-			module->set_method(name, Collector::allocate<Method>(block, module));
+			scope->last()->set_method(name, Collector::allocate<Method>(block, scope));
 		}
 
-		bool define_singleton_method(value_t obj, Symbol *name, Block *block)
+		bool define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block)
 		{
 			Class *klass = singleton_class(obj);
 
 			if(!klass)
 				return false;
 
-			klass->set_method(name, Collector::allocate<Method>(block, klass));
+			klass->set_method(name, Collector::allocate<Method>(block, scope));
 			return true;
 		}
 	};

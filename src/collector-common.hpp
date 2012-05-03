@@ -92,7 +92,10 @@ namespace Mirb
 			mark(frame->code);
 			mark(frame->obj);
 			mark(frame->name);
-			mark(frame->module);
+
+			if(frame->scope)
+				mark(frame->scope);
+
 			mark(frame->block);
 
 			if(frame->scopes)

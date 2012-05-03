@@ -300,12 +300,11 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		Module *dummy;
-		Method *inspect = lookup_method(auto_cast(class_of(obj)), Symbol::from_string("inspect"), &dummy);
+		Method *inspect = lookup_method(auto_cast(class_of(obj)), Symbol::from_string("inspect"));
 
 		value_t result = value_nil;
 
-		if(inspect && (inspect->block != Object::inspect_block || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"), &dummy)))
+		if(inspect && (inspect->block != Object::inspect_block || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"))))
 			result = call(obj, "inspect");
 
 		if(!result)
@@ -461,7 +460,7 @@ namespace Mirb
 		return value_raise;
 	}
 	
-	value_t eval(value_t self, Symbol *method_name, Module *method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input)
+	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input)
 	{
 		MemoryPool::Base memory_pool;
 		Document *document = Collector::allocate_pinned<Document>();
@@ -480,7 +479,7 @@ namespace Mirb
 
 		parser.load();
 		
-		Tree::Scope *scope = parser.parse_main();
+		Tree::Scope *tree_scope = parser.parse_main();
 	
 		if(!parser.messages.empty())
 		{
@@ -490,33 +489,29 @@ namespace Mirb
 			return value_nil;
 		}
 
-		OnStack<2> os(scope, document);
+		OnStack<3> os(tree_scope, method_name, scope);
 		
 		#ifdef MIRB_DEBUG_COMPILER
 			DebugPrinter printer;
 		
 			std::cout << "Parsing done.\n-----\n";
-			std::cout << printer.print_node(scope->group);
+			std::cout << printer.print_node(tree_scope->group);
 			std::cout << "\n-----\n";
 		#endif
 	
-		Block *block = Compiler::compile(scope, memory_pool);
+		Block *block = Compiler::compile(tree_scope, memory_pool);
 
-		return call_code(block, self, method_name, method_module, value_nil, 0, 0);
+		return call_code(block, self, method_name, scope, value_nil, 0, 0);
 	}
 	
-	Method *lookup_method(Module *module, Symbol *name, Module **result_module)
+	Method *lookup_method(Module *module, Symbol *name)
 	{
 		do
 		{
 			Method *result = module->get_method(name);
 
 			if(result)
-			{
-				*result_module = result->module;
-				mirb_debug_assert(module == result->module || module->original_module == result->module);
 				return result;
-			}
 
 			module = module->superclass;
 		}
@@ -525,9 +520,9 @@ namespace Mirb
 		return 0;
 	}
 	
-	Method *lookup(value_t obj, Symbol *name, Module **result_module)
+	Method *lookup(value_t obj, Symbol *name)
 	{
-		Method *result = lookup_method(class_of(obj), name, result_module);
+		Method *result = lookup_method(class_of(obj), name);
 
 		if(prelude_unlikely(!result))
 		{
@@ -538,9 +533,9 @@ namespace Mirb
 		return result;
 	}
 
-	Method *lookup_super(Module *module, Symbol *name, Module **result_module)
+	Method *lookup_super(Module *module, Symbol *name)
 	{
-		Method *result = lookup_method(module->superclass, name, result_module);
+		Method *result = lookup_method(module->superclass, name);
 
 		if(prelude_unlikely(!result))
 		{
@@ -614,14 +609,14 @@ namespace Mirb
 		return result;
 	}
 
-	value_t call_code(Block *code, value_t obj, Symbol *name, Module *module, value_t block, size_t argc, value_t argv[])
+	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
 	{
 		Frame frame;
 
 		frame.code = code;
 		frame.obj = obj;
 		frame.name = name;
-		frame.module = module;
+		frame.scope = scope;
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
@@ -632,9 +627,7 @@ namespace Mirb
 
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
-		Module *module;
-
-		Method *method = lookup(obj, name, &module);
+		Method *method = lookup(obj, name);
 
 		if(prelude_unlikely(!method))
 			return value_raise;
@@ -656,7 +649,7 @@ namespace Mirb
 			os_array[argc + i] = argv[i];
 		}
 
-		value_t result = call_code(method->block, obj, name, module, block, argc, &os_array[argc]);
+		value_t result = call_code(method->block, obj, name, method->scope, block, argc, &os_array[argc]);
 
 		os->~OnStackBlock<false>();
 
@@ -830,6 +823,8 @@ namespace Mirb
 		Collector::enable_interrupts = true;
 		
 		setup_main();
+
+		context->setup();
 
 		set_const(context->object_class, Symbol::from_literal("RUBY_ENGINE"), String::from_literal("mirb"));
 		set_const(context->object_class, Symbol::from_literal("RUBY_VERSION"), String::from_literal("1.9"));

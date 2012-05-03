@@ -5,7 +5,7 @@
 
 namespace Mirb
 {
-	value_t Proc::call_with_self(value_t self_value, value_t obj, value_t block, size_t argc, value_t argv[])
+	value_t Proc::call_with_options(value_t self_value, Tuple<Module> *scope, value_t obj, value_t block, size_t argc, value_t argv[])
 	{
 		auto self = cast<Proc>(obj);
 
@@ -14,7 +14,7 @@ namespace Mirb
 		frame.code = self->block;
 		frame.obj = self_value;
 		frame.name = self->name;
-		frame.module = self->module;
+		frame.scope = scope;
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
@@ -27,7 +27,7 @@ namespace Mirb
 	{
 		auto self = cast<Proc>(obj);
 
-		return call_with_self(self->self, obj, block, argc, argv);
+		return call_with_options(self->self, self->scope, obj, block, argc, argv);
 	}
 
 	void Proc::initialize()

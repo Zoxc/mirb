@@ -12,7 +12,7 @@ namespace Mirb
 			Block *code;
 			value_t obj;
 			Symbol *name;
-			Module *module;
+			Tuple<Module> *scope;
 			value_t block;
 
 			Tuple<> *args;
@@ -29,7 +29,7 @@ namespace Mirb
 				mark(code);
 				mark(obj);
 				mark(name);
-				mark(module);
+				mark(scope);
 				mark(block);
 				mark(args);
 			}

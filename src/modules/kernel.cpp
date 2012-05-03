@@ -34,7 +34,7 @@ namespace Mirb
 		return exception ? 0 : result.to_string();
 	}
 	
-	value_t Kernel::eval(value_t obj, value_t code, Module *module)
+	value_t Kernel::eval(value_t obj, value_t code)
 	{
 		if(Value::type(code) != Value::String)
 			return value_nil;
@@ -44,7 +44,7 @@ namespace Mirb
 		CharArray c_str = input->string.c_str();
 		CharArray filename("(eval)");
 
-		return eval(obj, Symbol::from_literal("in eval"), module, c_str.str_ref(), c_str.str_length(), filename);
+		return eval(obj, Symbol::from_literal("in eval"), current_frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
 	}
 
 	static FILE *open_file(CharArray &filename)
@@ -122,7 +122,7 @@ namespace Mirb
 
 		data[length] = 0;
 
-		value_t result = eval(self, Symbol::from_char_array("in " + filename), context->object_class, (char_t *)data, length, filename);
+		value_t result = eval(self, Symbol::from_char_array("in " + filename), context->object_scope, (char_t *)data, length, filename);
 
 		free(data);
 		fclose(file);
@@ -217,7 +217,7 @@ namespace Mirb
 		method<Arg::Block>(context->kernel_module, "proc", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
 		method(context->kernel_module, "backtrace", &backtrace);
-		method<Arg::Self, Arg::Value, Arg::Module>(context->kernel_module, "eval", &eval);
+		method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
 		method<Arg::Value>(context->kernel_module, "load", &load);

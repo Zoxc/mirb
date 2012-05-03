@@ -96,14 +96,12 @@ namespace Mirb
 			value_t obj = vars[op.obj];
 			Symbol *name = op.method;
 			
-			Module *module;
-
-			Method *method = lookup(obj, name, &module);
+			Method *method = lookup(obj, name);
 
 			if(prelude_unlikely(!method))
 				goto handle_call_exception;
 
-			value_t result = call_code(method->block, obj, name, module, block, op.argc, &vars[op.argv]);
+			value_t result = call_code(method->block, obj, name, method->scope, block, op.argc, &vars[op.argv]);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;
@@ -137,7 +135,7 @@ namespace Mirb
 		EndOp
 
 		Op(Closure)
-			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.module, op.argc, &vars[op.argv]);
+			vars[op.var] = Support::create_closure(op.block, frame.obj, frame.name, frame.scope, op.argc, &vars[op.argv]);
 		EndOp
 			
 		Op(LoadObject)
@@ -147,9 +145,9 @@ namespace Mirb
 		DeepOp(Class)
 			value_t super = op.super == no_var ? context->object_class : vars[op.super];
 		
-			Module *self = define_class(frame.module, op.name, auto_cast(super));
+			Module *self = define_class(frame.scope->last(), op.name, auto_cast(super));
 
-			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_append(self), value_nil, 0, nullptr);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
@@ -159,9 +157,9 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Module)
-			Module *self = define_module(frame.module,  op.name);
+			Module *self = define_module(frame.scope->last(), op.name);
 
-			value_t result = call_code(op.block, self, op.name, self, value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_append(self), value_nil, 0, nullptr);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_exception;
@@ -172,15 +170,13 @@ namespace Mirb
 
 		DeepOp(Super)
 			value_t block = op.block ? vars[op.block_var] : value_nil;
-
-			Module *module = frame.module;
-
-			Method *method = lookup_super(module, frame.name, &module);
+			
+			Method *method = lookup_super(frame.scope->last(), frame.name);
 
 			if(prelude_unlikely(!method))
 				goto handle_exception;
 
-			value_t result = call_code(method->block, frame.obj, frame.name, module, block, op.argc, &vars[op.argv]);
+			value_t result = call_code(method->block, frame.obj, frame.name, method->scope, block, op.argc, &vars[op.argv]);
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;
@@ -190,11 +186,11 @@ namespace Mirb
 		EndOp
 			
 		Op(Method)
-			Support::define_method(frame.module, op.name, op.block);
+			Support::define_method(frame.scope, op.name, op.block);
 		EndOp
 
 		DeepOp(SingletonMethod)
-			if(prelude_unlikely(!Support::define_singleton_method(vars[op.singleton], op.name, op.block)))
+			if(prelude_unlikely(!Support::define_singleton_method(frame.scope, vars[op.singleton], op.name, op.block)))
 				goto handle_exception;
 		EndOp
 

@@ -8,16 +8,16 @@ namespace Mirb
 	{
 		private:
 			static value_t call(value_t obj, value_t block, size_t argc, value_t argv[]);
-			static value_t call_with_self(value_t self_value, value_t obj, value_t block, size_t argc, value_t argv[]);
+			static value_t call_with_options(value_t self_value, Tuple<Module> *scope, value_t obj, value_t block, size_t argc, value_t argv[]);
 
 			friend class Object;
 
 		public:
-			Proc(Class *instance_of, value_t self, Symbol *name, Module *module, Block *block, Tuple<> *scopes) :
+			Proc(Class *instance_of, value_t self, Symbol *name, Tuple<Module> *scope, Block *block, Tuple<> *scopes) :
 				Object(Value::Proc, instance_of),
 				self(self),
 				name(name),
-				module(module),
+				scope(scope),
 				block(block),
 				scopes(scopes)
 			{
@@ -25,7 +25,7 @@ namespace Mirb
 
 			value_t self;
 			Symbol *name;
-			Module *module;
+			Tuple<Module> *scope;
 			Block *block;
 			Tuple<> *scopes;
 			
@@ -35,7 +35,7 @@ namespace Mirb
 				
 				mark(self);
 				mark(name);
-				mark(module);
+				mark(scope);
 				mark(block);
 				mark(scopes);
 			}

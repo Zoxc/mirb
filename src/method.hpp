@@ -64,16 +64,6 @@ namespace Mirb
 				static type apply(Frame &frame, State &state);
 		};
 		
-		class Module
-		{
-			public:
-				typedef Mirb::Module *type;
-				static const size_t consumes = 0;
-				static const bool any_arg = false;
-
-				static type apply(Frame &frame, State &state);
-		};
-		
 		class Count
 		{
 			public:

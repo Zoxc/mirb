@@ -16,7 +16,7 @@ namespace Mirb
 		code(frame->code),
 		obj(frame->obj),
 		name(frame->name),
-		module(frame->module),
+		scope(frame->scope),
 		block(frame->block),
 		ip(frame->ip)
 	{
@@ -32,10 +32,10 @@ namespace Mirb
 
 		Platform::color<Platform::Gray>("  in ");
 
-		value_t module = auto_cast(self->module);
+		Module *module = self->scope->last();
 
 		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->original_module;
+			module = module->original_module;
 
 		OnStack<1> os3(module);
 
@@ -85,12 +85,12 @@ namespace Mirb
 		CharArray result = "  in ";
 
 		OnStackString<1> os2(result);
-
-		value_t module = auto_cast(self->module);
+		
+		Module *module = self->scope->last();
 
 		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->original_module;
-		
+			module = module->original_module;
+
 		OnStack<1> os3(module);
 
 		result += inspect_obj(module);

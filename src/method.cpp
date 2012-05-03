@@ -26,11 +26,6 @@ namespace Mirb
 			return frame.block;
 		}
 
-		Module::type Module::apply(Frame &frame, State &)
-		{
-			return frame.module;
-		}
-
 		Count::type Count::apply(Frame &frame, State &)
 		{
 			return frame.argc;
@@ -67,7 +62,7 @@ namespace Mirb
 			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";
 		#endif
 
-		module->set_method(name, Collector::allocate<Method>(result, module));
+		module->set_method(name, Collector::allocate<Method>(result, nullptr));
 
 		return result;
 	}

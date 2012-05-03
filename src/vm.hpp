@@ -13,7 +13,7 @@ namespace Mirb
 			Block *code;
 			value_t obj;
 			Symbol *name;
-			Module *module;
+			Tuple<Module> *scope;
 			value_t block;
 			size_t argc;
 			value_t *argv;
