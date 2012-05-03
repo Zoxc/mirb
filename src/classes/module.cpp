@@ -12,6 +12,18 @@ namespace Mirb
 		
 		return methods;
 	}
+	
+	Method *Module::get_method(Symbol *name)
+	{
+		return auto_cast_null(get_methods()->map.get(name));
+	}
+
+	void Module::set_method(Symbol *name, Method *method)
+	{
+		Value::assert_valid(method);
+
+		return get_methods()->map.set(name, auto_cast_null(method));
+	}
 
 	value_t Module::to_s(value_t obj)
 	{

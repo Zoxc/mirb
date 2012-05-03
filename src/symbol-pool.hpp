@@ -52,7 +52,7 @@ namespace Mirb
 
 			static Symbol *create_value(Prelude::Allocator::Standard::Reference, const CharArray &key, size_t hash)
 			{
-				Symbol *result = new Symbol(key, hash); // TODO: Allocate as root memory.
+				Symbol *result = new Symbol(key, hash);
 
 				symbol_pool_list.append(result);
 
@@ -117,6 +117,4 @@ namespace Mirb
 	};
 	
 	extern SymbolPool symbol_pool;
-
-	void fix_symbol_pool();
 };

@@ -45,7 +45,7 @@ namespace Mirb
 			current_exception_frame_origin = 0;
 	}
 
-	value_t class_of(value_t obj)
+	Class *class_of(value_t obj)
 	{
 		Value::assert_valid(obj);
 
@@ -55,17 +55,17 @@ namespace Mirb
 			return Value::class_of_literal(obj);
 	}
 
-	value_t real_class(value_t obj)
+	Class *real_class(Class *obj)
 	{
 		Value::assert_valid(obj);
 
-		while(obj && (cast<Class>(obj)->singleton || cast<Class>(obj)->get_type() == Value::IClass))
-			obj = cast<Class>(obj)->superclass;
+		while(obj && (obj->singleton || obj->get_type() == Value::IClass))
+			obj = obj->superclass;
 
 		return obj;
 	}
 
-	value_t real_class_of(value_t obj)
+	Class *real_class_of(value_t obj)
 	{
 		return real_class(class_of(obj));
 	}
@@ -131,14 +131,6 @@ namespace Mirb
 		return define_module(under, cast<Symbol>(symbol_pool.get(name)));
 	}
 	
-	Class *create_include_class(Module *module, Class *super)
-	{
-		if(Value::type(module) == Value::IClass)
-			module = module->instance_of;
-
-		return Collector::allocate<Class>(module, super);
-	}
-
 	void include_module(Module *obj, Module *module)
 	{
 		Module *c = obj;
@@ -172,7 +164,7 @@ namespace Mirb
 
 			#ifdef DEBUG
 				{
-					value_t including = Value::type(module) == Value::IClass ? module->instance_of : module;
+					value_t including = Value::type(module) == Value::IClass ? module->original_module : module;
 
 					OnStack<4> os(obj, c, module, including);
 
@@ -182,7 +174,7 @@ namespace Mirb
 				}
 			#endif
 
-			c = c->superclass = create_include_class(module, c->superclass);
+			c = c->superclass = Class::create_include_class(module, c->superclass);
 
 			skip:
 				module = module->superclass;
@@ -199,7 +191,7 @@ namespace Mirb
 		return class_create_singleton(object, c);
 	}
 
-	void class_name(value_t  obj, Module *under, Symbol *name)
+	void class_name(value_t obj, Module *under, Symbol *name)
 	{
 		value_t under_path = get_var(under, context->syms.classpath);
 		
@@ -308,12 +300,12 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		value_t dummy;
-		Block *inspect = lookup_method(class_of(obj), Symbol::from_string("inspect"), &dummy);
+		Module *dummy;
+		Method *inspect = lookup_method(auto_cast(class_of(obj)), Symbol::from_string("inspect"), &dummy);
 
 		value_t result = value_nil;
 
-		if(inspect && (inspect != Object::inspect_block || lookup_method(class_of(obj), Symbol::from_string("to_s"), &dummy)))
+		if(inspect && (inspect->block != Object::inspect_block || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"), &dummy)))
 			result = call(obj, "inspect");
 
 		if(!result)
@@ -430,16 +422,6 @@ namespace Mirb
 		}
 	}
 	
-	value_t get_ivar(value_t obj, Symbol *name)
-	{
-		return get_var(obj, name);
-	}
-
-	void set_ivar(value_t obj, Symbol *name, value_t value)
-	{
-		set_var(obj, name, value);
-	}
-
 	value_t get_var(value_t obj, Symbol *name)
 	{
 		return get_vars(obj)->map.try_get(auto_cast(name), []{ return value_nil; });
@@ -452,18 +434,6 @@ namespace Mirb
 		get_vars(obj)->map.set(auto_cast(name), value);
 	}
 	
-	Block *get_method(value_t obj, Symbol *name)
-	{
-		return auto_cast_null(cast<Module>(obj)->get_methods()->map.get(name));
-	}
-
-	void set_method(value_t obj, Symbol *name, Block *method)
-	{
-		Value::assert_valid(method);
-
-		return cast<Module>(obj)->get_methods()->map.set(name, auto_cast_null(method));
-	}
-
 	bool type_error(value_t value, value_t expected)
 	{
 		value_t klass = class_of(value);
@@ -491,7 +461,7 @@ namespace Mirb
 		return value_raise;
 	}
 	
-	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input)
+	value_t eval(value_t self, Symbol *method_name, Module *method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input)
 	{
 		MemoryPool::Base memory_pool;
 		Document *document = Collector::allocate_pinned<Document>();
@@ -535,48 +505,29 @@ namespace Mirb
 		return call_code(block, self, method_name, method_module, value_nil, 0, 0);
 	}
 	
-	Block *lookup_method(value_t module, Symbol *name, value_t *result_module)
+	Method *lookup_method(Module *module, Symbol *name, Module **result_module)
 	{
 		do
 		{
-			Block *result = get_method(module, name);
+			Method *result = module->get_method(name);
 
 			if(result)
 			{
-				*result_module = module;
+				*result_module = result->module;
+				mirb_debug_assert(module == result->module || module->original_module == result->module);
 				return result;
 			}
 
-			module = cast<Class>(module)->superclass;
+			module = module->superclass;
 		}
 		while(module != nullptr);
 
 		return 0;
 	}
 	
-	Block *lookup_nothrow(value_t obj, Symbol *name, value_t *result_module)
+	Method *lookup(value_t obj, Symbol *name, Module **result_module)
 	{
-		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
-
-		if(prelude_unlikely(!result))
-			return 0;
-
-		return result;
-	}
-
-	Block *lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module)
-	{
-		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
-
-		if(prelude_unlikely(!result))
-			return 0;
-
-		return result;
-	}
-
-	Block *lookup(value_t obj, Symbol *name, value_t *result_module)
-	{
-		Mirb::Block *result = lookup_method(class_of(obj), name, result_module);
+		Method *result = lookup_method(class_of(obj), name, result_module);
 
 		if(prelude_unlikely(!result))
 		{
@@ -587,9 +538,9 @@ namespace Mirb
 		return result;
 	}
 
-	Block *lookup_super(value_t module, Symbol *name, value_t *result_module)
+	Method *lookup_super(Module *module, Symbol *name, Module **result_module)
 	{
-		Mirb::Block *result = lookup_method(cast<Class>(module)->superclass, name, result_module);
+		Method *result = lookup_method(module->superclass, name, result_module);
 
 		if(prelude_unlikely(!result))
 		{
@@ -663,7 +614,7 @@ namespace Mirb
 		return result;
 	}
 
-	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[])
+	value_t call_code(Block *code, value_t obj, Symbol *name, Module *module, value_t block, size_t argc, value_t argv[])
 	{
 		Frame frame;
 
@@ -681,9 +632,9 @@ namespace Mirb
 
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
-		value_t module;
+		Module *module;
 
-		Block *method = lookup(obj, name, &module);
+		Method *method = lookup(obj, name, &module);
 
 		if(prelude_unlikely(!method))
 			return value_raise;
@@ -705,7 +656,7 @@ namespace Mirb
 			os_array[argc + i] = argv[i];
 		}
 
-		value_t result = call_code(method, obj, name, module, block, argc, &os_array[argc]);
+		value_t result = call_code(method->block, obj, name, module, block, argc, &os_array[argc]);
 
 		os->~OnStackBlock<false>();
 
@@ -797,23 +748,24 @@ namespace Mirb
 
 	void setup_classes()
 	{
-		context->object_class = class_create_bare(nullptr);
-		context->module_class = class_create_bare(context->object_class);
-		context->class_class = class_create_bare(context->module_class);
+		context->object_class = Class::create_initial(nullptr);
+		context->module_class = Class::create_initial(context->object_class);
+		context->class_class = Class::create_initial(context->module_class);
 		
-		context->syms.classpath = Symbol::from_literal("__classpath__");
-		context->syms.classname = Symbol::from_literal("__classname__");
-		context->syms.attached =  Symbol::from_literal("__attached__");
-
 		Class *metaclass;
+		
+		context->syms.attached = Symbol::create_initial("__attached__");
 
 		metaclass = class_create_singleton(auto_cast(context->object_class), auto_cast(context->class_class));
 		metaclass = class_create_singleton(auto_cast(context->module_class), metaclass);
 		class_create_singleton(auto_cast(context->class_class), metaclass);
-
+		
 		context->symbol_class = class_create_unnamed(context->object_class);
 
-		fix_symbol_pool();
+		context->syms.attached->instance_of = context->symbol_class;
+
+		context->syms.classpath = Symbol::get("__classpath__");
+		context->syms.classname = Symbol::get("__classname__");
 
 		context->string_class = class_create_unnamed(context->object_class);
 		
@@ -831,7 +783,10 @@ namespace Mirb
 		context->fixnum_class = define_class(context->object_class, "Fixnum", context->object_class);
 
 		Value::initialize_class_table();
-		
+	}
+
+	void setup_main()
+	{
 		context->main = Collector::allocate<Object>(context->object_class);
 
 		singleton_method(context->main, "to_s", &main_to_s);
@@ -851,6 +806,7 @@ namespace Mirb
 		Lexer::setup_jump_table();
 
 		setup_classes();
+		Method::initialize(); // Must be called before methods are defined
 
 		Class::initialize();
 		Object::initialize();
@@ -870,9 +826,11 @@ namespace Mirb
 		Hash::initialize();
 		Exception::initialize();
 		initialize_exceptions();
-
+		
 		Collector::enable_interrupts = true;
 		
+		setup_main();
+
 		set_const(context->object_class, Symbol::from_literal("RUBY_ENGINE"), String::from_literal("mirb"));
 		set_const(context->object_class, Symbol::from_literal("RUBY_VERSION"), String::from_literal("1.9"));
 

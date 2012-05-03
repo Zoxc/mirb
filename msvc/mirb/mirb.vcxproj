@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\src\classes\false-class.cpp" />
     <ClCompile Include="..\..\src\classes\fixnum.cpp" />
     <ClCompile Include="..\..\src\classes\hash.cpp" />
+    <ClCompile Include="..\..\src\classes\method.cpp" />
     <ClCompile Include="..\..\src\classes\module.cpp" />
     <ClCompile Include="..\..\src\classes\nil-class.cpp" />
     <ClCompile Include="..\..\src\classes\object.cpp" />

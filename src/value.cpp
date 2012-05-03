@@ -112,9 +112,9 @@ namespace Mirb
 			return ((size_t)value & object_ref_mask) == 0;
 		}
 		
-		value_t class_of_literal(value_t value)
+		Mirb::Class *class_of_literal(value_t value)
 		{
-			return auto_cast(context->class_of_table[(size_t)value & literal_mask]);
+			return context->class_of_table[(size_t)value & literal_mask];
 		}
 
 		Type type(value_t value)

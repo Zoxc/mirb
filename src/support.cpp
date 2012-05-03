@@ -10,7 +10,7 @@ namespace Mirb
 {
 	namespace Support
 	{
-		value_t create_closure(Block *block, value_t self, Symbol *name, value_t module, size_t argc, value_t argv[])
+		value_t create_closure(Block *block, value_t self, Symbol *name, Module *module, size_t argc, value_t argv[])
 		{
 			auto &scopes = *Tuple<>::allocate(argc);
 			
@@ -18,32 +18,6 @@ namespace Mirb
 				scopes[i] = argv[i];
 
 			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, module, block, &scopes));
-		}
-
-		value_t get_const(value_t obj, Symbol *name)
-		{
-			if(prelude_unlikely(obj == context->main))
-				obj = context->object_class;
-
-			return Mirb::get_const(obj, name);
-		}
-
-		value_t set_const(value_t obj, Symbol *name, value_t value)
-		{
-			if(prelude_unlikely(obj == context->main))
-				obj = context->object_class;
-
-			return Mirb::set_const(obj, name, value);
-		}
-		
-		value_t get_ivar(value_t obj, Symbol *name)
-		{
-			return get_var(obj, name);
-		}
-
-		void set_ivar(value_t obj, Symbol *name, value_t value)
-		{
-			set_var(obj, name, value);
 		}
 
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
@@ -89,28 +63,9 @@ namespace Mirb
 			return hash;
 		}
 		
-		value_t define_class(value_t obj, Symbol *name, value_t super)
+		void define_method(Module *module, Symbol *name, Block *block)
 		{
-			if(prelude_unlikely(obj == context->main))
-				obj = context->object_class;
-			
-			return Mirb::define_class(auto_cast(obj), name, auto_cast(super));
-		}
-		
-		value_t define_module(value_t obj, Symbol *name)
-		{
-			if(prelude_unlikely(obj == context->main))
-				obj = context->object_class;
-			
- 			return Mirb::define_module(auto_cast(obj), name);
-		}
-		
-		void define_method(value_t obj, Symbol *name, Block *block)
-		{
-			if(prelude_unlikely(obj == context->main))
-				obj = context->object_class;
-
-			set_method(obj, name, block);
+			module->set_method(name, Collector::allocate<Method>(block, module));
 		}
 
 		bool define_singleton_method(value_t obj, Symbol *name, Block *block)
@@ -120,7 +75,7 @@ namespace Mirb
 			if(!klass)
 				return false;
 
-			set_method(klass, name, block);
+			klass->set_method(name, Collector::allocate<Method>(block, klass));
 			return true;
 		}
 	};

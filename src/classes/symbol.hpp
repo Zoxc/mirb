@@ -17,6 +17,8 @@ namespace Mirb
 			static value_t to_s(value_t obj);
 			static value_t inspect(value_t obj);
 
+			Symbol() : Object(Value::Symbol) {}
+			
 		public:
 			Symbol(const CharArray &char_array, size_t hash) : Object(Value::Symbol, context->symbol_class), string(char_array)
 			{
@@ -40,9 +42,12 @@ namespace Mirb
 					return string.get_string();
 			}
 
-			static Symbol *from_string(const char *string);
+			static Symbol *from_cstr_string(const char *string);
 			static Symbol *from_string(const std::string &string);
 			static Symbol *from_char_array(const CharArray &char_array);
+			static Symbol *get(const CharArray &char_array);
+			static Symbol *from_literal(const CharArray &char_array);
+			static Symbol *create_initial(const CharArray &char_array);
 			
 			template<typename F> void mark(F mark)
 			{
@@ -53,14 +58,7 @@ namespace Mirb
 				if(next)
 					mark(next);
 			}
-
-			template<size_t length> static Symbol *from_literal(const char (&string)[length])
-			{
-				CharArray char_array(string);
-
-				return from_char_array(char_array);
-			}
-
+			
 			static void initialize();
 	};
 	

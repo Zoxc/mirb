@@ -1,7 +1,6 @@
 #pragma once
 #include "value.hpp"
 #include "block.hpp"
-#include "method.hpp"
 #include "on-stack.hpp"
 #include "classes/symbol.hpp"
 
@@ -15,9 +14,9 @@ namespace Mirb
 
 	void set_current_exception(Exception *exception);
 
-	value_t class_of(value_t obj) prelude_nonnull(1);
-	value_t real_class(value_t obj) prelude_nonnull(1);
-	value_t real_class_of(value_t obj);
+	Class *class_of(value_t obj) prelude_nonnull(1);
+	Class *real_class(Class *obj) prelude_nonnull(1);
+	Class *real_class_of(value_t obj);
 
 	Class *singleton_class(value_t object);
 	
@@ -65,12 +64,7 @@ namespace Mirb
 
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);
-	value_t get_ivar(value_t obj, Symbol *name);
-	void set_ivar(value_t obj, Symbol *name, value_t value);
 	
-	Block *get_method(value_t obj, Symbol *name);
-	void set_method(value_t obj, Symbol *name, Block *method);
-
 	void initialize();
 	void finalize();
 	
@@ -89,27 +83,24 @@ namespace Mirb
 	/*
 	 * eval (calls Ruby code)
 	 */
-	value_t eval(value_t self, Symbol *method_name, value_t method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input = false) prelude_use_result;
+	value_t eval(value_t self, Symbol *method_name, Module *method_module, const char_t *input, size_t length, const CharArray &filename, bool free_input = false) prelude_use_result;
 	
-	Block *lookup_method(value_t module, Symbol *name, value_t *result_module);
+	Method *lookup_method(Module *module, Symbol *name, Module **result_module);
 
 	/*
 	 * lookup
 	 */
-	Block *lookup(value_t obj, Symbol *name, value_t *result_module);
+	Method *lookup(value_t obj, Symbol *name, Module **result_module);
 
 	/*
 	 * lookup_super
 	 */
-	Block *lookup_super(value_t module, Symbol *name, value_t *result_module);
-
-	Block *lookup_nothrow(value_t obj, Symbol *name, value_t *result_module);
-	Block *lookup_super_nothrow(value_t module, Symbol *name, value_t *result_module);
+	Method *lookup_super(Module *module, Symbol *name, Module **result_module);
 	
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block *code, value_t obj, Symbol *name, value_t module, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call_code(Block *code, value_t obj, Symbol *name, Module *module, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 	value_t call_frame(Frame &frame) prelude_use_result;
 	
 	/*
@@ -172,3 +163,4 @@ namespace Mirb
 	void setup_classes();
 };
 
+#include "method.hpp"

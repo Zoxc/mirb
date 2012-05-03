@@ -5,10 +5,28 @@
 
 namespace Mirb
 {
-	Class::Class(Module *module, Class *superclass) : Module(Value::IClass, module, superclass), singleton(false)
+	Class *Class::create_initial(Class *superclass)
 	{
-		methods = module->get_methods();
-		vars = get_vars(module);
+		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Value::Class));
+
+		result->superclass = superclass;
+
+		return result;
+	}
+
+	Class *Class::create_include_class(Module *module, Class *superclass)
+	{
+		if(Value::type(module) == Value::IClass)
+			module = module->original_module;
+
+		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Value::IClass));
+
+		result->superclass = superclass;
+		result->original_module = module;
+		result->methods = module->get_methods();
+		result->vars = get_vars(module);
+
+		return result;
 	}
 
 	value_t Class::to_s(value_t obj)

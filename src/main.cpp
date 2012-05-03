@@ -100,7 +100,7 @@ int main(int argc, const char *argv[])
 			block = Compiler::compile(scope, memory_pool);
 		}
 		
-		value_t result = call_code(block, context->main, Symbol::from_literal("main"), class_of(context->main), value_nil, 0, 0);
+		value_t result = call_code(block, context->main, Symbol::from_literal("main"), context->object_class, value_nil, 0, 0);
 		
 		OnStack<1> os1(result);
 

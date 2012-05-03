@@ -16,7 +16,7 @@ namespace Mirb
 			static value_t each(value_t obj, value_t block);
 
 		public:
-			Array(Module *instance_of) : Object(Value::Array, instance_of) {}
+			Array(Class *instance_of) : Object(Value::Array, instance_of) {}
 			Array() : Object(Value::Array, context->array_class) {}
 
 			Vector<value_t, AllocatorBase, Allocator> vector;

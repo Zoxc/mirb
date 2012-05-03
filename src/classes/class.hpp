@@ -1,6 +1,7 @@
 #pragma once
 #include "../value.hpp"
 #include "../block.hpp"
+#include "../context.hpp"
 #include "module.hpp"
 
 namespace Mirb
@@ -13,11 +14,15 @@ namespace Mirb
 			static value_t method_superclass(value_t obj);
 			static value_t method_new(value_t obj, size_t argc, value_t argv[]);
 
+			Class(Value::Type type) : Module(type), singleton(false) {}
+
 		public:
 			Class(Value::Type type, Class *instance_of, Class *superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
-			Class(Module *module, Class *superclass);
 
 			bool singleton;
+			
+			static Class *create_initial(Class *superclass);
+			static Class *create_include_class(Module *module, Class *superclass);
 
 			template<typename F> void mark(F mark)
 			{

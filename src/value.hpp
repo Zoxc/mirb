@@ -31,6 +31,7 @@ namespace Mirb
 	class Class;
 	class Symbol;
 	class String;
+	class Method;
 	class Array;
 	class Hash;
 	class StackFrame;
@@ -109,6 +110,7 @@ namespace Mirb
 			String,
 			Array,
 			Hash,
+			Method,
 			Proc,
 			Exception,
 			ReturnException,
@@ -184,7 +186,7 @@ namespace Mirb
 	
 		bool object_ref(value_t value);
 		
-		value_t class_of_literal(value_t value);
+		Mirb::Class *class_of_literal(value_t value);
 		
 		bool test(value_t value);
 
@@ -270,6 +272,9 @@ namespace Mirb
 
 				case Hash:
 					return T<Hash>::func(std::forward<Arg>(arg));
+					
+				case Method:
+					return T<Method>::func(std::forward<Arg>(arg));
 
 				case Proc:
 					return T<Proc>::func(std::forward<Arg>(arg));
@@ -323,6 +328,7 @@ namespace Mirb
 		mirb_typeclass(String, String);
 		mirb_typeclass(Array, Array);
 		mirb_typeclass(Hash, Hash);
+		mirb_typeclass(Method, Method);
 		mirb_typeclass(Proc, Proc);
 		mirb_typeclass(Exception, Exception);
 		mirb_typeclass(ReturnException, ReturnException);
@@ -349,6 +355,7 @@ namespace Mirb
 		mirb_derived_from(Object, Hash);
 		mirb_derived_from(Object, String);
 		mirb_derived_from(Object, Symbol);
+		mirb_derived_from(Object, Method);
 		mirb_derived_from(Object, Proc);
 		mirb_derived_from(Object, Exception);
 		mirb_derived_from(Object, ReturnException);
@@ -366,6 +373,8 @@ namespace Mirb
 		mirb_derived_from(Hash, Hash);
 		
 		mirb_derived_from(Proc, Proc);
+		
+		mirb_derived_from(Method, Method);
 		
 		mirb_derived_from(Exception, Exception);
 		mirb_derived_from(Exception, ReturnException);
@@ -424,6 +433,11 @@ namespace Mirb
 			Value::assert_valid(value);
 
 			return virtual_do<OfType<T>::template Test>(type(value), true);
+		}
+		
+		template<class T> void verify(T *value)
+		{
+			mirb_debug_assert(Value::of_type<T>((value_t)value));
 		}
 		
 		size_t hash(value_t value);

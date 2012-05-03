@@ -35,7 +35,7 @@ namespace Mirb
 		value_t module = auto_cast(self->module);
 
 		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->instance_of;
+			module = cast<Module>(module)->original_module;
 
 		OnStack<1> os3(module);
 
@@ -89,7 +89,7 @@ namespace Mirb
 		value_t module = auto_cast(self->module);
 
 		if(Value::type(module) == Value::IClass)
-			module = cast<Module>(module)->instance_of;
+			module = cast<Module>(module)->original_module;
 		
 		OnStack<1> os3(module);
 

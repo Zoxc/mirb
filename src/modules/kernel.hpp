@@ -8,7 +8,7 @@ namespace Mirb
 		value_t proc(value_t block);
 		value_t benchmark(value_t block);
 		value_t backtrace();
-		value_t eval(value_t obj, value_t code);
+		value_t eval(value_t obj, value_t code, Module *module);
 		value_t load(value_t filename);
 		value_t print(size_t argc, value_t argv[]);
 		value_t puts(size_t argc, value_t argv[]);

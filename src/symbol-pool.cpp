@@ -12,11 +12,4 @@ namespace Mirb
 
 		return SymbolPoolHashTable::get(key);
 	};
-
-	void fix_symbol_pool()
-	{
-		symbol_pool.each_value([&](Symbol *symbol) {
-			symbol->instance_of = auto_cast(context->symbol_class);
-		});
-	}
 };

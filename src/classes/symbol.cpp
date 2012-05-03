@@ -5,7 +5,7 @@
 
 namespace Mirb
 {
-	Symbol *Symbol::from_string(const char *string)
+	Symbol *Symbol::from_cstr_string(const char *string)
 	{
 		return symbol_pool.get(string);
 	}
@@ -18,6 +18,32 @@ namespace Mirb
 	Symbol *Symbol::from_char_array(const CharArray &char_array)
 	{
 		return symbol_pool.get(char_array);
+	}
+	
+	Symbol *Symbol::get(const CharArray &char_array)
+	{
+		return symbol_pool.get(char_array);
+	}
+	
+	Symbol *Symbol::from_literal(const CharArray &char_array)
+	{
+		return symbol_pool.get(char_array);
+	}
+	
+	Symbol *Symbol::create_initial(const CharArray &char_array)
+	{
+		Symbol *result = new Symbol();
+
+		result->string = char_array;
+		
+		result->hash_value = char_array.hash();
+		result->hashed = true;
+
+		symbol_pool_list.append(result);
+
+		symbol_pool.set(char_array, result);
+
+		return result;
 	}
 	
 	value_t Symbol::to_s(value_t obj)

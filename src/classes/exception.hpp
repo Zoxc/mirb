@@ -12,7 +12,7 @@ namespace Mirb
 			Block *code;
 			value_t obj;
 			Symbol *name;
-			value_t module;
+			Module *module;
 			value_t block;
 
 			Tuple<> *args;
@@ -49,8 +49,8 @@ namespace Mirb
 			static value_t method_initialize(value_t obj, value_t message);
 
 		public:
-			Exception(Value::Type type, Module *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(Module *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Class *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
 			value_t message;
 			Tuple<StackFrame> *backtrace;

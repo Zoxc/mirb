@@ -26,6 +26,11 @@ namespace Mirb
 			return frame.block;
 		}
 
+		Module::type Module::apply(Frame &frame, State &)
+		{
+			return frame.module;
+		}
+
 		Count::type Count::apply(Frame &frame, State &)
 		{
 			return frame.argc;
@@ -47,28 +52,27 @@ namespace Mirb
 		return ((value_t (*)())frame.code->opcodes)();
 	}
 
-	Block *generate_block(size_t flags, value_t module, Symbol *name, Block::executor_t executor, void *function)
+	Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Block::executor_t executor, void *function)
 	{
 		Block *result = Collector::allocate_pinned<Block>(nullptr);
+
+		Value::assert_valid(module);
 
 		result->opcodes = (const char *)function;
 		result->executor = executor;
 		
-		if((flags & Method::Singleton) != 0)
-			module = auto_cast(singleton_class(auto_cast(module)));
-
 		#ifdef DEBUG
 			OnStack<3> os(module, name, result);
 
 			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";
 		#endif
-		
-		set_method(module, name, result);
+
+		module->set_method(name, Collector::allocate<Method>(result, module));
 
 		return result;
 	}
 
-	Block *generate_method(size_t flags, value_t module, Symbol *name, void *function)
+	Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 	{
 		return generate_block(flags, module, name, wrapper, function);
 	}

@@ -125,6 +125,8 @@ namespace Mirb
 
 				return object;
 			}
+
+			friend class Class;
 			
 			template<class T> static void *allocate_pinned_object()
 			{
