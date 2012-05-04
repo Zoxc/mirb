@@ -32,7 +32,7 @@ namespace Mirb
 	/*
 	 * include_module (calls Ruby code)
 	 */
-	void include_module(Module *obj, Module *module);
+	void include_module(Module *obj, Module *module) prelude_nonnull(1, 2);
 	
 	void class_name(value_t obj, Module *under, Symbol *name);
 	Class *class_create_unnamed(Class *super);
