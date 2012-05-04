@@ -16,6 +16,22 @@ namespace Mirb
 	
 	namespace Arg
 	{
+		Info &Info::operator +=(const Info &other)
+		{
+			min += other.min;
+			max += other.max;
+			any_arg = any_arg || other.any_arg;
+
+			return *this;
+		}
+
+		const Info Self::info = {0, 0, false};
+		const Info Block::info = {0, 0, false};
+		const Info Count::info = {0, 0, true};
+		const Info Values::info = {0, 0, false};
+		const Info Value::info = {1, 1, false};
+		const Info Default::info = {0, 1, false};
+
 		Self::type Self::apply(Frame &frame, State &)
 		{
 			return frame.obj;
@@ -40,33 +56,64 @@ namespace Mirb
 		{
 			return frame.argv[state.index++];
 		}
+
+		Value::type Default::apply(Frame &frame, State &state)
+		{
+			if(state.index >= frame.argc)
+				return value_raise;
+			else
+				return frame.argv[state.index++];
+		}
 	}
-
-	value_t wrapper(Frame &frame)
+	
+	namespace MethodGen
 	{
-		return ((value_t (*)())frame.code->opcodes)();
-	}
+		Arg::Info fold(size_t num, ...)
+		{
+			va_list ap;
+			Arg::Info value = {0, 0, false};
+ 
+			va_start(ap, num);
 
-	Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Block::executor_t executor, void *function)
-	{
-		Block *result = Collector::allocate_pinned<Block>(nullptr);
+			for(size_t i = 0; i < num; ++i)
+				value += va_arg(ap, Arg::Info);
 
-		Value::assert_valid(module);
+			va_end(ap);
 
-		result->opcodes = (const char *)function;
-		result->executor = executor;
+			return value;
+		};
+	
+		value_t wrapper(Frame &frame)
+		{
+			Arg::State state(frame, fold(0));
+
+			if(state.error)
+				return value_raise;
 		
-		Tuple<Module> *scope = Tuple<Module>::allocate(1);
+			return ((value_t (*)())frame.code->opcodes)();
+		}
 
-		(*scope)[0] = module;
+		Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Block::executor_t executor, void *function)
+		{
+			Block *result = Collector::allocate_pinned<Block>(nullptr);
 
-		module->set_method(name, Collector::allocate<Method>(result, scope));
+			Value::assert_valid(module);
 
-		return result;
-	}
+			result->opcodes = (const char *)function;
+			result->executor = executor;
+		
+			Tuple<Module> *scope = Tuple<Module>::allocate(1);
 
-	Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
-	{
-		return generate_block(flags, module, name, wrapper, function);
-	}
+			(*scope)[0] = module;
+
+			module->set_method(name, Collector::allocate<Method>(result, scope));
+
+			return result;
+		}
+
+		Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
+		{
+			return generate_block(flags, module, name, wrapper, function);
+		}
+	};
 };

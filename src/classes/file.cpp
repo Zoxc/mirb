@@ -1,5 +1,6 @@
 #include "file.hpp"
 #include "../runtime.hpp"
+#include "../platform/platform.hpp"
 #include "string.hpp"
 
 namespace Mirb
@@ -56,24 +57,43 @@ namespace Mirb
 		return result;
 	}
 
-	value_t expand_path(value_t file_name, value_t path)
+	value_t expand_path(String *relative, String *absolute)
 	{
-		auto filename = cast<String>(file_name);
-		auto filepath = cast<String>(path);
-		
+		CharArray absolute_str = absolute ? absolute->string : Platform::cwd();
+
 		JoinSegments joiner;
 		
-		joiner.push(filepath->string);
-		joiner.push(filename->string);
+		joiner.push(absolute_str);
+		joiner.push(relative->string);
 		
 		return joiner.join().to_string();
+	}
+	
+	value_t dirname(String *path)
+	{
+		CharArray result = normalize_path(path->string);
+
+		for(size_t i = result.size(); i-- > 0;)
+			if(const_cast<const CharArray &>(result)[i] == '/')
+			{
+				if(i)
+				{
+					result.shrink(i);
+					return result.to_string();
+				}
+				else
+					return CharArray("/").to_string();
+			}
+		
+		return CharArray(".").to_string();
 	}
 
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
-
-		singleton_method<Arg::Value, Arg::Value>(context->file_class, "expand_path", &expand_path);
+		
+		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &expand_path);
+		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
 	}
 };
 

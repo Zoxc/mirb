@@ -30,7 +30,12 @@ namespace Mirb
 		{
 			munmap(region, bytes);
 		}
-
+		
+		CharArray cwd()
+		{
+			mirb_runtime_assert("Not implemented");
+		}
+		
 		void signal_handler(int)
 		{
 			Collector::signal();
