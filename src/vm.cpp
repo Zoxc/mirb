@@ -6,6 +6,7 @@
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"
 #include "classes/module.hpp"
+#include "classes/array.hpp"
 
 namespace Mirb
 {
@@ -29,6 +30,12 @@ namespace Mirb
 
 	value_t evaluate_block(Frame &frame)
 	{
+		if(prelude_unlikely(frame.argc < frame.code->min_args))
+			return raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
+
+		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
+			return raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
+
 		const char *ip_start = frame.code->opcodes;
 		const char *ip = ip_start;
 
@@ -57,6 +64,25 @@ namespace Mirb
 
 		Op(LoadArg)
 			vars[op.var] = frame.argv[op.arg];
+		EndOp
+			
+		Op(LoadArrayArg)
+			if(frame.argc > op.from_arg)
+			{
+				auto array = Collector::allocate<Array>();
+				array->vector.push_entries(frame.argv + op.from_arg, frame.argc - op.from_arg);
+				vars[op.var] = array;
+			}
+			else
+				vars[op.var] = Collector::allocate<Array>();
+		EndOp
+			
+		Op(LoadArgBranch)
+			if(frame.argc > op.arg)
+			{
+				vars[op.var] = frame.argv[op.arg];
+				ip = ip_start + op.pos;
+			}
 		EndOp
 
 		Op(Move)
@@ -121,16 +147,6 @@ namespace Mirb
 
 		Op(BranchIf)
 			if(Value::test(vars[op.var]))
-				ip = ip_start + op.pos;
-		EndOp
-
-		Op(BranchIfZero)
-			if((size_t)vars[op.var] == 0)
-				ip = ip_start + op.pos;
-		EndOp
-
-		Op(BranchUnlessZero)
-			if((size_t)vars[op.var] != 0)
 				ip = ip_start + op.pos;
 		EndOp
 

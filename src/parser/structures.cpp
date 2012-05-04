@@ -94,6 +94,7 @@ namespace Mirb
 		switch(lexeme())
 		{
 			case Lexeme::AMPERSAND:
+			case Lexeme::MUL:
 			case Lexeme::IDENT:
 				return true;
 
@@ -112,26 +113,88 @@ namespace Mirb
 				return;
 			}
 			
+			auto range = capture();
+
 			bool block_parameter = matches(Lexeme::AMPERSAND);
-			
-			Symbol *symbol = lexer.lexeme.symbol;
-			
-			if(block_parameter)
+			bool array_parameter = matches(Lexeme::MUL);
+
+			if(block_parameter && array_parameter)
+				error("A parameter cannot be both the block and the array parameter");
+
+			Tree::Parameter *parameter = nullptr;
+
+			if(require(Lexeme::IDENT))
 			{
-				if(scope->block_parameter)
-					error("You can only receive the block in one parameter.");
+				Symbol *symbol = lexer.lexeme.symbol;
+				range->expand(lexer.lexeme);
+			
+				if(scope->defined(symbol, false))
+					error("Variable " + lexer.lexeme.string() + " already defined");
 				else
-					scope->block_parameter = scope->define<Tree::Parameter>(symbol);
+				{
+					parameter = scope->define<Tree::Parameter>(symbol);
+					parameter->range = range;
+				}
+				
+				lexer.step();
+			}
+			else if(array_parameter)
+			{
+				parameter = scope->alloc_var<Tree::Parameter>();
+				parameter->range = range;
 			}
 			else
+				error("Expected a parameter name");
+
+			if(scope->array_parameter && !scope->array_parameter->reported && !block_parameter)
 			{
-				if(scope->defined(symbol, false))
-					error("Variable " + lexer.lexeme.string() + " already defined.");
-				else
-					scope->parameters.append(scope->define<Tree::Parameter>(symbol));
+				scope->array_parameter->reported = true;
+				report(*scope->array_parameter->range, "Array parameters must be last in the parameter list or right before a block parameter");
+			}
+
+			if(scope->block_parameter && !scope->block_parameter->reported)
+			{
+				scope->block_parameter->reported = true;
+				report(*scope->block_parameter->range, "Block parameters must be last in the parameter list");
 			}
 			
-			lexer.step();
+			if(matches(Lexeme::ASSIGN))
+			{
+				auto node = parse_expression();
+
+				if(parameter)
+					parameter->default_value = node;
+
+				if(array_parameter || block_parameter)
+					report(*range, (array_parameter ? "Array" : "Block") + std::string(" parameters cannot have default values"));
+			}
+			else if(!array_parameter && !block_parameter)
+			{
+				auto prev = scope->parameters.find([&](Tree::Parameter *param) -> bool { return param->default_value != nullptr; }, nullptr);
+
+				if(prev && !prev->reported)
+				{
+					prev->reported = true;
+					report(*prev->range, "Parameters with default values must come after regular parameters");
+				}
+			}
+
+			if(array_parameter)
+			{
+				if(scope->array_parameter)
+					report(*range, "You can only receive the remaining arguments in one parameter");
+				else
+					scope->array_parameter = parameter;
+			}
+			else if(block_parameter)
+			{
+				if(scope->block_parameter)
+					report(*range, "You can only receive the block in one parameter");
+				else
+					scope->block_parameter = parameter;
+			}
+			else if (parameter)
+				scope->parameters.push(parameter);
 		}
 		while(matches(Lexeme::COMMA));
 	}
@@ -139,6 +202,8 @@ namespace Mirb
 	Tree::Node *Parser::parse_method()
 	{
 		lexer.lexeme.allow_keywords = false;
+
+		auto range = capture();
 		
 		lexer.step();
 		
@@ -146,7 +211,7 @@ namespace Mirb
 		
 		auto result = new (fragment) Tree::MethodNode;
 
-		result->range = capture();
+		result->range = range;
 
 		Symbol *symbol;
 		
@@ -220,6 +285,7 @@ skip_name:
 		allocate_scope(Tree::Scope::Method, [&] {
 			result->scope = scope;
 			scope->owner = scope;
+			scope->range = result->range;
 			
 			if(matches(Lexeme::PARENT_OPEN))
 			{

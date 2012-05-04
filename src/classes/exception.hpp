@@ -18,6 +18,7 @@ namespace Mirb
 			Tuple<> *args;
 
 			const char *ip;
+			bool vars;
 			
 			static CharArray inspect_implementation(StackFrame *self);
 			static void print(StackFrame *self);

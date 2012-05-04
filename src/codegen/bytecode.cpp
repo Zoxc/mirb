@@ -307,29 +307,6 @@ namespace Mirb
 			gen(label_end);
 		}
 
-		void ByteCodeGenerator::write_variable(Tree::Variable *var, var_t value)
-		{
-			if(var->type == Tree::Variable::Heap)
-			{
-				var_t heap;
-
-				if(var->owner != scope)
-				{
-					heap = create_var();
-
-					gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
-				}
-				else
-					heap = heap_var;
-
-				gen<SetHeapVarOp>(heap, var->loc, value);
-			}
-			else
-			{
-				gen<MoveOp>(ref(var), value);
-			}
-		}
-		
 		void ByteCodeGenerator::convert_assignment(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::AssignmentNode *)basic_node;
@@ -340,25 +317,13 @@ namespace Mirb
 				{
 					auto variable = (Tree::VariableNode *)node->left;
 
-					if(variable->var->type == Tree::Variable::Heap)
-					{
-						var_t temp = reuse(var);
+					var_t result = write_variable(variable->var, [&](var_t store){
+						to_bytecode(node->right, store);
+					}, var);
 
-						to_bytecode(node->right, temp);
-						
-						write_variable(variable->var, temp);
+					if(is_var(var))
+						gen<MoveOp>(var, result);
 
-						if(is_var(var))
-							gen<MoveOp>(var, temp);
-					}
-					else
-					{
-						to_bytecode(node->right, ref(variable->var));
-					
-						if(is_var(var))
-							gen<MoveOp>(var, ref(variable->var));
-					}
-					
 					return;
 				}
 				
@@ -539,12 +504,12 @@ namespace Mirb
 				
 				// push arguments
 
-				VariableGroup group(this, scope->owner->parameters.size);
+				VariableGroup group(this, scope->owner->parameters.size());
 				
 				size_t param = 0;
 				
 				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i)
-					gen<MoveOp>(group[param++], ref(*i));
+					gen<MoveOp>(group[param++], ref(*i)); // TODO: Fix references to heap variables and check how array and block parameters should be handled
 				
 				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, group.size, group.use());
 				location(node->range);
@@ -875,6 +840,11 @@ namespace Mirb
 			}
 			
 			size_t ranges = source_locs.size();
+
+			if(scope->range)
+				final->range = new Range(*scope->range);
+			else
+				final->range = nullptr;
 			
 			if(ranges)
 			{
@@ -1012,22 +982,49 @@ namespace Mirb
 			}
 			
 			if(scope->block_parameter)
-				gen<BlockOp>(ref(scope->block_parameter));
+			{
+				write_variable(scope->block_parameter, [&](var_t store){
+					gen<BlockOp>(store);
+				}, return_var);
+			}
 			
 			size_t index = 0;
+			
+			final->min_args = 0;
+			final->max_args = 0;
 
-			for(auto i = scope->parameters.begin(); i != scope->parameters.end(); ++i)
+			for(size_t i = scope->parameters.size(); i-- >0;)
 			{
-				if(i().type == Tree::Variable::Heap)
+				auto parameter = scope->parameters[i];
+
+				final->max_args++;
+
+				if(parameter->default_value)
 				{
-					var_t value = create_var();
-
-					gen<LoadArgOp>(value, index++);
-
-					write_variable(*i, value);
+					write_variable(parameter, [&](var_t store){
+						Label *skip = create_label();
+						branches.push(BranchInfo(gen<LoadArgBranchOp>(store, i), skip));
+						to_bytecode(parameter->default_value, store);
+						gen(skip);
+					}, return_var);
 				}
 				else
-					gen<LoadArgOp>(ref(*i), index++);
+				{
+					final->min_args++;
+
+					write_variable(parameter, [&](var_t store){
+						gen<LoadArgOp>(store, i);
+					}, return_var);
+				}
+			}
+			
+			if(scope->array_parameter)
+			{
+				final->max_args = (size_t)-1;
+
+				write_variable(scope->array_parameter, [&](var_t store){
+					gen<LoadArrayArgOp>(store, scope->parameters.size());
+				}, return_var);
 			}
 			
 			gen(body);

@@ -22,6 +22,8 @@ namespace Mirb
 	Tree::BlockNode *Parser::parse_block()
 	{
 		bool curly;
+
+		auto range = capture();
 		
 		switch(lexeme())
 		{
@@ -54,6 +56,9 @@ namespace Mirb
 			
 				match(Lexeme::BITWISE_OR);
 			}
+
+			lexer.lexeme.prev_set(range);
+			scope->range = range;
 		
 			result->scope->group = parse_group();
 		});

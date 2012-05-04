@@ -107,7 +107,11 @@ namespace Mirb
 			public NamedVariable
 		{
 			public:
-				Parameter(Type type) : NamedVariable(type) {}
+				Parameter(Type type) : NamedVariable(type), reported(false), default_value(nullptr) {}
+
+				bool reported;
+				Node *default_value;
+				Range *range;
 				
 				ListEntry<Parameter> parameter_entry;
 		};
@@ -177,6 +181,7 @@ namespace Mirb
 				Scope *parent; // The scope enclosing this one
 				Scope *owner; // The first parent that isn't a closure. This field can point to itself.
 				Node *group;
+				Range *range;
 				
 				/*
 				 * Break related fields
@@ -200,14 +205,15 @@ namespace Mirb
 				 */
 				VariableMap variables; // A hash of the variables in this scope.
 				size_t heap_vars; // The number of the variables that must be stored on a heap scope.
-				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
 				Vector<Scope *, Fragment> referenced_scopes; // A list of all the scopes this scope requires.
 
 				Vector<Scope *, Fragment> children; // A list of all the immediate children. To keep them alive...
 				
 				Vector<Variable *, Fragment> variable_list; // A list of all variables in this scope.
-
-				CountedList<Parameter, Parameter, &Parameter::parameter_entry> parameters;
+				
+				Parameter *block_parameter; // Pointer to a named or unnamed block variable.
+				Parameter *array_parameter; // Pointer to a named or unnamed array variable.
+				Vector<Parameter *, Fragment> parameters;
 				
 				Vector<Scope *, Fragment> zsupers;
 				

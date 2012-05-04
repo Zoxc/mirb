@@ -123,12 +123,16 @@ namespace Mirb
 
 			const char *opcodes;
 
+			size_t min_args;
+			size_t max_args;
+
 			ExceptionBlock **exception_blocks;
 			size_t exception_block_count;
 
 			const char_t **strings;
 			size_t string_count;
-
+			
+			Range *range;
 			Range *ranges;
 			Map<size_t, Range *> source_location;
 

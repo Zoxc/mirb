@@ -184,6 +184,36 @@ namespace Mirb
 					gen(create_label());
 				}
 				
+				template<typename F> var_t write_variable(Tree::Variable *var, F func, var_t temp)
+				{
+					if(var->type == Tree::Variable::Heap)
+					{
+						var_t heap;
+
+						if(var->owner != scope)
+						{
+							heap = create_var();
+
+							gen<LookupOp>(heap, scope->referenced_scopes.index_of(var->owner));
+						}
+						else
+							heap = heap_var;
+
+						var_t store = reuse(temp);
+
+						func(store);
+
+						gen<SetHeapVarOp>(heap, var->loc, store);
+
+						return store;
+					}
+					else
+					{
+						func(ref(var));
+						return ref(var);
+					}
+				}
+		
 				var_t block_arg(Tree::Scope *scope, var_t break_dst);
 				var_t call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst);
 

@@ -11,6 +11,7 @@ namespace Mirb
 			fragment(fragment.base()),
 			type(type),
 			parent(parent),
+			range(nullptr),
 			break_id(no_break_id),
 			break_targets(0),
 			break_dst(no_var),
@@ -18,10 +19,12 @@ namespace Mirb
 			require_self(false),
 			variables(2, fragment),
 			heap_vars(0),
-			block_parameter(0),
 			referenced_scopes(fragment),
 			children(fragment),
 			variable_list(2, fragment),
+			block_parameter(nullptr),
+			array_parameter(nullptr),
+			parameters(fragment),
 			zsupers(fragment)
 		{
 			if(parent)

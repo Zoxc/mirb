@@ -18,7 +18,8 @@ namespace Mirb
 		name(frame->name),
 		scope(frame->scope),
 		block(frame->block),
-		ip(frame->ip)
+		ip(frame->ip),
+		vars(frame->vars != nullptr)
 	{
 		args = Tuple<>::allocate(frame->argc);
 
@@ -61,7 +62,12 @@ namespace Mirb
 
 		if(self->code->executor == &evaluate_block)
 		{
-			Range *range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+			Range *range;
+
+			if(self->vars)
+				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+			else
+				range = self->code->range;
 
 			if(range)
 			{
@@ -113,7 +119,12 @@ namespace Mirb
 
 		if(self->code->executor == &evaluate_block)
 		{
-			Range *range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+			Range *range;
+
+			if(self->vars)
+				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+			else
+				range = self->code->range;
 
 			if(range)
 			{

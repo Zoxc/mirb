@@ -29,6 +29,8 @@ namespace Mirb
 				LoadNil,
 				LoadObject,
 				LoadArg,
+				LoadArrayArg,
+				LoadArgBranch,
 				LoadSymbol,
 				Closure,
 				Class,
@@ -52,9 +54,7 @@ namespace Mirb
 				GetConst,
 				SetConst,
 				BranchIf,
-				BranchIfZero,
 				BranchUnless,
-				BranchUnlessZero,
 				Branch,
 				Return,
 				Handler,
@@ -77,6 +77,8 @@ namespace Mirb
 				&&OpLoadNil, \
 				&&OpLoadObject, \
 				&&OpLoadArg, \
+				&&OpLoadArrayArg, \
+				&&OpLoadArgBranch, \
 				&&OpLoadSymbol, \
 				&&OpClosure, \
 				&&OpClass, \
@@ -100,9 +102,7 @@ namespace Mirb
 				&&OpGetConst, \
 				&&OpSetConst, \
 				&&OpBranchIf, \
-				&&OpBranchIfZero, \
 				&&OpBranchUnless, \
-				&&OpBranchUnlessZero, \
 				&&OpBranch, \
 				&&OpReturn, \
 				&&OpHandler, \
@@ -125,6 +125,14 @@ namespace Mirb
 			public Opcode
 		{
 			OpcodeWrapper() : Opcode(type) {}
+		};
+		
+		struct BranchOpcode:
+			public Opcode
+		{
+			size_t pos;
+
+			BranchOpcode(Opcode::Type type) : Opcode(type) {}
 		};
 		
 		struct MoveOp:
@@ -184,6 +192,24 @@ namespace Mirb
 			size_t arg;
 
 			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
+		};
+		
+		struct LoadArrayArgOp:
+			public OpcodeWrapper<Opcode::LoadArrayArg>
+		{
+			var_t var;
+			size_t from_arg;
+
+			LoadArrayArgOp(var_t var, size_t from_arg) : var(var), from_arg(from_arg) {}
+		};
+		
+		struct LoadArgBranchOp:
+			public BranchOpcode
+		{
+			var_t var;
+			size_t arg;
+
+			LoadArgBranchOp(var_t var, size_t arg) : BranchOpcode(LoadArgBranch), var(var), arg(arg) {}
 		};
 		
 		struct LoadSymbolOp:
@@ -405,14 +431,6 @@ namespace Mirb
 			SetConstOp(Symbol *name, var_t var) : name(name), var(var) {}
 		};
 		
-		struct BranchOpcode:
-			public Opcode
-		{
-			size_t pos;
-
-			BranchOpcode(Opcode::Type type) : Opcode(type) {}
-		};
-		
 		struct BranchIfOp:
 			public BranchOpcode
 		{
@@ -421,28 +439,12 @@ namespace Mirb
 			BranchIfOp(var_t var) : BranchOpcode(BranchIf), var(var) {}
 		};
 		
-		struct BranchIfZeroOp:
-			public BranchOpcode
-		{
-			var_t var;
-
-			BranchIfZeroOp(var_t var) : BranchOpcode(BranchIfZero), var(var) {}
-		};
-		
 		struct BranchUnlessOp:
 			public BranchOpcode
 		{
 			var_t var;
 
 			BranchUnlessOp(var_t var) : BranchOpcode(BranchUnless), var(var) {}
-		};
-		
-		struct BranchUnlessZeroOp:
-			public BranchOpcode
-		{
-			var_t var;
-
-			BranchUnlessZeroOp(var_t var) : BranchOpcode(BranchUnlessZero), var(var) {}
 		};
 		
 		struct BranchOp:

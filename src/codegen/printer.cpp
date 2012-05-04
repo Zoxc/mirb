@@ -179,6 +179,26 @@ namespace Mirb
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
 				
+				case Opcode::LoadArrayArg:
+				{
+					auto op = (LoadArrayArgOp *)opcode;
+
+					opcode += sizeof(LoadArrayArgOp);
+					
+					return var(op->var) + " = array_arg " + raw(op->from_arg);
+				}
+				
+				case Opcode::LoadArgBranch:
+				{
+					auto op = (LoadArgBranchOp *)opcode;
+					
+					result = var(op->var) + " = load_arg_branch " + label(opcode) + ", " + raw(op->arg);
+
+					opcode += sizeof(LoadArgBranchOp);
+
+					break;
+				}
+				
 				case Opcode::LoadSymbol:
 				{
 					auto op = (LoadSymbolOp *)opcode;
@@ -239,7 +259,7 @@ namespace Mirb
 
 					opcode += sizeof(CallOp);
 					
-					return (op->var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Super:
@@ -248,7 +268,7 @@ namespace Mirb
 
 					opcode += sizeof(SuperOp);
 					
-					return (op->var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Lookup:
@@ -388,17 +408,6 @@ namespace Mirb
 					break;
 				}
 				
-				case Opcode::BranchIfZero:
-				{
-					auto op = (BranchIfZeroOp *)opcode;
-					
-					result = "branch " + label(opcode) + " if_zero " + var(op->var);
-
-					opcode += sizeof(BranchIfZeroOp);
-
-					break;
-				}
-				
 				case Opcode::BranchUnless:
 				{
 					auto op = (BranchUnlessOp *)opcode;
@@ -406,17 +415,6 @@ namespace Mirb
 					result = "branch " + label(opcode) + " unless " + var(op->var);
 
 					opcode += sizeof(BranchUnlessOp);
-
-					break;
-				}
-				
-				case Opcode::BranchUnlessZero:
-				{
-					auto op = (BranchUnlessZeroOp *)opcode;
-					
-					result = "branch " + label(opcode) + " unless_zero " + var(op->var);
-
-					opcode += sizeof(BranchUnlessZeroOp);
 
 					break;
 				}
