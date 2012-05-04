@@ -1,6 +1,7 @@
 #include "platform.hpp"
 #include "../collector.hpp"
 #include <signal.h>
+#include <unistd.h>
 
 #ifndef WIN32
 
@@ -33,7 +34,13 @@ namespace Mirb
 		
 		CharArray cwd()
 		{
-			mirb_runtime_assert("Not implemented");
+			char *result = getcwd(nullptr, 0);
+
+			CharArray str((const char_t *)result, std::strlen(result));
+
+			std::free(result);
+
+			return str;
 		}
 		
 		void signal_handler(int)

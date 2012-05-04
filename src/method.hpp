@@ -39,7 +39,7 @@ namespace Mirb
 			size_t index;
 			bool error;
 
-			State(Frame &frame, Info &&info) : index(0), error(false)
+			State(Frame &frame prelude_unused, Info &&info prelude_unused) : index(0), error(false)
 			{
 				mirb_debug_assert(frame.argc >= info.min);
 				mirb_debug_assert(info.any_arg || frame.argc <= info.max);

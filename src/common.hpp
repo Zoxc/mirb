@@ -21,6 +21,7 @@
 	#include <sys/stat.h>
 #endif
 
+#include <cstdarg>
 #include <algorithm> 
 #include <type_traits> 
 #include <iostream>

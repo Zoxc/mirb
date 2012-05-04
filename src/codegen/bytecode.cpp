@@ -1014,9 +1014,7 @@ namespace Mirb
 					gen<BlockOp>(store);
 				}, return_var);
 			}
-			
-			size_t index = 0;
-			
+
 			final->min_args = 0;
 			final->max_args = 0;
 
