@@ -10,6 +10,8 @@ namespace Mirb
 		value_t backtrace();
 		value_t eval(value_t obj, value_t code);
 		value_t load(value_t filename);
+		value_t require(value_t filename);
+		value_t require_relative(value_t filename);
 		value_t print(size_t argc, value_t argv[]);
 		value_t puts(size_t argc, value_t argv[]);
 		value_t raise(size_t argc, value_t argv[]);

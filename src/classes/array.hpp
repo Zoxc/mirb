@@ -11,6 +11,7 @@ namespace Mirb
 			static value_t allocate(value_t obj);
 			static value_t push(value_t obj, size_t argc, value_t argv[]);
 			static value_t pop(value_t obj);
+			static value_t unshift(value_t obj, size_t argc, value_t argv[]);
 			static value_t inspect(value_t obj);
 			static value_t length(value_t obj);
 			static value_t each(value_t obj, value_t block);

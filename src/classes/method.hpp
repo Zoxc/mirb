@@ -29,9 +29,7 @@ namespace Mirb
 				Object::mark(mark);
 
 				mark(block);
-
-				if(scope)
-					mark(scope);
+				mark(scope);
 			}
 
 			static void initialize();

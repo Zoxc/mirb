@@ -9,13 +9,21 @@ namespace Mirb
 	{
 		return auto_cast(Collector::allocate<Array>(auto_cast(obj)));
 	}
+	
+	value_t Array::unshift(value_t obj, size_t argc, value_t argv[])
+	{
+		auto self = cast<Array>(obj);
 
+		self->vector.push_entries_front(argv, argc);
+
+		return obj;
+	}
+	
 	value_t Array::push(value_t obj, size_t argc, value_t argv[])
 	{
 		auto self = cast<Array>(obj);
 
-		for(size_t i = 0; i < argc; ++i)
-			self->vector.push(argv[i]);
+		self->vector.push_entries(argv, argc);
 
 		return obj;
 	}
@@ -85,6 +93,7 @@ namespace Mirb
 		
 		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		
+		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::Self>(context->array_class, "pop", &pop);

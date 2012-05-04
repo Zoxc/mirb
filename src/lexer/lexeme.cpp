@@ -131,6 +131,7 @@ namespace Mirb
 		"not",
 		"and",
 		"or",
+		"__FILE__",
 		"end",
 	};
 

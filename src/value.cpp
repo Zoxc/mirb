@@ -14,6 +14,8 @@
 #include "classes/method.hpp"
 #include "classes/proc.hpp"
 #include "classes/symbol.hpp"
+#include "classes/io.hpp"
+#include "classes/file.hpp"
 #include "document.hpp"
 #include "tree/tree.hpp"
 

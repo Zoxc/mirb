@@ -224,6 +224,7 @@ namespace Mirb
 					case Lexeme::KW_SELF:
 					case Lexeme::KW_TRUE:
 					case Lexeme::KW_FALSE:
+					case Lexeme::KW_SPECIAL_FILE:
 					case Lexeme::KW_NIL:
 					case Lexeme::STRING:
 					case Lexeme::STRING_START:

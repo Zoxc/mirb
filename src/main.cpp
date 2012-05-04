@@ -4,6 +4,7 @@
 #include "parser/parser.hpp"
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
+#include "classes/array.hpp"
 #include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "block.hpp"
@@ -36,19 +37,29 @@ int main(int argc, const char *argv[])
 
 	if(argc > 1)
 	{
-		for(int i = 1; i < argc; ++i)
-		{
-			if(strcmp(argv[i], "-v") == 0)
-			{
-				std::cout << "mirb 0.1 (2012-05-02) [i386-mingw32]";
-				return 0;
-			}
+		int index = 1;
 
-			if(!Kernel::load(CharArray((const char_t *)argv[i]).to_string()))
-			{
-				report_exception();
-				return 1;
-			}
+		if(strcmp(argv[index], "-v") == 0)
+		{
+			std::cout << "mirb 0.1" << std::endl;
+			index++;
+		}
+
+		CharArray exec = CharArray((const char_t *)argv[index++]);
+		
+		Array *new_argv = Collector::allocate<Array>();
+
+		for(int i = index; i < argc; ++i)
+		{
+			new_argv->vector.push(CharArray((const char_t *)argv[i]).to_string());
+		}
+
+		set_const(context->object_class, Symbol::get("ARGV"), new_argv);
+
+		if(!Kernel::load(exec.to_string()))
+		{
+			report_exception();
+			return 1;
 		}
 
 		return 0;
@@ -100,7 +111,7 @@ int main(int argc, const char *argv[])
 			block = Compiler::compile(scope, memory_pool);
 		}
 
-		value_t result = call_code(block, context->main, Symbol::from_literal("main"), context->object_scope, value_nil, 0, 0);
+		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
 		
 		OnStack<1> os1(result);
 

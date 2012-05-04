@@ -385,6 +385,18 @@ namespace Mirb
 	{
 		switch (lexeme())
 		{
+			case Lexeme::KW_SPECIAL_FILE:
+			{
+				auto result = new (fragment) Tree::StringNode;
+
+				result->result_type = Value::String;
+				result->string.set<Tree::Fragment>(document.name.get_string(), fragment);
+
+				lexer.step();
+
+				return result;
+			}
+
 			case Lexeme::KW_BEGIN:
 				return parse_begin();
 

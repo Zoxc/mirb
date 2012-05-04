@@ -30,6 +30,9 @@ namespace Mirb
 			Class *false_class;
 			Class *module_class;
 			Class *method_class;
+			
+			Class *io_class;
+			Class *file_class;
 
 			Class *exception_class;
 
@@ -39,6 +42,7 @@ namespace Mirb
 			Class *standard_error;
 			Class *name_error;
 			Class *type_error;
+			Class *syntax_error;
 			Class *argument_error;
 			Class *runtime_error;
 			Class *local_jump_error;

@@ -2,8 +2,10 @@
 #include "../classes/object.hpp"
 #include "../classes/string.hpp"
 #include "../classes/symbol.hpp"
+#include "../classes/array.hpp"
 #include "../classes/exception.hpp"
 #include "../classes/exceptions.hpp"
+#include "../classes/file.hpp"
 #include "../platform/platform.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
@@ -47,7 +49,7 @@ namespace Mirb
 		return eval(obj, Symbol::from_literal("in eval"), current_frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
 	}
 
-	static FILE *open_file(CharArray &filename)
+	FILE *try_file(const CharArray &filename, CharArray &result)
 	{
 		CharArray filename_c_str = filename.c_str();
 
@@ -84,17 +86,46 @@ namespace Mirb
 			if(is_dir || !file)
 				return 0;
 
-			filename = filename_rb;
+			result = filename_rb;
 
 			return file;
 		}
 
 		return file;
 	}
-
-	static value_t run_file(value_t self, CharArray filename)
+	
+	FILE *open_file(CharArray &filename, bool try_relative)
 	{
-		FILE* file = open_file(filename);
+		auto load_path = cast<Array>(context->globals.get(Symbol::get("$:")));
+		FILE *result = nullptr;
+		
+		load_path->vector.each([&](value_t path) -> bool {
+			auto str = cast<String>(path)->string;
+
+			JoinSegments joiner;
+			
+			joiner.push(str);
+			joiner.push(filename);
+
+			str = joiner.join();
+
+			result = try_file(str, filename);
+
+			return result == nullptr;
+		});
+
+		if(result)
+			return result;
+
+		if(try_relative)
+			return try_file(filename, filename);
+		else
+			return nullptr;
+	}
+
+	value_t run_file(value_t self, CharArray filename, bool try_relative)
+	{
+		FILE* file = open_file(filename, try_relative);
 
 		if(!file)
 			return raise(context->load_error, "Unable to load file '" + filename + "'");
@@ -122,7 +153,7 @@ namespace Mirb
 
 		data[length] = 0;
 
-		value_t result = eval(self, Symbol::from_char_array("in " + filename), context->object_scope, (char_t *)data, length, filename);
+		value_t result = eval(self, Symbol::get("main"), context->object_scope, (char_t *)data, length, filename);
 
 		free(data);
 		fclose(file);
@@ -132,7 +163,17 @@ namespace Mirb
 	
 	value_t Kernel::load(value_t filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string);
+		return run_file(context->main, cast<String>(filename)->string, true);
+	}
+	
+	value_t Kernel::require(value_t filename)
+	{
+		return run_file(context->main, cast<String>(filename)->string, false);
+	}
+	
+	value_t Kernel::require_relative(value_t filename)
+	{
+		return run_file(context->main, cast<String>(filename)->string, true);
 	}
 	
 	value_t Kernel::print(size_t argc, value_t argv[])
@@ -221,8 +262,8 @@ namespace Mirb
 		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
 		method<Arg::Value>(context->kernel_module, "load", &load);
-		method<Arg::Value>(context->kernel_module, "require", &load);
-		method<Arg::Value>(context->kernel_module, "require_relative", &load);
+		method<Arg::Value>(context->kernel_module, "require", &require);
+		method<Arg::Value>(context->kernel_module, "require_relative", &require_relative);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
 	}
 };

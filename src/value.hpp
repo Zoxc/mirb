@@ -41,6 +41,8 @@ namespace Mirb
 	class NextException;
 	class RedoException;
 	class Proc;
+	class IO;
+	class File;
 
 	/* Format for tagged pointers
 	 *
@@ -117,6 +119,8 @@ namespace Mirb
 			BreakException,
 			NextException,
 			RedoException,
+			IO,
+			File,
 			Types
 		};
 		
@@ -294,6 +298,12 @@ namespace Mirb
 				case NextException:
 					return T<NextException>::func(std::forward<Arg>(arg));
 					
+				case IO:
+					return T<IO>::func(std::forward<Arg>(arg));
+					
+				case File:
+					return T<File>::func(std::forward<Arg>(arg));
+					
 				case FreeBlock:
 					return T<FreeBlock>::func(std::forward<Arg>(arg));
 					
@@ -335,6 +345,8 @@ namespace Mirb
 		mirb_typeclass(BreakException, BreakException);
 		mirb_typeclass(RedoException, RedoException);
 		mirb_typeclass(NextException, NextException);
+		mirb_typeclass(IO, IO);
+		mirb_typeclass(File, File);
 		mirb_typeclass(FreeBlock, FreeBlock);
 
 		template<class B, class D> struct DerivedFrom
@@ -360,6 +372,8 @@ namespace Mirb
 		mirb_derived_from(Object, Exception);
 		mirb_derived_from(Object, ReturnException);
 		mirb_derived_from(Object, BreakException);
+		mirb_derived_from(Object, IO);
+		mirb_derived_from(Object, File);
 		
 		mirb_derived_from(Module, Module);
 		mirb_derived_from(Module, Class);
@@ -385,6 +399,11 @@ namespace Mirb
 
 		mirb_derived_from(BreakException, BreakException);
 		
+		mirb_derived_from(IO, IO);
+		mirb_derived_from(IO, File);
+
+		mirb_derived_from(File, File);
+
 		mirb_derived_from(Array, Array);
 
 		template<class Base> struct OfType

@@ -198,6 +198,46 @@ namespace Mirb
 		char_array.append(rhs);
 		return char_array;
 	}
+	
+	const char_t &CharArray::operator [](size_t index) const
+	{
+		mirb_debug_assert(index < length);
+		return data[index];
+	}
+
+	char_t &CharArray::operator [](size_t index)
+	{
+		mirb_debug_assert(!shared && !static_data);
+		mirb_debug_assert(index < length);
+		return data[index];
+	}
+
+	CharArray CharArray::copy(size_t offset, size_t size) const
+	{
+		if(offset + size > length)
+		{
+			if(offset >= length)
+				return CharArray("");
+			else
+				return CharArray(data + offset, length - offset);
+		}
+		else
+			return CharArray(data + offset, size);
+	}
+	
+	void CharArray::shrink(size_t new_size)
+	{
+		mirb_debug_assert(new_size <= length);
+		length = new_size;
+	}
+
+	bool CharArray::equal(size_t offset, size_t other_offset, const CharArray &other, size_t size) const
+	{
+		if(offset + size > length || other_offset + size > other.length)
+			return false;
+
+		return std::memcmp(data + offset, other.data + other_offset, size) == 0;
+	}
 
 	value_t CharArray::to_string() const
 	{

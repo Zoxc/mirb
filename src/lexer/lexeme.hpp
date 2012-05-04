@@ -151,6 +151,7 @@ namespace Mirb
 				KW_NOT,
 				KW_AND,
 				KW_OR,
+				KW_SPECIAL_FILE,
 				KW_END,
 				TYPES
 			};

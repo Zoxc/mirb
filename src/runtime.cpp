@@ -18,6 +18,8 @@
 #include "classes/array.hpp"
 #include "classes/exception.hpp"
 #include "classes/exceptions.hpp"
+#include "classes/io.hpp"
+#include "classes/file.hpp"
 #include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
@@ -524,7 +526,7 @@ namespace Mirb
 			for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
 				i().print();
 
-			return value_nil;
+			return raise(context->syntax_error, "Unable to parse file '" + filename + "'");
 		}
 
 		OnStack<3> os(tree_scope, method_name, scope);
@@ -862,10 +864,15 @@ namespace Mirb
 		
 		Collector::enable_interrupts = true;
 		
+		IO::initialize();
+		File::initialize();
+
 		setup_main();
 
-		set_const(context->object_class, Symbol::from_literal("RUBY_ENGINE"), String::from_literal("mirb"));
-		set_const(context->object_class, Symbol::from_literal("RUBY_VERSION"), String::from_literal("1.9"));
+		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::from_literal("mirb"));
+		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::from_literal("1.9"));
+		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
+		context->globals.set(Symbol::get("$:"), Collector::allocate<Array>());
 
 		mirb_debug(Collector::collect());
 	}

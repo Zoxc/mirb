@@ -27,7 +27,7 @@ namespace Mirb
 			CharArray(const char_t *c_str, size_t length);
 			CharArray(const CharArray &char_array);
 			CharArray(CharArray &&char_array);
-			
+
 			template<size_t length> CharArray(const char (&string)[length])
 			{
 				set_literal(string);
@@ -48,6 +48,9 @@ namespace Mirb
 			void localize();
 			void append(const CharArray &other);
 			
+			const char_t &operator [](size_t index) const;
+			char_t &operator [](size_t index);
+
 			template<size_t length> void append(const char (&string)[length])
 			{
 				CharArray char_array(string);
@@ -61,6 +64,32 @@ namespace Mirb
 				append(string);
 
 				return *this;
+			}
+			
+			CharArray copy(size_t offset, size_t size) const;
+			
+			bool equal(size_t offset, size_t other_offset, const CharArray &other, size_t size) const;
+			
+			template<typename F> void split(F func, const CharArray &token) const
+			{
+				size_t last = 0;
+				size_t i = 0;
+
+				while(i < length - token.size() + 1)
+				{
+					if(equal(i, 0, token, token.size()))
+					{
+						func(copy(last, i - last));
+
+						i += token.size();
+						last = i;
+					}
+					else
+						++i;
+				}
+
+				if(i != last)
+					func(copy(last, i - last));
 			}
 			
 			size_t size() const;
@@ -85,12 +114,19 @@ namespace Mirb
 				shared = true;
 				static_data = true;
 			}
+
+			void shrink(size_t new_size);
 			
 			bool operator ==(CharArray &other) const
 			{
-				return length == other.length && memcmp(data, other.data, length) == 0;
+				return (length == other.length) && (std::memcmp(data, other.data, length) == 0);
 			}
-
+			
+			template<size_t string_length> bool operator ==(const char (&string)[string_length]) const
+			{
+				return (string_length - 1 == length) && (std::memcmp(data, &string, string_length - 1) == 0);
+			}
+			
 			std::string get_string() const
 			{
 				return std::string((const char *)data, length);

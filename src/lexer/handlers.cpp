@@ -331,11 +331,25 @@ namespace Mirb
 
 		if(!is_ident(input))
 		{
-			lexeme.stop = &input;
-			lexeme.type = Lexeme::GLOBAL;
-			lexeme.symbol = symbol_pool.get(lexeme);
+			switch(input)
+			{
+				case '0':
+				case ':':
+				case '*':
+					input++;
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::GLOBAL;
+					lexeme.symbol = symbol_pool.get(lexeme);
+					break;
 
-			parser.report(lexeme.dup(memory_pool), "Expected a global variable name");
+				default:
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::GLOBAL;
+					lexeme.symbol = symbol_pool.get(lexeme);
+
+					parser.report(lexeme.dup(memory_pool), "Expected a global variable name");
+					break;
+			}
 
 			return;
 		}

@@ -56,13 +56,11 @@ namespace Mirb
 		result->opcodes = (const char *)function;
 		result->executor = executor;
 		
-		#ifdef DEBUG
-			OnStack<3> os(module, name, result);
+		Tuple<Module> *scope = Tuple<Module>::allocate(1);
 
-			std::cout << "Defining method " << inspect_object(module) << "." << name->get_string() << "\n";
-		#endif
+		(*scope)[0] = module;
 
-		module->set_method(name, Collector::allocate<Method>(result, nullptr));
+		module->set_method(name, Collector::allocate<Method>(result, scope));
 
 		return result;
 	}

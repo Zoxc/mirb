@@ -13,6 +13,8 @@
 #include "classes/method.hpp"
 #include "classes/proc.hpp"
 #include "classes/symbol.hpp"
+#include "classes/io.hpp"
+#include "classes/file.hpp"
 
 namespace Mirb
 {
@@ -92,10 +94,7 @@ namespace Mirb
 			mark(frame->code);
 			mark(frame->obj);
 			mark(frame->name);
-
-			if(frame->scope)
-				mark(frame->scope);
-
+			mark(frame->scope);
 			mark(frame->block);
 
 			if(frame->scopes)
