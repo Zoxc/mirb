@@ -827,6 +827,30 @@ namespace Mirb
 			}
 		}
 		
+		void ByteCodeGenerator::early_finalize(Block *block, Tree::Scope *scope)
+		{
+			block->min_args = 0;
+			block->max_args = 0;
+
+			for(size_t i = 0; i < scope->parameters.size(); ++i)
+			{
+				block->max_args++;
+
+				if(scope->parameters[i]->default_value)
+					block->min_args++;
+			}
+			
+			if(scope->type == Tree::Scope::Closure)
+				block->max_args = (size_t)-1;
+
+			if(scope->range)
+				block->range = new Range(*scope->range);
+			else
+				block->range = nullptr;
+
+			final->blocks.push(block);
+		};
+
 		void ByteCodeGenerator::finalize()
 		{
 			if(strings.size())
@@ -841,10 +865,13 @@ namespace Mirb
 			
 			size_t ranges = source_locs.size();
 
-			if(scope->range)
-				final->range = new Range(*scope->range);
-			else
-				final->range = nullptr;
+			if(scope->defered())
+			{
+				if(scope->range)
+					final->range = new Range(*scope->range);
+				else
+					final->range = nullptr;
+			}
 			
 			if(ranges)
 			{
@@ -1018,6 +1045,9 @@ namespace Mirb
 				}
 			}
 			
+			if(scope->type == Tree::Scope::Closure)
+				final->max_args = (size_t)-1;
+
 			if(scope->array_parameter)
 			{
 				final->max_args = (size_t)-1;
@@ -1026,7 +1056,7 @@ namespace Mirb
 					gen<LoadArrayArgOp>(store, scope->parameters.size());
 				}, return_var);
 			}
-			
+
 			gen(body);
 
 			to_bytecode(scope->group, return_var);
@@ -1059,8 +1089,8 @@ namespace Mirb
 		{
 			Mirb::Block *result = Compiler::defer(scope);
 
-			final->blocks.push(result);
-
+			early_finalize(result, scope);
+			
 			return result;
 		}
 

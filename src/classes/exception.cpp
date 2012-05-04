@@ -5,6 +5,7 @@
 #include "class.hpp"
 #include "../block.hpp"
 #include "../document.hpp"
+#include "../compiler.hpp"
 #include "../generic/range.hpp"
 #include "../platform/platform.hpp"
 #include "../vm.hpp"
@@ -60,7 +61,7 @@ namespace Mirb
 			
 		std::cerr <<  ")";
 
-		if(self->code->executor == &evaluate_block)
+		if(self->code->executor == &evaluate_block || self->code->executor == &Compiler::deferred_block)
 		{
 			Range *range;
 

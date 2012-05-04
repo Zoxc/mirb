@@ -173,6 +173,11 @@ namespace Mirb
 					if(type == Tree::Scope::Closure || type == Tree::Scope::Method || type == Tree::Scope::Top)
 						delete fragment;
 				}
+
+				bool defered()
+				{
+					return type == Tree::Scope::Closure || type == Tree::Scope::Method;
+				}
 				
 				Document *document;
 				Block *final;

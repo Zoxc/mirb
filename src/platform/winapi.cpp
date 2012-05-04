@@ -33,8 +33,6 @@ namespace Mirb
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars)
 		{
 			#ifdef _UNICODE
-				char *utf8 = (char *) malloc(1000); //(llen + 1) * sizeof(TCHAR));
-
 				size_t size = WideCharToMultiByte(CP_UTF8, 0, buffer, tchars, nullptr, 0, NULL, NULL);
 
 				char *new_buffer = (char *)alloca(size);
@@ -43,7 +41,7 @@ namespace Mirb
 
 				return CharArray((const char_t *)new_buffer, size);
 			#else
-				return CharArray((const char_t *)buffer, size);
+				return CharArray((const char_t *)buffer, tchars);
 			#endif
 		}
 

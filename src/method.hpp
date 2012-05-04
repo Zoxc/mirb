@@ -41,17 +41,8 @@ namespace Mirb
 
 			State(Frame &frame, Info &&info) : index(0), error(false)
 			{
-				if(prelude_unlikely(frame.argc < info.min))
-				{
-					Mirb::raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(info.min) + " required)");
-					error = true;
-				}
-
-				if(prelude_unlikely(!info.any_arg && frame.argc > info.max))
-				{
-					Mirb::raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(info.max) + ")");
-					error = true;
-				}
+				mirb_debug_assert(frame.argc >= info.min);
+				mirb_debug_assert(info.any_arg || frame.argc <= info.max);
 			}
 		};
 
@@ -183,7 +174,7 @@ namespace Mirb
 
 	namespace MethodGen
 	{
-		Block *generate_block(size_t flags, Module *module, Symbol *name, Block::executor_t executor, void *function);
+		Block *generate_block(size_t flags, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function);
 	
 		value_t wrapper(Frame &frame);
 	
@@ -312,27 +303,27 @@ namespace Mirb
 	
 		template<typename Arg1> Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper<Arg1>, function);
+			return generate_block(flags, module, name, fold(1, Arg1::info), wrapper<Arg1>, function);
 		}
 	
 		template<typename Arg1, typename Arg2> Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper<Arg1, Arg2>, function);
+			return generate_block(flags, module, name, fold(2, Arg1::info, Arg2::info), wrapper<Arg1, Arg2>, function);
 		}
 	
 		template<typename Arg1, typename Arg2, typename Arg3> Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper<Arg1, Arg2, Arg3>, function);
+			return generate_block(flags, module, name, fold(3, Arg1::info, Arg2::info, Arg3::info), wrapper<Arg1, Arg2, Arg3>, function);
 		}
 	
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper<Arg1, Arg2, Arg3, Arg4>, function);
+			return generate_block(flags, module, name, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info), wrapper<Arg1, Arg2, Arg3, Arg4>, function);
 		}
 
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper<Arg1, Arg2, Arg3, Arg4, Arg5>, function);
+			return generate_block(flags, module, name, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info), wrapper<Arg1, Arg2, Arg3, Arg4, Arg5>, function);
 		}
 	};
 

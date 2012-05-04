@@ -93,7 +93,7 @@ namespace Mirb
 			return ((value_t (*)())frame.code->opcodes)();
 		}
 
-		Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Block::executor_t executor, void *function)
+		Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
 		{
 			Block *result = Collector::allocate_pinned<Block>(nullptr);
 
@@ -101,6 +101,8 @@ namespace Mirb
 
 			result->opcodes = (const char *)function;
 			result->executor = executor;
+			result->min_args = info.min;
+			result->max_args = info.any_arg ? (size_t)-1 : info.max;
 		
 			Tuple<Module> *scope = Tuple<Module>::allocate(1);
 
@@ -113,7 +115,7 @@ namespace Mirb
 
 		Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
-			return generate_block(flags, module, name, wrapper, function);
+			return generate_block(flags, module, name, fold(0), wrapper, function);
 		}
 	};
 };

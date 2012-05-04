@@ -16,7 +16,7 @@ namespace Mirb
 		return generator.generate();
 	}
 
-	value_t deferred_block(Frame &frame)
+	value_t Compiler::deferred_block(Frame &frame)
 	{
 		{
 			MemoryPool::Base memory_pool;

@@ -30,12 +30,6 @@ namespace Mirb
 
 	value_t evaluate_block(Frame &frame)
 	{
-		if(prelude_unlikely(frame.argc < frame.code->min_args))
-			return raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
-
-		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
-			return raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
-
 		const char *ip_start = frame.code->opcodes;
 		const char *ip = ip_start;
 
@@ -45,14 +39,8 @@ namespace Mirb
 #ifdef __GNUC__
 		value_t storage[frame.code->var_words];
 		value_t *vars = storage;
-
-		auto finalize = [&] {};
 #else
-		value_t *vars = new value_t[frame.code->var_words];
-
-		auto finalize = [&] {
-			delete[] vars;
-		};
+		value_t *vars = (value_t *)alloca(frame.code->var_words * sizeof(value_t));
 #endif
 
 		frame.vars = vars;
@@ -108,7 +96,6 @@ namespace Mirb
 		Op(Return)
 			value_t result = vars[op.var];
 			validate_return(result);
-			finalize();
 			return result;
 		EndOp
 
@@ -390,7 +377,6 @@ handle_exception:
 
 						value_t result = error->value;
 						set_current_exception(0);
-						finalize();
 						return result;
 					}
 					break;
@@ -403,7 +389,6 @@ handle_exception:
 						{
 							value_t result = error->value;
 							set_current_exception(0);
-							finalize();
 							return result;
 						}
 					}
@@ -412,8 +397,6 @@ handle_exception:
 					default:
 						break;
 				}
-
-				finalize();
 
 				return value_raise;
 			}

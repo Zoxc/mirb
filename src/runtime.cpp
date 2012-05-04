@@ -636,6 +636,12 @@ namespace Mirb
 
 			return value_raise;
 		}
+		
+		if(prelude_unlikely(frame.argc < frame.code->min_args))
+			return raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
+
+		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
+			return raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
 
 		value_t result = frame.code->executor(frame);
 		
