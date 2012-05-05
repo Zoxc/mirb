@@ -1,7 +1,8 @@
 #include "platform.hpp"
-#include "../collector.hpp"
 
 #ifdef WIN32
+
+#include "../collector.hpp"
 
 namespace Mirb
 {

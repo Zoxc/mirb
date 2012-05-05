@@ -61,6 +61,27 @@ namespace Mirb
 			
 			void process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail);
 
+			template<typename F> void typecheck(Tree::Node *&result, F func)
+			{
+				if(result->single())
+				{
+					result = func(result);
+				}
+				else
+				{
+					auto node = (Tree::MultipleExpressionsNode *)result;
+
+					if(!node->extended)
+						node->extended = capture();
+
+					func(nullptr);
+
+					lexer.lexeme.prev_set(node->extended);
+				}
+			};
+			
+			Tree::Node *typecheck(Tree::Node *result);
+
 			// expressions
 			Tree::Node *parse_variable(Symbol *symbol, Range *range);
 			bool is_assignment_op();
@@ -70,8 +91,8 @@ namespace Mirb
 			Tree::Node *parse_hash();
 			Tree::StringNode *parse_string(Value::Type type);
 			Tree::Node *parse_power();
-			Tree::Node *build_assignment(Tree::Node *left);
-			Tree::Node *process_assignment(Tree::Node *input);
+			Tree::Node *build_assignment(Tree::Node *left, bool allow_multiples);
+			Tree::Node *process_assignment(Tree::Node *&input, Range *&range, bool allow_multiples);
 			Tree::Node *parse_array();
 			Tree::Node *parse_unary();
 			Tree::Node *parse_boolean_unary();
@@ -79,9 +100,9 @@ namespace Mirb
 			void parse_arguments(Tree::CountedNodeList &arguments);
 			Tree::Node *parse_boolean();
 			
-			Tree::Node *parse_expression()
+			Tree::Node *parse_expression(bool allow_multiples = true)
 			{
-				return parse_assignment();
+				return parse_assignment(allow_multiples);
 			}
 			
 			Tree::Node *parse_statement()
@@ -102,7 +123,11 @@ namespace Mirb
 			Tree::Node *parse_if();
 			Tree::Node *parse_unless();
 			Tree::Node *parse_ternary_if();
-			Tree::Node *parse_assignment();
+			Tree::Node *parse_splat_expression();
+			Tree::Node *build_multiple_expressions(Tree::MultipleExpressionsNode *lhs, Tree::MultipleExpressionsNode *rhs);
+			Tree::MultipleExpressionsNode *wrap_in_multiple_expressions(Tree::Node *input, Range *range);
+			Tree::Node *parse_multiple_expressions(Range *range, bool allow_multiples = true);
+			Tree::Node *parse_assignment(bool allow_multiples);
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_case();
 			Tree::Node *parse_begin();
@@ -209,8 +234,11 @@ namespace Mirb
 					case Lexeme::UNARY_SUB:
 					case Lexeme::IVAR:
 					case Lexeme::GLOBAL:
+					case Lexeme::CVAR:
+					case Lexeme::SYMBOL:
 					case Lexeme::ADD:
 					case Lexeme::SUB:
+					case Lexeme::MUL:
 					case Lexeme::INTEGER:
 					case Lexeme::KW_IF:
 					case Lexeme::KW_UNLESS:

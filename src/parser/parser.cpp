@@ -188,7 +188,7 @@ namespace Mirb
 	{
 		do
 		{
-			auto node = parse_expression();
+			auto node = parse_expression(false);
 			
 			if(node)
 				arguments.append(node);
@@ -231,30 +231,38 @@ namespace Mirb
 		{
 			do
 			{
-				if(lexeme() == Lexeme::IDENT)
+				auto range = capture();
+				auto key = parse_expression(false);
+				lexer.lexeme.prev_set(range);
+
+				if(lexeme() == Lexeme::COLON)
 				{
-					auto key = new (fragment) Tree::SymbolNode;
+					auto node = new (fragment) Tree::SymbolNode;
+					auto call = static_cast<Tree::CallNode *>(key);
 
-					key->symbol = lexer.lexeme.symbol;
+					if(key->type() == Tree::Node::Variable)
+						node->symbol = static_cast<Tree::VariableNode *>(key)->var->name;
+					else if(key->type() == Tree::Node::Call && call->can_be_var)
+						node->symbol = call->method;
+					else
+						error("Use '=>' to associate non-identifier key");
 
-					result->entries.append(key);
+					result->entries.append(node);
 
 					lexer.step();
-
-					match(Lexeme::COLON);
 				}
 				else
 				{
-					auto key = parse_expression();
-					
-					result->entries.append(key);
+					if(key)
+						result->entries.append(key);
 
 					match(Lexeme::ASSOC);
 				}
 
-				auto value = parse_expression();
+				auto value = parse_expression(false);
 				
-				result->entries.append(value);
+				if(value)
+					result->entries.append(value);
 			}
 			while(matches(Lexeme::COMMA));
 		}
@@ -274,9 +282,10 @@ namespace Mirb
 		{
 			do
 			{
-				auto element = parse_expression();
+				auto element = parse_expression(false);
 				
-				result->entries.append(element);
+				if(element)
+					result->entries.append(element);
 			}
 			while(matches(Lexeme::COMMA));
 		}
@@ -639,16 +648,18 @@ namespace Mirb
 		
 		while(lexeme() == Lexeme::POWER)
 		{
-			auto node = new (fragment) Tree::BooleanOpNode;
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::BooleanOpNode;
 			
-			node->op = Lexeme::POWER;
-			node->left = result;
+				node->op = Lexeme::POWER;
+				node->left = result;
 			
-			lexer.step();
+				lexer.step();
 			
-			node->right = parse_lookup_chain();
-			
-			result = node;
+				node->right = typecheck(parse_lookup_chain());
+
+				return node;
+			});
 		}
 		
 		return result;
@@ -660,38 +671,23 @@ namespace Mirb
 		{
 			case Lexeme::BITWISE_NOT:
 			case Lexeme::LOGICAL_NOT:
+			case Lexeme::ADD:
+			case Lexeme::SUB:
 			{
 				auto result = new (fragment) Tree::UnaryOpNode;
 
 				result->range = capture();
-				result->op = lexeme();
+				result->op = (lexeme() == Lexeme::BITWISE_NOT || lexeme() == Lexeme::LOGICAL_NOT) ? lexeme() : Lexeme::operator_to_unary(lexeme());
 
 				lexer.step();
 
-				result->value = parse_power();
+				result->value = typecheck(parse_power());
 
 				lexer.lexeme.prev_set(result->range);
 				
 				return result;
 			}
 			
-			case Lexeme::ADD:
-			case Lexeme::SUB:
-			{
-				auto result = new (fragment) Tree::UnaryOpNode;
-				
-				result->op = Lexeme::operator_to_unary(lexeme());
-				result->range = capture();
-				
-				lexer.step();
-				
-				result->value = parse_power();
-
-				lexer.lexeme.prev_set(result->range);
-				
-				return result;
-			}
-
 			default:
 				return parse_power();
 		}
@@ -745,49 +741,132 @@ namespace Mirb
 		while(true)
 		{
 			Lexeme::Type op = lexeme();
-			Range *range = capture();
 			
 			if(!is_precedence_operator(op))
 				break;
-			
+
 			size_t precedence = operator_precedences[op - Lexeme::precedence_operators_start];
 			
 			if(precedence < min_precedence)
 				break;
 			
-			lexer.step();
-
-			Tree::Node *right = parse_unary();
-
-			while(true)
-			{
-				Lexeme::Type next_op = lexeme();
-
-				if(!is_precedence_operator(next_op))
-					break;
-
-				size_t next_precedence = operator_precedences[next_op - Lexeme::precedence_operators_start];
-
-				if(next_precedence <= precedence)
-					break;
-
-				right = parse_precedence_operator(right, next_precedence);
-			}
+			typecheck(left, [&](Tree::Node *left) -> Tree::Node * {
+				Range *range = capture();
 			
-			Tree::BinaryOpNode *node = new (fragment) Tree::BinaryOpNode;
-			
-			node->op = op;
-			node->left = left;
-			node->right = right;
-			node->range = range;
+				lexer.step();
 
-			left = node;
+				Tree::Node *right = typecheck(parse_unary());
+
+				while(true)
+				{
+					Lexeme::Type next_op = lexeme();
+
+					if(!is_precedence_operator(next_op))
+						break;
+
+					size_t next_precedence = operator_precedences[next_op - Lexeme::precedence_operators_start];
+
+					if(next_precedence <= precedence)
+						break;
+
+					right = typecheck(parse_precedence_operator(right, next_precedence));
+				}
+			
+				auto node = new (fragment) Tree::BinaryOpNode;
+			
+				node->op = op;
+				node->left = left;
+				node->right = right;
+				node->range = range;
+
+				return node;
+			});
 		}
 
 		return left;
 	}
+
+	Tree::Node *Parser::typecheck(Tree::Node *result)
+	{
+		if(result->single())
+			return result;
+
+		Tree::MultipleExpressionsNode *node = (Tree::MultipleExpressionsNode *)result;
+
+		report(*node->range, "Unexpected multiple expressions");
+
+		return nullptr;
+	}
 	
-	Tree::Node *Parser::build_assignment(Tree::Node *left)
+	Tree::Node *Parser::build_multiple_expressions(Tree::MultipleExpressionsNode *lhs, Tree::MultipleExpressionsNode *rhs)
+	{
+		error("Multiple expression assignment is unimplemeted");
+		return nullptr;
+	}
+
+	Tree::MultipleExpressionsNode *Parser::wrap_in_multiple_expressions(Tree::Node *input, Range *range)
+	{
+		if(input->type() == Tree::Node::MultipleExpressions)
+			return static_cast<Tree::MultipleExpressionsNode *>(input);
+
+		auto node = new (fragment) Tree::MultipleExpressionsNode;
+
+		node->expressions.append(input);
+		node->range = range;
+
+		return node;
+	}
+
+	Tree::Node *Parser::parse_splat_expression()
+	{
+		if(matches(Lexeme::MUL))
+		{
+			auto result = new (fragment) Tree::SplatNode;
+
+			result->range = capture();
+			result->expression = typecheck(parse_factor());
+
+			lexer.lexeme.prev_set(result->range);
+
+			return result;
+		}
+		else
+			return parse_ternary_if();
+	}
+
+	Tree::Node *Parser::parse_multiple_expressions(Range *range, bool allow_multiples)
+	{
+		auto result = parse_splat_expression();
+
+		if(allow_multiples)
+		{
+			if(matches(Lexeme::COMMA))
+			{
+				auto node = new (fragment) Tree::MultipleExpressionsNode;
+
+				node->expressions.append(result);
+
+				do
+				{
+					result = parse_splat_expression();
+
+					if(result)
+						node->expressions.append(result);
+				} while (matches(Lexeme::COMMA));
+
+				lexer.lexeme.prev_set(range);
+				node->range = range;
+			
+				return node;
+			}
+			else if(result->type() == Tree::Node::Splat)
+				return wrap_in_multiple_expressions(result, static_cast<Tree::SplatNode *>(result)->range);
+		}
+		
+		return result;
+	}
+
+	Tree::Node *Parser::build_assignment(Tree::Node *left, bool allow_multiples)
 	{
 		if(lexeme() == Lexeme::ASSIGN)
 		{
@@ -799,7 +878,7 @@ namespace Mirb
 			
 			result->left = left;
 			
-			result->right = parse_expression();
+			result->right = typecheck(parse_multiple_expressions(capture(), allow_multiples));
 			
 			return result;
 		}
@@ -818,23 +897,30 @@ namespace Mirb
 			
 			lexer.step();
 			
-			binary_op->right = parse_expression();
+			binary_op->right = typecheck(parse_multiple_expressions(capture(), allow_multiples));
 			
 			return result;
 		}
 	};
 
-	Tree::Node *Parser::parse_assignment()
+	Tree::Node *Parser::parse_assignment(bool allow_multiples)
 	{
-		Tree::Node *result = parse_ternary_if();
+		auto range = capture();
+
+		Tree::Node *result = parse_multiple_expressions(range, allow_multiples);
 		
-		while(is_assignment_op())
-			result = process_assignment(result);
-		
-		return result;
+		if(is_assignment_op())
+		{
+			while(is_assignment_op())
+				result = process_assignment(result, range, allow_multiples);
+
+			return result;
+		}
+		else
+			return typecheck(result);
 	}
 
-	Tree::Node *Parser::process_assignment(Tree::Node *input)
+	Tree::Node *Parser::process_assignment(Tree::Node *&input, Range *&range, bool allow_multiples)
 	{
 		if(!input)
 		{
@@ -844,6 +930,21 @@ namespace Mirb
 
 		switch(input->type())
 		{
+			case Tree::Node::MultipleExpressions:
+			{
+				if(lexeme() != Lexeme::ASSIGN)
+					error("Can only use regular assign with multiple expression assigment");
+
+				lexer.step();
+
+				auto range = capture();
+				auto rhs = parse_multiple_expressions(range, allow_multiples);
+				lexer.lexeme.prev_set(range);
+
+				return build_multiple_expressions(static_cast<Tree::MultipleExpressionsNode *>(input), wrap_in_multiple_expressions(rhs, range));
+			}
+			break;
+
 			case Tree::Node::Call:
 			{
 				auto node = (Tree::CallNode *)input;
@@ -853,24 +954,27 @@ namespace Mirb
 						break;
 				
 				if(node->can_be_var)
-					return build_assignment(parse_variable(node->method, node->range));
+					return build_assignment(parse_variable(node->method, node->range), allow_multiples);
 				else
 				{
 					Symbol *mutated = node->method;
 					
 					if(mutated)
 						mutated = Symbol::from_char_array(node->method->string + "=");
-					
+
 					if(lexeme() == Lexeme::ASSIGN)
 					{
 						lexer.step();
 						
 						node->method = mutated;
 						
-						Tree::Node *argument = parse_expression();
-						
+						Tree::Node *argument = parse_multiple_expressions(capture(), allow_multiples);
+
 						if(argument)
 						{
+							if(argument->type() == Tree::Node::MultipleExpressions)
+								return build_multiple_expressions(wrap_in_multiple_expressions(node, range), static_cast<Tree::MultipleExpressionsNode *>(argument));
+						
 							node->arguments.append(argument);
 
 							if(node->range)
@@ -881,6 +985,8 @@ namespace Mirb
 					}
 					else
 					{
+						auto assign_range = capture();
+					
 						// TODO: Save node->object in a temporary variable
 						auto result = new (fragment) Tree::CallNode;
 						
@@ -901,7 +1007,13 @@ namespace Mirb
 						
 						lexer.step();
 						
-						binary_op->right = parse_expression();
+						binary_op->right = parse_multiple_expressions(capture(), allow_multiples);
+
+						if(binary_op->right->type() == Tree::Node::MultipleExpressions)
+						{
+							report(*assign_range, "Can only use regular assign with multiple expression assigment");
+							return build_multiple_expressions(wrap_in_multiple_expressions(node, range), static_cast<Tree::MultipleExpressionsNode *>(binary_op->right));
+						}
 
 						lexer.lexeme.prev_set(result->range);
 						
@@ -918,7 +1030,7 @@ namespace Mirb
 			case Tree::Node::Variable:
 			case Tree::Node::Constant: //TODO: Make sure constant's object is not re-evaluated
 			case Tree::Node::IVar:
-				return build_assignment(input);
+				return build_assignment(input, allow_multiples);
 
 			default:
 				break;

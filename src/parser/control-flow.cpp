@@ -131,25 +131,27 @@ namespace Mirb
 		
 		if(lexeme() == Lexeme::QUESTION)
 		{
-			lexer.step();
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				lexer.step();
 			
-			auto node = new (fragment) Tree::IfNode;
+				auto node = new (fragment) Tree::IfNode;
 			
-			node->inverted = false;
+				node->inverted = false;
 			
-			node->left = result;
-			node->middle = parse_expression();
+				node->left = result;
+				node->middle = parse_expression();
 			
-			match(Lexeme::COLON);
+				match(Lexeme::COLON);
 			
-			node->right = parse_expression();
-			
-			return node;
+				node->right = parse_expression();
+
+				return node;
+			});
 		}
 		
 		return result;
 	}
-
+	
 	Tree::Node *Parser::parse_conditional()
 	{
 		Tree::Node *result = parse_boolean();

@@ -50,12 +50,16 @@ namespace Mirb
 				Method,
 				Rescue,
 				Handler,
+				Splat,
+				MultipleExpressions,
 				Types
 			};
 			
 			static std::string names[Types];
 
 			virtual NodeType type() { return None; };
+
+			bool single() { return (this == nullptr) || (type() != MultipleExpressions); }
 		};
 		
 		struct ListNode:

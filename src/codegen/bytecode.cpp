@@ -85,7 +85,9 @@ namespace Mirb
 			&ByteCodeGenerator::convert_module,
 			&ByteCodeGenerator::convert_method,
 			0, // Rescue
-			&ByteCodeGenerator::convert_handler
+			&ByteCodeGenerator::convert_handler,
+			&ByteCodeGenerator::convert_splat,
+			&ByteCodeGenerator::convert_multiple_expressions
 		};
 		
 		void ByteCodeGenerator::convert_string(Tree::Node *basic_node, var_t var)
@@ -825,6 +827,20 @@ namespace Mirb
 				
 				gen<UnwindOp>();
 			}
+		}
+		
+		void ByteCodeGenerator::convert_splat(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::SplatNode *)basic_node;
+
+			mirb_runtime_assert("Unimplemeted");
+		}
+		
+		void ByteCodeGenerator::convert_multiple_expressions(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::MultipleExpressionsNode *)basic_node;
+
+			mirb_runtime_assert("Unimplemeted");
 		}
 		
 		void ByteCodeGenerator::early_finalize(Block *block, Tree::Scope *scope)

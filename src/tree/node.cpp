@@ -39,6 +39,8 @@ namespace Mirb
 		"Module",
 		"Method",
 		"Rescue",
-		"Handler"
+		"Handler",
+		"Splat",
+		"MultipleExpressions"
 	};
 };

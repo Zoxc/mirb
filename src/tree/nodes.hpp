@@ -13,6 +13,7 @@ namespace Mirb
 	{
 		class Scope;
 		class Variable;
+		class NamedVariable;
 		
 		struct GroupNode:
 			public Node
@@ -20,6 +21,27 @@ namespace Mirb
 			NodeType type() { return Group; }
 			
 			NodeList statements;
+		};
+		
+		struct SplatNode:
+			public Node
+		{
+			NodeType type() { return Splat; }
+			
+			Range *range;
+			Node *expression;
+		};
+
+		struct MultipleExpressionsNode:
+			public Node
+		{
+			NodeType type() { return MultipleExpressions; }
+			
+			Range *range;
+			NodeList expressions;
+			Range *extended;
+
+			MultipleExpressionsNode() : extended(nullptr) {}
 		};
 		
 		struct BinaryOpNode:
@@ -113,10 +135,10 @@ namespace Mirb
 		{
 			NodeType type() { return Variable; }
 			
-			Tree::Variable *var;
+			Tree::NamedVariable *var; // Might contain an unnamed variable if it's the implict block parameter. TODO: Make an own yield node to fix this.
 			
 			VariableNode() {}
-			VariableNode(Tree::Variable *var) : var(var) {}
+			VariableNode(Tree::NamedVariable *var) : var(var) {}
 		};
 		
 		struct IVarNode:

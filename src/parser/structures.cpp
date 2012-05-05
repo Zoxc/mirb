@@ -41,7 +41,7 @@ namespace Mirb
 	{
 		auto range = capture();
 
-		Tree::Node *result = parse_unary();
+		Tree::Node *result = typecheck(parse_unary());
 
 		lexer.lexeme.prev_set(range);
 		

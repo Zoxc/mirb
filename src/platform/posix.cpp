@@ -1,9 +1,10 @@
 #include "platform.hpp"
+
+#ifndef WIN32
+
 #include "../collector.hpp"
 #include <signal.h>
 #include <unistd.h>
-
-#ifndef WIN32
 
 namespace Mirb
 {

@@ -80,6 +80,7 @@ namespace Mirb
 
 				case Lexeme::ADD:
 				case Lexeme::SUB:
+				case Lexeme::MUL:
 					{
 						if(lexer.lexeme.whitespace)
 						{
@@ -196,7 +197,7 @@ namespace Mirb
 			scope->block_parameter->name = 0;
 		}
 		
-		child->var = scope->block_parameter;
+		child->var = (Tree::NamedVariable *)scope->block_parameter;
 		
 		return alloc_call_node(child, Symbol::from_literal("call"), range, has_arguments());
 	}
@@ -208,23 +209,23 @@ namespace Mirb
 		if(!symbol)
 			range = parse_method_name(symbol);
 		
-		bool local = false;
-		
-		if(symbol)
-			local = scope->defined(symbol, true) != 0;
-		
 		bool has_args = has_arguments();
 		bool can_be_var = default_var && !has_args;
 		bool constant = symbol && is_constant(symbol);
+
+		if(can_be_var && !has_args) // Variable or constant
+		{
+			bool local = false;
+
+			if(symbol)
+				local = scope->defined(symbol, true) != 0;
 		
-		if(can_be_var && !has_args && (local || constant)) // Variable or constant
-		{
-			return parse_variable(symbol, range);
+			if(local || constant)
+				return parse_variable(symbol, range);
 		}
-		else // Call
-		{
-			return alloc_call_node(child, symbol, range, has_args, can_be_var && !constant);
-		}
+
+		// Call
+		return alloc_call_node(child, symbol, range, has_args, can_be_var && !constant);
 	}
 
 	bool Parser::is_lookup()
@@ -265,7 +266,7 @@ namespace Mirb
 
 						if(has_args || !is_constant(symbol))
 						{
-							return alloc_call_node(child, symbol, range, has_arguments());
+							return alloc_call_node(child, symbol, range, has_args);
 						}
 						else
 						{
@@ -325,9 +326,9 @@ namespace Mirb
 
 		while(is_lookup())
 		{
-			Tree::Node *node = parse_lookup(result);
-
-			result = node;
+			typecheck(result, [&](Tree::Node *result) {
+				return parse_lookup(result);
+			});
 		}
 
 		return result;

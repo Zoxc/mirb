@@ -77,6 +77,8 @@ namespace Mirb
 				void convert_module(Tree::Node *basic_node, var_t var);
 				void convert_method(Tree::Node *basic_node, var_t var);
 				void convert_handler(Tree::Node *basic_node, var_t var);
+				void convert_splat(Tree::Node *basic_node, var_t var);
+				void convert_multiple_expressions(Tree::Node *basic_node, var_t var);
 
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, var_t var);
 				
