@@ -117,6 +117,7 @@ namespace Mirb
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call(value_t obj, Symbol *name) prelude_use_result;
 	
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)

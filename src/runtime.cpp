@@ -21,6 +21,7 @@
 #include "classes/io.hpp"
 #include "classes/file.hpp"
 #include "modules/kernel.hpp"
+#include "modules/comparable.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
@@ -805,6 +806,7 @@ namespace Mirb
 
 		context->syms.classpath = Symbol::get("__classpath__");
 		context->syms.classname = Symbol::get("__classname__");
+		context->syms.compare = Symbol::get("<=>");
 
 		context->string_class = class_create_unnamed(context->object_class);
 		
@@ -872,7 +874,9 @@ namespace Mirb
 		
 		IO::initialize();
 		File::initialize();
-
+		
+		Comparable::initialize();
+		
 		setup_main();
 
 		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::from_literal("mirb"));

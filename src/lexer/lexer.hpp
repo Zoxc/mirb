@@ -37,6 +37,7 @@ namespace Mirb
 			
 			void report_null();
 			
+			bool parse_escape(std::string &result);
 			void parse_string(InterpolatedState *state);
 			
 			template<Lexeme::Type type> void single();

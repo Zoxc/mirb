@@ -140,6 +140,87 @@ namespace Mirb
 		lexeme.str->tail.length = str_length;
 	}
 	
+	bool Lexer::parse_escape(std::string &result)
+	{
+		switch(input)
+		{
+			case '\'':
+			case '\"':
+			case '\\':
+				result += input++;
+				break;
+							
+			case '0':
+				result += (char)0;
+				input++;
+				break;
+						
+			case 'n':
+				result += (char)0xA;
+				input++;
+				break;
+						
+			case 't':
+				result += (char)0x9;
+				input++;
+				break;
+						
+			case 'r':
+				result += (char)0xD;
+				input++;
+				break;
+						
+			case 'f':
+				result += (char)0xC;
+				input++;
+				break;
+						
+			case 'v':
+				result += (char)0xB;
+				input++;
+				break;
+						
+			case 'a':
+				result += (char)0x7;
+				input++;
+				break;
+						
+			case 'e':
+				result += (char)0x1B;
+				input++;
+				break;
+						
+			case 'b':
+				result += (char)0x8;
+				input++;
+				break;
+						
+			case 's':
+				result += (char)0x20;
+				input++;
+				break;
+						
+			case 0: 
+				if(process_null(&input))
+				{
+					lexeme.stop = &input;
+
+					return true;
+				}
+
+			default:
+				{
+					const char_t *start = lexeme.start;
+					lexeme.start = &input - 1;
+					lexeme.stop = &input + 1;
+					parser.report(lexeme.dup(memory_pool), "Invalid escape string");
+					lexeme.start = start;
+				}
+		}
+
+		return false;
+	}
+
 	void Lexer::parse_string(InterpolatedState *state)
 	{
 		lexeme.type = Lexeme::STRING;
@@ -248,81 +329,10 @@ namespace Mirb
 				case '\\':
 					input++;
 
-					switch(input)
+					if(parse_escape(result))
 					{
-						case '\'':
-						case '\"':
-						case '\\':
-							result += input++;
-							break;
-							
-						case '0':
-							result += (char)0;
-							input++;
-							break;
-						
-						case 'n':
-							result += (char)0xA;
-							input++;
-							break;
-						
-						case 't':
-							result += (char)0x9;
-							input++;
-							break;
-						
-						case 'r':
-							result += (char)0xD;
-							input++;
-							break;
-						
-						case 'f':
-							result += (char)0xC;
-							input++;
-							break;
-						
-						case 'v':
-							result += (char)0xB;
-							input++;
-							break;
-						
-						case 'a':
-							result += (char)0x7;
-							input++;
-							break;
-						
-						case 'e':
-							result += (char)0x1B;
-							input++;
-							break;
-						
-						case 'b':
-							result += (char)0x8;
-							input++;
-							break;
-						
-						case 's':
-							result += (char)0x20;
-							input++;
-							break;
-						
-						case 0:
-							if(process_null(&input))
-							{
-								lexeme.stop = &input;
-
-								parser.report(lexeme.dup(memory_pool), "Unterminated string");
-								goto error;
-							}
-
-							// Fallthrough
-							
-						default:
-							const char_t *start = lexeme.start;
-							lexeme.start = &input - 1;
-							lexeme.stop = &input + 1;
-							parser.report(lexeme.dup(memory_pool), "Invalid escape string");
-							lexeme.start = start;
+						parser.report(lexeme.dup(memory_pool), "Unterminated string");
+						goto error;
 					}
 					break;
 

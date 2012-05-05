@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\method.hpp" />
+    <ClInclude Include="..\..\src\modules\comparable.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\method.cpp" />
+    <ClCompile Include="..\..\src\modules\comparable.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />

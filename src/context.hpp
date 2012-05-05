@@ -14,6 +14,7 @@ namespace Mirb
 				Symbol *class_scope;
 				Symbol *classname;
 				Symbol *attached;
+				Symbol *compare;
 
 				Symbol *terminator;
 			};
@@ -50,6 +51,7 @@ namespace Mirb
 			Class *fixnum_class;
 
 			Module *kernel_module;
+			Module *comparable_module;
 			
 			Tuple<Module> *object_scope;
 
