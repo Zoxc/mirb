@@ -28,18 +28,34 @@ namespace Mirb
 		{
 			NodeType type() { return Splat; }
 			
-			Range *range;
 			Node *expression;
 		};
+		
+		struct MultipleExpressionNode:
+			public ListNode
+		{
+			NodeType type() { return InterpolatedPair; }
+			
+			Node *expression;
+			Range range;
+			int index;
+			size_t size;
 
+			MultipleExpressionNode(Node *expression, const Range &range) : expression(expression), range(range) {}
+		};
+		
+		typedef List<MultipleExpressionNode, ListNode> MultipleExpressionList;
+		
 		struct MultipleExpressionsNode:
 			public Node
 		{
 			NodeType type() { return MultipleExpressions; }
 			
 			Range *range;
-			NodeList expressions;
+			MultipleExpressionList expressions;
 			Range *extended;
+			size_t splat_index;
+			size_t expression_count;
 
 			MultipleExpressionsNode() : extended(nullptr) {}
 		};

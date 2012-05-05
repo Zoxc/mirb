@@ -218,7 +218,40 @@ namespace Mirb
 		Op(Block)
 			vars[op.var] = frame.block;
 		EndOp
+			
+		Op(Assign)
+			auto array = cast<Array>(vars[op.array]);
+		
+			if(array->vector.size() > op.size)
+				vars[op.var] = op.index < 0 ? array->vector[op.index + array->vector.size()] : array->vector[op.size];
+			else
+				vars[op.var] = value_nil;
+		EndOp
+			
+		Op(AssignArray)
+			auto array = cast<Array>(vars[op.array]);
 
+			auto result = Collector::allocate<Array>();
+		
+			if(array->vector.size() > op.size)
+				result->vector.push_entries(&array->vector[op.index], array->vector.size() - op.size);
+			
+			vars[op.var] = result;
+		EndOp
+			
+		Op(Push)
+			cast<Array>(vars[op.array])->vector.push(vars[op.value]);
+		EndOp
+			
+		Op(PushArray)
+			value_t value = vars[op.from];
+			
+			if(Value::of_type<Array>(value))
+				cast<Array>(vars[op.into])->vector.push(cast<Array>(value)->vector);
+			else
+				cast<Array>(vars[op.into])->vector.push(value);
+		EndOp
+			
 		Op(CreateHeap)
 			Tuple<> &heap = *Tuple<>::allocate(op.vars);
 

@@ -12,7 +12,7 @@ namespace Mirb
 		"Parsing Error"
 	};
 	
-	Message::Message(Parser &parser, Range &range, Severity severity) : parser(parser), range(range), severity(severity)
+	Message::Message(Parser &parser, const Range &range, Severity severity) : parser(parser), range(range), severity(severity)
 	{
 		auto i = parser.messages.mutable_iterator();
 		

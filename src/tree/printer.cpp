@@ -66,6 +66,11 @@ namespace Mirb
 	{
 		return wrap(node, this->node(node, indent));
 	}
+
+	std::string Printer::print_node(Tree::MultipleExpressionNode *node)
+	{
+		return wrap(node->expression, this->node(node->expression, 0));
+	}
 	
 	std::string Printer::node(Tree::SimpleNode *node, size_t indent)
 	{
@@ -328,6 +333,20 @@ namespace Mirb
 				auto target = (Tree::MethodNode *)node;
 				
 				return "def " + (target->singleton ? print_node(target->singleton) + "." : "") + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
+			}
+			
+			case Tree::SimpleNode::Splat:
+			{
+				auto target = (Tree::SplatNode *)node;
+				
+				return "*" + print_node(target->expression);
+			}
+			
+			case Tree::SimpleNode::MultipleExpressions:
+			{
+				auto target = (Tree::MultipleExpressionsNode *)node;
+				
+				return join(target->expressions, ", ");
 			}
 			
 			default:

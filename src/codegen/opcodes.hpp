@@ -32,6 +32,10 @@ namespace Mirb
 				LoadArrayArg,
 				LoadArgBranch,
 				LoadSymbol,
+				Assign,
+				AssignArray,
+				Push,
+				PushArray,
 				Closure,
 				Class,
 				Module,
@@ -80,6 +84,10 @@ namespace Mirb
 				&&OpLoadArrayArg, \
 				&&OpLoadArgBranch, \
 				&&OpLoadSymbol, \
+				&&OpAssign, \
+				&&OpAssignArray, \
+				&&OpPush, \
+				&&OpPushArray, \
 				&&OpClosure, \
 				&&OpClass, \
 				&&OpModule, \
@@ -219,6 +227,46 @@ namespace Mirb
 			Symbol *symbol;
 
 			LoadSymbolOp(var_t var, Symbol *symbol) : var(var), symbol(symbol) {}
+		};
+		
+		struct AssignOp:
+			public OpcodeWrapper<Opcode::Assign>
+		{
+			var_t var;
+			var_t array;
+			int index;
+			size_t size;
+
+			AssignOp(var_t var, var_t array, int index, size_t size) : var(var), array(array), index(index), size(size) {}
+		};
+		
+		struct AssignArrayOp:
+			public OpcodeWrapper<Opcode::AssignArray>
+		{
+			var_t var;
+			var_t array;
+			size_t index;
+			size_t size;
+
+			AssignArrayOp(var_t var, var_t array, size_t index, size_t size) : var(var), array(array), index(index), size(size) {}
+		};
+		
+		struct PushOp:
+			public OpcodeWrapper<Opcode::Push>
+		{
+			var_t array;
+			var_t value;
+
+			PushOp(var_t array, var_t value) : array(array), value(value) {}
+		};
+		
+		struct PushArrayOp:
+			public OpcodeWrapper<Opcode::PushArray>
+		{
+			var_t into;
+			var_t from;
+
+			PushArrayOp(var_t into, var_t from) : into(into), from(from) {}
 		};
 		
 		struct ClosureOp:

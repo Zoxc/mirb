@@ -459,6 +459,8 @@ namespace Mirb
 			mirb_debug_assert(Value::of_type<T>((value_t)value));
 		}
 		
+		bool is_fixnum(value_t value);
+		
 		size_t hash(value_t value);
 		
 		void initialize_type_table();

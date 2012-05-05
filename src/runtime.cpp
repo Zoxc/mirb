@@ -366,6 +366,8 @@ namespace Mirb
 	{
 		CharArray result;
 
+		OnStackString<1> os(result);
+
 		for(int i = scope->entries - 1; i >= 0; --i)
 		{
 			result += inspect_obj((*scope)[i]) = "::";

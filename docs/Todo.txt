@@ -6,6 +6,7 @@
 [X] String interpolation
 [X] Arrays
 [X] Hashes
+[X] Multiple assignment
 [ ] Loops
 [ ] Ranges
 [X] Class inheritance
@@ -16,7 +17,7 @@
 [X] Super
 [X] Exception handling
 [X] Garbage collection
-[ ] Splat operators
+[ ] Argument splat operators
 [X] Modules
 [ ] BasicObject
 [ ] Fix constant resolution path

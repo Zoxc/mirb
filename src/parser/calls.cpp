@@ -311,6 +311,8 @@ namespace Mirb
 					result->block = nullptr;
 
 					match(Lexeme::SQUARE_CLOSE);
+					
+					lexer.lexeme.prev_set(range);
 
 					return result;
 				}

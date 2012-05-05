@@ -86,7 +86,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_method,
 			0, // Rescue
 			&ByteCodeGenerator::convert_handler,
-			&ByteCodeGenerator::convert_splat,
+			0, // Splat
 			&ByteCodeGenerator::convert_multiple_expressions
 		};
 		
@@ -308,97 +308,40 @@ namespace Mirb
 			
 			gen(label_end);
 		}
-
-		void ByteCodeGenerator::convert_assignment(Tree::Node *basic_node, var_t var)
+		
+		void ByteCodeGenerator::convert_multiple_assignment(Tree::MultipleExpressionsNode *node, var_t rhs)
 		{
-			auto node = (Tree::AssignmentNode *)basic_node;
-			
-			switch(node->left->type())
+			var_t temp = create_var();
+
+			for(auto expr: node->expressions)
 			{
-				case Tree::SimpleNode::Variable:
+				if(expr->expression->type() == Tree::Node::Splat)
 				{
-					auto variable = (Tree::VariableNode *)node->left;
-
-					var_t result = write_variable(variable->var, [&](var_t store){
-						to_bytecode(node->right, store);
-					}, var);
-
-					if(is_var(var))
-						gen<MoveOp>(var, result);
-
-					return;
+					write_node(static_cast<Tree::SplatNode *>(expr->expression)->expression, [&](var_t store) {
+						gen<AssignArrayOp>(store, rhs, node->splat_index, node->expression_count);
+					}, temp);
 				}
-				
-				case Tree::SimpleNode::IVar:
+				else
 				{
-					auto variable = (Tree::IVarNode *)node->left;
-					
-					var_t temp = reuse(var);
-					
-					to_bytecode(node->right, temp);
-						
-					gen<SetIVarOp>(variable->name, temp);
-
-					if(is_var(var))
-						gen<MoveOp>(var, temp);
-					
-					return;
+					write_node(expr->expression, [&](var_t store) {
+						gen<AssignOp>(store, rhs, expr->index, expr->size);
+					}, temp);
 				}
-				
-				case Tree::SimpleNode::Global:
-				{
-					auto variable = (Tree::GlobalNode *)node->left;
-					
-					var_t temp = reuse(var);
-					
-					to_bytecode(node->right, temp);
-						
-					gen<SetGlobalOp>(variable->name, temp);
-
-					if(is_var(var))
-						gen<MoveOp>(var, temp);
-					
-					return;
-				}
-				
-				case Tree::SimpleNode::Constant:
-				{
-					auto variable = (Tree::ConstantNode *)node->left;
-					
-					var_t value = reuse(var);
-					var_t obj = no_var;
-					
-					if(variable->obj)
-					{
-						obj = create_var();
-						to_bytecode(variable->obj, obj);
-					}
-					else if(variable->top_scope)
-					{
-						obj = create_var();
-						gen<LoadObjectOp>(obj);
-					}
-
-					to_bytecode(node->right, value);
-
-					if(obj == no_var)
-						gen<SetConstOp>(variable->name, value);
-					else
-						gen<SetScopedConstOp>(obj, variable->name, value);
-
-					location(variable->range);
-
-					if(is_var(var))
-						gen<MoveOp>(var, value);
-					
-					return;	
-				}	
-				
-				default:
-					mirb_debug_abort("Unknown left hand expression");
 			}
 		}
 		
+		void ByteCodeGenerator::convert_assignment(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::AssignmentNode *)basic_node;
+
+			var_t result = write_node(node->left, [&](var_t store) {
+				to_bytecode(node->right, store);
+			}, var);
+
+			if(var != no_var)
+				gen<MoveOp>(var, result);
+		}
+
 		void ByteCodeGenerator::convert_self(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
@@ -485,12 +428,12 @@ namespace Mirb
 			
 			var_t obj = reuse(var);
 			
-			to_bytecode(node->object, obj);
-			
 			size_t argc;
 			var_t argv;
 
 			var_t closure = call_args(node->arguments, node->block ? node->block->scope : nullptr, argc, argv, var);
+			
+			to_bytecode(node->object, obj);
 			
 			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
 			location(node->range);
@@ -829,18 +772,40 @@ namespace Mirb
 			}
 		}
 		
-		void ByteCodeGenerator::convert_splat(Tree::Node *basic_node, var_t var)
-		{
-			auto node = (Tree::SplatNode *)basic_node;
-
-			mirb_runtime_assert("Unimplemeted");
-		}
-		
 		void ByteCodeGenerator::convert_multiple_expressions(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::MultipleExpressionsNode *)basic_node;
 
-			mirb_runtime_assert("Unimplemeted");
+			if(var == no_var)
+			{
+				for(auto expr: node->expressions)
+				{
+					if(expr->expression->type() == Tree::Node::Splat)
+						to_bytecode(static_cast<Tree::SplatNode *>(expr->expression)->expression, no_var);
+					else
+						to_bytecode(expr->expression, no_var);
+				}
+
+				return;
+			}
+
+			gen<ArrayOp>(var, 0, 0);
+			
+			var_t temp = create_var();
+
+			for(auto expr: node->expressions)
+			{
+				if(expr->expression->type() == Tree::Node::Splat)
+				{
+					to_bytecode(static_cast<Tree::SplatNode *>(expr->expression)->expression, temp);
+					gen<PushArrayOp>(var, temp);
+				}
+				else
+				{
+					to_bytecode(expr->expression, temp);
+					gen<PushOp>(var, temp);
+				}
+			}
 		}
 		
 		void ByteCodeGenerator::early_finalize(Block *block, Tree::Scope *scope)

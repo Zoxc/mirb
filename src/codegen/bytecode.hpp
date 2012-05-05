@@ -77,11 +77,12 @@ namespace Mirb
 				void convert_module(Tree::Node *basic_node, var_t var);
 				void convert_method(Tree::Node *basic_node, var_t var);
 				void convert_handler(Tree::Node *basic_node, var_t var);
-				void convert_splat(Tree::Node *basic_node, var_t var);
 				void convert_multiple_expressions(Tree::Node *basic_node, var_t var);
 
 				static void (ByteCodeGenerator::*jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, var_t var);
 				
+				void convert_multiple_assignment(Tree::MultipleExpressionsNode *node, var_t rhs);
+
 				// Members
 
 				Label *body; // The point after the prolog of the block.
@@ -184,6 +185,123 @@ namespace Mirb
 					
 					//TODO: Eliminate code generation from this point. The block will never be reached
 					gen(create_label());
+				}
+				
+				template<typename F> var_t write_node(Tree::Node *lhs, F func, var_t temp)
+				{
+					switch(lhs->type())
+					{
+						case Tree::SimpleNode::MultipleExpressions:
+						{
+							var_t var = reuse(temp);
+							var_t rhs = create_var();
+
+							func(var);
+							
+							gen<ArrayOp>(rhs, 0, 0); // TODO: Add an opcode to convert into an array to avoid copying data
+							gen<PushArrayOp>(rhs, var);
+							
+							convert_multiple_assignment((Tree::MultipleExpressionsNode *)lhs, rhs);
+
+							return var;
+						}
+				
+						case Tree::SimpleNode::Call:
+						{
+							auto node = (Tree::CallNode *)lhs;
+							
+							var_t var = reuse(temp);
+
+							func(var);
+							
+							size_t argc = node->arguments.size + 1;
+
+							VariableGroup group(this, argc);
+
+							size_t param = 0;
+							
+							for(auto arg: node->arguments)
+								to_bytecode(arg, group[param++]);
+
+							gen<MoveOp>(group[param++], var);
+							
+							var_t obj = create_var();
+			
+							to_bytecode(node->object, obj);
+			
+							gen<CallOp>(var, obj, node->method, no_var, nullptr, argc, group.use());
+							location(node->range);
+
+							return var;
+						}
+				
+						case Tree::SimpleNode::Variable:
+						{
+							auto variable = (Tree::VariableNode *)lhs;
+
+							return write_variable(variable->var, func, temp);
+						}
+				
+						case Tree::SimpleNode::IVar:
+						{
+							auto variable = (Tree::IVarNode *)lhs;
+
+							var_t var = reuse(temp);
+
+							func(var);
+					
+							gen<SetIVarOp>(variable->name, var);
+
+							return var;
+						}
+				
+						case Tree::SimpleNode::Global:
+						{
+							auto variable = (Tree::GlobalNode *)lhs;
+							
+							var_t var = reuse(temp);
+
+							func(var);
+					
+							gen<SetGlobalOp>(variable->name, var);
+							
+							return var;
+						}
+				
+						case Tree::SimpleNode::Constant:
+						{
+							auto variable = (Tree::ConstantNode *)lhs;
+					
+							var_t var = reuse(temp);
+
+							func(var);
+					
+							var_t obj = no_var;
+					
+							if(variable->obj)
+							{
+								obj = create_var();
+								to_bytecode(variable->obj, obj);
+							}
+							else if(variable->top_scope)
+							{
+								obj = create_var();
+								gen<LoadObjectOp>(obj);
+							}
+							
+							if(obj == no_var)
+								gen<SetConstOp>(variable->name, var);
+							else
+								gen<SetScopedConstOp>(obj, variable->name, var);
+
+							location(variable->range);
+
+							return var;	
+						}	
+				
+						default:
+							mirb_debug_abort("Unknown left hand expression");
+					}
 				}
 				
 				template<typename F> var_t write_variable(Tree::Variable *var, F func, var_t temp)

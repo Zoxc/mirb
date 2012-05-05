@@ -15,6 +15,8 @@ namespace Mirb
 			static value_t inspect(value_t obj);
 			static value_t length(value_t obj);
 			static value_t each(value_t obj, value_t block);
+			static value_t get(value_t obj, size_t index);
+			static value_t set(value_t obj, size_t index, value_t value);
 
 		public:
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}

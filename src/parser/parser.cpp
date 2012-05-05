@@ -24,7 +24,7 @@ namespace Mirb
 		lexer.load(document.data, document.length);
 	}
 	
-	void Parser::report(Range &range, std::string text, Message::Severity severity)
+	void Parser::report(const Range &range, std::string text, Message::Severity severity)
 	{
 		new (memory_pool) StringMessage(*this, range, severity, text);
 	}
@@ -623,9 +623,9 @@ namespace Mirb
 			case Lexeme::PARENT_OPEN:
 			{
 				lexer.step();
-					
-				auto result = parse_group();
-					
+
+				Tree::Node *result = parse_group();
+
 				match(Lexeme::PARENT_CLOSE);
 					
 				return result;
@@ -798,35 +798,24 @@ namespace Mirb
 		return nullptr;
 	}
 	
-	Tree::Node *Parser::build_multiple_expressions(Tree::MultipleExpressionsNode *lhs, Tree::MultipleExpressionsNode *rhs)
-	{
-		error("Multiple expression assignment is unimplemeted");
-		return nullptr;
-	}
-
-	Tree::MultipleExpressionsNode *Parser::wrap_in_multiple_expressions(Tree::Node *input, Range *range)
-	{
-		if(input->type() == Tree::Node::MultipleExpressions)
-			return static_cast<Tree::MultipleExpressionsNode *>(input);
-
-		auto node = new (fragment) Tree::MultipleExpressionsNode;
-
-		node->expressions.append(input);
-		node->range = range;
-
-		return node;
-	}
-
 	Tree::Node *Parser::parse_splat_expression()
 	{
 		if(matches(Lexeme::MUL))
 		{
+			if(matches(Lexeme::MUL))
+			{
+				Range range = lexer.lexeme;
+
+				while(matches(Lexeme::MUL));
+
+				lexer.lexeme.prev_set(&range);
+
+				report(range, "Nested splat operators are not allowed");
+			}
+
 			auto result = new (fragment) Tree::SplatNode;
 
-			result->range = capture();
 			result->expression = typecheck(parse_factor());
-
-			lexer.lexeme.prev_set(result->range);
 
 			return result;
 		}
@@ -834,36 +823,164 @@ namespace Mirb
 			return parse_ternary_if();
 	}
 
-	Tree::Node *Parser::parse_multiple_expressions(Range *range, bool allow_multiples)
+	void Parser::process_lhs(Tree::Node *&lhs, const Range &range)
 	{
+		if(!lhs)
+			return;
+
+		switch(lhs->type())
+		{
+			case Tree::Node::Group:
+			{
+				auto group = static_cast<Tree::GroupNode *>(lhs);
+				
+				if(group->statements.first && (group->statements.first == group->statements.last))
+				{
+					auto node = new (fragment) Tree::MultipleExpressionsNode;
+					node->expressions.append(new (fragment) Tree::MultipleExpressionNode(group->statements.first, range));
+
+					process_multiple_lhs(node);
+					
+					lhs = node;
+
+					return;
+				}
+
+				break;
+			}
+
+			case Tree::Node::MultipleExpressions:
+				process_multiple_lhs(static_cast<Tree::MultipleExpressionsNode *>(lhs));
+				return;
+				
+			case Tree::Node::IVar:
+			case Tree::Node::Global:
+			case Tree::Node::Constant:
+			case Tree::Node::Variable:
+				return;
+
+			case Tree::Node::Call:
+			{
+				auto node = static_cast<Tree::CallNode *>(lhs);
+
+				if(node->can_be_var)
+				{
+					lhs = parse_variable(node->method, node->range);
+					
+					return;
+				}
+				else if(node->subscript || (node->arguments.empty() && !node->block))
+				{
+					Symbol *mutated = node->method;
+					
+					if(mutated)
+						mutated = Symbol::from_char_array(node->method->string + "=");
+
+					node->method = mutated;
+
+					return;
+				}
+
+				break;
+			}
+
+			case Tree::Node::Splat:
+			{
+				auto node = static_cast<Tree::SplatNode *>(lhs);
+
+				process_lhs(node->expression, range);
+
+				return;
+			}
+
+			default:
+				break;
+		}
+
+		report(range, "Not an assignable expression");
+	}
+	
+	void Parser::process_multiple_lhs(Tree::MultipleExpressionsNode *node)
+	{
+		bool seen_splat = false;
+		int size = 0;
+		int index = 0;
+		int offset = 1;
+		int splat_index = -1;
+
+		for(auto expr: node->expressions)
+		{
+			expr->size = size;
+			expr->index = index;
+
+			if(expr->expression->type() == Tree::Node::Splat)
+			{
+				splat_index = size;
+				index = -1;
+				offset = -1;
+
+				if(seen_splat)
+					report(expr->range, "You can only have one splat operator on the left-hand side");
+				else
+					seen_splat = true;
+			}
+			else
+			{
+				size += 1;
+				index += offset;
+			}
+
+			process_lhs(expr->expression, expr->range);
+		}
+		
+		node->expression_count = size;
+		node->splat_index = splat_index;
+	}
+
+	Tree::Node *Parser::parse_multiple_expressions(bool allow_multiples)
+	{
+		Range range = lexer.lexeme;
 		auto result = parse_splat_expression();
 
 		if(allow_multiples)
 		{
+			Tree::MultipleExpressionsNode *node;
+
+			bool seen_splat = result && (result->type() == Tree::Node::Splat);
+			bool is_multi = lexeme() == Lexeme::COMMA || seen_splat;
+
+			if(is_multi)
+			{
+				lexer.lexeme.prev_set(&range);
+
+				node = new (fragment) Tree::MultipleExpressionsNode;
+				node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result,  range));
+			}
+			else
+				return result;
+
 			if(matches(Lexeme::COMMA))
 			{
-				auto node = new (fragment) Tree::MultipleExpressionsNode;
-
-				node->expressions.append(result);
-
 				do
 				{
-					result = parse_splat_expression();
+					Range result_range = lexer.lexeme;
+					result = typecheck(parse_splat_expression());
+					lexer.lexeme.prev_set(&result_range);
 
 					if(result)
-						node->expressions.append(result);
+						node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result,  result_range));
+
 				} while (matches(Lexeme::COMMA));
 
-				lexer.lexeme.prev_set(range);
-				node->range = range;
-			
-				return node;
 			}
-			else if(result->type() == Tree::Node::Splat)
-				return wrap_in_multiple_expressions(result, static_cast<Tree::SplatNode *>(result)->range);
+			
+			lexer.lexeme.prev_set(&range);
+			node->range = new (fragment) Range(range);
+
+			return node;
 		}
-		
-		return result;
+		else
+			return result;
 	}
 
 	Tree::Node *Parser::build_assignment(Tree::Node *left, bool allow_multiples)
@@ -878,7 +995,7 @@ namespace Mirb
 			
 			result->left = left;
 			
-			result->right = typecheck(parse_multiple_expressions(capture(), allow_multiples));
+			result->right = parse_assignment(allow_multiples);
 			
 			return result;
 		}
@@ -897,7 +1014,7 @@ namespace Mirb
 			
 			lexer.step();
 			
-			binary_op->right = typecheck(parse_multiple_expressions(capture(), allow_multiples));
+			binary_op->right = parse_assignment(allow_multiples);
 			
 			return result;
 		}
@@ -905,22 +1022,15 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_assignment(bool allow_multiples)
 	{
-		auto range = capture();
-
-		Tree::Node *result = parse_multiple_expressions(range, allow_multiples);
+		Tree::Node *result = parse_multiple_expressions(allow_multiples);
 		
 		if(is_assignment_op())
-		{
-			while(is_assignment_op())
-				result = process_assignment(result, range, allow_multiples);
-
-			return result;
-		}
+			return process_assignment(result, allow_multiples);
 		else
-			return typecheck(result);
+			return result;
 	}
 
-	Tree::Node *Parser::process_assignment(Tree::Node *&input, Range *&range, bool allow_multiples)
+	Tree::Node *Parser::process_assignment(Tree::Node *input, bool allow_multiples)
 	{
 		if(!input)
 		{
@@ -932,16 +1042,24 @@ namespace Mirb
 		{
 			case Tree::Node::MultipleExpressions:
 			{
+				auto node = (Tree::MultipleExpressionsNode *)input;
+
 				if(lexeme() != Lexeme::ASSIGN)
-					error("Can only use regular assign with multiple expression assigment");
+					error("Can only use regular assign with multiple expression assignment");
 
 				lexer.step();
 
-				auto range = capture();
-				auto rhs = parse_multiple_expressions(range, allow_multiples);
-				lexer.lexeme.prev_set(range);
+				process_multiple_lhs(node);
 
-				return build_multiple_expressions(static_cast<Tree::MultipleExpressionsNode *>(input), wrap_in_multiple_expressions(rhs, range));
+				auto result = new (fragment) Tree::AssignmentNode;
+			
+				result->op = Lexeme::ASSIGN;
+			
+				result->left = node;
+			
+				result->right = parse_assignment(allow_multiples);
+
+				return result;
 			}
 			break;
 
@@ -968,24 +1086,19 @@ namespace Mirb
 						
 						node->method = mutated;
 						
-						Tree::Node *argument = parse_multiple_expressions(capture(), allow_multiples);
+						Tree::Node *argument = parse_assignment(allow_multiples);
 
 						if(argument)
-						{
-							if(argument->type() == Tree::Node::MultipleExpressions)
-								return build_multiple_expressions(wrap_in_multiple_expressions(node, range), static_cast<Tree::MultipleExpressionsNode *>(argument));
-						
 							node->arguments.append(argument);
 
-							if(node->range)
-								lexer.lexeme.prev_set(node->range);
-						}
+						if(node->range)
+							lexer.lexeme.prev_set(node->range);
 
 						return input;
 					}
 					else
 					{
-						auto assign_range = capture();
+						Range assign_range = lexer.lexeme;
 					
 						// TODO: Save node->object in a temporary variable
 						auto result = new (fragment) Tree::CallNode;
@@ -1007,17 +1120,14 @@ namespace Mirb
 						
 						lexer.step();
 						
-						binary_op->right = parse_multiple_expressions(capture(), allow_multiples);
+						binary_op->right = parse_assignment(allow_multiples);
 
 						if(binary_op->right->type() == Tree::Node::MultipleExpressions)
-						{
-							report(*assign_range, "Can only use regular assign with multiple expression assigment");
-							return build_multiple_expressions(wrap_in_multiple_expressions(node, range), static_cast<Tree::MultipleExpressionsNode *>(binary_op->right));
-						}
+							report(assign_range, "Can only use regular assign with multiple expression assignment");
+
+						result->arguments.append(binary_op);
 
 						lexer.lexeme.prev_set(result->range);
-						
-						result->arguments.append(binary_op);
 						
 						return result;
 					}
@@ -1050,11 +1160,18 @@ namespace Mirb
 		if(lexeme() == Lexeme::KW_NOT)
 		{
 			lexer.step();
-			return new (fragment) Tree::BooleanNotNode(parse_expression());
+
+			auto result = parse_assignment(true);
+
+			typecheck(result, [&](Tree::Node *result) {
+				return new (fragment) Tree::BooleanNotNode(result);
+			});
+
+			return result;
 		}
 		else
 		{
-			return parse_expression();
+			return parse_assignment(true);
 		}
 	}
 
@@ -1064,28 +1181,88 @@ namespace Mirb
 		
 		while(lexeme() == Lexeme::KW_AND || lexeme() == Lexeme::KW_OR)
 		{
-			auto node = new (fragment) Tree::BooleanOpNode;
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::BooleanOpNode;
+				
+				node->op = lexeme();
+				node->left = result;
 			
-			node->op = lexeme();
-			node->left = result;
+				lexer.step();
 			
-			lexer.step();
-			
-			node->right = parse_boolean_unary();
-			
-			result = node;
+				node->right = parse_boolean_unary();
+
+				return node;
+			});
 		}
 		
 		return result;
 	}
 	
+	Tree::Node *Parser::parse_statements()
+	{
+		skip_lines();
+		
+		auto group = new (fragment) Tree::GroupNode;
+		
+		if(!is_sep())
+		{
+			if(!is_expression())
+				return group;
+
+			Tree::Node *node = parse_statement();
+
+			if(node && node->type() == Tree::Node::MultipleExpressions)
+			{
+				Range range = lexer.lexeme;
+
+				bool error = is_sep();
+				
+				skip_seps();
+		
+				while(is_expression())
+				{
+					error = true;
+					typecheck(parse_statement());
+			
+					if (!is_sep())
+						break;
+			
+					skip_seps();
+				}
+
+				lexer.lexeme.prev_set(&range);
+
+				if(error)
+					report(range, "Unexpected statement(s) after multiple expression(s)");
+
+				return node;
+			}
+			
+			if(node)
+				group->statements.append(node);
+		}
+		
+		skip_seps();
+		
+		while(is_expression())
+		{
+			Tree::Node *node = typecheck(parse_statement());
+			
+			if(node)
+				group->statements.append(node);
+			
+			if (!is_sep())
+				break;
+			
+			skip_seps();
+		}
+
+		return group;
+	}
+	
 	Tree::Node *Parser::parse_group()
 	{
-		auto node = new (fragment) Tree::GroupNode;
-		
-		parse_statements(node->statements);
-		
-		return node;
+		return typecheck(parse_statements());
 	}
 	
 	bool Parser::is_sep()
@@ -1095,28 +1272,10 @@ namespace Mirb
 	
 	void Parser::skip_seps()
 	{
-		while (is_sep())
+		while(is_sep())
 			lexer.step();
 	}
 	
-	void Parser::parse_statements(Tree::NodeList &list)
-	{
-		skip_seps();
-		
-		while(is_expression())
-		{
-			Tree::Node *node = parse_statement();
-			
-			if(node)
-				list.append(node);
-			
-			if (!is_sep())
-				return;
-			
-			skip_seps();
-		}
-	}
-
 	Tree::Scope *Parser::parse_main()
 	{
 		fragment = *new Tree::Fragment::Base(Tree::Chunk::main_size);

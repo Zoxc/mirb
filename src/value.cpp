@@ -24,6 +24,11 @@ namespace Mirb
 	namespace Value
 	{
 		Type type_table[literal_count];
+
+		bool is_fixnum(value_t value)
+		{
+			return (size_t)value & fixnum_mask;
+		}
 		
 		void initialize_type_table()
 		{

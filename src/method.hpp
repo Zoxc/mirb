@@ -82,6 +82,15 @@ namespace Mirb
 				static type apply(Frame &frame, State &state);
 		};
 		
+		class UInt
+		{
+			public:
+				typedef size_t type;
+				static const Info info;
+
+				static type apply(Frame &frame, State &state);
+		};
+		
 		class Value
 		{
 			public:

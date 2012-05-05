@@ -40,6 +40,15 @@ namespace Mirb
 			return result.str();
 		}
 		
+		std::string ByteCodePrinter::raw(int imm)
+		{
+			std::stringstream result;
+			
+			result << imm;
+			
+			return result.str();
+		}
+		
 		std::string ByteCodePrinter::raw(size_t imm)
 		{
 			std::stringstream result;
@@ -206,6 +215,42 @@ namespace Mirb
 					opcode += sizeof(LoadSymbolOp);
 					
 					return var(op->var) + " = :" + imm(op->symbol);
+				}
+				
+				case Opcode::Assign:
+				{
+					auto op = (AssignOp *)opcode;
+
+					opcode += sizeof(AssignOp);
+					
+					return var(op->var) + " = " + var(op->array) + "[" + raw(op->index) + "] if size > " + raw(op->size);
+				}
+				
+				case Opcode::AssignArray:
+				{
+					auto op = (AssignArrayOp *)opcode;
+
+					opcode += sizeof(AssignArrayOp);
+					
+					return var(op->var) + " = " + var(op->array) + "[" + raw(op->index) + "] if size > " + raw(op->size);
+				}
+				
+				case Opcode::Push:
+				{
+					auto op = (PushOp *)opcode;
+
+					opcode += sizeof(PushOp);
+					
+					return var(op->array) + " << " + var(op->value);
+				}
+				
+				case Opcode::PushArray:
+				{
+					auto op = (PushArrayOp *)opcode;
+
+					opcode += sizeof(PushArrayOp);
+					
+					return var(op->into) + " << *" + var(op->from);
 				}
 				
 				case Opcode::Closure:

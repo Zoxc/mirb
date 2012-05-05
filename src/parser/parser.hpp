@@ -25,7 +25,7 @@ namespace Mirb
 			
 			void load();
 			
-			void report(Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
+			void report(const Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
 			Tree::Fragment fragment;
 			Tree::Scope *scope;
@@ -60,7 +60,7 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
 			void process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail);
-
+			
 			template<typename F> void typecheck(Tree::Node *&result, F func)
 			{
 				if(result->single())
@@ -91,8 +91,13 @@ namespace Mirb
 			Tree::Node *parse_hash();
 			Tree::StringNode *parse_string(Value::Type type);
 			Tree::Node *parse_power();
+			Tree::Node *parse_splat_expression();
+			void process_lhs(Tree::Node *&lhs, const Range &range);
+			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
+			Tree::Node *parse_multiple_expressions(bool allow_multiples);
+			Tree::Node *parse_assignment(bool allow_multiples);
 			Tree::Node *build_assignment(Tree::Node *left, bool allow_multiples);
-			Tree::Node *process_assignment(Tree::Node *&input, Range *&range, bool allow_multiples);
+			Tree::Node *process_assignment(Tree::Node *input, bool allow_multiples);
 			Tree::Node *parse_array();
 			Tree::Node *parse_unary();
 			Tree::Node *parse_boolean_unary();
@@ -102,7 +107,7 @@ namespace Mirb
 			
 			Tree::Node *parse_expression(bool allow_multiples = true)
 			{
-				return parse_assignment(allow_multiples);
+				return typecheck(parse_assignment(allow_multiples));
 			}
 			
 			Tree::Node *parse_statement()
@@ -110,11 +115,11 @@ namespace Mirb
 				return parse_conditional();
 			}
 			
+			Tree::Node *parse_statements();
 			Tree::Node *parse_group();
 			
 			void parse_sep();
-			void parse_statements(Tree::NodeList &list);
-			
+
 			Tree::Scope *parse_main();
 			
 			// control flow
@@ -123,11 +128,6 @@ namespace Mirb
 			Tree::Node *parse_if();
 			Tree::Node *parse_unless();
 			Tree::Node *parse_ternary_if();
-			Tree::Node *parse_splat_expression();
-			Tree::Node *build_multiple_expressions(Tree::MultipleExpressionsNode *lhs, Tree::MultipleExpressionsNode *rhs);
-			Tree::MultipleExpressionsNode *wrap_in_multiple_expressions(Tree::Node *input, Range *range);
-			Tree::Node *parse_multiple_expressions(Range *range, bool allow_multiples = true);
-			Tree::Node *parse_assignment(bool allow_multiples);
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_case();
 			Tree::Node *parse_begin();

@@ -12,7 +12,7 @@ namespace Mirb
 			scope->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
 		
 		if(is_expression())
-			return new (fragment) Tree::ReturnNode(range, parse_expression());
+			return new (fragment) Tree::ReturnNode(range, parse_assignment(true));
 		else
 			return new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode);
 	}
@@ -27,7 +27,7 @@ namespace Mirb
 		lexer.step();
 		
 		if(is_expression())
-			return new (fragment) Tree::NextNode(range, parse_expression());
+			return new (fragment) Tree::NextNode(range, parse_assignment(true));
 		else
 			return new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode);
 	}
@@ -59,7 +59,7 @@ namespace Mirb
 		lexer.step();
 		
 		if(is_expression())
-			return new (fragment) Tree::BreakNode(range, parse_expression());
+			return new (fragment) Tree::BreakNode(range, parse_assignment(true));
 		else
 			return new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode);
 	}
@@ -158,17 +158,19 @@ namespace Mirb
 		
 		if (lexeme() == Lexeme::KW_IF || lexeme() == Lexeme::KW_UNLESS)
 		{
-			auto node = new (fragment) Tree::IfNode;
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::IfNode;
 			
-			node->inverted = lexeme() == Lexeme::KW_UNLESS;
+				node->inverted = lexeme() == Lexeme::KW_UNLESS;
 			
-			lexer.step();
+				lexer.step();
 			
-			node->middle = result;
-			node->left = parse_statement();
-			node->right = new (fragment) Tree::NilNode;
-			
-			return node;
+				node->middle = result;
+				node->left = typecheck(parse_statement());
+				node->right = new (fragment) Tree::NilNode;
+				
+				return node;
+			});
 		}
 		
 		return result;

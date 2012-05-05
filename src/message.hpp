@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "generic/range.hpp"
 #include <Prelude/List.hpp>
 
 namespace Mirb
@@ -18,12 +19,12 @@ namespace Mirb
 				SEVERITIES
 			};
 
-			Message(Parser &parser, Range &range, Severity severity);
+			Message(Parser &parser, const Range &range, Severity severity);
 
 			static std::string severity_names[SEVERITIES];
 
 			Parser &parser;
-			Range &range;
+			Range range;
 			Severity severity;
 			ListEntry<Message> entry;
 
@@ -39,7 +40,7 @@ namespace Mirb
 		private:
 			std::string text;
 		public:
-			StringMessage(Parser &parser, Range &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
+			StringMessage(Parser &parser, const Range &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
 
 			std::string string()
 			{

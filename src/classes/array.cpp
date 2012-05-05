@@ -86,7 +86,27 @@ namespace Mirb
 
 		return self;
 	}
+	
+	value_t Array::get(value_t obj, size_t index)
+	{
+		auto self = cast<Array>(obj);
 
+		if(index < self->vector.size())
+			return self->vector[index];
+		else
+			return value_nil;
+	}
+	
+	value_t Array::set(value_t obj, size_t index, value_t value)
+	{
+		auto self = cast<Array>(obj);
+
+		self->vector.expand_to(index + 1, value_nil);
+		self->vector[index] = value;
+
+		return value;
+	}
+	
 	void Array::initialize()
 	{
 		context->array_class = define_class("Array", context->object_class);
@@ -100,6 +120,8 @@ namespace Mirb
 		method<Arg::Self>(context->array_class, "length", &length);
 		method<Arg::Self>(context->array_class, "inspect", &inspect);
 		method<Arg::Self, Arg::Block>(context->array_class, "each", &each);
+		method<Arg::Self, Arg::UInt>(context->array_class, "[]", &get);
+		method<Arg::Self, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
 	}
 };
 

@@ -2,6 +2,7 @@
 #include "runtime.hpp"
 #include "codegen/bytecode.hpp"
 #include "codegen/opcodes.hpp"
+#include "classes/fixnum.hpp"
 
 #ifdef MIRB_DEBUG_BRIDGE
 	#include "codegen/printer.hpp"
@@ -29,6 +30,7 @@ namespace Mirb
 		const Info Block::info = {0, 0, false};
 		const Info Count::info = {0, 0, true};
 		const Info Values::info = {0, 0, false};
+		const Info UInt::info = {1, 1, false};
 		const Info Value::info = {1, 1, false};
 		const Info Default::info = {0, 1, false};
 
@@ -50,6 +52,20 @@ namespace Mirb
 		Values::type Values::apply(Frame &frame, State &)
 		{
 			return frame.argv;
+		}
+		
+		UInt::type UInt::apply(Frame &frame, State &state)
+		{
+			value_t result = frame.argv[state.index++];
+
+			if(Mirb::Value::is_fixnum(result))
+				return Fixnum::to_size_t(result);
+			else
+			{
+				state.error = true;
+				type_error(result, context->fixnum_class);
+				return -1;
+			}
 		}
 
 		Value::type Value::apply(Frame &frame, State &state)
