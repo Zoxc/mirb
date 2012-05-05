@@ -132,6 +132,8 @@ namespace Mirb
 		jump_table[(size_t)';'] = &Lexer::single<Lexeme::SEMICOLON>;
 		jump_table[(size_t)','] = &Lexer::single<Lexeme::COMMA>;
 		jump_table[(size_t)'?'] = &Lexer::single<Lexeme::QUESTION>;
+
+		jump_table[(size_t)'?'] = &Lexer::character;
 		
 		jump_table[(size_t)':'] = &Lexer::colon;
 		

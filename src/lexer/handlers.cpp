@@ -4,11 +4,16 @@
 
 namespace Mirb
 {
+	bool Lexer::is_white()
+	{
+		return (input.in(1, 9) || input.in(11, 12) || input.in(14, 32));
+	}
+	
 	void Lexer::white()
 	{
 		input++;
 		
-		while(input.in(1, 9) || input.in(11, 12) || input.in(14, 32))
+		while(is_white())
 			input++;
 
 		restep(true);
@@ -32,6 +37,57 @@ namespace Mirb
 		restep();
 	}
 	
+	void Lexer::character()
+	{
+		input++;
+
+		if(is_white() || input == '\0' || input == ':')
+		{
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::QUESTION;
+
+			return;
+		}
+		else
+		{
+			char_t first = input++;
+			char_t *str = new (memory_pool) char_t[1];
+
+			if(is_start_ident(first) && is_ident(input))
+			{
+				input--;
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::QUESTION;
+
+				return;
+			}
+			else if(first == '\\')
+			{
+				std::string result;
+
+				if(parse_escape(result))
+				{
+					lexeme.stop = &input;
+					lexeme.str = new (memory_pool) StringData(memory_pool);
+					lexeme.type = Lexeme::STRING;
+					parser.report(lexeme.dup(memory_pool), "Expected escape string");
+
+					return;
+				}
+
+				str[0] = result[0];
+			}
+			else
+				str[0] = first;
+
+			lexeme.str = new (memory_pool) StringData(memory_pool);
+			lexeme.str->tail.data = str;
+			lexeme.str->tail.length = 1;
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::STRING;
+		}
+	}
+
 	bool Lexer::process_null(const char_t *input, bool expected)
 	{
 		bool result = (size_t)(input - input_str) >= length;

@@ -81,6 +81,8 @@ namespace Mirb
 				case Lexeme::ADD:
 				case Lexeme::SUB:
 				case Lexeme::MUL:
+				case Lexeme::QUESTION:
+				case Lexeme::COLON:
 					{
 						if(lexer.lexeme.whitespace)
 						{

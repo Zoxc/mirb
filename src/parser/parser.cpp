@@ -451,6 +451,32 @@ namespace Mirb
 			case Lexeme::CURLY_OPEN:
 				return parse_hash();
 				
+			case Lexeme::QUESTION:
+			{
+				Range range = lexer.lexeme;
+
+				lexer.step();
+
+				if(lexeme() == Lexeme::SCOPE && !lexer.lexeme.whitespace)
+				{
+					auto result = new (fragment) Tree::StringNode;
+				
+					result->result_type = Value::String;
+					
+					result->string.data = (const char_t *)":";
+					result->string.length = 1;
+					
+					lexer.step();
+
+					return result;
+				}
+				else
+				{
+					report(range, "Expected characater literal");
+					return nullptr;
+				}
+			}
+				
 			case Lexeme::SYMBOL:
 			{
 				auto result = new (fragment) Tree::SymbolNode;
@@ -471,7 +497,7 @@ namespace Mirb
 				if(lexeme() == Lexeme::STRING || lexeme() == Lexeme::STRING_START)
 				{
 					if(lexer.lexeme.whitespace)
-						report(*range, "No whitespace between ':' and the string literal is allowed symbol string literals");
+						report(*range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
 
 					return parse_string(Value::Symbol);
 				}

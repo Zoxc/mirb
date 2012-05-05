@@ -267,6 +267,7 @@ namespace Mirb
 					case Lexeme::CURLY_OPEN:
 					case Lexeme::COLON:
 					case Lexeme::SCOPE:
+					case Lexeme::QUESTION:
 						return true;
 
 					default:

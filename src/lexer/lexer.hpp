@@ -45,11 +45,13 @@ namespace Mirb
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
 
 			void eol();
+			bool is_white();
 			void white();
 			void unknown();
 			void null();
 			void newline();
 			void carrige_return();
+			void character();
 			
 			void assign_equal();
 			void colon();
