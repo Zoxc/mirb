@@ -189,7 +189,7 @@ namespace Mirb
 		parse_then_sep();
 		
 		result->middle = parse_group();
-		result->right = new (fragment) Tree::NilNode;
+		result->right = parse_if_tail();
 		
 		match(Lexeme::KW_END);
 		
