@@ -370,7 +370,7 @@ namespace Mirb
 
 		for(int i = scope->entries - 1; i >= 0; --i)
 		{
-			result += inspect_obj((*scope)[i]) = "::";
+			result += inspect_obj((*scope)[i]) + "::";
 		}
 
 		return result;
@@ -680,7 +680,7 @@ namespace Mirb
 		if(prelude_unlikely(!method))
 			return value_raise;
 
-		void *stack_memory = std::malloc(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
+		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
 		if(prelude_unlikely(!stack_memory))
 			return raise(context->exception_class);
@@ -700,8 +700,6 @@ namespace Mirb
 		value_t result = call_code(method->block, obj, name, method->scope, block, argc, &os_array[argc]);
 
 		os->~OnStackBlock<false>();
-
-		std::free(stack_memory);
 
 		return result;
 	}
