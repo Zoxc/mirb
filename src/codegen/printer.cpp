@@ -304,7 +304,7 @@ namespace Mirb
 
 					opcode += sizeof(CallOp);
 					
-					return (op->var != no_var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Super:
@@ -313,7 +313,7 @@ namespace Mirb
 
 					opcode += sizeof(SuperOp);
 					
-					return (op->var != no_var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + print_block(op->block) + ", " + var(op->argv) + ", " + raw(op->argc);
+					return (op->var != no_var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
 				case Opcode::Lookup:

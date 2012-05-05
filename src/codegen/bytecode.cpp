@@ -233,7 +233,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (Mirb::Block *)0, (size_t)0, no_var);
+			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (size_t)0, no_var);
 			location(node->range);
 		}
 		
@@ -284,7 +284,7 @@ namespace Mirb
 			
 			to_bytecode(node->right, group[0]);
 			
-			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (Mirb::Block *)0, group.size, group.use());
+			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, group.size, group.use());
 			location(node->range);
 		}
 		
@@ -435,7 +435,7 @@ namespace Mirb
 			
 			to_bytecode(node->object, obj);
 			
-			gen<CallOp>(var, obj, node->method, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
+			gen<CallOp>(var, obj, node->method, closure, argc, argv);
 			location(node->range);
 		}
 		
@@ -456,7 +456,7 @@ namespace Mirb
 				for(auto i = scope->owner->parameters.begin(); i != scope->owner->parameters.end(); ++i)
 					gen<MoveOp>(group[param++], ref(*i)); // TODO: Fix references to heap variables and check how array and block parameters should be handled
 				
-				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, group.size, group.use());
+				gen<SuperOp>(var, closure, group.size, group.use());
 				location(node->range);
 			}
 			else
@@ -466,7 +466,7 @@ namespace Mirb
 
 				var_t closure = call_args(node->arguments, scope, argc, argv, var);
 				
-				gen<SuperOp>(var, closure, node->block ? node->block->scope->final : nullptr, argc, argv);
+				gen<SuperOp>(var, closure, argc, argv);
 				location(node->range);
 			}
 		}

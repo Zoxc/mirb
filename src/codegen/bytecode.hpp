@@ -229,7 +229,7 @@ namespace Mirb
 			
 							to_bytecode(node->object, obj);
 			
-							gen<CallOp>(var, obj, node->method, no_var, nullptr, argc, group.use());
+							gen<CallOp>(var, obj, node->method, no_var, argc, group.use());
 							location(node->range);
 
 							return var;

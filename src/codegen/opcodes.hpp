@@ -329,11 +329,10 @@ namespace Mirb
 			var_t obj;
 			Symbol *method;
 			var_t block_var;
-			Mirb::Block *block;
 			size_t argc;
 			var_t argv;
 
-			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), block(block), argc(argc), argv(argv)
+			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), argc(argc), argv(argv)
 			{
 				Value::assert_valid(method);
 			}
@@ -344,11 +343,10 @@ namespace Mirb
 		{
 			var_t var;
 			var_t block_var;
-			Mirb::Block *block;
 			size_t argc;
 			var_t argv;
 			
-			SuperOp(var_t var, var_t block_var, Mirb::Block *block, size_t argc, var_t argv) : var(var), block_var(block_var), block(block), argc(argc), argv(argv) {}
+			SuperOp(var_t var, var_t block_var, size_t argc, var_t argv) : var(var), block_var(block_var), argc(argc), argv(argv) {}
 		};
 		
 		struct LookupOp:

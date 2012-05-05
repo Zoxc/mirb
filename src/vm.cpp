@@ -100,12 +100,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Call)
-#ifdef DEBUG
-			for(size_t i = 0; i < frame.code->var_words; ++i)
-				mirb_debug_assert(vars[i] != nullptr);
-#endif
-
-			value_t block = op.block ? vars[op.block_var] : value_nil;
+			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
 			value_t obj = vars[op.obj];
 			Symbol *name = op.method;
 			
@@ -178,7 +173,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Super)
-			value_t block = op.block ? vars[op.block_var] : value_nil;
+			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
 			
 			Method *method = lookup_super(frame.scope->first(), frame.name);
 
