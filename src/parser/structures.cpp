@@ -301,7 +301,13 @@ skip_name:
 				parse_sep();
 			}
 		
-			result->scope->group = parse_group();
+			VoidTrapper trapper(this);
+
+			auto node = parse_group();
+
+			trapper.release();
+				
+			result->scope->group = parse_exception_handlers(node, trapper);
 		});		
 		
 		match(Lexeme::KW_END);

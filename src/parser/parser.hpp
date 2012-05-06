@@ -199,6 +199,7 @@ namespace Mirb
 			Tree::Scope *parse_main();
 			
 			// control flow
+			bool is_jump_argument();
 			Tree::Node *parse_if_tail();
 			void parse_then_sep();
 			Tree::Node *parse_if();

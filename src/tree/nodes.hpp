@@ -323,6 +323,8 @@ namespace Mirb
 		{
 			NodeType type() { return Rescue; }
 			
+			Node *pattern;
+			Node *var;
 			Node *group;
 		};
 		

@@ -2,13 +2,28 @@
 
 namespace Mirb
 {
+	bool Parser::is_jump_argument()
+	{
+		switch(lexeme())
+		{
+			case Lexeme::KW_UNLESS:
+			case Lexeme::KW_IF:
+			case Lexeme::KW_UNTIL:
+			case Lexeme::KW_WHILE:
+				return false;
+
+			default:
+				return is_expression();
+		}
+	}
+
 	Tree::Node *Parser::parse_return()
 	{
 		auto range = capture();
 		
 		lexer.step();
 		
-		if(is_expression())
+		if(is_jump_argument())
 			return raise_void(new (fragment) Tree::ReturnNode(range, parse_assignment(true)));
 		else
 			return raise_void(new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode));
@@ -20,7 +35,7 @@ namespace Mirb
 		
 		lexer.step();
 		
-		if(is_expression())
+		if(is_jump_argument())
 			return raise_void(new (fragment) Tree::NextNode(range, parse_assignment(true)));
 		else
 			return raise_void(new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode));
@@ -41,7 +56,7 @@ namespace Mirb
 		
 		lexer.step();
 		
-		if(is_expression())
+		if(is_jump_argument())
 			return raise_void(new (fragment) Tree::BreakNode(range, parse_assignment(true)));
 		else
 			return raise_void(new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode));
@@ -66,9 +81,24 @@ namespace Mirb
 		
 		while(lexeme() == Lexeme::KW_RESCUE)
 		{
-			lexer.step();
-			
 			auto rescue = new (fragment) Tree::RescueNode;
+			
+			lexer.step();
+
+			rescue->pattern = parse_assignment(true);
+
+			if(matches(Lexeme::ASSOC))
+			{
+				Range range = lexer.lexeme;
+
+				rescue->var = parse_operator_expression(true);
+
+				lexer.lexeme.prev_set(&range);
+
+				process_lhs(rescue->var, range);
+			}
+			else
+				rescue->var = 0;
 			
 			rescue->group = parse_group();
 			

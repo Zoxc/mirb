@@ -758,7 +758,7 @@ namespace Mirb
 				 */
 				for(auto i = node->rescues.begin(); i != node->rescues.end(); ++i)
 				{
-					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler;
+					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler; // TODO: Check filters and assign variables
 
 					handler->type = RuntimeException;
 

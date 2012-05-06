@@ -385,7 +385,7 @@ namespace Mirb
 	{
 		input++;
 
-		if(!is_ident(input))
+		if(!is_ident(input) || (input == '0' && !is_ident((&input)[1])))
 		{
 			switch(input)
 			{
