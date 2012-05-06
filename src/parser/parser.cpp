@@ -215,11 +215,13 @@ namespace Mirb
 
 				auto result = parse_operator_expression(false);
 
-				if(result->type() == Tree::Node::Splat)
-					node->variadic = true;
-			
 				if(result)
+				{
+					if(result->type() == Tree::Node::Splat)
+						node->variadic = true;
+			
 					node->arguments.append(result);
+				}
 			}
 		}
 		while(matches(Lexeme::COMMA));
