@@ -139,11 +139,11 @@ namespace Mirb
 				node->inverted = false;
 			
 				node->left = result;
-				node->middle = parse_expression();
+				node->middle = parse_operator_expression();
 			
 				match(Lexeme::COLON);
 			
-				node->right = parse_expression();
+				node->right = parse_operator_expression();
 
 				return node;
 			});
@@ -166,7 +166,7 @@ namespace Mirb
 				lexer.step();
 			
 				node->middle = result;
-				node->left = typecheck(parse_statement());
+				node->left = parse_expression();
 				node->right = new (fragment) Tree::NilNode;
 				
 				return node;

@@ -188,7 +188,7 @@ namespace Mirb
 	{
 		do
 		{
-			auto node = parse_expression(false);
+			auto node = parse_operator_expression(false);
 			
 			if(node)
 				arguments.append(node);
@@ -232,7 +232,7 @@ namespace Mirb
 			do
 			{
 				auto range = capture();
-				auto key = parse_expression(false);
+				auto key = parse_operator_expression(false);
 				lexer.lexeme.prev_set(range);
 
 				if(lexeme() == Lexeme::COLON)
@@ -259,7 +259,7 @@ namespace Mirb
 					match(Lexeme::ASSOC);
 				}
 
-				auto value = parse_expression(false);
+				auto value = parse_operator_expression(false);
 				
 				if(value)
 					result->entries.append(value);
@@ -282,7 +282,7 @@ namespace Mirb
 		{
 			do
 			{
-				auto element = parse_expression(false);
+				auto element = parse_operator_expression(false);
 				
 				if(element)
 					result->entries.append(element);
@@ -1284,11 +1284,6 @@ namespace Mirb
 		}
 
 		return group;
-	}
-	
-	Tree::Node *Parser::parse_group()
-	{
-		return typecheck(parse_statements());
 	}
 	
 	bool Parser::is_sep()

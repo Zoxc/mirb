@@ -105,18 +105,27 @@ namespace Mirb
 			void parse_arguments(Tree::CountedNodeList &arguments);
 			Tree::Node *parse_boolean();
 			
-			Tree::Node *parse_expression(bool allow_multiples = true)
+			Tree::Node *parse_operator_expression(bool allow_multiples = true)
 			{
 				return typecheck(parse_assignment(allow_multiples));
 			}
 			
+			Tree::Node *parse_expression()
+			{
+				return typecheck(parse_statement());
+			}
+			
+			Tree::Node *parse_group()
+			{
+				return typecheck(parse_statements());
+			}
+
 			Tree::Node *parse_statement()
 			{
 				return parse_conditional();
 			}
 			
 			Tree::Node *parse_statements();
-			Tree::Node *parse_group();
 			
 			void parse_sep();
 

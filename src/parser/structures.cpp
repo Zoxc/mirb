@@ -160,7 +160,7 @@ namespace Mirb
 			
 			if(matches(Lexeme::ASSIGN))
 			{
-				auto node = parse_expression(false);
+				auto node = parse_operator_expression(false);
 
 				if(parameter)
 					parameter->default_value = node;
