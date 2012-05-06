@@ -1136,12 +1136,13 @@ namespace Mirb
 			auto result = new (fragment) Tree::AssignmentNode;
 			
 			lexer.step();
+			skip_lines();
 			
 			result->op = Lexeme::ASSIGN;
 			
 			result->left = left;
 			
-			result->right = parse_assignment(allow_multiples);
+			result->right = parse_high_rescue(allow_multiples);
 			
 			return result;
 		}
@@ -1159,13 +1160,14 @@ namespace Mirb
 			binary_op->op = Lexeme::assign_to_operator(lexeme());
 			
 			lexer.step();
+			skip_lines();
 			
-			binary_op->right = parse_assignment(allow_multiples);
+			binary_op->right = parse_high_rescue(allow_multiples);
 			
 			return result;
 		}
 	};
-
+	
 	Tree::Node *Parser::parse_assignment(bool allow_multiples)
 	{
 		Tree::Node *result = parse_multiple_expressions(allow_multiples);
@@ -1194,6 +1196,7 @@ namespace Mirb
 					error("Can only use regular assign with multiple expression assignment");
 
 				lexer.step();
+				skip_lines();
 
 				process_multiple_lhs(node);
 
@@ -1229,10 +1232,11 @@ namespace Mirb
 					if(lexeme() == Lexeme::ASSIGN)
 					{
 						lexer.step();
+						skip_lines();
 						
 						node->method = mutated;
 						
-						Tree::Node *argument = parse_assignment(allow_multiples);
+						Tree::Node *argument = parse_high_rescue(allow_multiples);
 
 						if(argument)
 							node->arguments.append(argument);
@@ -1265,8 +1269,9 @@ namespace Mirb
 						binary_op->op = Lexeme::assign_to_operator(lexeme());
 						
 						lexer.step();
+						skip_lines();
 						
-						binary_op->right = parse_assignment(allow_multiples);
+						binary_op->right = parse_high_rescue(allow_multiples);
 
 						if(binary_op->right->type() == Tree::Node::MultipleExpressions)
 							report(assign_range, "Can only use regular assign with multiple expression assignment");
@@ -1295,8 +1300,9 @@ namespace Mirb
 		error("Cannot assign a value to an expression.");
 		
 		lexer.step();
+		skip_lines();
 
-		parse_expression();
+		parse_assignment(allow_multiples);
 
 		return input;
 	}

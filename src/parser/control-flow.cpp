@@ -213,11 +213,69 @@ namespace Mirb
 		return result;
 	}
 	
+	Tree::Node *Parser::parse_high_rescue(bool allow_multiples)
+	{
+		Tree::Node *result = parse_assignment(allow_multiples);
+		
+		if(lexeme() == Lexeme::KW_RESCUE && result->type() != Tree::Node::MultipleExpressions)
+		{
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::HandlerNode;
+
+				node->code = result;
+				node->ensure_group = nullptr;
+
+				auto rescue = new (fragment) Tree::RescueNode;
+			
+				lexer.step();
+
+				rescue->pattern = nullptr;
+				rescue->var = nullptr;
+				rescue->group = typecheck(parse_operator_expression(true));
+			
+				node->rescues.append(rescue);
+
+				return node;
+			});
+		}
+		
+		return result;
+	}
+
+	Tree::Node *Parser::parse_low_rescue()
+	{
+		Tree::Node *result = parse_conditional();
+		
+		if(lexeme() == Lexeme::KW_RESCUE)
+		{
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::HandlerNode;
+			
+				node->code = result;
+				node->ensure_group = nullptr;
+
+				auto rescue = new (fragment) Tree::RescueNode;
+			
+				lexer.step();
+
+				rescue->pattern = nullptr;
+				rescue->var = nullptr;
+				rescue->group =  typecheck(parse_tailing_loop());
+			
+				node->rescues.append(rescue);
+
+				return node;
+			});
+		}
+		
+		return result;
+	}
+	
 	Tree::Node *Parser::parse_tailing_loop()
 	{
 		VoidTrapper trapper(this);
 
-		Tree::Node *result = parse_conditional();
+		Tree::Node *result = parse_low_rescue();
 
 		trapper.release();
 		

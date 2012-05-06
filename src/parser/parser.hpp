@@ -207,6 +207,8 @@ namespace Mirb
 			void parse_then_sep();
 			Tree::Node *parse_if();
 			Tree::Node *parse_unless();
+			Tree::Node *parse_high_rescue(bool allow_multiples);
+			Tree::Node *parse_low_rescue();
 			Tree::Node *parse_ternary_if();
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_tailing_loop();
