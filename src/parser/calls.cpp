@@ -73,7 +73,7 @@ namespace Mirb
 
 	bool Parser::has_arguments()
 	{
-		if(is_expression() || lexeme() == Lexeme::AMPERSAND)
+		if(is_jump_argument() || lexeme() == Lexeme::AMPERSAND)
 		{
 			switch(lexeme())
 			{
