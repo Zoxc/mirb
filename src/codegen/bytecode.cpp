@@ -75,6 +75,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_call,
 			&ByteCodeGenerator::convert_super,
 			&ByteCodeGenerator::convert_if,
+			&ByteCodeGenerator::convert_loop,
 			&ByteCodeGenerator::convert_group,
 			0, // Void
 			&ByteCodeGenerator::convert_return,
@@ -490,35 +491,46 @@ namespace Mirb
 			
 			gen(body);
 			
-			if(is_var(var))
-			{
-				var_t result_left = create_var();
-				var_t result_right = create_var();
-
-				to_bytecode(node->middle, result_left);
+			to_bytecode(node->middle, var);
 				
-				gen<MoveOp>(var, result_left);
-				gen_branch(label_end);
+			gen_branch(label_end);
 
-				gen(label_else);
+			gen(label_else);
 
-				to_bytecode(node->right, result_right);
-				
-				gen<MoveOp>(var, result_right);
-				gen(label_end);
-			}
+			to_bytecode(node->right, var);
+
+			gen(label_end);
+		}
+		
+		void ByteCodeGenerator::convert_loop(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::LoopNode *)basic_node;
+			
+			node->label_start = create_label();
+			node->label_body = create_label();
+			node->label_end = create_label();
+			
+			gen(node->label_start);
+			
+			var_t temp = reuse(var);
+
+			to_bytecode(node->condition, temp);
+			
+			gen(node->label_body);
+
+			if(node->inverted)
+				gen_if(node->label_end, temp);
 			else
-			{
-				to_bytecode(node->middle, no_var);
-				
-				gen_branch(label_end);
+				gen_unless(node->label_end, temp);
+			
+			to_bytecode(node->body, temp);
 
-				gen(label_else);
-
-				to_bytecode(node->right, no_var);
-
-				gen(label_end);
-			}
+			gen(body);
+			gen_branch(node->label_start);
+			gen(node->label_end);
+			
+			if(is_var(var))
+				gen<LoadNilOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_group(Tree::Node *basic_node, var_t var)
@@ -560,7 +572,7 @@ namespace Mirb
 
 				//block_emmit_label(block, label);
 			}
-			else if(in_ensure_block())
+			else if(node->in_ensure)
 			{
 				gen<UnwindReturnOp>(temp, final);
 				location(node->range);
@@ -580,8 +592,18 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 
-			gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_dst);
-			location(node->range);
+			if(node->target)
+			{
+				if(node->in_ensure)
+					gen<UnwindBreakOp>(temp, final, 0);
+				else
+					gen_branch(node->target->label_end);
+			}
+			else
+			{
+				gen<UnwindBreakOp>(temp, scope->parent->final, scope->break_dst);
+				location(node->range);
+			}
 		}
 		
 		void ByteCodeGenerator::convert_next(Tree::Node *basic_node, var_t var)
@@ -590,9 +612,10 @@ namespace Mirb
 			
 			var_t temp = reuse(var);
 
-			
-			if(in_ensure_block())
+			if(node->in_ensure)
 				gen<UnwindNextOp>(return_var);
+			else if(node->target)
+				gen_branch(node->target->label_start);
 			else
 			{
 				to_bytecode(node->value, temp);
@@ -602,10 +625,14 @@ namespace Mirb
 			}
 		}
 		
-		void ByteCodeGenerator::convert_redo(Tree::Node *, var_t)
+		void ByteCodeGenerator::convert_redo(Tree::Node *basic_node, var_t)
 		{
-			if(in_ensure_block())
-				gen_unwind_redo(body);
+			auto node = (Tree::RedoNode *)basic_node;
+
+			if(node->in_ensure)
+				gen_unwind_redo(node->target ? node->target->label_body : body);
+			else if(node->target)
+				gen_branch(node->target->label_body);
 			else
 				branch(body);
 		}
@@ -687,8 +714,6 @@ namespace Mirb
 		{
 			auto node = (Tree::HandlerNode *)basic_node;
 			
-			scope->require_exceptions = true; // duh
-			
 			/*
 			 * Allocate and setup the new exception block
 			 */
@@ -703,6 +728,8 @@ namespace Mirb
 			else
 				exception_block->ensure_label.label = 0;
 			
+			exception_block->loop = 0;
+			
 			exception_blocks.push(exception_block);
 			
 			/*
@@ -715,6 +742,8 @@ namespace Mirb
 			 * Output the regular code
 			 */
 			to_bytecode(node->code, var);
+			
+			gen<HandlerOp>(exception_block->parent);
 
 			if(!node->rescues.empty())
 			{
@@ -722,7 +751,6 @@ namespace Mirb
 				 * Skip the rescue block
 				 */
 				Label *ok_label = create_label();
-				gen<HandlerOp>(exception_block->parent);
 				gen_branch(ok_label);
 				
 				/*
@@ -731,6 +759,7 @@ namespace Mirb
 				for(auto i = node->rescues.begin(); i != node->rescues.end(); ++i)
 				{
 					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler;
+
 					handler->type = RuntimeException;
 
 					Label *handler_body = gen(create_label());
@@ -739,14 +768,18 @@ namespace Mirb
 
 					exception_block->handlers.push(handler);
 					
-					//gen<FlushOp>(); Flush
-					
 					to_bytecode(i().group, var);
 					
 					gen_branch(ok_label);
 				}
 				
 				gen(ok_label);
+			}
+			else if(node->loop)
+			{
+				exception_block->loop = new LoopHandler;
+				exception_block->loop->next_label.label = node->loop->label_start;
+				exception_block->loop->break_label.label = node->loop->label_end;
 			}
 			
 			/*
@@ -889,11 +922,17 @@ namespace Mirb
 					ExceptionBlock *block = exception_blocks[i];
 					
 					final->exception_blocks[i] = block;
-
+					
 					if(block->ensure_label.label)
 						block->ensure_label.address = block->ensure_label.label->pos;
 					else
 						block->ensure_label.address = -1;
+
+					if(block->loop)
+					{
+						block->loop->next_label.address = block->loop->next_label.label->pos;
+						block->loop->break_label.address = block->loop->break_label.label->pos;
+					}
 
 					for(auto i: block->handlers)
 					{
@@ -968,10 +1007,7 @@ namespace Mirb
 			epilog = create_label();
 
 			if(scope->break_targets)
-			{
-				scope->require_exceptions = true;
 				final->break_targets = new var_t[scope->break_targets];
-			}
 			else
 				final->break_targets = 0;
 			
@@ -1073,21 +1109,6 @@ namespace Mirb
 			return result;
 		}
 
-		bool ByteCodeGenerator::in_ensure_block()
-		{
-			ExceptionBlock *exception_block = current_exception_block;
-			
-			while(exception_block)
-			{
-				if(exception_block->ensure_label.label != 0)
-					return true;
-
-				exception_block = exception_block->parent;
-			}
-			
-			return false;
-		}
-		
 		Label *ByteCodeGenerator::create_label()
 		{
 			#ifdef MIRB_DEBUG_COMPILER

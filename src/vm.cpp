@@ -394,7 +394,7 @@ handle_exception:
 
 						set_current_exception(0);
 
-						ip =  ip_start + error->pos;
+						ip = ip_start + error->pos;
 						OpContinue; // Restart block
 					}
 					break;
@@ -441,7 +441,7 @@ handle_exception:
 						{
 							current_exception_block = block->parent;
 							set_current_exception(0);
-							ip =  ip_start + ((RuntimeExceptionHandler *)i())->rescue_label.address;
+							ip = ip_start + ((RuntimeExceptionHandler *)i())->rescue_label.address;
 							OpContinue; // Execute rescue block
 						}
 
@@ -450,13 +450,50 @@ handle_exception:
 					}
 				}
 			}
+			else if(block->loop)
+			{
+				switch(exception->get_type())
+				{
+					case Value::BreakException:
+					{
+						set_current_exception(0);
+						
+						ip = ip_start + block->loop->break_label.address;
+						OpContinue; // Exit loop
+					}
+					break;
+
+					case Value::RedoException:
+					{
+						auto error = (RedoException *)exception;
+
+						set_current_exception(0);
+
+						ip = ip_start + error->pos;
+						OpContinue; // Restart loop
+					}
+					break;
+
+					case Value::NextException:
+					{
+						set_current_exception(0);
+
+						ip = ip_start + block->loop->next_label.address;
+						OpContinue; // Try next iteration
+					}
+					break;
+
+					default:
+						break;
+				}
+			}
 
 			current_exception_block = block->parent;
 
 			if(block->ensure_label.address != (size_t)-1)
 			{
 				handling_exception = true;
-				ip =  ip_start + block->ensure_label.address;
+				ip = ip_start + block->ensure_label.address;
 				OpContinue; // Execute ensure block
 			}
 			else

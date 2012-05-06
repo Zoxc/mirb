@@ -269,6 +269,13 @@ namespace Mirb
 				return (target->inverted ? "unless " : "if ") + print_node(target->left) + "\n" + print_node(target->middle) + "\nelse\n" + print_node(target->right) + "\nend\n";
 			}
 			
+			case Tree::SimpleNode::Loop:
+			{
+				auto target = (Tree::LoopNode *)node;
+				
+				return (target->inverted ? "until " : "while ") + print_node(target->condition) + " do\n" + print_node(target->body) + "\nend\n";
+			}
+			
 			case Tree::SimpleNode::Rescue:
 			{
 				auto target = (Tree::RescueNode *)node;

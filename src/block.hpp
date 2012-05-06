@@ -26,7 +26,7 @@ namespace Mirb
 	enum ExceptionHandlerType {
 		RuntimeException,
 		ClassException,
-		FilterException,
+		FilterException
 	};
 
 	struct ExceptionHandler {
@@ -49,16 +49,26 @@ namespace Mirb
 		public RuntimeExceptionHandler
 	{
 	};
+	
+	struct LoopHandler
+	{
+		BlockLabel next_label;
+		BlockLabel break_label;
+	};
 
 	struct ExceptionBlock {
 		ExceptionBlock *parent;
 		Vector<ExceptionHandler *> handlers;
 		BlockLabel ensure_label;
+		LoopHandler *loop;
 
 		~ExceptionBlock()
 		{
 			for(auto handler: handlers)
 				delete handler;
+
+			if(loop)
+				delete loop;
 		}
 	};
 	

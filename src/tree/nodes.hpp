@@ -8,6 +8,11 @@
 namespace Mirb
 {
 	class Parser;
+
+	namespace CodeGen
+	{
+		class Label;
+	};
 	
 	namespace Tree
 	{
@@ -293,6 +298,25 @@ namespace Mirb
 			Node *middle;
 			Node *right;
 		};
+
+		struct HandlerNode;
+		
+		struct LoopNode:
+			public Node
+		{
+			NodeType type() { return Loop; }
+			
+			bool inverted;
+			
+			Node *body;
+			Node *condition;
+			HandlerNode *handler;
+			CodeGen::Label *label_start;
+			CodeGen::Label *label_body;
+			CodeGen::Label *label_end;
+
+			LoopNode() : handler(nullptr) {}
+		};
 		
 		struct RescueNode:
 			public ListNode
@@ -302,7 +326,7 @@ namespace Mirb
 			Node *group;
 		};
 		
-		typedef List<RescueNode, ListNode>  RescueList;
+		typedef List<RescueNode, ListNode> RescueList;
 		
 		struct HandlerNode:
 			public Node
@@ -312,6 +336,9 @@ namespace Mirb
 			Node *code;
 			RescueList rescues;
 			Node *ensure_group;
+			LoopNode *loop;
+
+			HandlerNode() : loop(nullptr) {}
 		};
 		
 		//TODO: Make sure no void nodes are in found in expressions.
@@ -321,8 +348,12 @@ namespace Mirb
 			NodeType type() { return Void; }
 			
 			Range *range;
+			bool in_ensure;
+			LoopNode *target;
 			
-			VoidNode(Range *range) : range(range) {}
+			ListEntry<VoidNode> void_entry;
+
+			VoidNode(Range *range) : range(range), in_ensure(false), target(nullptr) {}
 		};
 		
 		struct ReturnNode:

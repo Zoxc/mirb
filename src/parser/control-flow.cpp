@@ -8,63 +8,46 @@ namespace Mirb
 		
 		lexer.step();
 		
-		if(scope->type == Tree::Scope::Closure)
-			scope->owner->require_exceptions = true; // Make sure our parent can handle the return exception.
-		
 		if(is_expression())
-			return new (fragment) Tree::ReturnNode(range, parse_assignment(true));
+			return raise_void(new (fragment) Tree::ReturnNode(range, parse_assignment(true)));
 		else
-			return new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode);
+			return raise_void(new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode));
 	}
 
 	Tree::Node *Parser::parse_next()
 	{
 		auto range = capture();
 		
-		if(scope->type != Tree::Scope::Closure)
-			error("Next outside of block.");
-		
 		lexer.step();
 		
 		if(is_expression())
-			return new (fragment) Tree::NextNode(range, parse_assignment(true));
+			return raise_void(new (fragment) Tree::NextNode(range, parse_assignment(true)));
 		else
-			return new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode);
+			return raise_void(new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode));
 	}
 
 	Tree::Node *Parser::parse_redo()
 	{
 		auto range = capture();
 		
-		if(scope->type != Tree::Scope::Closure)
-			error("Redo outside of block.");
-		
 		lexer.step();
 		
-		return new (fragment) Tree::RedoNode(range);
+		return raise_void(new (fragment) Tree::RedoNode(range));
 	}
 
 	Tree::Node *Parser::parse_break()
 	{
 		auto range = capture();
 		
-		if(scope->type == Tree::Scope::Closure)
-		{
-			if(scope->break_id == Tree::Scope::no_break_id)
-				scope->break_id = scope->parent->break_targets++;
-		}
-		else
-			error("Break outside of block.");
-		
 		lexer.step();
 		
 		if(is_expression())
-			return new (fragment) Tree::BreakNode(range, parse_assignment(true));
+			return raise_void(new (fragment) Tree::BreakNode(range, parse_assignment(true)));
 		else
-			return new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode);
+			return raise_void(new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode));
 	}
 
-	Tree::Node *Parser::parse_exception_handlers(Tree::Node *block)
+	Tree::Node *Parser::parse_exception_handlers(Tree::Node *block, VoidTrapper &trapper)
 	{
 		switch (lexeme())
 		{
@@ -93,7 +76,12 @@ namespace Mirb
 		}
 		
 		if(matches(Lexeme::KW_ENSURE))
+		{
+			for(auto node: trapper.list)
+				node->in_ensure = true;
+
 			result->ensure_group = parse_group();
+		}
 		else
 			result->ensure_group = 0;
 		
@@ -104,7 +92,13 @@ namespace Mirb
 	{
 		lexer.step();
 		
-		auto result = parse_exception_handlers(parse_group());
+		VoidTrapper trapper(this);
+
+		auto node = parse_group();
+
+		trapper.release();
+				
+		auto result = parse_exception_handlers(node, trapper);
 		
 		match(Lexeme::KW_END);
 		
@@ -166,7 +160,7 @@ namespace Mirb
 				lexer.step();
 			
 				node->middle = result;
-				node->left = parse_expression();
+				node->left = typecheck(parse_tailing_loop());
 				node->right = new (fragment) Tree::NilNode;
 				
 				return node;
@@ -174,6 +168,93 @@ namespace Mirb
 		}
 		
 		return result;
+	}
+	
+	Tree::Node *Parser::parse_tailing_loop()
+	{
+		VoidTrapper trapper(this);
+
+		Tree::Node *result = parse_conditional();
+
+		trapper.release();
+		
+		if (lexeme() == Lexeme::KW_WHILE || lexeme() == Lexeme::KW_UNTIL)
+		{
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::LoopNode;
+			
+				node->inverted = lexeme() == Lexeme::KW_UNTIL;
+			
+				lexer.step();
+			
+				node->body = result;
+				node->condition = typecheck(parse_tailing_loop());
+				
+				return process_loop(node, trapper);
+			});
+		}
+		
+		return result;
+	}
+	
+	Tree::Node *Parser::process_loop(Tree::LoopNode *loop, VoidTrapper &trapper)
+	{
+		bool trap_exceptions = false;
+
+		for(auto node: trapper.list)
+			if(node->type() != Tree::Node::Return)
+			{
+				if(node->in_ensure)
+					trap_exceptions = true;
+
+				node->target = loop;
+			}
+			else
+				raise_void(node);
+
+		trapper.list.clear();
+
+		if(trap_exceptions)
+		{
+			auto handler = new (fragment) Tree::HandlerNode;
+		
+			handler->code = loop;
+			handler->loop = loop;
+			handler->ensure_group = 0;
+		
+			return handler;
+		}
+		else
+			return loop;
+	}
+
+	Tree::Node *Parser::parse_loop()
+	{
+		auto node = new (fragment) Tree::LoopNode;
+			
+		node->inverted = lexeme() == Lexeme::KW_UNTIL;
+		
+		lexer.step();
+		
+		node->condition = typecheck(parse_expression());
+				
+		switch (lexeme())
+		{
+			case Lexeme::KW_DO:
+				lexer.step();
+				break;
+
+			default:
+				parse_sep();
+		}
+
+		VoidTrapper trapper(this);
+			
+		node->body = parse_group();
+		
+		match(Lexeme::KW_END);
+		
+		return process_loop(node, trapper);
 	}
 
 	Tree::Node *Parser::parse_unless()

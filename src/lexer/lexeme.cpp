@@ -109,6 +109,8 @@ namespace Mirb
 		"else",
 		"elsif",
 		"then",
+		"while",
+		"until",
 		"when",
 		"case",
 		"begin",

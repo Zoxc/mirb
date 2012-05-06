@@ -68,6 +68,7 @@ namespace Mirb
 				void convert_call(Tree::Node *basic_node, var_t var);
 				void convert_super(Tree::Node *basic_node, var_t var);
 				void convert_if(Tree::Node *basic_node, var_t var);
+				void convert_loop(Tree::Node *basic_node, var_t var);
 				void convert_group(Tree::Node *basic_node, var_t var);
 				void convert_return(Tree::Node *basic_node, var_t var);
 				void convert_break(Tree::Node *basic_node, var_t var);
@@ -122,8 +123,6 @@ namespace Mirb
 				#endif
 				
 				size_t loc;
-				
-				bool in_ensure_block();
 				
 				Mirb::Block *compile(Tree::Scope *scope);
 				Mirb::Block *defer(Tree::Scope *scope);

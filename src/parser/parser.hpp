@@ -23,6 +23,53 @@ namespace Mirb
 
 			MemoryPool memory_pool;
 			
+			typedef List<Tree::VoidNode, Tree::VoidNode, &Tree::VoidNode::void_entry> VoidList;
+
+			VoidList *void_list;
+
+			class VoidTrapper
+			{
+				private:
+					Parser *parser;
+					VoidList *prev;
+				public:
+					VoidList list;
+
+					VoidTrapper(Parser *parser) : parser(parser), prev(parser->void_list)
+					{
+						parser->void_list = &list;
+					}
+				
+					void release()
+					{
+						if(prev)
+						{
+							parser->void_list = prev;
+							prev = nullptr;
+						}
+					}
+				
+					void raise()
+					{
+						for(auto node: list)
+							parser->raise_void(node);
+
+						list.clear();
+					}
+
+					~VoidTrapper()
+					{
+						release();
+						raise();
+					}
+			};
+
+			Tree::VoidNode *raise_void(Tree::VoidNode *node)
+			{
+				void_list->append(node);
+				return node;
+			}
+			
 			void load();
 			
 			void report(const Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
@@ -45,8 +92,28 @@ namespace Mirb
 		
 				scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
 				
+				VoidTrapper trapper(this);
+
 				func();
 				
+				if(type != Tree::Scope::Closure)
+				{
+					for(auto node: trapper.list)
+						if(node->type() != Tree::Node::Return)
+							report(*node->range, Tree::SimpleNode::names[node->type()] + " outside of block.");
+				}
+				else
+				{
+					for(auto node: trapper.list)
+						if(node->type() == Tree::Node::Break)
+						{
+							scope->break_id = scope->parent->break_targets++;
+							break;
+						}
+				}
+
+				trapper.list.clear();
+
 				scope = current_scope;
 				fragment = current_fragment;
 			}
@@ -112,7 +179,7 @@ namespace Mirb
 			
 			Tree::Node *parse_expression()
 			{
-				return typecheck(parse_statement());
+				return typecheck(parse_boolean());
 			}
 			
 			Tree::Node *parse_group()
@@ -122,7 +189,7 @@ namespace Mirb
 
 			Tree::Node *parse_statement()
 			{
-				return parse_conditional();
+				return parse_tailing_loop();
 			}
 			
 			Tree::Node *parse_statements();
@@ -138,9 +205,12 @@ namespace Mirb
 			Tree::Node *parse_unless();
 			Tree::Node *parse_ternary_if();
 			Tree::Node *parse_conditional();
+			Tree::Node *parse_tailing_loop();
+			Tree::Node *parse_loop();
+			Tree::Node *process_loop(Tree::LoopNode *loop, VoidTrapper &trapper);
 			Tree::Node *parse_case();
 			Tree::Node *parse_begin();
-			Tree::Node *parse_exception_handlers(Tree::Node *block);
+			Tree::Node *parse_exception_handlers(Tree::Node *block, VoidTrapper &trapper);
 			Tree::Node *parse_return();
 			Tree::Node *parse_break();
 			Tree::Node *parse_next();
@@ -271,6 +341,8 @@ namespace Mirb
 					case Lexeme::KW_SUPER:
 					case Lexeme::KW_REDO:
 					case Lexeme::KW_NEXT:
+					case Lexeme::KW_WHILE:
+					case Lexeme::KW_UNTIL:
 					case Lexeme::PARENT_OPEN:
 					case Lexeme::SQUARE_OPEN:
 					case Lexeme::CURLY_OPEN:

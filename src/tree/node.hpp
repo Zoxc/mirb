@@ -39,6 +39,7 @@ namespace Mirb
 				Call,
 				Super,
 				If,
+				Loop,
 				Group,
 				Void,
 				Return,
