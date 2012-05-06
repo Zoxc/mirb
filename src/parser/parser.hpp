@@ -21,13 +21,13 @@ namespace Mirb
 			List<Message> messages;
 			Document &document;
 
-			void add_message(Message *message);
+			void add_message(Message *message, const Range &range);
 
 			MemoryPool memory_pool;
 			
 			typedef List<Tree::VoidNode, Tree::VoidNode, &Tree::VoidNode::void_entry> VoidList;
 
-			bool close_pair(const std::string &name, const Range &range, Lexeme::Type lexeme);
+			bool close_pair(const std::string &name, const Range &range, Lexeme::Type lexeme, bool skip = true);
 
 			VoidList *void_list;
 

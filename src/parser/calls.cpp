@@ -63,7 +63,7 @@ namespace Mirb
 			result->scope->group = parse_group();
 		});
 		
-		match(curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
+		close_pair("block", *result->scope->range, curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
 
 		if(!allowed)
 			report(*result->scope->range, "Unexpected block after block argument");
@@ -123,6 +123,8 @@ namespace Mirb
 			if(parenthesis)
 				*parenthesis = true;
 			
+			Range range = lexer.lexeme;
+
 			lexer.step();
 
 			if(lexeme() != Lexeme::PARENT_CLOSE)
@@ -130,7 +132,7 @@ namespace Mirb
 			
 			skip_lines();
 
-			match(Lexeme::PARENT_CLOSE);
+			close_pair("call arguments", range, Lexeme::PARENT_CLOSE);
 		}
 		else
 		{
@@ -318,8 +320,8 @@ namespace Mirb
 
 					result->block = nullptr;
 
-					match(Lexeme::SQUARE_CLOSE);
-					
+					close_pair("square bracket arguments", *range, Lexeme::SQUARE_CLOSE);
+
 					lexer.lexeme.prev_set(range);
 
 					return result;

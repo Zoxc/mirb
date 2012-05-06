@@ -20,6 +20,9 @@ namespace Mirb
 	
 	void Message::print()
 	{
+		CharArray line_prefix = (const char_t *)(severity == MESSAGE_NOTE ? "  " : "");
+
+		std::cerr << line_prefix.get_string();
 		switch(severity)
 		{
 			case MESSAGE_ERROR:
@@ -36,8 +39,8 @@ namespace Mirb
 
 		Platform::color<Platform::Bold>(": " + string() + "\n");
 
-		CharArray prefix = basename(parser.document.name) + "[" + CharArray::uint(range.line + 1) + "]: ";
-
+		CharArray prefix = line_prefix + basename(parser.document.name) + "[" + CharArray::uint(range.line + 1) + "]: ";
+		
 		Platform::color<Platform::Bold>(prefix);
 
 		std::cerr << range.get_line() << "\n";

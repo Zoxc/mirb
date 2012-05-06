@@ -130,6 +130,8 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_begin()
 	{
+		Range range = lexer.lexeme;
+
 		lexer.step();
 		
 		VoidTrapper trapper(this);
@@ -140,7 +142,7 @@ namespace Mirb
 				
 		auto result = parse_exception_handlers(node, trapper);
 		
-		match(Lexeme::KW_END);
+		close_pair("begin", range, Lexeme::KW_END);
 		
 		return result;
 	}
@@ -164,6 +166,8 @@ namespace Mirb
 		
 		if(lexeme() == Lexeme::QUESTION)
 		{
+			Range range = lexer.lexeme;
+
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				lexer.step();
 			
@@ -174,8 +178,8 @@ namespace Mirb
 				node->left = result;
 				node->middle = parse_operator_expression();
 			
-				match(Lexeme::COLON);
-			
+				close_pair("ternary if", range, Lexeme::COLON);
+		
 				node->right = parse_operator_expression();
 
 				return node;
@@ -270,7 +274,9 @@ namespace Mirb
 	Tree::Node *Parser::parse_loop()
 	{
 		auto node = new (fragment) Tree::LoopNode;
-			
+
+		Range range = lexer.lexeme;
+		
 		node->inverted = lexeme() == Lexeme::KW_UNTIL;
 		
 		lexer.step();
@@ -291,13 +297,15 @@ namespace Mirb
 			
 		node->body = parse_group();
 		
-		match(Lexeme::KW_END);
+		close_pair(node->inverted ? "until loop" : "while loop", range, Lexeme::KW_END);
 		
 		return process_loop(node, trapper);
 	}
 
 	Tree::Node *Parser::parse_unless()
 	{
+		Range range = lexer.lexeme;
+		
 		lexer.step();
 
 		auto result = new (fragment) Tree::IfNode;
@@ -311,7 +319,7 @@ namespace Mirb
 		result->middle = parse_group();
 		result->right = parse_if_tail();
 		
-		match(Lexeme::KW_END);
+		close_pair("unless", range, Lexeme::KW_END);
 		
 		return result;
 	}
@@ -350,6 +358,8 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_if()
 	{
+		Range range = lexer.lexeme;
+		
 		lexer.step();
 		
 		auto result = new (fragment) Tree::IfNode;
@@ -363,13 +373,15 @@ namespace Mirb
 		result->middle = parse_group();
 		result->right = parse_if_tail();
 		
-		match(Lexeme::KW_END);
+		close_pair("if", range, Lexeme::KW_END);
 		
 		return result;
 	}
 
 	Tree::Node *Parser::parse_case()
 	{
+		Range range = lexer.lexeme;
+		
 		lexer.step();
 
 		auto result = new (fragment) Tree::CaseNode;
@@ -411,9 +423,9 @@ namespace Mirb
 			result->else_clause = nullptr;
 
 		skip_seps();
-
-		match(Lexeme::KW_END);
-
+		
+		close_pair("case", range, Lexeme::KW_END);
+		
 		return result;
 	}
 };

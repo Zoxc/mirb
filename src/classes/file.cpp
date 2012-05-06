@@ -77,12 +77,9 @@ namespace Mirb
 
 		while(i-- > 0)
 			if(const_cast<const CharArray &>(result)[i] == '/')
-			{
-				++i;
 				break;
-			}
-
-		return result.copy(i, result.size());
+		
+		return result.copy(++i, result.size());
 	}
 
 	value_t dirname(String *path)

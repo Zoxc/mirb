@@ -32,7 +32,7 @@ namespace Mirb
 	
 	void Parser::report(const Range &range, std::string text, Message::Severity severity)
 	{
-		add_message(new (memory_pool) StringMessage(*this, range, severity, text));
+		add_message(new (memory_pool) StringMessage(*this, range, severity, text), range);
 	}
 
 	bool Parser::is_constant(Symbol *symbol)
@@ -63,13 +63,13 @@ namespace Mirb
 			lexer.step();
 	}
 
-	void Parser::add_message(Message *message)
+	void Parser::add_message(Message *message, const Range &range)
 	{
 		auto i = messages.mutable_iterator();
 		
 		while(i)
 		{
-			if(i().range.start > message->range.start)
+			if(i().range.start > range.start)
 				break;
 				
 			++i;
@@ -78,11 +78,13 @@ namespace Mirb
 		i.insert(message);
 	}
 
-	bool Parser::close_pair(const std::string &name, const Range &range, Lexeme::Type what)
+	bool Parser::close_pair(const std::string &name, const Range &range, Lexeme::Type what, bool skip)
 	{
 		if(lexeme() == what)
 		{
-			lexer.step();
+			if(skip)
+				lexer.step();
+
 			return true;
 		}
 		else
@@ -91,7 +93,7 @@ namespace Mirb
 			
 			message->note = new (memory_pool) StringMessage(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected " + Lexeme::describe_type(what) + " here, but found " + lexer.lexeme.describe());
 			
-			add_message(message);
+			add_message(message, lexer.lexeme);
 
 			return false;
 		}
@@ -289,6 +291,8 @@ namespace Mirb
 	Tree::Node *Parser::parse_hash()
 	{
 		auto result = new (fragment) Tree::HashNode;
+
+		Range start = lexer.lexeme;
 		
 		lexer.step();
 		
@@ -336,9 +340,10 @@ namespace Mirb
 			while(matches(Lexeme::COMMA));
 		}
 
-		skip_lines();		
-		match(Lexeme::CURLY_CLOSE);
-		
+		skip_lines();
+
+		close_pair("hash literal", start, Lexeme::CURLY_CLOSE);
+
 		return result;
 	}
 
@@ -346,8 +351,10 @@ namespace Mirb
 	{
 		auto result = new (fragment) Tree::ArrayNode;
 		
-		lexer.step();
+		Range range = lexer.lexeme;
 		
+		lexer.step();
+
 		if(lexeme() != Lexeme::SQUARE_CLOSE)
 		{
 			do
@@ -363,8 +370,9 @@ namespace Mirb
 		}
 
 		skip_lines();		
-		match(Lexeme::SQUARE_CLOSE);
-		
+
+		close_pair("array literal", range, Lexeme::SQUARE_CLOSE);
+
 		return result;
 	}
 
@@ -404,6 +412,8 @@ namespace Mirb
 		else
 		{
 			auto result = new (fragment) Tree::InterpolatedNode;
+
+			Range range = lexer.lexeme;
 				
 			result->result_type = type;
 
@@ -420,8 +430,8 @@ namespace Mirb
 				result->pairs.append(pair);
 			}
 			while(lexeme() == Lexeme::STRING_CONTINUE);
-				
-			if(require(Lexeme::STRING_END))
+			
+			if(close_pair("string interpolation", range, Lexeme::STRING_END, false))
 			{
 				process_string_entries(result, result->string);
 
@@ -751,12 +761,14 @@ namespace Mirb
 
 			case Lexeme::PARENT_OPEN:
 			{
+				Range range = lexer.lexeme;
+
 				lexer.step();
 
 				Tree::Node *result = parse_group();
 
-				match(Lexeme::PARENT_CLOSE);
-					
+				close_pair("parentheses", range, Lexeme::PARENT_CLOSE);
+				
 				return result;
 			}
 

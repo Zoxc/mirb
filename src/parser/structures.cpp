@@ -84,8 +84,8 @@ namespace Mirb
 			result->scope->group = parse_group();
 		});		
 		
-		match(Lexeme::KW_END);
-
+		close_pair("module", *range, Lexeme::KW_END);
+		
 		return result;
 	}
 
@@ -286,12 +286,14 @@ skip_name:
 			result->scope = scope;
 			scope->owner = scope;
 			scope->range = result->range;
+
+			Range parent_open = lexer.lexeme;
 			
 			if(matches(Lexeme::PARENT_OPEN))
 			{
 				parse_parameters();
 			
-				match(Lexeme::PARENT_CLOSE);
+				close_pair("method parameters", parent_open, Lexeme::PARENT_CLOSE);
 			}
 			else
 			{
@@ -310,7 +312,7 @@ skip_name:
 			result->scope->group = parse_exception_handlers(node, trapper);
 		});		
 		
-		match(Lexeme::KW_END);
+		close_pair("method", *range, Lexeme::KW_END);
 		
 		return result;
 	}
