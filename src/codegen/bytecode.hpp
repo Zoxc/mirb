@@ -68,6 +68,7 @@ namespace Mirb
 				void convert_call(Tree::Node *basic_node, var_t var);
 				void convert_super(Tree::Node *basic_node, var_t var);
 				void convert_if(Tree::Node *basic_node, var_t var);
+				void convert_case(Tree::Node *basic_node, var_t var);
 				void convert_loop(Tree::Node *basic_node, var_t var);
 				void convert_group(Tree::Node *basic_node, var_t var);
 				void convert_return(Tree::Node *basic_node, var_t var);
@@ -132,10 +133,10 @@ namespace Mirb
 					(this->*jump_table[node->type()])(node, var);
 				}
 				
-				var_t reuse(var_t)
+				var_t reuse(var_t var)
 				{
 					// TODO: Make sure no code stores results in the returned variable
-					return create_var();
+					return var == no_var ? create_var() : var;
 				}
 				
 				var_t ref(Tree::Variable *var)

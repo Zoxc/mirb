@@ -66,10 +66,15 @@ namespace Mirb
 	{
 		return wrap(node, this->node(node, indent));
 	}
-
+	
 	std::string Printer::print_node(Tree::MultipleExpressionNode *node)
 	{
 		return wrap(node->expression, this->node(node->expression, 0));
+	}
+	
+	std::string Printer::print_node(Tree::CaseEntry *node)
+	{
+		return "(when " + wrap(node->pattern, this->node(node->pattern, 0)) + ": " + wrap(node->group, this->node(node->group, 0)) + ")";
 	}
 	
 	std::string Printer::node(Tree::SimpleNode *node, size_t indent)
@@ -267,6 +272,13 @@ namespace Mirb
 				auto target = (Tree::IfNode *)node;
 				
 				return (target->inverted ? "unless " : "if ") + print_node(target->left) + "\n" + print_node(target->middle) + "\nelse\n" + print_node(target->right) + "\nend\n";
+			}
+			
+			case Tree::SimpleNode::Case:
+			{
+				auto target = (Tree::CaseNode *)node;
+				
+				return "case " + print_node(target->value) + "\n" + join(target->clauses, ", ") + "\nelse\n" + print_node(target->else_clause) + "\nend\n";
 			}
 			
 			case Tree::SimpleNode::Loop:

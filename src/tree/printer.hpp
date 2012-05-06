@@ -9,6 +9,7 @@ namespace Mirb
 	namespace Tree
 	{
 		struct MultipleExpressionNode;
+		struct CaseEntry;
 	};
 	
 	class Printer
@@ -20,6 +21,7 @@ namespace Mirb
 			template<class T> std::string join(T &list, std::string pre, std::string post);
 			std::string print_node(Tree::SimpleNode *node, size_t indent);
 			std::string print_node(Tree::MultipleExpressionNode *node);
+			std::string print_node(Tree::CaseEntry *node);
 			std::string print_symbol(Symbol *symbol);
 			virtual std::string get_indent(size_t indent);
 		public:

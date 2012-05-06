@@ -310,6 +310,25 @@ namespace Mirb
 			Node *middle;
 			Node *right;
 		};
+		
+		struct CaseEntry
+		{
+			ListEntry<CaseEntry> entry;
+			Range range;
+			Node *pattern;
+			Node *group;
+		};
+		
+		struct CaseNode:
+			public Node
+		{
+			NodeType type() { return Case; }
+			
+			Node *value;
+
+			List<CaseEntry> clauses;
+			Node *else_clause;
+		};
 
 		struct HandlerNode;
 		

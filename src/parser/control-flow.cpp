@@ -372,37 +372,46 @@ namespace Mirb
 	{
 		lexer.step();
 
-		Tree::IfNode *result = 0;
-		Tree::IfNode *first = 0;
-		
+		auto result = new (fragment) Tree::CaseNode;
+
+		if(!(lexeme() == Lexeme::KW_WHEN || lexeme() == Lexeme::KW_END || lexeme() == Lexeme::KW_ELSE || is_sep()))
+			result->value = parse_expression();
+		else
+			result->value = nullptr;
+
 		do
 		{
+			skip_seps();
+
+			auto clause = new (fragment) Tree::CaseEntry;
+
+			clause->range = lexer.lexeme;
+
 			match(Lexeme::KW_WHEN);
-			lexer.step();
 			
-			auto node = new (fragment) Tree::IfNode;
+			clause->pattern = parse_assignment(true);
 			
-			first = first ? first : node;
-			
-			node->inverted = false;
-			node->left = parse_expression();
-			
+			lexer.lexeme.prev_set(&clause->range);
+
 			parse_then_sep();
 			
-			node->middle = parse_group();
-			node->right = result;
-			
-			result = node;
+			clause->group = parse_group();
+
+			result->clauses.append(clause);
 		}
 		while(lexeme() == Lexeme::KW_WHEN);
-		
+
+		skip_seps();
+
 		if(matches(Lexeme::KW_ELSE))
 		{
-			first->right = parse_group();
+			result->else_clause = parse_group();
 		}
 		else
-			first->right = new (fragment) Tree::NilNode;
-		
+			result->else_clause = nullptr;
+
+		skip_seps();
+
 		match(Lexeme::KW_END);
 
 		return result;

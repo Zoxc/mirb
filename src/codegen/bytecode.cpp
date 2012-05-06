@@ -75,6 +75,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_call,
 			&ByteCodeGenerator::convert_super,
 			&ByteCodeGenerator::convert_if,
+			&ByteCodeGenerator::convert_case,
 			&ByteCodeGenerator::convert_loop,
 			&ByteCodeGenerator::convert_group,
 			0, // Void
@@ -506,6 +507,80 @@ namespace Mirb
 			gen(label_else);
 
 			to_bytecode(node->right, var);
+
+			gen(label_end);
+		}
+		
+		void ByteCodeGenerator::convert_case(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::CaseNode *)basic_node;
+			
+			var_t temp = reuse(var);
+			var_t test = create_var();
+
+			Label *label_end = create_label();
+			
+			if(node->value)
+			{
+				to_bytecode(node->value, temp);
+
+				for(auto clause: node->clauses)
+				{
+					Label *skip = create_label();
+
+					if(clause->pattern->type() == Tree::Node::MultipleExpressions)
+					{
+						Label *run = create_label();
+
+						auto multi = static_cast<Tree::MultipleExpressionsNode *>(clause->pattern);
+						
+						for(auto expr: multi->expressions) // TODO: Handle splat expressions
+						{
+							to_bytecode(expr->expression, test);
+			
+							gen<CallOp>(test, temp, Symbol::get("==="), no_var, 1, test);
+							location(&clause->range);
+							gen_if(run, test);
+						}
+						
+						gen_branch(skip);
+						gen(run);
+					}
+					else
+					{
+						to_bytecode(clause->pattern, test);
+			
+						gen<CallOp>(test, temp, Symbol::get("==="), no_var, 1, test);
+						location(&clause->range);
+						gen_unless(skip, test);
+					}
+
+					to_bytecode(clause->group, temp);
+					gen_branch(label_end);
+
+					gen(skip);
+				}
+			}
+			else
+			{
+				for(auto clause: node->clauses)
+				{
+					Label *skip = create_label();
+
+					to_bytecode(clause->pattern, test);
+					gen_unless(skip, test);
+
+					to_bytecode(clause->group, temp);
+					gen_branch(label_end);
+
+					gen(skip);
+				}
+			}
+
+			if(node->else_clause)
+				to_bytecode(node->else_clause, temp);
+			else if(var != no_var)
+				gen<LoadNilOp>(var);
 
 			gen(label_end);
 		}
