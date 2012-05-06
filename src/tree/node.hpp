@@ -32,6 +32,7 @@ namespace Mirb
 				True,
 				False,
 				Symbol,
+				NodeRange,
 				Array,
 				Hash,
 				Block,

@@ -159,10 +159,10 @@ namespace Mirb
 				parse_sep();
 		}
 	}
-
+	
 	Tree::Node *Parser::parse_ternary_if()
 	{
-		Tree::Node *result = parse_precedence_operator();
+		Tree::Node *result = parse_range();
 		
 		if(lexeme() == Lexeme::QUESTION)
 		{

@@ -68,6 +68,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_true,
 			&ByteCodeGenerator::convert_false,
 			&ByteCodeGenerator::convert_symbol,
+			&ByteCodeGenerator::convert_range,
 			&ByteCodeGenerator::convert_array,
 			&ByteCodeGenerator::convert_hash,
 			0, // Block
@@ -374,6 +375,13 @@ namespace Mirb
 
 			if(is_var(var))
 				gen<LoadSymbolOp>(var,  node->symbol);
+		}
+		
+		void ByteCodeGenerator::convert_range(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::RangeNode *)basic_node;
+			
+			mirb_runtime_abort("Unimplemented");
 		}
 		
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, var_t var)

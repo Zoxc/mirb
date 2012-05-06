@@ -939,6 +939,32 @@ namespace Mirb
 		return nullptr;
 	}
 	
+	Tree::Node *Parser::parse_range()
+	{
+		Tree::Node *result = parse_precedence_operator();
+		
+		if(lexeme() == Lexeme::RANGE_EXCL || lexeme() == Lexeme::RANGE_INCL)
+		{
+			Range range = lexer.lexeme;
+
+			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
+				auto node = new (fragment) Tree::RangeNode;
+
+				node->inclusive = lexeme() == Lexeme::RANGE_INCL;
+			
+				lexer.step();
+				skip_lines();
+			
+				node->left = result;
+				node->right = parse_operator_expression();
+			
+				return node;
+			});
+		}
+		
+		return result;
+	}
+	
 	Tree::Node *Parser::parse_splat_expression()
 	{
 		if(matches(Lexeme::MUL))

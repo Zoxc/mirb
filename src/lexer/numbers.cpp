@@ -101,8 +101,27 @@ namespace Mirb
 		}
 		else
 		{
-			lexeme.stop = &input;
-			lexeme.type = Lexeme::DOT;
+			if(input == '.')
+			{
+				input++;
+
+				if(input == '.')
+				{
+					input++;
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::RANGE_EXCL;
+				}
+				else
+				{
+					lexeme.stop = &input;
+					lexeme.type = Lexeme::RANGE_INCL;
+				}
+			}
+			else
+			{
+				lexeme.stop = &input;
+				lexeme.type = Lexeme::DOT;
+			}
 		}
 	}
 

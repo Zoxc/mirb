@@ -230,6 +230,16 @@ namespace Mirb
 			Mirb::Symbol *symbol;
 		};
 		
+		struct RangeNode:
+			public Node
+		{
+			NodeType type() { return NodeRange; }
+
+			bool inclusive;
+			Node *left;
+			Node *right;
+		};
+		
 		struct ArrayNode:
 			public Node
 		{

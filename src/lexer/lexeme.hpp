@@ -110,6 +110,8 @@ namespace Mirb
 				ASSIGN,
 				QUESTION,
 				DOT,
+				RANGE_INCL,
+				RANGE_EXCL,
 				COMMA,
 				COLON,
 				SCOPE,

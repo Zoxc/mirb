@@ -63,6 +63,7 @@ namespace Mirb
 				void convert_true(Tree::Node *basic_node, var_t var);
 				void convert_false(Tree::Node *basic_node, var_t var);
 				void convert_symbol(Tree::Node *basic_node, var_t var);
+				void convert_range(Tree::Node *basic_node, var_t var);
 				void convert_array(Tree::Node *basic_node, var_t var);
 				void convert_hash(Tree::Node *basic_node, var_t var);
 				void convert_call(Tree::Node *basic_node, var_t var);

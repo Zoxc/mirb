@@ -22,6 +22,7 @@ namespace Mirb
 		"True",
 		"False",
 		"Symbol",
+		"Range",
 		"Array",
 		"Hash",
 		"Block",

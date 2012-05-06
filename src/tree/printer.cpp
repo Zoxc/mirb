@@ -217,6 +217,13 @@ namespace Mirb
 				return result;
 			}
 			
+			case Tree::SimpleNode::NodeRange:
+			{
+				auto target = (Tree::RangeNode *)node;
+				
+				return print_node(target->left) + (target->inclusive ? ".." : "...") + print_node(target->right);
+			}
+			
 			case Tree::SimpleNode::Array:
 			{
 				auto target = (Tree::ArrayNode *)node;
