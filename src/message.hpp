@@ -16,6 +16,7 @@ namespace Mirb
 				MESSAGE_HINT,
 				MESSAGE_WARNING,
 				MESSAGE_ERROR,
+				MESSAGE_NOTE,
 				SEVERITIES
 			};
 
@@ -27,6 +28,7 @@ namespace Mirb
 			Range range;
 			Severity severity;
 			ListEntry<Message> entry;
+			Message *note;
 
 			virtual std::string string() = 0;
 			

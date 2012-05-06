@@ -12,6 +12,10 @@ namespace Mirb
 					std::cerr << ("\033[1;31m" + string + "\033[0m").get_string();
 					break;
 
+				case Blue:
+					std::cerr << ("\033[1;34m" + string + "\033[0m").get_string();
+					break;
+
 				case Green:
 					std::cerr << ("\033[1;32m" + string + "\033[0m").get_string();
 					break;

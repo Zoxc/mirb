@@ -12,6 +12,8 @@ namespace Mirb
 		CharArray join();
 	};
 
+	CharArray basename(CharArray path);
+
 	class File:
 		public IO
 	{

@@ -26,6 +26,14 @@ namespace Mirb
 					flags = FOREGROUND_RED;
 					break;
 					
+				case Purple:
+					flags = FOREGROUND_RED | FOREGROUND_BLUE;
+					break;
+					
+				case Blue:
+					flags = FOREGROUND_BLUE;
+					break;
+					
 				case Green:
 					flags = FOREGROUND_GREEN;
 					break;

@@ -32,7 +32,7 @@ namespace Mirb
 	
 	void Parser::report(const Range &range, std::string text, Message::Severity severity)
 	{
-		new (memory_pool) StringMessage(*this, range, severity, text);
+		add_message(new (memory_pool) StringMessage(*this, range, severity, text));
 	}
 
 	bool Parser::is_constant(Symbol *symbol)
@@ -62,7 +62,41 @@ namespace Mirb
 		if(skip)
 			lexer.step();
 	}
-	
+
+	void Parser::add_message(Message *message)
+	{
+		auto i = messages.mutable_iterator();
+		
+		while(i)
+		{
+			if(i().range.start > message->range.start)
+				break;
+				
+			++i;
+		}
+		
+		i.insert(message);
+	}
+
+	bool Parser::close_pair(const std::string &name, const Range &range, Lexeme::Type what)
+	{
+		if(lexeme() == what)
+		{
+			lexer.step();
+			return true;
+		}
+		else
+		{
+			auto message = new (memory_pool) StringMessage(*this, range, Message::MESSAGE_ERROR, "Unterminated " + name);
+			
+			message->note = new (memory_pool) StringMessage(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected " + Lexeme::describe_type(what) + " here, but found " + lexer.lexeme.describe());
+			
+			add_message(message);
+
+			return false;
+		}
+	}
+
 	void Parser::parse_sep()
 	{
 		switch (lexeme())

@@ -69,6 +69,22 @@ namespace Mirb
 		return joiner.join().to_string();
 	}
 	
+	CharArray basename(CharArray path)
+	{
+		CharArray result = normalize_path(path);
+
+		size_t i = result.size();
+
+		while(i-- > 0)
+			if(const_cast<const CharArray &>(result)[i] == '/')
+			{
+				++i;
+				break;
+			}
+
+		return result.copy(i, result.size());
+	}
+
 	value_t dirname(String *path)
 	{
 		CharArray result = normalize_path(path->string);

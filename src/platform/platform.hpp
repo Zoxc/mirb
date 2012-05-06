@@ -10,6 +10,8 @@ namespace Mirb
 			Green,
 			Bold,
 			Red,
+			Purple,
+			Blue,
 			Gray
 		};
 

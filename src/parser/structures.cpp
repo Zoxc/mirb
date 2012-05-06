@@ -32,7 +32,7 @@ namespace Mirb
 			result->scope->group = parse_group();
 		});		
 		
-		match(Lexeme::KW_END);
+		close_pair("class", *range, Lexeme::KW_END);
 		
 		return result;
 	}
