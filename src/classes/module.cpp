@@ -68,12 +68,91 @@ namespace Mirb
 		return obj;
 	}
 	
+	value_t attr_write(Frame &frame)
+	{
+		set_var(frame.obj, frame.code->symbol, frame.argv[0]);
+		return frame.argv[0];
+	}
+
+	value_t attr_read(Frame &frame)
+	{
+		return get_var(frame.obj, frame.code->symbol);
+	}
+
+	void attr(value_t module, value_t sym, bool write)
+	{
+		auto self = cast<Module>(module);
+		Symbol *name = cast<Symbol>(sym); 
+
+		Block *result = Collector::allocate_pinned<Block>(nullptr);
+		
+		result->symbol = Symbol::get("@" + name->string);
+
+		if(write)
+		{
+			name = Symbol::get(name->string + "=");
+			result->executor = attr_write;
+			result->min_args = 1;
+			result->max_args = 1;
+		}
+		else
+		{
+			result->executor = attr_read;
+			result->min_args = 0;
+			result->max_args = 0;
+		}
+		
+		Tuple<Module> *scope = Tuple<Module>::allocate(1);
+
+		(*scope)[0] = self;
+
+		self->set_method(name, Collector::allocate<Method>(result, scope));
+	}
+	
+	value_t attr_setup(value_t obj, size_t argc, value_t argv[], bool read, bool write)
+	{
+		auto self = cast<Module>(obj);
+
+		for(size_t i = 0; i < argc; ++i)
+		{
+			if(Value::of_type<Symbol>(argv[i]))
+			{
+				if(read)
+					attr(obj, argv[i], false);
+				if(write)
+					attr(obj, argv[i], true);
+			}
+			else
+				return raise(context->type_error, "Expected symbol");
+		}
+
+		return value_nil;
+	}
+	
+	value_t attr_writer(value_t obj, size_t argc, value_t argv[])
+	{
+		return attr_setup(obj, argc, argv, false, true);
+	}
+	
+	value_t attr_reader(value_t obj, size_t argc, value_t argv[])
+	{
+		return attr_setup(obj, argc, argv, true, false);
+	}
+	
+	value_t attr_accessor(value_t obj, size_t argc, value_t argv[])
+	{
+		return attr_setup(obj, argc, argv, true, true);
+	}
+	
 	void Module::initialize()
 	{
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
 		method<Arg::Self, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "include", &include);
 		method<Arg::Class<Module>>(context->module_class, "included", &included);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_reader", &attr_reader);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);
 	}
 };
 

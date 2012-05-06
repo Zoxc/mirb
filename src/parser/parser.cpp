@@ -544,7 +544,7 @@ namespace Mirb
 
 				lexer.step();
 
-				if(lexeme() == Lexeme::SCOPE && !lexer.lexeme.whitespace)
+				if(lexeme() == Lexeme::COLON && !lexer.lexeme.whitespace)
 				{
 					auto result = new (fragment) Tree::StringNode;
 				
@@ -956,7 +956,7 @@ namespace Mirb
 
 			auto result = new (fragment) Tree::SplatNode;
 
-			result->expression = typecheck(parse_factor());
+			result->expression = typecheck(parse_ternary_if());
 
 			return result;
 		}
@@ -1030,6 +1030,9 @@ namespace Mirb
 				auto node = static_cast<Tree::SplatNode *>(lhs);
 
 				process_lhs(node->expression, range);
+				
+				if(node->expression && (node->expression->type() == Tree::Node::MultipleExpressions))
+					report(range, "Cannot use the splat operator on multiple expressions");
 
 				return;
 			}

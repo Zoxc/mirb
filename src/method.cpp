@@ -106,7 +106,7 @@ namespace Mirb
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)())frame.code->opcodes)();
+			return ((value_t (*)())frame.code->function)();
 		}
 
 		Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
@@ -115,7 +115,7 @@ namespace Mirb
 
 			Value::assert_valid(module);
 
-			result->opcodes = (const char *)function;
+			result->function = function;
 			result->executor = executor;
 			result->min_args = info.min;
 			result->max_args = info.any_arg ? (size_t)-1 : info.max;

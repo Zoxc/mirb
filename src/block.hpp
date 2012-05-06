@@ -126,12 +126,20 @@ namespace Mirb
 
 			typedef value_t (*executor_t)(Frame &frame);
 
-			Tree::Scope *scope;
-			Document *document;
+			union
+			{
+				Tree::Scope *scope;
+				Symbol *symbol;
+			};
 
+			Document *document;
 			size_t var_words;
 
-			const char *opcodes;
+			union
+			{
+				const char *opcodes;
+				void *function;
+			};
 
 			size_t min_args;
 			size_t max_args;
