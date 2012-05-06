@@ -195,18 +195,7 @@ namespace Mirb
 			lexeme.type = Lexeme::SCOPE;
 		}
 		else
-		{
-			if(is_start_ident(input))
-			{
-				skip_ident();
-			
-				lexeme.stop = &input;
-				lexeme.type = Lexeme::SYMBOL;
-				lexeme.symbol = symbol_pool.get(lexeme);
-			}
-			else
-				lexeme.type = Lexeme::COLON;
-		}
+			lexeme.type = Lexeme::COLON;
 
 		lexeme.stop = &input;
 	}

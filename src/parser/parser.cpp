@@ -533,22 +533,48 @@ namespace Mirb
 
 			case Lexeme::COLON:
 			{
-				auto range = capture();
+				Range range = lexer.lexeme;
 
 				lexer.step();
 
-				if(lexeme() == Lexeme::STRING || lexeme() == Lexeme::STRING_START)
+				switch(lexeme())
 				{
-					if(lexer.lexeme.whitespace)
-						report(*range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
+					case Lexeme::IVAR:
+					case Lexeme::CVAR:
+					case Lexeme::GLOBAL:
+					case Lexeme::IDENT:
+					{
+						if(lexer.lexeme.whitespace)
+						{
+							range.start = range.stop;
+							range.stop = lexer.lexeme.start;
 
-					return parse_string(Value::Symbol);
-				}
-				else
-				{
-					report(*range, "Expected a symbol string literal, but found " + lexer.lexeme.describe());
+							report(range, "No whitespace between ':' and the identifier is allowed with symbol literals");
+						}
 
-					return 0;
+						auto result = new (fragment) Tree::SymbolNode;
+						result->symbol = lexer.lexeme.symbol;
+						lexer.step();
+						return result;
+					}
+					
+					case Lexeme::STRING:
+					case Lexeme::STRING_START:
+					{
+						if(lexer.lexeme.whitespace)
+						{
+							range.start = range.stop;
+							range.stop = lexer.lexeme.start;
+
+							report(range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
+						}
+
+						return parse_string(Value::Symbol);
+					}
+
+					default:
+						error("Expected a symbol literal, but found " + lexer.lexeme.describe());
+						return 0;
 				}
 			}
 
