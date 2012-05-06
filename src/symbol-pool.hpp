@@ -40,6 +40,12 @@ namespace Mirb
 				return key.hash();
 			}
 			
+			static void verify_value(Symbol *value)
+			{
+				if(value)
+					Value::assert_valid(value);
+			}
+
 			static bool valid_key(const CharArray &)
 			{
 				return true;
