@@ -189,6 +189,46 @@ namespace Mirb
 				vars[op.var] = result;
 		EndOp
 			
+		DeepOp(VariadicCall)
+			auto array = cast<Array>(vars[op.argv]);
+
+			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
+			value_t obj = vars[op.obj];
+			Symbol *name = op.method;
+			
+			Method *method = lookup(obj, name);
+
+			if(prelude_unlikely(!method))
+				goto handle_call_exception;
+
+			value_t result = call(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
+
+			if(prelude_unlikely(result == value_raise))
+				goto handle_call_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
+		DeepOp(VariadicSuper)
+			auto array = cast<Array>(vars[op.argv]);
+
+			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
+			
+			Method *method = lookup_super(frame.scope->first(), frame.name);
+
+			if(prelude_unlikely(!method))
+				goto handle_exception;
+
+			value_t result = call(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
+
+			if(prelude_unlikely(result == value_raise))
+				goto handle_call_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+			
 		Op(Method)
 			Support::define_method(frame.scope, op.name, op.block);
 		EndOp

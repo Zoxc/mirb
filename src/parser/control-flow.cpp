@@ -85,20 +85,30 @@ namespace Mirb
 			
 			lexer.step();
 
-			rescue->pattern = parse_assignment(true);
-
-			if(matches(Lexeme::ASSOC))
+			if(!is_sep() && lexeme() != Lexeme::KW_THEN)
 			{
-				Range range = lexer.lexeme;
+				rescue->pattern = parse_assignment(true);
 
-				rescue->var = parse_operator_expression(true);
+				if(matches(Lexeme::ASSOC))
+				{
+					Range range = lexer.lexeme;
 
-				lexer.lexeme.prev_set(&range);
+					rescue->var = parse_operator_expression(true);
 
-				process_lhs(rescue->var, range);
+					lexer.lexeme.prev_set(&range);
+
+					process_lhs(rescue->var, range);
+				}
+				else
+					rescue->var = nullptr;
 			}
 			else
-				rescue->var = 0;
+			{
+				rescue->pattern = nullptr;
+				rescue->var = nullptr;
+			}
+
+			parse_then_sep();
 			
 			rescue->group = parse_group();
 			
@@ -140,7 +150,6 @@ namespace Mirb
 		switch (lexeme())
 		{
 			case Lexeme::KW_THEN:
-			case Lexeme::COLON:
 				lexer.step();
 				break;
 

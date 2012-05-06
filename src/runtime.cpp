@@ -673,7 +673,7 @@ namespace Mirb
 
 		return call_frame(frame);
 	};
-
+	
 	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
 		Method *method = lookup(obj, name);
@@ -681,6 +681,11 @@ namespace Mirb
 		if(prelude_unlikely(!method))
 			return value_raise;
 
+		return call(method->block, obj, name, method->scope, block, argc, argv);
+	}
+
+	value_t call(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	{
 		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
 		if(prelude_unlikely(!stack_memory))
@@ -698,7 +703,7 @@ namespace Mirb
 			os_array[argc + i] = argv[i];
 		}
 
-		value_t result = call_code(method->block, obj, name, method->scope, block, argc, &os_array[argc]);
+		value_t result = call_code(code, obj, name, scope, block, argc, &os_array[argc]);
 
 		os->~OnStackBlock<false>();
 

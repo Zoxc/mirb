@@ -254,15 +254,27 @@ namespace Mirb
 			Scope *scope;
 		};
 		
+		struct BlockArg
+		{
+			Range range;
+			Node *node;
+
+			BlockArg(const Range &range, Node *node) : range(range), node(node) {}
+		};
+		
 		struct InvokeNode:
 			public Node
 		{
 			NodeType type() { return Invoke; }
 			
+			bool variadic;
 			CountedNodeList arguments;
 			BlockNode *block; // can be zero
+			BlockArg *block_arg;
 
 			Range *range;
+
+			InvokeNode() : variadic(false), block_arg(nullptr) {}
 		};
 		
 		struct CallNode:

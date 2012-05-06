@@ -316,6 +316,24 @@ namespace Mirb
 					return (op->var != no_var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", " + var(op->argv) + ", " + raw(op->argc);
 				}
 				
+				case Opcode::VariadicCall:
+				{
+					auto op = (VariadicCallOp *)opcode;
+
+					opcode += sizeof(VariadicCallOp);
+					
+					return (op->var != no_var ? var(op->var) + " = " : "") + "call " + var(op->obj) + ", " + imm(op->method) + ", " + var(op->block_var) + ", *" + var(op->argv);
+				}
+				
+				case Opcode::VariadicSuper:
+				{
+					auto op = (VariadicSuperOp *)opcode;
+
+					opcode += sizeof(VariadicSuperOp);
+					
+					return (op->var != no_var ? var(op->var) + " = " : "") + "super " + var(op->block_var) + ", *" + var(op->argv);
+				}
+				
 				case Opcode::Lookup:
 				{
 					auto op = (LookupOp *)opcode;

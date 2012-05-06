@@ -43,6 +43,8 @@ namespace Mirb
 				SingletonMethod,
 				Call,
 				Super,
+				VariadicCall,
+				VariadicSuper,
 				Lookup,
 				Self,
 				Block,
@@ -95,6 +97,8 @@ namespace Mirb
 				&&OpSingletonMethod, \
 				&&OpCall, \
 				&&OpSuper, \
+				&&OpVariadicCall, \
+				&&OpVariadicSuper, \
 				&&OpLookup, \
 				&&OpSelf, \
 				&&OpBlock, \
@@ -347,6 +351,31 @@ namespace Mirb
 			var_t argv;
 			
 			SuperOp(var_t var, var_t block_var, size_t argc, var_t argv) : var(var), block_var(block_var), argc(argc), argv(argv) {}
+		};
+		
+		struct VariadicCallOp:
+			public OpcodeWrapper<Opcode::VariadicCall>
+		{
+			var_t var;
+			var_t obj;
+			Symbol *method;
+			var_t block_var;
+			var_t argv;
+
+			VariadicCallOp(var_t var, var_t obj, Symbol *method, var_t block_var, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), argv(argv)
+			{
+				Value::assert_valid(method);
+			}
+		};
+		
+		struct VariadicSuperOp:
+			public OpcodeWrapper<Opcode::VariadicSuper>
+		{
+			var_t var;
+			var_t block_var;
+			var_t argv;
+			
+			VariadicSuperOp(var_t var, var_t block_var, var_t argv) : var(var), block_var(block_var), argv(argv) {}
 		};
 		
 		struct LookupOp:

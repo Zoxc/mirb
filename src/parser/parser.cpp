@@ -190,14 +190,37 @@ namespace Mirb
 		}
 	}
 	
-	void Parser::parse_arguments(Tree::CountedNodeList &arguments)
+	void Parser::parse_arguments(Tree::InvokeNode *node)
 	{
 		do
 		{
-			auto node = parse_operator_expression(false);
+			skip_lines();
+
+			if(lexeme() == Lexeme::AMPERSAND)
+			{
+				Range range = lexer.lexeme;
+				lexer.step();
+				auto result = parse_operator_expression(false);
+				lexer.lexeme.prev_set(&range);
+
+				if(node->block_arg)
+					report(range, "There can only be a single block argument");
+				else
+					node->block_arg = new (fragment) Tree::BlockArg(range, result);
+			}
+			else
+			{
+				if(node->block_arg)
+					report(node->block_arg->range, "The block arguments must be the last one");
+
+				auto result = parse_operator_expression(false);
+
+				if(result->type() == Tree::Node::Splat)
+					node->variadic = true;
 			
-			if(node)
-				arguments.append(node);
+				if(result)
+					node->arguments.append(result);
+			}
 		}
 		while(matches(Lexeme::COMMA));
 	}
@@ -237,6 +260,8 @@ namespace Mirb
 		{
 			do
 			{
+				skip_lines();
+
 				auto range = capture();
 				auto key = parse_operator_expression(false);
 				lexer.lexeme.prev_set(range);
@@ -256,6 +281,7 @@ namespace Mirb
 					result->entries.append(node);
 
 					lexer.step();
+					skip_lines();
 				}
 				else
 				{
@@ -263,6 +289,7 @@ namespace Mirb
 						result->entries.append(key);
 
 					match(Lexeme::ASSOC);
+					skip_lines();
 				}
 
 				auto value = parse_operator_expression(false);
@@ -272,7 +299,8 @@ namespace Mirb
 			}
 			while(matches(Lexeme::COMMA));
 		}
-		
+
+		skip_lines();		
 		match(Lexeme::CURLY_CLOSE);
 		
 		return result;
@@ -288,6 +316,8 @@ namespace Mirb
 		{
 			do
 			{
+				skip_lines();
+
 				auto element = parse_operator_expression(false);
 				
 				if(element)
@@ -295,7 +325,8 @@ namespace Mirb
 			}
 			while(matches(Lexeme::COMMA));
 		}
-		
+
+		skip_lines();		
 		match(Lexeme::SQUARE_CLOSE);
 		
 		return result;
@@ -999,6 +1030,8 @@ namespace Mirb
 			{
 				do
 				{
+					skip_lines();
+
 					Range result_range = lexer.lexeme;
 					result = typecheck(parse_splat_expression());
 					lexer.lexeme.prev_set(&result_range);

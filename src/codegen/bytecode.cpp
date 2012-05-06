@@ -427,16 +427,20 @@ namespace Mirb
 		{
 			auto node = (Tree::CallNode *)basic_node;
 			
-			var_t obj = reuse(var);
-			
 			size_t argc;
 			var_t argv;
 
-			var_t closure = call_args(node->arguments, node->block ? node->block->scope : nullptr, argc, argv, var);
+			var_t closure = call_args(node, node->block ? node->block->scope : nullptr, argc, argv, var);
+			
+			var_t obj = reuse(var);
 			
 			to_bytecode(node->object, obj);
 			
-			gen<CallOp>(var, obj, node->method, closure, argc, argv);
+			if(node->variadic)
+				gen<VariadicCallOp>(var, obj, node->method, closure, argv);
+			else
+				gen<CallOp>(var, obj, node->method, closure, argc, argv);
+
 			location(node->range);
 		}
 		
@@ -465,9 +469,13 @@ namespace Mirb
 				size_t argc;
 				var_t argv;
 
-				var_t closure = call_args(node->arguments, scope, argc, argv, var);
+				var_t closure = call_args(node, scope, argc, argv, var);
 				
-				gen<SuperOp>(var, closure, argc, argv);
+				if(node->variadic)
+					gen<VariadicSuperOp>(var, closure, argv);
+				else
+					gen<SuperOp>(var, closure, argc, argv);
+
 				location(node->range);
 			}
 		}
@@ -1154,30 +1162,63 @@ namespace Mirb
 			return var;
 		}
 		
-		var_t ByteCodeGenerator::call_args(Tree::CountedNodeList &arguments, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst)
+		var_t ByteCodeGenerator::call_args(Tree::InvokeNode *node, Tree::Scope *scope, size_t &argc, var_t &argv, var_t break_dst)
 		{
+			Tree::CountedNodeList &arguments = node->arguments;
+
 			if(scope)
 				Value::assert_valid(scope);
 
-			if(!arguments.empty())
+			if(node->variadic)
 			{
-				VariableGroup group(this, arguments.size);
+				argv = create_var();
+				var_t temp = create_var();
 
-				size_t param = 0;
-				
-				for(auto i = arguments.begin(); i != arguments.end(); ++i)
-					to_bytecode(*i, group[param++]);
+				gen<ArrayOp>(argv, 0, 0);
 
-				argc = group.size;
-				argv = group.use();
+				for(auto arg: node->arguments)
+				{
+					if(arg->type() == Tree::Node::Splat)
+					{
+						to_bytecode(static_cast<Tree::SplatNode *>(arg)->expression, temp);
+						gen<PushArrayOp>(argv, temp);
+					}
+					else
+					{
+						to_bytecode(arg, temp);
+						gen<PushOp>(argv, temp);
+					}
+				}
 			}
 			else
 			{
-				argc = 0;
-				argv = no_var;
+				if(!arguments.empty())
+				{
+					VariableGroup group(this, arguments.size);
+
+					size_t param = 0;
+				
+					for(auto i = arguments.begin(); i != arguments.end(); ++i)
+						to_bytecode(*i, group[param++]);
+
+					argc = group.size;
+					argv = group.use();
+				}
+				else
+				{
+					argc = 0;
+					argv = no_var;
+				}
 			}
-			
-			return block_arg(scope, break_dst);
+
+			if(node->block_arg)
+			{
+				var_t result = create_var();
+				to_bytecode(node->block_arg->node, result);
+				return result;
+			}
+			else
+				return block_arg(scope, break_dst);
 		}
 	};
 };

@@ -19,7 +19,7 @@ namespace Mirb
 		}
 	}
 
-	Tree::BlockNode *Parser::parse_block()
+	Tree::BlockNode *Parser::parse_block(bool allowed)
 	{
 		bool curly;
 
@@ -64,13 +64,16 @@ namespace Mirb
 		});
 		
 		match(curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
+
+		if(!allowed)
+			report(*result->scope->range, "Unexpected block after block argument");
 		
 		return result;
 	}
 
 	bool Parser::has_arguments()
 	{
-		if(is_expression())
+		if(is_expression() || lexeme() == Lexeme::AMPERSAND)
 		{
 			switch(lexeme())
 			{
@@ -83,6 +86,7 @@ namespace Mirb
 				case Lexeme::MUL:
 				case Lexeme::QUESTION:
 				case Lexeme::COLON:
+				case Lexeme::AMPERSAND:
 					{
 						if(lexer.lexeme.whitespace)
 						{
@@ -112,7 +116,7 @@ namespace Mirb
 			return false;
 	}
 
-	void Parser::parse_arguments(Tree::CountedNodeList &arguments, bool *parenthesis)
+	void Parser::parse_arguments(Tree::InvokeNode *node, bool *parenthesis)
 	{
 		if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
 		{
@@ -122,8 +126,10 @@ namespace Mirb
 			lexer.step();
 
 			if(lexeme() != Lexeme::PARENT_CLOSE)
-				parse_arguments(arguments);
+				parse_arguments(node);
 			
+			skip_lines();
+
 			match(Lexeme::PARENT_CLOSE);
 		}
 		else
@@ -131,7 +137,7 @@ namespace Mirb
 			if(parenthesis)
 				*parenthesis = false;
 			
-			parse_arguments(arguments);
+			parse_arguments(node);
 		}
 	}
 
@@ -146,12 +152,12 @@ namespace Mirb
 		
 		if(has_args)
 		{
-			parse_arguments(result->arguments, 0);
+			parse_arguments(result, 0);
 			lexer.lexeme.prev_set(range);
 		}
 		
-		result->block = parse_block();
-		
+		result->block = parse_block(result->block_arg == 0);
+				
 		return result;
 	}
 
@@ -165,12 +171,12 @@ namespace Mirb
 		bool parenthesis = false;
 		
 		if(has_arguments())
-			parse_arguments(result->arguments, &parenthesis);
+			parse_arguments(result, &parenthesis);
 
 		lexer.lexeme.prev_set(range);
 		result->range = range;
 		
-		result->block = parse_block();
+		result->block = parse_block(result->block_arg == 0);
 		
 		if(result->arguments.empty() && !parenthesis)
 		{
@@ -308,7 +314,7 @@ namespace Mirb
 					result->object = child;
 
 					if(lexeme() != Lexeme::SQUARE_CLOSE)
-						parse_arguments(result->arguments);
+						parse_arguments(result);
 
 					result->block = nullptr;
 
