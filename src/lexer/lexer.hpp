@@ -30,7 +30,6 @@ namespace Mirb
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
 
 			bool process_null(const char_t *input, bool expected = false);
-			void build_string(const char_t *start, char_t *str, size_t length);
 			void build_simple_string(const char_t *start, char_t *str, size_t length);
 
 			void restep(bool whitespace = false);
@@ -38,12 +37,12 @@ namespace Mirb
 			void report_null();
 			
 			bool parse_escape(std::string &result);
-			void parse_string(InterpolatedState *state);
+			void parse_interpolate(InterpolateState *state, bool continuing);
 			
 			template<Lexeme::Type type> void single();
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
-
+			
 			void eol();
 			bool is_white();
 			void white();
@@ -108,6 +107,7 @@ namespace Mirb
 			
 			void restore(Context &context);
 			
+			void to_regexp();
 			void load(const char_t *input, size_t length);
 			void step();
 			void identify_keywords();

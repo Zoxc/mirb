@@ -31,6 +31,7 @@ namespace Mirb
 	class Class;
 	class Symbol;
 	class String;
+	class Regexp;
 	class Method;
 	class Array;
 	class Hash;
@@ -110,6 +111,7 @@ namespace Mirb
 			Object,
 			Symbol,
 			String,
+			Regexp,
 			Array,
 			Hash,
 			Method,
@@ -267,9 +269,12 @@ namespace Mirb
 
 				case Symbol:
 					return T<Symbol>::func(std::forward<Arg>(arg));
-
+					
 				case String:
 					return T<String>::func(std::forward<Arg>(arg));
+
+				case Regexp:
+					return T<Regexp>::func(std::forward<Arg>(arg));
 
 				case Array:
 					return T<Array>::func(std::forward<Arg>(arg));
@@ -336,6 +341,7 @@ namespace Mirb
 		mirb_typeclass(Object, Object);
 		mirb_typeclass(Symbol, Symbol);
 		mirb_typeclass(String, String);
+		mirb_typeclass(Regexp, Regexp);
 		mirb_typeclass(Array, Array);
 		mirb_typeclass(Hash, Hash);
 		mirb_typeclass(Method, Method);
@@ -381,6 +387,8 @@ namespace Mirb
 		mirb_derived_from(Class, Class);
 		
 		mirb_derived_from(String, String);
+		
+		mirb_derived_from(Regexp, Regexp);
 		
 		mirb_derived_from(Symbol, Symbol);
 

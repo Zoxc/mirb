@@ -50,9 +50,8 @@ namespace Mirb
 
 		void (ByteCodeGenerator::*ByteCodeGenerator::jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, var_t var) = {
 			0, // None
-			&ByteCodeGenerator::convert_string,
+			&ByteCodeGenerator::convert_data,
 			&ByteCodeGenerator::convert_interpolated,
-			0, // InterpolatedPair
 			&ByteCodeGenerator::convert_integer,
 			&ByteCodeGenerator::convert_variable,
 			&ByteCodeGenerator::convert_ivar,
@@ -93,22 +92,22 @@ namespace Mirb
 			&ByteCodeGenerator::convert_multiple_expressions
 		};
 		
-		void ByteCodeGenerator::convert_string(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_data(Tree::Node *basic_node, var_t var)
 		{
 			if(!is_var(var))
 				return;
 
-			auto node = (Tree::StringNode *)basic_node;
+			auto node = (Tree::DataNode *)basic_node;
 
 			if(node->result_type == Value::Symbol)
-				gen<LoadSymbolOp>(var, symbol_pool.get(node->string.data, node->string.length));
+				gen<LoadSymbolOp>(var, symbol_pool.get(node->data.data, node->data.length));
 			else
-				gen_string(var, node->string);
+				gen_string(var, node->data);
 		}
 		
 		void ByteCodeGenerator::convert_interpolated(Tree::Node *basic_node, var_t var)
 		{
-			auto node = (Tree::InterpolatedNode *)basic_node;
+			auto node = (Tree::InterpolateNode *)basic_node;
 			
 			size_t param_count = 0;
 
@@ -120,7 +119,7 @@ namespace Mirb
 				param_count++;
 			}
 			
-			if(node->string.length)
+			if(node->data.length)
 				param_count++;
 			
 			VariableGroup group(this, param_count);
@@ -135,8 +134,8 @@ namespace Mirb
 				to_bytecode(i().group, group[param++]);
 			}
 			
-			if(node->string.length)
-				gen_string(group[param++], node->string);
+			if(node->data.length)
+				gen_string(group[param++], node->data);
 			
 			gen<InterpolateOp>(var, group.size, group.use(), node->result_type);
 		}

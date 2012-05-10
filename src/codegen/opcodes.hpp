@@ -606,9 +606,9 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::String>
 		{
 			var_t var;
-			StringData::Entry str;
+			InterpolateData::Entry str;
 
-			StringOp(var_t var, const StringData::Entry &str) : var(var), str(str) {}
+			StringOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:

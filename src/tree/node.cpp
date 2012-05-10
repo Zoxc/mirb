@@ -4,9 +4,8 @@ namespace Mirb
 {
 	std::string Tree::SimpleNode::names[] = {
 		"None",
-		"String",
+		"Data",
 		"Interpolated",
-		"InterpolatedPair",
 		"Integer",
 		"Variable",
 		"IVar",

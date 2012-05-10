@@ -130,7 +130,7 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator();
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
-			void process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail);
+			void process_interpolate_entries(Tree::InterpolateNode *root, InterpolateData::Entry &tail);
 			
 			template<typename F> void typecheck(Tree::Node *&result, F func)
 			{
@@ -160,7 +160,7 @@ namespace Mirb
 			bool is_sep();
 			void skip_seps();
 			Tree::Node *parse_hash();
-			Tree::StringNode *parse_string(Value::Type type);
+			Tree::Node *parse_data(Value::Type type);
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression();
 			void process_lhs(Tree::Node *&lhs, const Range &range);
@@ -326,6 +326,7 @@ namespace Mirb
 					case Lexeme::ADD:
 					case Lexeme::SUB:
 					case Lexeme::MUL:
+					case Lexeme::DIV:
 					case Lexeme::INTEGER:
 					case Lexeme::KW_IF:
 					case Lexeme::KW_UNLESS:
@@ -341,8 +342,6 @@ namespace Mirb
 					case Lexeme::KW_FALSE:
 					case Lexeme::KW_SPECIAL_FILE:
 					case Lexeme::KW_NIL:
-					case Lexeme::STRING:
-					case Lexeme::STRING_START:
 					case Lexeme::KW_YIELD:
 					case Lexeme::KW_RETURN:
 					case Lexeme::KW_BREAK:
@@ -358,6 +357,9 @@ namespace Mirb
 					case Lexeme::SCOPE:
 					case Lexeme::QUESTION:
 						return true;
+
+					case Lexeme::STRING:
+						return lexer.lexeme.data->type == InterpolateData::Starting || lexer.lexeme.data->type == InterpolateData::Plain;
 
 					default:
 						return false;

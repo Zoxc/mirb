@@ -8,12 +8,8 @@ namespace Mirb
 {
 	class Lexer;
 	
-	struct StringData;
-
-	struct InterpolatedState
-	{
-		Range *start;
-	};
+	struct InterpolateData;
+	struct InterpolateState;
 
 	class Lexeme:
 		public Range
@@ -22,10 +18,8 @@ namespace Mirb
 			enum Type
 			{
 				// values
-				STRING_START,
-				STRING_CONTINUE,
 				STRING,
-				STRING_END,
+				REGEXP,
 				INTEGER,
 				OCTAL,
 				REAL,
@@ -196,12 +190,12 @@ namespace Mirb
 			Type type;
 			const char_t *prev;
 			
-			Vector<InterpolatedState *, MemoryPool> curlies;
+			Vector<InterpolateState *, MemoryPool> curlies;
 			
 			union
 			{
 				Symbol *symbol;
-				StringData *str;
+				InterpolateData *data;
 			};
 
 			Range &get_prev();
@@ -215,8 +209,17 @@ namespace Mirb
 			static std::string describe(Range *range, Type type);
 			static std::string describe_type(Type type);
 	};
+	
+	struct InterpolateState
+	{
+		Range *start;
+		Lexeme::Type type;
+		char_t terminator;
 
-	struct StringData
+		InterpolateState() : start(0) {}
+	};
+
+	struct InterpolateData
 	{
 		struct Entry
 		{
@@ -255,9 +258,18 @@ namespace Mirb
 	
 		Vector<AdvancedEntry *, MemoryPool> entries;
 
-		Entry tail;
+		enum Type
+		{
+			Plain,
+			Starting,
+			Continuing,
+			Ending
+		};
 
-		StringData(MemoryPool memory_pool) : entries(memory_pool) {}
+		Entry tail;
+		Type type;
+
+		InterpolateData(MemoryPool memory_pool) : entries(memory_pool), type(Plain) {}
 	};
 
 };

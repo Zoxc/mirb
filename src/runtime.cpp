@@ -14,6 +14,7 @@
 #include "classes/false-class.hpp"
 #include "classes/nil-class.hpp"
 #include "classes/string.hpp"
+#include "classes/regexp.hpp"
 #include "classes/proc.hpp"
 #include "classes/array.hpp"
 #include "classes/exception.hpp"
@@ -879,6 +880,7 @@ namespace Mirb
 		
 		IO::initialize();
 		File::initialize();
+		Regexp::initialize();
 		
 		Comparable::initialize();
 		

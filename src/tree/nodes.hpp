@@ -36,11 +36,9 @@ namespace Mirb
 			Node *expression;
 		};
 		
-		struct MultipleExpressionNode:
-			public ListNode
+		struct MultipleExpressionNode
 		{
-			NodeType type() { return InterpolatedPair; }
-			
+			ListEntry<MultipleExpressionNode> entry;
 			Node *expression;
 			Range range;
 			int index;
@@ -49,15 +47,13 @@ namespace Mirb
 			MultipleExpressionNode(Node *expression, const Range &range) : expression(expression), range(range) {}
 		};
 		
-		typedef List<MultipleExpressionNode, ListNode> MultipleExpressionList;
-		
 		struct MultipleExpressionsNode:
 			public Node
 		{
 			NodeType type() { return MultipleExpressions; }
 			
 			Range *range;
-			MultipleExpressionList expressions;
+			List<MultipleExpressionNode> expressions;
 			Range *extended;
 			size_t splat_index;
 			size_t expression_count;
@@ -113,34 +109,30 @@ namespace Mirb
 			BooleanNotNode(Node *value) : UnaryOpNode(Lexeme::LOGICAL_NOT, value, nullptr) {}
 		};
 		
-		struct StringNode:
+		struct DataNode:
 			public Node
 		{
-			NodeType type() { return String; }
+			NodeType type() { return Data; }
 			
 			Value::Type result_type;
 			
-			StringData::Entry string;
+			InterpolateData::Entry data;
 		};
 		
-		struct InterpolatedPairNode:
-			public ListNode
+		struct InterpolatePairNode
 		{
-			NodeType type() { return InterpolatedPair; }
-			
-			StringData::Entry string;
+			ListEntry<InterpolatePairNode> entry;
+			InterpolateData::Entry string;
 
 			Node *group;
 		};
 		
-		typedef List<InterpolatedPairNode, ListNode> InterpolatedPairList;
-		
-		struct InterpolatedNode:
-			public StringNode
+		struct InterpolateNode:
+			public DataNode
 		{
-			NodeType type() { return Interpolated; }
+			NodeType type() { return Interpolate; }
 			
-			InterpolatedPairList pairs;
+			List<InterpolatePairNode> pairs;
 		};
 		
 		struct IntegerNode:

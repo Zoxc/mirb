@@ -124,7 +124,7 @@ namespace Mirb
 
 		error:
 		lexeme.stop = &input;
-		lexeme.str = new (memory_pool) StringData(memory_pool);
+		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 		return;
 		
 		done:
@@ -135,9 +135,9 @@ namespace Mirb
 		
 		build_simple_string(lexeme.start + 1, str, str_length);
 		
-		lexeme.str = new (memory_pool) StringData(memory_pool);
-		lexeme.str->tail.data = str;
-		lexeme.str->tail.length = str_length;
+		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+		lexeme.data->tail.data = str;
+		lexeme.data->tail.length = str_length;
 	}
 	
 	bool Lexer::parse_escape(std::string &result)
@@ -147,6 +147,7 @@ namespace Mirb
 			case '\'':
 			case '\"':
 			case '\\':
+			case '/':
 				result += input++;
 				break;
 							
@@ -202,11 +203,7 @@ namespace Mirb
 						
 			case 0: 
 				if(process_null(&input))
-				{
-					lexeme.stop = &input;
-
 					return true;
-				}
 
 			default:
 				{
@@ -221,26 +218,50 @@ namespace Mirb
 		return false;
 	}
 
-	void Lexer::parse_string(InterpolatedState *state)
+	void Lexer::parse_interpolate(InterpolateState *state, bool continuing)
 	{
-		lexeme.type = Lexeme::STRING;
+		lexeme.type = state->type;
 		std::string result;
-		StringData *data = new (memory_pool) StringData(memory_pool);
+
+		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+
+		if(continuing)
+			lexeme.data->type = InterpolateData::Ending;
 		
 		const char_t *start = lexeme.start;
-
+		
 		auto push = [&] {
-			auto entry = new (memory_pool) StringData::AdvancedEntry;
+			auto entry = new (memory_pool) InterpolateData::AdvancedEntry;
 			entry->set<MemoryPool>(result, memory_pool);
 			entry->type = lexeme.type;
 			entry->symbol = lexeme.symbol;
 			result = "";
-			data->entries.push(entry);
+			lexeme.data->entries.push(entry);
 		};
 
-		lexeme.type = state ? Lexeme::STRING_END : Lexeme::STRING;
-		
+		auto report_end = [&] {
+			lexeme.stop = &input;
+
+			if(state->start)
+			{
+				auto message = new (memory_pool) StringMessage(parser, lexeme.dup(memory_pool), Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
+			
+				message->note = new (memory_pool) StringMessage(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
+			
+				parser.add_message(message, lexeme);
+			}
+			else
+				parser.report(lexeme.dup(memory_pool), "Unterminated " + Lexeme::describe_type(state->type));
+		};
+
 		while(true)
+		{
+			if(input == state->terminator)
+			{
+				input++;
+				goto done;
+			}
+
 			switch(input)
 			{
 				case '#':
@@ -253,17 +274,19 @@ namespace Mirb
 							input++;
 
 							{
-								lexeme.type = state ? Lexeme::STRING_CONTINUE : Lexeme::STRING_START;
-
-								if(!state)
+								if(!continuing)
 								{
-									state = new (memory_pool) InterpolatedState;
+									lexeme.data->type = InterpolateData::Starting;
+
+									state = new (memory_pool) InterpolateState(*state);
 
 									lexeme.start = start;
 									lexeme.stop = &input;
 
 									state->start = new (memory_pool) Range(lexeme);
 								}
+								else
+									lexeme.data->type = InterpolateData::Continuing;
 
 								lexeme.curlies.push(state);
 							}
@@ -306,10 +329,6 @@ namespace Mirb
 					break;
 				}
 
-				case '"':
-					input++;
-					goto done;
-
 				case '\n':
 					result += input++;
 					lexeme.line++;
@@ -330,37 +349,23 @@ namespace Mirb
 					input++;
 
 					if(parse_escape(result))
-					{
-						parser.report(lexeme.dup(memory_pool), "Unterminated string");
-						goto error;
-					}
+						return report_end();
 					break;
 
 				case 0:
 					if(process_null(&input))
-					{
-						lexeme.stop = &input;
-						parser.report(lexeme.dup(memory_pool), "Unterminated string");
-						goto error;
-					}
+						return report_end();
 
 					// Fallthrough
 				
 				default:
 					result += input++;
 			}
-		
-		error:
-		lexeme.stop = &input;
-		lexeme.str = new (memory_pool) StringData(memory_pool);
-		return;
+		}
 		
 		done:
 		lexeme.stop = &input;
-		
-		lexeme.str = data;
-
-		data->tail.set<MemoryPool>(result, memory_pool);
+		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
 	void Lexer::curly_close()
@@ -372,18 +377,23 @@ namespace Mirb
 		if(lexeme.curlies.size() == 0)
 			return;
 		
-		InterpolatedState *state = lexeme.curlies.pop();
+		InterpolateState *state = lexeme.curlies.pop();
 		
 		if(!state)
 			return;
 		
-		parse_string(state);
+		parse_interpolate(state, true);
 	}
 
 	void Lexer::string()
 	{
 		input++;
 		
-		parse_string(nullptr);
+		InterpolateState state;
+
+		state.terminator = '"';
+		state.type = Lexeme::STRING;
+
+		parse_interpolate(&state, false);
 	}
 };

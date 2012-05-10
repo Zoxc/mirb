@@ -84,6 +84,7 @@ namespace Mirb
 				case Lexeme::ADD:
 				case Lexeme::SUB:
 				case Lexeme::MUL:
+				case Lexeme::DIV:
 				case Lexeme::QUESTION:
 				case Lexeme::COLON:
 				case Lexeme::AMPERSAND:

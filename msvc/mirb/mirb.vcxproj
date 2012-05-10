@@ -27,6 +27,7 @@
     <ClInclude Include="..\..\src\classes\nil-class.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
     <ClInclude Include="..\..\src\classes\proc.hpp" />
+    <ClInclude Include="..\..\src\classes\regexp.hpp" />
     <ClInclude Include="..\..\src\classes\string.hpp" />
     <ClInclude Include="..\..\src\classes\symbol.hpp" />
     <ClInclude Include="..\..\src\classes\true-class.hpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="..\..\src\classes\nil-class.cpp" />
     <ClCompile Include="..\..\src\classes\object.cpp" />
     <ClCompile Include="..\..\src\classes\proc.cpp" />
+    <ClCompile Include="..\..\src\classes\regexp.cpp" />
     <ClCompile Include="..\..\src\classes\string.cpp" />
     <ClCompile Include="..\..\src\classes\symbol.cpp" />
     <ClCompile Include="..\..\src\classes\true-class.cpp" />

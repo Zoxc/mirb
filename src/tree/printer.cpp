@@ -72,6 +72,11 @@ namespace Mirb
 		return wrap(node->expression, this->node(node->expression, 0));
 	}
 	
+	std::string Printer::print_node(Tree::InterpolatePairNode *node)
+	{
+		return std::string((const char *)node->string.data, node->string.length) + "#{" + print_node(node->group);
+	}
+	
 	std::string Printer::print_node(Tree::CaseEntry *node)
 	{
 		return "(when " + wrap(node->pattern, this->node(node->pattern, 0)) + ": " + wrap(node->group, this->node(node->group, 0)) + ")";
@@ -101,25 +106,18 @@ namespace Mirb
 				return Lexeme::names[target->op] +  " " + print_node(target->value);
 			}
 			
-			case Tree::SimpleNode::String:
+			case Tree::SimpleNode::Data:
 			{
-				auto target = (Tree::StringNode *)node;
+				auto target = (Tree::DataNode *)node;
 
-				return std::string((const char *)target->string.data, target->string.length);
+				return std::string((const char *)target->data.data, target->data.length);
 			}
 			
-			case Tree::SimpleNode::InterpolatedPair:
+			case Tree::SimpleNode::Interpolate:
 			{
-				auto target = (Tree::InterpolatedPairNode *)node;
+				auto target = (Tree::InterpolateNode *)node;
 				
-				return std::string((const char *)target->string.data, target->string.length) + "#{" + print_node(target->group);
-			}
-			
-			case Tree::SimpleNode::Interpolated:
-			{
-				auto target = (Tree::InterpolatedNode *)node;
-				
-				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->string.data, target->string.length) + "\"";
+				return "\"" + join(target->pairs, "}") + "}" + std::string((const char *)target->data.data, target->data.length) + "\"";
 			}
 			
 			case Tree::SimpleNode::Integer:

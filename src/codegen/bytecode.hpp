@@ -46,7 +46,7 @@ namespace Mirb
 		class ByteCodeGenerator
 		{
 			private:
-				void convert_string(Tree::Node *basic_node, var_t var);
+				void convert_data(Tree::Node *basic_node, var_t var);
 				void convert_interpolated(Tree::Node *basic_node, var_t var);
 				void convert_integer(Tree::Node *basic_node, var_t var);
 				void convert_variable(Tree::Node *basic_node, var_t var);
@@ -148,7 +148,7 @@ namespace Mirb
 						return no_var;
 				}
 				
-				void gen_string(var_t var, StringData::Entry data)
+				void gen_string(var_t var, InterpolateData::Entry data)
 				{
 					data = data.copy<Prelude::Allocator::Standard>();
 					strings.push(data.data);

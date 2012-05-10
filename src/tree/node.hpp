@@ -14,9 +14,8 @@ namespace Mirb
 			enum NodeType
 			{
 				None,
-				String,
-				Interpolated,
-				InterpolatedPair,
+				Data,
+				Interpolate,
 				Integer,
 				Variable,
 				IVar,

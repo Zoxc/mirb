@@ -37,6 +37,14 @@ namespace Mirb
 		restep();
 	}
 	
+	void Lexer::to_regexp()
+	{
+		InterpolateState state;
+		state.type = Lexeme::REGEXP;
+		state.terminator = '/';
+		parse_interpolate(&state, false);
+	}
+
 	void Lexer::character()
 	{
 		input++;
@@ -68,7 +76,7 @@ namespace Mirb
 				if(parse_escape(result))
 				{
 					lexeme.stop = &input;
-					lexeme.str = new (memory_pool) StringData(memory_pool);
+					lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 					lexeme.type = Lexeme::STRING;
 					parser.report(lexeme.dup(memory_pool), "Expected escape string");
 
@@ -80,9 +88,9 @@ namespace Mirb
 			else
 				str[0] = first;
 
-			lexeme.str = new (memory_pool) StringData(memory_pool);
-			lexeme.str->tail.data = str;
-			lexeme.str->tail.length = 1;
+			lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+			lexeme.data->tail.data = str;
+			lexeme.data->tail.length = 1;
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::STRING;
 		}

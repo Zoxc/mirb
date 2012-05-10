@@ -376,81 +376,101 @@ namespace Mirb
 		return result;
 	}
 
-	Tree::StringNode *Parser::parse_string(Value::Type type)
+	Tree::Node *Parser::parse_data(Value::Type type)
 	{
-		if(lexeme() == Lexeme::STRING)
+		switch(lexer.lexeme.data->type)
 		{
-			auto data = lexer.lexeme.str;
-
-			if(data->entries.size())
+			case InterpolateData::Plain:
 			{
-				auto result = new (fragment) Tree::InterpolatedNode;
+				auto data = lexer.lexeme.data;
 
-				result->result_type = type;
+				if(data->entries.size())
+				{
+					auto result = new (fragment) Tree::InterpolateNode;
 
-				process_string_entries(result, result->string);
+					result->result_type = type;
 
-				result->string = data->tail.copy<Tree::Fragment>(fragment);
+					process_interpolate_entries(result, result->data);
 
-				lexer.step();
+					result->data = data->tail.copy<Tree::Fragment>(fragment);
 
-				return result;
+					lexer.step();
+
+					return result;
+				}
+				else
+				{
+					auto result = new (fragment) Tree::DataNode;
+				
+					result->result_type = type;
+
+					result->data = data->tail.copy<Tree::Fragment>(fragment);
+					
+					lexer.step();
+
+					return result;
+				}
 			}
-			else
+
+			case InterpolateData::Starting:
 			{
-				auto result = new (fragment) Tree::StringNode;
+				Lexeme::Type token = lexeme();
+
+				auto result = new (fragment) Tree::InterpolateNode;
+
+				Range range = lexer.lexeme;
 				
 				result->result_type = type;
 
-				result->string = data->tail.copy<Tree::Fragment>(fragment);
+				do
+				{
+					auto pair = new (fragment) Tree::InterpolatePairNode;
+
+					process_interpolate_entries(result, pair->string);
+
+					lexer.step();
 					
-				lexer.step();
-
-				return result;
-			}
-		}
-		else
-		{
-			auto result = new (fragment) Tree::InterpolatedNode;
-
-			Range range = lexer.lexeme;
-				
-			result->result_type = type;
-
-			do
-			{
-				auto pair = new (fragment) Tree::InterpolatedPairNode;
-
-				process_string_entries(result, pair->string);
-
-				lexer.step();
+					pair->group = parse_group();
 					
-				pair->group = parse_group();
-					
-				result->pairs.append(pair);
-			}
-			while(lexeme() == Lexeme::STRING_CONTINUE);
+					result->pairs.append(pair);
+				}
+				while(lexeme() == token && lexer.lexeme.data->type == InterpolateData::Continuing);
+
+				if(lexeme() == token && lexer.lexeme.data->type == InterpolateData::Ending)
+				{
+					process_interpolate_entries(result, result->data);
+
+					result->data = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
+
+					lexer.step();
+				}
+				else
+				{
+					auto message = new (memory_pool) StringMessage(*this, range, Message::MESSAGE_ERROR, "Unterminated interpolate sequence of " +  Lexeme::describe_type(token));
 			
-			if(close_pair("string interpolation", range, Lexeme::STRING_END, false))
-			{
-				process_string_entries(result, result->string);
+					message->note = new (memory_pool) StringMessage(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected terminating " + Lexeme::describe_type(token) + " here, but found " + lexer.lexeme.describe());
+			
+					add_message(message, lexer.lexeme);
+				}
 
-				result->string = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
-
-				lexer.step();
+				return result;
 			}
-
-			return result;
+			
+			default:
+			{
+				unexpected();
+				return nullptr;
+			}
 		}
 	}
 
-	void Parser::process_string_entries(Tree::InterpolatedNode *root, StringData::Entry &tail)
+	void Parser::process_interpolate_entries(Tree::InterpolateNode *root, InterpolateData::Entry &tail)
 	{
-		auto &entries = lexer.lexeme.str->entries;
+		auto &entries = lexer.lexeme.data->entries;
 
 		for(auto entry: entries)
 		{
-			auto pair = new (fragment) Tree::InterpolatedPairNode;
+			auto pair = new (fragment) Tree::InterpolatePairNode;
 			pair->string = entry->copy<Tree::Fragment>(fragment);
 
 			switch(entry->type)
@@ -470,7 +490,7 @@ namespace Mirb
 			root->pairs.append(pair);
 		}
 
-		tail = lexer.lexeme.str->tail.copy<Tree::Fragment>(fragment);
+		tail = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
 	}
 
 	Tree::Node *Parser::parse_factor()
@@ -479,14 +499,21 @@ namespace Mirb
 		{
 			case Lexeme::KW_SPECIAL_FILE:
 			{
-				auto result = new (fragment) Tree::StringNode;
+				auto result = new (fragment) Tree::DataNode;
 
 				result->result_type = Value::String;
-				result->string.set<Tree::Fragment>(document.name.get_string(), fragment);
+				result->data.set<Tree::Fragment>(document.name.get_string(), fragment);
 
 				lexer.step();
 
 				return result;
+			}
+			
+			case Lexeme::DIV:
+			{
+				lexer.to_regexp();
+
+				return parse_data(Value::Regexp);
 			}
 
 			case Lexeme::KW_BEGIN:
@@ -546,12 +573,12 @@ namespace Mirb
 
 				if(lexeme() == Lexeme::COLON && !lexer.lexeme.whitespace)
 				{
-					auto result = new (fragment) Tree::StringNode;
+					auto result = new (fragment) Tree::DataNode;
 				
 					result->result_type = Value::String;
 					
-					result->string.data = (const char_t *)":";
-					result->string.length = 1;
+					result->data.data = (const char_t *)":";
+					result->data.length = 1;
 					
 					lexer.step();
 
@@ -603,7 +630,6 @@ namespace Mirb
 					}
 					
 					case Lexeme::STRING:
-					case Lexeme::STRING_START:
 					{
 						if(lexer.lexeme.whitespace)
 						{
@@ -613,7 +639,7 @@ namespace Mirb
 							report(range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
 						}
 
-						return parse_string(Value::Symbol);
+						return parse_data(Value::Symbol);
 					}
 
 					default:
@@ -621,10 +647,9 @@ namespace Mirb
 						return 0;
 				}
 			}
-
+			
 			case Lexeme::STRING:
-			case Lexeme::STRING_START:
-				return parse_string(Value::String);
+				return parse_data(Value::String);
 
 			case Lexeme::KW_SELF:
 			{

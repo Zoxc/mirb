@@ -24,6 +24,7 @@ namespace Mirb
 			Class *array_class;
 			Class *hash_class;
 			Class *string_class;
+			Class *regexp_class;
 			Class *proc_class;
 			Class *symbol_class;
 			Class *nil_class;

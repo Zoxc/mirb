@@ -5,10 +5,8 @@ namespace Mirb
 {
 	std::string Lexeme::names[TYPES] = {
 		// values
-		"opening-string",
-		"continuing-string",
 		"string",
-		"ending-string",
+		"regular expression",
 		"integer",
 		"octal",
 		"real",
@@ -166,7 +164,7 @@ namespace Mirb
 		prev = other.prev;
 		curlies = other.curlies;
 		symbol = other.symbol;
-		str = other.str;
+		data = other.data;
 		
 		return *this;
 	}
