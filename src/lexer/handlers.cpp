@@ -36,8 +36,48 @@ namespace Mirb
 
 		restep();
 	}
+
+	void Lexer::parse_delimited_data(Lexeme::Type type)
+	{
+		InterpolateState state;
+		state.type = type;
+
+		state.terminator = delimiter_mapping.try_get(input, [&]{
+			return input;
+		});
+
+		input++;
+
+		parse_interpolate(&state, false);
+	}
 	
-	void Lexer::to_regexp()
+	void Lexer::mod_to_literal()
+	{
+		switch(input)
+		{
+			case 'r':
+				input++;
+				return parse_delimited_data(Lexeme::REGEXP);
+
+			case 's':
+				input++;
+				return parse_delimited_data(Lexeme::SYMBOL);
+
+			case 'Q':
+				input++;
+				return parse_delimited_data(Lexeme::STRING);
+
+			default:
+				break;
+		}
+
+		if(is_alpha(input))
+			return;
+
+		return parse_delimited_data(Lexeme::STRING);
+	}
+
+	void Lexer::div_to_regexp()
 	{
 		InterpolateState state;
 		state.type = Lexeme::REGEXP;
@@ -303,6 +343,11 @@ namespace Mirb
 	{
 		eol();
 		restep();
+	}
+	
+	bool Lexer::is_alpha(char_t c)
+	{
+		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z') || Input::char_in(c, '0', '9');
 	}
 	
 	bool Lexer::is_start_ident(char_t c)

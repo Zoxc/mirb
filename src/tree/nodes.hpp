@@ -223,7 +223,7 @@ namespace Mirb
 		};
 		
 		struct RangeNode:
-			public Node
+			public LocationNode
 		{
 			NodeType type() { return NodeRange; }
 

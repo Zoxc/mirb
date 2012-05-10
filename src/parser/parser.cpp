@@ -376,8 +376,28 @@ namespace Mirb
 		return result;
 	}
 
-	Tree::Node *Parser::parse_data(Value::Type type)
+	Tree::Node *Parser::parse_data(Lexeme::Type override)
 	{
+		Value::Type type;
+
+		switch(override)
+		{
+			case Lexeme::STRING:
+				type = Value::String;
+				break;
+				
+			case Lexeme::REGEXP:
+				type = Value::Regexp;
+				break;
+
+			case Lexeme::SYMBOL:
+				type = Value::Symbol;
+				break;
+
+			default:
+				mirb_debug_abort("Unknown token");
+		}
+
 		switch(lexer.lexeme.data->type)
 		{
 			case InterpolateData::Plain:
@@ -511,9 +531,19 @@ namespace Mirb
 			
 			case Lexeme::DIV:
 			{
-				lexer.to_regexp();
+				lexer.div_to_regexp();
 
-				return parse_data(Value::Regexp);
+				return parse_data(lexeme());
+			}
+			
+			case Lexeme::MOD:
+			{
+				lexer.mod_to_literal();
+
+				if(lexeme() == Lexeme::MOD)
+					break;
+				else
+					return parse_data(lexeme());
 			}
 
 			case Lexeme::KW_BEGIN:
@@ -639,7 +669,7 @@ namespace Mirb
 							report(range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
 						}
 
-						return parse_data(Value::Symbol);
+						return parse_data(Lexeme::SYMBOL);
 					}
 
 					default:
@@ -648,8 +678,9 @@ namespace Mirb
 				}
 			}
 			
+			case Lexeme::REGEXP:
 			case Lexeme::STRING:
-				return parse_data(Value::String);
+				return parse_data(lexeme());
 
 			case Lexeme::KW_SELF:
 			{
@@ -798,14 +829,12 @@ namespace Mirb
 			}
 
 			default:
-			{
-				error("Expected expression but found " + lexer.lexeme.describe());
-				
-				lexer.step();
-					
-				return 0;
-			}
+				break;
 		}
+
+		error("Expected expression but found " + lexer.lexeme.describe());
+		lexer.step();
+		return 0;
 	}
 	
 	Tree::Node *Parser::parse_power()
@@ -976,6 +1005,8 @@ namespace Mirb
 
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				auto node = new (fragment) Tree::RangeNode;
+				
+				node->range = range;
 
 				node->inclusive = lexeme() == Lexeme::RANGE_INCL;
 			
@@ -984,7 +1015,7 @@ namespace Mirb
 			
 				node->left = result;
 				node->right = parse_operator_expression();
-			
+				
 				return node;
 			});
 		}

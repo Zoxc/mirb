@@ -11,6 +11,7 @@ namespace Mirb
 	}
 	
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
+	Map<char_t, char_t> Lexer::delimiter_mapping(2);
 	
 	Lexer::Context::Context(Lexer &lexer) : input(lexer.input), lexeme(lexer.lexeme)
 	{
@@ -72,6 +73,11 @@ namespace Mirb
 
 	void Lexer::setup_jump_table()
 	{
+		delimiter_mapping.set('(', ')');
+		delimiter_mapping.set('{', '}');
+		delimiter_mapping.set('[', ']');
+		delimiter_mapping.set('<', '>');
+
 		auto set_chars = [](char_t start, char_t stop, void (Lexer::*func)()) {
 			for(size_t c = start; c <= stop; ++c)
 				jump_table[(size_t)c] = func;

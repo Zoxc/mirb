@@ -26,7 +26,8 @@ namespace Mirb
 			
 			SymbolPool &symbol_pool;
 			Parser &parser;
-			
+
+			static Map<char_t, char_t> delimiter_mapping;
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
 
 			bool process_null(const char_t *input, bool expected = false);
@@ -38,7 +39,8 @@ namespace Mirb
 			
 			bool parse_escape(std::string &result);
 			void parse_interpolate(InterpolateState *state, bool continuing);
-			
+			void parse_delimited_data(Lexeme::Type type);
+
 			template<Lexeme::Type type> void single();
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
@@ -68,6 +70,7 @@ namespace Mirb
 			
 			void ivar();
 			void global();
+			static bool is_alpha(char_t c);
 			static bool is_ident(char_t c);
 			static bool is_start_ident(char_t c);
 			void skip_ident();
@@ -107,7 +110,9 @@ namespace Mirb
 			
 			void restore(Context &context);
 			
-			void to_regexp();
+			void mod_to_literal();
+			void div_to_regexp();
+
 			void load(const char_t *input, size_t length);
 			void step();
 			void identify_keywords();

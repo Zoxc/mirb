@@ -160,7 +160,7 @@ namespace Mirb
 			bool is_sep();
 			void skip_seps();
 			Tree::Node *parse_hash();
-			Tree::Node *parse_data(Value::Type type);
+			Tree::Node *parse_data(Lexeme::Type override);
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression();
 			void process_lhs(Tree::Node *&lhs, const Range &range);
@@ -322,11 +322,11 @@ namespace Mirb
 					case Lexeme::IVAR:
 					case Lexeme::GLOBAL:
 					case Lexeme::CVAR:
-					case Lexeme::SYMBOL:
 					case Lexeme::ADD:
 					case Lexeme::SUB:
 					case Lexeme::MUL:
 					case Lexeme::DIV:
+					case Lexeme::MOD:
 					case Lexeme::INTEGER:
 					case Lexeme::KW_IF:
 					case Lexeme::KW_UNLESS:
@@ -357,8 +357,10 @@ namespace Mirb
 					case Lexeme::SCOPE:
 					case Lexeme::QUESTION:
 						return true;
-
+						
 					case Lexeme::STRING:
+					case Lexeme::REGEXP:
+					case Lexeme::SYMBOL:
 						return lexer.lexeme.data->type == InterpolateData::Starting || lexer.lexeme.data->type == InterpolateData::Plain;
 
 					default:

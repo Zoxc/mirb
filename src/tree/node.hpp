@@ -75,6 +75,12 @@ namespace Mirb
 		{
 		};
 		
+		struct LocationNode:
+			public Node
+		{
+			Range range;
+		};
+		
 		typedef List<Node, ListNode> NodeList;
 		typedef CountedList<Node, ListNode> CountedNodeList;
 	};

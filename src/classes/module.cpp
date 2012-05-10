@@ -111,8 +111,6 @@ namespace Mirb
 	
 	value_t attr_setup(value_t obj, size_t argc, value_t argv[], bool read, bool write)
 	{
-		auto self = cast<Module>(obj);
-
 		for(size_t i = 0; i < argc; ++i)
 		{
 			if(Value::of_type<Symbol>(argv[i]))
