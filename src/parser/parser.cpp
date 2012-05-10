@@ -921,6 +921,8 @@ namespace Mirb
 			
 				lexer.step();
 
+				skip_lines();
+				
 				Tree::Node *right = typecheck(parse_unary());
 
 				while(true)
@@ -1363,6 +1365,8 @@ namespace Mirb
 		if(lexeme() == Lexeme::KW_NOT)
 		{
 			lexer.step();
+			
+			skip_lines();
 
 			auto result = parse_assignment(true);
 
@@ -1391,6 +1395,8 @@ namespace Mirb
 				node->left = result;
 			
 				lexer.step();
+
+				skip_lines();
 			
 				node->right = parse_boolean_unary();
 
