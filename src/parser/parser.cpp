@@ -847,7 +847,7 @@ namespace Mirb
 
 				lexer.step();
 
-				result->value = typecheck(parse_power());
+				result->value = typecheck(parse_unary());
 
 				lexer.lexeme.prev_set(result->range);
 				
