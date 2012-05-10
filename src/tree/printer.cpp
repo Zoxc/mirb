@@ -306,6 +306,9 @@ namespace Mirb
 				
 				std::string result = "begin\n" + print_node(target->code) + join(target->rescues);
 				
+				if(target->else_group)
+					result += "else\n" + print_node(target->else_group);
+				
 				if(target->ensure_group)
 					result += "ensure\n" + print_node(target->ensure_group);
 				

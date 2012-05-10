@@ -101,13 +101,6 @@ namespace Mirb
 							// Fallthrough
 
 						default:
-							/*  TODO: Issue a warning here?
-							const char_t *start = lexeme.start;
-							lexeme.start = &input - 1;
-							lexeme.stop = &input + 1;
-							parser.report(lexeme.dup(memory_pool), "Possibly invalid escape string", Message::MESSAGE_WARNING);
-							lexeme.start = start;*/
-							
 							input++;
 					}
 					break;
@@ -148,15 +141,6 @@ namespace Mirb
 	{
 		switch(input)
 		{
-			case '\'':
-			case '\"':
-			case '\\':
-			case '/':
-			case '(':
-			case ')':
-				result += input++;
-				break;
-				
 			case '0':
 				result += (char)0;
 				input++;
@@ -210,15 +194,9 @@ namespace Mirb
 			case 0: 
 				if(process_null(&input))
 					return true;
-
+			
 			default:
-				{
-					const char_t *start = lexeme.start;
-					lexeme.start = &input - 1;
-					lexeme.stop = &input + 1;
-					parser.report(lexeme.dup(memory_pool), "Invalid escape string");
-					lexeme.start = start;
-				}
+				result += input++;
 		}
 
 		return false;

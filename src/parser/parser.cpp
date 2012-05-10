@@ -530,6 +530,7 @@ namespace Mirb
 			}
 			
 			case Lexeme::DIV:
+			case Lexeme::ASSIGN_DIV:
 			{
 				lexer.div_to_regexp();
 
@@ -644,6 +645,7 @@ namespace Mirb
 					case Lexeme::CVAR:
 					case Lexeme::GLOBAL:
 					case Lexeme::IDENT:
+					case Lexeme::EXT_IDENT:
 					{
 						if(lexer.lexeme.whitespace)
 						{
@@ -711,14 +713,16 @@ namespace Mirb
 
 				return new (fragment) Tree::NilNode;
 			}
-
+			
+			case Lexeme::OCTAL:
+			case Lexeme::HEX:
 			case Lexeme::INTEGER:
 			{
 				auto result = new (fragment) Tree::IntegerNode;
 					
 				std::string str = lexer.lexeme.string();
 					
-				result->value = atoi(str.c_str());
+				result->value = atoi(str.c_str()); // TODO: Parse octal/hex and longer numbers correctly
 					
 				lexer.step();
 					
@@ -1023,7 +1027,7 @@ namespace Mirb
 		return result;
 	}
 	
-	Tree::Node *Parser::parse_splat_expression()
+	Tree::Node *Parser::parse_splat_expression(bool allow_multiples)
 	{
 		if(matches(Lexeme::MUL))
 		{
@@ -1040,12 +1044,12 @@ namespace Mirb
 
 			auto result = new (fragment) Tree::SplatNode;
 
-			result->expression = typecheck(parse_ternary_if());
+			result->expression = typecheck(parse_ternary_if(allow_multiples));
 
 			return result;
 		}
 		else
-			return parse_ternary_if();
+			return parse_ternary_if(allow_multiples);
 	}
 
 	void Parser::process_lhs(Tree::Node *&lhs, const Range &range)
@@ -1168,7 +1172,7 @@ namespace Mirb
 	Tree::Node *Parser::parse_multiple_expressions(bool allow_multiples)
 	{
 		Range range = lexer.lexeme;
-		auto result = parse_splat_expression();
+		auto result = parse_splat_expression(allow_multiples);
 
 		if(allow_multiples)
 		{
@@ -1194,7 +1198,7 @@ namespace Mirb
 					skip_lines();
 
 					Range result_range = lexer.lexeme;
-					result = typecheck(parse_splat_expression());
+					result = typecheck(parse_splat_expression(allow_multiples));
 					lexer.lexeme.prev_set(&result_range);
 
 					if(result)

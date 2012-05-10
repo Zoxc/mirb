@@ -36,6 +36,25 @@ namespace Mirb
 
 		restep();
 	}
+	
+	void Lexer::skip_line()
+	{
+		input++;
+
+		if(input == '\n')
+		{
+			newline();
+			return restep();
+		}
+		else if(input == '\r')
+		{
+			carrige_return();
+			return restep();
+		}
+		
+		input--;
+		unknown();
+	}
 
 	void Lexer::parse_delimited_data(Lexeme::Type type)
 	{
@@ -79,12 +98,14 @@ namespace Mirb
 
 	void Lexer::div_to_regexp()
 	{
+		input.set(lexeme.start + 1);
+
 		InterpolateState state;
 		state.type = Lexeme::REGEXP;
 		state.terminator = '/';
 		parse_interpolate(&state, false);
 	}
-
+	
 	void Lexer::character()
 	{
 		input++;

@@ -51,6 +51,7 @@ namespace Mirb
 			void unknown();
 			void null();
 			void newline();
+			void skip_line();
 			void carrige_return();
 			void character();
 			

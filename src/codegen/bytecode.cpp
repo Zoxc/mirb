@@ -877,6 +877,9 @@ namespace Mirb
 			 */
 			current_exception_block = exception_block->parent;
 			
+			if(node->else_group)
+				to_bytecode(node->else_group, no_var);
+
 			/*
 			 * Check for ensure node
 			 */

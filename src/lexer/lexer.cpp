@@ -111,6 +111,7 @@ namespace Mirb
 		// Newlines
 		jump_table[(size_t)'\n'] = &Lexer::newline;
 		jump_table[(size_t)'\r'] = &Lexer::carrige_return;
+		jump_table[(size_t)'\\'] = &Lexer::skip_line;
 		
 		// Arithmetic
 		jump_table[(size_t)'+'] = &Lexer::add;

@@ -85,28 +85,23 @@ namespace Mirb
 			
 			lexer.step();
 
-			if(!is_sep() && lexeme() != Lexeme::KW_THEN)
-			{
+			if(!is_sep() && lexeme() != Lexeme::KW_THEN && lexeme() != Lexeme::ASSOC)
 				rescue->pattern = parse_assignment(true);
+			else
+				rescue->pattern = nullptr;
+			
+			if(matches(Lexeme::ASSOC))
+			{
+				Range range = lexer.lexeme;
 
-				if(matches(Lexeme::ASSOC))
-				{
-					Range range = lexer.lexeme;
+				rescue->var = parse_operator_expression(true);
 
-					rescue->var = parse_operator_expression(true);
+				lexer.lexeme.prev_set(&range);
 
-					lexer.lexeme.prev_set(&range);
-
-					process_lhs(rescue->var, range);
-				}
-				else
-					rescue->var = nullptr;
+				process_lhs(rescue->var, range);
 			}
 			else
-			{
-				rescue->pattern = nullptr;
 				rescue->var = nullptr;
-			}
 
 			parse_then_sep();
 			
@@ -115,6 +110,9 @@ namespace Mirb
 			result->rescues.append(rescue);
 		}
 		
+		if(matches(Lexeme::KW_ELSE))
+			result->else_group = parse_group();
+
 		if(matches(Lexeme::KW_ENSURE))
 		{
 			for(auto node: trapper.list)
@@ -122,9 +120,7 @@ namespace Mirb
 
 			result->ensure_group = parse_group();
 		}
-		else
-			result->ensure_group = 0;
-		
+
 		return result;
 	}
 
@@ -160,7 +156,7 @@ namespace Mirb
 		}
 	}
 	
-	Tree::Node *Parser::parse_ternary_if()
+	Tree::Node *Parser::parse_ternary_if(bool allow_multiples)
 	{
 		Tree::Node *result = parse_range();
 		
@@ -176,11 +172,11 @@ namespace Mirb
 				node->inverted = false;
 			
 				node->left = result;
-				node->middle = parse_operator_expression();
+				node->middle = parse_operator_expression(allow_multiples);
 			
 				close_pair("ternary if", range, Lexeme::COLON);
 		
-				node->right = parse_operator_expression();
+				node->right = parse_operator_expression(allow_multiples);
 
 				return node;
 			});
@@ -223,7 +219,6 @@ namespace Mirb
 				auto node = new (fragment) Tree::HandlerNode;
 
 				node->code = result;
-				node->ensure_group = nullptr;
 
 				auto rescue = new (fragment) Tree::RescueNode;
 			
@@ -252,7 +247,6 @@ namespace Mirb
 				auto node = new (fragment) Tree::HandlerNode;
 			
 				node->code = result;
-				node->ensure_group = nullptr;
 
 				auto rescue = new (fragment) Tree::RescueNode;
 			
@@ -302,7 +296,13 @@ namespace Mirb
 	{
 		bool trap_exceptions = false;
 
-		for(auto node: trapper.list)
+		Tree::VoidNode *current = trapper.list.first;
+
+		while(current)
+		{
+			Tree::VoidNode *node = current;
+			current = current->void_entry.next;
+
 			if(node->type() != Tree::Node::Return)
 			{
 				if(node->in_ensure)
@@ -312,6 +312,7 @@ namespace Mirb
 			}
 			else
 				raise_void(node);
+		}
 
 		trapper.list.clear();
 
@@ -321,7 +322,6 @@ namespace Mirb
 		
 			handler->code = loop;
 			handler->loop = loop;
-			handler->ensure_group = 0;
 		
 			return handler;
 		}

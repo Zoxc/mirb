@@ -55,8 +55,15 @@ namespace Mirb
 				
 					void raise()
 					{
-						for(auto node: list)
+						Tree::VoidNode *current = list.first;
+
+						while(current)
+						{
+							Tree::VoidNode *node = current;
+							current = current->void_entry.next;
+
 							parser->raise_void(node);
+						}
 
 						list.clear();
 					}
@@ -162,7 +169,7 @@ namespace Mirb
 			Tree::Node *parse_hash();
 			Tree::Node *parse_data(Lexeme::Type override);
 			Tree::Node *parse_power();
-			Tree::Node *parse_splat_expression();
+			Tree::Node *parse_splat_expression(bool allow_multiples);
 			void process_lhs(Tree::Node *&lhs, const Range &range);
 			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
 			Tree::Node *parse_multiple_expressions(bool allow_multiples);
@@ -210,7 +217,7 @@ namespace Mirb
 			Tree::Node *parse_unless();
 			Tree::Node *parse_high_rescue(bool allow_multiples);
 			Tree::Node *parse_low_rescue();
-			Tree::Node *parse_ternary_if();
+			Tree::Node *parse_ternary_if(bool allow_multiples);
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_tailing_loop();
 			Tree::Node *parse_loop();
@@ -326,8 +333,11 @@ namespace Mirb
 					case Lexeme::SUB:
 					case Lexeme::MUL:
 					case Lexeme::DIV:
+					case Lexeme::ASSIGN_DIV:
 					case Lexeme::MOD:
 					case Lexeme::INTEGER:
+					case Lexeme::HEX:
+					case Lexeme::OCTAL:
 					case Lexeme::KW_IF:
 					case Lexeme::KW_UNLESS:
 					case Lexeme::KW_CASE:

@@ -370,10 +370,11 @@ namespace Mirb
 			
 			Node *code;
 			RescueList rescues;
+			Node *else_group;
 			Node *ensure_group;
 			LoopNode *loop;
 
-			HandlerNode() : loop(nullptr) {}
+			HandlerNode() : else_group(nullptr), ensure_group(nullptr), loop(nullptr) {}
 		};
 		
 		//TODO: Make sure no void nodes are in found in expressions.
