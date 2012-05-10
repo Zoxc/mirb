@@ -113,7 +113,6 @@ namespace Mirb
 				Vector<BranchInfo, MemoryPool> branches;
 				Vector<SourceInfo, MemoryPool> source_locs;
 				
-				var_t self_var;
 				var_t heap_var;
 
 				void finalize();

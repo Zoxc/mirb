@@ -197,8 +197,6 @@ namespace Mirb
 				
 				static const size_t no_break_id = (size_t)-1;
 
-				bool require_self;
-
 				/*
 				 * Variable related fields
 				 */

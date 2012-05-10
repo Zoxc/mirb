@@ -258,7 +258,10 @@ namespace Mirb
 
 				if(lexeme() == Lexeme::DOT)
 				{
-					result->singleton = parse_variable(symbol, range);
+					if(symbol == Symbol::get("self"))
+						result->singleton = new (fragment) Tree::SelfNode;
+					else
+						result->singleton = parse_variable(symbol, range);
 
 					lexer.step();
 				}

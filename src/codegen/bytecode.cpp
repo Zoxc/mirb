@@ -347,7 +347,7 @@ namespace Mirb
 		void ByteCodeGenerator::convert_self(Tree::Node *, var_t var)
 		{
 			if(is_var(var))
-				gen<MoveOp>(var, self_var);
+				gen<SelfOp>(var);
 		}
 		
 		void ByteCodeGenerator::convert_nil(Tree::Node *, var_t var)
@@ -1065,7 +1065,6 @@ namespace Mirb
 			opcode(memory_pool),
 			branches(memory_pool),
 			source_locs(memory_pool),
-			self_var(no_var),
 			heap_var(no_var),
 			var_count(scope->variable_list.size()),
 			memory_pool(memory_pool)
@@ -1111,13 +1110,6 @@ namespace Mirb
 				gen<CreateHeapOp>(heap_var, scope->heap_vars);
 			}
 
-			if(scope->require_self)
-			{
-				self_var = create_var();
-
-				gen<SelfOp>(self_var);
-			}
-			
 			if(scope->block_parameter)
 			{
 				write_variable(scope->block_parameter, [&](var_t store){

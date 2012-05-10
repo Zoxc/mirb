@@ -688,8 +688,6 @@ namespace Mirb
 			{
 				lexer.step();
 				
-				scope->require_self = true;
-
 				return new (fragment) Tree::SelfNode;
 			}
 
@@ -800,8 +798,6 @@ namespace Mirb
 
 				lexer.step();
 				
-				scope->require_self = true; // TODO: Reduce this to self calls only
-
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}
 			
@@ -814,8 +810,6 @@ namespace Mirb
 
 				lexer.step();
 				
-				scope->require_self = true;
-
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, false);
 			}
 
