@@ -482,11 +482,11 @@ namespace Mirb
 	
 	bool type_error(value_t value, value_t expected)
 	{
-		value_t klass = class_of(value);
+		value_t klass = real_class_of(value);
 
 		if(klass != expected)
 		{
-			raise(context->type_error, inspect_obj(value) + " is of class " + inspect_obj(class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
+			raise(context->type_error, inspect_obj(value) + " is of class " + inspect_obj(real_class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
 			return true;
 		}
 		else
