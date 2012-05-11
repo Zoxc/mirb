@@ -1436,6 +1436,46 @@ namespace Mirb
 		return result;
 	}
 	
+	Tree::Node *Parser::parse_alias()
+	{
+		if(lexeme() == Lexeme::KW_ALIAS)
+		{
+			Range range = lexer.lexeme;
+			lexer.step();
+			
+			auto node = new (fragment) Tree::AliasNode;
+
+			lexer.lexeme.allow_keywords = false;
+
+			auto parse_name = [&](Tree::Node *&node) {
+				if(lexeme() == Lexeme::SYMBOL)
+					node = parse_factor();
+				else
+				{
+					auto symbol = new (fragment) Tree::SymbolNode;
+
+					parse_method_name(symbol->symbol);
+
+					node = symbol;
+				}
+			};
+			
+			parse_name(node->new_name);
+
+			lexer.lexeme.allow_keywords = true;
+
+			parse_name(node->old_name);
+
+			lexer.lexeme.prev_set(&range);
+
+			node->range = range;
+
+			return node;
+		}
+		else
+			return parse_boolean();
+	}
+	
 	Tree::Node *Parser::parse_statements()
 	{
 		skip_lines();
@@ -1444,7 +1484,7 @@ namespace Mirb
 		
 		if(!is_sep())
 		{
-			if(!is_expression())
+			if(!is_statement())
 				return group;
 
 			Tree::Node *node = parse_statement();
@@ -1457,7 +1497,7 @@ namespace Mirb
 				
 				skip_seps();
 		
-				while(is_expression())
+				while(is_statement())
 				{
 					error = true;
 					typecheck(parse_statement());
@@ -1482,7 +1522,7 @@ namespace Mirb
 		
 		skip_seps();
 		
-		while(is_expression())
+		while(is_statement())
 		{
 			Tree::Node *node = typecheck(parse_statement());
 			

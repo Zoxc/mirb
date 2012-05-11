@@ -41,6 +41,7 @@ namespace Mirb
 				Module,
 				Method,
 				SingletonMethod,
+				Alias,
 				Call,
 				Super,
 				VariadicCall,
@@ -95,6 +96,7 @@ namespace Mirb
 				&&OpModule, \
 				&&OpMethod, \
 				&&OpSingletonMethod, \
+				&&OpAlias, \
 				&&OpCall, \
 				&&OpSuper, \
 				&&OpVariadicCall, \
@@ -324,6 +326,15 @@ namespace Mirb
 			Mirb::Block *block;
 			
 			SingletonMethodOp(var_t singleton, Symbol *name, Mirb::Block *block) : singleton(singleton), name(name), block(block) {}
+		};
+		
+		struct AliasOp:
+			public OpcodeWrapper<Opcode::Alias>
+		{
+			var_t new_name;
+			var_t old_name;
+			
+			AliasOp(var_t new_name, var_t old_name) : new_name(new_name), old_name(old_name) {}
 		};
 		
 		struct CallOp:

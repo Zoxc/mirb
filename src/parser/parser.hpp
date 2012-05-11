@@ -179,6 +179,7 @@ namespace Mirb
 			Tree::Node *parse_array();
 			Tree::Node *parse_range();
 			Tree::Node *parse_unary();
+			Tree::Node *parse_alias();
 			Tree::Node *parse_boolean_unary();
 			Tree::Node *parse_factor();
 			Tree::Node *parse_boolean();
@@ -375,6 +376,18 @@ namespace Mirb
 
 					default:
 						return false;
+				}
+			}
+			
+			bool is_statement()
+			{
+				switch(lexeme())
+				{
+					case Lexeme::KW_ALIAS:
+						return true;
+
+					default:
+						return is_expression();
 				}
 			}
 	};

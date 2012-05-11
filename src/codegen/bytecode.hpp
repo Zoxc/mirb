@@ -79,6 +79,7 @@ namespace Mirb
 				void convert_class(Tree::Node *basic_node, var_t var);
 				void convert_module(Tree::Node *basic_node, var_t var);
 				void convert_method(Tree::Node *basic_node, var_t var);
+				void convert_alias(Tree::Node *basic_node, var_t var);
 				void convert_handler(Tree::Node *basic_node, var_t var);
 				void convert_multiple_expressions(Tree::Node *basic_node, var_t var);
 

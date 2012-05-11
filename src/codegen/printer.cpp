@@ -298,6 +298,15 @@ namespace Mirb
 					return "singleton_method " + var(op->singleton)+ ", " + imm(op->name) + ", " + print_block(op->block);
 				}
 				
+				case Opcode::Alias:
+				{
+					auto op = (AliasOp *)opcode;
+
+					opcode += sizeof(AliasOp);
+					
+					return "alias " + var(op->new_name)+ ", " + var(op->old_name);
+				}
+				
 				case Opcode::Call:
 				{
 					auto op = (CallOp *)opcode;

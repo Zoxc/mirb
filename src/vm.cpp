@@ -361,7 +361,19 @@ namespace Mirb
 		Op(Interpolate)
 			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv], op.result);
 		EndOp
+			
+		DeepOp(Alias)
+			auto method = frame.scope->first()->get_method(auto_cast(vars[op.old_name]));
 
+			if(prelude_unlikely(!method))
+			{
+				raise(context->name_error, "Unable to find method " + inspect_obj(vars[op.old_name]) + " on " + inspect_obj(frame.scope->first()));
+				goto handle_exception;
+			}
+
+			frame.scope->first()->set_method(auto_cast(vars[op.new_name]), method);
+		EndOp
+			
 		Op(Handler)
 			current_exception_block = op.block;
 		EndOp

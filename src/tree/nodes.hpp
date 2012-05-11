@@ -462,5 +462,14 @@ namespace Mirb
 			Scope *scope;
 			Range *range;
 		};
+		
+		struct AliasNode:
+			public LocationNode
+		{
+			NodeType type() { return Alias; }
+			
+			Node *new_name;
+			Node *old_name;
+		};
 	};
 };

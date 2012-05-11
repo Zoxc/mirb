@@ -119,6 +119,7 @@ namespace Mirb
 		"class",
 		"module",
 		"def",
+		"alias",
 		"self",
 		"do",
 		"yield",

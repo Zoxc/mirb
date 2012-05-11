@@ -362,6 +362,13 @@ namespace Mirb
 				return "def " + (target->singleton ? print_node(target->singleton) + "." : "") + print_symbol(target->name) + "\n" + print_node(target->scope->group) + "end\n";
 			}
 			
+			case Tree::SimpleNode::Alias:
+			{
+				auto target = (Tree::AliasNode *)node;
+				
+				return "alias "  + print_node(target->new_name) + " " + print_node(target->old_name);
+			}
+			
 			case Tree::SimpleNode::Splat:
 			{
 				auto target = (Tree::SplatNode *)node;

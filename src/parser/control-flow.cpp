@@ -187,7 +187,7 @@ namespace Mirb
 	
 	Tree::Node *Parser::parse_conditional()
 	{
-		Tree::Node *result = parse_boolean();
+		Tree::Node *result = parse_alias();
 		
 		if (lexeme() == Lexeme::KW_IF || lexeme() == Lexeme::KW_UNLESS)
 		{

@@ -40,6 +40,7 @@ namespace Mirb
 		"Class",
 		"Module",
 		"Method",
+		"Alias",
 		"Rescue",
 		"Handler",
 		"Splat",
