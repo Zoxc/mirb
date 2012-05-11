@@ -454,6 +454,10 @@ namespace Mirb
 			{
 				case '0':
 				case ':':
+				case '\\':
+				case '/':
+				case '$':
+				case '_':
 				case '*':
 					input++;
 					lexeme.stop = &input;
