@@ -207,7 +207,6 @@ namespace Mirb
 
 	char_t &CharArray::operator [](size_t index)
 	{
-		mirb_debug_assert(!shared && !static_data);
 		mirb_debug_assert(index < length);
 		return data[index];
 	}

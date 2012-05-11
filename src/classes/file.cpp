@@ -21,6 +21,15 @@ namespace Mirb
 
 		return result;
 	}
+	
+	bool absolute_path(const CharArray &path)
+	{
+#ifdef WIN32
+		return path.size() > 1 && path[1] == ':';
+#else
+		return path.size() > 0 && path[0] == '/';
+#endif
+	}
 
 	void JoinSegments::push(const CharArray &path)
 	{
@@ -60,11 +69,14 @@ namespace Mirb
 
 	value_t expand_path(String *relative, String *absolute)
 	{
-		CharArray absolute_str = absolute ? absolute->string : Platform::cwd();
-
 		JoinSegments joiner;
 		
-		joiner.push(absolute_str);
+		if(!absolute_path(relative->string))
+		{
+			CharArray absolute_str = absolute ? absolute->string : Platform::cwd();
+			joiner.push(absolute_str);
+		}
+
 		joiner.push(relative->string);
 		
 		return joiner.join().to_string();
@@ -88,7 +100,7 @@ namespace Mirb
 		CharArray result = normalize_path(path->string);
 
 		for(size_t i = result.size(); i-- > 0;)
-			if(const_cast<const CharArray &>(result)[i] == '/')
+			if(result[i] == '/')
 			{
 				if(i)
 				{
