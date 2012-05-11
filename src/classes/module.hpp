@@ -32,6 +32,8 @@ namespace Mirb
 			Method *get_method(Symbol *name);
 			void set_method(Symbol *name, Method *method);
 
+			static value_t alias_method(value_t obj, Symbol *new_name, Symbol *old_name);
+
 			template<typename F> void mark(F mark)
 			{
 				Object::mark(mark);

@@ -155,10 +155,28 @@ namespace Mirb
 	{
 		return obj;
 	}
+	
+	value_t Module::alias_method(value_t obj, Symbol *new_name, Symbol *old_name)
+	{
+		auto self = cast<Module>(obj);
+
+		auto method = self->get_method(auto_cast(old_name));
+
+		if(prelude_unlikely(!method))
+		{
+			raise(context->name_error, "Unable to find method " + inspect_obj(old_name) + " on " + inspect_obj(new_name));
+			return value_raise;
+		}
+
+		self->set_method(auto_cast(new_name), method);
+
+		return obj;
+	}
 
 	void Module::initialize()
 	{
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
+		method<Arg::Self, Arg::Class<Symbol>, Arg::Class<Symbol>>(context->module_class, "alias_method", &alias_method);
 		method<Arg::Self, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "include", &include);
 		method<Arg::Value>(context->module_class, "included", &included);

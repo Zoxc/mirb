@@ -363,15 +363,10 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(Alias)
-			auto method = frame.scope->first()->get_method(auto_cast(vars[op.old_name]));
+			value_t result = Module::alias_method(auto_cast(frame.scope->first()), auto_cast(vars[op.new_name]), auto_cast(vars[op.old_name]));
 
-			if(prelude_unlikely(!method))
-			{
-				raise(context->name_error, "Unable to find method " + inspect_obj(vars[op.old_name]) + " on " + inspect_obj(frame.scope->first()));
+			if(prelude_unlikely(!result))
 				goto handle_exception;
-			}
-
-			frame.scope->first()->set_method(auto_cast(vars[op.new_name]), method);
 		EndOp
 			
 		Op(Handler)
