@@ -128,7 +128,7 @@ namespace Mirb
 		FILE* file = open_file(filename, try_relative);
 
 		if(!file)
-			return raise(context->load_error, "Unable to load file '" + filename + "'");
+			return raise(context->load_error, "Unable to find file '" + filename + "'");
 
 		fseek(file, 0, SEEK_END);
 
