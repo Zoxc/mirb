@@ -17,6 +17,7 @@ namespace Mirb
 				Data,
 				Interpolate,
 				Integer,
+				Float,
 				Variable,
 				IVar,
 				Global,

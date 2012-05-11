@@ -143,6 +143,14 @@ namespace Mirb
 			int value;
 		};
 
+		struct FloatNode:
+			public Node
+		{
+			NodeType type() { return Float; }
+			
+			double value;
+		};
+
 		struct VariableNode:
 			public Node
 		{

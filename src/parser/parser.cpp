@@ -159,6 +159,10 @@ namespace Mirb
 			case Lexeme::BITWISE_XOR:
 			case Lexeme::BITWISE_OR:
 			case Lexeme::COMPARE:
+			case Lexeme::LESS:
+			case Lexeme::LESS_OR_EQUAL:
+			case Lexeme::GREATER:
+			case Lexeme::GREATER_OR_EQUAL:
 			case Lexeme::EQUALITY:
 			case Lexeme::CASE_EQUALITY:
 			case Lexeme::MATCHES:
@@ -712,6 +716,19 @@ namespace Mirb
 				return new (fragment) Tree::NilNode;
 			}
 			
+			case Lexeme::REAL:
+			{
+				auto result = new (fragment) Tree::FloatNode;
+					
+				std::string str = lexer.lexeme.string();
+					
+				result->value = std::atof(str.c_str()); // TODO: Parse to double
+					
+				lexer.step();
+					
+				return result;
+			}
+			
 			case Lexeme::OCTAL:
 			case Lexeme::HEX:
 			case Lexeme::INTEGER:
@@ -720,7 +737,7 @@ namespace Mirb
 					
 				std::string str = lexer.lexeme.string();
 					
-				result->value = atoi(str.c_str()); // TODO: Parse octal/hex and longer numbers correctly
+				result->value = std::atoi(str.c_str()); // TODO: Parse octal/hex and longer numbers correctly
 					
 				lexer.step();
 					

@@ -53,6 +53,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_data,
 			&ByteCodeGenerator::convert_interpolated,
 			&ByteCodeGenerator::convert_integer,
+			&ByteCodeGenerator::convert_float,
 			&ByteCodeGenerator::convert_variable,
 			&ByteCodeGenerator::convert_ivar,
 			&ByteCodeGenerator::convert_global,
@@ -148,6 +149,16 @@ namespace Mirb
 				auto node = (Tree::IntegerNode *)basic_node;
 				
 				gen<LoadFixnumOp>(var, Fixnum::from_int(node->value));
+			}
+		}
+		
+		void ByteCodeGenerator::convert_float(Tree::Node *basic_node, var_t var)
+		{
+			if(is_var(var))
+			{
+				auto node = (Tree::FloatNode *)basic_node;
+				
+				gen<LoadFloatOp>(var, node->value);
 			}
 		}
 

@@ -134,6 +134,19 @@ namespace Mirb
 					return var(op->dst) + " = " + var(op->src);
 				}
 				
+				case Opcode::LoadFloat:
+				{
+					auto op = (LoadFloatOp *)opcode;
+
+					opcode += sizeof(LoadFloatOp);
+					
+					std::stringstream result;
+					
+					result << var(op->var) << " = " << op->value;
+			
+					return result.str();
+				}
+				
 				case Opcode::LoadFixnum:
 				{
 					auto op = (LoadFixnumOp *)opcode;

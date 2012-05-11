@@ -7,6 +7,7 @@
 #include "classes/string.hpp"
 #include "classes/module.hpp"
 #include "classes/array.hpp"
+#include "classes/float.hpp"
 
 namespace Mirb
 {
@@ -237,7 +238,11 @@ namespace Mirb
 			if(prelude_unlikely(!Support::define_singleton_method(frame.scope, vars[op.singleton], op.name, op.block)))
 				goto handle_exception;
 		EndOp
-
+			
+		Op(LoadFloat)
+			vars[op.var] = Collector::allocate<Float>(op.value);
+		EndOp
+			
 		Op(Lookup)
 			vars[op.var] = (*frame.scopes)[op.index];
 		EndOp

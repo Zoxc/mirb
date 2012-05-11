@@ -339,6 +339,7 @@ namespace Mirb
 					case Lexeme::INTEGER:
 					case Lexeme::HEX:
 					case Lexeme::OCTAL:
+					case Lexeme::REAL:
 					case Lexeme::KW_IF:
 					case Lexeme::KW_UNLESS:
 					case Lexeme::KW_CASE:

@@ -18,6 +18,7 @@
 #include "classes/regexp.hpp"
 #include "classes/proc.hpp"
 #include "classes/array.hpp"
+#include "classes/float.hpp"
 #include "classes/exception.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/io.hpp"
@@ -875,6 +876,7 @@ namespace Mirb
 		String::initialize();
 		Fixnum::initialize();
 		Numeric::initialize();
+		Float::initialize();
 		Proc::initialize();
 		Array::initialize();
 		Hash::initialize();

@@ -55,6 +55,24 @@ namespace Mirb
 				static type apply(Frame &frame, State &state);
 		};
 		
+		template<class T> class SelfClass
+		{
+			public:
+				typedef T *type;
+				static const Info info;
+
+				static type apply(Frame &frame, State &state)
+				{
+					value_t result = frame.obj;
+
+					mirb_runtime_assert(Mirb::Value::of_type<T>(result));
+
+					return auto_cast(result);
+				}
+		};
+		
+		template<class T> const Info SelfClass<T>::info = {0, 0, false};
+		
 		class Block
 		{
 			public:

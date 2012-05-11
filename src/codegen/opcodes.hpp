@@ -24,6 +24,7 @@ namespace Mirb
 			{
 				Move,
 				LoadFixnum,
+				LoadFloat,
 				LoadTrue,
 				LoadFalse,
 				LoadNil,
@@ -79,6 +80,7 @@ namespace Mirb
 			#define MIRB_OPCODES \
 				&&OpMove, \
 				&&OpLoadFixnum, \
+				&&OpLoadFloat, \
 				&&OpLoadTrue, \
 				&&OpLoadFalse, \
 				&&OpLoadNil, \
@@ -156,6 +158,15 @@ namespace Mirb
 			var_t src;
 
 			MoveOp(var_t dst, var_t src) : dst(dst), src(src) {}
+		};
+		
+		struct LoadFloatOp:
+			public OpcodeWrapper<Opcode::LoadFloat>
+		{
+			var_t var;
+			double value;
+
+			LoadFloatOp(var_t var, double value) : var(var), value(value) {}
 		};
 		
 		struct LoadFixnumOp:

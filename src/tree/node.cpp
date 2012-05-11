@@ -7,6 +7,7 @@ namespace Mirb
 		"Data",
 		"Interpolated",
 		"Integer",
+		"Float",
 		"Variable",
 		"IVar",
 		"Global",

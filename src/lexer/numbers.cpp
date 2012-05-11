@@ -96,8 +96,6 @@ namespace Mirb
 
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::REAL;
-			
-			parser.report(lexeme.dup(memory_pool), "no .<digit> floating literal anymore; put 0 before dot");
 		}
 		else
 		{
