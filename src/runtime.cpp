@@ -903,6 +903,9 @@ namespace Mirb
 
 	void finalize()
 	{
+		for(size_t i = context->at_exits.size(); i-- > 0;)
+			Proc::call(context->at_exits[i], value_nil, 0, nullptr);
+
 		Collector::free();
 	}
 };

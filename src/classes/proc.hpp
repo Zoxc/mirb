@@ -7,7 +7,6 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t call(value_t obj, value_t block, size_t argc, value_t argv[]);
 			static value_t call_with_options(value_t self_value, Tuple<Module> *scope, value_t obj, value_t block, size_t argc, value_t argv[]);
 
 			friend class Object;
@@ -22,6 +21,8 @@ namespace Mirb
 				scopes(scopes)
 			{
 			}
+			
+			static value_t call(value_t obj, value_t block, size_t argc, value_t argv[]);
 
 			value_t self;
 			Symbol *name;

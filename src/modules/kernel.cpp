@@ -12,12 +12,19 @@
 
 namespace Mirb
 {
+	value_t Kernel::at_exit(value_t block)
+	{
+		if(type_error(block, context->proc_class))
+			return 0;
+
+		context->at_exits.push(block);
+
+		return block;
+	}
+	
 	value_t Kernel::proc(value_t block)
 	{
-		if(block)
-			return block;
-		else
-			return value_nil;
+		return block;
 	}
 	
 	value_t Kernel::benchmark(value_t block)
@@ -255,6 +262,7 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
+		method<Arg::Block>(context->kernel_module, "at_exit", &at_exit);
 		method<Arg::Block>(context->kernel_module, "proc", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
 		method(context->kernel_module, "backtrace", &backtrace);

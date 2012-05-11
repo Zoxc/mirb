@@ -5,6 +5,7 @@ namespace Mirb
 {
 	namespace Kernel
 	{
+		value_t at_exit(value_t block);
 		value_t proc(value_t block);
 		value_t benchmark(value_t block);
 		value_t backtrace();

@@ -71,6 +71,7 @@ namespace Mirb
 			Class *terminator;
 			
 			ValueMap::MapType globals;
+			Vector<value_t, AllocatorBase, Allocator> at_exits;
 
 			Context();
 			
@@ -85,7 +86,8 @@ namespace Mirb
 
 					start++;
 				}
-
+				
+				at_exits.mark(mark);
 				globals.mark(mark);
 			}
 
