@@ -232,6 +232,8 @@ namespace Mirb
 			{
 				lexer.step();
 					
+				skip_lines();
+					
 				if(lexeme() == Lexeme::PARENT_CLOSE)
 					error("Expected expression");
 				else
@@ -305,6 +307,8 @@ skip_name:
 			
 			if(matches(Lexeme::PARENT_OPEN))
 			{
+				skip_lines();
+					
 				if(lexeme() != Lexeme::PARENT_CLOSE)
 					parse_parameters();
 			

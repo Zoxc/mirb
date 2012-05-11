@@ -835,7 +835,9 @@ namespace Mirb
 				Range range = lexer.lexeme;
 
 				lexer.step();
-
+				
+				skip_lines();
+					
 				Tree::Node *result = parse_group();
 
 				close_pair("parentheses", range, Lexeme::PARENT_CLOSE);

@@ -51,6 +51,8 @@ namespace Mirb
 			if(lexeme() == Lexeme::BITWISE_OR)
 			{
 				lexer.step();
+
+				skip_lines();
 			
 				parse_parameters();
 			
@@ -128,7 +130,9 @@ namespace Mirb
 			Range range = lexer.lexeme;
 
 			lexer.step();
-
+			
+			skip_lines();
+					
 			if(lexeme() != Lexeme::PARENT_CLOSE)
 				parse_arguments(node);
 			
@@ -264,6 +268,8 @@ namespace Mirb
 					
 					lexer.step();
 					
+					skip_lines();
+					
 					lexer.lexeme.allow_keywords = true;
 
 					if(require_ident())
@@ -294,7 +300,9 @@ namespace Mirb
 					lexer.lexeme.allow_keywords = false;
 
 					lexer.step();
-
+					
+					skip_lines();
+					
 					lexer.lexeme.allow_keywords = true;
 
 					if(lexeme() == Lexeme::PARENT_OPEN)
@@ -308,6 +316,8 @@ namespace Mirb
 					auto range = capture();
 
 					lexer.step();
+					
+					skip_lines();
 					
 					auto result = new (fragment) Tree::CallNode;
 					
