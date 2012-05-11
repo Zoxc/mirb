@@ -284,6 +284,15 @@ namespace Mirb
 					return (op->var != no_var ? var(op->var) + " = " : "") + "class " + imm(op->name) + ", " + var(op->super) + ", " + print_block(op->block) + (op->scope != no_var ? ", " + var(op->scope) : "");
 				}
 				
+				case Opcode::SingletonClass:
+				{
+					auto op = (SingletonClassOp *)opcode;
+
+					opcode += sizeof(SingletonClassOp);
+					
+					return (op->var != no_var ? var(op->var) + " = " : "") + "singleton_class " + var(op->singleton) + ", " + print_block(op->block);
+				}
+				
 				case Opcode::Module:
 				{
 					auto op = (ModuleOp *)opcode;

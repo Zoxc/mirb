@@ -39,6 +39,7 @@ namespace Mirb
 				PushArray,
 				Closure,
 				Class,
+				SingletonClass,
 				Module,
 				Method,
 				SingletonMethod,
@@ -95,6 +96,7 @@ namespace Mirb
 				&&OpPushArray, \
 				&&OpClosure, \
 				&&OpClass, \
+				&&OpSingletonClass, \
 				&&OpModule, \
 				&&OpMethod, \
 				&&OpSingletonMethod, \
@@ -307,6 +309,16 @@ namespace Mirb
 			Mirb::Block *block;
 			
 			ClassOp(var_t var, var_t scope, Symbol *name, var_t super, Mirb::Block *block) : var(var), scope(scope), name(name), super(super), block(block) {}
+		};
+		
+		struct SingletonClassOp:
+			public OpcodeWrapper<Opcode::SingletonClass>
+		{
+			var_t var;
+			var_t singleton;
+			Mirb::Block *block;
+			
+			SingletonClassOp(var_t var, var_t singleton, Mirb::Block *block) : var(var), singleton(singleton), block(block) {}
 		};
 		
 		struct ModuleOp:

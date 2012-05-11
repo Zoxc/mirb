@@ -12,17 +12,28 @@ namespace Mirb
 		
 		result->range = range;
 
-		parse_module_name(*result);
-
-		if(lexeme() == Lexeme::LESS)
+		if(matches(Lexeme::LEFT_SHIFT))
 		{
-			lexer.step();
-
-			result->super = parse_expression();
+			result->singleton = parse_expression();
+			result->super = nullptr;
+			result->name = nullptr;
 		}
 		else
-			result->super = 0;
-		
+		{
+			result->singleton = nullptr;
+
+			parse_module_name(*result);
+
+			if(lexeme() == Lexeme::LESS)
+			{
+				lexer.step();
+
+				result->super = parse_expression();
+			}
+			else
+				result->super = nullptr;
+		}
+
 		lexer.lexeme.prev_set(range);
 
 		parse_sep();

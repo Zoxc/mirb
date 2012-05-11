@@ -742,33 +742,45 @@ namespace Mirb
 		void ByteCodeGenerator::convert_class(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::ClassNode *)basic_node;
-			
-			var_t super;
-			
-			if(node->super)
+
+			if(node->singleton)
 			{
-				super = reuse(var);
-				
-				to_bytecode(node->super, super);
+				var_t singleton = reuse(var);
+			
+				to_bytecode(node->singleton, singleton);
+
+				gen<SingletonClassOp>(var, singleton, compile(node->scope));
+				location(node->range);
 			}
 			else
-				super = no_var;
+			{
+				var_t super;
 			
-			var_t temp = no_var;
+				if(node->super)
+				{
+					super = reuse(var);
+				
+					to_bytecode(node->super, super);
+				}
+				else
+					super = no_var;
+			
+				var_t temp = no_var;
 
-			if(node->scoped)
-			{
-				temp = create_var();
-				to_bytecode(node->scoped, temp);
-			}
-			else if(node->top_scope)
-			{
-				temp = create_var();
-				gen<LoadObjectOp>(temp);
-			}
+				if(node->scoped)
+				{
+					temp = create_var();
+					to_bytecode(node->scoped, temp);
+				}
+				else if(node->top_scope)
+				{
+					temp = create_var();
+					gen<LoadObjectOp>(temp);
+				}
 
-			gen<ClassOp>(var, temp, node->name, super, compile(node->scope));
-			location(node->range);
+				gen<ClassOp>(var, temp, node->name, super, compile(node->scope));
+				location(node->range);
+			}
 		}
 		
 		void ByteCodeGenerator::convert_module(Tree::Node *basic_node, var_t var)

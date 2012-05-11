@@ -158,6 +158,21 @@ namespace Mirb
 				vars[op.var] = result;
 		EndOp
 
+		DeepOp(SingletonClass)
+			Class *self = singleton_class(vars[op.singleton]);
+			
+			if(prelude_unlikely(self == nullptr))
+				goto handle_exception;
+
+			value_t result = call_code(op.block, self, Symbol::get("singleton class"), frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
+
+			if(prelude_unlikely(result == value_raise))
+				goto handle_exception;
+
+			if(op.var != no_var)
+				vars[op.var] = result;
+		EndOp
+
 		DeepOp(Module)
 			Module *self = define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name);
 		

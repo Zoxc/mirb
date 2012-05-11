@@ -457,6 +457,7 @@ namespace Mirb
 		{
 			NodeType type() { return Class; }
 			
+			Node *singleton;
 			Node *super;
 		};
 		
