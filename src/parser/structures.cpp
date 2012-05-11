@@ -305,7 +305,8 @@ skip_name:
 			
 			if(matches(Lexeme::PARENT_OPEN))
 			{
-				parse_parameters();
+				if(lexeme() != Lexeme::PARENT_CLOSE)
+					parse_parameters();
 			
 				close_pair("method parameters", parent_open, Lexeme::PARENT_CLOSE);
 			}
