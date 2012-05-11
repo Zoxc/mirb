@@ -173,6 +173,27 @@ namespace Mirb
 		return obj;
 	}
 
+	value_t Module::const_defined(Module *obj, Symbol *constant)
+	{
+		if(obj->vars)
+			return auto_cast(obj->vars->map.has(constant));
+		else
+			return value_false;
+	}
+
+	value_t Module::const_get(Module *obj, Symbol *constant)
+	{
+		return get_vars(obj)->map.try_get(constant, [&]{
+			return raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + constant->string);
+		});
+	}
+
+	value_t Module::const_set(Module *obj, Symbol *constant, value_t value)
+	{
+		get_vars(obj)->map.set(constant, value);
+		return value;
+	}
+
 	void Module::initialize()
 	{
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
@@ -189,6 +210,10 @@ namespace Mirb
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "public", &Mirb::visibility_dummy);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "private", &Mirb::visibility_dummy);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "protected", &Mirb::visibility_dummy);
+		
+		method<Arg::SelfClass<Module>, Arg::Class<Symbol>>(context->module_class, "const_defined?", &const_defined);
+		method<Arg::SelfClass<Module>, Arg::Class<Symbol>>(context->module_class, "const_get", &const_get);
+		method<Arg::SelfClass<Module>, Arg::Class<Symbol>, Arg::Value>(context->module_class, "const_set", &const_set);
 	}
 };
 
