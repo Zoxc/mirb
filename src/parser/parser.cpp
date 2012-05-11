@@ -646,7 +646,11 @@ namespace Mirb
 			{
 				Range range = lexer.lexeme;
 
+				lexer.lexeme.allow_keywords = false;
+
 				lexer.step();
+
+				lexer.lexeme.allow_keywords = true;
 
 				switch(lexeme())
 				{
