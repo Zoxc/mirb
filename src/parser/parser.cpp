@@ -393,9 +393,13 @@ namespace Mirb
 			case Lexeme::REGEXP:
 				type = Value::Regexp;
 				break;
-
+				
 			case Lexeme::SYMBOL:
 				type = Value::Symbol;
+				break;
+
+			case Lexeme::ARRAY:
+				type = Value::Array;
 				break;
 
 			default:
@@ -686,6 +690,7 @@ namespace Mirb
 			
 			case Lexeme::REGEXP:
 			case Lexeme::STRING:
+			case Lexeme::ARRAY:
 				return parse_data(lexeme());
 
 			case Lexeme::KW_SELF:

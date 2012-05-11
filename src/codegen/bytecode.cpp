@@ -4,6 +4,7 @@
 #include "../compiler.hpp"
 #include "../block.hpp"
 #include "../classes/fixnum.hpp"
+#include "../classes/array.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "printer.hpp"
@@ -101,10 +102,37 @@ namespace Mirb
 
 			auto node = (Tree::DataNode *)basic_node;
 
-			if(node->result_type == Value::Symbol)
-				gen<LoadSymbolOp>(var, symbol_pool.get(node->data.data, node->data.length));
-			else
-				gen_string(var, node->data);
+			switch(node->result_type)
+			{
+				case Value::Symbol:
+					gen<LoadSymbolOp>(var, symbol_pool.get(node->data.data, node->data.length));
+					break;
+					
+				case Value::String:
+					gen_string(var, node->data);
+					break;
+
+				case Value::Array:
+				{
+					var_t array = reuse(var);
+					var_t element = create_var();
+
+					gen<ArrayOp>(array, 0, 0);
+
+					Array::parse(node->data.data, node->data.length, [&](const std::string &str){
+						InterpolateData::Entry data;
+						data.data = (const char_t *)str.data();
+						data.length = str.length();
+						gen_string(element, data);
+						gen<PushOp>(array, element);
+					});
+
+					break;
+				}
+
+				default:
+					mirb_debug_abort("Unknown data type");
+			}
 		}
 		
 		void ByteCodeGenerator::convert_interpolated(Tree::Node *basic_node, var_t var)

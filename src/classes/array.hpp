@@ -31,6 +31,39 @@ namespace Mirb
 				vector.mark(mark);
 			}
 
+			template<typename F> static void parse(const char_t *input, size_t length, F func)
+			{
+				const char_t *end = input + length;
+
+				auto is_white = [&] {
+					return (*input >= 1 && *input <= 32);
+				};
+
+				auto skip_white = [&] {
+					while(is_white() && input < end)
+						input++;
+				};
+				
+				auto push = [&] {
+					const char_t *start = input;
+
+					while(input < end && !is_white())
+						input++;
+
+					std::string out((const char *)start, (size_t)input - (size_t)start);
+
+					func(out);
+				};
+
+				while(input < end)
+				{
+					skip_white();
+
+					if(input < end)
+						push();
+				}
+			}
+			
 			static void initialize();
 	};
 };

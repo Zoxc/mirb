@@ -85,6 +85,46 @@ namespace Mirb
 			case 'Q':
 				input++;
 				return parse_delimited_data(Lexeme::STRING);
+				
+			case 'w':
+			{
+				input++;
+				
+				char_t terminator = delimiter_mapping.try_get(input, [&]{
+					return input;
+				});
+
+				if(input == 0 && process_null(&input))
+					return;
+
+				input++;
+
+				const char_t *start = &input;
+
+				while(input != terminator)
+				{
+					if(input == 0 && process_null(&input))
+						return;
+
+					input++;
+				}
+				
+				std::string result((const char *)start, (size_t)&input - (size_t)start);
+
+				lexeme.stop = &input;
+
+				lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+				lexeme.data->tail.set<MemoryPool>(result, memory_pool);
+				lexeme.type = Lexeme::ARRAY;
+				
+				input++;
+
+				return;
+			}
+
+			case 'W':
+				input++;
+				return parse_delimited_data(Lexeme::ARRAY);
 
 			default:
 				break;

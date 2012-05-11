@@ -36,11 +36,30 @@ namespace Mirb
 				if(prelude_likely(Value::type(obj) == Value::String))
 					result += cast<String>(obj)->string;
 			}
+			
+			switch(type)
+			{
+				case Value::Symbol:
+					return result.to_string();
+					break;
+					
+				case Value::String:
+					return symbol_pool.get(result);
 
-			if(type == Value::String)
-				return result.to_string();
-			else
-				return symbol_pool.get(result);
+				case Value::Array:
+				{
+					Array *array = Collector::allocate<Array>();
+
+					Array::parse(result.raw(), result.size(), [&](const std::string &str){
+						array->vector.push(CharArray(str).to_string());
+					});
+
+					return array;
+				}
+
+				default:
+					mirb_debug_abort("Unknown data type");
+			}
 		}
 		
 		value_t create_array(size_t argc, value_t argv[])

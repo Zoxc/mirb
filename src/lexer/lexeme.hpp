@@ -19,6 +19,7 @@ namespace Mirb
 			{
 				// values
 				STRING,
+				ARRAY,
 				REGEXP,
 				INTEGER,
 				OCTAL,

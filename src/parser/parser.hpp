@@ -372,6 +372,7 @@ namespace Mirb
 						
 					case Lexeme::STRING:
 					case Lexeme::REGEXP:
+					case Lexeme::ARRAY:
 					case Lexeme::SYMBOL:
 						return lexer.lexeme.data->type == InterpolateData::Starting || lexer.lexeme.data->type == InterpolateData::Plain;
 

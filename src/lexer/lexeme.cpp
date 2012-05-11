@@ -6,6 +6,7 @@ namespace Mirb
 	std::string Lexeme::names[TYPES] = {
 		// values
 		"string",
+		"array",
 		"regular expression",
 		"integer",
 		"octal",
