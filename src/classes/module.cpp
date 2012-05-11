@@ -151,7 +151,7 @@ namespace Mirb
 		return attr_setup(obj, argc, argv, true, true);
 	}
 	
-	value_t dummy(value_t obj)
+	value_t visibility_dummy(value_t obj, size_t argc, value_t argv[])
 	{
 		return obj;
 	}
@@ -186,9 +186,9 @@ namespace Mirb
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);
 		
-		method<Arg::Self>(context->module_class, "public", &Mirb::dummy);
-		method<Arg::Self>(context->module_class, "private", &Mirb::dummy);
-		method<Arg::Self>(context->module_class, "protected", &Mirb::dummy);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "public", &Mirb::visibility_dummy);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "private", &Mirb::visibility_dummy);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "protected", &Mirb::visibility_dummy);
 	}
 };
 
