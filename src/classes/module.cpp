@@ -164,7 +164,7 @@ namespace Mirb
 
 		if(prelude_unlikely(!method))
 		{
-			raise(context->name_error, "Unable to find method " + inspect_obj(old_name) + " on " + inspect_obj(new_name));
+			raise(context->name_error, "Unable to find method " + inspect_obj(old_name) + " on " + inspect_obj(obj));
 			return value_raise;
 		}
 
@@ -193,7 +193,32 @@ namespace Mirb
 		get_vars(obj)->map.set(constant, value);
 		return value;
 	}
+	
+	value_t Module::module_function(Module *obj, size_t argc, value_t argv[])
+	{
+		Class *meta = class_of(obj);
 
+		OnStack<1> os(obj);
+
+		for(size_t i = 0; i < argc; ++i)
+		{
+			if(type_error(argv[i], context->symbol_class))
+				return 0;
+			
+			auto method = obj->get_method(auto_cast(argv[i]));
+
+			if(prelude_unlikely(!method))
+			{
+				raise(context->name_error, "Unable to find method " + inspect_obj(argv[i]) + " on " + inspect_obj(obj));
+				return value_raise;
+			}
+
+			meta->set_method(auto_cast(argv[i]), method);
+		}
+
+		return obj;
+	}
+	
 	void Module::initialize()
 	{
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
@@ -206,6 +231,8 @@ namespace Mirb
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_reader", &attr_reader);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);
+		
+		method<Arg::SelfClass<Module>, Arg::Count, Arg::Values>(context->module_class, "module_function", &module_function);
 		
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "public", &Mirb::visibility_dummy);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "private", &Mirb::visibility_dummy);
