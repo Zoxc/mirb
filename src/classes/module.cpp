@@ -44,6 +44,15 @@ namespace Mirb
 		return obj;
 	}
 	
+	value_t Module::extend_object(value_t self, value_t obj)
+	{
+		OnStack<1> os(obj);
+
+		include_module(auto_cast(singleton_class(obj)), auto_cast(self));
+
+		return obj;
+	}
+	
 	value_t Module::included(value_t obj)
 	{
 		return obj;
@@ -55,7 +64,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i],  context->module_class))
+			if(type_error(argv[i], context->module_class))
 				return 0;
 
 			if(!call(argv[i], "append_features", 1, &obj))
@@ -152,7 +161,9 @@ namespace Mirb
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
 		method<Arg::Self, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "include", &include);
-		method<Arg::Class<Module>>(context->module_class, "included", &included);
+		method<Arg::Value>(context->module_class, "included", &included);
+		method<Arg::Value>(context->module_class, "extended", &included);
+		method<Arg::Self, Arg::Value>(context->module_class, "extend_object", &extend_object);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_reader", &attr_reader);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);

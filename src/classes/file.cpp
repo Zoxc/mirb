@@ -2,6 +2,7 @@
 #include "../runtime.hpp"
 #include "../platform/platform.hpp"
 #include "string.hpp"
+#include "fixnum.hpp"
 
 namespace Mirb
 {
@@ -107,6 +108,16 @@ namespace Mirb
 		
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
+
+		set_const(context->file_class, Symbol::get("SEPARATOR"), String::from_literal("/"));
+
+#ifdef WIN32
+		set_const(context->file_class, Symbol::get("FNM_SYSCASE"), Fixnum::from_int(8));
+		set_const(context->file_class, Symbol::get("ALT_SEPARATOR"), String::from_literal("\\"));
+#else
+		set_const(context->file_class, Symbol::get("FNM_SYSCASE"), Fixnum::from_int(0));
+		set_const(context->file_class, Symbol::get("ALT_SEPARATOR"), value_nil);
+#endif
 	}
 };
 

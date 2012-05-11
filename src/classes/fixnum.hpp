@@ -8,7 +8,8 @@ namespace Mirb
 		typedef intptr_t int_t;
 
 		static_assert(sizeof(int_t) == sizeof(size_t), "int_t must be pointer sized");
-
+		
+		value_t zero(value_t obj);
 		value_t to_s(value_t obj);
 		value_t times(value_t obj, value_t block);
 		value_t add(value_t obj, value_t other);

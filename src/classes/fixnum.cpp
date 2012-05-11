@@ -35,6 +35,11 @@ namespace Mirb
 		return (int_t)fix_to_int(obj);
 	}
 	
+	value_t Fixnum::zero(value_t obj)
+	{
+		return auto_cast(to_int(obj) == 0);
+	}
+	
 	value_t Fixnum::to_s(value_t obj)
 	{
 		char_t buffer[15];
@@ -88,6 +93,7 @@ namespace Mirb
 	void Fixnum::initialize()
 	{
 		method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
+		method<Arg::Self>(context->fixnum_class, "zero?", &zero);
 		method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
 
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "+", &add);

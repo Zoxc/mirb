@@ -32,6 +32,8 @@ namespace Mirb
 			Class *false_class;
 			Class *module_class;
 			Class *method_class;
+			Class *numeric_class;
+			Class *fixnum_class;
 			
 			Class *io_class;
 			Class *file_class;
@@ -49,7 +51,6 @@ namespace Mirb
 			Class *runtime_error;
 			Class *local_jump_error;
 			Class *load_error;
-			Class *fixnum_class;
 
 			Module *kernel_module;
 			Module *comparable_module;

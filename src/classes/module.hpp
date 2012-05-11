@@ -12,6 +12,7 @@ namespace Mirb
 			static value_t to_s(value_t obj);
 			static value_t append_features(value_t obj, value_t mod);
 			static value_t included(value_t obj);
+			static value_t extend_object(value_t self, value_t obj);
 			
 			Module(Value::Type type) : Object(type), methods(nullptr), superclass(nullptr) {}
 

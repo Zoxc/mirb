@@ -104,13 +104,35 @@ namespace Mirb
 	{
 		return real_class_of(obj);
 	}
+	
+	value_t Object::extend(value_t obj, size_t argc, value_t argv[])
+	{
+		OnStack<1> os(obj);
 
+		for(size_t i = 0; i < argc; ++i)
+		{
+			if(type_error(argv[i], context->module_class))
+				return 0;
+
+			if(!call(argv[i], "extend_object", 1, &obj))
+				return 0;
+			
+			if(!call(argv[i], "extended", 1, &obj))
+				return 0;
+		}
+
+		return obj;
+	}
+	
 	void Object::initialize()
 	{
 		method(context->object_class, "initialize", &dummy);
 		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
 		method<Arg::Self>(context->object_class, "class", &klass);
+		method<Arg::Self>(context->object_class, "freeze", &dummy);
+		method<Arg::Self>(context->object_class, "frozen?", &dummy);
+		method<Arg::Self, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
 		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
 		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);
 		method<Arg::Self, Arg::Value>(context->object_class, "eql?", &equal);

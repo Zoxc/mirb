@@ -10,6 +10,7 @@
 #include "classes/class.hpp"
 #include "classes/hash.hpp"
 #include "classes/fixnum.hpp"
+#include "classes/numeric.hpp"
 #include "classes/true-class.hpp"
 #include "classes/false-class.hpp"
 #include "classes/nil-class.hpp"
@@ -829,7 +830,8 @@ namespace Mirb
 		context->nil_class = define_class("NilClass", context->object_class);
 		context->false_class = define_class("FalseClass", context->object_class);
 		context->true_class = define_class("TrueClass", context->object_class);
-		context->fixnum_class = define_class("Fixnum", context->object_class);
+		context->numeric_class = define_class("Numeric", context->object_class);
+		context->fixnum_class = define_class("Fixnum", context->numeric_class);
 
 		Value::initialize_class_table();
 	}
@@ -870,6 +872,7 @@ namespace Mirb
 		Symbol::initialize();
 		String::initialize();
 		Fixnum::initialize();
+		Numeric::initialize();
 		Proc::initialize();
 		Array::initialize();
 		Hash::initialize();

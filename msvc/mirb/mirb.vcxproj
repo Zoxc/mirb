@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\src\classes\method.hpp" />
     <ClInclude Include="..\..\src\classes\module.hpp" />
     <ClInclude Include="..\..\src\classes\nil-class.hpp" />
+    <ClInclude Include="..\..\src\classes\numeric.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
     <ClInclude Include="..\..\src\classes\proc.hpp" />
     <ClInclude Include="..\..\src\classes\regexp.hpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="..\..\src\classes\method.cpp" />
     <ClCompile Include="..\..\src\classes\module.cpp" />
     <ClCompile Include="..\..\src\classes\nil-class.cpp" />
+    <ClCompile Include="..\..\src\classes\numeric.cpp" />
     <ClCompile Include="..\..\src\classes\object.cpp" />
     <ClCompile Include="..\..\src\classes\proc.cpp" />
     <ClCompile Include="..\..\src\classes\regexp.cpp" />
