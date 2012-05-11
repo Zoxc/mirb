@@ -9,6 +9,7 @@ namespace Mirb
 		public Object
 	{
 		private:
+			static value_t method_defined(Module *obj, Symbol *name);
 			static value_t const_defined(Module *obj, Symbol *constant);
 			static value_t const_get(Module *obj, Symbol *constant);
 			static value_t const_set(Module *obj, Symbol *constant, value_t value);

@@ -219,6 +219,11 @@ namespace Mirb
 		return obj;
 	}
 	
+	value_t Module::method_defined(Module *obj, Symbol *name)
+	{
+		return auto_cast(lookup_method(obj, name) != 0);
+	}
+
 	void Module::initialize()
 	{
 		method<Arg::Self>(context->module_class, "to_s", &to_s);
@@ -241,6 +246,8 @@ namespace Mirb
 		method<Arg::SelfClass<Module>, Arg::Class<Symbol>>(context->module_class, "const_defined?", &const_defined);
 		method<Arg::SelfClass<Module>, Arg::Class<Symbol>>(context->module_class, "const_get", &const_get);
 		method<Arg::SelfClass<Module>, Arg::Class<Symbol>, Arg::Value>(context->module_class, "const_set", &const_set);
+
+		method<Arg::SelfClass<Module>, Arg::Class<Symbol>>(context->module_class, "method_defined?", &method_defined);
 	}
 };
 
