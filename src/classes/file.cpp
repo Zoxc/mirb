@@ -73,8 +73,15 @@ namespace Mirb
 		
 		if(!absolute_path(relative->string))
 		{
-			CharArray absolute_str = absolute ? absolute->string : Platform::cwd();
-			joiner.push(absolute_str);
+			if(absolute)
+			{
+				if(!absolute_path(absolute->string))
+					absolute = auto_cast(expand_path(absolute, nullptr));
+
+				joiner.push(absolute->string);
+			}
+			else
+				joiner.push(Platform::cwd());
 		}
 
 		joiner.push(relative->string);
