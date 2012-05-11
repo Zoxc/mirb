@@ -431,6 +431,7 @@ namespace Mirb
 					auto result = new (fragment) Tree::DataNode;
 				
 					result->result_type = type;
+					result->range = lexer.lexeme;
 
 					result->data = data->tail.copy<Tree::Fragment>(fragment);
 					

@@ -110,7 +110,7 @@ namespace Mirb
 		};
 		
 		struct DataNode:
-			public Node
+			public LocationNode
 		{
 			NodeType type() { return Data; }
 			

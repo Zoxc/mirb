@@ -75,6 +75,7 @@ namespace Mirb
 				Array,
 				Hash,
 				String,
+				Regexp,
 				Interpolate
 			};
 
@@ -132,6 +133,7 @@ namespace Mirb
 				&&OpArray, \
 				&&OpHash, \
 				&&OpString, \
+				&&OpRegexp, \
 				&&OpInterpolate
 
 			Type op;
@@ -643,6 +645,15 @@ namespace Mirb
 			InterpolateData::Entry str;
 
 			StringOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
+		};
+		
+		struct RegexpOp:
+			public OpcodeWrapper<Opcode::Regexp>
+		{
+			var_t var;
+			InterpolateData::Entry str;
+
+			RegexpOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
 		};
 		
 		struct InterpolateOp:

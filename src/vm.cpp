@@ -5,6 +5,7 @@
 #include "generic/range.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"
+#include "classes/regexp.hpp"
 #include "classes/module.hpp"
 #include "classes/array.hpp"
 #include "classes/float.hpp"
@@ -376,6 +377,15 @@ namespace Mirb
 
 		Op(String)
 			vars[op.var] = CharArray(op.str.data, op.str.length).to_string();
+		EndOp
+
+		Op(Regexp)
+			value_t result = Regexp::allocate(op.str.data, op.str.length);
+
+			if(prelude_unlikely(!result))
+				goto handle_exception;
+
+			vars[op.var] = result;
 		EndOp
 
 		Op(Interpolate)

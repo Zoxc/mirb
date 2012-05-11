@@ -156,6 +156,13 @@ namespace Mirb
 					gen<StringOp>(var, data);
 				}
 				
+				void gen_regexp(var_t var, InterpolateData::Entry data)
+				{
+					data = data.copy<Prelude::Allocator::Standard>();
+					strings.push(data.data);
+					gen<RegexpOp>(var, data);
+				}
+				
 				void gen_if(Label *ltrue, var_t var)
 				{
 					branches.push(BranchInfo(gen<BranchIfOp>(var), ltrue));

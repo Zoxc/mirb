@@ -4,6 +4,7 @@
 #include "classes/array.hpp"
 #include "classes/string.hpp"
 #include "classes/hash.hpp"
+#include "classes/regexp.hpp"
 #include "runtime.hpp"
 
 namespace Mirb
@@ -45,6 +46,9 @@ namespace Mirb
 					
 				case Value::String:
 					return symbol_pool.get(result);
+
+				case Value::Regexp:
+					return Regexp::allocate(result.raw(), result.size());
 
 				case Value::Array:
 				{

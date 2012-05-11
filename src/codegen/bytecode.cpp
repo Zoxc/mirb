@@ -112,6 +112,11 @@ namespace Mirb
 					gen_string(var, node->data);
 					break;
 
+				case Value::Regexp:
+					gen_regexp(var, node->data);
+					location(&node->range);
+					break;
+
 				case Value::Array:
 				{
 					var_t array = reuse(var);

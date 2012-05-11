@@ -608,6 +608,15 @@ namespace Mirb
 					return var(op->var) + " = string '" + std::string((const char *)op->str.data, op->str.length) + "'";
 				}
 				
+				case Opcode::Regexp:
+				{
+					auto op = (RegexpOp *)opcode;
+
+					opcode += sizeof(RegexpOp);
+					
+					return var(op->var) + " = regexp /" + std::string((const char *)op->str.data, op->str.length) + "/";
+				}
+				
 				case Opcode::Interpolate:
 				{
 					auto op = (InterpolateOp *)opcode;
