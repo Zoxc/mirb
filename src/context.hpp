@@ -32,11 +32,13 @@ namespace Mirb
 			Class *false_class;
 			Class *module_class;
 			Class *method_class;
-			Class *numeric_class;
-			Class *fixnum_class;
+			Class *dir_class;
 			
 			Class *io_class;
 			Class *file_class;
+			
+			Class *numeric_class;
+			Class *fixnum_class;
 
 			Class *exception_class;
 
@@ -54,7 +56,8 @@ namespace Mirb
 
 			Module *kernel_module;
 			Module *comparable_module;
-			
+			Module *process_module;
+
 			Method *inspect_method;
 
 			Tuple<Module> *object_scope;

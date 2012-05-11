@@ -11,7 +11,8 @@ namespace Mirb
 		void push(const CharArray &path);
 		CharArray join();
 	};
-
+	
+	CharArray normalize_path(const CharArray &path);
 	CharArray basename(CharArray path);
 
 	class File:

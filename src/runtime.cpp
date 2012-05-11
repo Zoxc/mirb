@@ -22,8 +22,10 @@
 #include "classes/exceptions.hpp"
 #include "classes/io.hpp"
 #include "classes/file.hpp"
+#include "classes/dir.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
+#include "modules/process.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
@@ -883,9 +885,11 @@ namespace Mirb
 		
 		IO::initialize();
 		File::initialize();
+		Dir::initialize();
 		Regexp::initialize();
 		
 		Comparable::initialize();
+		Process::initialize();
 		
 		setup_main();
 

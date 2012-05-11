@@ -15,6 +15,7 @@
     <ClInclude Include="..\..\src\char-array.hpp" />
     <ClInclude Include="..\..\src\classes\array.hpp" />
     <ClInclude Include="..\..\src\classes\class.hpp" />
+    <ClInclude Include="..\..\src\classes\dir.hpp" />
     <ClInclude Include="..\..\src\classes\exception.hpp" />
     <ClInclude Include="..\..\src\classes\exceptions.hpp" />
     <ClInclude Include="..\..\src\classes\false-class.hpp" />
@@ -51,6 +52,7 @@
     <ClInclude Include="..\..\src\method.hpp" />
     <ClInclude Include="..\..\src\modules\comparable.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
+    <ClInclude Include="..\..\src\modules\process.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\platform\platform.hpp" />
@@ -73,6 +75,7 @@
     <ClCompile Include="..\..\src\char-array.cpp" />
     <ClCompile Include="..\..\src\classes\array.cpp" />
     <ClCompile Include="..\..\src\classes\class.cpp" />
+    <ClCompile Include="..\..\src\classes\dir.cpp" />
     <ClCompile Include="..\..\src\classes\exception.cpp" />
     <ClCompile Include="..\..\src\classes\exceptions.cpp" />
     <ClCompile Include="..\..\src\classes\false-class.cpp" />
@@ -111,6 +114,7 @@
     <ClCompile Include="..\..\src\method.cpp" />
     <ClCompile Include="..\..\src\modules\comparable.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
+    <ClCompile Include="..\..\src\modules\process.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />

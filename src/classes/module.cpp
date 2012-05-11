@@ -151,7 +151,7 @@ namespace Mirb
 		return attr_setup(obj, argc, argv, true, true);
 	}
 	
-	value_t visibility_dummy(value_t obj, size_t argc, value_t argv[])
+	value_t visibility_dummy(value_t obj, size_t, value_t[])
 	{
 		return obj;
 	}
