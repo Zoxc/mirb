@@ -383,7 +383,7 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(Alias)
-			value_t result = Module::alias_method(auto_cast(frame.scope->first()), auto_cast(vars[op.new_name]), auto_cast(vars[op.old_name]));
+			value_t result = Module::alias_method(frame.scope->first(), auto_cast(vars[op.new_name]), auto_cast(vars[op.old_name]));
 
 			if(prelude_unlikely(!result))
 				goto handle_exception;
