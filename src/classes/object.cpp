@@ -5,6 +5,7 @@
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "proc.hpp"
+#include "fixnum.hpp"
 
 namespace Mirb
 {
@@ -124,8 +125,16 @@ namespace Mirb
 		return obj;
 	}
 	
+	value_t object_id(value_t obj)
+	{
+		return Fixnum::from_size_t(Value::hash(obj)); // TODO: Make a proper object_id
+	}
+	
 	void Object::initialize()
 	{
+		method<Arg::Self>(context->object_class, "object_id", &object_id);
+		method<Arg::Self>(context->object_class, "__id__", &object_id);
+
 		method(context->object_class, "initialize", &dummy);
 		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
