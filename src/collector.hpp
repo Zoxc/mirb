@@ -33,6 +33,11 @@ namespace Mirb
 				{
 					return (value_t)((size_t)this + sizeof(Region));
 				}
+				
+				bool area_contains(value_t obj)
+				{
+					return ((size_t)obj >= (size_t)data()) && ((size_t)obj <= (size_t)end);
+				}
 
 				bool contains(value_t obj)
 				{

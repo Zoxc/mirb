@@ -253,14 +253,14 @@ namespace Mirb
 		{
 			value_t result = pos;
 			
-			mirb_debug_assert(region->contains(pos));
+			mirb_debug_assert(region->area_contains(pos));
 			
 			value_t next = (value_t)((size_t)pos + size);
 
 			if((size_t)next > (size_t)region->end)
 				return allocate_region(size);
 			
-			mirb_debug_assert(region->contains(next));
+			mirb_debug_assert(region->area_contains(next));
 			
 			pos = next;
 

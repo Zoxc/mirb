@@ -61,7 +61,7 @@ namespace Mirb
 				typedef T *type;
 				static const Info info;
 
-				static type apply(Frame &frame, State &state)
+				static type apply(Frame &frame, State &)
 				{
 					value_t result = frame.obj;
 
