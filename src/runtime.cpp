@@ -320,7 +320,7 @@ namespace Mirb
 
 		value_t result = value_nil;
 
-		if(inspect && (inspect->block != Object::inspect_block || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"))))
+		if(inspect && (inspect != context->inspect_method || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"))))
 			result = call(obj, "inspect");
 
 		if(!result)

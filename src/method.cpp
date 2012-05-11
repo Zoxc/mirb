@@ -109,27 +109,29 @@ namespace Mirb
 			return ((value_t (*)())frame.code->function)();
 		}
 
-		Block *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
+		Method *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
 		{
-			Block *result = Collector::allocate_pinned<Block>(nullptr);
+			Block *block = Collector::allocate_pinned<Block>(nullptr);
 
 			Value::assert_valid(module);
 
-			result->function = function;
-			result->executor = executor;
-			result->min_args = info.min;
-			result->max_args = info.any_arg ? (size_t)-1 : info.max;
+			block->function = function;
+			block->executor = executor;
+			block->min_args = info.min;
+			block->max_args = info.any_arg ? (size_t)-1 : info.max;
 		
 			Tuple<Module> *scope = Tuple<Module>::allocate(1);
 
 			(*scope)[0] = module;
 
-			module->set_method(name, Collector::allocate<Method>(result, scope));
+			Method *result = Collector::allocate<Method>(block, scope);
+
+			module->set_method(name, result);
 
 			return result;
 		}
 
-		Block *generate_method(size_t flags, Module *module, Symbol *name, void *function)
+		Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
 		{
 			return generate_block(flags, module, name, fold(0), wrapper, function);
 		}

@@ -54,6 +54,8 @@ namespace Mirb
 			Module *kernel_module;
 			Module *comparable_module;
 			
+			Method *inspect_method;
+
 			Tuple<Module> *object_scope;
 
 			Symbols syms;

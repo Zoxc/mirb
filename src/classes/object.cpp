@@ -8,8 +8,6 @@
 
 namespace Mirb
 {
-	Block *Object::inspect_block;
-
 	void Object::generate_hash()
 	{
 		hash_value = hash_number((size_t)this); // Note: The first two bits are constant
@@ -102,11 +100,17 @@ namespace Mirb
 		}
 	}
 	
+	value_t Object::klass(value_t obj)
+	{
+		return real_class_of(obj);
+	}
+
 	void Object::initialize()
 	{
 		method(context->object_class, "initialize", &dummy);
-		inspect_block = method<Arg::Self>(context->object_class, "inspect", &inspect);
+		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
+		method<Arg::Self>(context->object_class, "class", &klass);
 		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
 		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);
 		method<Arg::Self, Arg::Value>(context->object_class, "eql?", &equal);

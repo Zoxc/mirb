@@ -12,6 +12,7 @@ namespace Mirb
 	{
 		private:
 			static value_t tap(value_t obj, value_t block);
+			static value_t klass(value_t obj);
 			static value_t dummy();
 			static value_t inspect(value_t obj);
 			static value_t instance_eval(value_t obj, size_t argc, value_t argv[], value_t block);
@@ -39,8 +40,6 @@ namespace Mirb
 			static value_t allocate(value_t instance_of);
 			static value_t to_s(value_t obj);
 
-			static Block *inspect_block;
-			
 			union
 			{
 				Class *instance_of;
