@@ -1,7 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include <Prelude/CountedList.hpp>
-#include "../generic/range.hpp"
+#include "../generic/source-loc.hpp"
 
 namespace Mirb
 {
@@ -81,7 +81,7 @@ namespace Mirb
 		struct LocationNode:
 			public Node
 		{
-			Range range;
+			SourceLoc range;
 		};
 		
 		typedef List<Node, ListNode> NodeList;

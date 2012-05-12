@@ -112,7 +112,7 @@ namespace Mirb
 				return SymbolPoolHashTable::get(key);
 			}
 
-			Symbol *get(Range &range);
+			Symbol *get(SourceLoc &range);
 
 			Symbol *get(const char_t *start, const char_t *stop)
 			{

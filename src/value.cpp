@@ -15,6 +15,7 @@
 #include "classes/proc.hpp"
 #include "classes/symbol.hpp"
 #include "classes/regexp.hpp"
+#include "classes/range.hpp"
 #include "classes/io.hpp"
 #include "classes/file.hpp"
 #include "classes/float.hpp"

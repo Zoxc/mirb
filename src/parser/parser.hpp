@@ -21,11 +21,11 @@ namespace Mirb
 			List<Message> messages;
 			Document &document;
 
-			void add_message(Message *message, const Range &range);
+			void add_message(Message *message, const SourceLoc &range);
 
 			MemoryPool memory_pool;
 			
-			bool close_pair(const std::string &name, const Range &range, Lexeme::Type lexeme, bool skip = true);
+			bool close_pair(const std::string &name, const SourceLoc &range, Lexeme::Type lexeme, bool skip = true);
 
 			Tree::VoidNode *raise_void(Tree::VoidNode *node)
 			{
@@ -35,7 +35,7 @@ namespace Mirb
 			
 			void load();
 			
-			void report(const Range &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
+			void report(const SourceLoc &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
 			Tree::Fragment fragment;
 			Tree::Scope *scope;
@@ -112,7 +112,7 @@ namespace Mirb
 			Tree::Node *typecheck(Tree::Node *result);
 
 			// expressions
-			Tree::Node *parse_variable(Symbol *symbol, Range *range);
+			Tree::Node *parse_variable(Symbol *symbol, SourceLoc *range);
 			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();
@@ -121,7 +121,7 @@ namespace Mirb
 			Tree::Node *parse_data(Lexeme::Type override);
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression(bool allow_multiples);
-			void process_lhs(Tree::Node *&lhs, const Range &range);
+			void process_lhs(Tree::Node *&lhs, const SourceLoc &range);
 			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
 			Tree::Node *parse_multiple_expressions(bool allow_multiples);
 			Tree::Node *parse_assignment(bool allow_multiples);
@@ -200,8 +200,8 @@ namespace Mirb
 			Tree::BlockNode *parse_block(bool allowed);
 			void parse_arguments(Tree::InvokeNode *node);
 			void parse_arguments(Tree::InvokeNode *node, bool *parenthesis);
-			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, Range *range, bool has_args, bool can_be_var = false);
-			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, Range *range, bool default_var);
+			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, SourceLoc *range, bool has_args, bool can_be_var = false);
+			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, SourceLoc *range, bool default_var);
 			Tree::Node *parse_lookup_chain();
 			Tree::Node *parse_yield();
 			Tree::Node *parse_super();
@@ -276,9 +276,9 @@ namespace Mirb
 				}
 			}
 			
-			Range *capture();
+			SourceLoc *capture();
 
-			Range *parse_method_name(Symbol *&symbol);
+			SourceLoc *parse_method_name(Symbol *&symbol);
 
 			bool is_expression()
 			{

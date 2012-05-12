@@ -226,7 +226,7 @@ namespace Mirb
 			{
 				auto target = (Tree::RangeNode *)node;
 				
-				return print_node(target->left) + (target->inclusive ? ".." : "...") + print_node(target->right);
+				return print_node(target->left) + (target->exclusive ? "..." : "..") + print_node(target->right);
 			}
 			
 			case Tree::SimpleNode::Array:

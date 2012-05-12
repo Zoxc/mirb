@@ -33,6 +33,7 @@ namespace Mirb
 			Class *module_class;
 			Class *method_class;
 			Class *dir_class;
+			Class *range_class;
 			
 			Class *io_class;
 			Class *file_class;

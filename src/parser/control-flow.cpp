@@ -92,7 +92,7 @@ namespace Mirb
 			
 			if(matches(Lexeme::ASSOC))
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				rescue->var = parse_operator_expression(true);
 
@@ -125,7 +125,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_begin()
 	{
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 
 		lexer.step();
 
@@ -161,7 +161,7 @@ namespace Mirb
 		
 		if(lexeme() == Lexeme::QUESTION)
 		{
-			Range range = lexer.lexeme;
+			SourceLoc range = lexer.lexeme;
 
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				lexer.step();
@@ -297,7 +297,7 @@ namespace Mirb
 	{
 		auto node = new (fragment) Tree::LoopNode;
 
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		node->inverted = lexeme() == Lexeme::KW_UNTIL;
 		
@@ -328,7 +328,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_unless()
 	{
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		lexer.step();
 
@@ -382,7 +382,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_if()
 	{
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		lexer.step();
 		
@@ -404,7 +404,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_case()
 	{
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		lexer.step();
 

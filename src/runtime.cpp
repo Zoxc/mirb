@@ -24,6 +24,7 @@
 #include "classes/io.hpp"
 #include "classes/file.hpp"
 #include "classes/dir.hpp"
+#include "classes/range.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
@@ -895,6 +896,7 @@ namespace Mirb
 		Proc::initialize();
 		Array::initialize();
 		Hash::initialize();
+		Range::initialize();
 		Exception::initialize();
 		initialize_exceptions();
 		

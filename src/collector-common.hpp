@@ -12,6 +12,7 @@
 #include "classes/fixnum.hpp"
 #include "classes/method.hpp"
 #include "classes/regexp.hpp"
+#include "classes/range.hpp"
 #include "classes/proc.hpp"
 #include "classes/symbol.hpp"
 #include "classes/io.hpp"

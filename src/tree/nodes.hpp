@@ -28,13 +28,13 @@ namespace Mirb
 		{
 			NodeType type() { return Void; }
 			
-			Range *range;
+			SourceLoc *range;
 			bool in_ensure;
 			LoopNode *target;
 			
 			ListEntry<VoidNode> void_entry;
 
-			VoidNode(Range *range) : range(range), in_ensure(false), target(nullptr) {}
+			VoidNode(SourceLoc *range) : range(range), in_ensure(false), target(nullptr) {}
 		};
 		
 		typedef List<VoidNode, VoidNode, &VoidNode::void_entry> VoidList;
@@ -83,11 +83,11 @@ namespace Mirb
 		{
 			ListEntry<MultipleExpressionNode> entry;
 			Node *expression;
-			Range range;
+			SourceLoc range;
 			int index;
 			size_t size;
 
-			MultipleExpressionNode(Node *expression, const Range &range) : expression(expression), range(range) {}
+			MultipleExpressionNode(Node *expression, const SourceLoc &range) : expression(expression), range(range) {}
 		};
 		
 		struct MultipleExpressionsNode:
@@ -95,9 +95,9 @@ namespace Mirb
 		{
 			NodeType type() { return MultipleExpressions; }
 			
-			Range *range;
+			SourceLoc *range;
 			List<MultipleExpressionNode> expressions;
-			Range *extended;
+			SourceLoc *extended;
 			size_t splat_index;
 			size_t expression_count;
 
@@ -113,7 +113,7 @@ namespace Mirb
 			Node *right;
 			Lexeme::Type op;
 			
-			Range *range;
+			SourceLoc *range;
 		};
 
 		struct VariableNode;
@@ -136,12 +136,12 @@ namespace Mirb
 			NodeType type() { return UnaryOp; }
 			
 			UnaryOpNode() {};
-			UnaryOpNode(Lexeme::Type op, Node *value, Range *range) : op(op), value(value), range(range) {}
+			UnaryOpNode(Lexeme::Type op, Node *value, SourceLoc *range) : op(op), value(value), range(range) {}
 			
 			Lexeme::Type op;
 			Node *value;
 			
-			Range *range;
+			SourceLoc *range;
 		};
 		
 		struct BooleanNotNode:
@@ -245,10 +245,10 @@ namespace Mirb
 			Node *obj;
 			Mirb::Symbol *name;
 
-			Range *range;
+			SourceLoc *range;
 			
 			ConstantNode() {}
-			ConstantNode(Node *obj, Mirb::Symbol *name, Range *range, bool top_scope = false) : top_scope(top_scope), obj(obj), name(name), range(range) {}
+			ConstantNode(Node *obj, Mirb::Symbol *name, SourceLoc *range, bool top_scope = false) : top_scope(top_scope), obj(obj), name(name), range(range) {}
 		};
 
 		struct SelfNode:
@@ -288,7 +288,7 @@ namespace Mirb
 		{
 			NodeType type() { return NodeRange; }
 
-			bool inclusive;
+			bool exclusive;
 			Node *left;
 			Node *right;
 		};
@@ -320,10 +320,10 @@ namespace Mirb
 		
 		struct BlockArg
 		{
-			Range range;
+			SourceLoc range;
 			Node *node;
 
-			BlockArg(const Range &range, Node *node) : range(range), node(node) {}
+			BlockArg(const SourceLoc &range, Node *node) : range(range), node(node) {}
 		};
 		
 		struct InvokeNode:
@@ -336,7 +336,7 @@ namespace Mirb
 			BlockNode *block; // can be zero
 			BlockArg *block_arg;
 
-			Range *range;
+			SourceLoc *range;
 
 			InvokeNode() : variadic(false), block(nullptr), block_arg(nullptr) {}
 		};
@@ -378,7 +378,7 @@ namespace Mirb
 		struct CaseEntry
 		{
 			ListEntry<CaseEntry> entry;
-			Range range;
+			SourceLoc range;
 			Node *pattern;
 			Node *group;
 		};
@@ -445,7 +445,7 @@ namespace Mirb
 		{
 			NodeType type() { return Return; }
 			
-			ReturnNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+			ReturnNode(SourceLoc *range, Node *value) : VoidNode(range), value(value) {}
 			
 			Node *value;
 		};
@@ -455,7 +455,7 @@ namespace Mirb
 		{
 			NodeType type() { return Next; }
 			
-			NextNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+			NextNode(SourceLoc *range, Node *value) : VoidNode(range), value(value) {}
 			
 			Node *value;
 		};
@@ -465,7 +465,7 @@ namespace Mirb
 		{
 			NodeType type() { return Break; }
 			
-			BreakNode(Range *range, Node *value) : VoidNode(range), value(value) {}
+			BreakNode(SourceLoc *range, Node *value) : VoidNode(range), value(value) {}
 			
 			Node *value;
 		};
@@ -475,7 +475,7 @@ namespace Mirb
 		{
 			NodeType type() { return Redo; }
 			
-			RedoNode(Range *range) : VoidNode(range) {}
+			RedoNode(SourceLoc *range) : VoidNode(range) {}
 		};
 		
 		struct ModuleNode:
@@ -489,7 +489,7 @@ namespace Mirb
 			Mirb::Symbol *name;
 			Scope *scope;
 
-			Range *range;
+			SourceLoc *range;
 
 			ModuleNode() : scoped(nullptr) {}
 		};
@@ -511,7 +511,7 @@ namespace Mirb
 			Node *singleton;
 			Mirb::Symbol *name;
 			Scope *scope;
-			Range *range;
+			SourceLoc *range;
 		};
 		
 		struct AliasNode:

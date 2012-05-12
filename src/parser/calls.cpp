@@ -128,7 +128,7 @@ namespace Mirb
 			if(parenthesis)
 				*parenthesis = true;
 			
-			Range range = lexer.lexeme;
+			SourceLoc range = lexer.lexeme;
 
 			lexer.step();
 			
@@ -150,7 +150,7 @@ namespace Mirb
 		}
 	}
 
-	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, Range *range, bool has_args, bool can_be_var)
+	Tree::Node *Parser::alloc_call_node(Tree::Node *object, Symbol *symbol, SourceLoc *range, bool has_args, bool can_be_var)
 	{
 		auto result = new (fragment) Tree::CallNode;
 		
@@ -219,7 +219,7 @@ namespace Mirb
 		return alloc_call_node(child, Symbol::from_literal("call"), range, has_arguments());
 	}
 
-	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, Range *range, bool default_var)
+	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, SourceLoc *range, bool default_var)
 	{
 		mirb_debug_assert((symbol && (range != 0)) || (!symbol && range == 0));
 

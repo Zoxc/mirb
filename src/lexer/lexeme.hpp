@@ -2,7 +2,7 @@
 #include <Prelude/Vector.hpp>
 #include "../common.hpp"
 #include "../symbol-pool.hpp"
-#include "../generic/range.hpp"
+#include "../generic/source-loc.hpp"
 
 namespace Mirb
 {
@@ -17,7 +17,7 @@ namespace Mirb
 	};
 
 	class Lexeme:
-		public Range
+		public SourceLoc
 	{
 		public:
 			enum Type
@@ -209,15 +209,15 @@ namespace Mirb
 				Tree::HeredocNode *heredoc;
 			};
 
-			Range &get_prev();
+			SourceLoc &get_prev();
 
-			void prev_set(Range *range);
+			void prev_set(SourceLoc *range);
 			
 			static std::string names[TYPES];
 			
 			std::string describe();
 			
-			static std::string describe(Range *range, Type type);
+			static std::string describe(SourceLoc *range, Type type);
 			static std::string describe_type(Type type);
 	};
 	
@@ -225,7 +225,7 @@ namespace Mirb
 
 	struct InterpolateState
 	{
-		Range *start;
+		SourceLoc *start;
 		Lexeme::Type type;
 		char_t terminator;
 		Heredoc *heredoc;

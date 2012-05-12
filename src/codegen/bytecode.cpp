@@ -433,7 +433,16 @@ namespace Mirb
 		{
 			auto node = (Tree::RangeNode *)basic_node;
 			
-			mirb_runtime_abort("Unimplemented");
+			if(is_var(var))
+			{
+				var_t low = reuse(var);
+				var_t high = create_var();
+				
+				to_bytecode(node->left, low);
+				to_bytecode(node->right, high);
+
+				gen<RangeOp>(var, low, high, node->exclusive);
+			}
 		}
 		
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, var_t var)
@@ -1080,7 +1089,7 @@ namespace Mirb
 				block->max_args = (size_t)-1;
 
 			if(scope->range)
-				block->range = new Range(*scope->range);
+				block->range = new SourceLoc(*scope->range);
 			else
 				block->range = nullptr;
 
@@ -1103,7 +1112,7 @@ namespace Mirb
 
 			if(ranges)
 			{
-				final->ranges = (Range *)std::malloc(ranges * sizeof(Range));
+				final->ranges = (SourceLoc *)std::malloc(ranges * sizeof(SourceLoc));
 
 				ranges = 0;
 				

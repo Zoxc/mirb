@@ -2,13 +2,14 @@
 #include "runtime.hpp"
 #include "support.hpp"
 #include "document.hpp"
-#include "generic/range.hpp"
+#include "generic/source-loc.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"
 #include "classes/regexp.hpp"
 #include "classes/module.hpp"
 #include "classes/array.hpp"
 #include "classes/float.hpp"
+#include "classes/range.hpp"
 
 namespace Mirb
 {
@@ -381,6 +382,15 @@ namespace Mirb
 
 		Op(Regexp)
 			value_t result = Regexp::allocate(CharArray(op.str.data, op.str.length));
+
+			if(prelude_unlikely(!result))
+				goto handle_exception;
+
+			vars[op.var] = result;
+		EndOp
+			
+		DeepOp(Range)
+			value_t result = Range::allocate(vars[op.low], vars[op.high], op.exclusive);
 
 			if(prelude_unlikely(!result))
 				goto handle_exception;

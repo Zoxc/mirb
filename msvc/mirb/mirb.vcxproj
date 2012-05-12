@@ -30,6 +30,7 @@
     <ClInclude Include="..\..\src\classes\numeric.hpp" />
     <ClInclude Include="..\..\src\classes\object.hpp" />
     <ClInclude Include="..\..\src\classes\proc.hpp" />
+    <ClInclude Include="..\..\src\classes\range.hpp" />
     <ClInclude Include="..\..\src\classes\regexp.hpp" />
     <ClInclude Include="..\..\src\classes\string.hpp" />
     <ClInclude Include="..\..\src\classes\symbol.hpp" />
@@ -45,7 +46,7 @@
     <ClInclude Include="..\..\src\context.hpp" />
     <ClInclude Include="..\..\src\document.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
-    <ClInclude Include="..\..\src\generic\range.hpp" />
+    <ClInclude Include="..\..\src\generic\source-loc.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="..\..\src\classes\numeric.cpp" />
     <ClCompile Include="..\..\src\classes\object.cpp" />
     <ClCompile Include="..\..\src\classes\proc.cpp" />
+    <ClCompile Include="..\..\src\classes\range.cpp" />
     <ClCompile Include="..\..\src\classes\regexp.cpp" />
     <ClCompile Include="..\..\src\classes\string.cpp" />
     <ClCompile Include="..\..\src\classes\symbol.cpp" />

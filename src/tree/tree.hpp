@@ -112,7 +112,7 @@ namespace Mirb
 
 				bool reported;
 				Node *default_value;
-				Range *range;
+				SourceLoc *range;
 				
 				ListEntry<Parameter> parameter_entry;
 		};
@@ -191,7 +191,7 @@ namespace Mirb
 				Scope *parent; // The scope enclosing this one
 				Scope *owner; // The first parent that isn't a closure. This field can point to itself.
 				Node *group;
-				Range *range;
+				SourceLoc *range;
 				
 				/*
 				 * Break related fields

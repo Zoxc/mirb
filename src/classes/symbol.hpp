@@ -8,7 +8,7 @@
 
 namespace Mirb
 {
-	class Range;
+	class SourceLoc;
 
 	class Symbol:
 		public Object

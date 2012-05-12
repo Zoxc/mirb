@@ -143,7 +143,7 @@ namespace Mirb
 	};
 
 	Lexeme::Lexeme(const Lexeme &lexeme) :
-		Range(lexeme),
+		SourceLoc(lexeme),
 		lexer(lexeme.lexer),
 		whitespace(lexeme.whitespace),
 		allow_keywords(lexeme.allow_keywords),
@@ -160,7 +160,7 @@ namespace Mirb
 		if(this == &other)
 			return *this;
 		
-		Range::operator=(other);
+		SourceLoc::operator=(other);
 		
 		whitespace = other.whitespace;
 		allow_keywords = other.allow_keywords;
@@ -174,12 +174,12 @@ namespace Mirb
 		return *this;
 	}
 
-	void Lexeme::prev_set(Range *range)
+	void Lexeme::prev_set(SourceLoc *range)
 	{
 		range->stop = prev;
 	}
 	
-	std::string Lexeme::describe(Range *range, Type type)
+	std::string Lexeme::describe(SourceLoc *range, Type type)
 	{
 		std::string result;
 		
@@ -214,9 +214,9 @@ namespace Mirb
 		return result;
 	}
 	
-	Range &Lexeme::get_prev()
+	SourceLoc &Lexeme::get_prev()
 	{
-		Range &result = *new (lexer.memory_pool) Range;
+		SourceLoc &result = *new (lexer.memory_pool) SourceLoc;
 		result.start = prev;
 		result.stop = prev + 1;
 		result.line = line;

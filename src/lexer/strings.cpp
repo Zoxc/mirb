@@ -213,7 +213,7 @@ namespace Mirb
 									lexeme.start = start;
 									lexeme.stop = &input;
 
-									state->start = new (memory_pool) Range(lexeme);
+									state->start = new (memory_pool) SourceLoc(lexeme);
 								}
 								else
 									lexeme.data->type = InterpolateData::Continuing;

@@ -1,12 +1,11 @@
 #pragma once
 #include "common.hpp"
-#include "generic/range.hpp"
+#include "generic/source-loc.hpp"
 #include <Prelude/List.hpp>
 
 namespace Mirb
 {
 	class Parser;
-	class Range;
 
 	class Message
 	{
@@ -20,12 +19,12 @@ namespace Mirb
 				SEVERITIES
 			};
 
-			Message(Parser &parser, const Range &range, Severity severity);
+			Message(Parser &parser, const SourceLoc &range, Severity severity);
 
 			static std::string severity_names[SEVERITIES];
 
 			Parser &parser;
-			Range range;
+			SourceLoc range;
 			Severity severity;
 			ListEntry<Message> entry;
 			Message *note;
@@ -42,7 +41,7 @@ namespace Mirb
 		private:
 			std::string text;
 		public:
-			StringMessage(Parser &parser, const Range &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
+			StringMessage(Parser &parser, const SourceLoc &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
 
 			std::string string()
 			{

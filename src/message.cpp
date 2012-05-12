@@ -1,7 +1,7 @@
 #include "message.hpp"
 #include "document.hpp"
 #include "parser/parser.hpp"
-#include "generic/range.hpp"
+#include "generic/source-loc.hpp"
 #include "platform/platform.hpp"
 #include "classes/file.hpp"
 
@@ -14,7 +14,7 @@ namespace Mirb
 		"Note"
 	};
 	
-	Message::Message(Parser &parser, const Range &range, Severity severity) : parser(parser), range(range), severity(severity), note(nullptr)
+	Message::Message(Parser &parser, const SourceLoc &range, Severity severity) : parser(parser), range(range), severity(severity), note(nullptr)
 	{
 	}
 	

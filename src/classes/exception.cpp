@@ -6,7 +6,7 @@
 #include "../block.hpp"
 #include "../document.hpp"
 #include "../compiler.hpp"
-#include "../generic/range.hpp"
+#include "../generic/source-loc.hpp"
 #include "../platform/platform.hpp"
 #include "../vm.hpp"
 
@@ -63,7 +63,7 @@ namespace Mirb
 
 		if(self->code->executor == &evaluate_block || self->code->executor == &Compiler::deferred_block)
 		{
-			Range *range;
+			SourceLoc *range;
 
 			if(self->vars)
 				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
@@ -120,7 +120,7 @@ namespace Mirb
 
 		if(self->code->executor == &evaluate_block)
 		{
-			Range *range;
+			SourceLoc *range;
 
 			if(self->vars)
 				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));

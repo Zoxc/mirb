@@ -36,6 +36,7 @@ namespace Mirb
 	class Array;
 	class Hash;
 	class Float;
+	class Range;
 	class StackFrame;
 	class Exception;
 	class ReturnException;
@@ -103,6 +104,7 @@ namespace Mirb
 			InternalBlock,
 			InternalScope,
 			Float,
+			Range,
 			Fixnum,
 			True,
 			False,
@@ -248,6 +250,9 @@ namespace Mirb
 				case Float:
 					return T<Float>::func(std::forward<Arg>(arg));
 
+				case Range:
+					return T<Range>::func(std::forward<Arg>(arg));
+
 				case Fixnum:
 					return T<Fixnum>::func(std::forward<Arg>(arg));
 
@@ -337,6 +342,7 @@ namespace Mirb
 		mirb_typeclass(InternalBlock, Block);
 		mirb_typeclass(InternalScope, Tree::Scope);
 		mirb_typeclass(Float, Float);
+		mirb_typeclass(Range, Range);
 		mirb_typeclass(Fixnum, Value::Immediate<Fixnum>);
 		mirb_typeclass(True, Value::Immediate<True>);
 		mirb_typeclass(False, Value::Immediate<False>);
@@ -388,6 +394,7 @@ namespace Mirb
 		mirb_derived_from(Object, File);
 		mirb_derived_from(Object, Float);
 		mirb_derived_from(Object, Regexp);
+		mirb_derived_from(Object, Range);
 		
 		mirb_derived_from(Module, Module);
 		mirb_derived_from(Module, Class);
@@ -397,6 +404,8 @@ namespace Mirb
 		mirb_derived_from(String, String);
 		
 		mirb_derived_from(Float, Float);
+		
+		mirb_derived_from(Range, Range);
 		
 		mirb_derived_from(Regexp, Regexp);
 		

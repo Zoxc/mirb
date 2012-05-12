@@ -111,7 +111,7 @@ namespace Mirb
 				JoiningBuffer<sizeof(MoveOp) * 32, MemoryPool> opcode;
 				
 				typedef std::pair<size_t, Label *> BranchInfo;
-				typedef std::pair<size_t, Range *> SourceInfo;
+				typedef std::pair<size_t, SourceLoc *> SourceInfo;
 
 				Vector<BranchInfo, MemoryPool> branches;
 				Vector<SourceInfo, MemoryPool> source_locs;
@@ -186,7 +186,7 @@ namespace Mirb
 					branches.push(BranchInfo(gen<BranchUnlessOp>(var), lfalse));
 				}
 				
-				void location(Range *range)
+				void location(SourceLoc *range)
 				{
 					source_locs.push(SourceInfo(opcode.size(), range));
 				}

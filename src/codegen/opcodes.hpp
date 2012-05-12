@@ -76,6 +76,7 @@ namespace Mirb
 				Hash,
 				String,
 				Regexp,
+				Range,
 				Interpolate
 			};
 
@@ -134,6 +135,7 @@ namespace Mirb
 				&&OpHash, \
 				&&OpString, \
 				&&OpRegexp, \
+				&&OpRange, \
 				&&OpInterpolate
 
 			Type op;
@@ -654,6 +656,17 @@ namespace Mirb
 			InterpolateData::Entry str;
 
 			RegexpOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
+		};
+		
+		struct RangeOp:
+			public OpcodeWrapper<Opcode::Range>
+		{
+			var_t var;
+			var_t low;
+			var_t high;
+			bool exclusive;
+
+			RangeOp(var_t var, var_t low, var_t high, bool exclusive) : var(var), low(low), high(high), exclusive(exclusive) {}
 		};
 		
 		struct InterpolateOp:

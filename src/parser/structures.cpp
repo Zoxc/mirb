@@ -267,7 +267,7 @@ namespace Mirb
 
 			case Lexeme::IDENT:
 			{
-				Range *range = parse_method_name(symbol);
+				SourceLoc *range = parse_method_name(symbol);
 
 				if(lexeme() == Lexeme::DOT)
 				{
@@ -305,7 +305,7 @@ skip_name:
 
 			if(lexeme() == Lexeme::PARENT_OPEN)
 			{
-				Range parent_open = lexer.lexeme;
+				SourceLoc parent_open = lexer.lexeme;
 
 				lexer.step();
 			

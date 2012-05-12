@@ -18,9 +18,9 @@ namespace Mirb
 	{
 	}
 
-	Range *Parser::capture()
+	SourceLoc *Parser::capture()
 	{
-		return new (fragment) Range(lexer.lexeme);
+		return new (fragment) SourceLoc(lexer.lexeme);
 	}
 	
 	void Parser::load()
@@ -30,7 +30,7 @@ namespace Mirb
 		lexer.load(document.data, document.length);
 	}
 	
-	void Parser::report(const Range &range, std::string text, Message::Severity severity)
+	void Parser::report(const SourceLoc &range, std::string text, Message::Severity severity)
 	{
 		add_message(new (memory_pool) StringMessage(*this, range, severity, text), range);
 	}
@@ -63,7 +63,7 @@ namespace Mirb
 			lexer.step();
 	}
 
-	void Parser::add_message(Message *message, const Range &range)
+	void Parser::add_message(Message *message, const SourceLoc &range)
 	{
 		auto i = messages.mutable_iterator();
 		
@@ -78,7 +78,7 @@ namespace Mirb
 		i.insert(message);
 	}
 
-	bool Parser::close_pair(const std::string &name, const Range &range, Lexeme::Type what, bool skip)
+	bool Parser::close_pair(const std::string &name, const SourceLoc &range, Lexeme::Type what, bool skip)
 	{
 		if(lexeme() == what)
 		{
@@ -114,9 +114,9 @@ namespace Mirb
 		}
 	}
 
-	Range *Parser::parse_method_name(Symbol *&symbol)
+	SourceLoc *Parser::parse_method_name(Symbol *&symbol)
 	{
-		Range *range = capture();
+		SourceLoc *range = capture();
 
 		switch(lexeme())
 		{
@@ -214,7 +214,7 @@ namespace Mirb
 		}
 	}
 				
-	Tree::Node *Parser::parse_variable(Symbol *symbol, Range *range)
+	Tree::Node *Parser::parse_variable(Symbol *symbol, SourceLoc *range)
 	{
 		if(is_constant(symbol))
 		{
@@ -233,7 +233,7 @@ namespace Mirb
 	void Parser::parse_arguments(Tree::InvokeNode *node)
 	{
 		Tree::HashNode *hash = nullptr;
-		Range last_hash;
+		SourceLoc last_hash;
 
 		do
 		{
@@ -241,7 +241,7 @@ namespace Mirb
 
 			if(lexeme() == Lexeme::AMPERSAND)
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 				lexer.step();
 				auto result = parse_splat_operator_expression();
 				lexer.lexeme.prev_set(&range);
@@ -256,7 +256,7 @@ namespace Mirb
 				if(node->block_arg)
 					report(node->block_arg->range, "The block argument must be the last one");
 
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				auto result = parse_splat_operator_expression();
 
@@ -346,7 +346,7 @@ namespace Mirb
 	{
 		auto result = new (fragment) Tree::HashNode;
 
-		Range start = lexer.lexeme;
+		SourceLoc start = lexer.lexeme;
 		
 		lexer.step();
 		
@@ -407,7 +407,7 @@ namespace Mirb
 
 		result->variadic = false;
 		
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		lexer.step();
 
@@ -504,7 +504,7 @@ namespace Mirb
 
 				auto result = new (fragment) Tree::InterpolateNode;
 
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 				
 				result->result_type = type;
 
@@ -603,7 +603,7 @@ namespace Mirb
 
 				Tree::Node *node;
 
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				if(lexeme() == Lexeme::PARENT_OPEN)
 				{
@@ -732,7 +732,7 @@ namespace Mirb
 				
 			case Lexeme::QUESTION:
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				lexer.step();
 
@@ -769,7 +769,7 @@ namespace Mirb
 
 			case Lexeme::COLON:
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				lexer.lexeme.allow_keywords = false;
 
@@ -825,7 +825,7 @@ namespace Mirb
 				
 			case Lexeme::COMMAND:
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				auto command = parse_data(Lexeme::STRING);
 
@@ -838,7 +838,7 @@ namespace Mirb
 
 				result->object = new (fragment) Tree::SelfNode;
 				result->method = Symbol::get("`");
-				result->range = new (fragment) Range(range);
+				result->range = new (fragment) SourceLoc(range);
 
 				return result;
 			}
@@ -987,7 +987,7 @@ namespace Mirb
 
 			case Lexeme::PARENT_OPEN:
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				lexer.step();
 				
@@ -1118,7 +1118,7 @@ namespace Mirb
 				break;
 			
 			typecheck(left, [&](Tree::Node *left) -> Tree::Node * {
-				Range *range = capture();
+				SourceLoc *range = capture();
 			
 				lexer.step();
 
@@ -1173,14 +1173,14 @@ namespace Mirb
 		
 		if(lexeme() == Lexeme::RANGE_EXCL || lexeme() == Lexeme::RANGE_INCL)
 		{
-			Range range = lexer.lexeme;
+			SourceLoc range = lexer.lexeme;
 
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				auto node = new (fragment) Tree::RangeNode;
 				
 				node->range = range;
 
-				node->inclusive = lexeme() == Lexeme::RANGE_INCL;
+				node->exclusive = lexeme() == Lexeme::RANGE_EXCL;
 			
 				lexer.step();
 				skip_lines();
@@ -1201,7 +1201,7 @@ namespace Mirb
 		{
 			if(matches(Lexeme::MUL))
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				while(matches(Lexeme::MUL));
 
@@ -1220,7 +1220,7 @@ namespace Mirb
 			return parse_ternary_if(allow_multiples);
 	}
 
-	void Parser::process_lhs(Tree::Node *&lhs, const Range &range)
+	void Parser::process_lhs(Tree::Node *&lhs, const SourceLoc &range)
 	{
 		if(!lhs)
 			return;
@@ -1339,7 +1339,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_multiple_expressions(bool allow_multiples)
 	{
-		Range range = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		auto result = parse_splat_expression(allow_multiples);
 		
 		bool seen_splat = result && (result->type() == Tree::Node::Splat);
@@ -1366,7 +1366,7 @@ namespace Mirb
 				{
 					skip_lines();
 
-					Range result_range = lexer.lexeme;
+					SourceLoc result_range = lexer.lexeme;
 					result = typecheck(parse_splat_expression(allow_multiples));
 					lexer.lexeme.prev_set(&result_range);
 
@@ -1378,7 +1378,7 @@ namespace Mirb
 			}
 			
 			lexer.lexeme.prev_set(&range);
-			node->range = new (fragment) Range(range);
+			node->range = new (fragment) SourceLoc(range);
 
 			return node;
 		}
@@ -1388,7 +1388,7 @@ namespace Mirb
 
 			auto node = new (fragment) Tree::MultipleExpressionsNode;
 			
-			node->range = new (fragment) Range(range);
+			node->range = new (fragment) SourceLoc(range);
 			node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result,  range));
 
 			return node;
@@ -1516,7 +1516,7 @@ namespace Mirb
 					}
 					else
 					{
-						Range assign_range = lexer.lexeme;
+						SourceLoc assign_range = lexer.lexeme;
 					
 						// TODO: Save node->object in a temporary variable
 						auto result = new (fragment) Tree::CallNode;
@@ -1626,7 +1626,7 @@ namespace Mirb
 	{
 		if(lexeme() == Lexeme::KW_ALIAS)
 		{
-			Range range = lexer.lexeme;
+			SourceLoc range = lexer.lexeme;
 			lexer.step();
 			
 			auto node = new (fragment) Tree::AliasNode;
@@ -1677,7 +1677,7 @@ namespace Mirb
 
 			if(node && node->type() == Tree::Node::MultipleExpressions)
 			{
-				Range range = lexer.lexeme;
+				SourceLoc range = lexer.lexeme;
 
 				bool error = is_sep();
 				

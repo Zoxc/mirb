@@ -1,7 +1,7 @@
 #pragma once
 #include "../common.hpp"
 #include <Prelude/Map.hpp>
-#include "../generic/range.hpp"
+#include "../generic/source-loc.hpp"
 #include "../tree/tree.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
@@ -29,7 +29,7 @@ namespace Mirb
 		Tree::Scope *scope;
 		Tree::Fragment fragment;
 		Tree::VoidTrapper *trapper;
-		Range range;
+		SourceLoc range;
 
 		Heredoc(Tree::Fragment fragment) : fragment(fragment) {}
 	};

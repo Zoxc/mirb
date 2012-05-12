@@ -3,7 +3,7 @@
 #include <Prelude/Map.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
-#include "generic/range.hpp"
+#include "generic/source-loc.hpp"
 #include "vm.hpp"
 #include "allocator.hpp"
 
@@ -77,7 +77,7 @@ namespace Mirb
 	
 	extern const var_t no_var;
 
-	class Range;
+	class SourceLoc;
 	class Document;
 
 	class Block:
@@ -155,9 +155,9 @@ namespace Mirb
 			const char_t **strings;
 			size_t string_count;
 			
-			Range *range;
-			Range *ranges;
-			Map<size_t, Range *> source_location;
+			SourceLoc *range;
+			SourceLoc *ranges;
+			Map<size_t, SourceLoc *> source_location;
 
 			executor_t executor;
 			

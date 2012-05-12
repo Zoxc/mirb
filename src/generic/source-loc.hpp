@@ -30,16 +30,16 @@ namespace Mirb
 			}
 	};
 	
-	class Range:
+	class SourceLoc:
 		public BasicRange
 	{
 		public:
 			const char_t *line_start;
 			size_t line;
 
-			Range &dup(MemoryPool &memory_pool)
+			SourceLoc &dup(MemoryPool &memory_pool)
 			{
-				return *new (memory_pool) Range(*this);
+				return *new (memory_pool) SourceLoc(*this);
 			}
 	
 			std::string get_line()

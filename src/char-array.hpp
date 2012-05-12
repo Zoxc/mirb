@@ -158,4 +158,6 @@ namespace Mirb
 	}
 	
 	CharArray operator+(const CharArray &lhs, const CharArray &rhs);
+	CharArray operator+(const char *lhs, const CharArray &rhs);
+	CharArray operator+(const CharArray &lhs, const char *rhs);
 };
