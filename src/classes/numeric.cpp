@@ -17,6 +17,8 @@ namespace Mirb
 
 	void Numeric::initialize()
 	{
+		include_module(context->numeric_class, context->comparable_module);
+		
 		method<Arg::Self>(context->numeric_class, "nonzero?", &nonzero);
 	}
 };

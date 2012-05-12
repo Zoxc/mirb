@@ -26,6 +26,7 @@
 #include "classes/dir.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
+#include "modules/enumerable.hpp"
 #include "modules/process.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
@@ -880,6 +881,9 @@ namespace Mirb
 		TrueClass::initialize();
 		FalseClass::initialize();
 		NilClass::initialize();
+		
+		Comparable::initialize();
+		Enumerable::initialize();
 
 		Symbol::initialize();
 		String::initialize();
@@ -899,7 +903,6 @@ namespace Mirb
 		Dir::initialize();
 		Regexp::initialize();
 		
-		Comparable::initialize();
 		Process::initialize();
 		
 		setup_main();

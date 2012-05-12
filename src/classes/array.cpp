@@ -111,6 +111,8 @@ namespace Mirb
 	{
 		context->array_class = define_class("Array", context->object_class);
 		
+		include_module(context->array_class, context->enumerable_module);
+		
 		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
 		
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);

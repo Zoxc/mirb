@@ -61,6 +61,11 @@ namespace Mirb
 		return value_nil;
 	}
 	
+	value_t Object::pattern(value_t obj)
+	{
+		return value_nil;
+	}
+	
 	value_t Object::equal(value_t obj, value_t other)
 	{
 		return auto_cast(obj == other);
@@ -141,6 +146,7 @@ namespace Mirb
 		method<Arg::Self>(context->object_class, "class", &klass);
 		method<Arg::Self>(context->object_class, "freeze", &dummy);
 		method<Arg::Self>(context->object_class, "frozen?", &dummy);
+		method<Arg::Self, Arg::Value>(context->object_class, "=~", &pattern);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
 		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
 		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);

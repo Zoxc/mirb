@@ -14,6 +14,7 @@ namespace Mirb
 			static value_t tap(value_t obj, value_t block);
 			static value_t klass(value_t obj);
 			static value_t dummy();
+			static value_t pattern(value_t obj);
 			static value_t inspect(value_t obj);
 			static value_t instance_eval(value_t obj, size_t argc, value_t argv[], value_t block);
 			static value_t equal(value_t obj, value_t other);

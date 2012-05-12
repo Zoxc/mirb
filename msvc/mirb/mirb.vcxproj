@@ -52,6 +52,7 @@
     <ClInclude Include="..\..\src\message.hpp" />
     <ClInclude Include="..\..\src\method.hpp" />
     <ClInclude Include="..\..\src\modules\comparable.hpp" />
+    <ClInclude Include="..\..\src\modules\enumerable.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
     <ClInclude Include="..\..\src\modules\process.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
@@ -115,6 +116,7 @@
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\method.cpp" />
     <ClCompile Include="..\..\src\modules\comparable.cpp" />
+    <ClCompile Include="..\..\src\modules\enumerable.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
     <ClCompile Include="..\..\src\modules\process.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />

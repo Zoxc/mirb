@@ -58,8 +58,6 @@ namespace Mirb
 	{
 		context->comparable_module = define_module("Comparable");
 
-		include_module(context->fixnum_class, context->comparable_module);
-		
 		method<Arg::Self, Arg::Value>(context->comparable_module, "<", &less);
 		method<Arg::Self, Arg::Value>(context->comparable_module, "<=", &less_or_equal);
 		method<Arg::Self, Arg::Value>(context->comparable_module, ">", &greater);

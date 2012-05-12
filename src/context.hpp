@@ -57,6 +57,7 @@ namespace Mirb
 
 			Module *kernel_module;
 			Module *comparable_module;
+			Module *enumerable_module;
 			Module *process_module;
 
 			Method *inspect_method;
