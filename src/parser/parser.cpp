@@ -232,6 +232,9 @@ namespace Mirb
 	
 	void Parser::parse_arguments(Tree::InvokeNode *node)
 	{
+		Tree::HashNode *hash = nullptr;
+		Range last_hash;
+
 		do
 		{
 			skip_lines();
@@ -251,7 +254,9 @@ namespace Mirb
 			else
 			{
 				if(node->block_arg)
-					report(node->block_arg->range, "The block arguments must be the last one");
+					report(node->block_arg->range, "The block argument must be the last one");
+
+				Range range = lexer.lexeme;
 
 				auto result = parse_operator_expression(false);
 
@@ -259,8 +264,53 @@ namespace Mirb
 				{
 					if(result->type() == Tree::Node::Splat)
 						node->variadic = true;
-			
-					node->arguments.append(result);
+
+					auto append_hash = [&](Tree::Node *append) {
+						lexer.step();
+						
+						skip_lines();
+
+						if(!hash)
+						{
+							hash = new (fragment) Tree::HashNode;
+							node->arguments.append(hash);
+						}
+
+						hash->entries.append(append);
+
+						append = parse_operator_expression(false);
+
+						if(append)
+							hash->entries.append(append);
+
+						lexer.lexeme.prev_set(&range);
+
+						last_hash = range;
+					};
+
+					if(lexeme() == Lexeme::ASSOC)
+						append_hash(result);
+					else if(lexeme() == Lexeme::COLON)
+					{
+						auto node = new (fragment) Tree::SymbolNode;
+						auto call = static_cast<Tree::CallNode *>(result);
+
+						if(result->type() == Tree::Node::Variable)
+							node->symbol = static_cast<Tree::VariableNode *>(result)->var->name;
+						else if(result->type() == Tree::Node::Call && call->can_be_var)
+							node->symbol = call->method;
+						else
+							error("Use '=>' to associate non-identifier key");
+
+						append_hash(node);
+					}
+					else
+					{
+						if(hash)
+							report(last_hash, "Association arguments must come after regular arguments");
+
+						node->arguments.append(result);
+					}
 				}
 			}
 		}

@@ -51,7 +51,6 @@ namespace Mirb
 			
 			void report_null();
 
-			
 			bool heredoc_terminates(Heredoc *heredoc);
 			
 			void parse_interpolate_heredoc(Heredoc *heredoc);
