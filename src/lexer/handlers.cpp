@@ -695,6 +695,7 @@ namespace Mirb
 				case '$':
 				case '_':
 				case '*':
+				case '?':
 					input++;
 					lexeme.stop = &input;
 					lexeme.type = Lexeme::GLOBAL;
