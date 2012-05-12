@@ -380,7 +380,7 @@ namespace Mirb
 		EndOp
 
 		Op(Regexp)
-			value_t result = Regexp::allocate(op.str.data, op.str.length);
+			value_t result = Regexp::allocate(CharArray(op.str.data, op.str.length));
 
 			if(prelude_unlikely(!result))
 				goto handle_exception;

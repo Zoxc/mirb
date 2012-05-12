@@ -387,6 +387,7 @@ namespace Mirb
 		mirb_derived_from(Object, IO);
 		mirb_derived_from(Object, File);
 		mirb_derived_from(Object, Float);
+		mirb_derived_from(Object, Regexp);
 		
 		mirb_derived_from(Module, Module);
 		mirb_derived_from(Module, Class);

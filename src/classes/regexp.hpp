@@ -11,13 +11,23 @@ namespace Mirb
 	class Regexp:
 		public Object
 	{
+		private:
+			static value_t to_s(Regexp *obj);
 		public:
 			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of) {}
 
 			real_pcre *re;
+			CharArray pattern;
 
-			static Regexp *allocate(const char_t *pattern, size_t length);
+			static Regexp *allocate(const CharArray &pattern);
+			
+			template<typename F> void mark(F mark)
+			{
+				Object::mark(mark);
 
+				mark(pattern);
+			}
+			
 			static void initialize();
 	};
 };

@@ -48,7 +48,7 @@ namespace Mirb
 					return symbol_pool.get(result);
 
 				case Value::Regexp:
-					return Regexp::allocate(result.raw(), result.size());
+					return Regexp::allocate(result);
 
 				case Value::Array:
 				{
