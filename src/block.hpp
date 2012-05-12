@@ -3,6 +3,7 @@
 #include <Prelude/Map.hpp>
 #include <Prelude/Vector.hpp>
 #include <Prelude/List.hpp>
+#include "generic/range.hpp"
 #include "vm.hpp"
 #include "allocator.hpp"
 
@@ -90,6 +91,7 @@ namespace Mirb
 				opcodes(nullptr),
 				exception_blocks(nullptr),
 				strings(nullptr),
+				range(nullptr),
 				ranges(nullptr),
 				source_location(2),
 				break_targets(nullptr)
@@ -98,6 +100,9 @@ namespace Mirb
 			
 			~Block()
 			{
+				if(range)
+					delete range;
+
 				if(ranges)
 					std::free(ranges);
 

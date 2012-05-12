@@ -1046,14 +1046,6 @@ namespace Mirb
 			
 			size_t ranges = source_locs.size();
 
-			if(scope->defered())
-			{
-				if(scope->range)
-					final->range = new Range(*scope->range);
-				else
-					final->range = nullptr;
-			}
-			
 			if(ranges)
 			{
 				final->ranges = (Range *)std::malloc(ranges * sizeof(Range));
