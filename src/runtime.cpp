@@ -909,6 +909,10 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		context->globals.set(Symbol::get("$:"), Collector::allocate<Array>());
 
+		context->globals.set(Symbol::get("$stderr"), Collector::allocate<Object>());
+		context->globals.set(Symbol::get("$stdout"), Collector::allocate<Object>());
+		context->globals.set(Symbol::get("$stdin"), Collector::allocate<Object>());
+
 		mirb_debug(Collector::collect());
 	}
 

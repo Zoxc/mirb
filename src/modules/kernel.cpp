@@ -139,7 +139,7 @@ namespace Mirb
 
 		CharArray full_path = File::expand_path(filename);
 
-		if(require && !context->loaded.each([&](value_t path) -> bool { return cast<String>(path)->string != full_path;	}))
+		if(require && !context->loaded.each([&](value_t path) { return cast<String>(path)->string != full_path;	}))
 		{
 			return value_nil;
 		}
