@@ -21,7 +21,6 @@
 #include "classes/float.hpp"
 #include "document.hpp"
 #include "tree/tree.hpp"
-#include "hash-map.hpp"
 
 namespace Mirb
 {

@@ -18,7 +18,6 @@
 #include "classes/io.hpp"
 #include "classes/file.hpp"
 #include "classes/float.hpp"
-#include "hash-map.hpp"
 
 namespace Mirb
 {
@@ -156,6 +155,5 @@ namespace Mirb
 
 	size_t size_of_value(value_t value);
 	
-	typedef Allocator<ValueMapPair *, AllocatorBase>::Storage ValueMapPairStorage;
 	typedef Allocator<value_t, AllocatorBase>::Storage ValueStorage;
 };

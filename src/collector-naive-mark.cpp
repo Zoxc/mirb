@@ -17,11 +17,6 @@ namespace Mirb
 
 	struct NaiveMarkFunc
 	{
-		void operator()(const ValueMapPairStorage &storage)
-		{
-			template_naive_mark(storage.array);
-		}
-
 		void operator()(const ValueStorage &storage)
 		{
 			template_naive_mark(storage.array);

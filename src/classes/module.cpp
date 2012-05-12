@@ -2,28 +2,28 @@
 #include "symbol.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
-#include "../hash-map.hpp"
+#include "../value-map.hpp"
 
 namespace Mirb
 {
-	HashMap *Module::get_methods()
+	ValueMap *Module::get_methods()
 	{
 		if(prelude_unlikely(!methods))
-			methods = Collector::allocate<HashMap>();
+			methods = Collector::allocate<ValueMap>();
 		
 		return methods;
 	}
 	
 	Method *Module::get_method(Symbol *name)
 	{
-		return auto_cast_null(HashMapAccess::get(get_methods(), name, [] { return nullptr; }));
+		return auto_cast_null(ValueMapAccess::get(get_methods(), name, [] { return nullptr; }));
 	}
 
 	void Module::set_method(Symbol *name, Method *method)
 	{
 		Value::assert_valid(method);
 
-		HashMapAccess::set(get_methods(), name, method);
+		ValueMapAccess::set(get_methods(), name, method);
 	}
 
 	value_t Module::to_s(value_t obj)
@@ -177,21 +177,23 @@ namespace Mirb
 	value_t Module::const_defined(Module *obj, Symbol *constant)
 	{
 		if(obj->vars)
-			return auto_cast(obj->vars->map.has(constant));
+			return ValueMapAccess::has(obj->vars, constant);
 		else
 			return value_false;
 	}
 
 	value_t Module::const_get(Module *obj, Symbol *constant)
 	{
-		return get_vars(obj)->map.try_get(constant, [&]{
+		return ValueMapAccess::get(get_vars(obj), constant, [&]() -> value_t {
+			OnStack<2> os(obj, constant);
+
 			return raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + constant->string);
 		});
 	}
 
 	value_t Module::const_set(Module *obj, Symbol *constant, value_t value)
 	{
-		get_vars(obj)->map.set(constant, value);
+		ValueMapAccess::set(get_vars(obj), constant, value);
 		return value;
 	}
 	

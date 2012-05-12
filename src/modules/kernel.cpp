@@ -103,7 +103,7 @@ namespace Mirb
 	
 	FILE *open_file(CharArray &filename, bool try_relative)
 	{
-		auto load_path = cast<Array>(context->globals.get(Symbol::get("$:")));
+		auto load_path = cast<Array>(get_global(Symbol::get("$:")));
 		FILE *result = nullptr;
 		
 		load_path->vector.each([&](value_t path) -> bool {

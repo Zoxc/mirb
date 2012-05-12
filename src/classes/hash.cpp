@@ -12,7 +12,7 @@ namespace Mirb
 	{
 		auto self = cast<Hash>(obj);
 
-		return self->map.try_get(key, [&]() -> value_t {
+		return HashAccess::get(self, key, [&]() -> value_t {
 			if(self->flag)
 				return yield(self->default_value);
 			else
@@ -24,7 +24,7 @@ namespace Mirb
 	{
 		auto self = cast<Hash>(obj);
 
-		self->map.set(key, value);
+		HashAccess::set(self, key, value);
 
 		return value;
 	}
@@ -38,7 +38,7 @@ namespace Mirb
 		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
-		if(!self->map.each_pair([&](value_t key, value_t value) -> bool {
+		if(!self->data.each_pair([&](value_t key, value_t value) -> bool {
 
 			OnStack<1> os(value);
 			

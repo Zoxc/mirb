@@ -17,6 +17,7 @@ namespace Mirb
 				Symbol *classname;
 				Symbol *attached;
 				Symbol *compare;
+				Symbol *equal;
 
 				Symbol *terminator;
 			};
@@ -79,11 +80,16 @@ namespace Mirb
 
 			Frame *exception_frame_origin;
 			
-			ValueMap::MapType globals;
+			ValueMapData globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;
 			Vector<value_t, AllocatorBase, Allocator> loaded;
 
 			Context();
+			
+			bool accessing(bool = true)
+			{
+				mirb_runtime_abort("Should not be called");
+			}
 			
 			template<typename F> void mark(F mark)
 			{
@@ -104,6 +110,8 @@ namespace Mirb
 
 			void setup();
 	};
+	
+	typedef ValueMapManipulator<true, Context, &Context::globals> GlobalAccess;
 
 	extern Context *context;
 };

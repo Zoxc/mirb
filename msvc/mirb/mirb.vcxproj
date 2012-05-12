@@ -47,7 +47,6 @@
     <ClInclude Include="..\..\src\document.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
     <ClInclude Include="..\..\src\generic\source-loc.hpp" />
-    <ClInclude Include="..\..\src\hash-map.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
@@ -110,7 +109,6 @@
     <ClCompile Include="..\..\src\context.cpp" />
     <ClCompile Include="..\..\src\document.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
-    <ClCompile Include="..\..\src\hash-map.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />
     <ClCompile Include="..\..\src\lexer\lexer.cpp" />

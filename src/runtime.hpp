@@ -68,9 +68,13 @@ namespace Mirb
 	value_t get_scoped_const(value_t obj, Symbol *name);
 	value_t get_const(Tuple<Module> *scope, Symbol *name);
 	value_t set_const(value_t obj, Symbol *name, value_t value);
-
+	
+	value_t get_var_raw(value_t obj, Symbol *name);
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);
+	
+	value_t get_global(Symbol *name);
+	void set_global(Symbol *name, value_t value);
 	
 	void initialize();
 	void finalize();

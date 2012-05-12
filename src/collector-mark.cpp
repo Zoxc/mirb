@@ -20,12 +20,6 @@ namespace Mirb
 
 	template<void(*callback)()> struct MarkFunc
 	{
-		void operator()(const ValueMapPairStorage &storage)
-		{
-			if(template_mark(storage.array))
-				callback();
-		}
-
 		void operator()(const ValueStorage &storage)
 		{
 			if(template_mark(storage.array))

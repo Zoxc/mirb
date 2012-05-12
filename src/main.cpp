@@ -10,7 +10,6 @@
 #include "platform/platform.hpp"
 #include "block.hpp"
 #include "document.hpp"
-#include "hash-map.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"

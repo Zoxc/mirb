@@ -31,12 +31,6 @@ namespace Mirb
 				template_thread(*const_cast<decltype(storage.array) *>(&storage.array));
 		}
 
-		void operator()(const ValueMapPairStorage &storage)
-		{
-			if(storage)
-				template_thread(*const_cast<decltype(storage.array) *>(&storage.array));
-		}
-
 		void operator()(const CharArray &string)
 		{
 			char_t * const&data = Accesser::CharArray::data(string);

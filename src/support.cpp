@@ -81,7 +81,7 @@ namespace Mirb
 			Hash *hash = Collector::allocate<Hash>(context->hash_class);
 			
 			for(size_t i = 0; i < argc; i += 2)
-				hash->map.set(argv[i],  argv[i + 1]);
+				HashAccess::set(hash, argv[i], argv[i + 1]);
 
 			return hash;
 		}

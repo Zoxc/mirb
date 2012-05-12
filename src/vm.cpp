@@ -442,11 +442,11 @@ namespace Mirb
 		EndOp
 			
 		Op(GetGlobal)
-			vars[op.var] = context->globals.try_get(op.name, [&] { return value_nil; });
+			vars[op.var] = get_global(op.name);
 		EndOp
 
 		Op(SetGlobal)
-			context->globals.set(op.name, vars[op.var]);
+			set_global(op.name, vars[op.var]);
 		EndOp
 
 		OpEpilogue

@@ -32,7 +32,6 @@
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
-#include "hash-map.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
@@ -89,7 +88,7 @@ namespace Mirb
 			return nullptr;
 		}
 
-		value_t existing = get_vars(under)->map.get(auto_cast(name));
+		value_t existing = get_var_raw(under, name);
 		
 		if(prelude_unlikely(existing != value_raise))
 		{
@@ -123,7 +122,7 @@ namespace Mirb
 			return nullptr;
 		}
 
-		value_t existing = get_vars(under)->map.get(auto_cast(name));
+		value_t existing = get_var_raw(under, name);
 
 		if(prelude_unlikely(existing != value_raise))
 		{
@@ -396,7 +395,7 @@ namespace Mirb
 
 		while(module)
 		{
-			value_t value = get_vars(module)->map.get(auto_cast(name));
+			value_t value = get_var_raw(module, name);
 
 			if(value != value_raise)
 				return value;
@@ -413,7 +412,7 @@ namespace Mirb
 		
 		for(size_t i = 0; i < scope->entries; ++i)
 		{
-			value_t value = get_vars((*scope)[i])->map.get(auto_cast(name));
+			value_t value = get_var_raw((*scope)[i], name);
 
 			if(value != value_raise)
 				return value;
@@ -430,7 +429,7 @@ namespace Mirb
 		if(!can_have_consts(obj))
 			return value_raise;
 
-		value_t value = get_vars(obj)->map.get(auto_cast(name));
+		value_t value = get_var_raw(obj, name);
 
 		if(value)
 			return value;
@@ -467,32 +466,36 @@ namespace Mirb
 		if(!can_have_consts(obj))
 			return value_raise;
 		
-		ValueMap *vars = get_vars(obj);
+		set_var(obj, name, value);
 
-		value_t *old = vars->map.get_ref(auto_cast(name));
-
-		if(prelude_unlikely(old != 0))
-		{
-			*old = value;
-			return value_true;
-		}
-		else
-		{
-			set_var(obj, name, value);
-			return value_false;
-		}
+		return value_true;
 	}
 	
+	value_t get_var_raw(value_t obj, Symbol *name)
+	{
+		return ValueMapAccess::get(get_vars(obj), name, [] { return value_raise; });
+	}
+
 	value_t get_var(value_t obj, Symbol *name)
 	{
-		return get_vars(obj)->map.try_get(auto_cast(name), []{ return value_nil; });
+		return ValueMapAccess::get(get_vars(obj), name, [] { return value_nil; });
 	}
 
 	void set_var(value_t obj, Symbol *name, value_t value)
 	{
 		Value::assert_valid(value);
 
-		get_vars(obj)->map.set(auto_cast(name), value);
+		ValueMapAccess::set(get_vars(obj), name, value);
+	}
+	
+	value_t get_global(Symbol *name)
+	{
+		return GlobalAccess::get(context, name, [] { return value_nil; });
+	}
+
+	void set_global(Symbol *name, value_t value)
+	{
+		GlobalAccess::set(context, name, value);
 	}
 	
 	bool type_error(value_t value, value_t expected)
@@ -831,6 +834,7 @@ namespace Mirb
 		context->syms.classpath = Symbol::get("__classpath__");
 		context->syms.classname = Symbol::get("__classname__");
 		context->syms.compare = Symbol::get("<=>");
+		context->syms.equal = Symbol::get("==");
 
 		context->string_class = class_create_unnamed(context->object_class);
 		
@@ -917,11 +921,11 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
 
-		context->globals.set(Symbol::get("$:"), Collector::allocate<Array>());
+		set_global(Symbol::get("$:"), Collector::allocate<Array>());
 
-		context->globals.set(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
-		context->globals.set(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));
-		context->globals.set(Symbol::get("$stdin"), Collector::allocate<Object>(context->object_class));
+		set_global(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
+		set_global(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));
+		set_global(Symbol::get("$stdin"), Collector::allocate<Object>(context->object_class));
 
 		mirb_debug(Collector::collect());
 	}

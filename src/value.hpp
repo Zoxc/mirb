@@ -25,9 +25,7 @@ namespace Mirb
 	class ObjectHeader;
 	class VariableBlock;
 	template<class T = Value::Header> class Tuple;
-	class HashMap;
 	class ValueMap;
-	class ValueMapPair;
 	class Module;
 	class Class;
 	class Symbol;
@@ -95,9 +93,7 @@ namespace Mirb
 		enum Type {
 			None,
 			FreeBlock,
-			InternalHashMap,
 			InternalValueMap,
-			InternalValueMapPair,
 			InternalStackFrame,
 			InternalTuple,
 			InternalValueTuple,
@@ -222,15 +218,9 @@ namespace Mirb
 		{
 			switch(type)
 			{
-				case InternalHashMap:
-					return T<InternalHashMap>::func(std::forward<Arg>(arg));
-
 				case InternalValueMap:
 					return T<InternalValueMap>::func(std::forward<Arg>(arg));
 
-				case InternalValueMapPair:
-					return T<InternalValueMapPair>::func(std::forward<Arg>(arg));
-					
 				case InternalStackFrame:
 					return T<InternalStackFrame>::func(std::forward<Arg>(arg));
 					
@@ -337,9 +327,7 @@ namespace Mirb
 		
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
-		mirb_typeclass(InternalHashMap, HashMap);
 		mirb_typeclass(InternalValueMap, ValueMap);
-		mirb_typeclass(InternalValueMapPair, ValueMapPair);
 		mirb_typeclass(InternalStackFrame, StackFrame);
 		mirb_typeclass(InternalTuple, Tuple<Mirb::Object>);
 		mirb_typeclass(InternalValueTuple, Tuple<Value::Header>);
