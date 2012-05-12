@@ -21,6 +21,7 @@ namespace Mirb
 				{
 					input--;
 					real();
+					break;
 				}
 
 				input--;
