@@ -299,6 +299,7 @@ namespace Mirb
 			NodeType type() { return Array; }
 			
 			CountedNodeList entries;
+			bool variadic;
 		};
 		
 		struct HashNode:

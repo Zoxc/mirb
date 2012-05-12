@@ -439,6 +439,43 @@ namespace Mirb
 		void ByteCodeGenerator::convert_array(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::ArrayNode *)basic_node;
+
+			if(node->variadic)
+			{
+				if(var == no_var)
+				{
+					for(auto expr: node->entries)
+					{
+						if(expr->type() == Tree::Node::Splat)
+							to_bytecode(static_cast<Tree::SplatNode *>(expr)->expression, no_var);
+						else
+							to_bytecode(expr, no_var);
+					}
+
+					return;
+				}
+
+				gen<ArrayOp>(var, 0, 0);
+			
+				var_t temp = create_var();
+
+				for(auto expr: node->entries)
+				{
+					if(expr->type() == Tree::Node::Splat)
+					{
+						to_bytecode(static_cast<Tree::SplatNode *>(expr)->expression, temp);
+						gen<PushArrayOp>(var, temp);
+					}
+					else
+					{
+						to_bytecode(expr, temp);
+						gen<PushOp>(var, temp);
+					}
+				}
+
+				return;
+			}
+
 			
 			if(!is_var(var))
 			{

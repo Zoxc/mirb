@@ -134,10 +134,13 @@ namespace Mirb
 				void to_bytecode(Tree::Node *node, var_t var)
 				{
 					mirb_debug_assert(node);
-					mirb_debug_assert(node->type() != Tree::Node::None);
 					mirb_debug_assert(node->type() < Tree::Node::Types);
 
-					(this->*jump_table[node->type()])(node, var);
+					auto func = jump_table[node->type()];
+					
+					mirb_debug_assert(func);
+
+					(this->*func)(node, var);
 				}
 				
 				var_t reuse(var_t var)

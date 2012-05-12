@@ -140,6 +140,16 @@ namespace Mirb
 				return typecheck(parse_assignment(allow_multiples));
 			}
 			
+			Tree::Node *parse_splat_operator_expression()
+			{
+				auto result = parse_assignment(false);
+
+				if(result->type() == Tree::Node::MultipleExpressions)
+					return static_cast<Tree::MultipleExpressionsNode *>(result)->expressions.first->expression;
+				else
+					return result;
+			}
+			
 			Tree::Node *parse_expression()
 			{
 				return typecheck(parse_boolean());

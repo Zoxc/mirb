@@ -243,7 +243,7 @@ namespace Mirb
 			{
 				Range range = lexer.lexeme;
 				lexer.step();
-				auto result = parse_operator_expression(false);
+				auto result = parse_splat_operator_expression();
 				lexer.lexeme.prev_set(&range);
 
 				if(node->block_arg)
@@ -258,7 +258,7 @@ namespace Mirb
 
 				Range range = lexer.lexeme;
 
-				auto result = parse_operator_expression(false);
+				auto result = parse_splat_operator_expression();
 
 				if(result)
 				{
@@ -404,6 +404,8 @@ namespace Mirb
 	Tree::Node *Parser::parse_array()
 	{
 		auto result = new (fragment) Tree::ArrayNode;
+
+		result->variadic = false;
 		
 		Range range = lexer.lexeme;
 		
@@ -415,10 +417,15 @@ namespace Mirb
 			{
 				skip_lines();
 
-				auto element = parse_operator_expression(false);
+				auto element = parse_splat_operator_expression();
 				
 				if(element)
+				{
+					if(element->type() == Tree::Node::Splat)
+						result->variadic = true;
+
 					result->entries.append(element);
+				}
 			}
 			while(matches(Lexeme::COMMA));
 		}
@@ -1334,12 +1341,13 @@ namespace Mirb
 	{
 		Range range = lexer.lexeme;
 		auto result = parse_splat_expression(allow_multiples);
+		
+		bool seen_splat = result && (result->type() == Tree::Node::Splat);
 
 		if(allow_multiples)
 		{
 			Tree::MultipleExpressionsNode *node;
 
-			bool seen_splat = result && (result->type() == Tree::Node::Splat);
 			bool is_multi = lexeme() == Lexeme::COMMA || seen_splat;
 
 			if(is_multi)
@@ -1371,6 +1379,17 @@ namespace Mirb
 			
 			lexer.lexeme.prev_set(&range);
 			node->range = new (fragment) Range(range);
+
+			return node;
+		}
+		else if(seen_splat)
+		{
+			lexer.lexeme.prev_set(&range);
+
+			auto node = new (fragment) Tree::MultipleExpressionsNode;
+			
+			node->range = new (fragment) Range(range);
+			node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result,  range));
 
 			return node;
 		}
