@@ -19,7 +19,50 @@ namespace Mirb
 		class Scope;
 		class Variable;
 		class NamedVariable;
+
+		struct LoopNode;
 		
+		//TODO: Make sure no void nodes are in found in expressions.
+		struct VoidNode:
+			public Node
+		{
+			NodeType type() { return Void; }
+			
+			Range *range;
+			bool in_ensure;
+			LoopNode *target;
+			
+			ListEntry<VoidNode> void_entry;
+
+			VoidNode(Range *range) : range(range), in_ensure(false), target(nullptr) {}
+		};
+		
+		typedef List<VoidNode, VoidNode, &VoidNode::void_entry> VoidList;
+
+		class VoidTrapper
+		{
+			private:
+			public:
+				VoidTrapper *prev;
+				bool trap_return;
+				bool in_ensure;
+				LoopNode *target;
+				VoidList list;
+				ListEntry<VoidTrapper> entry;
+
+				VoidTrapper(VoidTrapper *prev, bool trap_return) : prev(prev), trap_return(trap_return), in_ensure(false), target(nullptr)
+				{
+				}
+
+				void trap(VoidNode *node)
+				{
+					if(!trap_return && node->type() == Node::Return)
+						prev->trap(node);
+					else
+						list.append(node);
+				}
+		};
+
 		struct GroupNode:
 			public Node
 		{
@@ -117,6 +160,16 @@ namespace Mirb
 			Value::Type result_type;
 			
 			InterpolateData::Entry data;
+		};
+		
+		struct HeredocNode:
+			public Node
+		{
+			NodeType type() { return Heredoc; }
+			
+			Node *data;
+
+			HeredocNode() : data(nullptr) {}
 		};
 		
 		struct InterpolatePairNode
@@ -351,12 +404,12 @@ namespace Mirb
 			
 			Node *body;
 			Node *condition;
-			HandlerNode *handler;
+			bool trap_exceptions;
 			CodeGen::Label *label_start;
 			CodeGen::Label *label_body;
 			CodeGen::Label *label_end;
 
-			LoopNode() : handler(nullptr) {}
+			LoopNode() : trap_exceptions(false) {}
 		};
 		
 		struct RescueNode:
@@ -381,23 +434,9 @@ namespace Mirb
 			Node *else_group;
 			Node *ensure_group;
 			LoopNode *loop;
+			VoidTrapper *trapper;
 
 			HandlerNode() : else_group(nullptr), ensure_group(nullptr), loop(nullptr) {}
-		};
-		
-		//TODO: Make sure no void nodes are in found in expressions.
-		struct VoidNode:
-			public Node
-		{
-			NodeType type() { return Void; }
-			
-			Range *range;
-			bool in_ensure;
-			LoopNode *target;
-			
-			ListEntry<VoidNode> void_entry;
-
-			VoidNode(Range *range) : range(range), in_ensure(false), target(nullptr) {}
 		};
 		
 		struct ReturnNode:

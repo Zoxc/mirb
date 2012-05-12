@@ -25,59 +25,11 @@ namespace Mirb
 
 			MemoryPool memory_pool;
 			
-			typedef List<Tree::VoidNode, Tree::VoidNode, &Tree::VoidNode::void_entry> VoidList;
-
 			bool close_pair(const std::string &name, const Range &range, Lexeme::Type lexeme, bool skip = true);
-
-			VoidList *void_list;
-
-			class VoidTrapper
-			{
-				private:
-					Parser *parser;
-					VoidList *prev;
-				public:
-					VoidList list;
-
-					VoidTrapper(Parser *parser) : parser(parser), prev(parser->void_list)
-					{
-						parser->void_list = &list;
-					}
-				
-					void release()
-					{
-						if(prev)
-						{
-							parser->void_list = prev;
-							prev = nullptr;
-						}
-					}
-				
-					void raise()
-					{
-						Tree::VoidNode *current = list.first;
-
-						while(current)
-						{
-							Tree::VoidNode *node = current;
-							current = current->void_entry.next;
-
-							parser->raise_void(node);
-						}
-
-						list.clear();
-					}
-
-					~VoidTrapper()
-					{
-						release();
-						raise();
-					}
-			};
 
 			Tree::VoidNode *raise_void(Tree::VoidNode *node)
 			{
-				void_list->append(node);
+				trapper->trap(node);
 				return node;
 			}
 			
@@ -87,46 +39,45 @@ namespace Mirb
 			
 			Tree::Fragment fragment;
 			Tree::Scope *scope;
+			Tree::VoidTrapper *trapper;
 			
 			void unexpected(bool skip = true);
 			void expected(Lexeme::Type what, bool skip = false);
 			
 			void error(std::string text);
 			
+			template<typename F> Tree::VoidTrapper *trap(F func)
+			{
+				Tree::VoidTrapper *old = trapper;
+				Tree::VoidTrapper *result = new (fragment) Tree::VoidTrapper(trapper, false);
+				trapper = result;
+
+				func();
+
+				trapper = old;
+
+				scope->trapper_list.append(result);
+
+				return result;
+			};
+			
 			template<typename F> void allocate_scope(Tree::Scope::Type type, F func)
 			{
 				Tree::Scope *current_scope = scope;
 				Tree::Fragment current_fragment = fragment;
+				Tree::VoidTrapper *current_trapper = trapper;
 
 				if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
 					fragment = *new Tree::FragmentBase(Tree::Chunk::block_size);
 		
 				scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
+				trapper = &scope->trapper;
 				
-				VoidTrapper trapper(this);
-
 				func();
 				
-				if(type != Tree::Scope::Closure)
-				{
-					for(auto node: trapper.list)
-						if(node->type() != Tree::Node::Return)
-							report(*node->range, Tree::SimpleNode::names[node->type()] + " outside of block.");
-				}
-				else
-				{
-					for(auto node: trapper.list)
-						if(node->type() == Tree::Node::Break)
-						{
-							scope->break_id = scope->parent->break_targets++;
-							break;
-						}
-				}
-
-				trapper.list.clear();
-
 				scope = current_scope;
 				fragment = current_fragment;
+				trapper = current_trapper;
 			}
 			
 			static bool is_constant(Symbol *symbol);
@@ -222,10 +173,10 @@ namespace Mirb
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_tailing_loop();
 			Tree::Node *parse_loop();
-			Tree::Node *process_loop(Tree::LoopNode *loop, VoidTrapper &trapper);
+			Tree::Node *process_loop(Tree::LoopNode *loop, Tree::VoidTrapper *trapper);
 			Tree::Node *parse_case();
 			Tree::Node *parse_begin();
-			Tree::Node *parse_exception_handlers(Tree::Node *block, VoidTrapper &trapper);
+			Tree::Node *parse_exception_handlers(Tree::Node *block, Tree::VoidTrapper *trapper);
 			Tree::Node *parse_return();
 			Tree::Node *parse_break();
 			Tree::Node *parse_next();
@@ -258,6 +209,11 @@ namespace Mirb
 				return lexer.lexeme.type;
 			}
 			
+			void skip_lines()
+			{
+				while(matches(Lexeme::LINE));
+			}
+
 		private:
 			bool match(Lexeme::Type what)
 			{
@@ -310,11 +266,6 @@ namespace Mirb
 				}
 			}
 			
-			void skip_lines()
-			{
-				while(matches(Lexeme::LINE));
-			}
-
 			Range *capture();
 
 			Range *parse_method_name(Symbol *&symbol);
@@ -336,6 +287,7 @@ namespace Mirb
 					case Lexeme::DIV:
 					case Lexeme::ASSIGN_DIV:
 					case Lexeme::MOD:
+					case Lexeme::LEFT_SHIFT:
 					case Lexeme::INTEGER:
 					case Lexeme::HEX:
 					case Lexeme::OCTAL:

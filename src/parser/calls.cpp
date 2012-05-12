@@ -91,6 +91,7 @@ namespace Mirb
 				case Lexeme::QUESTION:
 				case Lexeme::COLON:
 				case Lexeme::AMPERSAND:
+				case Lexeme::LEFT_SHIFT:
 					{
 						if(lexer.lexeme.whitespace)
 						{

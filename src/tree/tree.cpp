@@ -1,4 +1,5 @@
 #include "tree.hpp"
+#include "../parser/parser.hpp"
 
 namespace Mirb
 {
@@ -6,6 +7,7 @@ namespace Mirb
 	{
 		Scope::Scope(Document *document, Fragment fragment, Scope *parent, Type type) :
 			PinnedHeader(Value::InternalScope),
+			trapper(nullptr, true),
 			document(document),
 			final(0),
 			fragment(fragment.base()),
@@ -33,7 +35,52 @@ namespace Mirb
 			else
 				owner = 0;
 		}
+		
+		void Scope::parse_done(Parser &parser)
+		{
+			for(auto child: children)
+				child->parse_done(parser);
+			
+			for(auto trapper: trapper_list)
+			{
+				if(trapper->in_ensure)
+					for(auto node: trapper->list)
+						node->in_ensure = true;
 
+				if(trapper->target)
+				{
+					for(auto node: trapper->list)
+					{
+						if(node->in_ensure)
+							trapper->target->trap_exceptions = true;
+
+						node->target = trapper->target;
+					}
+				}
+				else
+				{
+					for(auto node: trapper->list)
+						trapper->prev->trap(node); 
+				}
+			}
+
+			if(type != Closure)
+			{
+				for(auto node: trapper.list)
+					if(node->type() != Tree::Node::Return)
+						parser.report(*node->range, Tree::SimpleNode::names[node->type()] + " outside of block.");
+			}
+			else
+			{
+				for(auto node: trapper.list)
+					if(node->type() == Tree::Node::Break)
+					{
+						break_id = parent->break_targets++;
+						break;
+					}
+			}
+		}
+				
 		void Scope::require_scope(Scope *scope)
 		{
 			if(referenced_scopes.find(scope))

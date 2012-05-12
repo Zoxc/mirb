@@ -15,6 +15,7 @@ namespace Mirb
 			{
 				None,
 				Data,
+				Heredoc,
 				Interpolate,
 				Integer,
 				Float,

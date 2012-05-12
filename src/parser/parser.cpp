@@ -8,9 +8,9 @@ namespace Mirb
 		lexer(symbol_pool, memory_pool, *this),
 		document(*document),
 		memory_pool(memory_pool),
-		void_list(nullptr),
-		fragment(0),
-		scope(0)
+		trapper(nullptr),
+		fragment(nullptr),
+		scope(nullptr)
 	{
 	}
 	
@@ -462,6 +462,8 @@ namespace Mirb
 					pair->group = parse_group();
 					
 					result->pairs.append(pair);
+
+					skip_lines();
 				}
 				while(lexeme() == token && lexer.lexeme.data->type == InterpolateData::Continuing);
 
@@ -546,6 +548,19 @@ namespace Mirb
 				return parse_data(lexeme());
 			}
 			
+			case Lexeme::LEFT_SHIFT:
+			{
+				lexer.left_shift_to_heredoc();
+
+				if(lexeme() == Lexeme::LEFT_SHIFT)
+					break;
+				else
+				{
+					lexer.step();
+					return lexer.lexeme.heredoc;
+				}
+			}
+
 			case Lexeme::MOD:
 			{
 				lexer.mod_to_literal();
@@ -1591,6 +1606,9 @@ namespace Mirb
 		});
 		
 		match(Lexeme::END);
+
+		lexer.done();
+		result->parse_done(*this);
 		
 		return result;
 	}

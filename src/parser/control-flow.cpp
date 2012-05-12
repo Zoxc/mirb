@@ -62,7 +62,7 @@ namespace Mirb
 			return raise_void(new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode));
 	}
 
-	Tree::Node *Parser::parse_exception_handlers(Tree::Node *block, VoidTrapper &trapper)
+	Tree::Node *Parser::parse_exception_handlers(Tree::Node *block, Tree::VoidTrapper *trapper)
 	{
 		switch (lexeme())
 		{
@@ -78,7 +78,7 @@ namespace Mirb
 		auto result = new (fragment) Tree::HandlerNode;
 		
 		result->code = block;
-		
+
 		while(lexeme() == Lexeme::KW_RESCUE)
 		{
 			auto rescue = new (fragment) Tree::RescueNode;
@@ -115,8 +115,7 @@ namespace Mirb
 
 		if(matches(Lexeme::KW_ENSURE))
 		{
-			for(auto node: trapper.list)
-				node->in_ensure = true;
+			trapper->in_ensure = true;
 
 			result->ensure_group = parse_group();
 		}
@@ -129,13 +128,13 @@ namespace Mirb
 		Range range = lexer.lexeme;
 
 		lexer.step();
+
+		Tree::Node *node;
 		
-		VoidTrapper trapper(this);
-
-		auto node = parse_group();
-
-		trapper.release();
-				
+		Tree::VoidTrapper *trapper = trap([&]{
+			node = parse_group();
+		});
+		
 		auto result = parse_exception_handlers(node, trapper);
 		
 		close_pair("begin", range, Lexeme::KW_END);
@@ -267,17 +266,19 @@ namespace Mirb
 	
 	Tree::Node *Parser::parse_tailing_loop()
 	{
-		VoidTrapper trapper(this);
+		Tree::Node *result;
 
-		Tree::Node *result = parse_low_rescue();
-
-		trapper.release();
+		Tree::VoidTrapper *trapper = trap([&]{
+			result = parse_low_rescue();
+		});
 		
 		if (lexeme() == Lexeme::KW_WHILE || lexeme() == Lexeme::KW_UNTIL)
 		{
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				auto node = new (fragment) Tree::LoopNode;
-			
+				
+				trapper->target = node;
+				
 				node->inverted = lexeme() == Lexeme::KW_UNTIL;
 			
 				lexer.step();
@@ -285,50 +286,13 @@ namespace Mirb
 				node->body = result;
 				node->condition = typecheck(parse_tailing_loop());
 				
-				return process_loop(node, trapper);
+				return node;
 			});
 		}
 		
 		return result;
 	}
 	
-	Tree::Node *Parser::process_loop(Tree::LoopNode *loop, VoidTrapper &trapper)
-	{
-		bool trap_exceptions = false;
-
-		Tree::VoidNode *current = trapper.list.first;
-
-		while(current)
-		{
-			Tree::VoidNode *node = current;
-			current = current->void_entry.next;
-
-			if(node->type() != Tree::Node::Return)
-			{
-				if(node->in_ensure)
-					trap_exceptions = true;
-
-				node->target = loop;
-			}
-			else
-				raise_void(node);
-		}
-
-		trapper.list.clear();
-
-		if(trap_exceptions)
-		{
-			auto handler = new (fragment) Tree::HandlerNode;
-		
-			handler->code = loop;
-			handler->loop = loop;
-		
-			return handler;
-		}
-		else
-			return loop;
-	}
-
 	Tree::Node *Parser::parse_loop()
 	{
 		auto node = new (fragment) Tree::LoopNode;
@@ -351,13 +315,15 @@ namespace Mirb
 				parse_sep();
 		}
 
-		VoidTrapper trapper(this);
-			
-		node->body = parse_group();
+		Tree::VoidTrapper *trapper = trap([&]{
+			node->body = parse_group();
+		});
+
+		trapper->target = node;
 		
 		close_pair(node->inverted ? "until loop" : "while loop", range, Lexeme::KW_END);
 		
-		return process_loop(node, trapper);
+		return node;
 	}
 
 	Tree::Node *Parser::parse_unless()

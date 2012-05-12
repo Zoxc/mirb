@@ -171,7 +171,7 @@ namespace Mirb
 		lexeme.start = start;
 	}
 
-	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool)
+	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool), heredocs(memory_pool)
 	{
 	}
 	
@@ -179,6 +179,12 @@ namespace Mirb
 	{
 		input = context.input;
 		lexeme = context.lexeme;
+	}
+
+	void Lexer::done()
+	{
+		for(auto heredoc: heredocs)
+			parser.report(heredoc->range, "Missing heredoc");
 	}
 	
 	void Lexer::load(const char_t *input, size_t length)

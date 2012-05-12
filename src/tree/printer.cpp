@@ -113,6 +113,13 @@ namespace Mirb
 				return std::string((const char *)target->data.data, target->data.length);
 			}
 			
+			case Tree::SimpleNode::Heredoc:
+			{
+				auto target = (Tree::HeredocNode *)node;
+
+				return print_node(target->data);
+			}
+			
 			case Tree::SimpleNode::Interpolate:
 			{
 				auto target = (Tree::InterpolateNode *)node;

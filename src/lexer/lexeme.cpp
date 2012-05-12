@@ -8,6 +8,7 @@ namespace Mirb
 		"string",
 		"array",
 		"regular expression",
+		"heredoc",
 		"integer",
 		"octal",
 		"real",

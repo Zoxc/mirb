@@ -9,6 +9,7 @@
 namespace Mirb
 {
 	class Block;
+	class Parser;
 
 	namespace Tree
 	{
@@ -178,7 +179,11 @@ namespace Mirb
 				{
 					return type == Tree::Scope::Closure || type == Tree::Scope::Method;
 				}
+
+				void parse_done(Parser &parser);
 				
+				VoidTrapper trapper;
+				List<VoidTrapper> trapper_list;
 				Document *document;
 				Block *final;
 				FragmentBase *fragment;

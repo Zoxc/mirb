@@ -52,6 +52,7 @@ namespace Mirb
 		void (ByteCodeGenerator::*ByteCodeGenerator::jump_table[Tree::SimpleNode::Types])(Tree::Node *basic_node, var_t var) = {
 			0, // None
 			&ByteCodeGenerator::convert_data,
+			&ByteCodeGenerator::convert_heredoc,
 			&ByteCodeGenerator::convert_interpolated,
 			&ByteCodeGenerator::convert_integer,
 			&ByteCodeGenerator::convert_float,
@@ -138,6 +139,13 @@ namespace Mirb
 				default:
 					mirb_debug_abort("Unknown data type");
 			}
+		}
+		
+		void ByteCodeGenerator::convert_heredoc(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::HeredocNode *)basic_node;
+
+			to_bytecode(node->data, var);
 		}
 		
 		void ByteCodeGenerator::convert_interpolated(Tree::Node *basic_node, var_t var)
@@ -640,6 +648,16 @@ namespace Mirb
 		void ByteCodeGenerator::convert_loop(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::LoopNode *)basic_node;
+
+			if(node->trap_exceptions)
+			{
+				auto handler = new (memory_pool) Tree::HandlerNode;
+		
+				handler->code = node;
+				handler->loop = node;
+		
+				return to_bytecode(handler, var);
+			}
 			
 			node->label_start = create_label();
 			node->label_body = create_label();

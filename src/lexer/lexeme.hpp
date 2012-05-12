@@ -11,6 +11,11 @@ namespace Mirb
 	struct InterpolateData;
 	struct InterpolateState;
 
+	namespace Tree
+	{
+		struct HeredocNode;
+	};
+
 	class Lexeme:
 		public Range
 	{
@@ -21,6 +26,7 @@ namespace Mirb
 				STRING,
 				ARRAY,
 				REGEXP,
+				HEREDOC,
 				INTEGER,
 				OCTAL,
 				REAL,
@@ -198,6 +204,7 @@ namespace Mirb
 			{
 				Symbol *symbol;
 				InterpolateData *data;
+				Tree::HeredocNode *heredoc;
 			};
 
 			Range &get_prev();
@@ -212,13 +219,16 @@ namespace Mirb
 			static std::string describe_type(Type type);
 	};
 	
+	struct Heredoc;
+
 	struct InterpolateState
 	{
 		Range *start;
 		Lexeme::Type type;
 		char_t terminator;
+		Heredoc *heredoc;
 
-		InterpolateState() : start(0) {}
+		InterpolateState() : start(0), heredoc(0) {}
 	};
 
 	struct InterpolateData

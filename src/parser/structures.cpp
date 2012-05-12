@@ -322,12 +322,12 @@ skip_name:
 				parse_sep();
 			}
 		
-			VoidTrapper trapper(this);
-
-			auto node = parse_group();
-
-			trapper.release();
-				
+			Tree::Node *node;
+		
+			Tree::VoidTrapper *trapper = trap([&]{
+				node = parse_group();
+			});
+			
 			result->scope->group = parse_exception_handlers(node, trapper);
 		});		
 		

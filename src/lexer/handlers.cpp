@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 #include "../symbol-pool.hpp"
 #include "../parser/parser.hpp"
+#include "../tree/nodes.hpp"
 
 namespace Mirb
 {
@@ -68,6 +69,98 @@ namespace Mirb
 		input++;
 
 		parse_interpolate(&state, false);
+	}
+
+	void Lexer::left_shift_to_heredoc()
+	{
+		auto heredoc = new (memory_pool) Heredoc(parser.fragment);
+		
+		heredoc->scope = parser.scope;
+		heredoc->trapper = parser.trapper;
+
+		if(input == '-')
+		{
+			input++;
+			heredoc->remove_ident = true;
+		}
+		else
+			heredoc->remove_ident = false;
+		
+		std::string name;
+
+		if(is_ident(input))
+		{
+			heredoc->type = 0;
+
+			while(is_ident(input))
+			{
+				name += input;
+				input++;
+			}
+		}
+		else
+		{
+			auto get_name = [&]() {
+				heredoc->type = input++;
+
+				if(input == heredoc->type)
+				{
+					input++;
+
+					const char_t *start = lexeme.start;
+
+					lexeme.start = &input - 2;
+					lexeme.stop = &input;
+					parser.report(lexeme, "Expected heredoc delimiter");
+
+					lexeme.start = start;
+					return;
+				}
+
+				while(input != heredoc->type)
+				{
+					if(input == 0 && process_null(&input))
+						return;
+
+					if(input == '\n' || input == '\r')
+					{
+						lexeme.stop = &input;
+						parser.report(lexeme, "Unterminated heredoc delimiter");
+						return;
+					}
+
+					name += input;
+				}
+
+				input++;
+			};
+
+			switch(input)
+			{
+				case '"':
+				case '\'':
+					get_name();
+					break;
+
+				default:
+					lexeme.stop = &input;
+					parser.report(lexeme, "Expected heredoc delimiter");
+					return;
+			}
+		}
+
+		heredoc->name.set<MemoryPool>(name, memory_pool);
+
+		heredocs.push(heredoc);
+		
+		heredoc->node = new (heredoc->fragment) Tree::HeredocNode;
+
+		lexeme.stop = &input;
+
+		heredoc->range = lexeme;
+
+		lexeme.type = Lexeme::HEREDOC;
+		lexeme.heredoc = heredoc->node;
 	}
 	
 	void Lexer::mod_to_literal()
@@ -217,31 +310,125 @@ namespace Mirb
 		else
 			unknown();
 	}
+	
+	void Lexer::parse_interpolate_heredoc(Heredoc *heredoc)
+	{
+		InterpolateState state;
+		state.type = Lexeme::STRING;
+		state.heredoc = heredoc;
+
+		parse_interpolate(&state, false);
+
+		heredoc->node->data = parser.parse_data(Lexeme::STRING);
+	}
+	
+	bool Lexer::heredoc_terminates(Heredoc *heredoc)
+	{
+		const char_t *start = &input;
+		size_t line = lexeme.line;
+		const char_t *line_start = lexeme.line_start;
+
+		if(input == '\n')
+		{
+			input++;
+			line++;
+
+			line_start = &input;
+		}
+		else if(input == '\r')
+		{
+			input++;
+			line++;
+
+			if(input == '\n')
+				input++;
+
+			line_start = &input;
+		}
+		
+		if(heredoc->remove_ident)
+			while(is_white())
+				input++;
+		
+		const char_t *str = &input;
+
+		while(input != '\n' && input != '\r' && (input != 0 || !process_null(&input)))
+			input++;
+
+		if((size_t)&input - (size_t)str != heredoc->name.length)
+		{
+			input.set(start);
+			return false;
+		}
+
+		if(std::memcmp(str, heredoc->name.data, heredoc->name.length) == 0)
+		{
+			lexeme.line = line;
+			lexeme.line_start = line_start;
+			return true;
+		}
+
+		input.set(start);
+		return false;
+	}
+
+	void Lexer::process_newline(bool no_heredoc)
+	{
+		lexeme.line++;
+		lexeme.line_start = &input;
+
+		if(heredocs.size() && !no_heredoc)
+		{
+			Heredoc *heredoc = heredocs.pop();
+		
+			Lexeme old = lexeme;
+
+			Tree::Scope *current_scope = parser.scope;
+			Tree::Fragment current_fragment = parser.fragment;
+			Tree::VoidTrapper *current_trapper = parser.trapper;
+
+			parser.fragment = heredoc->fragment;
+			parser.scope = heredoc->scope;
+			parser.trapper = heredoc->trapper;
+
+			parse_interpolate_heredoc(heredoc);
+				
+			parser.scope = current_scope;
+			parser.fragment = current_fragment;
+			parser.trapper = current_trapper;
+			
+			if(input == '\n')
+				newline();
+			else if(input == '\r')
+				carrige_return();
+
+			lexeme = old;
+		}
+	}
 
 	void Lexer::newline()
 	{
 		input++;
-		lexeme.line++;
-		lexeme.line_start = &input;
+		lexeme.type = Lexeme::LINE;
+
+		process_newline();
 	
 		lexeme.start = &input;
 		lexeme.stop = &input;
-		lexeme.type = Lexeme::LINE;
 	}
 
 	void Lexer::carrige_return()
 	{
 		input++;
-		lexeme.line++;
+		lexeme.type = Lexeme::LINE;
 
 		if(input == '\n')
 			input++;
 
-		lexeme.line_start = &input;
+		process_newline();
 
 		lexeme.start = &input;
 		lexeme.stop = &input;
-		lexeme.type = Lexeme::LINE;
 	}
 
 	void Lexer::eol()

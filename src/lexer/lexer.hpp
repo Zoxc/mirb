@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include <Prelude/Map.hpp>
 #include "../generic/range.hpp"
+#include "../tree/tree.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
 
@@ -19,6 +20,20 @@ namespace Mirb
 			Map<Symbol *, Lexeme::Type> mapping;
 	};
 	
+	struct Heredoc
+	{
+		InterpolateData::Entry name;
+		char_t type;
+		bool remove_ident;
+		Tree::HeredocNode *node;
+		Tree::Scope *scope;
+		Tree::Fragment fragment;
+		Tree::VoidTrapper *trapper;
+		Range range;
+
+		Heredoc(Tree::Fragment fragment) : fragment(fragment) {}
+	};
+
 	class Lexer
 	{
 		private:
@@ -31,12 +46,15 @@ namespace Mirb
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
 
 			bool process_null(const char_t *input, bool expected = false);
-			void build_simple_string(const char_t *start, char_t *str, size_t length);
 
 			void restep(bool whitespace = false);
 			
 			void report_null();
+
 			
+			bool heredoc_terminates(Heredoc *heredoc);
+			
+			void parse_interpolate_heredoc(Heredoc *heredoc);
 			bool parse_escape(std::string &result);
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
@@ -51,6 +69,7 @@ namespace Mirb
 			void unknown();
 			void null();
 			void newline();
+			void process_newline(bool no_heredoc = false);
 			void skip_line();
 			void carrige_return();
 			void character();
@@ -105,6 +124,8 @@ namespace Mirb
 			Keywords keywords;
 			
 			Lexeme lexeme;
+			
+			Vector<Heredoc *, MemoryPool> heredocs;
 
 			const char_t *input_str;
 			size_t length;
@@ -113,9 +134,11 @@ namespace Mirb
 			
 			void mod_to_literal();
 			void div_to_regexp();
+			void left_shift_to_heredoc();
 
 			void load(const char_t *input, size_t length);
 			void step();
 			void identify_keywords();
+			void done();
 	};
 };

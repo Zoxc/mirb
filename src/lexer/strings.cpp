@@ -4,57 +4,12 @@
 
 namespace Mirb
 {
-	void Lexer::build_simple_string(const char_t *start, char_t *str, size_t length prelude_unused)
-	{
-		char_t *writer = str;
-		const char_t *input = start;
-	 
-		while(true)
-			switch(*input)
-			{
-				case '\'':
-					goto done;
-					
-				case '\\':
-					input++;
-					
-					switch(*input)
-					{
-						case '\'':
-						case '\\':
-							*writer++ = *input++;
-							break;
-						
-						case 0:
-							if(process_null(input, true))
-								goto done;
-							
-							// Fallthrough
-
-						default:
-							*writer++ = '\\';
-							*writer++ = *input++;
-					}
-					break;
-				
-				case 0:
-					if(process_null(input, true))
-						goto done;
-				
-				default:
-					*writer++ = *input++;
-			}
-			
-		done:
-		mirb_debug_assert((size_t)(writer - str) == length);
-	}
-
 	void Lexer::simple_string()
 	{
 		input++;
 		
 		lexeme.type = Lexeme::STRING;
-		size_t overhead = 2;
+		std::string result;
 
 		while(true)
 			switch(input)
@@ -64,19 +19,17 @@ namespace Mirb
 					goto done;
 
 				case '\n':
-					input++;
-					lexeme.line++;
-					lexeme.line_start = &input;
+					result += input++;
+					process_newline();
 					break;
 						
 				case '\r':
-					input++;
-					lexeme.line++;
+					result += input++;
 
 					if(input == '\n')
-						input++;
-
-					lexeme.line_start = &input;
+						result += input++;
+					
+					process_newline();
 					break;
 
 				case '\\':
@@ -86,8 +39,7 @@ namespace Mirb
 					{
 						case '\'':
 						case '\\':
-							overhead++;
-							input++;
+							result += input++;
 							break;
 						
 						case 0:
@@ -101,7 +53,7 @@ namespace Mirb
 							// Fallthrough
 
 						default:
-							input++;
+							result += input++;
 					}
 					break;
 
@@ -116,7 +68,7 @@ namespace Mirb
 					// Fallthrough
 
 				default:
-					input++;		
+					result += input++;		
 			}
 
 		error:
@@ -127,14 +79,8 @@ namespace Mirb
 		done:
 		lexeme.stop = &input;
 		
-		size_t str_length = lexeme.length() - overhead;
-		char_t *str = new (memory_pool) char_t[str_length];
-		
-		build_simple_string(lexeme.start + 1, str, str_length);
-		
 		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
-		lexeme.data->tail.data = str;
-		lexeme.data->tail.length = str_length;
+		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
 	bool Lexer::parse_escape(std::string &result)
@@ -240,7 +186,7 @@ namespace Mirb
 
 		while(true)
 		{
-			if(input == state->terminator)
+			if(input == state->terminator && !state->heredoc)
 			{
 				input++;
 				goto done;
@@ -314,19 +260,23 @@ namespace Mirb
 				}
 
 				case '\n':
+					if(state->heredoc && heredoc_terminates(state->heredoc))
+						goto done;
+
 					result += input++;
-					lexeme.line++;
-					lexeme.line_start = &input;
+					process_newline(state->heredoc != 0);
 					break;
 						
 				case '\r':
+					if(state->heredoc && heredoc_terminates(state->heredoc))
+						goto done;
+
 					result += input++;
-					lexeme.line++;
 
 					if(input == '\n')
 						result += input++;
-
-					lexeme.line_start = &input;
+					
+					process_newline(state->heredoc != 0);
 					break;
 
 				case '\\':

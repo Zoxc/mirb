@@ -5,6 +5,7 @@ namespace Mirb
 	std::string Tree::SimpleNode::names[] = {
 		"None",
 		"Data",
+		"Heredoc",
 		"Interpolated",
 		"Integer",
 		"Float",
