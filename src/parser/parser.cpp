@@ -590,6 +590,56 @@ namespace Mirb
 				return result;
 			}
 			
+			case Lexeme::KW_DEFINED:
+			{
+				lexer.step();
+
+				Tree::Node *node;
+
+				Range range = lexer.lexeme;
+
+				if(lexeme() == Lexeme::PARENT_OPEN)
+				{
+					node = parse_expression();
+
+					close_pair("defined? parentheses", range, Lexeme::PARENT_CLOSE);
+				}
+				else
+					node = parse_operator_expression();
+				
+				lexer.lexeme.prev_set(&range);
+
+				switch(node->type())
+				{
+					case Tree::Node::Variable:
+					{
+						auto result = new (fragment) Tree::DataNode;
+						result->result_type = Value::String;
+						result->data.set<Tree::Fragment>("local-variable", fragment);
+						return result;
+					}
+
+					case Tree::Node::Call:
+					{
+						auto call = static_cast<Tree::CallNode *>(node);
+
+						if(call->can_be_var)
+							return new (fragment) Tree::NilNode;
+
+						break;
+					}
+
+					case Tree::Node::IVar:
+					case Tree::Node::Global:
+					case Tree::Node::Constant:
+						return new (fragment) Tree::NilNode; // TODO: Implement
+				};
+
+				report(range, "Invalid expression in defined?");
+
+				return nullptr;
+			}
+
 			case Lexeme::DIV:
 			case Lexeme::ASSIGN_DIV:
 			{

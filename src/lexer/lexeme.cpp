@@ -122,6 +122,7 @@ namespace Mirb
 		"module",
 		"def",
 		"alias",
+		"defined?",
 		"self",
 		"do",
 		"yield",

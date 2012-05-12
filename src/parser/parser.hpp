@@ -302,6 +302,7 @@ namespace Mirb
 					case Lexeme::LOGICAL_NOT:
 					case Lexeme::KW_DEF:
 					case Lexeme::KW_SELF:
+					case Lexeme::KW_DEFINED:
 					case Lexeme::KW_TRUE:
 					case Lexeme::KW_FALSE:
 					case Lexeme::KW_SPECIAL_FILE:

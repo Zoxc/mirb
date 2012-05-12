@@ -143,6 +143,7 @@ namespace Mirb
 				KW_MODULE,
 				KW_DEF,
 				KW_ALIAS,
+				KW_DEFINED,
 				KW_SELF,
 				KW_DO,
 				KW_YIELD,
