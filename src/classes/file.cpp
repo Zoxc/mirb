@@ -154,10 +154,17 @@ namespace Mirb
 		return joiner.join().to_string();
 	}
 	
+	value_t exists(String *path)
+	{
+		return auto_cast(Platform::file_exists(path->string));
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
 		
+		singleton_method<Arg::Class<String>>(context->file_class, "exists?", &exists);
+
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
 		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &join);

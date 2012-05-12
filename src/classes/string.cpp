@@ -1,5 +1,6 @@
 #include "string.hpp"
 #include "symbol.hpp"
+#include "array.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -37,9 +38,21 @@ namespace Mirb
 
 		return obj;
 	}
+	
+	value_t split(String *self, String *sep)
+	{
+		auto result = Collector::allocate<Array>();
+
+		self->string.split([&](const CharArray &match) {
+			result->vector.push(match.to_string());
+		}, sep->string);
+
+		return result;
+	}
 
 	void String::initialize()
 	{
+		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::Self>(context->string_class, "inspect", &inspect);
 		method<Arg::Self>(context->string_class, "to_s", &to_s);
 		method<Arg::Self, Arg::Value>(context->string_class, "concat", &concat);

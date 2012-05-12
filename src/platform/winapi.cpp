@@ -30,6 +30,21 @@ namespace Mirb
 		{
 			VirtualFree(region, 0, MEM_RELEASE);
 		}
+		
+		template<typename F> void to_tchar(const CharArray &string, F func)
+		{
+			#ifdef _UNICODE
+				size_t size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), nullptr, 0);
+
+				TCHAR *buffer = (TCHAR *)alloca(size * sizeof(TCHAR));
+
+				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), buffer, size);
+
+				func(buffer, size);
+			#else
+				func((const TCHAR *)string.raw(), string.size());
+			#endif
+		}
 
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars)
 		{
@@ -70,6 +85,37 @@ namespace Mirb
 			} 
 		} 
  
+		CharArray path(const CharArray &path)
+		{
+			#ifdef _UNICODE
+				CharArray result(path);
+
+				result.localize();
+
+				for(size_t i = 0; i < result.size(); ++i)
+					if(result[i] == '/')
+						result[i] = '\\';
+
+				if(result[result.size()-1] == '\\')
+					result.shrink(result.size() - 1);
+
+				return "\\\\?\\" + result;
+			#else
+				return path;
+			#endif
+		}
+	
+		bool file_exists(const CharArray &file)
+		{
+			DWORD attrib; 
+
+			to_tchar(path(file).c_str(), [&](const TCHAR *buffer, size_t) {
+				attrib = GetFileAttributes(buffer);
+			});
+
+			return (attrib != INVALID_FILE_ATTRIBUTES);
+		}
+
 		void initialize()
 		{
 			SetConsoleTitle(TEXT("mirb"));

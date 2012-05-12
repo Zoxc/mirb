@@ -14,7 +14,8 @@ namespace Mirb
 			Blue,
 			Gray
 		};
-
+		
+		bool file_exists(const CharArray &file);
 		CharArray cwd();
 		void *allocate_region(size_t bytes);
 		void free_region(void *region, size_t bytes);
