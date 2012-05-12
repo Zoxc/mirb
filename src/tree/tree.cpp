@@ -41,26 +41,26 @@ namespace Mirb
 			for(auto child: children)
 				child->parse_done(parser);
 			
-			for(auto trapper: trapper_list)
+			for(auto trap: trapper_list)
 			{
-				if(trapper->in_ensure)
-					for(auto node: trapper->list)
+				if(trap->in_ensure)
+					for(auto node: trap->list)
 						node->in_ensure = true;
 
-				if(trapper->target)
+				if(trap->target)
 				{
-					for(auto node: trapper->list)
+					for(auto node: trap->list)
 					{
 						if(node->in_ensure)
-							trapper->target->trap_exceptions = true;
+							trap->target->trap_exceptions = true;
 
-						node->target = trapper->target;
+						node->target = trap->target;
 					}
 				}
 				else
 				{
-					for(auto node: trapper->list)
-						trapper->prev->trap(node); 
+					for(auto node: trap->list)
+						trap->prev->trap(node); 
 				}
 			}
 

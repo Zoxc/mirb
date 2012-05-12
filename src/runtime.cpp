@@ -370,9 +370,12 @@ namespace Mirb
 
 	CharArray scope_path(Tuple<Module> *scope)
 	{
-		CharArray result;
+		Value::assert_valid(scope);
 
-		OnStackString<1> os(result);
+		CharArray result;
+		
+		OnStack<1> os(scope);
+		OnStackString<1> oss(result);
 
 		for(int i = scope->entries - 1; i >= 0; --i)
 		{
@@ -416,6 +419,9 @@ namespace Mirb
 	
 	value_t get_scoped_const(value_t obj, Symbol *name)
 	{
+		Value::assert_valid(obj);
+		Value::assert_valid(name);
+
 		if(!can_have_consts(obj))
 			return value_raise;
 
@@ -436,6 +442,9 @@ namespace Mirb
 
 	value_t get_const(Tuple<Module> *scope, Symbol *name)
 	{
+		Value::assert_valid(scope);
+		Value::assert_valid(name);
+
 		value_t result = test_const(scope, name);
 
 		if(prelude_likely(result != value_raise))

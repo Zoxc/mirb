@@ -8,9 +8,9 @@ namespace Mirb
 		lexer(symbol_pool, memory_pool, *this),
 		document(*document),
 		memory_pool(memory_pool),
-		trapper(nullptr),
 		fragment(nullptr),
-		scope(nullptr)
+		scope(nullptr),
+		trapper(nullptr)
 	{
 	}
 	
