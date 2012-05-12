@@ -330,4 +330,16 @@ namespace Mirb
 
 		parse_interpolate(&state, false);
 	}
+
+	void Lexer::command()
+	{
+		input++;
+		
+		InterpolateState state;
+
+		state.terminator = '`';
+		state.type = Lexeme::COMMAND;
+
+		parse_interpolate(&state, false);
+	}
 };

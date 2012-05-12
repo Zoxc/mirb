@@ -303,10 +303,12 @@ skip_name:
 			scope->owner = scope;
 			scope->range = result->range;
 
-			Range parent_open = lexer.lexeme;
-			
-			if(matches(Lexeme::PARENT_OPEN))
+			if(lexeme() == Lexeme::PARENT_OPEN)
 			{
+				Range parent_open = lexer.lexeme;
+
+				lexer.step();
+			
 				skip_lines();
 					
 				if(lexeme() != Lexeme::PARENT_CLOSE)

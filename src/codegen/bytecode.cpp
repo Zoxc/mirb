@@ -1039,7 +1039,7 @@ namespace Mirb
 					block->min_args++;
 			}
 			
-			if(scope->type == Tree::Scope::Closure)
+			if(scope->type == Tree::Scope::Closure || scope->array_parameter)
 				block->max_args = (size_t)-1;
 
 			if(scope->range)

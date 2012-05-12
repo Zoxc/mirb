@@ -97,6 +97,9 @@ namespace Mirb
 		// String
 		jump_table[(size_t)'"'] = &Lexer::string;
 
+		// Command
+		jump_table[(size_t)'`'] = &Lexer::command;
+
 		// Numbers
 		jump_table[(size_t)'0'] = &Lexer::zero;
 		jump_table[(size_t)'.'] = &Lexer::real;

@@ -337,7 +337,7 @@ namespace Mirb
 
 			Range *range;
 
-			InvokeNode() : variadic(false), block_arg(nullptr) {}
+			InvokeNode() : variadic(false), block(nullptr), block_arg(nullptr) {}
 		};
 		
 		struct CallNode:
@@ -489,6 +489,8 @@ namespace Mirb
 			Scope *scope;
 
 			Range *range;
+
+			ModuleNode() : scoped(nullptr) {}
 		};
 		
 		struct ClassNode:

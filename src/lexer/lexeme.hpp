@@ -26,6 +26,7 @@ namespace Mirb
 				STRING,
 				ARRAY,
 				REGEXP,
+				COMMAND,
 				HEREDOC,
 				INTEGER,
 				OCTAL,

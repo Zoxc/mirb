@@ -101,6 +101,7 @@ namespace Mirb
 			
 			void ident();
 			void string();
+			void command();
 			void simple_string();
 		public:
 			class Context

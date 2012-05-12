@@ -170,10 +170,14 @@ namespace Mirb
 			case 'r':
 				input++;
 				return parse_delimited_data(Lexeme::REGEXP);
-
+				
 			case 's':
 				input++;
 				return parse_delimited_data(Lexeme::SYMBOL);
+
+			case 'x':
+				input++;
+				return parse_delimited_data(Lexeme::COMMAND);
 
 			case 'Q':
 				input++;

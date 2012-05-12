@@ -633,6 +633,9 @@ namespace Mirb
 					case Tree::Node::Global:
 					case Tree::Node::Constant:
 						return new (fragment) Tree::NilNode; // TODO: Implement
+
+					default:
+						break;
 				};
 
 				report(range, "Invalid expression in defined?");
@@ -812,6 +815,26 @@ namespace Mirb
 			case Lexeme::STRING:
 			case Lexeme::ARRAY:
 				return parse_data(lexeme());
+				
+			case Lexeme::COMMAND:
+			{
+				Range range = lexer.lexeme;
+
+				auto command = parse_data(Lexeme::STRING);
+
+				auto result = new (fragment) Tree::CallNode;
+
+				if(command)
+					result->arguments.append(command);
+
+				lexer.lexeme.prev_set(&range);
+
+				result->object = new (fragment) Tree::SelfNode;
+				result->method = Symbol::get("`");
+				result->range = new (fragment) Range(range);
+
+				return result;
+			}
 
 			case Lexeme::KW_SELF:
 			{
