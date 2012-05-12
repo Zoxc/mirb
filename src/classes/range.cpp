@@ -13,7 +13,7 @@ namespace Mirb
 		
 		CharArray high = inspect_obj(obj->high);
 
-		return (low + (obj->flag ? "..." : "..") + high).to_string();
+		return (low + (const char_t *)(obj->flag ? "..." : "..") + high).to_string();
 	}
 	
 	Range *Range::allocate(value_t low, value_t high, bool exclusive)

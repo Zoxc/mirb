@@ -39,6 +39,17 @@ namespace Mirb
 
 				mark(string);
 			}
+			
+			size_t hash()
+			{
+				if(!hashed)
+				{
+					hash_value = string.hash();
+					hashed = true;
+				}
+
+				return hash_value;
+			}
 
 			static value_t from_symbol(Symbol *symbol);
 			static value_t from_string(const char *c_str);

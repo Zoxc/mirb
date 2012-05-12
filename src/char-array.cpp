@@ -199,14 +199,14 @@ namespace Mirb
 		return char_array;
 	}
 	
-	CharArray operator+(const char *lhs, const CharArray &rhs)
+	CharArray operator+(const char_t *lhs, const CharArray &rhs)
 	{
 		CharArray char_array((const char_t *)lhs);
 		char_array.append(rhs);
 		return char_array;
 	}
 
-	CharArray operator+(const CharArray &lhs, const char *rhs)
+	CharArray operator+(const CharArray &lhs, const char_t *rhs)
 	{
 		CharArray char_array(lhs);
 		char_array.append(CharArray((const char_t *)rhs));
