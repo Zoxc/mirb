@@ -14,6 +14,8 @@ namespace Mirb
 			static value_t set(value_t obj, value_t key, value_t value);
 
 		public:
+			Hash() : Object(Value::Hash, context->hash_class), map(3), default_value(value_nil) {}
+
 			Hash(Class *instance_of) : Object(Value::Hash, instance_of), map(3), default_value(value_nil)
 			{
 				flag = false;

@@ -907,11 +907,13 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::from_literal("mirb"));
 		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::from_literal("1.9"));
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
+		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
+
 		context->globals.set(Symbol::get("$:"), Collector::allocate<Array>());
 
-		context->globals.set(Symbol::get("$stderr"), Collector::allocate<Object>());
-		context->globals.set(Symbol::get("$stdout"), Collector::allocate<Object>());
-		context->globals.set(Symbol::get("$stdin"), Collector::allocate<Object>());
+		context->globals.set(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
+		context->globals.set(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));
+		context->globals.set(Symbol::get("$stdin"), Collector::allocate<Object>(context->object_class));
 
 		mirb_debug(Collector::collect());
 	}
