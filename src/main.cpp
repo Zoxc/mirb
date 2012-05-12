@@ -5,10 +5,12 @@
 #include "classes/exception.hpp"
 #include "classes/string.hpp"
 #include "classes/array.hpp"
+#include "classes/fixnum.hpp"
 #include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "block.hpp"
 #include "document.hpp"
+#include "hash-map.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
@@ -18,11 +20,11 @@ using namespace Mirb;
 
 void report_exception()
 {
-	Exception *exception = current_exception;
+	Exception *exception = context->exception;
 
 	swallow_exception();
 
-	OnStack<1> os2(exception);
+	OnStack<1> os(exception);
 
 	Platform::color<Platform::Red>(inspect_obj(real_class_of(auto_cast(exception))));
 			
@@ -34,7 +36,7 @@ void report_exception()
 int main(int argc, const char *argv[])
 {
 	Mirb::initialize();
-
+	
 	if(argc > 1)
 	{
 		int index = 1;

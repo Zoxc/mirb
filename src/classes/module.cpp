@@ -2,27 +2,28 @@
 #include "symbol.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
+#include "../hash-map.hpp"
 
 namespace Mirb
 {
-	ValueMap *Module::get_methods()
+	HashMap *Module::get_methods()
 	{
 		if(prelude_unlikely(!methods))
-			methods = Collector::allocate<ValueMap>();
+			methods = Collector::allocate<HashMap>();
 		
 		return methods;
 	}
 	
 	Method *Module::get_method(Symbol *name)
 	{
-		return auto_cast_null(get_methods()->map.get(name));
+		return auto_cast_null(HashMapAccess::get(get_methods(), name, [] { return nullptr; }));
 	}
 
 	void Module::set_method(Symbol *name, Method *method)
 	{
 		Value::assert_valid(method);
 
-		return get_methods()->map.set(name, auto_cast_null(method));
+		HashMapAccess::set(get_methods(), name, method);
 	}
 
 	value_t Module::to_s(value_t obj)

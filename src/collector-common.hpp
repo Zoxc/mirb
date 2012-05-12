@@ -18,6 +18,7 @@
 #include "classes/io.hpp"
 #include "classes/file.hpp"
 #include "classes/float.hpp"
+#include "hash-map.hpp"
 
 namespace Mirb
 {
@@ -84,9 +85,6 @@ namespace Mirb
 				on_stack = on_stack->prev;
 			}
 		}
-
-		if(current_exception)
-			mark(current_exception);
 
 		Frame *frame = current_frame;
 

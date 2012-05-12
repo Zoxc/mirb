@@ -5,6 +5,8 @@
 
 namespace Mirb
 {
+	class Frame;
+
 	class Context
 	{
 		public:
@@ -70,8 +72,12 @@ namespace Mirb
 			Class *class_of_table[literal_count];
 
 			Object *main;
+
+			Exception *exception;
 			
 			Class *terminator;
+
+			Frame *exception_frame_origin;
 			
 			ValueMap::MapType globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;

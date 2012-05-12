@@ -25,6 +25,7 @@ namespace Mirb
 	class ObjectHeader;
 	class VariableBlock;
 	template<class T = Value::Header> class Tuple;
+	class HashMap;
 	class ValueMap;
 	class ValueMapPair;
 	class Module;
@@ -94,6 +95,7 @@ namespace Mirb
 		enum Type {
 			None,
 			FreeBlock,
+			InternalHashMap,
 			InternalValueMap,
 			InternalValueMapPair,
 			InternalStackFrame,
@@ -144,7 +146,7 @@ namespace Mirb
 			
 				Type get_type();
 
-				static const size_t type_bits = 6;
+				static const size_t type_bits = 7;
 
 				static_assert(((1 << type_bits) - 1) >= (size_t)Types, "Too few bits for type field");
 				
@@ -220,6 +222,9 @@ namespace Mirb
 		{
 			switch(type)
 			{
+				case InternalHashMap:
+					return T<InternalHashMap>::func(std::forward<Arg>(arg));
+
 				case InternalValueMap:
 					return T<InternalValueMap>::func(std::forward<Arg>(arg));
 
@@ -332,6 +337,7 @@ namespace Mirb
 		
 		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
 		
+		mirb_typeclass(InternalHashMap, HashMap);
 		mirb_typeclass(InternalValueMap, ValueMap);
 		mirb_typeclass(InternalValueMapPair, ValueMapPair);
 		mirb_typeclass(InternalStackFrame, StackFrame);

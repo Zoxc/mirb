@@ -5,6 +5,8 @@
 
 namespace Mirb
 {
+	class HashMap;
+
 	class Module:
 		public Object
 	{
@@ -23,7 +25,7 @@ namespace Mirb
 
 			friend class Class;
 		protected:
-			ValueMap *methods;
+			HashMap *methods;
 
 		public:
 			Module(Value::Type type, Class *instance_of, Class *superclass) : Object(type, instance_of), methods(nullptr), superclass(superclass) {}
@@ -32,7 +34,7 @@ namespace Mirb
 
 			static value_t include(value_t obj, size_t argc, value_t argv[]);
 
-			ValueMap *get_methods();
+			HashMap *get_methods();
 			
 			Method *get_method(Symbol *name);
 			void set_method(Symbol *name, Method *method);

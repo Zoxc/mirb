@@ -133,14 +133,14 @@ namespace Mirb
 
 				return (*this)[0];
 			}
-			/*
+			
 			T *last()
 			{
 				mirb_debug_assert(entries > 0);
 
 				return (*this)[entries - 1];
 			}
-			*/
+			
 			static Tuple *allocate(size_t size)
 			{
 				return TupleUtil<T>::allocate(size);

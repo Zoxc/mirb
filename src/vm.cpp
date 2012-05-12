@@ -453,7 +453,7 @@ namespace Mirb
 
 handle_call_exception:
 		{
-			BreakException *exception = (BreakException *)current_exception;
+			BreakException *exception = (BreakException *)context->exception;
 
 			if(prelude_unlikely(exception->get_type() == Value::BreakException && exception->target == frame.code))
 			{
@@ -469,7 +469,7 @@ handle_call_exception:
 
 handle_exception:
 		{
-			Exception *exception = current_exception;
+			Exception *exception = context->exception;
 
 			if(!current_exception_block)
 			{

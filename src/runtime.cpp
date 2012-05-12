@@ -32,6 +32,7 @@
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
+#include "hash-map.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
@@ -39,20 +40,20 @@
 
 namespace Mirb
 {
-	Exception *current_exception;
-	Frame *current_exception_frame_origin;
-
 	void set_current_exception(Exception *exception)
 	{
 		if(exception)
+		{
+			Value::assert_valid(exception);
 			Value::assert_valid(exception->instance_of);
+		}
 
-		current_exception = exception;
+		context->exception = exception;
 
 		if(exception)
-			current_exception_frame_origin = current_frame;
+			context->exception_frame_origin = current_frame;
 		else
-			current_exception_frame_origin = 0;
+			context->exception_frame_origin = 0;
 	}
 
 	Class *class_of(value_t obj)
@@ -614,13 +615,13 @@ namespace Mirb
 		if(result != value_raise)
 			Value::assert_valid(result);
 
-		if(current_exception && result != value_raise)
+		if(context->exception && result != value_raise)
 		{
 			Frame *current = current_frame->prev;
 
 			while(true)
 			{
-				if(current == current_exception_frame_origin)
+				if(current == context->exception_frame_origin)
 					return true;
 
 				if(!current)
@@ -652,7 +653,7 @@ namespace Mirb
 			current_frame = frame.prev;
 
 			#ifdef DEBUG
-				current_exception_frame_origin = current_frame;
+				context->exception_frame_origin = current_frame;
 			#endif
 
 			return value_raise;
@@ -668,7 +669,7 @@ namespace Mirb
 		
 		#ifdef DEBUG
 			if(!validate_return(result))
-				current_exception_frame_origin = frame.prev;
+				context->exception_frame_origin = frame.prev;
 		#endif
 
 		current_frame = frame.prev;

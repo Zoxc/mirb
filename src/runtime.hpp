@@ -9,9 +9,6 @@ namespace Mirb
 	class CharArray;
 	class Exception;
 	
-	extern Exception *current_exception;
-	extern Frame *current_exception_frame_origin;
-
 	void set_current_exception(Exception *exception);
 
 	Class *class_of(value_t obj) prelude_nonnull(1);
