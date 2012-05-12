@@ -138,13 +138,29 @@ namespace Mirb
 		
 		return CharArray(".").to_string();
 	}
+	
+	value_t join(size_t argc, value_t argv[])
+	{
+		JoinSegments joiner;
 
+		for(size_t i = 0; i < argc; ++i)
+		{
+			if(type_error(argv[i], context->string_class))
+				return 0;
+
+			joiner.push(cast<String>(argv[i])->string);
+		}
+
+		return joiner.join().to_string();
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
 		
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
+		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &join);
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::from_literal("/"));
 

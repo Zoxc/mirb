@@ -339,6 +339,8 @@ namespace Mirb
 
 	CharArray pretty_inspect(value_t obj)
 	{
+		OnStack<1> os(obj);
+
 		return inspect_obj(obj) + ":" + inspect_obj(real_class_of(obj));
 	}
 
