@@ -44,6 +44,18 @@ namespace Mirb
 			return str;
 		}
 		
+		bool file_exists(const CharArray &file)
+		{
+			CharArray file_cstr = file.c_str();
+
+			struct stat buf;
+
+			if(stat(file_cstr.c_str_ref(), &buf) == 0)
+				return true;
+			else
+				return false;
+		}
+
 		void signal_handler(int)
 		{
 			Collector::signal();
