@@ -1,0 +1,4 @@
+
+module RbConfig
+  CONFIG = {}
+end
