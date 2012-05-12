@@ -15,7 +15,18 @@ namespace Mirb
 				break;
 		
 			case '.':
-				real();
+				input++;
+
+				if(input.in('0', '9'))
+				{
+					input--;
+					real();
+				}
+
+				input--;
+				
+				lexeme.type = Lexeme::INTEGER;
+				lexeme.stop = &input;
 				break;
 
 			case '0':
