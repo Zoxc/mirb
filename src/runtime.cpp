@@ -184,18 +184,6 @@ namespace Mirb
 				}
 			}
 
-			#ifdef DEBUG
-				{
-					value_t including = Value::type(module) == Value::IClass ? module->original_module : module;
-
-					OnStack<4> os(obj, c, module, including);
-
-					std::cout << "Including module " << inspect_object(including) << " in " << inspect_object(obj) << "\n";
-
-					swallow_exception();
-				}
-			#endif
-
 			c = c->superclass = Class::create_include_class(module, c->superclass);
 
 			skip:
