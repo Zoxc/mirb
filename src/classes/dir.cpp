@@ -9,7 +9,7 @@ namespace Mirb
 {
 	value_t pwd()
 	{
-		return normalize_path(Platform::cwd()).to_string();
+		return File::normalize_path(Platform::cwd()).to_string();
 	}
 	
 	void Dir::initialize()

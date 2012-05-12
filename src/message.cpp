@@ -39,7 +39,7 @@ namespace Mirb
 
 		Platform::color<Platform::Bold>(": " + string() + "\n");
 
-		CharArray prefix = line_prefix + basename(parser.document.name) + "[" + CharArray::uint(range.line + 1) + "]: ";
+		CharArray prefix = line_prefix + File::basename(parser.document.name) + "[" + CharArray::uint(range.line + 1) + "]: ";
 		
 		Platform::color<Platform::Bold>(prefix);
 

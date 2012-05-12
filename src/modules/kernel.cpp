@@ -130,12 +130,21 @@ namespace Mirb
 			return nullptr;
 	}
 
-	value_t run_file(value_t self, CharArray filename, bool try_relative)
+	value_t run_file(value_t self, CharArray filename, bool try_relative, bool require)
 	{
 		FILE* file = open_file(filename, try_relative);
 
 		if(!file)
 			return raise(context->load_error, "Unable to find file '" + filename + "'");
+
+		CharArray full_path = File::expand_path(filename);
+
+		if(require && !context->loaded.each([&](value_t path) -> bool { return cast<String>(path)->string != full_path;	}))
+		{
+			return value_nil;
+		}
+
+		context->loaded.push(full_path.to_string());
 
 		fseek(file, 0, SEEK_END);
 
@@ -165,22 +174,22 @@ namespace Mirb
 		free(data);
 		fclose(file);
 
-		return result;
+		return result == 0 ? 0 : value_nil;
 	}
 	
 	value_t Kernel::load(value_t filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, true);
+		return run_file(context->main, cast<String>(filename)->string, true, false);
 	}
 	
 	value_t Kernel::require(value_t filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, false);
+		return run_file(context->main, cast<String>(filename)->string, false, true);
 	}
 	
 	value_t Kernel::require_relative(value_t filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, true);
+		return run_file(context->main, cast<String>(filename)->string, true, true);
 	}
 	
 	value_t Kernel::print(size_t argc, value_t argv[])

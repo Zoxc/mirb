@@ -6,7 +6,7 @@
 
 namespace Mirb
 {
-	CharArray normalize_path(const CharArray &path)
+	CharArray File::normalize_path(const CharArray &path)
 	{
 		CharArray result(path);
 
@@ -22,7 +22,7 @@ namespace Mirb
 		return result;
 	}
 	
-	bool absolute_path(const CharArray &path)
+	bool File::absolute_path(const CharArray &path)
 	{
 #ifdef WIN32
 		return path.size() > 1 && path[1] == ':';
@@ -33,7 +33,7 @@ namespace Mirb
 
 	void JoinSegments::push(const CharArray &path)
 	{
-		normalize_path(path).split([&](const CharArray &part) {
+		File::normalize_path(path).split([&](const CharArray &part) {
 			segments.push_back(part);
 		}, CharArray("/"));
 	}
@@ -66,30 +66,48 @@ namespace Mirb
 
 		return result;
 	}
-
-	value_t expand_path(String *relative, String *absolute)
+	
+	CharArray File::expand_path(CharArray relative)
 	{
-		JoinSegments joiner;
-		
-		if(!absolute_path(relative->string))
+		if(!absolute_path(relative))
 		{
-			if(absolute)
-			{
-				if(!absolute_path(absolute->string))
-					absolute = auto_cast(expand_path(absolute, nullptr));
+			JoinSegments joiner;
+			joiner.push(Platform::cwd());
+			joiner.push(relative);
 
-				joiner.push(absolute->string);
-			}
-			else
-				joiner.push(Platform::cwd());
+			return joiner.join();
 		}
+		else
+			return relative;
+	};
+	
+	CharArray File::expand_path(CharArray relative, CharArray from)
+	{
+		if(!absolute_path(relative))
+		{
+			JoinSegments joiner;
 
-		joiner.push(relative->string);
-		
-		return joiner.join().to_string();
+			if(!absolute_path(from))
+				from = expand_path(from);
+
+			joiner.push(from);
+			joiner.push(relative);
+
+			return joiner.join();
+		}
+		else
+			return relative;
+	};
+	
+	value_t File::rb_expand_path(String *relative, String *absolute)
+	{
+		if(absolute)
+			return File::expand_path(relative->string, absolute->string).to_string();
+		else
+			return File::expand_path(relative->string).to_string();
 	}
 	
-	CharArray basename(CharArray path)
+	CharArray File::basename(CharArray path)
 	{
 		CharArray result = normalize_path(path);
 
@@ -104,7 +122,7 @@ namespace Mirb
 
 	value_t dirname(String *path)
 	{
-		CharArray result = normalize_path(path->string);
+		CharArray result = File::normalize_path(path->string);
 
 		for(size_t i = result.size(); i-- > 0;)
 			if(result[i] == '/')
@@ -125,7 +143,7 @@ namespace Mirb
 	{
 		context->file_class = define_class("File", context->io_class);
 		
-		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &expand_path);
+		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::from_literal("/"));

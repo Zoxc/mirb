@@ -73,6 +73,7 @@ namespace Mirb
 			
 			ValueMap::MapType globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;
+			Vector<value_t, AllocatorBase, Allocator> loaded;
 
 			Context();
 			
@@ -89,6 +90,7 @@ namespace Mirb
 				}
 				
 				at_exits.mark(mark);
+				loaded.mark(mark);
 				globals.mark(mark);
 			}
 

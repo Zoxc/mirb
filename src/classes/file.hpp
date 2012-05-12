@@ -12,9 +12,6 @@ namespace Mirb
 		CharArray join();
 	};
 	
-	CharArray normalize_path(const CharArray &path);
-	CharArray basename(CharArray path);
-
 	class File:
 		public IO
 	{
@@ -25,6 +22,13 @@ namespace Mirb
 			{
 				IO::mark(mark);
 			}
+			
+			static bool absolute_path(const CharArray &path);
+			static CharArray normalize_path(const CharArray &path);
+			static CharArray basename(CharArray path);
+			static value_t rb_expand_path(String *relative, String *absolute);
+			static CharArray expand_path(CharArray relative);
+			static CharArray expand_path(CharArray relative, CharArray from);
 
 			static void initialize();
 	};

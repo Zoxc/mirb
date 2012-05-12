@@ -122,6 +122,11 @@ namespace Mirb
 				return (length == other.length) && (std::memcmp(data, other.data, length) == 0);
 			}
 			
+			template<typename T> bool operator !=(T &&other) const
+			{
+				return !(*this == other);
+			}
+			
 			template<size_t string_length> bool operator ==(const char (&string)[string_length]) const
 			{
 				return (string_length - 1 == length) && (std::memcmp(data, &string, string_length - 1) == 0);
