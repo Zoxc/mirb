@@ -99,29 +99,29 @@ namespace Mirb
 
 			template<typename O> static value_t &key_slot(O owner, size_t index)
 			{
-				return (*data(owner).table)[index];
+				return (*ValueMapManipulator::data(owner).table)[index];
 			}
 			
 			template<typename O> static value_t &value_slot(O owner, size_t index)
 			{
-				return (*data(owner).table)[index + 1];
+				return (*ValueMapManipulator::data(owner).table)[index + 1];
 			}
 
 			template<bool can_expand, typename O> static value_t store(O owner, value_t &key, value_t &value)
 			{
 				return search(owner, key, [&](size_t index) -> value_t {
-					key_slot(owner, index) = key;
-					value_slot(owner, index) = value;
-					data(owner).entries++;
+					ValueMapManipulator::key_slot(owner, index) = key;
+					ValueMapManipulator::value_slot(owner, index) = value;
+					ValueMapManipulator::data(owner).entries++;
 					
-					size_t mask = data(owner).mask;
+					size_t mask = ValueMapManipulator::data(owner).mask;
 
-					if(prelude_unlikely(can_expand && (data(owner).entries > mask)))
-						return expand(owner);
+					if(prelude_unlikely(can_expand && (ValueMapManipulator::data(owner).entries > mask)))
+						return ValueMapManipulator::expand(owner);
 					else
 						return value_false;
 				}, [&](size_t index) -> value_t {
-					value_slot(owner, index) = value;
+					ValueMapManipulator::value_slot(owner, index) = value;
 					return value_true;
 				});
 			}
@@ -215,19 +215,19 @@ namespace Mirb
 		public:
 			template<typename func> static value_t get(Owner *owner, value_t key, func create_value)
 			{
-				return enter(owner, key, [&]() -> value_t {
-					return search(owner, key, [&](size_t) {
+				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {
+					return ValueMapManipulator::search(owner, key, [&](size_t) {
 						return create_value();
 					}, [&](size_t index) {
-						return value_slot(owner, index);
+						return ValueMapManipulator::value_slot(owner, index);
 					});
 				});
 			}
 			
 			static value_t has(Owner *owner, value_t key)
 			{
-				return enter(owner, key, [&]() -> value_t {
-					return search(owner, key, [&](size_t) {
+				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {
+					return ValueMapManipulator::search(owner, key, [&](size_t) {
 						return value_false;
 					}, [&](size_t) {
 						return value_true;
@@ -237,8 +237,8 @@ namespace Mirb
 			
 			static value_t set(Owner *owner, value_t key, value_t value)
 			{
-				return enter(owner, key, value, [&]() -> value_t {
-					return store<true>(owner, key, value);
+				return ValueMapManipulator::enter(owner, key, value, [&]() -> value_t {
+					return ValueMapManipulator::store<true>(owner, key, value);
 				});
 			}
 	};

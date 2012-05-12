@@ -61,7 +61,7 @@ namespace Mirb
 		return value_nil;
 	}
 	
-	value_t Object::pattern(value_t obj)
+	value_t Object::pattern(value_t)
 	{
 		return value_nil;
 	}
