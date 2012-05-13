@@ -372,8 +372,13 @@ namespace Mirb
 			vars[op.var] = Support::create_array(op.argc, &vars[op.argv]);
 		EndOp
 
-		Op(Hash)
-			vars[op.var] = Support::create_hash(op.argc, &vars[op.argv]);
+		DeepOp(Hash)
+			value_t result = Support::create_hash(op.argc, &vars[op.argv]);
+		
+			if(prelude_unlikely(!result))
+				goto handle_exception;
+
+			vars[op.var] = result;
 		EndOp
 
 		Op(String)

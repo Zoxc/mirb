@@ -50,11 +50,17 @@ namespace Mirb
 		return result;
 	}
 
+	value_t String::equal(String *self, String *other)
+	{
+		return auto_cast(self->string == other->string);
+	}
+
 	void String::initialize()
 	{
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::Self>(context->string_class, "inspect", &inspect);
 		method<Arg::Self>(context->string_class, "to_s", &to_s);
+		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "==", &equal);
 		method<Arg::Self, Arg::Value>(context->string_class, "concat", &concat);
 		method<Arg::Self, Arg::Value>(context->string_class, "<<", &concat);
 		method<Arg::Self, Arg::Value>(context->string_class, "+", &concat);

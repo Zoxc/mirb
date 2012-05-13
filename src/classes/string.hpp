@@ -13,6 +13,7 @@ namespace Mirb
 			static value_t inspect(value_t obj);
 			static value_t to_s(value_t obj);
 			static value_t concat(value_t obj, value_t other);
+			static value_t equal(String *self, String *other);
 			
 		public:
 			String(Class *instance_of) : Object(Value::String, instance_of) {}

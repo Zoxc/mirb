@@ -303,7 +303,7 @@ namespace Mirb
 		};
 		
 		struct HashNode:
-			public Node
+			public LocationNode
 		{
 			NodeType type() { return Hash; }
 			

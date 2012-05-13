@@ -46,5 +46,5 @@ namespace Mirb
 			static void initialize();
 	};
 	
-	typedef ValueMapManipulator<true, Hash, &Hash::data> HashAccess;
+	typedef ValueMapManipulator<false, Hash, &Hash::data> HashAccess;
 };

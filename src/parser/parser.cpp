@@ -273,6 +273,7 @@ namespace Mirb
 						if(!hash)
 						{
 							hash = new (fragment) Tree::HashNode;
+							hash->range = range;
 							node->arguments.append(hash);
 						}
 
@@ -282,8 +283,9 @@ namespace Mirb
 
 						if(append)
 							hash->entries.append(append);
-
+						
 						lexer.lexeme.prev_set(&range);
+						lexer.lexeme.prev_set(&hash->range);
 
 						last_hash = range;
 					};
@@ -346,7 +348,7 @@ namespace Mirb
 	{
 		auto result = new (fragment) Tree::HashNode;
 
-		SourceLoc start = lexer.lexeme;
+		SourceLoc range = lexer.lexeme;
 		
 		lexer.step();
 		
@@ -396,7 +398,11 @@ namespace Mirb
 
 		skip_lines();
 
-		close_pair("hash literal", start, Lexeme::CURLY_CLOSE);
+		close_pair("hash literal", range, Lexeme::CURLY_CLOSE);
+
+		lexer.lexeme.prev_set(&range);
+
+		result->range = range;
 
 		return result;
 	}

@@ -24,7 +24,10 @@ namespace Mirb
 	{
 		auto self = cast<Hash>(obj);
 
-		HashAccess::set(self, key, value);
+		OnStack<1> os(value);
+
+		if(!HashAccess::set(self, key, value))
+			return 0;
 
 		return value;
 	}

@@ -137,18 +137,40 @@ namespace Mirb
 
 				size_t old_entries = data(owner).entries;
 
-				ValueMapData new_data(size << 1); // TODO: OnStack for this
-				
-				for(size_t i = 0; i < size; i += 1)
+				ValueMapData new_data(size << 1);
+
+				if(light)
 				{
-					value_t key = key_slot(owner, i << 1);
-
-					if(key != value_undef)
+					for(size_t i = 0; i < size; i += 1)
 					{
-						value_t value = value_slot(owner, i << 1); // TODO: OnStack for key, value
+						value_t key = key_slot(owner, i << 1);
 
-						if(!store<false, ValueMapData &>(new_data, key, value))
-							return 0;
+						if(key != value_undef)
+						{
+							value_t value = value_slot(owner, i << 1);
+
+							if(!store<false, ValueMapData &>(new_data, key, value))
+								return 0;
+						}
+					}
+				}
+				else
+				{
+					OnStack<1> os(new_data.table);
+
+					for(size_t i = 0; i < size; i += 1)
+					{
+						value_t key = key_slot(owner, i << 1);
+
+						if(key != value_undef)
+						{
+							value_t value = value_slot(owner, i << 1);
+
+							OnStack<2> os2(key, value);
+
+							if(!store<false, ValueMapData &>(new_data, key, value))
+								return 0;
+						}
 					}
 				}
 

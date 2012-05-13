@@ -527,7 +527,8 @@ namespace Mirb
 				to_bytecode(*i, group[param++]);
 			}
 			
-			gen<HashOp>(var, group.size, group.use());	
+			gen<HashOp>(var, group.size, group.use());
+			location(&node->range);
 		}
 		
 		void ByteCodeGenerator::convert_call(Tree::Node *basic_node, var_t var)
