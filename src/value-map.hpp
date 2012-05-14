@@ -28,22 +28,6 @@ namespace Mirb
 			mark(table);
 		}
 		
-		template<typename func> bool each_pair(func do_for_pair)
-		{
-			for(size_t i = 0; i <= mask; ++i)
-			{
-				value_t key = (*table)[i << 1];
-
-				if(key != value_undef)
-				{
-					if(!do_for_pair(key, (*table)[(i << 1) + 1]))
-						return false;
-				}
-			}
-				
-			return true;
-		}
-		
 		static value_t call(value_t obj, value_t *key);
 		static value_t raise();
 	};
@@ -141,7 +125,7 @@ namespace Mirb
 
 				if(light)
 				{
-					for(size_t i = 0; i < size; i += 1)
+					for(size_t i = 0; i < size; ++i)
 					{
 						value_t key = key_slot(owner, i << 1);
 
@@ -158,7 +142,7 @@ namespace Mirb
 				{
 					OnStack<1> os(new_data.table);
 
-					for(size_t i = 0; i < size; i += 1)
+					for(size_t i = 0; i < size; ++i)
 					{
 						value_t key = key_slot(owner, i << 1);
 
@@ -179,16 +163,6 @@ namespace Mirb
 				mirb_debug_assert(old_entries == data(owner).entries);
 				mirb_debug_assert(data(owner).mask >= data(owner).entries);
 
-				return value_true;
-			}
-
-			static value_t increase(Owner *&owner)
-			{
-				size_t mask = data(owner).mask;
-
-				if(prelude_unlikely(data(owner).entries > (mask - 1 - (mask >> 2)) ))
-					return expand(owner);
-				
 				return value_true;
 			}
 			
@@ -235,6 +209,24 @@ namespace Mirb
 			}
 			
 		public:
+			template<typename func> static bool each_pair(Owner *&owner, func do_for_pair)
+			{
+				size_t size = data(owner).mask + 1;
+
+				for(size_t i = 0; i < size; ++i)
+				{
+					value_t key = key_slot(owner, i << 1);
+
+					if(key != value_undef)
+					{
+						if(!do_for_pair(key, value_slot(owner, i << 1)))
+							return false;
+					}
+				}
+				
+				return true;
+			}
+		
 			template<typename func> static value_t get(Owner *owner, value_t key, func create_value)
 			{
 				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {

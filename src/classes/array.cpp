@@ -5,9 +5,9 @@
 
 namespace Mirb
 {
-	value_t Array::allocate(value_t obj)
+	value_t Array::allocate(Class *instance_of)
 	{
-		return auto_cast(Collector::allocate<Array>(auto_cast(obj)));
+		return Collector::allocate<Array>(instance_of);
 	}
 	
 	value_t Array::unshift(value_t obj, size_t argc, value_t argv[])
@@ -107,14 +107,39 @@ namespace Mirb
 		return value;
 	}
 	
+	value_t first(Array *self)
+	{
+		if(self->vector.size() > 1)
+			return self->vector[0];
+		else
+			return value_nil;
+	}
+	
+	value_t last(Array *self)
+	{
+		if(self->vector.size() > 1)
+			return self->vector[self->vector.size() - 1];
+		else
+			return value_nil;
+	}
+	
+	value_t empty(Array *self)
+	{
+		return auto_cast(self->vector.size() == 0);
+	}
+	
 	void Array::initialize()
 	{
 		context->array_class = define_class("Array", context->object_class);
 		
 		include_module(context->array_class, context->enumerable_module);
 		
-		singleton_method<Arg::Self>(context->array_class, "allocate", &allocate);
-		
+		singleton_method<Arg::SelfClass<Class>>(context->array_class, "allocate", &allocate);
+
+		method<Arg::SelfClass<Array>>(context->array_class, "first", &first);
+		method<Arg::SelfClass<Array>>(context->array_class, "last", &last);
+		method<Arg::SelfClass<Array>>(context->array_class, "empty?", &empty);
+
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);

@@ -8,10 +8,11 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(value_t obj);
-			static value_t inspect(value_t obj);
-			static value_t get(value_t obj, value_t key);
-			static value_t set(value_t obj, value_t key, value_t value);
+			static value_t allocate(Class *instance_of);
+			static value_t to_s(Hash *self);
+			static value_t each(Hash *self, value_t block);
+			static value_t get(Hash *self, value_t key);
+			static value_t set(Hash *self, value_t key, value_t value);
 
 		public:
 			Hash() : Object(Value::Hash, context->hash_class), data(8), default_value(value_nil), _accessing(false) {}

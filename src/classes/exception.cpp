@@ -181,9 +181,9 @@ namespace Mirb
 		}
 	}
 	
-	value_t Exception::allocate(value_t obj)
+	value_t Exception::allocate(Class *instance_of)
 	{
-		return auto_cast(Collector::allocate<Exception>(Value::Exception, auto_cast(obj), value_nil, nullptr));
+		return Collector::allocate<Exception>(Value::Exception, instance_of, value_nil, nullptr);
 	}
 
 	value_t Exception::to_s(value_t obj)
@@ -206,7 +206,7 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Arg::Self>(context->exception_class, "allocate", &allocate);
+		singleton_method<Arg::SelfClass<Class>>(context->exception_class, "allocate", &allocate);
 
 		method<Arg::Self, Arg::Value>(context->exception_class, "initialize", &method_initialize);
 		method<Arg::Self>(context->exception_class, "message", &to_s);

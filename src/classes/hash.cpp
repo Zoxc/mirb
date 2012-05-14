@@ -3,15 +3,13 @@
 
 namespace Mirb
 {
-	value_t Hash::allocate(value_t obj)
+	value_t Hash::allocate(Class *instance_of)
 	{
-		return auto_cast(Collector::allocate<Hash>(auto_cast(obj)));
+		return Collector::allocate<Hash>(instance_of);
 	}
 
-	value_t Hash::get(value_t obj, value_t key)
+	value_t Hash::get(Hash *self, value_t key)
 	{
-		auto self = cast<Hash>(obj);
-
 		return HashAccess::get(self, key, [&]() -> value_t {
 			if(self->flag)
 				return yield(self->default_value);
@@ -20,10 +18,8 @@ namespace Mirb
 		});
 	}
 	
-	value_t Hash::set(value_t obj, value_t key, value_t value)
+	value_t Hash::set(Hash *self, value_t key, value_t value)
 	{
-		auto self = cast<Hash>(obj);
-
 		OnStack<1> os(value);
 
 		if(!HashAccess::set(self, key, value))
@@ -32,16 +28,14 @@ namespace Mirb
 		return value;
 	}
 	
-	value_t Hash::inspect(value_t obj)
+	value_t Hash::to_s(Hash *self)
 	{
-		auto self = cast<Hash>(obj);
-
 		CharArray result = "{";
 
 		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
-		if(!self->data.each_pair([&](value_t key, value_t value) -> bool {
+		if(!HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
 
 			OnStack<1> os(value);
 			
@@ -62,15 +56,34 @@ namespace Mirb
 		return result.to_string();
 	}
 	
+	value_t Hash::each(Hash *self, value_t block)
+	{
+		OnStack<2> os(self, block);
+
+		if(!HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+			value_t argv[2];
+			
+			argv[0] = key;
+			argv[1] = value;
+			
+			return yield(block, 2, argv) != 0;
+		}))
+			return 0;
+
+		return self;
+	}
+
 	void Hash::initialize()
 	{
 		context->hash_class = define_class("Hash", context->object_class);
 		
-		singleton_method<Arg::Self>(context->hash_class, "allocate", &allocate);
+		singleton_method<Arg::SelfClass<Class>>(context->hash_class, "allocate", &allocate);
+		
+		method<Arg::SelfClass<Hash>, Arg::Block>(context->hash_class, "each", &each);
 
-		method<Arg::Self>(context->hash_class, "inspect", &inspect);
-		method<Arg::Self, Arg::Value>(context->hash_class, "[]", &get);
-		method<Arg::Self, Arg::Value, Arg::Value>(context->hash_class, "[]=", &set);
+		method<Arg::SelfClass<Hash>>(context->hash_class, "to_s", &to_s);
+		method<Arg::SelfClass<Hash>, Arg::Value>(context->hash_class, "[]", &get);
+		method<Arg::SelfClass<Hash>, Arg::Value, Arg::Value>(context->hash_class, "[]=", &set);
 	}
 };
 

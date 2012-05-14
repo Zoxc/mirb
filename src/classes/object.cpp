@@ -15,9 +15,9 @@ namespace Mirb
 		this->hashed = true;
 	}
 	
-	value_t Object::allocate(value_t instance_of)
+	value_t Object::allocate(Class *instance_of)
 	{
-		return auto_cast(Collector::allocate<Object>(auto_cast(instance_of)));
+		return auto_cast(Collector::allocate<Object>(instance_of));
 	}
 	
 	value_t Object::tap(value_t obj, value_t block)
@@ -57,6 +57,11 @@ namespace Mirb
 	}
 	
 	value_t Object::dummy()
+	{
+		return value_nil;
+	}
+	
+	value_t Object::variadic_dummy(size_t argc)
 	{
 		return value_nil;
 	}
@@ -135,16 +140,37 @@ namespace Mirb
 		return Fixnum::from_size_t(Value::hash(obj)); // TODO: Make a proper object_id
 	}
 	
+	value_t kind_of(value_t obj, Class *klass)
+	{
+		Class *c = class_of(obj);
+
+		while(c)
+		{
+			c = real_class(c);
+
+			if(!c)
+				break;
+
+			if(c == klass)
+				return value_true;
+
+			c = c->superclass;
+		}
+
+		return value_false;
+	}
+	
 	void Object::initialize()
 	{
 		method<Arg::Self>(context->object_class, "object_id", &object_id);
 		method<Arg::Self>(context->object_class, "__id__", &object_id);
-
-		method(context->object_class, "initialize", &dummy);
+		method<Arg::Count>(context->object_class, "initialize", &variadic_dummy);
 		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
 		method<Arg::Self>(context->object_class, "class", &klass);
 		method<Arg::Self>(context->object_class, "freeze", &dummy);
+		method<Arg::Self, Arg::Class<Class>>(context->object_class, "is_a?", &kind_of);
+		method<Arg::Self, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
 		method<Arg::Self>(context->object_class, "frozen?", &dummy);
 		method<Arg::Self, Arg::Value>(context->object_class, "=~", &pattern);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
@@ -157,7 +183,7 @@ namespace Mirb
 		method<Arg::Self>(context->object_class, "!", &method_not);
 		method<Arg::Self, Arg::Count, Arg::Values, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
 
-		singleton_method<Arg::Self>(context->object_class, "allocate", &allocate);
+		singleton_method<Arg::SelfClass<Class>>(context->object_class, "allocate", &allocate);
 	}
 };
 

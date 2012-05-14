@@ -45,7 +45,7 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(value_t obj);
+			static value_t allocate(Class *instance_of);
 			static value_t to_s(value_t obj);
 			static value_t method_initialize(value_t obj, value_t message);
 

@@ -12,6 +12,7 @@ namespace Mirb
 	void set_current_exception(Exception *exception);
 
 	Class *class_of(value_t obj) prelude_nonnull(1);
+	bool is_real_class(Class *obj);
 	Class *real_class(Class *obj) prelude_nonnull(1);
 	Class *real_class_of(value_t obj);
 

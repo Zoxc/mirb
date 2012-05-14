@@ -49,6 +49,19 @@ namespace Mirb
 
 		return result;
 	}
+	
+	value_t match(value_t self, value_t regexp)
+	{
+		if(!Value::of_type<Regexp>(regexp))
+		{
+			regexp = call(context->regexp_class, "new", value_nil, 1, &regexp);
+
+			if(!regexp || type_error(regexp, context->regexp_class))
+				return 0;
+		}
+
+		return call(regexp, "match", value_nil, 1, &self);
+	}
 
 	value_t String::equal(String *self, String *other)
 	{
@@ -57,6 +70,7 @@ namespace Mirb
 
 	void String::initialize()
 	{
+		method<Arg::Self, Arg::Value>(context->string_class, "match", &match);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::Self>(context->string_class, "inspect", &inspect);
 		method<Arg::Self>(context->string_class, "to_s", &to_s);

@@ -13,11 +13,16 @@ namespace Mirb
 	{
 		private:
 			static value_t to_s(Regexp *obj);
+			static value_t rb_initialize(Regexp *obj, value_t pattern);
+			static value_t rb_allocate(Class *instance_of);
+			static value_t match(Regexp *obj, String *string);
 		public:
-			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of) {}
+			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of), re(nullptr) {}
 
 			real_pcre *re;
 			CharArray pattern;
+
+			bool compile_pattern();
 
 			static Regexp *allocate(const CharArray &pattern);
 			

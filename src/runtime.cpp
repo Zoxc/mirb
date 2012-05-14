@@ -64,12 +64,17 @@ namespace Mirb
 		else
 			return Value::class_of_literal(obj);
 	}
+	
+	bool is_real_class(Class *obj)
+	{
+		return !obj->singleton && obj->get_type() != Value::IClass;
+	}
 
 	Class *real_class(Class *obj)
 	{
 		Value::assert_valid(obj);
 
-		while(obj && (obj->singleton || obj->get_type() == Value::IClass))
+		while(obj && !is_real_class(obj))
 			obj = obj->superclass;
 
 		return obj;
@@ -906,6 +911,13 @@ namespace Mirb
 
 		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::from_literal("mirb"));
 		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::from_literal("1.9"));
+
+#ifdef WIN32
+		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-mswin"));
+#else
+		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-posix"));
+#endif
+
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
 

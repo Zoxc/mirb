@@ -147,7 +147,7 @@ namespace Mirb
 			value_t * const Header::list_end = nullptr;
 		#endif
 		
-		Header::Header(Type type) : type(type), marked(false)
+		Header::Header(Type type) : type(type), marked(false), hashed(false), flag(false)
 		{
 			#ifdef DEBUG
 				alive = true;

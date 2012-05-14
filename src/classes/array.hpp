@@ -8,7 +8,7 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(value_t obj);
+			static value_t allocate(Class *instance_of);
 			static value_t push(value_t obj, size_t argc, value_t argv[]);
 			static value_t pop(value_t obj);
 			static value_t unshift(value_t obj, size_t argc, value_t argv[]);
