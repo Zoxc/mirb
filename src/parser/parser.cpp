@@ -1173,7 +1173,7 @@ namespace Mirb
 		return nullptr;
 	}
 	
-	Tree::Node *Parser::parse_range()
+	Tree::Node *Parser::parse_range(bool allow_multiple)
 	{
 		Tree::Node *result = parse_precedence_operator();
 		
@@ -1192,7 +1192,7 @@ namespace Mirb
 				skip_lines();
 			
 				node->left = result;
-				node->right = parse_operator_expression();
+				node->right = parse_operator_expression(allow_multiple);
 				
 				return node;
 			});

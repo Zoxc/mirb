@@ -157,7 +157,7 @@ namespace Mirb
 	
 	Tree::Node *Parser::parse_ternary_if(bool allow_multiples)
 	{
-		Tree::Node *result = parse_range();
+		Tree::Node *result = parse_range(allow_multiples);
 		
 		if(lexeme() == Lexeme::QUESTION)
 		{

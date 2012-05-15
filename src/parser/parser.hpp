@@ -128,7 +128,7 @@ namespace Mirb
 			Tree::Node *build_assignment(Tree::Node *left, bool allow_multiples);
 			Tree::Node *process_assignment(Tree::Node *input, bool allow_multiples);
 			Tree::Node *parse_array();
-			Tree::Node *parse_range();
+			Tree::Node *parse_range(bool allow_multiple);
 			Tree::Node *parse_unary();
 			Tree::Node *parse_alias();
 			Tree::Node *parse_boolean_unary();
