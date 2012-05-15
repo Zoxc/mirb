@@ -15,7 +15,7 @@ namespace Mirb
 			static value_t to_s(Array *self);
 			static value_t length(Array *self);
 			static value_t each(Array *self, value_t block);
-			static value_t get(Array *self, value_t index);
+			static value_t get(Array *self, value_t index, value_t size);
 			static value_t set(Array *self, size_t index, value_t value);
 			static value_t join(Array *self, String *sep);
 

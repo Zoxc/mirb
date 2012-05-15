@@ -127,8 +127,43 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t Array::get(Array *self, value_t index)
+	value_t Array::get(Array *self, value_t index, value_t size)
 	{
+		if(size)
+		{
+			if(!Value::is_fixnum(index) || !Value::is_fixnum(size))
+				return raise(context->type_error, "Arguments must be instances of Fixnum");
+
+			int start = Fixnum::to_size_t(index);
+			int length = Fixnum::to_size_t(size);
+			size_t vector_size = self->vector.size();
+
+			if(start < 0)
+			{
+				start = -start;
+
+				if(prelude_unlikely((size_t)start > vector_size))
+					return value_nil;
+				else
+					start = vector_size - (size_t)start;
+			}
+
+			if(prelude_unlikely(length < 1))
+				return value_nil;
+
+			auto result = Collector::allocate<Array>();
+			
+			if((size_t)start < self->vector.size())
+			{
+				if((size_t)start + (size_t)length > vector_size)
+					length = vector_size - start;
+
+				result->vector.push_entries(&self->vector[start], length);
+			}
+
+			return result;
+		}
+
 		if(Value::is_fixnum(index))
 		{
 			size_t i = Fixnum::to_size_t(index);
@@ -207,7 +242,7 @@ namespace Mirb
 		method<Arg::SelfClass<Array>, Arg::DefaultClass<String>>(context->array_class, "join", &join);
 		method<Arg::SelfClass<Array>>(context->array_class, "to_s", &to_s);
 		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
-		method<Arg::SelfClass<Array>, Arg::Value>(context->array_class, "[]", &get);
+		method<Arg::SelfClass<Array>, Arg::Value, Arg::Default>(context->array_class, "[]", &get);
 		method<Arg::SelfClass<Array>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
 	}
 };
