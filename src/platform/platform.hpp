@@ -15,7 +15,9 @@ namespace Mirb
 			Gray
 		};
 		
-		bool file_exists(const CharArray &file);
+		bool is_file(const CharArray &path);
+		bool is_directory(const CharArray &path);
+		bool file_exists(const CharArray &path);
 		CharArray cwd();
 		void *allocate_region(size_t bytes);
 		void free_region(void *region, size_t bytes);

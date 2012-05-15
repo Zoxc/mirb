@@ -1,3 +1,5 @@
+#include "../classes/file.hpp"
+
 namespace Mirb
 {
 	namespace Platform
@@ -10,6 +12,49 @@ namespace Mirb
 				std::string format();
 		};
 		
+		CharArray convert_path(const CharArray &path);
+		CharArray from_tchar(const TCHAR *buffer, size_t tchars);
+		CharArray from_tchar(const TCHAR *buffer);
+
+		template<typename F> void to_tchar(const CharArray &string, F func)
+		{
+			#ifdef _UNICODE
+				size_t size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), nullptr, 0);
+
+				TCHAR *buffer = (TCHAR *)alloca((size + 1) * sizeof(TCHAR));
+
+				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), buffer, size);
+
+				buffer[size] = 0;
+
+				func(buffer, size);
+			#else
+				func((const TCHAR *)string.raw(), string.size());
+			#endif
+		}
+
+		template<typename F> bool list_dir(const CharArray &path, F func)
+		{
+			WIN32_FIND_DATA ffd;
+			HANDLE handle;
+
+			to_tchar(convert_path(File::join(File::expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
+				handle = FindFirstFile(buffer, &ffd);
+			});
+
+			if(handle == INVALID_HANDLE_VALUE)
+				return false;
+
+			do
+			{
+				func(from_tchar(ffd.cFileName));
+			} while (FindNextFile(handle, &ffd) != 0);
+
+			FindClose(handle);
+
+			return true;
+		}
+
 		template<Color input> void color(const CharArray &string)
 		{
 			WORD flags;

@@ -70,13 +70,7 @@ namespace Mirb
 	CharArray File::expand_path(CharArray relative)
 	{
 		if(!absolute_path(relative))
-		{
-			JoinSegments joiner;
-			joiner.push(Platform::cwd());
-			joiner.push(relative);
-
-			return joiner.join();
-		}
+			return join(Platform::cwd(), relative);
 		else
 			return relative;
 	};
@@ -85,15 +79,10 @@ namespace Mirb
 	{
 		if(!absolute_path(relative))
 		{
-			JoinSegments joiner;
-
 			if(!absolute_path(from))
 				from = expand_path(from);
 
-			joiner.push(from);
-			joiner.push(relative);
-
-			return joiner.join();
+			return join(from, relative);
 		}
 		else
 			return relative;
@@ -107,6 +96,16 @@ namespace Mirb
 			return File::expand_path(relative->string).to_string();
 	}
 	
+	CharArray File::join(const CharArray &left, const CharArray &right)
+	{
+		JoinSegments joiner;
+
+		joiner.push(left);
+		joiner.push(right);
+		
+		return joiner.join();
+	}
+
 	CharArray File::basename(CharArray path)
 	{
 		CharArray result = normalize_path(path);
@@ -139,7 +138,7 @@ namespace Mirb
 		return CharArray(".").to_string();
 	}
 	
-	value_t join(size_t argc, value_t argv[])
+	value_t rb_join(size_t argc, value_t argv[])
 	{
 		JoinSegments joiner;
 
@@ -159,16 +158,28 @@ namespace Mirb
 		return auto_cast(Platform::file_exists(path->string));
 	}
 	
+	value_t file(String *path)
+	{
+		return auto_cast(Platform::is_file(path->string));
+	}
+	
+	value_t directory(String *path)
+	{
+		return auto_cast(Platform::is_directory(path->string));
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
 		
 		singleton_method<Arg::Class<String>>(context->file_class, "exists?", &exists);
 		singleton_method<Arg::Class<String>>(context->file_class, "exist?", &exists);
+		singleton_method<Arg::Class<String>>(context->file_class, "file?", &file);
+		singleton_method<Arg::Class<String>>(context->file_class, "directory?", &directory);
 
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
-		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &join);
+		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &rb_join);
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::get("/"));
 	}

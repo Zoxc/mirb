@@ -2,6 +2,7 @@
 
 #ifdef WIN32
 
+#include <tchar.h>
 #include "../collector.hpp"
 
 namespace Mirb
@@ -31,21 +32,6 @@ namespace Mirb
 			VirtualFree(region, 0, MEM_RELEASE);
 		}
 		
-		template<typename F> void to_tchar(const CharArray &string, F func)
-		{
-			#ifdef _UNICODE
-				size_t size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), nullptr, 0);
-
-				TCHAR *buffer = (TCHAR *)alloca(size * sizeof(TCHAR));
-
-				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), buffer, size);
-
-				func(buffer, size);
-			#else
-				func((const TCHAR *)string.raw(), string.size());
-			#endif
-		}
-
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars)
 		{
 			#ifdef _UNICODE
@@ -59,6 +45,11 @@ namespace Mirb
 			#else
 				return CharArray((const char_t *)buffer, tchars);
 			#endif
+		}
+		
+		CharArray from_tchar(const TCHAR *buffer)
+		{
+			return from_tchar(buffer, _tcslen(buffer));
 		}
 
 		CharArray cwd()
@@ -85,7 +76,7 @@ namespace Mirb
 			} 
 		} 
  
-		CharArray path(const CharArray &path)
+		CharArray convert_path(const CharArray &path)
 		{
 			#ifdef _UNICODE
 				CharArray result(path);
@@ -105,15 +96,34 @@ namespace Mirb
 			#endif
 		}
 	
-		bool file_exists(const CharArray &file)
+		DWORD attributes(const CharArray &path)
 		{
 			DWORD attrib; 
 
-			to_tchar(path(file).c_str(), [&](const TCHAR *buffer, size_t) {
+			to_tchar(convert_path(path), [&](const TCHAR *buffer, size_t) {
 				attrib = GetFileAttributes(buffer);
 			});
 
-			return (attrib != INVALID_FILE_ATTRIBUTES);
+			return attrib;
+		}
+		
+		bool file_exists(const CharArray &path)
+		{
+			return (attributes(path) != INVALID_FILE_ATTRIBUTES);
+		}
+		
+		bool is_directory(const CharArray &path)
+		{
+			DWORD attrib = attributes(path); 
+
+			return ((attrib != INVALID_FILE_ATTRIBUTES) && (attrib & FILE_ATTRIBUTE_DIRECTORY));
+		}
+
+		bool is_file(const CharArray &path)
+		{
+			DWORD attrib = attributes(path); 
+
+			return ((attrib != INVALID_FILE_ATTRIBUTES) && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
 		}
 
 		void initialize()
