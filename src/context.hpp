@@ -60,6 +60,7 @@ namespace Mirb
 			Class *runtime_error;
 			Class *local_jump_error;
 			Class *load_error;
+			Class *system_call_error;
 
 			Module *kernel_module;
 			Module *comparable_module;

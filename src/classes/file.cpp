@@ -88,6 +88,52 @@ namespace Mirb
 			return relative;
 	};
 	
+	bool File::fnmatch(const CharArray &path, const CharArray &pattern)
+	{
+		size_t i = 0;
+		size_t p = 0;
+
+		while(i < path.size() && p < pattern.size())
+		{
+			switch(pattern[p])
+			{
+				case '*':
+				{
+					if(++p >= pattern.size())
+						return true;
+
+					char_t terminator = pattern[p];
+
+					while(path[i] != terminator)
+					{
+						i++;
+
+						if(i >= path.size())
+							return false;
+					}
+
+					break;
+				}
+
+				case '?':
+					p++, i++;
+					break;
+
+				default:
+				{
+					if(pattern[p] != path[i])
+						return false;
+
+					p++, i++;
+
+					break;
+				}
+			}
+		}
+
+		return i == path.size() && p == pattern.size();
+	}
+	
 	value_t File::rb_expand_path(String *relative, String *absolute)
 	{
 		if(absolute)
@@ -168,6 +214,11 @@ namespace Mirb
 		return auto_cast(Platform::is_directory(path->string));
 	}
 	
+	value_t rb_fnmatch(String *pattern, String *path)
+	{
+		return auto_cast(File::fnmatch(path->string, pattern->string));
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
@@ -176,6 +227,8 @@ namespace Mirb
 		singleton_method<Arg::Class<String>>(context->file_class, "exist?", &exists);
 		singleton_method<Arg::Class<String>>(context->file_class, "file?", &file);
 		singleton_method<Arg::Class<String>>(context->file_class, "directory?", &directory);
+		singleton_method<Arg::Class<String>, Arg::Class<String>>(context->file_class, "fnmatch?", &rb_fnmatch);
+		singleton_method<Arg::Class<String>, Arg::Class<String>>(context->file_class, "fnmatch", &rb_fnmatch);
 
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);

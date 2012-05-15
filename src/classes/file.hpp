@@ -25,6 +25,7 @@ namespace Mirb
 			
 			static bool absolute_path(const CharArray &path);
 			static CharArray join(const CharArray &left, const CharArray &right);
+			static bool fnmatch(const CharArray &path, const CharArray &pattern);
 			static CharArray normalize_path(const CharArray &path);
 			static CharArray basename(CharArray path);
 			static value_t rb_expand_path(String *relative, String *absolute);
