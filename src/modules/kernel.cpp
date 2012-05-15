@@ -144,12 +144,15 @@ namespace Mirb
 
 		CharArray full_path = File::expand_path(filename);
 
-		if(require && !context->loaded.each([&](value_t path) { return cast<String>(path)->string != full_path;	}))
-		{
-			return value_nil;
-		}
+		bool loaded = false;
 
-		context->loaded.push(full_path.to_string());
+		loaded = !context->loaded.each([&](value_t path) { return cast<String>(path)->string != full_path; });
+
+		if(require && loaded)
+			return value_nil;
+
+		if(!loaded)
+			context->loaded.push(full_path.to_string());
 
 		fseek(file, 0, SEEK_END);
 
@@ -178,8 +181,15 @@ namespace Mirb
 
 		free(data);
 		fclose(file);
+		
+		if(result)
+		{
+			// TODO: Remove loaded file from loaded list
 
-		return result == 0 ? 0 : value_nil;
+			return value_nil;
+		}
+		else
+			return 0;
 	}
 	
 	value_t Kernel::load(value_t filename)
