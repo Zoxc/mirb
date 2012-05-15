@@ -556,4 +556,12 @@ namespace Mirb
 		mirb_debug_assert(Value::of_type<T>(obj));
 		return reinterpret_cast<T *>(obj);
 	}
+
+	template<typename T> T *try_cast(value_t obj)
+	{
+		if(Value::of_type<T>(obj))
+			return reinterpret_cast<T *>(obj);
+		else
+			return 0;
+	}
 };

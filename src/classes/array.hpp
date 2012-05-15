@@ -17,6 +17,7 @@ namespace Mirb
 			static value_t each(Array *self, value_t block);
 			static value_t get(Array *self, value_t index);
 			static value_t set(Array *self, size_t index, value_t value);
+			static value_t join(Array *self, String *sep);
 
 		public:
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}

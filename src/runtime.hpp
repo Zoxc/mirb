@@ -93,6 +93,21 @@ namespace Mirb
 	value_t raise(Class *exception_class, const CharArray &message);
 
 	value_t raise(value_t exception);
+	
+	template<typename T> T *raise_cast(value_t obj) prelude_use_result;
+
+	template<typename T> T *raise_cast(value_t obj)
+	{
+		if(Value::of_type<T>(obj))
+			return reinterpret_cast<T *>(obj);
+		else if(!obj)
+			return 0;
+		else
+		{
+			raise(context->type_error, "Invalid type passed");
+			return 0;
+		}
+	}
 
 	void swallow_exception();
 

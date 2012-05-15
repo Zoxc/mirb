@@ -58,6 +58,57 @@ namespace Mirb
 		return result.to_string();
 	}
 	
+	value_t Array::join(Array *self, String *sep)
+	{
+		CharArray result;
+
+		OnStack<1> os1(self);
+		OnStackString<1> os2(result);
+
+		for(size_t i = 0; i < self->vector.size(); ++i)
+		{
+			if(i && sep)
+				result += sep->string;
+
+			value_t value = self->vector[i];
+
+			auto str = try_cast<String>(value);
+
+			if(str)
+				result += str->string;
+			else
+			{
+				auto array = try_cast<Array>(value);
+
+				if(array == self)
+					result += "[...]";
+				else
+				{
+					String *desc;
+
+					if(array)
+					{
+						value_t vsep = sep;
+					
+						if(sep)
+							desc = raise_cast<String>(call(array, "join", 1, &vsep));
+						else
+							desc = raise_cast<String>(call(array, "join"));
+					}
+					else
+						desc = raise_cast<String>(call(value, "to_s"));
+
+					if(!desc)
+						return 0;
+					
+					result += desc->string;
+				}
+			}
+		}
+
+		return result.to_string();
+	}
+	
 	value_t Array::length(Array *self)
 	{
 		return Fixnum::from_size_t(self->vector.size());
@@ -153,6 +204,7 @@ namespace Mirb
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
 		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
+		method<Arg::SelfClass<Array>, Arg::DefaultClass<String>>(context->array_class, "join", &join);
 		method<Arg::SelfClass<Array>>(context->array_class, "to_s", &to_s);
 		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
 		method<Arg::SelfClass<Array>, Arg::Value>(context->array_class, "[]", &get);
