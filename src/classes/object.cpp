@@ -174,8 +174,29 @@ namespace Mirb
 		return value_nil;
 	}
 	
+	value_t instance_variable_set(value_t self, Symbol *name, value_t value)
+	{
+		if(name->string.size() == 0 || name->string[0] != '@')
+			return raise(context->standard_error, "Invalid instance variable name");
+
+		set_var(self, name, value);
+
+		return value;
+	}
+	
+	value_t instance_variable_get(value_t self, Symbol *name, value_t value)
+	{
+		if(name->string.size() == 0 || name->string[0] != '@')
+			return raise(context->standard_error, "Invalid instance variable name");
+
+		return get_var(self, name);
+	}
+	
 	void Object::initialize()
 	{
+		method<Arg::Self, Arg::Class<Symbol>, Arg::Value>(context->object_class, "instance_variable_set", &instance_variable_set);
+		method<Arg::Self, Arg::Class<Symbol>>(context->object_class, "instance_variable_get", &instance_variable_get);
+
 		method<Arg::Self>(context->object_class, "object_id", &object_id);
 		method<Arg::Self>(context->object_class, "__id__", &object_id);
 		method<Arg::Count>(context->object_class, "initialize", &variadic_dummy);
