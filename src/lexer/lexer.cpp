@@ -130,7 +130,7 @@ namespace Mirb
 		jump_table[(size_t)'~'] = &Lexer::single<Lexeme::BITWISE_NOT>;
 		
 		// Logical operators
-		jump_table[(size_t)'!'] = &Lexer::assign<Lexeme::LOGICAL_NOT, Lexeme::NO_EQUALITY>;
+		jump_table[(size_t)'!'] = &Lexer::exclamation;
 		
 		// Misc
 		jump_table[(size_t)'('] = &Lexer::single<Lexeme::PARENT_OPEN>;
