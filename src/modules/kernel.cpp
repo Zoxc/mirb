@@ -273,6 +273,7 @@ namespace Mirb
 		
 		method<Arg::Block>(context->kernel_module, "at_exit", &at_exit);
 		method<Arg::Block>(context->kernel_module, "proc", &proc);
+		method<Arg::Block>(context->kernel_module, "lambda", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
 		method(context->kernel_module, "backtrace", &backtrace);
 		method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
