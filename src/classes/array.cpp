@@ -33,7 +33,7 @@ namespace Mirb
 			return value_nil;
 	}
 	
-	value_t Array::inspect(Array *self)
+	value_t Array::to_s(Array *self)
 	{
 		CharArray result = "[";
 
@@ -153,7 +153,7 @@ namespace Mirb
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
 		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
-		method<Arg::SelfClass<Array>>(context->array_class, "inspect", &inspect);
+		method<Arg::SelfClass<Array>>(context->array_class, "to_s", &to_s);
 		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
 		method<Arg::SelfClass<Array>, Arg::Value>(context->array_class, "[]", &get);
 		method<Arg::SelfClass<Array>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
