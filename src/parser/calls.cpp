@@ -216,7 +216,7 @@ namespace Mirb
 		
 		child->var = (Tree::NamedVariable *)scope->block_parameter;
 		
-		return alloc_call_node(child, Symbol::from_literal("call"), range, has_arguments());
+		return alloc_call_node(child, Symbol::get("call"), range, has_arguments());
 	}
 
 	Tree::Node *Parser::parse_call(Symbol *symbol, Tree::Node *child, SourceLoc *range, bool default_var)
@@ -322,7 +322,7 @@ namespace Mirb
 					
 					auto result = new (fragment) Tree::CallNode;
 					
-					result->method = Symbol::from_literal("[]");
+					result->method = Symbol::get("[]");
 					result->range = range; //TODO: Extend range back to child
 					result->subscript = true;
 					

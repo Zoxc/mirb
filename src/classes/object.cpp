@@ -38,11 +38,11 @@ namespace Mirb
 	value_t Object::to_s(value_t obj)
 	{
 		value_t c = real_class_of(obj);
-		value_t name = get_var(c, Symbol::from_literal("__classname__"));
+		value_t name = get_var(c, context->syms.classname);
 
 		if(Value::test(name))
 		{
-			auto classname = cast<String>(get_var(c, Symbol::from_literal("__classname__")));
+			auto classname = cast<String>(name);
 
 			CharArray result = "#<" + classname->string + ":0x" + CharArray::hex((size_t)obj) + ">";
 
@@ -104,7 +104,7 @@ namespace Mirb
 			{
 				CharArray code = cast<String>(argv[0])->string.c_str();
 
-				return eval(obj, Symbol::from_literal("in eval"), current_frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
+				return eval(obj, Symbol::get("in eval"), current_frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
 			}
 			else
 				return raise(context->type_error, "Expected string");

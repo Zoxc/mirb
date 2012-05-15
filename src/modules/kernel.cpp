@@ -53,7 +53,7 @@ namespace Mirb
 		CharArray c_str = input->string.c_str();
 		CharArray filename("(eval)");
 
-		return eval(obj, Symbol::from_literal("in eval"), current_frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
+		return eval(obj, Symbol::get("in eval"), current_frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
 	}
 
 	FILE *try_file(const CharArray &filename, CharArray &result)

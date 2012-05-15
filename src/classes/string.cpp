@@ -10,6 +10,11 @@ namespace Mirb
 		return Collector::allocate<String>(symbol->string);
 	}
 	
+	value_t String::get(const CharArray &string)
+	{
+		return Collector::allocate<String>(string);
+	}
+			
 	value_t String::from_string(const char *c_str)
 	{
 		return Collector::allocate<String>((const char_t *)c_str, std::strlen(c_str));

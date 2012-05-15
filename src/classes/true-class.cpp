@@ -8,14 +8,14 @@ namespace Mirb
 {
 	value_t TrueClass::to_s()
 	{
-		return String::from_literal("true");
+		return String::get("true");
 	}
 
 	void TrueClass::initialize()
 	{
 		method(context->true_class, "to_s", &to_s);
 
-		set_const(context->object_class, Symbol::from_literal("TRUE"), value_true);
+		set_const(context->object_class, Symbol::get("TRUE"), value_true);
 	};
 };
 

@@ -15,7 +15,7 @@ namespace Mirb
 	{
 		method(context->false_class, "to_s", &to_s);
 
-		set_const(context->object_class, Symbol::from_literal("FALSE"), value_false);
+		set_const(context->object_class, Symbol::get("FALSE"), value_false);
 	};
 };
 

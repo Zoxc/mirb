@@ -427,12 +427,12 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::from_literal("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
+			set_current_exception(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::get("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(Collector::allocate<BreakException>(context->local_jump_error, String::from_literal("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
+			set_current_exception(Collector::allocate<BreakException>(context->local_jump_error, String::get("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
 			goto handle_exception;
 		EndOp
 			

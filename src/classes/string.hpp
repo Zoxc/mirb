@@ -31,11 +31,8 @@ namespace Mirb
 				return string.get_string();
 			}
 			
-			template<size_t length> static value_t from_literal(const char (&string)[length])
-			{
-				return auto_cast(Collector::allocate<String>(string));
-			}
-			
+			static value_t get(const CharArray &string);
+
 			CharArray string;
 			
 			template<typename F> void mark(F mark)

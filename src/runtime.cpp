@@ -816,7 +816,7 @@ namespace Mirb
 
 	value_t main_to_s()
 	{
-		return String::from_literal("main");
+		return String::get("main");
 	}
 	
 	value_t main_include(size_t argc, value_t argv[])
@@ -849,11 +849,11 @@ namespace Mirb
 
 		context->string_class = class_create_unnamed(context->object_class);
 		
-		class_name(context->object_class, context->object_class, Symbol::from_literal("Object"));
-		class_name(context->module_class, context->object_class, Symbol::from_literal("Module"));
-		class_name(context->class_class, context->object_class, Symbol::from_literal("Class"));
-		class_name(context->symbol_class, context->object_class, Symbol::from_literal("Symbol"));
-		class_name(context->string_class, context->object_class, Symbol::from_literal("String"));
+		class_name(context->object_class, context->object_class, Symbol::get("Object"));
+		class_name(context->module_class, context->object_class, Symbol::get("Module"));
+		class_name(context->class_class, context->object_class, Symbol::get("Class"));
+		class_name(context->symbol_class, context->object_class, Symbol::get("Symbol"));
+		class_name(context->string_class, context->object_class, Symbol::get("String"));
 		
 		context->setup(); // Required by simple define_class
 
@@ -927,13 +927,13 @@ namespace Mirb
 		
 		setup_main();
 
-		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::from_literal("mirb"));
-		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::from_literal("1.9"));
+		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::get("mirb"));
+		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::get("1.9"));
 
 #ifdef WIN32
-		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-winapi"));
+		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::get("mirb-winapi"));
 #else
-		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-posix"));
+		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::get("mirb-posix"));
 #endif
 
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());

@@ -33,13 +33,13 @@ namespace Mirb
 	{
 		auto self = cast<Class>(obj);
 
-		value_t name = get_var(obj, Symbol::from_literal("__classname__"));
+		value_t name = get_var(obj, context->syms.classname);
 		
 		if(Value::test(name))
 			return name;
 		else if(self->singleton)
 		{
-			value_t real = get_var(obj, Symbol::from_literal("__attached__"));
+			value_t real = get_var(obj, context->syms.attached);
 
 			OnStack<1> os(real);
 

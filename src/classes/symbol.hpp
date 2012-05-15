@@ -46,7 +46,6 @@ namespace Mirb
 			static Symbol *from_string(const std::string &string);
 			static Symbol *from_char_array(const CharArray &char_array);
 			static Symbol *get(const CharArray &char_array);
-			static Symbol *from_literal(const CharArray &char_array);
 			static Symbol *create_initial(const CharArray &char_array);
 			
 			template<typename F> void mark(F mark)
@@ -64,7 +63,7 @@ namespace Mirb
 	
 	template<size_t length> Symbol *symbol_cast(const char (&string)[length])
 	{
-		return Symbol::from_literal(string);
+		return Symbol::get(string);
 	}
 	
 	static inline Symbol *symbol_cast(Symbol *symbol)

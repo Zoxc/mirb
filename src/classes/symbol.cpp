@@ -25,11 +25,6 @@ namespace Mirb
 		return symbol_pool.get(char_array);
 	}
 	
-	Symbol *Symbol::from_literal(const CharArray &char_array)
-	{
-		return symbol_pool.get(char_array);
-	}
-	
 	Symbol *Symbol::create_initial(const CharArray &char_array)
 	{
 		Symbol *result = new Symbol();

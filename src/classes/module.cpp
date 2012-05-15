@@ -28,7 +28,7 @@ namespace Mirb
 
 	value_t Module::to_s(value_t obj)
 	{
-		value_t name = get_var(obj, Symbol::from_literal("__classname__"));
+		value_t name = get_var(obj, context->syms.classname);
 
 		if(Value::test(name))
 			return name;

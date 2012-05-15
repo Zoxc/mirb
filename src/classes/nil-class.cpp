@@ -27,7 +27,7 @@ namespace Mirb
 		method(context->nil_class, "inspect", &inspect);
 		method(context->nil_class, "nil", &nil);
 
-		set_const(context->object_class, Symbol::from_literal("NIL"), value_nil);
+		set_const(context->object_class, Symbol::get("NIL"), value_nil);
 	};
 };
 
