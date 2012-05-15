@@ -46,10 +46,14 @@ namespace Mirb
 
 			if(!append_inspect(result, value))
 				return false;
-
+			
+			result += ", ";
 			return true;
 		}))
 			return 0;
+
+		if(result.size() > 1)
+			result.shrink(result.size() - 2);
 
 		result += "}";
 
