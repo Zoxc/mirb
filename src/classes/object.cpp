@@ -169,7 +169,7 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t Object::initialize_copy(value_t obj, value_t other)
+	value_t Object::initialize_copy(value_t)
 	{
 		return value_nil;
 	}
@@ -189,7 +189,7 @@ namespace Mirb
 		method<Arg::Self, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
 		method<Arg::Self>(context->object_class, "frozen?", &dummy);
 		method<Arg::Self, Arg::Value>(context->object_class, "=~", &pattern);
-		method<Arg::Self, Arg::Value>(context->object_class, "initialize_copy", &initialize_copy);
+		method<Arg::Value>(context->object_class, "initialize_copy", &initialize_copy);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
 		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
 		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);

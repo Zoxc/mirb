@@ -16,7 +16,7 @@ namespace Mirb
 			static value_t rb_dup(value_t obj);
 			static value_t dummy();
 			static value_t variadic_dummy(size_t argc);
-			static value_t initialize_copy(value_t obj, value_t other);
+			static value_t initialize_copy(value_t other);
 			static value_t pattern(value_t obj);
 			static value_t inspect(value_t obj);
 			static value_t instance_eval(value_t obj, size_t argc, value_t argv[], value_t block);
