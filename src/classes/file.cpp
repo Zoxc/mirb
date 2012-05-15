@@ -164,6 +164,7 @@ namespace Mirb
 		context->file_class = define_class("File", context->io_class);
 		
 		singleton_method<Arg::Class<String>>(context->file_class, "exists?", &exists);
+		singleton_method<Arg::Class<String>>(context->file_class, "exist?", &exists);
 
 		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);

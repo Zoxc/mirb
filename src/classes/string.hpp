@@ -10,6 +10,7 @@ namespace Mirb
 		public Object
 	{
 		private:
+			static value_t rb_get(String *self, value_t index);
 			static value_t inspect(String *self);
 			static value_t to_s(value_t self);
 			static value_t concat(String *self, String *other);

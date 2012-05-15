@@ -22,6 +22,7 @@ namespace Mirb
 		public:
 			CharArray() : length(0), data(0), shared(false) {}
 			
+			CharArray(const char_t c);
 			CharArray(const char_t *c_str);
 			CharArray(const std::string &string);
 			CharArray(const char_t *c_str, size_t length);

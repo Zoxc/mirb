@@ -8,6 +8,18 @@ namespace Mirb
 	{
 		*this = c_str;
 	}
+	
+	CharArray::CharArray(const char_t c)
+	{
+		this->length = 1;
+
+		data = (char_t *)Collector::allocate(1);
+
+		*data = c;
+
+		shared = false;
+		static_data = false;
+	}
 
 	CharArray::CharArray(const char_t *c_str, size_t length)
 	{

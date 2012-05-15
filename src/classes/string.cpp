@@ -1,6 +1,8 @@
 #include "string.hpp"
 #include "symbol.hpp"
 #include "array.hpp"
+#include "fixnum.hpp"
+#include "range.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -101,12 +103,41 @@ namespace Mirb
 		else
 			return value_nil;
 	}
+	
+	value_t String::rb_get(String *self, value_t index)
+	{
+		if(Value::is_fixnum(index))
+		{
+			size_t i = Fixnum::to_size_t(index);
 
+			if(i < self->string.size())
+				return String::get(self->string[i]);
+			else
+				return String::get("");
+		}
+		else if(Value::of_type<Range>(index))
+		{
+			size_t start;
+			size_t length;
+
+			auto range = cast<Range>(index);
+
+			if(!range->convert_to_index(start, length, self->string.size()))
+				return 0;
+
+			return String::get(self->string.copy(start, length));
+		}
+		else
+			return type_error(index, "Range or Fixnum");
+	}
+	
 	void String::initialize()
 	{
 		method<Arg::Self, Arg::Value>(context->string_class, "match", &match);
 		method<Arg::Self>(context->string_class, "to_s", &to_s);
 		
+		method<Arg::SelfClass<String>, Arg::Value>(context->string_class, "[]", &rb_get);
+
 		method<Arg::SelfClass<String>>(context->string_class, "downcase", &downcase);
 		method<Arg::SelfClass<String>>(context->string_class, "downcase!", &downcase_self);
 		method<Arg::SelfClass<String>>(context->string_class, "upcase", &upcase);
