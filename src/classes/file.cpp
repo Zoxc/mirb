@@ -171,14 +171,6 @@ namespace Mirb
 		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &join);
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::get("/"));
-
-#ifdef WIN32
-		set_const(context->file_class, Symbol::get("FNM_SYSCASE"), Fixnum::from_int(8));
-		set_const(context->file_class, Symbol::get("ALT_SEPARATOR"), String::get("\\"));
-#else
-		set_const(context->file_class, Symbol::get("FNM_SYSCASE"), Fixnum::from_int(0));
-		set_const(context->file_class, Symbol::get("ALT_SEPARATOR"), value_nil);
-#endif
 	}
 };
 
