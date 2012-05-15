@@ -239,6 +239,7 @@ namespace Mirb
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
 		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
+		method<Arg::SelfClass<Array>>(context->array_class, "size", &length);
 		method<Arg::SelfClass<Array>, Arg::DefaultClass<String>>(context->array_class, "join", &join);
 		method<Arg::SelfClass<Array>>(context->array_class, "to_s", &to_s);
 		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
