@@ -1082,7 +1082,7 @@ namespace Mirb
 			{
 				block->max_args++;
 
-				if(scope->parameters[i]->default_value)
+				if(!scope->parameters[i]->default_value)
 					block->min_args++;
 			}
 			
