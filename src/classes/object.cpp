@@ -160,12 +160,18 @@ namespace Mirb
 		return value_false;
 	}
 	
+	value_t nil()
+	{
+		return value_false;
+	}
+	
 	void Object::initialize()
 	{
 		method<Arg::Self>(context->object_class, "object_id", &object_id);
 		method<Arg::Self>(context->object_class, "__id__", &object_id);
 		method<Arg::Count>(context->object_class, "initialize", &variadic_dummy);
 		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
+		method(context->object_class, "nil?", &nil);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
 		method<Arg::Self>(context->object_class, "class", &klass);
 		method<Arg::Self>(context->object_class, "freeze", &dummy);
