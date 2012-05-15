@@ -13,7 +13,14 @@ class File
 	end
 end
 
+class Signal
+	def self.trap(name)
+	end
+end
+
 require 'enumerable'
 require 'fileutils'
+
+ARGV << 'rubyspec/:core'
 
 load File.expand_path("mspec/bin/mspec-run", File.dirname(__FILE__))
