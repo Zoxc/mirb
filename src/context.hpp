@@ -79,8 +79,9 @@ namespace Mirb
 			Exception *exception;
 			
 			Class *terminator;
-
+			
 			Frame *exception_frame_origin;
+			Frame *frame;
 			
 			ValueMapData globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;

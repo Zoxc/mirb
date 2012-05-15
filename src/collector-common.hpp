@@ -85,7 +85,7 @@ namespace Mirb
 			}
 		}
 
-		Frame *frame = current_frame;
+		Frame *frame = context->frame;
 
 		while(frame)
 		{

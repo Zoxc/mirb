@@ -25,8 +25,6 @@ namespace Mirb
 			CharArray inspect();
 	};
 
-	extern Frame *current_frame;
-
 	value_t evaluate_block(Frame &frame);
 };
 

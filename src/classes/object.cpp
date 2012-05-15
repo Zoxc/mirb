@@ -94,7 +94,7 @@ namespace Mirb
 		if(argc == 0)
 		{
 			if(Value::type(block) == Value::Proc)
-				return Proc::call_with_options(obj, current_frame->prev->scope, block, value_nil, 0, nullptr);
+				return Proc::call_with_options(obj, context->frame->prev->scope, block, value_nil, 0, nullptr);
 			else
 				return raise(context->type_error, "Expected block to evaluate");
 		}
@@ -104,7 +104,7 @@ namespace Mirb
 			{
 				CharArray code = cast<String>(argv[0])->string.c_str();
 
-				return eval(obj, Symbol::get("in eval"), current_frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
+				return eval(obj, Symbol::get("in eval"), context->frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
 			}
 			else
 				return raise(context->type_error, "Expected string");

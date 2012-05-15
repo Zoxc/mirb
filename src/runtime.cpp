@@ -51,7 +51,7 @@ namespace Mirb
 		context->exception = exception;
 
 		if(exception)
-			context->exception_frame_origin = current_frame;
+			context->exception_frame_origin = context->frame;
 		else
 			context->exception_frame_origin = 0;
 	}
@@ -632,7 +632,7 @@ namespace Mirb
 
 		if(context->exception && result != value_raise)
 		{
-			Frame *current = current_frame->prev;
+			Frame *current = context->frame->prev;
 
 			while(true)
 			{
@@ -658,17 +658,17 @@ namespace Mirb
 		if(frame.code->scope)
 			Value::assert_valid(frame.code->scope);
 
-		frame.prev = current_frame;
-		current_frame = &frame;
+		frame.prev = context->frame;
+		context->frame = &frame;
 
 		frame.vars = nullptr;
 
 		if(prelude_unlikely(Collector::check()))
 		{
-			current_frame = frame.prev;
+			context->frame = frame.prev;
 
 			#ifdef DEBUG
-				context->exception_frame_origin = current_frame;
+				context->exception_frame_origin = context->frame;
 			#endif
 
 			return value_raise;
@@ -687,7 +687,7 @@ namespace Mirb
 				context->exception_frame_origin = frame.prev;
 		#endif
 
-		current_frame = frame.prev;
+		context->frame = frame.prev;
 
 		return result;
 	}
@@ -769,7 +769,7 @@ namespace Mirb
 	{
 		size_t index = 0;
 
-		Frame *current = current_frame;
+		Frame *current = context->frame;
 		
 		while(current)
 		{
@@ -780,7 +780,7 @@ namespace Mirb
 
 		auto &result = *Tuple<StackFrame>::allocate(index);
 		
-		current = current_frame;
+		current = context->frame;
 		index = 0;
 
 		while(current)

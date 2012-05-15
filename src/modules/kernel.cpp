@@ -27,6 +27,11 @@ namespace Mirb
 		return block;
 	}
 	
+	value_t Kernel::block_given()
+	{
+		return auto_cast(context->frame->prev->block != value_nil);
+	}
+	
 	value_t Kernel::benchmark(value_t block)
 	{
 		CharArray result;
@@ -53,7 +58,7 @@ namespace Mirb
 		CharArray c_str = input->string.c_str();
 		CharArray filename("(eval)");
 
-		return eval(obj, Symbol::get("in eval"), current_frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
+		return eval(obj, Symbol::get("in eval"), context->frame->prev->scope, c_str.str_ref(), c_str.str_length(), filename);
 	}
 
 	FILE *try_file(const CharArray &filename, CharArray &result)
@@ -271,6 +276,7 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
+		method(context->kernel_module, "block_given?", &block_given);
 		method<Arg::Block>(context->kernel_module, "at_exit", &at_exit);
 		method<Arg::Block>(context->kernel_module, "proc", &proc);
 		method<Arg::Block>(context->kernel_module, "lambda", &proc);

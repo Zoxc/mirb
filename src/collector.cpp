@@ -164,7 +164,7 @@ namespace Mirb
 
 		#ifdef DEBUG
 		{
-			Frame *frame = current_frame;
+			Frame *frame = context->frame;
 
 			while(frame)
 			{
