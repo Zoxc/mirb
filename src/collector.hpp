@@ -81,36 +81,6 @@ namespace Mirb
 			static void free_region(Region *region);
 			static void *get_region(size_t bytes);
 
-			static void *allocate_simple(size_t bytes)
-			{
-				mirb_debug_assert((bytes & object_ref_mask) == 0);
-				
-				memory += bytes;
-
-				char_t *result;
-
-				#ifdef VALGRIND
-					result = (char_t *)std::malloc(bytes);
-			
-					mirb_runtime_assert(result != 0);
-				#else
-					result = current->pos;
-
-					char_t *next = result + bytes;
-		
-					mirb_debug_assert(((size_t)next & object_ref_mask) == 0);
-
-					if(prelude_unlikely(next > current->end))
-						return get_region(bytes);
-
-					current->pos = next;
-				#endif
-
-				mirb_debug_assert(((size_t)result & object_ref_mask) == 0);
-
-				return (void *)result;
-			}
-
 			template<class T> static void *allocate_object()
 			{
 				return allocate_simple(sizeof(T));
@@ -124,14 +94,11 @@ namespace Mirb
 					object->size = sizeof(T);
 				#endif
 
-				#ifdef VALGRIND
-					heap_list.append(object);
-				#endif
-
 				return object;
 			}
-
+			
 			friend class Class;
+			friend class Value::Header;
 			
 			template<class T> static void *allocate_pinned_object()
 			{
@@ -179,6 +146,36 @@ namespace Mirb
 					return false;
 			}
 			
+			static void *allocate_simple(size_t bytes)
+			{
+				mirb_debug_assert((bytes & object_ref_mask) == 0);
+				
+				memory += bytes;
+
+				char_t *result;
+
+				#ifdef VALGRIND
+					result = (char_t *)std::malloc(bytes);
+			
+					mirb_runtime_assert(result != 0);
+				#else
+					result = current->pos;
+
+					char_t *next = result + bytes;
+		
+					mirb_debug_assert(((size_t)next & object_ref_mask) == 0);
+
+					if(prelude_unlikely(next > current->end))
+						return get_region(bytes);
+
+					current->pos = next;
+				#endif
+
+				mirb_debug_assert(((size_t)result & object_ref_mask) == 0);
+
+				return (void *)result;
+			}
+
 			static void *allocate(size_t bytes);
 			static void *reallocate(void *memory, size_t old_size, size_t bytes);
 

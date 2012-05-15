@@ -1,11 +1,6 @@
-#include "object.hpp"
-#include "class.hpp"
-#include "symbol.hpp"
-#include "string.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
-#include "proc.hpp"
-#include "fixnum.hpp"
+#include "../classes.hpp"
 
 namespace Mirb
 {
@@ -165,6 +160,35 @@ namespace Mirb
 		return value_false;
 	}
 	
+	template<Value::Type type> struct DupObject
+	{
+		typedef value_t Result;
+		typedef typename Value::TypeClass<type>::Class Class;
+
+		static value_t func(value_t value)
+		{
+			return Class::dup(static_cast<Class *>(value));
+		}
+	};
+	
+	value_t Object::rb_dup(value_t obj)
+	{
+		value_t result = Value::virtual_do<DupObject>(Value::type(obj), obj);
+
+		if(!result)
+			return 0;
+
+		if(!call_argv(result, "initialize_copy", 1, &obj))
+			return 0;
+
+		return result;
+	}
+	
+	value_t Object::initialize_copy(value_t obj, value_t other)
+	{
+		return value_nil;
+	}
+	
 	void Object::initialize()
 	{
 		method<Arg::Self>(context->object_class, "object_id", &object_id);
@@ -173,12 +197,14 @@ namespace Mirb
 		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
 		method(context->object_class, "nil?", &nil);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
+		method<Arg::Self>(context->object_class, "dup", &rb_dup);
 		method<Arg::Self>(context->object_class, "class", &klass);
 		method<Arg::Self>(context->object_class, "freeze", &dummy);
 		method<Arg::Self, Arg::Class<Class>>(context->object_class, "is_a?", &kind_of);
 		method<Arg::Self, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
 		method<Arg::Self>(context->object_class, "frozen?", &dummy);
 		method<Arg::Self, Arg::Value>(context->object_class, "=~", &pattern);
+		method<Arg::Self, Arg::Value>(context->object_class, "initialize_copy", &initialize_copy);
 		method<Arg::Self, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
 		method<Arg::Self, Arg::Block>(context->object_class, "tap", &tap);
 		method<Arg::Self, Arg::Value>(context->object_class, "equal?", &equal);

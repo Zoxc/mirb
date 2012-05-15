@@ -13,8 +13,10 @@ namespace Mirb
 		private:
 			static value_t tap(value_t obj, value_t block);
 			static value_t klass(value_t obj);
+			static value_t rb_dup(value_t obj);
 			static value_t dummy();
 			static value_t variadic_dummy(size_t argc);
+			static value_t initialize_copy(value_t obj, value_t other);
 			static value_t pattern(value_t obj);
 			static value_t inspect(value_t obj);
 			static value_t instance_eval(value_t obj, size_t argc, value_t argv[], value_t block);
@@ -30,6 +32,8 @@ namespace Mirb
 			friend class Module;
 			friend class Symbol;
 		public:
+			Object(const Object &other) : Value::Header(other), instance_of(other.instance_of), vars(nullptr), hash_value(other.hash_value) {}
+
 			Object(Value::Type type, Class *instance_of) : Value::Header(type), instance_of(instance_of), vars(nullptr)
 			{
 				Value::verify(instance_of);
@@ -53,7 +57,12 @@ namespace Mirb
 			size_t hash_value;
 
 			static void initialize();
-
+			
+			template<class T> static value_t dup(T *other)
+			{
+				return new(collector) T(*other);
+			}
+			
 			template<typename F> void mark(F mark)
 			{
 				mark(instance_of);

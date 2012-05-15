@@ -6,6 +6,8 @@
 
 namespace Mirb
 {
+	class Collector;
+
 	// PinnedHeader are objects with a fixed memory address
 
 	class PinnedHeader:
@@ -260,4 +262,8 @@ namespace Mirb
 
 			void free(const Storage &) {}
 	};
+
+	extern Collector &collector;
 };
+
+void *operator new(size_t bytes, Mirb::Collector &) throw();

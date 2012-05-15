@@ -21,6 +21,7 @@ namespace Mirb
 			static value_t upcase_self(String *self);
 			
 		public:
+			String(const String &other) : Object(other), string(other.string) {}
 			String(Class *instance_of) : Object(Value::String, instance_of) {}
 			String(const CharArray &char_array) : Object(Value::String, auto_cast(context->string_class)), string(char_array) {}
 			String(const char_t *c_str, size_t length) : Object(Value::String, auto_cast(context->string_class)), string(c_str, length) {}

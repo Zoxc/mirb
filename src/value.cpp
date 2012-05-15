@@ -1,26 +1,8 @@
 #include "value.hpp"
-#include "classes/object.hpp"
-#include "classes/fixnum.hpp"
-#include "classes/nil-class.hpp"
-#include "classes/false-class.hpp"
-#include "classes/true-class.hpp"
-#include "classes/array.hpp"
-#include "classes/hash.hpp"
-#include "classes/class.hpp"
-#include "classes/string.hpp"
-#include "classes/proc.hpp"
-#include "classes/symbol.hpp"
-#include "classes/exceptions.hpp"
-#include "classes/method.hpp"
-#include "classes/proc.hpp"
-#include "classes/symbol.hpp"
-#include "classes/regexp.hpp"
-#include "classes/range.hpp"
-#include "classes/io.hpp"
-#include "classes/file.hpp"
-#include "classes/float.hpp"
+#include "classes.hpp"
 #include "document.hpp"
 #include "tree/tree.hpp"
+#include "runtime.hpp"
 
 namespace Mirb
 {
@@ -147,23 +129,43 @@ namespace Mirb
 			value_t * const Header::list_end = nullptr;
 		#endif
 		
-		Header::Header(Type type) : type(type), marked(false), hashed(false), flag(false)
+		void Header::setup()
 		{
+			marked = false;
+
 			#ifdef DEBUG
 				alive = true;
 				magic = magic_value;
-				size = 0;
 				refs = nullptr;
 				mark_data = list_end;
 				thread_data = list_end;
 			#else
 				data = list_end;
 			#endif
+				
+			#ifdef VALGRIND
+				Collector::heap_list.append(this);
+			#endif
+		}
+
+		Header::Header(const Header &other) : type(other.type), hashed(other.hashed), flag(other.flag)
+		{
+			setup();
+		}
+
+		Header::Header(Type type) : type(type), hashed(false), flag(false)
+		{
+			setup();
 		}
 
 		Type Header::get_type()
 		{
 			return type;
+		}
+		
+		value_t Header::dup(value_t obj)
+		{
+			return raise(context->type_error, "Unable to duplicate instances of " + inspect_obj(real_class_of(obj)));
 		}
 
 		template<Type type> struct HashValue
@@ -183,5 +185,6 @@ namespace Mirb
 
 			return virtual_do<HashValue>(type(value), value);
 		}
+
 	};
 };

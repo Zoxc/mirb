@@ -137,7 +137,10 @@ namespace Mirb
 				#else
 					value_t *data;
 				#endif
+
+				void setup();
 			public:
+				Header(const Header &other);
 				Header(Type type);
 			
 				Type get_type();
@@ -174,6 +177,8 @@ namespace Mirb
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
 				#endif
+
+				static value_t dup(value_t obj);
 
 				size_t hash()
 				{
