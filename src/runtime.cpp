@@ -85,7 +85,27 @@ namespace Mirb
 	{
 		return real_class(class_of(obj));
 	}
+	
+	bool kind_of(Class *klass, value_t obj)
+	{
+		Class *c = class_of(obj);
 
+		while(c)
+		{
+			c = real_class(c);
+
+			if(!c)
+				break;
+
+			if(c == klass)
+				return true;
+
+			c = c->superclass;
+		}
+
+		return false;
+	}
+	
 	Class *define_class(value_t under, Symbol *name, Class *super)
 	{
 		if(prelude_unlikely(!Value::of_type<Module>(under)))

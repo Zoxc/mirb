@@ -135,24 +135,9 @@ namespace Mirb
 		return Fixnum::from_size_t(Value::hash(obj)); // TODO: Make a proper object_id
 	}
 	
-	value_t kind_of(value_t obj, Class *klass)
+	value_t Object::kind_of(value_t obj, Class *klass)
 	{
-		Class *c = class_of(obj);
-
-		while(c)
-		{
-			c = real_class(c);
-
-			if(!c)
-				break;
-
-			if(c == klass)
-				return value_true;
-
-			c = c->superclass;
-		}
-
-		return value_false;
+		return auto_cast(Mirb::kind_of(klass, obj));
 	}
 	
 	value_t nil()

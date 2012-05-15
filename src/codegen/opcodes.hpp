@@ -67,7 +67,8 @@ namespace Mirb
 				Branch,
 				Return,
 				Handler,
-				Unwind,
+				UnwindEnsure,
+				UnwindFilter,
 				UnwindReturn,
 				UnwindBreak,
 				UnwindRedo,
@@ -126,7 +127,8 @@ namespace Mirb
 				&&OpBranch, \
 				&&OpReturn, \
 				&&OpHandler, \
-				&&OpUnwind, \
+				&&OpUnwindEnsure, \
+				&&OpUnwindFilter, \
 				&&OpUnwindReturn, \
 				&&OpUnwindBreak, \
 				&&OpUnwindRedo, \
@@ -582,8 +584,13 @@ namespace Mirb
 			HandlerOp(ExceptionBlock *block) : block(block) {}
 		};
 		
-		struct UnwindOp:
-			public OpcodeWrapper<Opcode::Unwind>
+		struct UnwindEnsureOp:
+			public OpcodeWrapper<Opcode::UnwindEnsure>
+		{
+		};
+		
+		struct UnwindFilterOp:
+			public OpcodeWrapper<Opcode::UnwindFilter>
 		{
 		};
 		

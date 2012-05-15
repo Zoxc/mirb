@@ -24,6 +24,7 @@ namespace Mirb
 			static value_t not_equal(value_t obj, value_t other);
 			static value_t method_not(value_t obj);
 			static value_t extend(value_t obj, size_t argc, value_t argv[]);
+			static value_t kind_of(value_t obj, Class *klass);
 			
 			void generate_hash();
 			
@@ -60,7 +61,7 @@ namespace Mirb
 			
 			template<class T> static value_t dup(T *other)
 			{
-				return new(collector) T(*other);
+				return new (collector) T(*other);
 			}
 			
 			template<typename F> void mark(F mark)

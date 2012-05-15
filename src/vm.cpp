@@ -36,8 +36,9 @@ namespace Mirb
 		const char *ip_start = frame.code->opcodes;
 		const char *ip = ip_start;
 
-		bool handling_exception = false;
 		ExceptionBlock *current_exception_block = nullptr;
+		size_t current_handler;
+		Exception *current_exception;
 
 #ifdef __GNUC__
 		value_t storage[frame.code->var_words];
@@ -417,13 +418,14 @@ namespace Mirb
 		Op(Handler)
 			current_exception_block = op.block;
 		EndOp
-
-		Op(Unwind)
-			if(prelude_unlikely(handling_exception))
-			{
-				handling_exception = false;
+			
+		Op(UnwindEnsure)
+			if(prelude_unlikely(context->exception))
 				goto handle_exception;
-			}
+		EndOp
+
+		Op(UnwindFilter)
+			goto exception_block_handler;
 		EndOp
 
 		DeepOp(UnwindReturn)
@@ -474,15 +476,15 @@ handle_call_exception:
 
 handle_exception:
 		{
-			Exception *exception = context->exception;
+			current_exception = context->exception;
 
 			if(!current_exception_block)
 			{
-				switch(exception->get_type())
+				switch(current_exception->get_type())
 				{
 					case Value::RedoException:
 					{
-						auto error = (RedoException *)exception;
+						auto error = (RedoException *)current_exception;
 
 						set_current_exception(0);
 
@@ -493,7 +495,7 @@ handle_exception:
 
 					case Value::NextException:
 					{
-						auto error = (NextException *)exception;
+						auto error = (NextException *)current_exception;
 
 						value_t result = error->value;
 						set_current_exception(0);
@@ -503,7 +505,7 @@ handle_exception:
 
 					case Value::ReturnException:
 					{
-						auto error = (ReturnException *)exception;
+						auto error = (ReturnException *)current_exception;
 
 						if(error->target == frame.code)
 						{
@@ -521,43 +523,64 @@ handle_exception:
 				return value_raise;
 			}
 
-			ExceptionBlock *block = current_exception_block;
-
-			if(exception->get_type() == Value::Exception)
+			if(current_exception->get_type() == Value::Exception)
 			{
-				for(auto i = block->handlers.begin(); i != block->handlers.end(); ++i)
+				for(current_handler = 0; current_handler < current_exception_block->handlers.size(); ++current_handler)
 				{
-					switch(i()->type)
+					switch(current_exception_block->handlers[current_handler]->type)
 					{
-						case RuntimeException:
+						case FilterException:
 						{
-							current_exception_block = block->parent;
-							set_current_exception(0);
-							ip = ip_start + ((RuntimeExceptionHandler *)i())->rescue_label.address;
-							OpContinue; // Execute rescue block
+							auto handler = (FilterExceptionHandler *)current_exception_block->handlers[current_handler];
+
+							ip = ip_start + handler->test_label.address;
+							OpContinue; // Execute test block
+
+exception_block_handler: // The test block will jump back here
+							auto klass = try_cast<Class>(vars[handler->result]);
+							if(!klass || !kind_of(klass, current_exception))
+								continue;
 						}
 
-						default:
-							break;
+						// Fallthrough
+
+						case StandardException:
+						{
+							if(!kind_of(context->standard_error, current_exception))
+								continue;
+							else
+								break;
+						}
 					}
+					
+					auto handler = current_exception_block->handlers[current_handler];
+
+					current_exception_block = current_exception_block->parent;
+					set_current_exception(0);
+
+					if(handler->var != no_var)
+						vars[handler->var] = current_exception;
+
+					ip = ip_start + handler->rescue_label.address;
+					OpContinue; // Execute rescue block
 				}
 			}
-			else if(block->loop)
+			else if(current_exception_block->loop)
 			{
-				switch(exception->get_type())
+				switch(current_exception->get_type())
 				{
 					case Value::BreakException:
 					{
 						set_current_exception(0);
 						
-						ip = ip_start + block->loop->break_label.address;
+						ip = ip_start + current_exception_block->loop->break_label.address;
 						OpContinue; // Exit loop
 					}
 					break;
 
 					case Value::RedoException:
 					{
-						auto error = (RedoException *)exception;
+						auto error = (RedoException *)current_exception;
 
 						set_current_exception(0);
 
@@ -570,7 +593,7 @@ handle_exception:
 					{
 						set_current_exception(0);
 
-						ip = ip_start + block->loop->next_label.address;
+						ip = ip_start + current_exception_block->loop->next_label.address;
 						OpContinue; // Try next iteration
 					}
 					break;
@@ -580,11 +603,12 @@ handle_exception:
 				}
 			}
 
-			current_exception_block = block->parent;
+			
+			ExceptionBlock *block = current_exception_block;
+			current_exception_block = current_exception_block->parent;
 
 			if(block->ensure_label.address != (size_t)-1)
 			{
-				handling_exception = true;
 				ip = ip_start + block->ensure_label.address;
 				OpContinue; // Execute ensure block
 			}

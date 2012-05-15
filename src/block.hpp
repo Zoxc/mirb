@@ -25,13 +25,8 @@ namespace Mirb
 	};
 	
 	enum ExceptionHandlerType {
-		RuntimeException,
-		ClassException,
+		StandardException,
 		FilterException
-	};
-
-	struct ExceptionHandler {
-		ExceptionHandlerType type;
 	};
 	
 	union BlockLabel
@@ -40,15 +35,19 @@ namespace Mirb
 		size_t address;
 	};
 	
-	struct RuntimeExceptionHandler:
+	typedef size_t var_t;
+	
+	struct ExceptionHandler {
+		ExceptionHandlerType type;
+		BlockLabel rescue_label;
+		var_t var;
+	};
+	
+	struct FilterExceptionHandler:
 		public ExceptionHandler
 	{
-		BlockLabel rescue_label;
-	};
-
-	struct ClassExceptionHandler:
-		public RuntimeExceptionHandler
-	{
+		BlockLabel test_label;
+		var_t result;
 	};
 	
 	struct LoopHandler
@@ -72,8 +71,6 @@ namespace Mirb
 				delete loop;
 		}
 	};
-	
-	typedef size_t var_t;
 	
 	extern const var_t no_var;
 

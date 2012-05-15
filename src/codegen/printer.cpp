@@ -540,11 +540,18 @@ namespace Mirb
 					return "handler " + (op->block ? raw((size_t)op->block) : "nil");
 				}
 				
-				case Opcode::Unwind:
+				case Opcode::UnwindEnsure:
 				{
-					opcode += sizeof(UnwindOp);
+					opcode += sizeof(UnwindEnsureOp);
 
-					return "unwind";
+					return "unwind_ensure";
+				}
+				
+				case Opcode::UnwindFilter:
+				{
+					opcode += sizeof(UnwindFilterOp);
+
+					return "unwind_filter";
 				}
 				
 				case Opcode::UnwindReturn:

@@ -987,16 +987,50 @@ namespace Mirb
 				 */
 				for(auto i = node->rescues.begin(); i != node->rescues.end(); ++i)
 				{
-					RuntimeExceptionHandler *handler = new RuntimeExceptionHandler; // TODO: Check filters and assign variables
+					ExceptionHandler *handler;
 
-					handler->type = RuntimeException;
+					var_t temp = var;
 
+					if(i().pattern)
+					{
+						temp = reuse(temp);
+
+						auto rescue =  new FilterExceptionHandler;
+
+						rescue->type = FilterException;
+
+						Label *test_body = gen(create_label());
+
+						rescue->test_label.label = test_body;
+						rescue->result = temp;
+						
+						to_bytecode(i().pattern, temp);
+
+						gen<UnwindFilterOp>();
+					
+						handler = rescue;
+					}
+					else
+					{
+						handler = new ExceptionHandler;
+						handler->type = StandardException;
+					}
+					
 					Label *handler_body = gen(create_label());
 
 					handler->rescue_label.label = handler_body;
 
+					if(i().var)
+					{
+						var_t result = write_node(i().var, [&](var_t store) {
+							handler->var = store;
+						}, temp);
+					}
+					else
+						handler->var = no_var;
+
 					exception_block->handlers.push(handler);
-					
+
 					to_bytecode(i().group, var);
 					
 					gen_branch(ok_label);
@@ -1033,7 +1067,7 @@ namespace Mirb
 				 */
 				to_bytecode(node->ensure_group, no_var);
 				
-				gen<UnwindOp>();
+				gen<UnwindEnsureOp>();
 			}
 		}
 		
@@ -1162,17 +1196,24 @@ namespace Mirb
 					{
 						switch(i->type)
 						{
-							case RuntimeException:
+							case FilterException:
 							{
-								RuntimeExceptionHandler *handler = (RuntimeExceptionHandler *)i;
+								FilterExceptionHandler *handler = (FilterExceptionHandler *)i;
+
+								handler->test_label.address = handler->test_label.label->pos;
+							}
+
+							// Fallthrough
+
+							case StandardException:
+							{
+								ExceptionHandler *handler = (ExceptionHandler *)i;
 
 								handler->rescue_label.address = handler->rescue_label.label->pos;
 
 								break;
 							}
 
-							case ClassException:
-							case FilterException:
 							default:
 								break;
 						}
