@@ -165,6 +165,8 @@ namespace Mirb
 
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
 				lexer.step();
+
+				skip_lines();
 			
 				auto node = new (fragment) Tree::IfNode;
 			
@@ -174,6 +176,8 @@ namespace Mirb
 				node->middle = parse_operator_expression(allow_multiples);
 			
 				close_pair("ternary if", range, Lexeme::COLON);
+
+				skip_lines();
 		
 				node->right = parse_operator_expression(allow_multiples);
 
