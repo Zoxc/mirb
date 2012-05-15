@@ -54,13 +54,13 @@ namespace Mirb
 	{
 		if(!Value::of_type<Regexp>(regexp))
 		{
-			regexp = call(context->regexp_class, "new", value_nil, 1, &regexp);
+			regexp = call_argv(context->regexp_class, "new", value_nil, 1, &regexp);
 
 			if(!regexp || type_error(regexp, context->regexp_class))
 				return 0;
 		}
 
-		return call(regexp, "match", value_nil, 1, &self);
+		return call_argv(regexp, "match", value_nil, 1, &self);
 	}
 
 	value_t String::equal(String *self, String *other)

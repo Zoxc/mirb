@@ -66,7 +66,7 @@ namespace Mirb
 			argv[0] = key;
 			argv[1] = value;
 			
-			return yield(block, 2, argv) != 0;
+			return yield_argv(block, 2, argv) != 0; // TODO: Replace with variadic call
 		}))
 			return 0;
 

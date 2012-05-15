@@ -81,7 +81,7 @@ namespace Mirb
 
 		OnStack<1> os(result);
 
-		if(!call(result, "initialize", argc, argv))
+		if(!call_argv(result, "initialize", argc, argv))
 			return 0;
 
 		return result;

@@ -137,28 +137,27 @@ namespace Mirb
 	value_t call_frame(Frame &frame) prelude_use_result;
 	
 	/*
-	 * call (calls Ruby code, argv does not need to be marked)
+	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t call(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]) prelude_use_result;
-	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
-	value_t call(value_t obj, Symbol *name) prelude_use_result;
+	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 	
 	/*
-	 * call (calls Ruby code, argv does not need to be marked)
+	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[]) prelude_use_result;
-	template<size_t length> value_t call(value_t obj, const char (&name)[length], value_t block, size_t argc, value_t argv[])
+	template<typename T> value_t call_argv(value_t obj, T &&name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	template<typename T> value_t call_argv(value_t obj, T &&name, value_t block, size_t argc, value_t argv[])
 	{
-		return call(obj, symbol_cast(name), block, argc, argv);
+		return call_argv(obj, symbol_cast(std::forward<T>(name)), block, argc, argv);
 	}
 	
 	/*
-	 * call (calls Ruby code, argv does not need to be marked)
+	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[]) prelude_use_result;
-	template<typename T> value_t call(value_t obj, T&& name, size_t argc, value_t argv[])
+	template<typename T> value_t call_argv(value_t obj, T&& name, size_t argc, value_t argv[]) prelude_use_result;
+	template<typename T> value_t call_argv(value_t obj, T&& name, size_t argc, value_t argv[])
 	{
-		return call(obj, symbol_cast(name), value_nil, argc, argv);
+		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, argc, argv);
 	}
 	
 	/*
@@ -167,18 +166,18 @@ namespace Mirb
 	template<typename T> value_t call(value_t obj, T&& name) prelude_use_result;
 	template<typename T> value_t call(value_t obj, T&& name)
 	{
-		return call(obj, symbol_cast(name), value_nil, 0, 0);
+		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, 0, 0);
 	}
 	
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[]) prelude_use_result;
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj, size_t argc, value_t argv[]) prelude_use_result;
+	value_t yield_argv(value_t obj, size_t argc, value_t argv[]) prelude_use_result;
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)

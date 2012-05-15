@@ -91,7 +91,7 @@ namespace Mirb
 						value_t vsep = sep;
 					
 						if(sep)
-							desc = raise_cast<String>(call(array, "join", 1, &vsep));
+							desc = raise_cast<String>(call_argv(array, "join", 1, &vsep)); // TODO: Replace with variadic call
 						else
 							desc = raise_cast<String>(call(array, "join"));
 					}
@@ -120,7 +120,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			if(!yield(block, 1, &self->vector[i]))
+			if(!yield_argv(block, 1, &self->vector[i]))
 				return 0;
 		}
 

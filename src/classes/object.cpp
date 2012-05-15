@@ -24,7 +24,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		if(yield(block, 1, &obj) == value_raise)
+		if(yield_argv(block, 1, &obj) == value_raise)
 			return value_raise;
 
 		return obj;
@@ -61,7 +61,7 @@ namespace Mirb
 		return value_nil;
 	}
 	
-	value_t Object::variadic_dummy(size_t argc)
+	value_t Object::variadic_dummy(size_t)
 	{
 		return value_nil;
 	}
@@ -125,10 +125,10 @@ namespace Mirb
 			if(type_error(argv[i], context->module_class))
 				return 0;
 
-			if(!call(argv[i], "extend_object", 1, &obj))
+			if(!call_argv(argv[i], "extend_object", 1, &obj))
 				return 0;
 			
-			if(!call(argv[i], "extended", 1, &obj))
+			if(!call_argv(argv[i], "extended", 1, &obj))
 				return 0;
 		}
 

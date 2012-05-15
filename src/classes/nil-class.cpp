@@ -8,12 +8,12 @@ namespace Mirb
 {
 	value_t NilClass::to_s()
 	{
-		return String::from_literal("");
+		return String::get("");
 	}
 
 	value_t NilClass::inspect()
 	{
-		return String::from_literal("nil");
+		return String::get("nil");
 	}
 	
 	value_t NilClass::nil()

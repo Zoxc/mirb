@@ -219,7 +219,7 @@ namespace Mirb
 			if(prelude_unlikely(!method))
 				goto handle_call_exception;
 
-			value_t result = call(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;
@@ -238,7 +238,7 @@ namespace Mirb
 			if(prelude_unlikely(!method))
 				goto handle_exception;
 
-			value_t result = call(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
 
 			if(prelude_unlikely(result == value_raise))
 				goto handle_call_exception;

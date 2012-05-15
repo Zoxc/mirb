@@ -68,10 +68,10 @@ namespace Mirb
 			if(type_error(argv[i], context->module_class))
 				return 0;
 
-			if(!call(argv[i], "append_features", 1, &obj))
+			if(!call_argv(argv[i], "append_features", 1, &obj))
 				return 0;
 			
-			if(!call(argv[i], "included", 1, &obj))
+			if(!call_argv(argv[i], "included", 1, &obj))
 				return 0;
 		}
 

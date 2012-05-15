@@ -493,7 +493,7 @@ namespace Mirb
 	
 	value_t compare(value_t left, value_t right)
 	{
-		value_t result = call(left, context->syms.compare, value_nil, 1, &right);
+		value_t result = call_argv(left, context->syms.compare, value_nil, 1, &right);
 		
 		if(!result)
 			return 0;
@@ -707,17 +707,17 @@ namespace Mirb
 		return call_frame(frame);
 	};
 	
-	value_t call(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
+	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
 		Method *method = lookup(obj, name);
 
 		if(prelude_unlikely(!method))
 			return value_raise;
 
-		return call(method->block, obj, name, method->scope, block, argc, argv);
+		return call_argv(method->block, obj, name, method->scope, block, argc, argv);
 	}
 
-	value_t call(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
 	{
 		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
@@ -743,7 +743,7 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t yield(value_t obj, value_t block, size_t argc, value_t argv[])
+	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[])
 	{
 		if(!Value::of_type<Proc>(obj))
 		{
@@ -751,17 +751,17 @@ namespace Mirb
 			return value_raise;
 		}
 
-		return call(obj, "call", block, argc, argv);
+		return call_argv(obj, "call", block, argc, argv);
 	}
 	
-	value_t yield(value_t obj, size_t argc, value_t argv[])
+	value_t yield_argv(value_t obj, size_t argc, value_t argv[])
 	{
-		return yield(obj, value_nil, argc, argv);
+		return yield_argv(obj, value_nil, argc, argv);
 	}
 	
 	value_t yield(value_t obj)
 	{
-		return yield(obj, value_nil, 0, 0);
+		return yield_argv(obj, value_nil, 0, 0);
 	}
 	
 	Tuple<StackFrame> *backtrace()

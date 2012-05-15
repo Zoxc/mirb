@@ -8,7 +8,7 @@ namespace Mirb
 {
 	value_t FalseClass::to_s()
 	{
-		return String::from_literal("false");
+		return String::get("false");
 	}
 
 	void FalseClass::initialize()
