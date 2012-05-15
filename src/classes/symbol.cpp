@@ -41,26 +41,28 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t Symbol::to_s(value_t obj)
+	value_t Symbol::to_s(Symbol *self)
 	{
-		auto self = cast<Symbol>(obj);
-
 		return self->string.to_string();
 	}
 	
-	value_t Symbol::inspect(value_t obj)
+	value_t Symbol::inspect(Symbol *self)
 	{
-		auto self = cast<Symbol>(obj);
-
 		CharArray string = ":" + self->string;
 
 		return string.to_string();
 	}
+	
+	value_t to_sym(value_t obj)
+	{
+		return obj;
+	}
 
 	void Symbol::initialize()
 	{
-		method<Arg::Self>(context->symbol_class, "to_s", &to_s);
-		method<Arg::Self>(context->symbol_class, "inspect", &inspect);
+		method<Arg::SelfClass<Symbol>>(context->symbol_class, "to_s", &to_s);
+		method<Arg::Self>(context->symbol_class, "to_sym", &to_sym);
+		method<Arg::SelfClass<Symbol>>(context->symbol_class, "inspect", &inspect);
 	}
 };
 

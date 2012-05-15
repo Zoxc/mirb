@@ -14,8 +14,8 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t to_s(value_t obj);
-			static value_t inspect(value_t obj);
+			static value_t to_s(Symbol *self);
+			static value_t inspect(Symbol *self);
 
 			Symbol() : Object(Value::Symbol) {}
 			

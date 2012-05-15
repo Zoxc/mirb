@@ -144,6 +144,11 @@ namespace Mirb
 
 		return result.to_string();
 	}
+	
+	value_t to_sym(String *self)
+	{
+		return Symbol::get(self->string);
+	}
 
 	void String::initialize()
 	{
@@ -160,7 +165,9 @@ namespace Mirb
 		method<Arg::SelfClass<String>, Arg::UInt, Arg::DefaultClass<String>>(context->string_class, "ljust", &ljust);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::SelfClass<String>>(context->string_class, "inspect", &inspect);
+		method<Arg::SelfClass<String>>(context->string_class, "to_sym", &to_sym);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "==", &equal);
+		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "===", &equal);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "concat", &concat);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "<<", &concat);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "+", &concat);
