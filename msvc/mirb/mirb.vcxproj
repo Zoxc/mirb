@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\block.hpp" />
     <ClInclude Include="..\..\src\char-array.hpp" />
+    <ClInclude Include="..\..\src\classes.hpp" />
     <ClInclude Include="..\..\src\classes\array.hpp" />
     <ClInclude Include="..\..\src\classes\class.hpp" />
     <ClInclude Include="..\..\src\classes\dir.hpp" />
