@@ -42,8 +42,10 @@ namespace Mirb
 			Class *file_class;
 			
 			Class *numeric_class;
-			Class *fixnum_class;
 			Class *float_class;
+
+			Class *integer_class;
+			Class *fixnum_class;
 
 			Class *exception_class;
 

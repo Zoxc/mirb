@@ -23,6 +23,7 @@
     <ClInclude Include="..\..\src\classes\fixnum.hpp" />
     <ClInclude Include="..\..\src\classes\float.hpp" />
     <ClInclude Include="..\..\src\classes\hash.hpp" />
+    <ClInclude Include="..\..\src\classes\integer.hpp" />
     <ClInclude Include="..\..\src\classes\io.hpp" />
     <ClInclude Include="..\..\src\classes\method.hpp" />
     <ClInclude Include="..\..\src\classes\module.hpp" />
@@ -86,6 +87,7 @@
     <ClCompile Include="..\..\src\classes\fixnum.cpp" />
     <ClCompile Include="..\..\src\classes\float.cpp" />
     <ClCompile Include="..\..\src\classes\hash.cpp" />
+    <ClCompile Include="..\..\src\classes\integer.cpp" />
     <ClCompile Include="..\..\src\classes\io.cpp" />
     <ClCompile Include="..\..\src\classes\method.cpp" />
     <ClCompile Include="..\..\src\classes\module.cpp" />
