@@ -89,12 +89,25 @@ namespace Mirb
 
 		return int_to_fix(lhs == rhs ? 0 : (lhs > rhs ? 1 : -1));
 	}
-
+	
+	value_t Fixnum::pos(value_t obj)
+	{
+		return obj;
+	}
+	
+	value_t Fixnum::neg(value_t obj)
+	{
+		return int_to_fix(-fix_to_int(obj));
+	}
+	
 	void Fixnum::initialize()
 	{
 		method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
 		method<Arg::Self>(context->fixnum_class, "zero?", &zero);
 		method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
+		
+		method<Arg::Self>(context->fixnum_class, "+@", &pos);
+		method<Arg::Self>(context->fixnum_class, "-@", &neg);
 
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "+", &add);
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "-", &sub);
