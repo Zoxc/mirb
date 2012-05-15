@@ -2,6 +2,7 @@
 #include "object.hpp"
 #include "symbol.hpp"
 #include "string.hpp"
+#include "fixnum.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -9,6 +10,11 @@ namespace Mirb
 	value_t NilClass::to_s()
 	{
 		return String::get("");
+	}
+
+	value_t NilClass::to_i()
+	{
+		return Fixnum::from_int(0);
 	}
 
 	value_t NilClass::inspect()
@@ -23,6 +29,7 @@ namespace Mirb
 	
 	void NilClass::initialize()
 	{
+		method(context->nil_class, "to_i", &to_i);
 		method(context->nil_class, "to_s", &to_s);
 		method(context->nil_class, "inspect", &inspect);
 		method(context->nil_class, "nil", &nil);
