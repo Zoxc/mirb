@@ -11,6 +11,7 @@ namespace Mirb
 			static value_t allocate(Class *instance_of);
 			static value_t push(Array *self, size_t argc, value_t argv[]);
 			static value_t pop(Array *self);
+			static value_t shift(Array *self);
 			static value_t unshift(Array *self, size_t argc, value_t argv[]);
 			static value_t to_s(Array *self);
 			static value_t length(Array *self);

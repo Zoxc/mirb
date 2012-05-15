@@ -11,6 +11,14 @@ namespace Mirb
 		return Collector::allocate<Array>(instance_of);
 	}
 	
+	value_t Array::shift(Array *self)
+	{
+		if(self->vector.size())
+			return self->vector.shift();
+		else
+			return value_nil;
+	}
+	
 	value_t Array::unshift(Array *self, size_t argc, value_t argv[])
 	{
 		self->vector.push_entries_front(argv, argc);
@@ -233,7 +241,8 @@ namespace Mirb
 		method<Arg::SelfClass<Array>>(context->array_class, "first", &first);
 		method<Arg::SelfClass<Array>>(context->array_class, "last", &last);
 		method<Arg::SelfClass<Array>>(context->array_class, "empty?", &empty);
-
+		
+		method<Arg::SelfClass<Array>>(context->array_class, "shift", &shift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
