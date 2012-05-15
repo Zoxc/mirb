@@ -66,6 +66,9 @@ namespace Mirb
 				return *this;
 			}
 			
+			bool downcase();
+			bool upcase();
+
 			CharArray copy(size_t offset, size_t size) const;
 			
 			bool equal(size_t offset, size_t other_offset, const CharArray &other, size_t size) const;

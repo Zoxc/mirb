@@ -62,11 +62,50 @@ namespace Mirb
 	{
 		return auto_cast(self->string == other->string);
 	}
+	
+	value_t String::downcase(String *self)
+	{
+		CharArray result(self->string);
+
+		result.downcase();
+
+		return result.to_string();
+	}
+
+	value_t String::downcase_self(String *self)
+	{
+		if(self->string.downcase())
+			return self;
+		else
+			return value_nil;
+	}
+	
+	value_t String::upcase(String *self)
+	{
+		CharArray result(self->string);
+
+		result.upcase();
+
+		return result.to_string();
+	}
+
+	value_t String::upcase_self(String *self)
+	{
+		if(self->string.upcase())
+			return self;
+		else
+			return value_nil;
+	}
 
 	void String::initialize()
 	{
 		method<Arg::Self, Arg::Value>(context->string_class, "match", &match);
 		method<Arg::Self>(context->string_class, "to_s", &to_s);
+		
+		method<Arg::SelfClass<String>>(context->string_class, "downcase", &downcase);
+		method<Arg::SelfClass<String>>(context->string_class, "downcase!", &downcase_self);
+		method<Arg::SelfClass<String>>(context->string_class, "upcase", &upcase);
+		method<Arg::SelfClass<String>>(context->string_class, "upcase!", &upcase_self);
 
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::SelfClass<String>>(context->string_class, "inspect", &inspect);

@@ -105,6 +105,38 @@ namespace Mirb
 			static_data = false;
 		}
 	}
+	
+	bool CharArray::downcase()
+	{
+		bool changed = false;
+
+		localize();
+
+		for(size_t i = 0; i < length; ++i)
+			if(data[i] >= 'A' && data[i] <= 'Z')
+			{
+				changed = true;
+				data[i] = 'a' + (data[i] - 'A');
+			}
+
+		return changed;
+	}
+	
+	bool CharArray::upcase()
+	{
+		bool changed = false;
+
+		localize();
+
+		for(size_t i = 0; i < length; ++i)
+			if(data[i] >= 'a' && data[i] <= 'z')
+			{
+				changed = true;
+				data[i] = 'A' + (data[i] - 'a');
+			}
+
+		return changed;
+	}
 
 	void CharArray::append(const CharArray& other)
 	{

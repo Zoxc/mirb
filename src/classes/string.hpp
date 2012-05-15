@@ -14,6 +14,10 @@ namespace Mirb
 			static value_t to_s(value_t self);
 			static value_t concat(String *self, String *other);
 			static value_t equal(String *self, String *other);
+			static value_t downcase(String *self);
+			static value_t downcase_self(String *self);
+			static value_t upcase(String *self);
+			static value_t upcase_self(String *self);
 			
 		public:
 			String(Class *instance_of) : Object(Value::String, instance_of) {}
