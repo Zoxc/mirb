@@ -131,6 +131,20 @@ namespace Mirb
 			return type_error(index, "Range or Fixnum");
 	}
 	
+	value_t String::ljust(String *self, size_t length, String *other)
+	{
+		CharArray padding = other ? other->string : " ";
+		CharArray result = self->string;
+
+		while(result.size() < length)
+		{
+			size_t remaining = length - self->string.size();
+			result += padding.copy(0, remaining);
+		}
+
+		return result.to_string();
+	}
+
 	void String::initialize()
 	{
 		method<Arg::Self, Arg::Value>(context->string_class, "match", &match);
@@ -142,7 +156,8 @@ namespace Mirb
 		method<Arg::SelfClass<String>>(context->string_class, "downcase!", &downcase_self);
 		method<Arg::SelfClass<String>>(context->string_class, "upcase", &upcase);
 		method<Arg::SelfClass<String>>(context->string_class, "upcase!", &upcase_self);
-
+		
+		method<Arg::SelfClass<String>, Arg::UInt, Arg::DefaultClass<String>>(context->string_class, "ljust", &ljust);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::SelfClass<String>>(context->string_class, "inspect", &inspect);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "==", &equal);
