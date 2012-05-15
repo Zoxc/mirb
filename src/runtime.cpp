@@ -913,7 +913,7 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("RUBY_VERSION"), String::from_literal("1.9"));
 
 #ifdef WIN32
-		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-mswin"));
+		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-winapi"));
 #else
 		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::from_literal("mirb-posix"));
 #endif
