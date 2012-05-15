@@ -162,7 +162,7 @@ namespace Mirb
 			compact();
 		#endif
 
-		#ifdef DEBUG
+		#ifdef DEBUG_MEMORY
 		{
 			Frame *frame = context->frame;
 

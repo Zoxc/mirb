@@ -448,27 +448,33 @@ namespace Mirb
 		inline void assert_valid_base(value_t obj) prelude_nonnull(1);
 		inline void assert_valid_base(value_t obj  prelude_unused)
 		{
-			mirb_debug(mirb_debug_assert(obj->magic == Header::magic_value));
-			mirb_debug_assert(obj->type != None && obj->type != FreeBlock);
+			#ifdef DEBUG_MEMORY
+				mirb_debug(mirb_debug_assert(obj->magic == Header::magic_value));
+				mirb_debug_assert(obj->type != None && obj->type != FreeBlock);
+			#endif
 		}
 
 		inline void assert_alive(value_t obj) prelude_nonnull(1);
-		inline void assert_alive(value_t obj)
+		inline void assert_alive(value_t obj  prelude_unused)
 		{
-			assert_valid_base(obj);
-			mirb_debug(mirb_debug_assert(obj->alive));
+			#ifdef DEBUG_MEMORY
+				assert_valid_base(obj);
+				mirb_debug(mirb_debug_assert(obj->alive));
+			#endif
 		}
 
 		inline void assert_valid(value_t obj) prelude_nonnull(1);
-		inline void assert_valid(value_t obj)
+		inline void assert_valid(value_t obj  prelude_unused)
 		{
-			if(object_ref(obj))
-			{
-				assert_alive(obj);
-				mirb_debug_assert(obj->marked == false);
-				mirb_debug_assert((obj->*Header::mark_list) == Value::Header::list_end);
-				mirb_debug_assert((obj->*Header::thread_list) == Value::Header::list_end);
-			}
+			#ifdef DEBUG_MEMORY
+				if(object_ref(obj))
+				{
+					assert_alive(obj);
+					mirb_debug_assert(obj->marked == false);
+					mirb_debug_assert((obj->*Header::mark_list) == Value::Header::list_end);
+					mirb_debug_assert((obj->*Header::thread_list) == Value::Header::list_end);
+				}
+			#endif
 		}
 
 		template<class T> bool of_type(value_t value) prelude_nonnull(1);
