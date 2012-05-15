@@ -26,6 +26,15 @@ namespace Mirb
 		return self;
 	}
 	
+	value_t Array::plus(Array *self, Array *other)
+	{
+		auto result = new (collector) Array(*self);
+		
+		result->vector.push(other->vector);
+
+		return result;
+	}
+	
 	value_t Array::push(Array *self, size_t argc, value_t argv[])
 	{
 		self->vector.push_entries(argv, argc);
@@ -245,6 +254,7 @@ namespace Mirb
 		method<Arg::SelfClass<Array>>(context->array_class, "shift", &shift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
+		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "+", &plus);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
 		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
