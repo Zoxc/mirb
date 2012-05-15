@@ -33,7 +33,12 @@ namespace Mirb
 			left = -left;
 
 			if((size_t)left > size)
-				left = 0;
+			{
+				start = 0;
+				length = 0;
+
+				return true;
+			}
 			else
 				left = size - (size_t)left;
 		}
@@ -43,7 +48,12 @@ namespace Mirb
 			right = -right;
 
 			if((size_t)right > size)
-				right = 0;
+			{
+				start = 0;
+				length = 0;
+
+				return true;
+			}
 			else
 				right = size - (size_t)right;
 		}
