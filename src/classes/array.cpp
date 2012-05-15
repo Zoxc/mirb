@@ -109,7 +109,7 @@ namespace Mirb
 	
 	value_t first(Array *self)
 	{
-		if(self->vector.size() > 1)
+		if(self->vector.size() > 0)
 			return self->vector[0];
 		else
 			return value_nil;
@@ -117,7 +117,7 @@ namespace Mirb
 	
 	value_t last(Array *self)
 	{
-		if(self->vector.size() > 1)
+		if(self->vector.size() > 0)
 			return self->vector[self->vector.size() - 1];
 		else
 			return value_nil;
