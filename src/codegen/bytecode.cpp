@@ -53,7 +53,7 @@ namespace Mirb
 			0, // None
 			&ByteCodeGenerator::convert_data,
 			&ByteCodeGenerator::convert_heredoc,
-			&ByteCodeGenerator::convert_interpolated,
+			&ByteCodeGenerator::convert_interpolate,
 			&ByteCodeGenerator::convert_integer,
 			&ByteCodeGenerator::convert_float,
 			&ByteCodeGenerator::convert_variable,
@@ -148,7 +148,7 @@ namespace Mirb
 			to_bytecode(node->data, var);
 		}
 		
-		void ByteCodeGenerator::convert_interpolated(Tree::Node *basic_node, var_t var)
+		void ByteCodeGenerator::convert_interpolate(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::InterpolateNode *)basic_node;
 			

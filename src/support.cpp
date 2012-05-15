@@ -41,11 +41,10 @@ namespace Mirb
 			switch(type)
 			{
 				case Value::Symbol:
-					return result.to_string();
-					break;
-					
-				case Value::String:
 					return symbol_pool.get(result);
+
+				case Value::String:
+					return result.to_string();
 
 				case Value::Regexp:
 					return Regexp::allocate(result);
