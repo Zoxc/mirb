@@ -10,9 +10,9 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t inspect(value_t obj);
-			static value_t to_s(value_t obj);
-			static value_t concat(value_t obj, value_t other);
+			static value_t inspect(String *self);
+			static value_t to_s(value_t self);
+			static value_t concat(String *self, String *other);
 			static value_t equal(String *self, String *other);
 			
 		public:

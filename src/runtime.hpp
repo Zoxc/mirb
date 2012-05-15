@@ -81,8 +81,14 @@ namespace Mirb
 	void finalize();
 	
 	/*
+	 * compare (calls Ruby code)
+	 */
+	value_t compare(value_t left, value_t right);
+
+	/*
 	 * raise
 	 */
+	value_t type_error(value_t value, const CharArray &expected);
 	bool type_error(value_t value, value_t expected);
 	value_t raise(Class *exception_class, const CharArray &message);
 

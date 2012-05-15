@@ -491,13 +491,31 @@ namespace Mirb
 		GlobalAccess::set(context, name, value);
 	}
 	
+	value_t compare(value_t left, value_t right)
+	{
+		value_t result = call(left, context->syms.compare, value_nil, 1, &right);
+		
+		if(!result)
+			return 0;
+
+		if(!Value::is_fixnum(result))
+			return raise(context->type_error, "<=> must return a Fixnum");
+
+		return result;
+	}
+
+	value_t type_error(value_t value, const CharArray &expected)
+	{
+		return raise(context->type_error, pretty_inspect(value) + " was given when " + expected + " was expected");
+	}
+
 	bool type_error(value_t value, value_t expected)
 	{
 		value_t klass = real_class_of(value);
 
 		if(klass != expected)
 		{
-			raise(context->type_error, inspect_obj(value) + " is of class " + inspect_obj(real_class_of(value)) + " while " + inspect_obj(expected)  + " was expected");
+			raise(context->type_error, pretty_inspect(value) + " was given when a object of type " + inspect_obj(expected)  + " was expected");
 			return true;
 		}
 		else

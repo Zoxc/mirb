@@ -212,7 +212,7 @@ namespace Mirb
 
 			if(prelude_unlikely(!method))
 			{
-				raise(context->name_error, "Unable to find method " + inspect_obj(argv[i]) + " on " + inspect_obj(obj));
+				raise(context->name_error, "Unable to find method " + inspect_obj(argv[i]) + " on " + pretty_inspect(obj));
 				return value_raise;
 			}
 

@@ -9,14 +9,14 @@ namespace Mirb
 	{
 		private:
 			static value_t allocate(Class *instance_of);
-			static value_t push(value_t obj, size_t argc, value_t argv[]);
-			static value_t pop(value_t obj);
-			static value_t unshift(value_t obj, size_t argc, value_t argv[]);
-			static value_t inspect(value_t obj);
-			static value_t length(value_t obj);
-			static value_t each(value_t obj, value_t block);
-			static value_t get(value_t obj, size_t index);
-			static value_t set(value_t obj, size_t index, value_t value);
+			static value_t push(Array *self, size_t argc, value_t argv[]);
+			static value_t pop(Array *self);
+			static value_t unshift(Array *self, size_t argc, value_t argv[]);
+			static value_t inspect(Array *self);
+			static value_t length(Array *self);
+			static value_t each(Array *self, value_t block);
+			static value_t get(Array *self, value_t index);
+			static value_t set(Array *self, size_t index, value_t value);
 
 		public:
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}

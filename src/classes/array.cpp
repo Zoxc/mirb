@@ -1,6 +1,7 @@
 #include "array.hpp"
 #include "string.hpp"
 #include "fixnum.hpp"
+#include "range.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -10,38 +11,30 @@ namespace Mirb
 		return Collector::allocate<Array>(instance_of);
 	}
 	
-	value_t Array::unshift(value_t obj, size_t argc, value_t argv[])
+	value_t Array::unshift(Array *self, size_t argc, value_t argv[])
 	{
-		auto self = cast<Array>(obj);
-
 		self->vector.push_entries_front(argv, argc);
 
-		return obj;
+		return self;
 	}
 	
-	value_t Array::push(value_t obj, size_t argc, value_t argv[])
+	value_t Array::push(Array *self, size_t argc, value_t argv[])
 	{
-		auto self = cast<Array>(obj);
-
 		self->vector.push_entries(argv, argc);
 
-		return obj;
+		return self;
 	}
 	
-	value_t Array::pop(value_t obj)
+	value_t Array::pop(Array *self)
 	{
-		auto self = cast<Array>(obj);
-
 		if(self->vector.size())
 			return self->vector.pop();
 		else
 			return value_nil;
 	}
 	
-	value_t Array::inspect(value_t obj)
+	value_t Array::inspect(Array *self)
 	{
-		auto self = cast<Array>(obj);
-
 		CharArray result = "[";
 
 		OnStack<1> os1(self);
@@ -65,17 +58,13 @@ namespace Mirb
 		return result.to_string();
 	}
 	
-	value_t Array::length(value_t obj)
+	value_t Array::length(Array *self)
 	{
-		auto self = cast<Array>(obj);
-
 		return Fixnum::from_size_t(self->vector.size());
 	}
 	
-	value_t Array::each(value_t obj, value_t block)
+	value_t Array::each(Array *self, value_t block)
 	{
-		auto self = cast<Array>(obj);
-		
 		OnStack<2> os(self, block);
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
@@ -87,20 +76,39 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t Array::get(value_t obj, size_t index)
+	value_t Array::get(Array *self, value_t index)
 	{
-		auto self = cast<Array>(obj);
+		if(Value::is_fixnum(index))
+		{
+			size_t i = Fixnum::to_size_t(index);
 
-		if(index < self->vector.size())
-			return self->vector[index];
+			if(i < self->vector.size())
+				return self->vector[i];
+			else
+				return value_nil;
+		}
+		else if(Value::of_type<Range>(index))
+		{
+			size_t start;
+			size_t length;
+
+			auto range = cast<Range>(index);
+
+			if(!range->convert_to_index(start, length, self->vector.size()))
+				return 0;
+
+			auto result = Collector::allocate<Array>();
+
+			result->vector.push_entries(&self->vector[start], length);
+
+			return result;
+		}
 		else
-			return value_nil;
+			return type_error(index, "Range or Fixnum");
 	}
 	
-	value_t Array::set(value_t obj, size_t index, value_t value)
+	value_t Array::set(Array *self, size_t index, value_t value)
 	{
-		auto self = cast<Array>(obj);
-
 		self->vector.expand_to(index + 1, value_nil);
 		self->vector[index] = value;
 
@@ -140,15 +148,15 @@ namespace Mirb
 		method<Arg::SelfClass<Array>>(context->array_class, "last", &last);
 		method<Arg::SelfClass<Array>>(context->array_class, "empty?", &empty);
 
-		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
-		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "push", &push);
-		method<Arg::Self, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
-		method<Arg::Self>(context->array_class, "pop", &pop);
-		method<Arg::Self>(context->array_class, "length", &length);
-		method<Arg::Self>(context->array_class, "inspect", &inspect);
-		method<Arg::Self, Arg::Block>(context->array_class, "each", &each);
-		method<Arg::Self, Arg::UInt>(context->array_class, "[]", &get);
-		method<Arg::Self, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
+		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
+		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
+		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
+		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
+		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
+		method<Arg::SelfClass<Array>>(context->array_class, "inspect", &inspect);
+		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
+		method<Arg::SelfClass<Array>, Arg::Value>(context->array_class, "[]", &get);
+		method<Arg::SelfClass<Array>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
 	}
 };
 

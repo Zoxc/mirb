@@ -14,6 +14,8 @@ namespace Mirb
 			{
 				flag = exclusive;
 			}
+
+			bool convert_to_index(size_t &start, size_t &length, size_t size);
 			
 			value_t low;
 			value_t high;

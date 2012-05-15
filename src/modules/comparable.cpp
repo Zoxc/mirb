@@ -6,13 +6,10 @@ namespace Mirb
 {
 	template<typename F> value_t compare(value_t obj, value_t other, F func)
 	{
-		value_t result = call(obj, context->syms.compare, value_nil, 1, &other);
+		value_t result = compare(obj, other);
 		
 		if(!result)
 			return 0;
-
-		if(!Value::is_fixnum(result))
-			return raise(context->type_error, "<=> must return a Fixnum");
 
 		return auto_cast(func(Fixnum::to_int(result)));
 	}
