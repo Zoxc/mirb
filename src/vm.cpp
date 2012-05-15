@@ -420,7 +420,7 @@ namespace Mirb
 		EndOp
 			
 		Op(UnwindEnsure)
-			if(prelude_unlikely(context->exception))
+			if(prelude_unlikely(context->exception != 0))
 				goto handle_exception;
 		EndOp
 
@@ -531,13 +531,11 @@ handle_exception:
 					{
 						case FilterException:
 						{
-							auto handler = (FilterExceptionHandler *)current_exception_block->handlers[current_handler];
-
-							ip = ip_start + handler->test_label.address;
+							ip = ip_start + static_cast<FilterExceptionHandler *>(current_exception_block->handlers[current_handler])->test_label.address;
 							OpContinue; // Execute test block
 
 exception_block_handler: // The test block will jump back here
-							auto klass = try_cast<Class>(vars[handler->result]);
+							auto klass = try_cast<Class>(vars[static_cast<FilterExceptionHandler *>(current_exception_block->handlers[current_handler])->result]);
 							if(!klass || !kind_of(klass, current_exception))
 								continue;
 						}

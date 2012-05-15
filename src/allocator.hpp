@@ -230,7 +230,7 @@ namespace Mirb
 			};
 			
 			Allocator(typename Base::Reference = Base::default_reference) {}
-			Allocator(const Allocator &array_allocator) {}
+			Allocator(const Allocator &) {}
 				
 			void null(A &ref)
 			{
