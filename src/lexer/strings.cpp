@@ -160,13 +160,13 @@ namespace Mirb
 		
 		const char_t *start = lexeme.start;
 		
-		auto push = [&] {
+		auto push = [&](InterpolateData *data) {
 			auto entry = new (memory_pool) InterpolateData::AdvancedEntry;
 			entry->set<MemoryPool>(result, memory_pool);
 			entry->type = lexeme.type;
 			entry->symbol = lexeme.symbol;
 			result = "";
-			lexeme.data->entries.push(entry);
+			data->entries.push(entry);
 		};
 
 		auto report_end = [&] {
@@ -226,12 +226,14 @@ namespace Mirb
 							{
 								lexeme.start = &input;
 								Lexeme::Type old_type = lexeme.type;
+								InterpolateData *data = lexeme.data;
 
 								global();
 
 								if(lexeme.type != Lexeme::NONE)
-									push();
-
+									push(data);
+								
+								lexeme.data = data;
 								lexeme.start = start;
 								lexeme.type = old_type;
 							}
@@ -241,12 +243,14 @@ namespace Mirb
 							{
 								lexeme.start = &input;
 								Lexeme::Type old_type = lexeme.type;
+								InterpolateData *data = lexeme.data;
 
 								ivar();
 
 								if(lexeme.type != Lexeme::NONE)
-									push();
-
+									push(data);
+								
+								lexeme.data = data;
 								lexeme.start = start;
 								lexeme.type = old_type;
 							}
