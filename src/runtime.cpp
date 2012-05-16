@@ -743,7 +743,7 @@ namespace Mirb
 		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
 		if(prelude_unlikely(!stack_memory))
-			return raise(context->exception_class);
+			return raise(context->runtime_error, "Unable to allocate stack memory");
 
 		OnStackBlock<false> *os = new (stack_memory) OnStackBlock<false>();
 
