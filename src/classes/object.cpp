@@ -163,6 +163,8 @@ namespace Mirb
 		if(!result)
 			return 0;
 
+		OnStack<1> os(result);
+
 		if(!call_argv(result, "initialize_copy", 1, &obj))
 			return 0;
 
