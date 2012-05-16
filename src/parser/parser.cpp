@@ -888,6 +888,7 @@ namespace Mirb
 				return result;
 			}
 			
+			case Lexeme::BINARY:
 			case Lexeme::OCTAL:
 			case Lexeme::HEX:
 			case Lexeme::INTEGER:
@@ -896,7 +897,7 @@ namespace Mirb
 					
 				std::string str = lexer.lexeme.string();
 					
-				result->value = std::atoi(str.c_str()); // TODO: Parse octal/hex and longer numbers correctly
+				result->value = std::atoi(str.c_str()); // TODO: Parse octal/hex/binary and longer numbers correctly
 					
 				lexer.step();
 					

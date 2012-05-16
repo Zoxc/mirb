@@ -12,6 +12,7 @@ namespace Mirb
 		"heredoc",
 		"integer",
 		"octal",
+		"binary",
 		"real",
 		"hex",
 		"instance variable",

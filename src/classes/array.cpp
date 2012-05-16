@@ -293,6 +293,8 @@ namespace Mirb
 					++pos;
 			}
 		}
+
+		return true;
 	}
 
 	value_t Array::rb_sort(Array *self)

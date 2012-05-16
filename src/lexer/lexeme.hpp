@@ -30,6 +30,7 @@ namespace Mirb
 				HEREDOC,
 				INTEGER,
 				OCTAL,
+				BINARY,
 				REAL,
 				HEX,
 				IVAR,

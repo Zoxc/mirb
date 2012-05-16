@@ -29,6 +29,32 @@ namespace Mirb
 				lexeme.type = Lexeme::INTEGER;
 				lexeme.stop = &input;
 				break;
+				
+			case 'b':
+			case 'B':
+				{
+					input++;
+
+					while(input.in('0', '1'))
+						input++;
+
+					if(input.in('2', '9'))
+					{
+						while(input.in('0', '9'))
+							input++;
+
+						lexeme.type = Lexeme::INTEGER;
+						lexeme.stop = &input;
+
+						parser.report(lexeme.dup(memory_pool), "Invalid binary number '" + lexeme.string() + "'");
+					}
+					else
+					{
+						lexeme.type = Lexeme::BINARY;
+						lexeme.stop = &input;
+					}
+				}
+				break;
 
 			case '0':
 			case '1':
