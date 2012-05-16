@@ -36,6 +36,11 @@ namespace Mirb
 		return self;
 	}
 	
+	value_t String::plus(String *self, String *other)
+	{
+		return String::get(self->string + other->string);
+	}
+	
 	value_t split(String *self, String *sep)
 	{
 		auto result = Collector::allocate<Array>();
@@ -170,7 +175,7 @@ namespace Mirb
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "===", &equal);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "concat", &concat);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "<<", &concat);
-		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "+", &concat);
+		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "+", &plus);
 	}
 };
 
