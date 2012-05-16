@@ -34,7 +34,8 @@ namespace Mirb
 	void JoinSegments::push(const CharArray &path)
 	{
 		File::normalize_path(path).split([&](const CharArray &part) {
-			segments.push_back(part);
+			if(part.size())
+				segments.push_back(part);
 		}, CharArray("/"));
 	}
 
