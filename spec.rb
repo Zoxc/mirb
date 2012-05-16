@@ -1,7 +1,15 @@
 $:.unshift File.expand_path('speclib', File.dirname(__FILE__))
 
-RUBY_VERSION = 0.1
 RUBY_PATCHLEVEL = 0
+
+class SystemExit < Exception
+end
+
+module Kernel
+	def exit(errnum)
+		raise SystemExit
+	end
+end
 
 class File
 	if RUBY_PLATFORM.match(/winapi/)
@@ -13,14 +21,17 @@ class File
 	end
 end
 
-class Signal
+module Signal
 	def self.trap(name)
 	end
 end
 
 require 'enumerable'
 require 'fileutils'
+require 'pp'
 
-ARGV << 'rubyspec/:core'
+ARGV << ':core' << ':language'
 
-load File.expand_path("mspec/bin/mspec-run", File.dirname(__FILE__))
+puts benchmark {
+	load File.expand_path("mspec/bin/mspec-run", File.dirname(__FILE__))
+}
