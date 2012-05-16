@@ -1486,7 +1486,7 @@ namespace Mirb
 			
 				result->left = node;
 			
-				result->right = parse_assignment(allow_multiples);
+				result->right = parse_high_rescue(allow_multiples);
 
 				return result;
 			}
