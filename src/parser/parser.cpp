@@ -783,22 +783,20 @@ namespace Mirb
 
 				lexer.lexeme.allow_keywords = true;
 
+				if(lexer.lexeme.whitespace)
+				{
+					range.start = range.stop;
+					range.stop = lexer.lexeme.start;
+
+					report(range, "No whitespace between ':' and the literal is allowed with symbol literals");
+				}
+
 				switch(lexeme())
 				{
 					case Lexeme::IVAR:
 					case Lexeme::CVAR:
 					case Lexeme::GLOBAL:
-					case Lexeme::IDENT:
-					case Lexeme::EXT_IDENT:
 					{
-						if(lexer.lexeme.whitespace)
-						{
-							range.start = range.stop;
-							range.stop = lexer.lexeme.start;
-
-							report(range, "No whitespace between ':' and the identifier is allowed with symbol literals");
-						}
-
 						auto result = new (fragment) Tree::SymbolNode;
 						result->symbol = lexer.lexeme.symbol;
 						lexer.step();
@@ -806,21 +804,16 @@ namespace Mirb
 					}
 					
 					case Lexeme::STRING:
-					{
-						if(lexer.lexeme.whitespace)
-						{
-							range.start = range.stop;
-							range.stop = lexer.lexeme.start;
-
-							report(range, "No whitespace between ':' and the string literal is allowed with symbol string literals");
-						}
-
 						return parse_data(Lexeme::SYMBOL);
-					}
 
 					default:
-						error("Expected a symbol literal, but found " + lexer.lexeme.describe());
-						return 0;
+					{
+						auto result = new (fragment) Tree::SymbolNode;
+
+						parse_method_name(result->symbol);
+
+						return result;
+					}
 				}
 			}
 			
