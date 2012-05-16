@@ -17,6 +17,7 @@ namespace Mirb
 			static value_t concat(String *self, String *other);
 			static value_t add(String *self, String *other);
 			static value_t equal(String *self, String *other);
+			static value_t compare(String *self, String *other);
 			static value_t downcase(String *self);
 			static value_t downcase_self(String *self);
 			static value_t upcase(String *self);

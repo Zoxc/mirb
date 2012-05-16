@@ -155,6 +155,29 @@ namespace Mirb
 		return Symbol::get(self->string);
 	}
 
+	value_t String::compare(String *self, String *other)
+	{
+		for(size_t i = 0; true; ++i)
+		{
+			bool self_empty = self->string.size() - i == 0;
+			bool other_empty = other->string.size() - i == 0;
+
+			if(self_empty)
+				return other_empty ? Fixnum::from_int(0) : Fixnum::from_int(-1);
+			else if(other_empty)
+				return Fixnum::from_int(1);
+			
+			char_t self_char = self->string[i];
+			char_t other_char = other->string[i];
+			
+			if(self_char > other_char)
+				return Fixnum::from_int(1);
+
+			if(self_char < other_char)
+				return Fixnum::from_int(-1);
+		}
+	}
+
 	void String::initialize()
 	{
 		method<Arg::Self, Arg::Value>(context->string_class, "match", &match);
@@ -171,6 +194,7 @@ namespace Mirb
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "split", &split);
 		method<Arg::SelfClass<String>>(context->string_class, "inspect", &inspect);
 		method<Arg::SelfClass<String>>(context->string_class, "to_sym", &to_sym);
+		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "<=>", &String::compare);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "==", &equal);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "===", &equal);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "concat", &concat);
