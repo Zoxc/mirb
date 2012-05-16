@@ -10,6 +10,7 @@ namespace Mirb
 		"Integer",
 		"Float",
 		"Variable",
+		"CVar",
 		"IVar",
 		"Global",
 		"Constant",

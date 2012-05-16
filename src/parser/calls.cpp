@@ -162,7 +162,9 @@ namespace Mirb
 		if(has_args)
 		{
 			parse_arguments(result, 0);
-			lexer.lexeme.prev_set(range);
+
+			if(range)
+				lexer.lexeme.prev_set(range);
 		}
 		
 		result->block = parse_block(result->block_arg == 0);

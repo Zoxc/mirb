@@ -215,6 +215,16 @@ namespace Mirb
 			VariableNode(Tree::NamedVariable *var) : var(var) {}
 		};
 		
+		struct CVarNode:
+			public Node
+		{
+			NodeType type() { return CVar; }
+			
+			Mirb::Symbol *name;
+			
+			CVarNode(Mirb::Symbol *name) : name(name) {}
+		};
+		
 		struct IVarNode:
 			public Node
 		{

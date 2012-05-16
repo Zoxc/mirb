@@ -449,6 +449,25 @@ namespace Mirb
 
 		switch(override)
 		{
+			case Lexeme::COMMAND:
+			{
+				SourceLoc range = lexer.lexeme;
+
+				auto command = parse_data(Lexeme::STRING);
+
+				auto result = new (fragment) Tree::CallNode;
+
+				if(command)
+					result->arguments.append(command);
+
+				lexer.lexeme.prev_set(&range);
+
+				result->object = new (fragment) Tree::SelfNode;
+				result->method = Symbol::get("`");
+				result->range = new (fragment) SourceLoc(range);
+
+				return result;
+			}
 			case Lexeme::STRING:
 				type = Value::String;
 				break;
@@ -569,6 +588,10 @@ namespace Mirb
 
 			switch(entry->type)
 			{
+				case Lexeme::CVAR:
+					pair->group = new (fragment) Tree::CVarNode(entry->symbol);
+					break;
+
 				case Lexeme::IVAR:
 					pair->group = new (fragment) Tree::IVarNode(entry->symbol);
 					break;
@@ -641,7 +664,8 @@ namespace Mirb
 
 						break;
 					}
-
+					
+					case Tree::Node::CVar:
 					case Tree::Node::IVar:
 					case Tree::Node::Global:
 					case Tree::Node::Constant:
@@ -817,31 +841,12 @@ namespace Mirb
 				}
 			}
 			
+			case Lexeme::COMMAND:
 			case Lexeme::REGEXP:
 			case Lexeme::STRING:
 			case Lexeme::ARRAY:
 				return parse_data(lexeme());
-				
-			case Lexeme::COMMAND:
-			{
-				SourceLoc range = lexer.lexeme;
-
-				auto command = parse_data(Lexeme::STRING);
-
-				auto result = new (fragment) Tree::CallNode;
-
-				if(command)
-					result->arguments.append(command);
-
-				lexer.lexeme.prev_set(&range);
-
-				result->object = new (fragment) Tree::SelfNode;
-				result->method = Symbol::get("`");
-				result->range = new (fragment) SourceLoc(range);
-
-				return result;
-			}
-
+			
 			case Lexeme::KW_SELF:
 			{
 				lexer.step();
@@ -937,11 +942,17 @@ namespace Mirb
 						return call_node;
 					}
 				}
+				
+				return 0;
+			}
 			
+			case Lexeme::CVAR:
+			{
 				Symbol *symbol = lexer.lexeme.symbol;
 					
+				lexer.step();
 				
-				return new (fragment) Tree::IVarNode(symbol);
+				return new (fragment) Tree::CVarNode(symbol);
 			}
 
 			case Lexeme::IVAR:
@@ -1249,6 +1260,7 @@ namespace Mirb
 				process_multiple_lhs(static_cast<Tree::MultipleExpressionsNode *>(lhs));
 				return;
 				
+			case Tree::Node::CVar:
 			case Tree::Node::IVar:
 			case Tree::Node::Global:
 			case Tree::Node::Constant:
@@ -1558,6 +1570,7 @@ namespace Mirb
 			case Tree::Node::Variable:
 			case Tree::Node::Constant: //TODO: Make sure constant's object is not re-evaluated
 			case Tree::Node::IVar:
+			case Tree::Node::CVar:
 				return build_assignment(input, allow_multiples);
 
 			default:

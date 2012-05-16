@@ -162,6 +162,13 @@ namespace Mirb
 				}
 			}
 			
+			case Tree::SimpleNode::CVar:
+			{
+				auto target = (Tree::CVarNode *)node;
+				
+				return print_symbol(target->name);
+			};
+				
 			case Tree::SimpleNode::IVar:
 			{
 				auto target = (Tree::IVarNode *)node;

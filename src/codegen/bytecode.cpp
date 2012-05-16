@@ -57,6 +57,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_integer,
 			&ByteCodeGenerator::convert_float,
 			&ByteCodeGenerator::convert_variable,
+			&ByteCodeGenerator::convert_cvar,
 			&ByteCodeGenerator::convert_ivar,
 			&ByteCodeGenerator::convert_global,
 			&ByteCodeGenerator::convert_constant,
@@ -236,6 +237,16 @@ namespace Mirb
 			auto node = (Tree::VariableNode *)basic_node;
 
 			gen<MoveOp>(var, read_variable(node->var));
+		}
+		
+		void ByteCodeGenerator::convert_cvar(Tree::Node *basic_node, var_t var)
+		{
+			if(!is_var(var))
+				return;
+			
+			auto node = (Tree::CVarNode *)basic_node;
+			
+			gen<GetIVarOp>(var, node->name); // TODO: Fix cvars
 		}
 		
 		void ByteCodeGenerator::convert_ivar(Tree::Node *basic_node, var_t var)

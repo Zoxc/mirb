@@ -245,6 +245,16 @@ namespace Mirb
 			}
 			break;
 			
+			case Lexeme::CVAR:
+			{
+				result->singleton = new (fragment) Tree::CVarNode(lexer.lexeme.symbol);
+			
+				lexer.step();
+
+				match(Lexeme::DOT);
+			}
+			break;
+
 			case Lexeme::IVAR:
 			{
 				result->singleton = new (fragment) Tree::IVarNode(lexer.lexeme.symbol);

@@ -52,6 +52,7 @@ namespace Mirb
 				void convert_integer(Tree::Node *basic_node, var_t var);
 				void convert_float(Tree::Node *basic_node, var_t var);
 				void convert_variable(Tree::Node *basic_node, var_t var);
+				void convert_cvar(Tree::Node *basic_node, var_t var);
 				void convert_ivar(Tree::Node *basic_node, var_t var);
 				void convert_global(Tree::Node *basic_node, var_t var);
 				void convert_constant(Tree::Node *basic_node, var_t var);
@@ -257,6 +258,19 @@ namespace Mirb
 							auto variable = (Tree::VariableNode *)lhs;
 
 							return write_variable(variable->var, func, temp);
+						}
+				
+						case Tree::SimpleNode::CVar:
+						{
+							auto variable = (Tree::CVarNode *)lhs;
+
+							var_t var = reuse(temp);
+
+							func(var);
+					
+							gen<SetIVarOp>(variable->name, var); // TODO: Fix cvars
+
+							return var;
 						}
 				
 						case Tree::SimpleNode::IVar:
