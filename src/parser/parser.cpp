@@ -417,24 +417,24 @@ namespace Mirb
 		
 		lexer.step();
 
-		if(lexeme() != Lexeme::SQUARE_CLOSE)
+		do
 		{
-			do
-			{
-				skip_lines();
-
-				auto element = parse_splat_operator_expression();
+			skip_lines();
 				
-				if(element)
-				{
-					if(element->type() == Tree::Node::Splat)
-						result->variadic = true;
+			if(lexeme() == Lexeme::SQUARE_CLOSE)
+				break;
 
-					result->entries.append(element);
-				}
+			auto element = parse_splat_operator_expression();
+				
+			if(element)
+			{
+				if(element->type() == Tree::Node::Splat)
+					result->variadic = true;
+
+				result->entries.append(element);
 			}
-			while(matches(Lexeme::COMMA));
 		}
+		while(matches(Lexeme::COMMA));
 
 		skip_lines();		
 
