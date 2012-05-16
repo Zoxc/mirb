@@ -184,7 +184,7 @@ namespace Mirb
 		return value;
 	}
 	
-	value_t instance_variable_get(value_t self, Symbol *name, value_t value)
+	value_t instance_variable_get(value_t self, Symbol *name)
 	{
 		if(name->string.size() == 0 || name->string[0] != '@')
 			return raise(context->standard_error, "Invalid instance variable name");
