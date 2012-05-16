@@ -26,12 +26,43 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t Array::plus(Array *self, Array *other)
+	value_t Array::add(Array *self, Array *other)
 	{
 		auto result = new (collector) Array(*self);
 		
 		result->vector.push(other->vector);
 
+		return result;
+	}
+	
+	value_t Array::sub(Array *self, Array *other)
+	{
+		auto result = new (collector) Array;
+
+		OnStack<3> os(result, self, other);
+
+		for(size_t i = 0; i < self->vector.size(); ++i)
+		{
+			bool found = false;
+
+			for(size_t j = 0; j < other->vector.size(); ++j)
+			{
+				value_t result = call_argv(self->vector[i], context->syms.equal, 1, &other->vector[j]);
+
+				if(!result)
+					return 0;
+
+				if(Value::test(result))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(!found)
+				result->vector.push(self->vector[i]);
+		}
+		
 		return result;
 	}
 	
@@ -254,7 +285,8 @@ namespace Mirb
 		method<Arg::SelfClass<Array>>(context->array_class, "shift", &shift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
-		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "+", &plus);
+		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "+", &add);
+		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "-", &sub);
 		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
 		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
 		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);

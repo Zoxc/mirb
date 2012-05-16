@@ -15,7 +15,7 @@ namespace Mirb
 			static value_t to_s(value_t self);
 			static value_t ljust(String *self, size_t length, String *other);
 			static value_t concat(String *self, String *other);
-			static value_t plus(String *self, String *other);
+			static value_t add(String *self, String *other);
 			static value_t equal(String *self, String *other);
 			static value_t downcase(String *self);
 			static value_t downcase_self(String *self);
