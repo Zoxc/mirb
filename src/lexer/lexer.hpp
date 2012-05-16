@@ -58,10 +58,63 @@ namespace Mirb
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
 
+			SourceLoc range(const char_t *start, const char_t *stop); 
+
 			template<Lexeme::Type type> void single();
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
 			
+			template<typename F> void skip_numbers(F test)
+			{
+				bool trailing = false;
+				const char_t *pos;
+
+				while(test())
+				{
+					input++;
+
+					if(input == '_')
+					{
+						pos = &input;
+						input++;
+						trailing = true;
+						
+						if(input == '_')
+						{
+							const char_t *start = &input;
+
+							while(input == '_')
+								input++;
+							
+							parser.report(range(start, &input), "Only one underscore is allowed between digits in number literals");
+						}
+
+					}
+					else
+						trailing = false;
+				}
+
+				if(trailing)
+					parser.report(range(pos, pos + 1), "Trailing '_' in number");
+			}
+
+			template<Lexeme::Type type, char_t high> void get_number()
+			{
+				skip_numbers([&] { return input.in('0', high); });
+				
+				if(input.in('0', '9'))
+				{
+					number();
+
+					parser.report(lexeme, "Invalid " + Lexeme::describe_type(type) + " number");
+				}
+				else
+				{
+					lexeme.type = type;
+					lexeme.stop = &input;
+				}
+			}
+
 			void eol();
 			bool is_white();
 			void white();

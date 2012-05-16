@@ -31,9 +31,9 @@ namespace Mirb
 		lexeme.type = Lexeme::NONE;
 
 		if (lexeme.length() == 1)
-			parser.report(lexeme.dup(memory_pool), "Invalid character '" + lexeme.string() + "'");
+			parser.report(lexeme, "Invalid character '" + lexeme.string() + "'");
 		else
-			parser.report(lexeme.dup(memory_pool), "Invalid characters '" + lexeme.string() + "'");
+			parser.report(lexeme, "Invalid characters '" + lexeme.string() + "'");
 
 		restep();
 	}
@@ -276,7 +276,7 @@ namespace Mirb
 					lexeme.stop = &input;
 					lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 					lexeme.type = Lexeme::STRING;
-					parser.report(lexeme.dup(memory_pool), "Expected escape string");
+					parser.report(lexeme, "Expected escape string");
 
 					return;
 				}
@@ -635,7 +635,7 @@ namespace Mirb
 			lexeme.symbol = symbol_pool.get(lexeme);
 
 			if(error)
-				parser.report(lexeme.dup(memory_pool), "Instance variable names cannot start with a number");
+				parser.report(lexeme, "Instance variable names cannot start with a number");
 		}
 		else if(input == '@')
 		{
@@ -654,7 +654,7 @@ namespace Mirb
 				lexeme.symbol = symbol_pool.get(lexeme);
 
 				if(error)
-					parser.report(lexeme.dup(memory_pool), "Class variable names cannot start with a number");
+					parser.report(lexeme, "Class variable names cannot start with a number");
 			}
 			else
 			{
@@ -662,7 +662,7 @@ namespace Mirb
 				lexeme.type = Lexeme::CVAR;
 				lexeme.symbol = symbol_pool.get(lexeme);
 
-				parser.report(lexeme.dup(memory_pool), "Expected a class variable name");
+				parser.report(lexeme, "Expected a class variable name");
 			}
 		}
 		else
@@ -671,7 +671,7 @@ namespace Mirb
 			lexeme.type = Lexeme::IVAR;
 			lexeme.symbol = symbol_pool.get(lexeme);
 
-			parser.report(lexeme.dup(memory_pool), "Expected a instance variable name");
+			parser.report(lexeme, "Expected a instance variable name");
 		}
 	}
 	
@@ -713,7 +713,7 @@ namespace Mirb
 					lexeme.type = Lexeme::GLOBAL;
 					lexeme.symbol = symbol_pool.get(lexeme);
 
-					parser.report(lexeme.dup(memory_pool), "Expected a global variable name");
+					parser.report(lexeme, "Expected a global variable name");
 					break;
 			}
 
@@ -729,7 +729,7 @@ namespace Mirb
 		lexeme.symbol = symbol_pool.get(lexeme);
 
 		if(error)
-			parser.report(lexeme.dup(memory_pool), "Global variable names cannot start with a number");
+			parser.report(lexeme, "Global variable names cannot start with a number");
 	}
 	
 	void Lexer::add()

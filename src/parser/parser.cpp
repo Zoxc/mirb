@@ -44,7 +44,7 @@ namespace Mirb
 	
 	void Parser::error(std::string text)
 	{
-		report(lexer.lexeme.dup(memory_pool), text);
+		report(lexer.lexeme, text);
 	}
 
 	void Parser::expected(Lexeme::Type what, bool skip)

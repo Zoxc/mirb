@@ -32,28 +32,8 @@ namespace Mirb
 				
 			case 'b':
 			case 'B':
-				{
-					input++;
-
-					while(input.in('0', '1'))
-						input++;
-
-					if(input.in('2', '9'))
-					{
-						while(input.in('0', '9'))
-							input++;
-
-						lexeme.type = Lexeme::INTEGER;
-						lexeme.stop = &input;
-
-						parser.report(lexeme.dup(memory_pool), "Invalid binary number '" + lexeme.string() + "'");
-					}
-					else
-					{
-						lexeme.type = Lexeme::BINARY;
-						lexeme.stop = &input;
-					}
-				}
+				input++;
+				get_number<Lexeme::BINARY, '1'>();
 				break;
 
 			case '0':
@@ -66,31 +46,22 @@ namespace Mirb
 			case '7':
 			case '8':
 			case '9':
-				{
-					while(input.in('0', '7'))
-						input++;
-
-					if(input.in('8', '9'))
-					{
-						while(input.in('0', '9'))
-							input++;
-
-						lexeme.type = Lexeme::INTEGER;
-						lexeme.stop = &input;
-
-						parser.report(lexeme.dup(memory_pool), "Invalid octal number '" + lexeme.string() + "'");
-					}
-					else
-					{
-						lexeme.type = Lexeme::OCTAL;
-						lexeme.stop = &input;
-					}
-				}
+				get_number<Lexeme::OCTAL, '7'>();
 				break;
 
 			default: // Single 0
 				lexeme.type = Lexeme::INTEGER;
 				lexeme.stop = &input;
+
+				if(input == '_')
+				{
+					while(input == '_')
+						input++;
+
+					lexeme.stop = &input;
+					parser.report(lexeme, "Trailing _ in number");
+				}
+
 				break;
 		}
 	}
@@ -99,9 +70,8 @@ namespace Mirb
 	{
 		input++;
 
-		while(input >= '0' && input <= '9')
-			input++;
-
+		skip_numbers([&] { return input.in('0', '9'); });
+		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::INTEGER;
 		
@@ -109,15 +79,14 @@ namespace Mirb
 			return;
 		
 		input++;
-		
+
 		if(!input.in('0', '9'))
 		{
 			input--;
 			return;
 		}
-		
-		while(input.in('0', '9'))
-			input++;
+
+		skip_numbers([&] { return input.in('0', '9'); });
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::REAL;
@@ -164,11 +133,22 @@ namespace Mirb
 	void Lexer::hex()
 	{
 		input++;
-
-		if(input.in('0', '9') || input.in('A', 'F'))
+		
+		if(input == '_')
 		{
-			while(input.in('0', '9') || input.in('A', 'F'))
+			const char_t *start = &input;
+
+			while(input == '_')
 				input++;
+			
+			parser.report(range(start, &input), "Expected hex digit, but found underscore(s)");
+		}
+
+		auto is_hex = [&] { return input.in('0', '9') || input.in('A', 'F') || input.in('a', 'f'); };
+
+		if(is_hex())
+		{
+			skip_numbers(is_hex);
 
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::HEX;
@@ -178,7 +158,7 @@ namespace Mirb
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::HEX;
 
-			parser.report(lexeme.dup(memory_pool), "Invalid hex number: '" + lexeme.string() + "'");
+			parser.report(lexeme, "Invalid hex number");
 		}
 	}
 };

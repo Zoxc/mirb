@@ -46,7 +46,7 @@ namespace Mirb
 							if(process_null(&input))
 							{
 								lexeme.stop = &input;
-								parser.report(lexeme.dup(memory_pool), "Unterminated string");
+								parser.report(lexeme, "Unterminated string");
 								goto error;
 							}
 
@@ -61,7 +61,7 @@ namespace Mirb
 					if(process_null(&input))
 					{
 						lexeme.stop = &input;
-						parser.report(lexeme.dup(memory_pool), "Unterminated string");
+						parser.report(lexeme, "Unterminated string");
 						goto error;
 					}
 				
@@ -174,14 +174,14 @@ namespace Mirb
 
 			if(state->start)
 			{
-				auto message = new (memory_pool) StringMessage(parser, lexeme.dup(memory_pool), Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
+				auto message = new (memory_pool) StringMessage(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
 			
 				message->note = new (memory_pool) StringMessage(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
 			
 				parser.add_message(message, lexeme);
 			}
 			else
-				parser.report(lexeme.dup(memory_pool), "Unterminated " + Lexeme::describe_type(state->type));
+				parser.report(lexeme, "Unterminated " + Lexeme::describe_type(state->type));
 		};
 
 		while(true)

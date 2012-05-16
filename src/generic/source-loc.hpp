@@ -37,11 +37,6 @@ namespace Mirb
 			const char_t *line_start;
 			size_t line;
 
-			SourceLoc &dup(MemoryPool &memory_pool)
-			{
-				return *new (memory_pool) SourceLoc(*this);
-			}
-	
 			std::string get_line()
 			{
 				const char_t *input = line_start;

@@ -170,8 +170,18 @@ namespace Mirb
 		const char_t *start = lexeme.start;
 		lexeme.start = &input - 1;
 		lexeme.stop = &input;
-		parser.report(lexeme.dup(memory_pool), "Unexpected null terminator");
+		parser.report(lexeme, "Unexpected null terminator");
 		lexeme.start = start;
+	}
+	
+	SourceLoc Lexer::range(const char_t *start, const char_t *stop)
+	{
+		SourceLoc result(lexeme);
+		
+		result.start = start;
+		result.stop = stop;
+
+		return result;
 	}
 
 	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool), heredocs(memory_pool)
