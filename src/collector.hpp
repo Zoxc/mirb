@@ -135,7 +135,9 @@ namespace Mirb
 
 			static bool check()
 			{
-				mirb_debug(collect());
+#ifdef DEBUG_MEMORY
+				collect();
+#endif
 
 				if(prelude_unlikely(pending))
 				{
