@@ -12,6 +12,7 @@ namespace Mirb
 		value_t zero(value_t obj);
 		value_t to_s(value_t obj);
 		value_t times(value_t obj, value_t block);
+		value_t upto(value_t obj, value_t arg, value_t block);
 		value_t pos(value_t obj);
 		value_t neg(value_t obj);
 		value_t add(value_t obj, value_t other);

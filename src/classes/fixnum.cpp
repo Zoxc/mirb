@@ -53,11 +53,29 @@ namespace Mirb
 	{
 		size_t times = to_size_t(obj);
 
-		OnStack<2> os(obj, block);
+		OnStack<1> os(block);
 
 		while(times--)
 			if(!yield(block))
 				return 0;
+
+		return obj;
+	}
+	
+	value_t Fixnum::upto(value_t obj, value_t arg, value_t block)
+	{
+		int_t from = to_int(obj);
+		int_t to = to_int(arg);
+
+		OnStack<1> os(block);
+
+		for(;from <= to; ++from)
+		{
+			value_t current = from_int(from);
+
+			if(!yield_argv(block, 1, &current))
+				return 0;
+		}
 
 		return obj;
 	}
@@ -105,6 +123,7 @@ namespace Mirb
 		method<Arg::Self>(context->fixnum_class, "to_s", &to_s);
 		method<Arg::Self>(context->fixnum_class, "zero?", &zero);
 		method<Arg::Self, Arg::Block>(context->fixnum_class, "times", &times);
+		method<Arg::Self, Arg::Value, Arg::Block>(context->fixnum_class, "upto", &upto);
 		
 		method<Arg::Self>(context->fixnum_class, "+@", &pos);
 		method<Arg::Self>(context->fixnum_class, "-@", &neg);
