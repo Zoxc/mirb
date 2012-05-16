@@ -310,6 +310,7 @@ namespace Mirb
 					case Lexeme::KW_CLASS:
 					case Lexeme::KW_MODULE:
 					case Lexeme::KW_NOT:
+					case Lexeme::BITWISE_NOT:
 					case Lexeme::LOGICAL_NOT:
 					case Lexeme::KW_DEF:
 					case Lexeme::KW_SELF:
