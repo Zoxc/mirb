@@ -700,6 +700,7 @@ namespace Mirb
 				case '$':
 				case '_':
 				case '.':
+				case '~':
 				case '*':
 				case '?':
 					input++;
