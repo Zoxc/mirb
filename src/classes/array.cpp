@@ -270,6 +270,45 @@ namespace Mirb
 		return auto_cast(self->vector.size() == 0);
 	}
 	
+	bool Array::sort(Array *&array)
+	{
+		size_t pos = 1;
+
+		while(pos < array->vector.size())
+		{
+			value_t result = compare(array->vector[pos], array->vector[pos - 1]);
+
+			if(!result)
+				return false;
+
+			if(Fixnum::to_int(result) >= 0)
+				++pos;
+			else
+			{
+				std::swap(array->vector[pos], array->vector[pos - 1]);
+
+				if(pos > 1)
+					--pos;
+				else
+					++pos;
+			}
+		}
+	}
+
+	value_t Array::rb_sort(Array *self)
+	{
+		auto result = new (collector) Array;
+
+		result->vector.push_entries(self->vector.raw(), self->vector.size());
+		
+		OnStack<1> os(result);
+
+		if(!sort(result))
+			return 0;
+
+		return result;
+	}
+	
 	void Array::initialize()
 	{
 		context->array_class = define_class("Array", context->object_class);
@@ -277,6 +316,8 @@ namespace Mirb
 		include_module(context->array_class, context->enumerable_module);
 		
 		singleton_method<Arg::SelfClass<Class>>(context->array_class, "allocate", &allocate);
+		
+		method<Arg::SelfClass<Array>>(context->array_class, "sort", &rb_sort);
 
 		method<Arg::SelfClass<Array>>(context->array_class, "first", &first);
 		method<Arg::SelfClass<Array>>(context->array_class, "last", &last);

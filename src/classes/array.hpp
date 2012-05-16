@@ -14,6 +14,8 @@ namespace Mirb
 			static value_t shift(Array *self);
 			static value_t unshift(Array *self, size_t argc, value_t argv[]);
 			static value_t to_s(Array *self);
+			static value_t rb_sort(Array *self);
+			static bool sort(Array *&array);
 			static value_t add(Array *self, Array *other);
 			static value_t sub(Array *self, Array *other);
 			static value_t length(Array *self);
