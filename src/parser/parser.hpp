@@ -144,7 +144,7 @@ namespace Mirb
 			{
 				auto result = parse_assignment(false);
 
-				if(result->type() == Tree::Node::MultipleExpressions)
+				if(result && result->type() == Tree::Node::MultipleExpressions)
 					return static_cast<Tree::MultipleExpressionsNode *>(result)->expressions.first->expression;
 				else
 					return result;
