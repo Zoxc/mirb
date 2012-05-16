@@ -1,4 +1,5 @@
 #include "../classes/file.hpp"
+#include <tchar.h>
 
 namespace Mirb
 {
@@ -33,7 +34,7 @@ namespace Mirb
 			#endif
 		}
 
-		template<typename F> bool list_dir(const CharArray &path, F func)
+		template<typename F> bool list_dir(const CharArray &path, bool skip_special, F func)
 		{
 			WIN32_FIND_DATA ffd;
 			HANDLE handle;
@@ -47,7 +48,10 @@ namespace Mirb
 
 			do
 			{
-				func(from_tchar(ffd.cFileName));
+				if(skip_special && (_tcscmp(ffd.cFileName, _T("..")) == 0 || _tcscmp(ffd.cFileName, _T(".")) == 0))
+					continue;
+
+				func(from_tchar(ffd.cFileName), (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
 			} while (FindNextFile(handle, &ffd) != 0);
 
 			FindClose(handle);

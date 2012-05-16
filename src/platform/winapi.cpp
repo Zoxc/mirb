@@ -2,7 +2,6 @@
 
 #ifdef WIN32
 
-#include <tchar.h>
 #include "../collector.hpp"
 
 namespace Mirb

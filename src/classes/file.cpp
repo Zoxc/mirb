@@ -10,6 +10,9 @@ namespace Mirb
 	{
 		CharArray result(path);
 
+		if(!result.size())
+			return result;
+
 		result.localize();
 
 		for(size_t i = 0; i < result.size(); ++i)
@@ -34,7 +37,7 @@ namespace Mirb
 	void JoinSegments::push(const CharArray &path)
 	{
 		File::normalize_path(path).split([&](const CharArray &part) {
-			if(part.size())
+			if(part.size() || (segments.size() == 0))
 				segments.push_back(part);
 		}, CharArray("/"));
 	}
@@ -93,8 +96,16 @@ namespace Mirb
 	{
 		size_t i = 0;
 		size_t p = 0;
+		size_t pr = pattern.size();
 
-		while(i < path.size() && p < pattern.size())
+		for(size_t j = 0; j < pattern.size(); ++j)
+			if(pattern[j] == '*')
+				pr -= 1;
+
+		if(pr > path.size())
+			return false;
+
+		while(p < pattern.size())
 		{
 			switch(pattern[p])
 			{
@@ -104,6 +115,20 @@ namespace Mirb
 						return true;
 
 					char_t terminator = pattern[p];
+
+					if(terminator == '*')
+						break;
+
+					if(terminator == '?')
+					{
+						while(pr < path.size() - i)
+							i++;
+
+						break;
+					}
+
+					if(i >= path.size())
+						return true;
 
 					while(path[i] != terminator)
 					{
@@ -117,11 +142,17 @@ namespace Mirb
 				}
 
 				case '?':
+					if(i >= path.size())
+						return false;
+
 					p++, i++;
 					break;
 
 				default:
 				{
+					if(i >= path.size())
+						return false;
+
 					if(pattern[p] != path[i])
 						return false;
 
