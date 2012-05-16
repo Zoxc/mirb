@@ -19,6 +19,7 @@ namespace Mirb
 		value_t sub(value_t obj, value_t other);
 		value_t mul(value_t obj, value_t other);
 		value_t div(value_t obj, value_t other);
+		value_t mod(value_t obj, value_t other);
 		value_t compare(value_t obj, value_t other);
 
 		value_t from_size_t(size_t value);

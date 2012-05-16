@@ -100,6 +100,11 @@ namespace Mirb
 		return int_to_fix(fix_to_int(obj) / fix_to_int(other));
 	}
 
+	value_t Fixnum::mod(value_t obj, value_t other)
+	{
+		return int_to_fix(fix_to_int(obj) % fix_to_int(other));
+	}
+
 	value_t Fixnum::compare(value_t obj, value_t other)
 	{
 		int_t lhs = fix_to_int(obj);
@@ -132,6 +137,7 @@ namespace Mirb
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "-", &sub);
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "*", &mul);
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "/", &div);
+		method<Arg::Self, Arg::Value>(context->fixnum_class, "%", &mod);
 		method<Arg::Self, Arg::Value>(context->fixnum_class, "<=>", &compare);
 	}
 };
