@@ -352,49 +352,49 @@ namespace Mirb
 		
 		lexer.step();
 		
-		if(lexeme() != Lexeme::CURLY_CLOSE)
+		do
 		{
-			do
-			{
-				skip_lines();
-
-				auto range = capture();
-				auto key = parse_operator_expression(false);
-				lexer.lexeme.prev_set(range);
-
-				if(lexeme() == Lexeme::COLON)
-				{
-					auto node = new (fragment) Tree::SymbolNode;
-					auto call = static_cast<Tree::CallNode *>(key);
-
-					if(key->type() == Tree::Node::Variable)
-						node->symbol = static_cast<Tree::VariableNode *>(key)->var->name;
-					else if(key->type() == Tree::Node::Call && call->can_be_var)
-						node->symbol = call->method;
-					else
-						error("Use '=>' to associate non-identifier key");
-
-					result->entries.append(node);
-
-					lexer.step();
-					skip_lines();
-				}
-				else
-				{
-					if(key)
-						result->entries.append(key);
-
-					match(Lexeme::ASSOC);
-					skip_lines();
-				}
-
-				auto value = parse_operator_expression(false);
+			skip_lines();
 				
-				if(value)
-					result->entries.append(value);
+			if(lexeme() == Lexeme::CURLY_CLOSE)
+				break;
+
+			auto range = capture();
+			auto key = parse_operator_expression(false);
+			lexer.lexeme.prev_set(range);
+
+			if(lexeme() == Lexeme::COLON)
+			{
+				auto node = new (fragment) Tree::SymbolNode;
+				auto call = static_cast<Tree::CallNode *>(key);
+
+				if(key->type() == Tree::Node::Variable)
+					node->symbol = static_cast<Tree::VariableNode *>(key)->var->name;
+				else if(key->type() == Tree::Node::Call && call->can_be_var)
+					node->symbol = call->method;
+				else
+					error("Use '=>' to associate non-identifier key");
+
+				result->entries.append(node);
+
+				lexer.step();
+				skip_lines();
 			}
-			while(matches(Lexeme::COMMA));
+			else
+			{
+				if(key)
+					result->entries.append(key);
+
+				match(Lexeme::ASSOC);
+				skip_lines();
+			}
+
+			auto value = parse_operator_expression(false);
+				
+			if(value)
+				result->entries.append(value);
 		}
+		while(matches(Lexeme::COMMA));
 
 		skip_lines();
 
