@@ -50,14 +50,19 @@ namespace Mirb
 		
 			if(lexeme() == Lexeme::BITWISE_OR)
 			{
+				SourceLoc block_range = lexer.lexeme;
+		
 				lexer.step();
 
 				skip_lines();
+
+				if(lexeme() != Lexeme::BITWISE_OR)
+					parse_parameters();
 			
-				parse_parameters();
-			
-				match(Lexeme::BITWISE_OR);
+				close_pair("block parameters", block_range, Lexeme::BITWISE_OR);
 			}
+			else if(lexeme() == Lexeme::LOGICAL_OR)
+				lexer.step();
 
 			lexer.lexeme.prev_set(range);
 			scope->range = range;
