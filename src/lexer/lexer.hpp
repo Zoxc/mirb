@@ -115,6 +115,7 @@ namespace Mirb
 				}
 			}
 
+			bool exponent();
 			void eol();
 			bool is_white();
 			void white();

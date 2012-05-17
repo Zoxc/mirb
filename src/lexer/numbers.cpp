@@ -3,6 +3,26 @@
 
 namespace Mirb
 {
+	bool Lexer::exponent()
+	{
+		if(input == 'e' || input == 'E')
+		{
+			input++;
+
+			if(input == '+' || input == '-')
+				input++;
+
+			skip_numbers([&] { return input.in('0', '9'); });
+			
+			lexeme.type = Lexeme::REAL;
+			lexeme.stop = &input;
+
+			return true;
+		}
+		else
+			return false;
+	}
+
 	void Lexer::zero()
 	{
 		input++;
@@ -62,6 +82,8 @@ namespace Mirb
 					parser.report(lexeme, "Trailing _ in number");
 				}
 
+				exponent();
+
 				break;
 		}
 	}
@@ -75,7 +97,7 @@ namespace Mirb
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::INTEGER;
 		
-		if(input != '.')
+		if(exponent() || input != '.')
 			return;
 		
 		input++;
@@ -90,6 +112,8 @@ namespace Mirb
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::REAL;
+
+		exponent();
 	}
 
 	void Lexer::real()
@@ -98,11 +122,12 @@ namespace Mirb
 		
 		if(input.in('0', '9'))
 		{
-			while(input.in('0', '9'))
-				input++;
+			skip_numbers([&] { return input.in('0', '9'); });
 
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::REAL;
+
+			exponent();
 		}
 		else
 		{

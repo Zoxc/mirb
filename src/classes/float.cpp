@@ -8,7 +8,7 @@ namespace Mirb
 {
 	value_t Float::to_s(Float *obj)
 	{
-		char_t buffer[15];
+		char_t buffer[32];
 
 		size_t length = sprintf((char *)buffer, "%f", obj->value);
 
