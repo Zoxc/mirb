@@ -636,6 +636,8 @@ namespace Mirb
 
 				if(lexeme() == Lexeme::PARENT_OPEN)
 				{
+					lexer.step();
+
 					node = parse_expression();
 
 					close_pair("defined? parentheses", range, Lexeme::PARENT_CLOSE);
