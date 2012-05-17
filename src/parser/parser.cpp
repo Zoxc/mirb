@@ -1463,11 +1463,20 @@ namespace Mirb
 		if(!input)
 		{
 			lexer.step();
-			return parse_expression();
+			return parse_high_rescue(allow_multiples, true);
 		}
 
 		switch(input->type())
 		{
+			case Tree::Node::BinaryOp:
+			{
+				auto node = (Tree::BinaryOpNode *)input;
+
+				node->right = process_assignment(node->right, allow_multiples);
+
+				return node;
+			}
+
 			case Tree::Node::MultipleExpressions:
 			{
 				auto node = (Tree::MultipleExpressionsNode *)input;
