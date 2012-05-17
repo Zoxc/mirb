@@ -1206,7 +1206,7 @@ namespace Mirb
 		return result;
 	}
 	
-	Tree::Node *Parser::parse_splat_expression(bool allow_multiples)
+	Tree::Node *Parser::parse_splat_expression(bool allow_multiples, bool nested)
 	{
 		if(matches(Lexeme::MUL))
 		{
@@ -1223,12 +1223,12 @@ namespace Mirb
 
 			auto result = new (fragment) Tree::SplatNode;
 
-			result->expression = typecheck(parse_ternary_if(allow_multiples));
+			result->expression = nested ? typecheck(parse_assignment(false, false)) : typecheck(parse_ternary_if(allow_multiples));
 
 			return result;
 		}
 		else
-			return parse_ternary_if(allow_multiples);
+			return nested ? parse_assignment(false, false) : parse_ternary_if(allow_multiples);
 	}
 
 	void Parser::process_lhs(Tree::Node *&lhs, const SourceLoc &range)
@@ -1349,10 +1349,10 @@ namespace Mirb
 		node->splat_index = splat_index;
 	}
 
-	Tree::Node *Parser::parse_multiple_expressions(bool allow_multiples)
+	Tree::Node *Parser::parse_multiple_expressions(bool allow_multiples, bool nested)
 	{
 		SourceLoc range = lexer.lexeme;
-		auto result = parse_splat_expression(allow_multiples);
+		auto result = parse_splat_expression(allow_multiples, nested);
 		
 		bool seen_splat = result && (result->type() == Tree::Node::Splat);
 
@@ -1379,7 +1379,7 @@ namespace Mirb
 					skip_lines();
 
 					SourceLoc result_range = lexer.lexeme;
-					result = typecheck(parse_splat_expression(allow_multiples));
+					result = typecheck(parse_splat_expression(allow_multiples, nested));
 					lexer.lexeme.prev_set(&result_range);
 
 					if(result)
@@ -1422,7 +1422,7 @@ namespace Mirb
 			
 			result->left = left;
 			
-			result->right = parse_high_rescue(allow_multiples);
+			result->right = parse_high_rescue(allow_multiples, true);
 			
 			return result;
 		}
@@ -1442,15 +1442,15 @@ namespace Mirb
 			lexer.step();
 			skip_lines();
 			
-			binary_op->right = parse_high_rescue(allow_multiples);
+			binary_op->right = parse_high_rescue(allow_multiples, true);
 			
 			return result;
 		}
 	};
 	
-	Tree::Node *Parser::parse_assignment(bool allow_multiples)
+	Tree::Node *Parser::parse_assignment(bool allow_multiples, bool nested)
 	{
-		Tree::Node *result = parse_multiple_expressions(allow_multiples);
+		Tree::Node *result = parse_multiple_expressions(allow_multiples, nested);
 		
 		if(is_assignment_op())
 			return process_assignment(result, allow_multiples);
@@ -1486,7 +1486,7 @@ namespace Mirb
 			
 				result->left = node;
 			
-				result->right = parse_high_rescue(allow_multiples);
+				result->right = parse_high_rescue(allow_multiples, true);
 
 				return result;
 			}
@@ -1516,7 +1516,7 @@ namespace Mirb
 						
 						node->method = mutated;
 						
-						Tree::Node *argument = parse_high_rescue(allow_multiples);
+						Tree::Node *argument = parse_high_rescue(allow_multiples, true);
 
 						if(argument)
 							node->arguments.append(argument);
@@ -1551,7 +1551,7 @@ namespace Mirb
 						lexer.step();
 						skip_lines();
 						
-						binary_op->right = parse_high_rescue(allow_multiples);
+						binary_op->right = parse_high_rescue(allow_multiples, true);
 
 						if(binary_op->right->type() == Tree::Node::MultipleExpressions)
 							report(assign_range, "Can only use regular assign with multiple expression assignment");
@@ -1583,7 +1583,7 @@ namespace Mirb
 		lexer.step();
 		skip_lines();
 
-		parse_assignment(allow_multiples);
+		parse_high_rescue(allow_multiples, true);
 
 		return input;
 	}
@@ -1596,7 +1596,7 @@ namespace Mirb
 			
 			skip_lines();
 
-			auto result = parse_assignment(true);
+			auto result = parse_assignment(true, false);
 
 			typecheck(result, [&](Tree::Node *result) {
 				return new (fragment) Tree::BooleanNotNode(result);
@@ -1606,7 +1606,7 @@ namespace Mirb
 		}
 		else
 		{
-			return parse_assignment(true);
+			return parse_assignment(true, false);
 		}
 	}
 

@@ -24,7 +24,7 @@ namespace Mirb
 		lexer.step();
 		
 		if(is_jump_argument())
-			return raise_void(new (fragment) Tree::ReturnNode(range, parse_assignment(true)));
+			return raise_void(new (fragment) Tree::ReturnNode(range, parse_assignment(true, false)));
 		else
 			return raise_void(new (fragment) Tree::ReturnNode(range, new (fragment) Tree::NilNode));
 	}
@@ -36,7 +36,7 @@ namespace Mirb
 		lexer.step();
 		
 		if(is_jump_argument())
-			return raise_void(new (fragment) Tree::NextNode(range, parse_assignment(true)));
+			return raise_void(new (fragment) Tree::NextNode(range, parse_assignment(true, false)));
 		else
 			return raise_void(new (fragment) Tree::NextNode(range, new (fragment) Tree::NilNode));
 	}
@@ -57,7 +57,7 @@ namespace Mirb
 		lexer.step();
 		
 		if(is_jump_argument())
-			return raise_void(new (fragment) Tree::BreakNode(range, parse_assignment(true)));
+			return raise_void(new (fragment) Tree::BreakNode(range, parse_assignment(true, false)));
 		else
 			return raise_void(new (fragment) Tree::BreakNode(range, new (fragment) Tree::NilNode));
 	}
@@ -86,7 +86,7 @@ namespace Mirb
 			lexer.step();
 
 			if(!is_sep() && lexeme() != Lexeme::KW_THEN && lexeme() != Lexeme::ASSOC)
-				rescue->pattern = parse_assignment(true);
+				rescue->pattern = parse_assignment(true, false);
 			else
 				rescue->pattern = nullptr;
 			
@@ -212,9 +212,9 @@ namespace Mirb
 		return result;
 	}
 	
-	Tree::Node *Parser::parse_high_rescue(bool allow_multiples)
+	Tree::Node *Parser::parse_high_rescue(bool allow_multiples, bool nested)
 	{
-		Tree::Node *result = parse_assignment(allow_multiples);
+		Tree::Node *result = parse_assignment(allow_multiples, nested);
 		
 		if(lexeme() == Lexeme::KW_RESCUE && result->type() != Tree::Node::MultipleExpressions)
 		{
@@ -429,7 +429,7 @@ namespace Mirb
 
 			match(Lexeme::KW_WHEN);
 			
-			clause->pattern = parse_assignment(true);
+			clause->pattern = parse_assignment(true, false);
 			
 			lexer.lexeme.prev_set(&clause->range);
 

@@ -120,11 +120,11 @@ namespace Mirb
 			Tree::Node *parse_hash();
 			Tree::Node *parse_data(Lexeme::Type override);
 			Tree::Node *parse_power();
-			Tree::Node *parse_splat_expression(bool allow_multiples);
+			Tree::Node *parse_splat_expression(bool allow_multiples, bool nested);
 			void process_lhs(Tree::Node *&lhs, const SourceLoc &range);
 			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
-			Tree::Node *parse_multiple_expressions(bool allow_multiples);
-			Tree::Node *parse_assignment(bool allow_multiples);
+			Tree::Node *parse_multiple_expressions(bool allow_multiples, bool nested);
+			Tree::Node *parse_assignment(bool allow_multiples, bool nested);
 			Tree::Node *build_assignment(Tree::Node *left, bool allow_multiples);
 			Tree::Node *process_assignment(Tree::Node *input, bool allow_multiples);
 			Tree::Node *parse_array();
@@ -137,12 +137,14 @@ namespace Mirb
 			
 			Tree::Node *parse_operator_expression(bool allow_multiples = true)
 			{
-				return typecheck(parse_assignment(allow_multiples));
+				return typecheck(parse_assignment(false, false));
+				// TODO: Pass on allow_multiples and return an error if multiple expressions are used in an assignment
+				// TODO: Also disallow splash assignments
 			}
 			
 			Tree::Node *parse_splat_operator_expression()
 			{
-				auto result = parse_assignment(false);
+				auto result = parse_assignment(false, false);
 
 				if(result && result->type() == Tree::Node::MultipleExpressions)
 					return static_cast<Tree::MultipleExpressionsNode *>(result)->expressions.first->expression;
@@ -177,7 +179,7 @@ namespace Mirb
 			void parse_then_sep();
 			Tree::Node *parse_if();
 			Tree::Node *parse_unless();
-			Tree::Node *parse_high_rescue(bool allow_multiples);
+			Tree::Node *parse_high_rescue(bool allow_multiples, bool nested);
 			Tree::Node *parse_low_rescue();
 			Tree::Node *parse_ternary_if(bool allow_multiples);
 			Tree::Node *parse_conditional();
