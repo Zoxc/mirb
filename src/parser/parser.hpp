@@ -112,6 +112,7 @@ namespace Mirb
 			Tree::Node *typecheck(Tree::Node *result);
 
 			// expressions
+			Tree::Node *parse_symbol();
 			Tree::Node *parse_variable(Symbol *symbol, SourceLoc *range);
 			bool is_assignment_op();
 			bool is_equality_op();

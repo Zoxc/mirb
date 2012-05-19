@@ -609,6 +609,72 @@ namespace Mirb
 
 		tail = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
 	}
+	
+	Tree::Node *Parser::parse_symbol()
+	{
+		switch(lexeme())
+		{
+			case Lexeme::COLON:
+			{
+				SourceLoc range = lexer.lexeme;
+
+				lexer.lexeme.allow_keywords = false;
+
+				lexer.step();
+
+				lexer.lexeme.allow_keywords = true;
+
+				if(lexer.lexeme.whitespace)
+				{
+					range.start = range.stop;
+					range.stop = lexer.lexeme.start;
+
+					report(range, "No whitespace between ':' and the literal is allowed with symbol literals");
+				}
+
+				switch(lexeme())
+				{
+					case Lexeme::IVAR:
+					case Lexeme::CVAR:
+					case Lexeme::GLOBAL:
+					{
+						auto result = new (fragment) Tree::SymbolNode;
+						result->symbol = lexer.lexeme.symbol;
+						lexer.step();
+						return result;
+					}
+					
+					case Lexeme::STRING:
+						return parse_data(Lexeme::SYMBOL);
+
+					default:
+					{
+						auto result = new (fragment) Tree::SymbolNode;
+
+						parse_method_name(result->symbol);
+
+						return result;
+					}
+				}
+
+			}
+
+			case Lexeme::SYMBOL:
+			{
+				auto result = new (fragment) Tree::SymbolNode;
+
+				result->symbol = lexer.lexeme.symbol;
+
+				lexer.step();
+
+				return result;
+			}
+			
+			default:
+				expected(Lexeme::SYMBOL);
+				return 0;
+		}
+	}
 
 	Tree::Node *Parser::parse_factor()
 	{
@@ -789,60 +855,9 @@ namespace Mirb
 			}
 				
 			case Lexeme::SYMBOL:
-			{
-				auto result = new (fragment) Tree::SymbolNode;
-
-				result->symbol = lexer.lexeme.symbol;
-
-				lexer.step();
-
-				return result;
-			}
-
 			case Lexeme::COLON:
-			{
-				SourceLoc range = lexer.lexeme;
+				return parse_symbol();
 
-				lexer.lexeme.allow_keywords = false;
-
-				lexer.step();
-
-				lexer.lexeme.allow_keywords = true;
-
-				if(lexer.lexeme.whitespace)
-				{
-					range.start = range.stop;
-					range.stop = lexer.lexeme.start;
-
-					report(range, "No whitespace between ':' and the literal is allowed with symbol literals");
-				}
-
-				switch(lexeme())
-				{
-					case Lexeme::IVAR:
-					case Lexeme::CVAR:
-					case Lexeme::GLOBAL:
-					{
-						auto result = new (fragment) Tree::SymbolNode;
-						result->symbol = lexer.lexeme.symbol;
-						lexer.step();
-						return result;
-					}
-					
-					case Lexeme::STRING:
-						return parse_data(Lexeme::SYMBOL);
-
-					default:
-					{
-						auto result = new (fragment) Tree::SymbolNode;
-
-						parse_method_name(result->symbol);
-
-						return result;
-					}
-				}
-			}
-			
 			case Lexeme::COMMAND:
 			case Lexeme::REGEXP:
 			case Lexeme::STRING:
@@ -1660,15 +1675,21 @@ namespace Mirb
 			lexer.lexeme.allow_keywords = false;
 
 			auto parse_name = [&](Tree::Node *&node) {
-				if(lexeme() == Lexeme::SYMBOL)
-					node = parse_factor();
-				else
+				switch(lexeme())
 				{
-					auto symbol = new (fragment) Tree::SymbolNode;
+					case Lexeme::SYMBOL:
+					case Lexeme::COLON:
+						node = parse_symbol();
+						break;
+						
+					default:
+					{
+						auto symbol = new (fragment) Tree::SymbolNode;
 
-					parse_method_name(symbol->symbol);
+						parse_method_name(symbol->symbol);
 
-					node = symbol;
+						node = symbol;
+					}
 				}
 			};
 			
