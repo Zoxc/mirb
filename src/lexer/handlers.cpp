@@ -168,11 +168,8 @@ namespace Mirb
 		switch(input)
 		{
 			case 'r':
-			{
 				input++;
-				parse_delimited_data(Lexeme::REGEXP);
-				regexp_options();
-			}
+				return parse_delimited_data(Lexeme::REGEXP);
 				
 			case 's':
 				input++;
@@ -257,7 +254,6 @@ namespace Mirb
 		state.type = Lexeme::REGEXP;
 		state.terminator = '/';
 		parse_interpolate(&state, false);
-		regexp_options();
 	}
 	
 	void Lexer::character()

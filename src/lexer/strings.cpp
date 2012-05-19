@@ -304,6 +304,12 @@ namespace Mirb
 		done:
 		lexeme.stop = &input;
 		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
+
+		if(lexeme.data->type == InterpolateData::Plain || lexeme.data->type == InterpolateData::Ending)
+		{
+			if(state->type == Lexeme::REGEXP)
+				regexp_options();
+		}
 	}
 	
 	void Lexer::curly_close()
