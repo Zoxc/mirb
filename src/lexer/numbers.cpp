@@ -55,6 +55,19 @@ namespace Mirb
 				input++;
 				get_number<Lexeme::BINARY, '1'>();
 				break;
+				
+			case '_':
+			case 'o':
+			case 'O':
+				input++;
+				get_number<Lexeme::OCTAL, '7'>();
+				break;
+
+			case 'd':
+			case 'D':
+				input++;
+				get_number<Lexeme::INTEGER, '9'>();
+				break;
 
 			case '0':
 			case '1':
