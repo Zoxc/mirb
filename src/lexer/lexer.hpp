@@ -52,6 +52,7 @@ namespace Mirb
 			void report_null();
 
 			bool heredoc_terminates(Heredoc *heredoc);
+			void regexp_options();
 			
 			void parse_interpolate_heredoc(Heredoc *heredoc);
 			bool parse_escape(std::string &result);
@@ -143,6 +144,7 @@ namespace Mirb
 			
 			void ivar();
 			void global();
+			static bool is_char(char_t c);
 			static bool is_alpha(char_t c);
 			static bool is_ident(char_t c);
 			static bool is_start_ident(char_t c);

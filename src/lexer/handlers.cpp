@@ -168,8 +168,11 @@ namespace Mirb
 		switch(input)
 		{
 			case 'r':
+			{
 				input++;
-				return parse_delimited_data(Lexeme::REGEXP);
+				parse_delimited_data(Lexeme::REGEXP);
+				regexp_options();
+			}
 				
 			case 's':
 				input++;
@@ -233,6 +236,19 @@ namespace Mirb
 		return parse_delimited_data(Lexeme::STRING);
 	}
 
+	void Lexer::regexp_options()
+	{
+		while(is_char(input))
+		{
+			if(input != 'i' && input != 'm')
+			{
+				parser.report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
+			}
+
+			input++;
+		}
+	}
+
 	void Lexer::div_to_regexp()
 	{
 		input.set(lexeme.start + 1);
@@ -241,6 +257,7 @@ namespace Mirb
 		state.type = Lexeme::REGEXP;
 		state.terminator = '/';
 		parse_interpolate(&state, false);
+		regexp_options();
 	}
 	
 	void Lexer::character()
@@ -597,14 +614,19 @@ namespace Mirb
 		restep();
 	}
 	
+	bool Lexer::is_char(char_t c)
+	{
+		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z');
+	}
+	
 	bool Lexer::is_alpha(char_t c)
 	{
-		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z') || Input::char_in(c, '0', '9');
+		return is_char(c) || Input::char_in(c, '0', '9');
 	}
 	
 	bool Lexer::is_start_ident(char_t c)
 	{
-		return Input::char_in(c, 'a', 'z') || Input::char_in(c, 'A', 'Z') || c == '_';
+		return is_char(c) || c == '_';
 	}
 	
 	bool Lexer::is_ident(char_t c)
