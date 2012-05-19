@@ -90,8 +90,6 @@ namespace Mirb
 
 	void Lexer::number()
 	{
-		input++;
-
 		skip_numbers([&] { return input.in('0', '9'); });
 		
 		lexeme.stop = &input;
