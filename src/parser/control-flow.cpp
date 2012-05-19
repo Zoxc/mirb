@@ -86,7 +86,7 @@ namespace Mirb
 			lexer.step();
 
 			if(!is_sep() && lexeme() != Lexeme::KW_THEN && lexeme() != Lexeme::ASSOC)
-				rescue->pattern = parse_assignment(true, false);
+				rescue->pattern = process_rhs(parse_multiple_expressions(true, true));
 			else
 				rescue->pattern = nullptr;
 			
@@ -214,7 +214,7 @@ namespace Mirb
 	
 	Tree::Node *Parser::parse_high_rescue(bool allow_multiples, bool nested)
 	{
-		Tree::Node *result = parse_assignment(allow_multiples, nested);
+		Tree::Node *result = process_rhs(parse_assignment(allow_multiples, nested));
 		
 		if(lexeme() == Lexeme::KW_RESCUE && result->type() != Tree::Node::MultipleExpressions)
 		{
@@ -429,7 +429,7 @@ namespace Mirb
 
 			match(Lexeme::KW_WHEN);
 			
-			clause->pattern = parse_assignment(true, false);
+			clause->pattern = process_rhs(parse_multiple_expressions(true, true));
 			
 			lexer.lexeme.prev_set(&clause->range);
 

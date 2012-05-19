@@ -1240,13 +1240,35 @@ namespace Mirb
 			}
 
 			auto result = new (fragment) Tree::SplatNode;
-
-			result->expression = nested ? typecheck(parse_assignment(false, false)) : typecheck(parse_ternary_if(allow_multiples));
+			
+			if(is_expression())
+				result->expression = nested ? typecheck(parse_assignment(false, false)) : typecheck(parse_ternary_if(allow_multiples));
+			else
+				result->expression = 0;
 
 			return result;
 		}
 		else
 			return nested ? parse_assignment(false, false) : parse_ternary_if(allow_multiples);
+	}
+	
+	Tree::Node *Parser::process_rhs(Tree::Node *rhs)
+	{
+		if(rhs->type() != Tree::Node::MultipleExpressions)
+			return rhs;
+
+		auto node = static_cast<Tree::MultipleExpressionsNode *>(rhs);
+		
+		for(auto expr: node->expressions)
+		{
+			if(expr->expression->type() == Tree::Node::Splat)
+			{
+				if(!static_cast<Tree::SplatNode *>(expr->expression)->expression)
+					report(expr->range, "Expected argument with splat operator");
+			}
+		}
+
+		return rhs;
 	}
 
 	void Parser::process_lhs(Tree::Node *&lhs, const SourceLoc &range)

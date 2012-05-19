@@ -122,6 +122,7 @@ namespace Mirb
 			Tree::Node *parse_data(Lexeme::Type override);
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression(bool allow_multiples, bool nested);
+			Tree::Node *process_rhs(Tree::Node *rhs);
 			void process_lhs(Tree::Node *&lhs, const SourceLoc &range);
 			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
 			Tree::Node *parse_multiple_expressions(bool allow_multiples, bool nested);
@@ -138,14 +139,14 @@ namespace Mirb
 			
 			Tree::Node *parse_operator_expression(bool allow_multiples = true)
 			{
-				return typecheck(parse_assignment(false, false));
+				return typecheck(process_rhs(parse_assignment(false, false)));
 				// TODO: Pass on allow_multiples and return an error if multiple expressions are used in an assignment
 				// TODO: Also disallow splash assignments
 			}
 			
 			Tree::Node *parse_splat_operator_expression()
 			{
-				auto result = parse_assignment(false, false);
+				auto result = process_rhs(parse_multiple_expressions(false, true));
 
 				if(result && result->type() == Tree::Node::MultipleExpressions)
 					return static_cast<Tree::MultipleExpressionsNode *>(result)->expressions.first->expression;

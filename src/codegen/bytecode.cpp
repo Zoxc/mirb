@@ -382,9 +382,12 @@ namespace Mirb
 			{
 				if(expr->expression->type() == Tree::Node::Splat)
 				{
-					write_node(static_cast<Tree::SplatNode *>(expr->expression)->expression, [&](var_t store) {
-						gen<AssignArrayOp>(store, rhs, node->splat_index, node->expression_count);
-					}, temp);
+					auto splat_node = static_cast<Tree::SplatNode *>(expr->expression);
+
+					if(splat_node->expression)
+						write_node(splat_node->expression, [&](var_t store) {
+							gen<AssignArrayOp>(store, rhs, node->splat_index, node->expression_count);
+						}, temp);
 				}
 				else
 				{
