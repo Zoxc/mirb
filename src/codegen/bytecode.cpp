@@ -64,7 +64,6 @@ namespace Mirb
 			&ByteCodeGenerator::convert_unary_op,
 			&ByteCodeGenerator::convert_boolean_not,
 			&ByteCodeGenerator::convert_binary_op,
-			&ByteCodeGenerator::convert_boolean_op,
 			&ByteCodeGenerator::convert_assignment,
 			&ByteCodeGenerator::convert_self,
 			&ByteCodeGenerator::convert_nil,
@@ -351,7 +350,7 @@ namespace Mirb
 			to_bytecode(node->right, group[0]);
 			
 			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, group.size, group.use());
-			location(node->range);
+			location(&node->range);
 		}
 		
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, var_t var)

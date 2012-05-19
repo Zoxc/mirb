@@ -105,15 +105,13 @@ namespace Mirb
 		};
 		
 		struct BinaryOpNode:
-			public Node
+			public LocationNode
 		{
 			NodeType type() { return BinaryOp; }
 			
 			Node *left;
 			Node *right;
 			Lexeme::Type op;
-			
-			SourceLoc *range;
 		};
 
 		struct VariableNode;
@@ -122,12 +120,6 @@ namespace Mirb
 			public BinaryOpNode
 		{
 			NodeType type() { return Assignment; }
-		};
-		
-		struct BooleanOpNode:
-			public BinaryOpNode
-		{
-			NodeType type() { return BooleanOp; }
 		};
 		
 		struct UnaryOpNode:

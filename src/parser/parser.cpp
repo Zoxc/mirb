@@ -1026,17 +1026,18 @@ namespace Mirb
 	{
 		Tree::Node *result = parse_lookup_chain();
 		
-		while(lexeme() == Lexeme::POWER)
+		if(lexeme() == Lexeme::POWER)
 		{
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
-				auto node = new (fragment) Tree::BooleanOpNode;
+				auto node = new (fragment) Tree::BinaryOpNode;
 			
 				node->op = Lexeme::POWER;
+				node->range = lexer.lexeme;
 				node->left = result;
 			
 				lexer.step();
 			
-				node->right = typecheck(parse_lookup_chain());
+				node->right = typecheck(parse_unary());
 
 				return node;
 			});
@@ -1131,7 +1132,7 @@ namespace Mirb
 				break;
 			
 			typecheck(left, [&](Tree::Node *left) -> Tree::Node * {
-				SourceLoc *range = capture();
+				SourceLoc range = lexer.lexeme;
 			
 				lexer.step();
 
@@ -1438,7 +1439,7 @@ namespace Mirb
 			result->left = left;
 			result->right = binary_op;
 			binary_op->left = left;
-			binary_op->range = capture();
+			binary_op->range = lexer.lexeme;
 			binary_op->op = Lexeme::assign_to_operator(lexeme());
 			
 			lexer.step();
@@ -1556,7 +1557,7 @@ namespace Mirb
 						auto binary_op = new (fragment) Tree::BinaryOpNode;
 						
 						binary_op->left = node;
-						binary_op->range = capture();
+						binary_op->range = lexer.lexeme;
 						binary_op->op = Lexeme::assign_to_operator(lexeme());
 						
 						lexer.step();
@@ -1628,9 +1629,10 @@ namespace Mirb
 		while(lexeme() == Lexeme::KW_AND || lexeme() == Lexeme::KW_OR)
 		{
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
-				auto node = new (fragment) Tree::BooleanOpNode;
+				auto node = new (fragment) Tree::BinaryOpNode;
 				
-				node->op = lexeme();
+				node->op = lexeme() == Lexeme::KW_AND ? Lexeme::LOGICAL_AND : Lexeme::LOGICAL_OR;
+				node->range = lexer.lexeme;
 				node->left = result;
 			
 				lexer.step();

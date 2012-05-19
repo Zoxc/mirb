@@ -27,7 +27,6 @@ namespace Mirb
 				UnaryOp,
 				BooleanNot,
 				BinaryOp,
-				BooleanOp,
 				Assignment,
 				Self,
 				Nil,
@@ -83,6 +82,9 @@ namespace Mirb
 			public Node
 		{
 			SourceLoc range;
+			
+			LocationNode() {}
+			LocationNode(const SourceLoc &range) : range(range) {}
 		};
 		
 		typedef List<Node, ListNode> NodeList;

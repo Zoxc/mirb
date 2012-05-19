@@ -90,7 +90,6 @@ namespace Mirb
 		switch(node->type())
 		{
 			case Tree::SimpleNode::BinaryOp:
-			case Tree::SimpleNode::BooleanOp:
 			case Tree::SimpleNode::Assignment:
 			{
 				auto target = (Tree::BinaryOpNode *)node;

@@ -17,7 +17,6 @@ namespace Mirb
 		"UnaryOp",
 		"BooleanNot",
 		"BinaryOp",
-		"BooleanOp",
 		"Assignment",
 		"Self",
 		"Nil",
