@@ -1021,7 +1021,7 @@ namespace Mirb
 				
 				skip_lines();
 					
-				Tree::Node *result = parse_group();
+				Tree::Node *result = parse_statements();
 
 				close_pair("parentheses", range, Lexeme::PARENT_CLOSE);
 				
@@ -1438,7 +1438,7 @@ namespace Mirb
 				if(is_expression())
 				{
 					SourceLoc result_range = lexer.lexeme;
-					result = typecheck(parse_splat_expression(allow_multiples, nested));
+					result = parse_splat_expression(allow_multiples, nested);
 					lexer.lexeme.prev_set(&result_range);
 
 					if(result)
