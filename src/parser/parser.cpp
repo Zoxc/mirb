@@ -1254,18 +1254,23 @@ namespace Mirb
 	
 	Tree::Node *Parser::process_rhs(Tree::Node *rhs)
 	{
-		if(rhs->type() != Tree::Node::MultipleExpressions)
+		if(!rhs || rhs->type() != Tree::Node::MultipleExpressions)
 			return rhs;
 
 		auto node = static_cast<Tree::MultipleExpressionsNode *>(rhs);
 		
 		for(auto expr: node->expressions)
 		{
-			if(expr->expression->type() == Tree::Node::Splat)
+			if(expr->expression)
 			{
-				if(!static_cast<Tree::SplatNode *>(expr->expression)->expression)
-					report(expr->range, "Expected argument with splat operator");
+				if(expr->expression->type() == Tree::Node::Splat)
+				{
+					if(!static_cast<Tree::SplatNode *>(expr->expression)->expression)
+						report(expr->range, "Expected argument with splat operator");
+				}
 			}
+			else
+				report(expr->range, "Unexpected trailing comma");
 		}
 
 		return rhs;
@@ -1365,7 +1370,7 @@ namespace Mirb
 			expr->size = size;
 			expr->index = index;
 
-			if(expr->expression->type() == Tree::Node::Splat)
+			if(!expr->expression || expr->expression->type() == Tree::Node::Splat)
 			{
 				splat_index = size;
 				index = -1;
@@ -1412,21 +1417,35 @@ namespace Mirb
 			else
 				return result;
 
-			if(matches(Lexeme::COMMA))
+			while(lexeme() == Lexeme::COMMA)
 			{
-				do
-				{
-					skip_lines();
+				SourceLoc comma = lexer.lexeme;
 
+				step_lines();
+					
+				if(lexeme() == Lexeme::COMMA)
+				{
+					SourceLoc error;
+
+					while(lexeme() == Lexeme::COMMA)
+					{
+						step_lines();
+					}
+
+					report(error, "Unexpected multiple commas");
+				}
+
+				if(is_expression())
+				{
 					SourceLoc result_range = lexer.lexeme;
 					result = typecheck(parse_splat_expression(allow_multiples, nested));
 					lexer.lexeme.prev_set(&result_range);
 
 					if(result)
-						node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result,  result_range));
-
-				} while (matches(Lexeme::COMMA));
-
+						node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result, result_range));
+				}
+				else
+					node->expressions.append(new (fragment) Tree::MultipleExpressionNode(0, comma));
 			}
 			
 			lexer.lexeme.prev_set(&range);

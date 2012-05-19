@@ -227,7 +227,13 @@ namespace Mirb
 			{
 				while(matches(Lexeme::LINE));
 			}
+			
+			void step_lines()
+			{
+				lexer.step();
 
+				while(matches(Lexeme::LINE));
+			}
 		private:
 			bool match(Lexeme::Type what)
 			{
