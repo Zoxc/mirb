@@ -703,6 +703,7 @@ namespace Mirb
 				case '~':
 				case '*':
 				case '?':
+				case '!':
 					input++;
 					lexeme.stop = &input;
 					lexeme.type = Lexeme::GLOBAL;
