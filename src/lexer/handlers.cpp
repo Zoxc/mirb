@@ -701,6 +701,9 @@ namespace Mirb
 				case '_':
 				case '.':
 				case '~':
+				case ';':
+				case '"':
+				case '\'':
 				case '*':
 				case '?':
 				case '!':
