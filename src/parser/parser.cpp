@@ -265,54 +265,7 @@ namespace Mirb
 					if(result->type() == Tree::Node::Splat)
 						node->variadic = true;
 
-					auto append_hash = [&](Tree::Node *append) {
-						lexer.step();
-						
-						skip_lines();
-
-						if(!hash)
-						{
-							hash = new (fragment) Tree::HashNode;
-							hash->range = range;
-							node->arguments.append(hash);
-						}
-
-						hash->entries.append(append);
-
-						append = parse_operator_expression(false);
-
-						if(append)
-							hash->entries.append(append);
-						
-						lexer.lexeme.prev_set(&range);
-						lexer.lexeme.prev_set(&hash->range);
-
-						last_hash = range;
-					};
-
-					if(lexeme() == Lexeme::ASSOC)
-						append_hash(result);
-					else if(lexeme() == Lexeme::COLON)
-					{
-						auto node = new (fragment) Tree::SymbolNode;
-						auto call = static_cast<Tree::CallNode *>(result);
-
-						if(result->type() == Tree::Node::Variable)
-							node->symbol = static_cast<Tree::VariableNode *>(result)->var->name;
-						else if(result->type() == Tree::Node::Call && call->can_be_var)
-							node->symbol = call->method;
-						else
-							error("Use '=>' to associate non-identifier key");
-
-						append_hash(node);
-					}
-					else
-					{
-						if(hash)
-							report(last_hash, "Association arguments must come after regular arguments");
-
-						node->arguments.append(result);
-					}
+					parse_association_argument(result, range, last_hash, hash, [&](Tree::Node *child) { node->arguments.append(child); });
 				}
 			}
 		}
@@ -406,7 +359,7 @@ namespace Mirb
 
 		return result;
 	}
-
+	
 	Tree::Node *Parser::parse_array()
 	{
 		auto result = new (fragment) Tree::ArrayNode;
@@ -414,6 +367,9 @@ namespace Mirb
 		result->variadic = false;
 		
 		SourceLoc range = lexer.lexeme;
+
+		Tree::HashNode *hash = nullptr;
+		SourceLoc last_hash;
 		
 		lexer.step();
 
@@ -424,14 +380,18 @@ namespace Mirb
 			if(lexeme() == Lexeme::SQUARE_CLOSE)
 				break;
 
+			SourceLoc element_range = lexer.lexeme;
+
 			auto element = parse_splat_operator_expression();
+
+			lexer.lexeme.prev_set(&element_range);
 				
 			if(element)
 			{
 				if(element->type() == Tree::Node::Splat)
 					result->variadic = true;
-
-				result->entries.append(element);
+				
+				parse_association_argument(element, element_range, last_hash, hash, [&](Tree::Node *child) { result->entries.append(child); });
 			}
 		}
 		while(matches(Lexeme::COMMA));

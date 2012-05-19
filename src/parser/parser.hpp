@@ -195,6 +195,61 @@ namespace Mirb
 			Tree::Node *parse_break();
 			Tree::Node *parse_next();
 			Tree::Node *parse_redo();
+
+			template<typename F> void parse_association_argument(Tree::Node *result, const SourceLoc &result_range, SourceLoc &last_hash, Tree::HashNode *&hash, F func)
+			{
+				auto append_hash = [&](Tree::Node *append) {
+					step_lines();
+						
+					if(!hash)
+					{
+						hash = new (fragment) Tree::HashNode;
+						hash->range = result_range;
+						func(hash);
+					}
+
+					hash->entries.append(append);
+
+					append = parse_operator_expression(false);
+
+					if(append)
+						hash->entries.append(append);
+						
+					lexer.lexeme.prev_set(&hash->range);
+
+					last_hash = result_range;
+					lexer.lexeme.prev_set(&last_hash);
+				};
+
+				if(lexeme() == Lexeme::ASSOC)
+				{
+					if(result->type() == Tree::Node::Splat)
+						report(result_range, "Cannot use the splat operator on an association key");
+
+					append_hash(result);
+				}
+				else if(lexeme() == Lexeme::COLON)
+				{
+					auto node = new (fragment) Tree::SymbolNode;
+					auto call = static_cast<Tree::CallNode *>(result);
+
+					if(result->type() == Tree::Node::Variable)
+						node->symbol = static_cast<Tree::VariableNode *>(result)->var->name;
+					else if(result->type() == Tree::Node::Call && call->can_be_var)
+						node->symbol = call->method;
+					else
+						error("Use '=>' to associate non-identifier key");
+
+					append_hash(node);
+				}
+				else
+				{
+					if(hash)
+						report(last_hash, "Association arguments must come after regular arguments");
+
+					func(result);
+				}
+			}
 			
 			// calls
 			bool require_ident();
