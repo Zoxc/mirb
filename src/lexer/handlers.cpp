@@ -329,8 +329,8 @@ namespace Mirb
 	bool Lexer::heredoc_terminates(Heredoc *heredoc)
 	{
 		const char_t *start = &input;
-		size_t line = lexeme.line;
-		const char_t *line_start = lexeme.line_start;
+		size_t line = lexeme.current_line;
+		const char_t *line_start = lexeme.current_line_start;
 
 		if(input == '\n')
 		{
@@ -367,8 +367,8 @@ namespace Mirb
 
 		if(std::memcmp(str, heredoc->name.data, heredoc->name.length) == 0)
 		{
-			lexeme.line = line;
-			lexeme.line_start = line_start;
+			lexeme.current_line = line;
+			lexeme.current_line_start = line_start;
 			return true;
 		}
 
@@ -378,8 +378,8 @@ namespace Mirb
 
 	void Lexer::process_newline(bool no_heredoc)
 	{
-		lexeme.line++;
-		lexeme.line_start = &input;
+		lexeme.current_line++;
+		lexeme.current_line_start = &input;
 
 		if(heredocs.size() && !no_heredoc)
 		{

@@ -146,6 +146,8 @@ namespace Mirb
 	Lexeme::Lexeme(const Lexeme &lexeme) :
 		SourceLoc(lexeme),
 		lexer(lexeme.lexer),
+		current_line(lexeme.current_line),
+		current_line_start(lexeme.current_line_start),
 		whitespace(lexeme.whitespace),
 		allow_keywords(lexeme.allow_keywords),
 		error(lexeme.error),
@@ -163,6 +165,8 @@ namespace Mirb
 		
 		SourceLoc::operator=(other);
 		
+		current_line = other.current_line;
+		current_line_start = other.current_line_start;
 		whitespace = other.whitespace;
 		allow_keywords = other.allow_keywords;
 		error = other.error;
@@ -188,10 +192,8 @@ namespace Mirb
 			result = "'" + names[type] + "'";
 		else if(type >= keyword_start && type <= keyword_end)
 			result = "'" + names[type] + "' (keyword)";
-		else if(type == IDENT || type == EXT_IDENT)
-			result = "'" + range->string() + "' (" + names[type] + ")";
 		else
-			result = range->string() + " (" + names[type] + ")";
+			result = "'" + range->get_line() + "' (" + names[type] + ")";
 		
 		return result;
 	}

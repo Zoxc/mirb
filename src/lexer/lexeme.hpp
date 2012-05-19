@@ -194,6 +194,9 @@ namespace Mirb
 			
 			Lexer &lexer;
 			
+			const char_t *current_line_start;
+			size_t current_line;
+
 			bool whitespace;
 			bool allow_keywords;
 			bool error;

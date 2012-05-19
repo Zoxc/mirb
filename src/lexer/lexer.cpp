@@ -207,8 +207,8 @@ namespace Mirb
 		this->length = length;
 		
 		lexeme.start = input;
-		lexeme.line_start = input;
-		lexeme.line = 0;
+		lexeme.current_line_start = input;
+		lexeme.current_line = 0;
 		lexeme.allow_keywords = true;
 		
 		step();
@@ -225,6 +225,8 @@ namespace Mirb
 		lexeme.start = &input;
 		lexeme.error = false;
 		lexeme.whitespace = whitespace;
+		lexeme.line = lexeme.current_line;
+		lexeme.line_start = lexeme.current_line_start;
 
 #ifdef DEBUG
 		lexeme.type = Lexeme::TYPES;
