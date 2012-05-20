@@ -191,6 +191,7 @@ namespace Mirb
 			void mod_to_literal();
 			void div_to_regexp();
 			void left_shift_to_heredoc();
+			bool whitespace_after();
 
 			void load(const char_t *input, size_t length);
 			void step();

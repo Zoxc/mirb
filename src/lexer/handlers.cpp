@@ -19,6 +19,11 @@ namespace Mirb
 
 		restep(true);
 	}
+	
+	bool Lexer::whitespace_after()
+	{
+		return is_white();
+	}
 
 	void Lexer::unknown()
 	{
