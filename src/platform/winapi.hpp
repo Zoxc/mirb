@@ -1,4 +1,3 @@
-#include "../classes/file.hpp"
 #include <tchar.h>
 
 namespace Mirb
@@ -13,7 +12,9 @@ namespace Mirb
 				std::string format();
 		};
 		
-		CharArray convert_path(const CharArray &path);
+		void raise(const CharArray &message);
+
+		CharArray to_win_path(const CharArray &path);
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars);
 		CharArray from_tchar(const TCHAR *buffer);
 
@@ -26,6 +27,9 @@ namespace Mirb
 
 				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), buffer, size);
 
+				if(size == 0)
+					raise("Unable to convert UTF-8 pathname to UCS-2");
+
 				buffer[size] = 0;
 
 				func(buffer, size);
@@ -33,18 +37,37 @@ namespace Mirb
 				func((const TCHAR *)string.raw(), string.size());
 			#endif
 		}
+		
+		template<typename F> void to_short_win_path(const CharArray &path, F func)
+		{
+			#ifdef _UNICODE
+				to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size) {
+					if(size > MAX_PATH)
+					{
+						if(GetShortPathName(buffer, buffer, size + 1) == 0)
+							raise("Unable to convert long pathname to a short pathname");
+					}
 
-		template<typename F> bool list_dir(const CharArray &path, bool skip_special, F func)
+					func(buffer);
+				});
+			#else
+				to_tchar(to_win_path(expand_path(path)), [&](const TCHAR *buffer, size_t) {
+					func(buffer);
+				});
+			#endif
+		}
+	
+		template<typename F> void list_dir(const CharArray &path, bool skip_special, F func)
 		{
 			WIN32_FIND_DATA ffd;
 			HANDLE handle;
 
-			to_tchar(convert_path(File::join(File::expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
+			to_tchar(to_win_path(File::join(expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
 				handle = FindFirstFile(buffer, &ffd);
 			});
 
 			if(handle == INVALID_HANDLE_VALUE)
-				return false;
+				raise("Unable to list directory '" + path + "'");
 
 			do
 			{
@@ -55,8 +78,6 @@ namespace Mirb
 			} while (FindNextFile(handle, &ffd) != 0);
 
 			FindClose(handle);
-
-			return true;
 		}
 
 		template<Color input> void color(const CharArray &string)

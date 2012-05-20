@@ -4,6 +4,11 @@
 
 namespace Mirb
 {
+	namespace Platform
+	{
+		struct error_t;
+	};
+
 	struct JoinSegments
 	{
 		std::vector<CharArray> segments;

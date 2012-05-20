@@ -3,11 +3,26 @@
 #ifdef WIN32
 
 #include "../collector.hpp"
+#include "../runtime.hpp"
 
 namespace Mirb
 {
 	namespace Platform
 	{
+		void raise(const CharArray &message)
+		{
+			TCHAR *msg_buffer;
+			DWORD err_no = GetLastError(); 
+
+			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS, 0, err_no, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msg_buffer, 0, 0);
+
+			CharArray msg = message + "\nError #" + CharArray::uint(err_no) + ": "   + from_tchar(msg_buffer);
+
+			LocalFree(msg_buffer);
+
+			throw Exception(msg);
+		}
+		
 		std::string BenchmarkResult::format()
 		{
 			std::stringstream result;
@@ -40,6 +55,9 @@ namespace Mirb
 
 				size = WideCharToMultiByte(CP_UTF8, 0, buffer, tchars, new_buffer, size, NULL, NULL);
 
+				if(size == 0)
+					raise("Unable to convert UCS-2 pathname to UTF-8");
+
 				return CharArray((const char_t *)new_buffer, size);
 			#else
 				return CharArray((const char_t *)buffer, tchars);
@@ -51,17 +69,6 @@ namespace Mirb
 			return from_tchar(buffer, _tcslen(buffer));
 		}
 
-		CharArray cwd()
-		{
-			size_t size = GetCurrentDirectory(0, 0);
-
-			TCHAR *buffer = (TCHAR *)alloca(size * sizeof(TCHAR));
-
-			size = GetCurrentDirectory(size, buffer);
-
-			return from_tchar(buffer, size);
-		}
-		
 		BOOL __stdcall ctrl_handler(DWORD ctrl_type) 
 		{ 
 			switch(ctrl_type) 
@@ -75,23 +82,71 @@ namespace Mirb
 			} 
 		} 
  
-		CharArray convert_path(const CharArray &path)
+		CharArray normalize_separator_to(const CharArray &path)
+		{
+			CharArray result = path;
+
+			result.localize();
+
+			for(size_t i = 0; i < result.size(); ++i)
+				if(result[i] == '/')
+					result[i] = '\\';
+
+			if(result[result.size()-1] == '\\')
+				result.shrink(result.size() - 1);
+
+			return result;
+		}
+	
+		CharArray normalize_separator_from(const CharArray &path)
+		{
+			CharArray result = path;
+
+			result.localize();
+
+			for(size_t i = 0; i < result.size(); ++i)
+				if(result[i] == '\\')
+					result[i] = '/';
+
+			if(result[result.size()-1] == '/')
+				result.shrink(result.size() - 1);
+
+			return result;
+		}
+	
+		CharArray from_win_path(const CharArray &path)
 		{
 			#ifdef _UNICODE
-				CharArray result(path);
+				CharArray result = (path.copy(0, 4) == "\\\\?\\") ? path.copy(4, path.size()) : path;
 
-				result.localize();
-
-				for(size_t i = 0; i < result.size(); ++i)
-					if(result[i] == '/')
-						result[i] = '\\';
-
-				if(result[result.size()-1] == '\\')
-					result.shrink(result.size() - 1);
-
-				return "\\\\?\\" + result;
+				return normalize_separator_from(result);
 			#else
 				return path;
+			#endif
+		}
+	
+		CharArray to_win_path(const CharArray &path)
+		{
+			#ifdef _UNICODE
+				return "\\\\?\\" + normalize_separator_to(path);
+			#else
+				return path;
+			#endif
+		}
+	
+		CharArray from_short_win_path(const TCHAR *buffer)
+		{
+			#ifdef _UNICODE
+				size_t size = GetLongPathName(buffer, 0, 0);
+
+				TCHAR *long_buffer = (TCHAR *)alloca((size + 1) * sizeof(TCHAR));
+
+				if(GetLongPathName(buffer, long_buffer, size + 1) == 0)
+					raise("Unable to convert short pathname to a long pathname");
+
+				return from_win_path(from_tchar(long_buffer));
+			#else
+				return CharArray((const char_t *)buffer, std::strlen(buffer));
 			#endif
 		}
 	
@@ -99,13 +154,33 @@ namespace Mirb
 		{
 			DWORD attrib; 
 
-			to_tchar(convert_path(path), [&](const TCHAR *buffer, size_t) {
+			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
 				attrib = GetFileAttributes(buffer);
 			});
 
 			return attrib;
 		}
 		
+		CharArray cwd()
+		{
+			size_t size = GetCurrentDirectory(0, 0);
+
+			TCHAR *buffer = (TCHAR *)alloca(size * sizeof(TCHAR));
+
+			if(GetCurrentDirectory(size, buffer) == 0)
+				raise("Unable to get the current directory");
+
+			return from_short_win_path(buffer);
+		}
+		
+		void cd(const CharArray &path)
+		{
+			to_short_win_path(path, [&](const TCHAR *buffer) {
+				if(SetCurrentDirectory(buffer) == 0)
+					raise("Unable change the current directory to '" + path + "'");
+			});
+		}
+
 		bool file_exists(const CharArray &path)
 		{
 			return (attributes(path) != INVALID_FILE_ATTRIBUTES);

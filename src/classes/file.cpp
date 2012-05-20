@@ -74,7 +74,16 @@ namespace Mirb
 	CharArray File::expand_path(CharArray relative)
 	{
 		if(!absolute_path(relative))
-			return join(Platform::cwd(), relative);
+		{
+			try
+			{
+				return join(Platform::cwd(), relative);
+			}
+			catch(const Platform::Exception &)
+			{
+				return CharArray();
+			}
+		}
 		else
 			return relative;
 	};

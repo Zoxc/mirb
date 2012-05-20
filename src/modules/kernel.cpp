@@ -177,7 +177,7 @@ namespace Mirb
 
 		data[length] = 0;
 
-		value_t result = eval(self, Symbol::get("main"), context->object_scope, (char_t *)data, length, filename);
+		value_t result = eval(self, Symbol::get("main"), context->object_scope, (char_t *)data, length, full_path);
 
 		free(data);
 		fclose(file);

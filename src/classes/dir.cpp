@@ -10,19 +10,39 @@ namespace Mirb
 {
 	value_t pwd()
 	{
-		return File::normalize_path(Platform::cwd()).to_string();
+		return Platform::wrap([&] {
+			return Platform::cwd().to_string();
+		});
+	}
+	
+	value_t chdir(String *path, value_t block)
+	{
+		return Platform::wrap([&]() -> value_t {
+			CharArray cwd = Platform::cwd();
+
+			Platform::cd(path->string);
+		
+			OnStackString<1> os(cwd);
+
+			value_t result = yield(block);
+
+			Platform::cd(cwd);
+		
+			return result;
+		});
 	}
 	
 	value_t entries(String *path)
 	{
-		auto array = new (collector) Array;
+		return Platform::wrap([&]() -> value_t {
+			auto array = new (collector) Array;
 
-		if(!Platform::list_dir(path->string, false, [&](const CharArray &filename, bool) {
-			array->vector.push(filename.to_string());
-		}))
-			return raise(context->system_call_error, "Unable to list directory '" + path->string + "'");
+			Platform::list_dir(path->string, false, [&](const CharArray &filename, bool) {
+				array->vector.push(filename.to_string());
+			});
 
-		return array;
+			return array;
+		});
 	}
 
 	bool is_pattern(const CharArray &fn)
@@ -84,28 +104,31 @@ namespace Mirb
 	
 	value_t rb_glob(String *pattern)
 	{
-		auto array = new (collector) Array;
+		return Platform::wrap([&]() -> value_t {
+			auto array = new (collector) Array;
 
-		std::vector<CharArray> segments;
+			std::vector<CharArray> segments;
 
-		CharArray path = File::normalize_path(pattern->string);
+			CharArray path = File::normalize_path(pattern->string);
 
-		path.split([&](const CharArray &part) {
-			segments.push_back(part);
-		}, CharArray("/"));
+			path.split([&](const CharArray &part) {
+				segments.push_back(part);
+			}, CharArray("/"));
 
-		if(File::absolute_path(path))
-			glob(array, segments, 1, segments[0].size() ? segments[0] : "/");
-		else
-			glob(array, segments, 0, "");
+			if(File::absolute_path(path))
+				glob(array, segments, 1, segments[0].size() ? segments[0] : "/");
+			else
+				glob(array, segments, 0, "");
 
-		return array;
+			return array;
+		});
 	}
 	
 	void Dir::initialize()
 	{
 		context->dir_class = define_class("Dir", context->object_class);
 		
+		singleton_method<Arg::Class<String>, Arg::Block>(context->dir_class, "chdir", &chdir);
 		singleton_method<Arg::Class<String>>(context->dir_class, "entries", &entries);
 		singleton_method<Arg::Class<String>>(context->dir_class, "glob", &rb_glob);
 		singleton_method<Arg::Class<String>>(context->dir_class, "[]", &rb_glob);

@@ -129,6 +129,7 @@
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
     <ClCompile Include="..\..\src\parser\parser.cpp" />
     <ClCompile Include="..\..\src\parser\structures.cpp" />
+    <ClCompile Include="..\..\src\platform\platform.cpp" />
     <ClCompile Include="..\..\src\platform\posix.cpp" />
     <ClCompile Include="..\..\src\platform\winapi.cpp" />
     <ClCompile Include="..\..\src\runtime.cpp" />
