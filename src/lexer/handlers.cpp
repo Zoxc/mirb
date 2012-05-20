@@ -242,9 +242,19 @@ namespace Mirb
 	{
 		while(is_char(input))
 		{
-			if(input != 'i' && input != 'm')
+			switch(input)
 			{
-				parser.report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
+				case 'i':
+				case 'm':
+				case 'u':
+				case 's':
+				case 'n':
+				case 'o':
+				case 'e':
+					break;
+
+				default:
+					parser.report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
 			}
 
 			input++;
