@@ -684,28 +684,17 @@ namespace Mirb
 					}
 
 					case Tree::Node::Call:
-					{
-						auto call = static_cast<Tree::CallNode *>(node);
-
-						if(call->can_be_var)
-							return new (fragment) Tree::NilNode;
-
-						break;
-					}
-					
 					case Tree::Node::CVar:
 					case Tree::Node::IVar:
 					case Tree::Node::Global:
 					case Tree::Node::Constant:
-						return new (fragment) Tree::NilNode; // TODO: Implement
+						break; // TODO: Implement
 
 					default:
 						break;
 				};
 
-				report(range, "Invalid expression in defined?");
-
-				return nullptr;
+				return new (fragment) Tree::NilNode;
 			}
 
 			case Lexeme::DIV:
