@@ -10,6 +10,15 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		void raise(const CharArray &message)
+		{
+			int num = errno;
+
+			CharArray error = (const char_t *)strerror(num);
+
+			throw Exception(message + "\nError #" + CharArray::uint(num) + ": " + error);
+		}
+
 		std::string BenchmarkResult::format()
 		{
 			std::stringstream result;
@@ -37,6 +46,9 @@ namespace Mirb
 		{
 			char *result = getcwd(nullptr, 0);
 
+			if(!result)
+				raise("Unable to get the current directory");
+
 			CharArray str((const char_t *)result, std::strlen(result));
 
 			std::free(result);
@@ -44,16 +56,46 @@ namespace Mirb
 			return str;
 		}
 		
-		bool file_exists(const CharArray &file)
+		void cd(const CharArray &path)
+		{
+			CharArray path_cstr = path.c_str();
+
+			if(chdir(path_cstr.c_str_ref()) == -1)
+				raise("Unable change the current directory to '" + path + "'");
+		}
+
+		bool stat(struct stat &buf, const CharArray &file)
 		{
 			CharArray file_cstr = file.c_str();
 
+			return ::stat(file_cstr.c_str_ref(), &buf) == 0;
+		}
+
+		bool file_exists(const CharArray &file)
+		{
 			struct stat buf;
 
-			if(stat(file_cstr.c_str_ref(), &buf) == 0)
-				return true;
-			else
+			return stat(buf, file);
+		}
+
+		bool is_directory(const CharArray &path)
+		{
+			struct stat buf;
+
+			if(!stat(buf, file))
 				return false;
+
+			return S_ISDIR(buf.st_mode);
+		}
+
+		bool is_file(const CharArray &path)
+		{
+			struct stat buf;
+
+			if(!stat(buf, file))
+				return false;
+
+			return S_ISREG(buf.st_mode);
 		}
 
 		void signal_handler(int)

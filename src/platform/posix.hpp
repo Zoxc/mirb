@@ -1,9 +1,13 @@
 #include <sys/time.h>
+#include <dirent.h>
+#include <fcntl.h>
 
 namespace Mirb
 {
 	namespace Platform
 	{
+		void raise(const CharArray &message);
+
 		template<Color input> void color(const CharArray &string)
 		{
 			switch(input)
@@ -54,5 +58,41 @@ namespace Mirb
 			
 			return result;
 		};
+
+		template<typename F> void list_dir(const CharArray &path, bool skip_special, F func)
+		{
+			DIR *d;
+			dirent *dir;
+
+			CharArray path_cstr = path.c_str();
+
+			d = opendir(path_cstr.c_str_ref());
+
+			if(!d)
+				raise("Unable to list directory: '" + path + "'");
+
+			int fd = dirfd(d);
+
+			if(fd == -1)
+				raise("Unable to get directory descriptor");
+
+			while((dir = readdir(d)) != 0)
+			{
+
+				if(skip_special && (strcmp(dir->d_name, "..") == 0 || strcmp(dir->d_name, ".") == 0))
+					continue;
+
+				struct stat st;
+
+				CharArray name = (const char_t *)dir->d_name;
+
+				if(fstatat(fd, dir->d_name, &st, AT_NO_AUTOMOUNT | AT_SYMLINK_NOFOLLOW) != 0)
+					raise("Unable to stat file: '" + File::join(path, name) + "'");
+
+				func(name, S_ISDIR(st.st_mode));
+			}
+
+			closedir(d);
+		}
 	};
 };
