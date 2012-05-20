@@ -186,13 +186,7 @@ namespace Mirb
 			static const Type keyword_end = KW_END;
 			static const Type values_end = NONE;
 
-			Lexeme(Lexer &lexer, MemoryPool::Reference memory_pool) : lexer(lexer), curlies(memory_pool) {}
-			
-			Lexeme(const Lexeme &lexeme);
-			
-			Lexeme& operator=(const Lexeme& other);
-			
-			Lexer &lexer;
+			Lexeme(MemoryPool memory_pool) : curlies(memory_pool) {}
 			
 			const char_t *current_line_start;
 			size_t current_line;
@@ -212,8 +206,6 @@ namespace Mirb
 				InterpolateData *data;
 				Tree::HeredocNode *heredoc;
 			};
-
-			SourceLoc &get_prev();
 
 			void prev_set(SourceLoc *range);
 			

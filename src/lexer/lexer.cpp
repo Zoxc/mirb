@@ -13,10 +13,6 @@ namespace Mirb
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
 	Map<char_t, char_t> Lexer::delimiter_mapping(2);
 	
-	Lexer::Context::Context(Lexer &lexer) : input(lexer.input), lexeme(lexer.lexeme)
-	{
-	}
-	
 	template<Lexeme::Type type> void Lexer::single()
 	{
 		input++;
@@ -184,16 +180,10 @@ namespace Mirb
 		return result;
 	}
 
-	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(*this, memory_pool), heredocs(memory_pool)
+	Lexer::Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser) : symbol_pool(symbol_pool), parser(parser), memory_pool(memory_pool), keywords(symbol_pool), lexeme(memory_pool), heredocs(memory_pool)
 	{
 	}
 	
-	void Lexer::restore(Context &context)
-	{
-		input = context.input;
-		lexeme = context.lexeme;
-	}
-
 	void Lexer::done()
 	{
 		for(auto heredoc: heredocs)

@@ -160,18 +160,6 @@ namespace Mirb
 			void command();
 			void simple_string();
 		public:
-			class Context
-			{
-				friend class Lexer;
-				
-				private:
-					Input input;
-				public:
-					Context(Lexer &lexer);
-					
-					Lexeme lexeme;
-			};
-			
 			static void setup_jump_table();
 
 			Lexer(SymbolPool &symbol_pool, MemoryPool memory_pool, Parser &parser);
@@ -185,8 +173,6 @@ namespace Mirb
 
 			const char_t *input_str;
 			size_t length;
-			
-			void restore(Context &context);
 			
 			void mod_to_literal();
 			void div_to_regexp();
