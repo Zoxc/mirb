@@ -13,6 +13,11 @@ namespace Mirb
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
 	Map<char_t, char_t> Lexer::delimiter_mapping(2);
 	
+	void Lexer::report(const SourceLoc &range, std::string text, Message::Severity severity)
+	{
+		parser.report(range, text, severity);
+	}
+
 	template<Lexeme::Type type> void Lexer::single()
 	{
 		input++;
@@ -166,7 +171,7 @@ namespace Mirb
 		const char_t *start = lexeme.start;
 		lexeme.start = &input - 1;
 		lexeme.stop = &input;
-		parser.report(lexeme, "Unexpected null terminator");
+		report(lexeme, "Unexpected null terminator");
 		lexeme.start = start;
 	}
 	
@@ -187,7 +192,7 @@ namespace Mirb
 	void Lexer::done()
 	{
 		for(auto heredoc: heredocs)
-			parser.report(heredoc->range, "Missing heredoc");
+			report(heredoc->range, "Missing heredoc");
 	}
 	
 	void Lexer::load(const char_t *input, size_t length)

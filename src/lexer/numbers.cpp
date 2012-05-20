@@ -92,7 +92,7 @@ namespace Mirb
 						input++;
 
 					lexeme.stop = &input;
-					parser.report(lexeme, "Trailing _ in number");
+					report(lexeme, "Trailing _ in number");
 				}
 
 				exponent();
@@ -177,7 +177,7 @@ namespace Mirb
 			while(input == '_')
 				input++;
 			
-			parser.report(range(start, &input), "Expected hex digit, but found underscore(s)");
+			report(range(start, &input), "Expected hex digit, but found underscore(s)");
 		}
 
 		auto is_hex = [&] { return input.in('0', '9') || input.in('A', 'F') || input.in('a', 'f'); };
@@ -194,7 +194,7 @@ namespace Mirb
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::HEX;
 
-			parser.report(lexeme, "Invalid hex number");
+			report(lexeme, "Invalid hex number");
 		}
 	}
 };

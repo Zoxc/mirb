@@ -1035,7 +1035,7 @@ namespace Mirb
 
 					if(i().var)
 					{
-						var_t result = write_node(i().var, [&](var_t store) {
+						write_node(i().var, [&](var_t store) {
 							handler->var = store;
 						}, temp);
 					}

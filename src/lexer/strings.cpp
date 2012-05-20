@@ -46,7 +46,7 @@ namespace Mirb
 							if(process_null(&input))
 							{
 								lexeme.stop = &input;
-								parser.report(lexeme, "Unterminated string");
+								report(lexeme, "Unterminated string");
 								goto error;
 							}
 
@@ -61,7 +61,7 @@ namespace Mirb
 					if(process_null(&input))
 					{
 						lexeme.stop = &input;
-						parser.report(lexeme, "Unterminated string");
+						report(lexeme, "Unterminated string");
 						goto error;
 					}
 				
@@ -181,7 +181,7 @@ namespace Mirb
 				parser.add_message(message, lexeme);
 			}
 			else
-				parser.report(lexeme, "Unterminated " + Lexeme::describe_type(state->type));
+				report(lexeme, "Unterminated " + Lexeme::describe_type(state->type));
 		};
 
 		while(true)

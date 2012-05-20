@@ -37,9 +37,9 @@ namespace Mirb
 		const char *ip = ip_start;
 		
 		ExceptionBlock *current_exception_block = nullptr;
-		ExceptionBlock *loop_exception_block;
-		size_t loop_handler;
-		Exception *current_exception;
+		ExceptionBlock *loop_exception_block = nullptr; // Does not need initialization
+		size_t loop_handler = 0; // Does not need initialization
+		Exception *current_exception = nullptr; // Does not need initialization
 
 #ifdef __GNUC__
 		value_t storage[frame.code->var_words];

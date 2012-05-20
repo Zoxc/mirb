@@ -137,7 +137,7 @@ namespace Mirb
 			Tree::Node *parse_factor();
 			Tree::Node *parse_boolean();
 			
-			Tree::Node *parse_operator_expression(bool allow_multiples = true)
+			Tree::Node *parse_operator_expression(bool allow_multiples prelude_unused = true)
 			{
 				return typecheck(process_rhs(parse_assignment(false, false)));
 				// TODO: Pass on allow_multiples and return an error if multiple expressions are used in an assignment

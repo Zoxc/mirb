@@ -36,9 +36,9 @@ namespace Mirb
 		lexeme.type = Lexeme::NONE;
 
 		if (lexeme.length() == 1)
-			parser.report(lexeme, "Invalid character '" + lexeme.string() + "'");
+			report(lexeme, "Invalid character '" + lexeme.string() + "'");
 		else
-			parser.report(lexeme, "Invalid characters '" + lexeme.string() + "'");
+			report(lexeme, "Invalid characters '" + lexeme.string() + "'");
 
 		restep();
 	}
@@ -116,7 +116,7 @@ namespace Mirb
 
 					lexeme.start = &input - 2;
 					lexeme.stop = &input;
-					parser.report(lexeme, "Expected heredoc delimiter");
+					report(lexeme, "Expected heredoc delimiter");
 
 					lexeme.start = start;
 					return;
@@ -130,7 +130,7 @@ namespace Mirb
 					if(input == '\n' || input == '\r')
 					{
 						lexeme.stop = &input;
-						parser.report(lexeme, "Unterminated heredoc delimiter");
+						report(lexeme, "Unterminated heredoc delimiter");
 						return;
 					}
 
@@ -149,7 +149,7 @@ namespace Mirb
 
 				default:
 					lexeme.stop = &input;
-					parser.report(lexeme, "Expected heredoc delimiter");
+					report(lexeme, "Expected heredoc delimiter");
 					return;
 			}
 		}
@@ -254,7 +254,7 @@ namespace Mirb
 					break;
 
 				default:
-					parser.report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
+					report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
 			}
 
 			input++;
@@ -304,7 +304,7 @@ namespace Mirb
 					lexeme.stop = &input;
 					lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 					lexeme.type = Lexeme::STRING;
-					parser.report(lexeme, "Expected escape string");
+					report(lexeme, "Expected escape string");
 
 					return;
 				}
@@ -668,7 +668,7 @@ namespace Mirb
 			lexeme.symbol = symbol_pool.get(lexeme);
 
 			if(error)
-				parser.report(lexeme, "Instance variable names cannot start with a number");
+				report(lexeme, "Instance variable names cannot start with a number");
 		}
 		else if(input == '@')
 		{
@@ -687,7 +687,7 @@ namespace Mirb
 				lexeme.symbol = symbol_pool.get(lexeme);
 
 				if(error)
-					parser.report(lexeme, "Class variable names cannot start with a number");
+					report(lexeme, "Class variable names cannot start with a number");
 			}
 			else
 			{
@@ -695,7 +695,7 @@ namespace Mirb
 				lexeme.type = Lexeme::CVAR;
 				lexeme.symbol = symbol_pool.get(lexeme);
 
-				parser.report(lexeme, "Expected a class variable name");
+				report(lexeme, "Expected a class variable name");
 			}
 		}
 		else
@@ -704,7 +704,7 @@ namespace Mirb
 			lexeme.type = Lexeme::IVAR;
 			lexeme.symbol = symbol_pool.get(lexeme);
 
-			parser.report(lexeme, "Expected a instance variable name");
+			report(lexeme, "Expected a instance variable name");
 		}
 	}
 	
@@ -753,7 +753,7 @@ namespace Mirb
 					lexeme.type = Lexeme::GLOBAL;
 					lexeme.symbol = symbol_pool.get(lexeme);
 
-					parser.report(lexeme, "Expected a global variable name");
+					report(lexeme, "Expected a global variable name");
 					break;
 			}
 
@@ -769,7 +769,7 @@ namespace Mirb
 		lexeme.symbol = symbol_pool.get(lexeme);
 
 		if(error)
-			parser.report(lexeme, "Global variable names cannot start with a number");
+			report(lexeme, "Global variable names cannot start with a number");
 	}
 	
 	void Lexer::add()

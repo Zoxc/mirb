@@ -2,6 +2,7 @@
 #include "../common.hpp"
 #include <Prelude/Map.hpp>
 #include "../generic/source-loc.hpp"
+#include "../message.hpp"
 #include "../tree/tree.hpp"
 #include "input.hpp"
 #include "lexeme.hpp"
@@ -59,6 +60,8 @@ namespace Mirb
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
 
+			void report(const SourceLoc &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
+			
 			SourceLoc range(const char_t *start, const char_t *stop); 
 
 			template<Lexeme::Type type> void single();
@@ -68,7 +71,7 @@ namespace Mirb
 			template<typename F> void skip_numbers(F test)
 			{
 				bool trailing = false;
-				const char_t *pos;
+				const char_t *pos = nullptr;
 
 				while(test())
 				{
@@ -87,7 +90,7 @@ namespace Mirb
 							while(input == '_')
 								input++;
 							
-							parser.report(range(start, &input), "Only one underscore is allowed between digits in number literals");
+							report(range(start, &input), "Only one underscore is allowed between digits in number literals");
 						}
 
 					}
@@ -96,7 +99,7 @@ namespace Mirb
 				}
 
 				if(trailing)
-					parser.report(range(pos, pos + 1), "Trailing '_' in number");
+					report(range(pos, pos + 1), "Trailing '_' in number");
 			}
 
 			template<Lexeme::Type type, char_t high> void get_number()
@@ -107,7 +110,7 @@ namespace Mirb
 				{
 					number();
 
-					parser.report(lexeme, "Invalid " + Lexeme::describe_type(type) + " number");
+					report(lexeme, "Invalid " + Lexeme::describe_type(type) + " number");
 				}
 				else
 				{
