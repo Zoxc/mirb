@@ -182,7 +182,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\Prelude\include;$(SolutionDir)..\..\..\Libraries\pcre;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG;DEBUG_RAISE;MIRB_GC_SKIP_BLOCKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MIRB_GC_SKIP_BLOCKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
