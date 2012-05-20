@@ -405,7 +405,7 @@ namespace Mirb
 					case Lexeme::ARRAY:
 					case Lexeme::SYMBOL:
 					case Lexeme::COMMAND:
-						return lexer.lexeme.data->type == InterpolateData::Starting || lexer.lexeme.data->type == InterpolateData::Plain;
+						return lexer.lexeme.data->beginning();
 
 					default:
 						return false;

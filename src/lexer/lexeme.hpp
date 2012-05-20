@@ -256,6 +256,16 @@ namespace Mirb
 
 				return result;
 			}
+			
+			std::string get()
+			{
+				return std::string((const char *)data, length);
+			}
+			
+			template<typename A> void add(const std::string &add, typename A::Reference ref = A::default_reference)
+			{
+				set<A>(get() + add, ref);
+			};
 
 			template<typename A> void set(const std::string &other, typename A::Reference ref = A::default_reference)
 			{
@@ -286,6 +296,11 @@ namespace Mirb
 
 		Entry tail;
 		Type type;
+
+		bool beginning()
+		{
+			return type == Plain || type == Starting;
+		}
 
 		InterpolateData(MemoryPool memory_pool) : entries(memory_pool), type(Plain) {}
 	};

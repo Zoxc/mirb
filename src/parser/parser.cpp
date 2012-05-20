@@ -820,10 +820,62 @@ namespace Mirb
 
 			case Lexeme::COMMAND:
 			case Lexeme::REGEXP:
-			case Lexeme::STRING:
 			case Lexeme::ARRAY:
 				return parse_data(lexeme());
 			
+			case Lexeme::STRING:
+			{
+				auto result = static_cast<Tree::DataNode *>(parse_data(lexeme()));
+				
+				if(!result)
+					return 0;
+
+				while(lexeme() == Lexeme::STRING && lexer.lexeme.data->beginning())
+				{
+					Tree::InterpolateNode *new_result;
+
+					auto add = static_cast<Tree::DataNode *>(parse_data(lexeme()));
+
+					if(!add)
+						return 0;
+
+					auto add_inter = static_cast<Tree::InterpolateNode *>(add);
+					auto result_inter = static_cast<Tree::InterpolateNode *>(result);
+
+					if(add->type() == Tree::Node::Interpolate)
+					{
+						new_result = new (fragment) Tree::InterpolateNode;
+						new_result->data = result->data;
+						new_result->result_type = Value::String;
+					}
+					else
+						new_result = result_inter;
+
+					if(add_inter->type() == Tree::Node::Interpolate && !add_inter->pairs.empty())
+					{
+						add_inter->pairs.first->string.set<Tree::Fragment>(result->data.get() + add_inter->pairs.first->string.get(), fragment);
+						new_result->data = add_inter->data;
+
+						Tree::InterpolatePairNode *current = add_inter->pairs.first;
+
+						while(current)
+						{
+							auto next = current->entry.next;
+
+							new_result->pairs.append(current);
+
+							current = next;
+						}
+					}
+					else
+						new_result->data.add<Tree::Fragment>(add->data.get(), fragment);
+
+					result = new_result;
+				}
+
+				return result;
+			}
+
 			case Lexeme::KW_SELF:
 			{
 				lexer.step();
