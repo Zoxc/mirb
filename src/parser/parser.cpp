@@ -1338,7 +1338,7 @@ namespace Mirb
 					
 					return;
 				}
-				else if(!parameter && (node->subscript || (node->arguments.empty() && !node->block)))
+				else if(!parameter && (node->subscript || (node->arguments.empty() && !node->block && !node->block_arg)))
 				{
 					Symbol *mutated = node->method;
 					
@@ -1580,7 +1580,7 @@ namespace Mirb
 				auto node = (Tree::CallNode *)input;
 					
 				if(!node->subscript)
-					if(!node->arguments.empty() || node->block)
+					if(!node->arguments.empty() || node->block || node->block_arg)
 						break;
 				
 				if(node->can_be_var)
@@ -1594,8 +1594,7 @@ namespace Mirb
 
 					if(lexeme() == Lexeme::ASSIGN)
 					{
-						lexer.step();
-						skip_lines();
+						step_lines();
 						
 						node->method = mutated;
 						
@@ -1613,12 +1612,69 @@ namespace Mirb
 					{
 						SourceLoc assign_range = lexer.lexeme;
 					
-						// TODO: Save node->object in a temporary variable
+						auto group = new (fragment) Tree::GroupNode;
+						
+						auto object = new (fragment) Tree::VariableNode(scope->alloc_var<Tree::NamedVariable>());
+
+						{
+							auto assign = new (fragment) Tree::AssignmentNode;
+						
+							assign->left = object;
+							assign->op = Lexeme::ASSIGN;
+							assign->right = node->object;
+
+							group->statements.append(assign);
+						}
+
+						node->object = object;
+
+						Tree::VariableNode *block_arg;
+
+						if(node->block_arg)
+						{
+							block_arg = new (fragment) Tree::VariableNode(scope->alloc_var<Tree::NamedVariable>());
+
+							{
+								auto assign = new (fragment) Tree::AssignmentNode;
+						
+								assign->left = block_arg;
+								assign->op = Lexeme::ASSIGN;
+								assign->right = node->block_arg->node;
+
+								group->statements.append(assign);
+							}
+
+							node->block_arg->node = block_arg;
+						}
+						
+						auto arguments = new (fragment) Tree::VariableNode(scope->alloc_var<Tree::NamedVariable>());
+
+						{
+							auto right = new (fragment) Tree::MultipleExpressionsNode;
+
+							for(auto i: node->arguments)
+								right->expressions.append(new (fragment) Tree::MultipleExpressionNode(i, SourceLoc()));
+
+							auto assign = new (fragment) Tree::AssignmentNode;
+						
+							assign->left = arguments;
+							assign->op = Lexeme::ASSIGN;
+							assign->right = right;
+
+							group->statements.append(assign);
+
+							node->arguments.clear();
+							node->variadic = true;
+							node->arguments.append(new Tree::SplatNode(arguments));
+						}
+						
 						auto result = new (fragment) Tree::CallNode;
 						
-						result->object = node->object;
+						result->object = object;
 						result->method = mutated;
-						result->block = 0;
+						result->block_arg = node->block_arg;
+						result->variadic = true;
+						result->arguments.append(new Tree::SplatNode(arguments));
 
 						if(node->range)
 							result->range = capture();
@@ -1631,8 +1687,7 @@ namespace Mirb
 						binary_op->range = lexer.lexeme;
 						binary_op->op = Lexeme::assign_to_operator(lexeme());
 						
-						lexer.step();
-						skip_lines();
+						step_lines();
 						
 						binary_op->right = parse_high_rescue(allow_multiples, true);
 
@@ -1642,8 +1697,10 @@ namespace Mirb
 						result->arguments.append(binary_op);
 
 						lexer.lexeme.prev_set(result->range);
+
+						group->statements.append(result);
 						
-						return result;
+						return group;
 					}
 				}
 

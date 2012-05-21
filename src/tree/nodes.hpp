@@ -77,6 +77,9 @@ namespace Mirb
 			NodeType type() { return Splat; }
 			
 			Node *expression;
+
+			SplatNode() {}
+			SplatNode(Node *expression) : expression(expression) {}
 		};
 		
 		struct MultipleExpressionNode
