@@ -78,10 +78,11 @@ namespace Mirb
 				bool heap : 1;
 				bool has_default_value : 1;
 				bool parameter_group : 1;
+				bool discard : 1;
 
 				Scope *owner; // Only valid for heap variables
 				
-				Variable() : heap(false), has_default_value(false), parameter_group(false)
+				Variable() : heap(false), has_default_value(false), parameter_group(false), discard(false)
 				{
 				}
 

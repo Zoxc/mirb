@@ -752,6 +752,9 @@ namespace Mirb
 			case Lexeme::KW_WHILE:
 			case Lexeme::KW_UNTIL:
 				return parse_loop();
+				
+			case Lexeme::KW_FOR:
+				return parse_for_loop();
 
 			case Lexeme::KW_CASE:
 				return parse_case();

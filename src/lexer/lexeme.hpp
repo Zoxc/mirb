@@ -137,6 +137,8 @@ namespace Mirb
 				KW_THEN,
 				KW_WHILE,
 				KW_UNTIL,
+				KW_FOR,
+				KW_IN,
 				KW_WHEN,
 				KW_CASE,
 				KW_BEGIN,

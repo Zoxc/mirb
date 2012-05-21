@@ -78,10 +78,9 @@ namespace Mirb
 
 	void Lexer::left_shift_to_heredoc()
 	{
-		auto heredoc = new (memory_pool) Heredoc(parser.fragment);
+		auto heredoc = new (memory_pool) Heredoc;
 		
 		heredoc->scope = parser.scope;
-		heredoc->trapper = parser.trapper;
 
 		if(input == '-')
 		{
@@ -158,7 +157,7 @@ namespace Mirb
 
 		heredocs.push(heredoc);
 		
-		heredoc->node = new (heredoc->fragment) Tree::HeredocNode;
+		heredoc->node = new (*heredoc->scope->fragment) Tree::HeredocNode;
 
 		lexeme.stop = &input;
 
@@ -470,20 +469,10 @@ namespace Mirb
 		
 			Lexeme old = lexeme;
 
-			Tree::Scope *current_scope = parser.scope;
-			Tree::Fragment current_fragment = parser.fragment;
-			Tree::VoidTrapper *current_trapper = parser.trapper;
-
-			parser.fragment = heredoc->fragment;
-			parser.scope = heredoc->scope;
-			parser.trapper = heredoc->trapper;
-
-			parse_interpolate_heredoc(heredoc);
+			parser.enter_scope(heredoc->scope, [&] {
+				parse_interpolate_heredoc(heredoc);
+			});
 				
-			parser.scope = current_scope;
-			parser.fragment = current_fragment;
-			parser.trapper = current_trapper;
-			
 			if(input == '\n')
 				newline();
 			else if(input == '\r')

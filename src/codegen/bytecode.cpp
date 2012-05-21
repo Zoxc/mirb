@@ -1346,7 +1346,7 @@ namespace Mirb
 			{
 				final->max_args = (size_t)-1;
 
-				if(scope->array_parameter->name)
+				if(!scope->array_parameter->discard)
 					write_variable(scope->array_parameter, [&](var_t store){
 						gen<LoadArrayArgOp>(store, scope->parameters.size());
 					}, return_var);

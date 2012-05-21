@@ -61,23 +61,34 @@ namespace Mirb
 				return result;
 			};
 			
-			template<typename F> void allocate_scope(Tree::Scope::Type type, F func)
+			template<typename F> void enter_scope(Tree::Scope *new_scope, F func)
 			{
 				Tree::Scope *current_scope = scope;
 				Tree::Fragment current_fragment = fragment;
 				Tree::VoidTrapper *current_trapper = trapper;
 
-				if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
-					fragment = *new Tree::FragmentBase(Tree::Chunk::block_size);
-		
-				scope = Collector::allocate_pinned<Tree::Scope>(&document, fragment, scope, type);
-				trapper = &scope->trapper;
+				fragment = *new_scope->fragment;
+				scope = new_scope;
+				trapper = &new_scope->trapper;
 				
 				func();
 				
 				scope = current_scope;
 				fragment = current_fragment;
 				trapper = current_trapper;
+			}
+			
+			template<typename F> void allocate_scope(Tree::Scope::Type type, F func)
+			{
+				Tree::Fragment new_fragment = fragment;
+
+				if(type == Tree::Scope::Closure || type == Tree::Scope::Method)
+					new_fragment = *new Tree::FragmentBase(Tree::Chunk::block_size);
+		
+				auto new_scope = Collector::allocate_pinned<Tree::Scope>(&document, new_fragment, scope, type);
+				trapper = &scope->trapper;
+
+				enter_scope(new_scope, func);
 			}
 			
 			static bool is_constant(Symbol *symbol);
@@ -186,6 +197,7 @@ namespace Mirb
 			Tree::Node *parse_ternary_if(bool allow_multiples);
 			Tree::Node *parse_conditional();
 			Tree::Node *parse_tailing_loop();
+			Tree::Node *parse_for_loop();
 			Tree::Node *parse_loop();
 			Tree::Node *process_loop(Tree::LoopNode *loop, Tree::VoidTrapper *trapper);
 			Tree::Node *parse_case();
@@ -394,6 +406,7 @@ namespace Mirb
 					case Lexeme::KW_NEXT:
 					case Lexeme::KW_WHILE:
 					case Lexeme::KW_UNTIL:
+					case Lexeme::KW_FOR:
 					case Lexeme::PARENT_OPEN:
 					case Lexeme::SQUARE_OPEN:
 					case Lexeme::CURLY_OPEN:

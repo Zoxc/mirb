@@ -300,6 +300,87 @@ namespace Mirb
 		return result;
 	}
 	
+	Tree::Node *Parser::parse_for_loop()
+	{
+		auto node = new (fragment) Tree::CallNode;
+		
+		SourceLoc range = lexer.lexeme;
+		
+		lexer.step();
+
+		node->block = new (fragment) Tree::BlockNode;
+
+		Tree::GroupNode *group;
+		
+		SourceLoc var_range = lexer.lexeme;
+
+		allocate_scope(Tree::Scope::Closure, [&] {
+			node->block->scope = scope;
+
+			group = new (fragment) Tree::GroupNode;
+
+			scope->group = group;
+			scope->array_parameter = scope->alloc_var<Tree::Parameter>();
+			
+			auto variables = parse_multiple_expressions(true, false);
+			lexer.lexeme.prev_set(&var_range);
+
+			Tree::MultipleExpressionsNode *men;
+
+			if(variables->type() == Tree::Node::MultipleExpressions)
+				men = (Tree::MultipleExpressionsNode *)variables;
+			else
+			{
+				men = new (fragment) Tree::MultipleExpressionsNode;
+				men->range = new (fragment) SourceLoc(var_range);
+				men->expressions.append(new (fragment) Tree::MultipleExpressionNode(variables, var_range));
+			}
+
+			process_multiple_lhs(men, false);
+
+			scope->range = new (fragment) SourceLoc(var_range);
+			
+			auto assignment = new (fragment) Tree::AssignmentNode;
+
+			assignment->left = men;
+			assignment->op = Lexeme::ASSIGN;
+			assignment->right = new (fragment) Tree::VariableNode(scope->array_parameter);
+
+			group->statements.append(assignment);
+		});
+
+		match(Lexeme::KW_IN);
+
+		lexer.lexeme.prev_set(&var_range);
+
+		node->object = parse_expression();
+		node->method = Symbol::get("each");
+				
+		switch (lexeme())
+		{
+			case Lexeme::KW_DO:
+				lexer.step();
+				break;
+
+			default:
+				parse_sep();
+		}
+		
+		node->range = new (fragment) SourceLoc(range);
+		lexer.lexeme.prev_set(node->range);
+
+		enter_scope(node->block->scope, [&] {
+			auto body = parse_group();
+
+			if(body)
+				group->statements.append(body);
+		});
+		
+		close_pair("for loop", range, Lexeme::KW_END);
+		
+		return node;
+	}
+
 	Tree::Node *Parser::parse_loop()
 	{
 		auto node = new (fragment) Tree::LoopNode;

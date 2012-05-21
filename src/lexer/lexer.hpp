@@ -28,11 +28,7 @@ namespace Mirb
 		bool remove_ident;
 		Tree::HeredocNode *node;
 		Tree::Scope *scope;
-		Tree::Fragment fragment;
-		Tree::VoidTrapper *trapper;
 		SourceLoc range;
-
-		Heredoc(Tree::Fragment fragment) : fragment(fragment) {}
 	};
 
 	class Lexer

@@ -173,6 +173,7 @@ namespace Mirb
 		{
 			parameter = scope->alloc_var<Tree::Parameter>();
 			parameter->range = range;
+			parameter->discard = true;
 		}
 		else
 			error("Expected a parameter name");
@@ -260,6 +261,7 @@ namespace Mirb
 				auto parameter = scope->alloc_var<Tree::Parameter>();
 
 				parameter->range = comma;
+				parameter->discard = true;
 
 				if(scope->array_parameter)
 					report(comma, "Cannot have a trailing comma and an array parameter");

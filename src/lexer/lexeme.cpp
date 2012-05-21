@@ -116,6 +116,8 @@ namespace Mirb
 		"then",
 		"while",
 		"until",
+		"for",
+		"in",
 		"when",
 		"case",
 		"begin",
