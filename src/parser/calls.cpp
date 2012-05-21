@@ -100,8 +100,9 @@ namespace Mirb
 				case Lexeme::AMPERSAND:
 				case Lexeme::LEFT_SHIFT:
 					return lexer.lexeme.whitespace && !lexer.whitespace_after();
-
+					
 				case Lexeme::ASSIGN_DIV:
+				case Lexeme::ASSIGN_MOD:
 				case Lexeme::CURLY_OPEN:
 					return false;
 

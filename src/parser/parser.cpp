@@ -730,6 +730,7 @@ namespace Mirb
 			}
 
 			case Lexeme::MOD:
+			case Lexeme::ASSIGN_MOD:
 			{
 				lexer.mod_to_literal();
 

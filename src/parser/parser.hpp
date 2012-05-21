@@ -364,6 +364,7 @@ namespace Mirb
 					case Lexeme::DIV:
 					case Lexeme::ASSIGN_DIV:
 					case Lexeme::MOD:
+					case Lexeme::ASSIGN_MOD:
 					case Lexeme::LEFT_SHIFT:
 					case Lexeme::INTEGER:
 					case Lexeme::HEX:

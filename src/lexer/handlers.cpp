@@ -170,6 +170,8 @@ namespace Mirb
 	
 	void Lexer::mod_to_literal()
 	{
+		input.set(lexeme.start + 1);
+
 		switch(input)
 		{
 			case 'r':
