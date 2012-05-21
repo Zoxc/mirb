@@ -198,7 +198,7 @@ namespace Mirb
 
 			template<typename F> void parse_association_argument(Tree::Node *result, const SourceLoc &result_range, SourceLoc &last_hash, Tree::HashNode *&hash, F func)
 			{
-				auto append_hash = [&](Tree::Node *append) {
+				auto append_hash = [&](Tree::Node *append) mutable {
 					step_lines();
 						
 					if(!hash)

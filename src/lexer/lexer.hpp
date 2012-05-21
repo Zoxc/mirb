@@ -104,7 +104,7 @@ namespace Mirb
 
 			template<Lexeme::Type type, char_t high> void get_number()
 			{
-				skip_numbers([&] { return input.in('0', high); });
+				skip_numbers([&]() mutable { return input.in('0', high); });
 				
 				if(input.in('0', '9'))
 				{
