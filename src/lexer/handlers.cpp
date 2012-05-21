@@ -190,6 +190,19 @@ namespace Mirb
 				input++;
 				return parse_delimited_data(Lexeme::STRING);
 				
+			case 'q':
+				{
+					input++;
+				
+					char_t terminator = delimiter_mapping.try_get(input, [&]{
+						return input;
+					});
+
+					input++;
+
+					return parse_simple_string(terminator);
+				}
+				
 			case 'w':
 			{
 				input++;

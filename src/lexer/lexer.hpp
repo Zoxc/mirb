@@ -59,6 +59,7 @@ namespace Mirb
 			bool parse_escape(std::string &result);
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
+			void parse_simple_string(char_t terminator);
 
 			void report(const SourceLoc &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
 			

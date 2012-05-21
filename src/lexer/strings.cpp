@@ -8,16 +8,24 @@ namespace Mirb
 	{
 		input++;
 		
+		parse_simple_string('\'');
+	}
+
+	void Lexer::parse_simple_string(char_t terminator)
+	{
 		lexeme.type = Lexeme::STRING;
 		std::string result;
 
 		while(true)
+		{
+			if(input == terminator)
+			{
+				input++;
+				goto done;
+			}
+
 			switch(input)
 			{
-				case '\'':
-					input++;
-					goto done;
-
 				case '\n':
 					result += input++;
 					process_newline();
@@ -35,26 +43,9 @@ namespace Mirb
 				case '\\':
 					input++;
 
-					switch(input)
-					{
-						case '\'':
-						case '\\':
-							result += input++;
-							break;
-						
-						case 0:
-							if(process_null(&input))
-							{
-								lexeme.stop = &input;
-								report(lexeme, "Unterminated string");
-								goto error;
-							}
+					if(input == '\\' || input == terminator)
+						result += input++;
 
-							// Fallthrough
-
-						default:
-							result += input++;
-					}
 					break;
 
 				case 0:
@@ -70,6 +61,7 @@ namespace Mirb
 				default:
 					result += input++;		
 			}
+		}
 
 		error:
 		lexeme.stop = &input;
