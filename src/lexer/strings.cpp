@@ -344,12 +344,20 @@ namespace Mirb
 	void Lexer::command()
 	{
 		input++;
-		
-		InterpolateState state;
 
-		state.terminator = '`';
-		state.type = Lexeme::COMMAND;
+		if(lexeme.allow_keywords)
+		{
+			InterpolateState state;
 
-		parse_interpolate(&state, false);
+			state.terminator = '`';
+			state.type = Lexeme::COMMAND;
+
+			parse_interpolate(&state, false);
+		}
+		else
+		{
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::BACKTICK;
+		}
 	}
 };

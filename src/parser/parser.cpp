@@ -171,6 +171,7 @@ namespace Mirb
 			case Lexeme::LOGICAL_NOT:
 			case Lexeme::UNARY_ADD:
 			case Lexeme::UNARY_SUB:
+			case Lexeme::BACKTICK:
 			{
 				symbol = symbol_pool.get(lexer.lexeme);
 

@@ -43,6 +43,7 @@ namespace Mirb
 				NONE,
 				
 				ASSOC,
+				BACKTICK,
 				POWER,
 				
 				// order contiguous binary operators
