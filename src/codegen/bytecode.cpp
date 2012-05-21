@@ -1337,9 +1337,10 @@ namespace Mirb
 			{
 				final->max_args = (size_t)-1;
 
-				write_variable(scope->array_parameter, [&](var_t store){
-					gen<LoadArrayArgOp>(store, scope->parameters.size());
-				}, return_var);
+				if(scope->array_parameter->name)
+					write_variable(scope->array_parameter, [&](var_t store){
+						gen<LoadArrayArgOp>(store, scope->parameters.size());
+					}, return_var);
 			}
 
 			gen(body);

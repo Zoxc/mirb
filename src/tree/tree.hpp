@@ -98,7 +98,7 @@ namespace Mirb
 			public Variable
 		{
 			public:
-				NamedVariable(Type type) : Variable(type) {}
+				NamedVariable(Type type) : Variable(type), name(nullptr) {}
 				
 				Symbol *name;
 				NamedVariable *next;

@@ -57,7 +57,7 @@ namespace Mirb
 				skip_lines();
 
 				if(lexeme() != Lexeme::BITWISE_OR)
-					parse_parameters();
+					parse_parameters(true);
 			
 				close_pair("block parameters", block_range, Lexeme::BITWISE_OR);
 			}

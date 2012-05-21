@@ -266,8 +266,10 @@ namespace Mirb
 			Tree::Node *parse_super();
 			
 			// structures
+			void process_parameters(bool block, Tree::Node *lhs, const SourceLoc &range);
+			void process_multiple_parameters(bool block, Tree::MultipleExpressionsNode *node);
 			bool is_parameter();
-			void parse_parameters();
+			void parse_parameters(bool block);
 			Tree::Node *parse_class();
 			Tree::Node *parse_module();
 			Tree::Node *parse_method();

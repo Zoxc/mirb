@@ -114,7 +114,7 @@ namespace Mirb
 		}
 	}
 
-	void Parser::parse_parameters()
+	void Parser::parse_parameters(bool block)
 	{
 		do
 		{
@@ -134,7 +134,7 @@ namespace Mirb
 
 			Tree::Parameter *parameter = nullptr;
 
-			if(require(Lexeme::IDENT))
+			if(lexeme() == Lexeme::IDENT)
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
 				range->expand(lexer.lexeme);
@@ -322,14 +322,14 @@ skip_name:
 				skip_lines();
 					
 				if(lexeme() != Lexeme::PARENT_CLOSE)
-					parse_parameters();
+					parse_parameters(false);
 			
 				close_pair("method parameters", parent_open, Lexeme::PARENT_CLOSE);
 			}
 			else
 			{
 				if(is_parameter())
-					parse_parameters();
+					parse_parameters(false);
 			
 				parse_sep();
 			}
