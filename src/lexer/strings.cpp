@@ -92,10 +92,15 @@ namespace Mirb
 
 					input++;
 				
-					while(input.in('0', '7'))
+					if(input.in('0', '7'))
+					{
 						input++;
 
-					size_t num = 0;
+						if(input.in('0', '7'))
+							input++;
+					}
+
+					char_t num = 0;
 					size_t power = 0;
 
 					for(const char_t *c = &input - 1; c >= start; --c, power += 3)
@@ -104,7 +109,38 @@ namespace Mirb
 					result += (char)num;
 					break;
 				}
-						
+					
+			case 'x':
+				{
+					const char_t *start = &input;
+
+					input++;
+				
+					if(input.in('0', '9') || input.in('A', 'F') || input.in('a', 'f'))
+					{
+						input++;
+
+						if(input.in('0', '9') || input.in('A', 'F') || input.in('a', 'f'))
+							input++;
+					}
+
+					char_t num = 0;
+					size_t power = 0;
+
+					for(const char_t *c = &input - 1; c >= start; --c, power += 4)
+					{
+						if(*c >= 'a')
+							num += (*c - 'a' + 10) << power;
+						else if(*c >= 'A')
+							num += (*c - 'A' + 10) << power;
+						else
+							num += (*c - '0') << power;
+					}
+
+					result += (char)num;
+					break;
+				}
+					
 			case 'n':
 				result += (char)0xA;
 				input++;
