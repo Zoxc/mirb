@@ -21,6 +21,12 @@ namespace Mirb
 
 			Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text);
 
+			~Message()
+			{
+				if(note)
+					note->~Message();
+			}
+
 			static std::string severity_names[SEVERITIES];
 
 			Parser &parser;
