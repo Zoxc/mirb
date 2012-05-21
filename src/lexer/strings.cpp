@@ -422,7 +422,11 @@ namespace Mirb
 
 				case '\\':
 					input++;
-					parse_escape(result, false, state->heredoc != 0);
+					if(!parse_escape(result, false, state->heredoc != 0))
+					{
+						if(input != 0)
+							result += input++;
+					}
 					break;
 
 				case 0:
