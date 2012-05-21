@@ -294,14 +294,27 @@ namespace Mirb
 
 		if(first == '\\')
 		{
-			if(parse_escape(result))
+			if(!parse_escape(result, true, false))
 			{
-				lexeme.stop = &input;
-				lexeme.data = new (memory_pool) InterpolateData(memory_pool);
-				lexeme.type = Lexeme::STRING;
-				report(lexeme, "Expected escape string");
+				switch(input)
+				{
+					case 0:
+						if(process_null(&input))
+						{
+							lexeme.stop = &input;
+							lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+							lexeme.type = Lexeme::STRING;
+							report(lexeme, "Expected escape string");
 
-				return;
+							return;
+						}
+
+						// Fallthrough
+
+					default:
+						result += input++;
+						break;
+				}
 			}
 		}
 		else
@@ -468,6 +481,10 @@ namespace Mirb
 			Heredoc *heredoc = heredocs.pop();
 		
 			Lexeme old = lexeme;
+			
+			lexeme.start = &input;
+			lexeme.line = lexeme.current_line;
+			lexeme.line_start = lexeme.current_line_start;
 
 			parser.enter_scope(heredoc->scope, [&] {
 				parse_interpolate_heredoc(heredoc);

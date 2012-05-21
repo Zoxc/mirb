@@ -45,6 +45,8 @@ namespace Mirb
 
 					if(input == '\\' || input == terminator)
 						result += input++;
+					else
+						result += '\\';
 
 					break;
 
@@ -75,10 +77,38 @@ namespace Mirb
 		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
-	bool Lexer::parse_escape(std::string &result)
+	bool Lexer::parse_escape(std::string &result, bool capture_newline, bool no_heredoc)
 	{
 		switch(input)
 		{
+			case '\n':
+				if(capture_newline)
+					result += input++;
+				else
+					input++;
+
+				process_newline(no_heredoc, false);
+				break;
+						
+			case '\r':
+				if(capture_newline)
+				{
+					input++;
+
+					if(input == '\n')
+						result += input++;
+				}
+				else
+				{
+					input++;
+
+					if(input == '\n')
+						input++;
+				}
+					
+				process_newline(no_heredoc, false);
+				break;
+
 			case '0':
 			case '1':
 			case '2':
@@ -185,16 +215,14 @@ namespace Mirb
 				result += (char)0x20;
 				input++;
 				break;
-						
-			case 0: 
-				if(process_null(&input))
-					return true;
+				
+				// Fallthrough
 			
 			default:
-				result += input++;
+				return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	void Lexer::parse_interpolate(InterpolateState *state, bool continuing)
@@ -221,7 +249,15 @@ namespace Mirb
 		auto report_end = [&] {
 			lexeme.stop = &input;
 
-			if(state->start)
+			if(state->heredoc)
+			{
+				auto message = new (memory_pool) Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated heredoc");
+			
+				message->note = new (memory_pool) Message(parser, state->heredoc->range, Message::MESSAGE_NOTE, "Starting here");
+			
+				parser.add_message(message, lexeme);
+			}
+			else if(state->start)
 			{
 				auto message = new (memory_pool) Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
 			
@@ -334,9 +370,7 @@ namespace Mirb
 
 				case '\\':
 					input++;
-
-					if(parse_escape(result))
-						return report_end();
+					parse_escape(result, false, state->heredoc != 0);
 					break;
 
 				case 0:
