@@ -196,7 +196,7 @@ namespace Mirb
 			Tree::Node *parse_next();
 			Tree::Node *parse_redo();
 
-			template<typename F> void parse_association_argument(Tree::Node *result, const SourceLoc &result_range, SourceLoc &last_hash, Tree::HashNode *&hash, F func)
+			template<bool allow_colon, typename F> void parse_association_argument(Tree::Node *result, const SourceLoc &result_range, SourceLoc &last_hash, Tree::HashNode *&hash, F func)
 			{
 				auto append_hash = [&](Tree::Node *append) mutable {
 					step_lines();
@@ -228,7 +228,7 @@ namespace Mirb
 
 					append_hash(result);
 				}
-				else if(lexeme() == Lexeme::COLON)
+				else if(allow_colon && lexeme() == Lexeme::COLON)
 				{
 					auto node = new (fragment) Tree::SymbolNode;
 					auto call = static_cast<Tree::CallNode *>(result);

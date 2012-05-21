@@ -266,7 +266,7 @@ namespace Mirb
 					if(result->type() == Tree::Node::Splat)
 						node->variadic = true;
 
-					parse_association_argument(result, range, last_hash, hash, [&](Tree::Node *child) { node->arguments.append(child); });
+					parse_association_argument<false>(result, range, last_hash, hash, [&](Tree::Node *child) { node->arguments.append(child); });
 				}
 			}
 		}
@@ -392,7 +392,7 @@ namespace Mirb
 				if(element->type() == Tree::Node::Splat)
 					result->variadic = true;
 				
-				parse_association_argument(element, element_range, last_hash, hash, [&](Tree::Node *child) { result->entries.append(child); });
+				parse_association_argument<true>(element, element_range, last_hash, hash, [&](Tree::Node *child) { result->entries.append(child); });
 			}
 		}
 		while(matches(Lexeme::COMMA));

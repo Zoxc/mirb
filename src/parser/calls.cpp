@@ -87,6 +87,9 @@ namespace Mirb
 				case Lexeme::SQUARE_OPEN:
 				case Lexeme::SCOPE:
 					return lexer.lexeme.whitespace;
+
+				case Lexeme::COLON:
+					return !lexer.whitespace_after();
 				
 				case Lexeme::ADD:
 				case Lexeme::SUB:
@@ -94,7 +97,6 @@ namespace Mirb
 				case Lexeme::MOD:
 				case Lexeme::DIV:
 				case Lexeme::QUESTION:
-				case Lexeme::COLON:
 				case Lexeme::AMPERSAND:
 				case Lexeme::LEFT_SHIFT:
 					return lexer.lexeme.whitespace && !lexer.whitespace_after();
