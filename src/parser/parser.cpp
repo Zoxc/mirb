@@ -1666,7 +1666,7 @@ namespace Mirb
 			
 			skip_lines();
 
-			auto result = parse_assignment(true, false);
+			auto result = parse_boolean_unary();
 
 			typecheck(result, [&](Tree::Node *result) {
 				return new (fragment) Tree::BooleanNotNode(result);
