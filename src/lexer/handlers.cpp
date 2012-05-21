@@ -288,38 +288,43 @@ namespace Mirb
 	
 	void Lexer::question_to_character()
 	{
-		char_t first = input++;
-
 		std::string result;
 
-		if(first == '\\')
+		if(input == '\\')
 		{
+			input++;
+
 			if(!parse_escape(result, true, false))
 			{
-				switch(input)
+				if(input == 0 && process_null(&input))
 				{
-					case 0:
-						if(process_null(&input))
-						{
-							lexeme.stop = &input;
-							lexeme.data = new (memory_pool) InterpolateData(memory_pool);
-							lexeme.type = Lexeme::STRING;
-							report(lexeme, "Expected escape string");
+					lexeme.stop = &input;
+					lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+					lexeme.type = Lexeme::STRING;
+					report(lexeme, "Expected escape string");
 
-							return;
-						}
-
-						// Fallthrough
-
-					default:
-						result += input++;
-						break;
+					return;
 				}
 			}
+			else
+				goto result;
 		}
-		else
-			result = first;
+		else if(input == 0)
+		{
+			if(process_null(&input))
+			{
+				lexeme.stop = &input;
+				lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+				lexeme.type = Lexeme::STRING;
+				report(lexeme, "Expected escape string");
 
+				return;
+			}
+		}
+
+		result = input++;
+
+	result:
 		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 		lexeme.stop = &input;
