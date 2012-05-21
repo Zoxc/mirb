@@ -11,7 +11,10 @@ namespace Mirb
 			case Lexeme::KW_UNTIL:
 			case Lexeme::KW_WHILE:
 				return false;
-
+				
+			case Lexeme::COLON:
+				return !lexer.whitespace_after();
+				
 			default:
 				return is_expression();
 		}
