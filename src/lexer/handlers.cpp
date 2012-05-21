@@ -134,7 +134,7 @@ namespace Mirb
 						return;
 					}
 
-					name += input;
+					name += input++;
 				}
 
 				input++;
