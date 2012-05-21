@@ -780,28 +780,17 @@ namespace Mirb
 				
 			case Lexeme::QUESTION:
 			{
-				SourceLoc range = lexer.lexeme;
+				lexer.question_to_character();
 
+				auto result = new (fragment) Tree::DataNode;
+				
+				result->result_type = Value::String;
+					
+				result->data = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
+					
 				lexer.step();
 
-				if(lexeme() == Lexeme::COLON && !lexer.lexeme.whitespace)
-				{
-					auto result = new (fragment) Tree::DataNode;
-				
-					result->result_type = Value::String;
-					
-					result->data.data = (const char_t *)":";
-					result->data.length = 1;
-					
-					lexer.step();
-
-					return result;
-				}
-				else
-				{
-					report(range, "Expected characater literal");
-					return nullptr;
-				}
+				return result;
 			}
 				
 			case Lexeme::SYMBOL:

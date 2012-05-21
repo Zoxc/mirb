@@ -129,7 +129,6 @@ namespace Mirb
 			void process_newline(bool no_heredoc = false);
 			void skip_line();
 			void carrige_return();
-			void character();
 			
 			void assign_equal();
 			void colon();
@@ -180,6 +179,7 @@ namespace Mirb
 			void mod_to_literal();
 			void div_to_regexp();
 			void left_shift_to_heredoc();
+			void question_to_character();
 			bool whitespace_after();
 
 			void load(const char_t *input, size_t length);

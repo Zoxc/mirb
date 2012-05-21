@@ -271,55 +271,31 @@ namespace Mirb
 		parse_interpolate(&state, false);
 	}
 	
-	void Lexer::character()
+	void Lexer::question_to_character()
 	{
-		input++;
+		char_t first = input++;
 
-		if(is_white() || input == '\0' || input == ':')
+		std::string result;
+
+		if(first == '\\')
 		{
-			lexeme.stop = &input;
-			lexeme.type = Lexeme::QUESTION;
-
-			return;
-		}
-		else
-		{
-			char_t first = input++;
-			char_t *str = new (memory_pool) char_t[1];
-
-			if(is_start_ident(first) && is_ident(input))
+			if(parse_escape(result))
 			{
-				input--;
 				lexeme.stop = &input;
-				lexeme.type = Lexeme::QUESTION;
+				lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+				lexeme.type = Lexeme::STRING;
+				report(lexeme, "Expected escape string");
 
 				return;
 			}
-			else if(first == '\\')
-			{
-				std::string result;
-
-				if(parse_escape(result))
-				{
-					lexeme.stop = &input;
-					lexeme.data = new (memory_pool) InterpolateData(memory_pool);
-					lexeme.type = Lexeme::STRING;
-					report(lexeme, "Expected escape string");
-
-					return;
-				}
-
-				str[0] = result[0];
-			}
-			else
-				str[0] = first;
-
-			lexeme.data = new (memory_pool) InterpolateData(memory_pool);
-			lexeme.data->tail.data = str;
-			lexeme.data->tail.length = 1;
-			lexeme.stop = &input;
-			lexeme.type = Lexeme::STRING;
 		}
+		else
+			result = first;
+
+		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
+		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
+		lexeme.stop = &input;
+		lexeme.type = Lexeme::STRING;
 	}
 
 	bool Lexer::process_null(const char_t *input, bool expected)
