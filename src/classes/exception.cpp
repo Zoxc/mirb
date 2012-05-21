@@ -185,21 +185,25 @@ namespace Mirb
 	{
 		return Collector::allocate<Exception>(Value::Exception, instance_of, value_nil, nullptr);
 	}
-
-	value_t Exception::to_s(value_t obj)
+	
+	value_t Exception::to_s(Exception *self)
 	{
-		auto self = cast<Exception>(obj);
-
 		return self->message;
 	}
 
-	value_t Exception::method_initialize(value_t obj, value_t message)
+	value_t Exception::rb_backtrace(Exception *self)
 	{
-		auto self = cast<Exception>(obj);
+		if(self->backtrace)
+			return StackFrame::get_backtrace(self->backtrace).to_string();
+		else
+			return value_nil;
+	}
 
+	value_t Exception::rb_initialize(Exception *self, value_t message)
+	{
 		self->message = message;
 
-		return obj;
+		return self;
 	}
 
 	void Exception::initialize()
@@ -208,9 +212,10 @@ namespace Mirb
 
 		singleton_method<Arg::SelfClass<Class>>(context->exception_class, "allocate", &allocate);
 
-		method<Arg::Self, Arg::Value>(context->exception_class, "initialize", &method_initialize);
-		method<Arg::Self>(context->exception_class, "message", &to_s);
-		method<Arg::Self>(context->exception_class, "to_s", &to_s);
+		method<Arg::SelfClass<Exception>, Arg::Value>(context->exception_class, "initialize", &rb_initialize);
+		method<Arg::SelfClass<Exception>>(context->exception_class, "backtrace", &rb_backtrace);
+		method<Arg::SelfClass<Exception>>(context->exception_class, "message", &to_s);
+		method<Arg::SelfClass<Exception>>(context->exception_class, "to_s", &to_s);
 	}
 };
 

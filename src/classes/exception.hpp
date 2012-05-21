@@ -46,8 +46,9 @@ namespace Mirb
 	{
 		private:
 			static value_t allocate(Class *instance_of);
-			static value_t to_s(value_t obj);
-			static value_t method_initialize(value_t obj, value_t message);
+			static value_t to_s(Exception *obj);
+			static value_t rb_backtrace(Exception *self);
+			static value_t rb_initialize(Exception *obj, value_t message);
 
 		public:
 			Exception(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
