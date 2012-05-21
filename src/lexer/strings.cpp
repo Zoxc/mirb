@@ -186,7 +186,7 @@ namespace Mirb
 
 		while(true)
 		{
-			if(input == state->terminator && !state->heredoc)
+			if(!state->heredoc && input == state->terminator)
 			{
 				input++;
 				goto done;
