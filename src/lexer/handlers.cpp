@@ -251,6 +251,7 @@ namespace Mirb
 				case 'n':
 				case 'o':
 				case 'e':
+				case 'x':
 					break;
 
 				default:
