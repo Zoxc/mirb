@@ -102,9 +102,9 @@ namespace Mirb
 
 		void Scope::require_var(Scope *owner, Variable *var)
 		{
-			if(var->type != Variable::Heap)
+			if(!var->heap)
 			{
-				var->type = Variable::Heap;
+				var->heap = true;
 				var->loc = owner->heap_vars++;
 				var->owner = owner;
 			}

@@ -205,7 +205,7 @@ namespace Mirb
 
 		var_t ByteCodeGenerator::read_variable(Tree::Variable *var)
 		{
-			if(var->type == Tree::Variable::Heap)
+			if(var->heap)
 			{
 				var_t heap;
 
@@ -1129,7 +1129,7 @@ namespace Mirb
 			{
 				block->max_args++;
 
-				if(!scope->parameters[i]->default_value)
+				if(!scope->parameters[i]->has_default_value)
 					block->min_args++;
 			}
 			
@@ -1311,12 +1311,12 @@ namespace Mirb
 
 				final->max_args++;
 
-				if(parameter->default_value)
+				if(parameter->has_default_value)
 				{
 					write_variable(parameter, [&](var_t store){
 						Label *skip = create_label();
 						branches.push(BranchInfo(gen<LoadArgBranchOp>(store, i), skip));
-						to_bytecode(parameter->default_value, store);
+						to_bytecode(parameter->node, store);
 						gen(skip);
 					}, return_var);
 				}
@@ -1324,9 +1324,18 @@ namespace Mirb
 				{
 					final->min_args++;
 
-					write_variable(parameter, [&](var_t store){
-						gen<LoadArgOp>(store, i);
-					}, return_var);
+					if(parameter->parameter_group)
+					{
+						write_node(parameter->node, [&](var_t store){
+							gen<LoadArgOp>(store, i);
+						}, return_var);
+					}
+					else
+					{
+						write_variable(parameter, [&](var_t store){
+							gen<LoadArgOp>(store, i);
+						}, return_var);
+					}
 				}
 			}
 			

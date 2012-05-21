@@ -140,24 +140,13 @@ namespace Mirb
 				auto target = (Tree::VariableNode *)node;
 				auto var = target->var;
 				
-				switch(var->type)
+				if(((Tree::NamedVariable *)var)->name)
+					return print_symbol(((Tree::NamedVariable *)var)->name);
+				else
 				{
-					case Tree::Variable::Temporary:
-					{
-						std::stringstream out;
-						out << "__temp" << var->loc << "__";
-						return out.str();
-					}
-					
-					default:
-						if(((Tree::NamedVariable *)var)->name)
-							return print_symbol(((Tree::NamedVariable *)var)->name);
-						else
-						{
-							std::stringstream out;
-							out << "__temp" << var->loc << "__";
-							return out.str();
-						}
+					std::stringstream out;
+					out << "__temp" << var->loc << "__";
+					return out.str();
 				}
 			}
 			

@@ -75,19 +75,13 @@ namespace Mirb
 		class Variable
 		{
 			public:
-				enum Type
-				{
-					Temporary,
-					Local,
-					Heap,
-					Types
-				};
+				bool heap : 1;
+				bool has_default_value : 1;
+				bool parameter_group : 1;
 
-				Type type;
 				Scope *owner; // Only valid for heap variables
 				
-				Variable(Type type)
-					: type(type)
+				Variable() : heap(false), has_default_value(false), parameter_group(false)
 				{
 				}
 
@@ -98,7 +92,7 @@ namespace Mirb
 			public Variable
 		{
 			public:
-				NamedVariable(Type type) : Variable(type), name(nullptr) {}
+				NamedVariable() : name(nullptr) {}
 				
 				Symbol *name;
 				NamedVariable *next;
@@ -108,11 +102,11 @@ namespace Mirb
 			public NamedVariable
 		{
 			public:
-				Parameter(Type type) : NamedVariable(type), reported(false), default_value(nullptr) {}
+				Parameter() : NamedVariable(), reported(false), node(nullptr) {}
 
 				bool reported;
-				Node *default_value;
-				SourceLoc *range;
+				Node *node;
+				SourceLoc range;
 				
 				ListEntry<Parameter> parameter_entry;
 		};
@@ -238,14 +232,12 @@ namespace Mirb
 					mark(owner);
 				}
 
-				template<class T> T *alloc_var(Variable::Type type = Variable::Local)
+				template<class T> T *alloc_var()
 				{
-					T *result = new (Fragment(*fragment)) T(type);
+					T *result = new (Fragment(*fragment)) T;
 					
 					result->loc = variable_list.size();
 					
-					result->type = type;
-
 					variable_list.push(result);
 					
 					return result;

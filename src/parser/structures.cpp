@@ -104,6 +104,7 @@ namespace Mirb
 	{
 		switch(lexeme())
 		{
+			case Lexeme::PARENT_OPEN:
 			case Lexeme::AMPERSAND:
 			case Lexeme::MUL:
 			case Lexeme::IDENT:
@@ -113,101 +114,159 @@ namespace Mirb
 				return false;
 		}
 	}
-
-	void Parser::parse_parameters(bool block)
+	
+	void Parser::parse_parameter(bool block, bool nested)
 	{
-		do
+		if(lexeme() == Lexeme::PARENT_OPEN)
 		{
-			if(!is_parameter())
-			{
-				error("Expected paramater, but found " + lexer.lexeme.describe());
-				return;
-			}
-			
-			auto range = capture();
+			SourceLoc parent = lexer.lexeme;
 
-			bool block_parameter = matches(Lexeme::AMPERSAND);
-			bool array_parameter = matches(Lexeme::MUL);
+			lexer.step();
 
-			if(block_parameter && array_parameter)
-				error("A parameter cannot be both the block and the array parameter");
+			SourceLoc range;
 
-			Tree::Parameter *parameter = nullptr;
+			auto group = parse_multiple_expressions(true, false);
 
-			if(lexeme() == Lexeme::IDENT)
-			{
-				Symbol *symbol = lexer.lexeme.symbol;
-				range->expand(lexer.lexeme);
-			
-				if(scope->defined(symbol, false))
-					error("Variable " + lexer.lexeme.string() + " already defined");
-				else
-				{
-					parameter = scope->define<Tree::Parameter>(symbol);
-					parameter->range = range;
-				}
+			lexer.lexeme.prev_set(&range);
+
+			process_lhs(group, range, true);
+
+			auto parameter = scope->alloc_var<Tree::Parameter>();
+
+			parameter->range = range;
+			parameter->node = group;
+			parameter->parameter_group = true;
+
+			scope->parameters.push(parameter);
+
+			close_pair("parameter group", parent, Lexeme::PARENT_CLOSE);
 				
-				lexer.step();
-			}
-			else if(array_parameter)
+			return;
+		}
+			
+		SourceLoc range = lexer.lexeme;
+
+		bool block_parameter = matches(Lexeme::AMPERSAND);
+		bool array_parameter = matches(Lexeme::MUL);
+
+		if(block_parameter && array_parameter)
+			error("A parameter cannot be both the block and the array parameter");
+
+		Tree::Parameter *parameter = nullptr;
+
+		if(lexeme() == Lexeme::IDENT)
+		{
+			Symbol *symbol = lexer.lexeme.symbol;
+			range.expand(lexer.lexeme);
+			
+			if(scope->defined(symbol, false))
+				error("Variable " + lexer.lexeme.string() + " already defined");
+			else
 			{
-				parameter = scope->alloc_var<Tree::Parameter>();
+				parameter = scope->define<Tree::Parameter>(symbol);
 				parameter->range = range;
 			}
-			else
-				error("Expected a parameter name");
+				
+			lexer.step();
+		}
+		else if(array_parameter)
+		{
+			parameter = scope->alloc_var<Tree::Parameter>();
+			parameter->range = range;
+		}
+		else
+			error("Expected a parameter name");
 
-			if(scope->array_parameter && !scope->array_parameter->reported && !block_parameter)
+		if(scope->array_parameter && !scope->array_parameter->reported && !block_parameter)
+		{
+			scope->array_parameter->reported = true;
+			report(scope->array_parameter->range, "Array parameters must be last in the parameter list or right before a block parameter");
+		}
+
+		if(scope->block_parameter && !scope->block_parameter->reported)
+		{
+			scope->block_parameter->reported = true;
+			report(scope->block_parameter->range, "Block parameters must be last in the parameter list");
+		}
+			
+		if(matches(Lexeme::ASSIGN))
+		{
+			auto node = parse_operator_expression(false);
+
+			if(parameter)
 			{
-				scope->array_parameter->reported = true;
-				report(*scope->array_parameter->range, "Array parameters must be last in the parameter list or right before a block parameter");
+				parameter->node = node;
+				parameter->has_default_value = true;
 			}
 
-			if(scope->block_parameter && !scope->block_parameter->reported)
+			if(array_parameter || block_parameter)
+				report(range, (array_parameter ? "Array" : "Block") + std::string(" parameters cannot have default values"));
+		}
+		else if(!array_parameter && !block_parameter)
+		{
+			auto prev = scope->parameters.find([&](Tree::Parameter *param) -> bool { return param->has_default_value; }, nullptr);
+
+			if(prev && !prev->reported)
 			{
-				scope->block_parameter->reported = true;
-				report(*scope->block_parameter->range, "Block parameters must be last in the parameter list");
+				prev->reported = true;
+				report(prev->range, "Parameters with default values must come after regular parameters");
+			}
+		}
+
+		if(array_parameter)
+		{
+			if(scope->array_parameter)
+				report(range, "You can only receive the remaining arguments in one parameter");
+			else
+				scope->array_parameter = parameter;
+		}
+		else if(block_parameter)
+		{
+			if(scope->block_parameter)
+				report(range, "You can only receive the block in one parameter");
+			else
+				scope->block_parameter = parameter;
+		}
+		else if (parameter)
+			scope->parameters.push(parameter);
+	}
+
+	void Parser::parse_parameters(bool block, bool nested)
+	{
+		parse_parameter(block, nested);
+
+		while(lexeme() == Lexeme::COMMA)
+		{
+			SourceLoc comma = lexer.lexeme;
+
+			step_lines();
+					
+			if(lexeme() == Lexeme::COMMA)
+			{
+				SourceLoc error;
+
+				while(lexeme() == Lexeme::COMMA)
+				{
+					step_lines();
+				}
+
+				report(error, "Unexpected multiple commas");
 			}
 			
-			if(matches(Lexeme::ASSIGN))
+			if(is_parameter())
+				parse_parameter(block, nested);
+			else
 			{
-				auto node = parse_operator_expression(false);
+				auto parameter = scope->alloc_var<Tree::Parameter>();
 
-				if(parameter)
-					parameter->default_value = node;
+				parameter->range = comma;
 
-				if(array_parameter || block_parameter)
-					report(*range, (array_parameter ? "Array" : "Block") + std::string(" parameters cannot have default values"));
-			}
-			else if(!array_parameter && !block_parameter)
-			{
-				auto prev = scope->parameters.find([&](Tree::Parameter *param) -> bool { return param->default_value != nullptr; }, nullptr);
-
-				if(prev && !prev->reported)
-				{
-					prev->reported = true;
-					report(*prev->range, "Parameters with default values must come after regular parameters");
-				}
-			}
-
-			if(array_parameter)
-			{
 				if(scope->array_parameter)
-					report(*range, "You can only receive the remaining arguments in one parameter");
+					report(comma, "Cannot have a trailing comma and an array parameter");
 				else
 					scope->array_parameter = parameter;
 			}
-			else if(block_parameter)
-			{
-				if(scope->block_parameter)
-					report(*range, "You can only receive the block in one parameter");
-				else
-					scope->block_parameter = parameter;
-			}
-			else if (parameter)
-				scope->parameters.push(parameter);
 		}
-		while(matches(Lexeme::COMMA));
 	}
 
 	Tree::Node *Parser::parse_method()

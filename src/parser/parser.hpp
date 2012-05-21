@@ -123,8 +123,8 @@ namespace Mirb
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression(bool allow_multiples, bool nested);
 			Tree::Node *process_rhs(Tree::Node *rhs);
-			void process_lhs(Tree::Node *&lhs, const SourceLoc &range);
-			void process_multiple_lhs(Tree::MultipleExpressionsNode *node);
+			void process_lhs(Tree::Node *&lhs, const SourceLoc &range, bool parameter = false);
+			void process_multiple_lhs(Tree::MultipleExpressionsNode *node, bool parameter);
 			Tree::Node *parse_multiple_expressions(bool allow_multiples, bool nested);
 			Tree::Node *parse_assignment(bool allow_multiples, bool nested);
 			Tree::Node *build_assignment(Tree::Node *left, bool allow_multiples);
@@ -266,10 +266,9 @@ namespace Mirb
 			Tree::Node *parse_super();
 			
 			// structures
-			void process_parameters(bool block, Tree::Node *lhs, const SourceLoc &range);
-			void process_multiple_parameters(bool block, Tree::MultipleExpressionsNode *node);
 			bool is_parameter();
-			void parse_parameters(bool block);
+			void parse_parameter(bool block, bool nested);
+			void parse_parameters(bool block, bool nested = false);
 			Tree::Node *parse_class();
 			Tree::Node *parse_module();
 			Tree::Node *parse_method();

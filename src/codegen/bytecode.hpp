@@ -337,7 +337,7 @@ namespace Mirb
 				
 				template<typename F> var_t write_variable(Tree::Variable *var, F func, var_t temp)
 				{
-					if(var->type == Tree::Variable::Heap)
+					if(var->heap)
 					{
 						var_t heap;
 

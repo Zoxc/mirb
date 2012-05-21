@@ -1278,7 +1278,7 @@ namespace Mirb
 		return rhs;
 	}
 
-	void Parser::process_lhs(Tree::Node *&lhs, const SourceLoc &range)
+	void Parser::process_lhs(Tree::Node *&lhs, const SourceLoc &range, bool parameter)
 	{
 		if(!lhs)
 			return;
@@ -1294,7 +1294,7 @@ namespace Mirb
 					auto node = new (fragment) Tree::MultipleExpressionsNode;
 					node->expressions.append(new (fragment) Tree::MultipleExpressionNode(group->statements.first, range));
 
-					process_multiple_lhs(node);
+					process_multiple_lhs(node, parameter);
 					
 					lhs = node;
 
@@ -1305,15 +1305,25 @@ namespace Mirb
 			}
 
 			case Tree::Node::MultipleExpressions:
-				process_multiple_lhs(static_cast<Tree::MultipleExpressionsNode *>(lhs));
+				process_multiple_lhs(static_cast<Tree::MultipleExpressionsNode *>(lhs), parameter);
 				return;
 				
 			case Tree::Node::CVar:
 			case Tree::Node::IVar:
 			case Tree::Node::Global:
 			case Tree::Node::Constant:
+				if(parameter)
+					break;
+				else
+					return;
+				
 			case Tree::Node::Variable:
-				return;
+				{
+					if(parameter)
+						error("Variable " + static_cast<Tree::VariableNode *>(lhs)->var->name->get_string() + " already defined");
+
+					return;
+				}
 
 			case Tree::Node::Call:
 			{
@@ -1325,7 +1335,7 @@ namespace Mirb
 					
 					return;
 				}
-				else if(node->subscript || (node->arguments.empty() && !node->block))
+				else if(!parameter && (node->subscript || (node->arguments.empty() && !node->block)))
 				{
 					Symbol *mutated = node->method;
 					
@@ -1356,10 +1366,10 @@ namespace Mirb
 				break;
 		}
 
-		report(range, "Not an assignable expression");
+		report(range, parameter ? "Not a valid parameter" : "Not an assignable expression");
 	}
 	
-	void Parser::process_multiple_lhs(Tree::MultipleExpressionsNode *node)
+	void Parser::process_multiple_lhs(Tree::MultipleExpressionsNode *node, bool parameter)
 	{
 		bool seen_splat = false;
 		int size = 0;
@@ -1389,7 +1399,7 @@ namespace Mirb
 				index += offset;
 			}
 
-			process_lhs(expr->expression, expr->range);
+			process_lhs(expr->expression, expr->range, parameter);
 		}
 		
 		node->expression_count = size;
@@ -1548,7 +1558,7 @@ namespace Mirb
 				lexer.step();
 				skip_lines();
 
-				process_multiple_lhs(node);
+				process_multiple_lhs(node, false);
 
 				auto result = new (fragment) Tree::AssignmentNode;
 			
