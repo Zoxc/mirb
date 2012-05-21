@@ -35,7 +35,7 @@ require 'pp'
 ARGV << ':core' << ':language'
 
 puts benchmark {
-	Dir.chdir(File.expand_path('rubyspec', current_directory)) do
+	Dir.chdir(current_directory) do
 		load File.expand_path("mspec/bin/mspec-run", current_directory)
 	end
 }
