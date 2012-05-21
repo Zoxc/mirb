@@ -20,7 +20,7 @@ namespace Mirb
 			}
 		};
 	};
-	
+
 	template<Value::Type type> struct FreeClass
 	{
 		typedef void Result;
@@ -28,10 +28,13 @@ namespace Mirb
 
 		static void func(value_t value)
 		{
-			static_cast<Class *>(value)->~Class();
+			if(Class::finalizer)
+			{
+				static_cast<Class *>(value)->~Class();
+			}
 		}
 	};
-	
+
 	template<typename F> void each_root(F mark)
 	{
 		context->mark(mark);

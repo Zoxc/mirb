@@ -17,7 +17,7 @@ namespace Mirb
 	{
 		thread_pointer(reinterpret_cast<value_t *>(&value));
 	};
-	
+
 	template<> void template_thread<Value::Header>(Value::Header *&value)
 	{
 		thread_value(&value);
@@ -38,7 +38,7 @@ namespace Mirb
 			if(data && !Accesser::CharArray::static_data(string))
 				thread_data((value_t *)&data, &VariableBlock::from_memory(data));
 		}
-		
+
 		template<class T> void operator()(T *&value)
 		{
 			template_thread(value);
@@ -57,7 +57,7 @@ namespace Mirb
 			static_cast<Class *>(value)->template mark<ThreadFunc>(func);
 		}
 	};
-	
+
 	void thread_value(value_t *node)
 	{
 		if(Value::object_ref(*node))
@@ -105,10 +105,10 @@ namespace Mirb
 			*current = free;
 			current = temp;
 		}
-		
+
 		(node->*Value::Header::thread_list) = Value::Header::list_end;
 	}
-	
+
 	void move(value_t p, value_t new_p, size_t size)
 	{
 		mirb_debug(mirb_debug_assert(p->size == size));
@@ -116,10 +116,10 @@ namespace Mirb
 		if(p != new_p)
 			std::memmove(new_p, p, size);
 	}
-	
+
 	void thread_children(value_t obj)
 	{
-		Value::virtual_do<ThreadClass>(Value::type(obj), obj);
+		Value::virtual_do<ThreadClass>(obj->type, obj);
 	}
 
 	struct RegionWalker
@@ -139,7 +139,7 @@ namespace Mirb
 			mirb_debug(mirb_debug_assert(obj->alive));
 			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
 		}
-		
+
 		bool load()
 		{
 			pos = (value_t)region->data();
@@ -178,12 +178,12 @@ namespace Mirb
 
 			this->region = region;
 			this->pos = target;
-			
+
 			mirb_debug_assert(pos != (value_t)region->pos);
 			mirb_debug_assert(region->contains(pos));
 
 			test(pos);
-			
+
 			return true;
 		}
 
@@ -194,22 +194,22 @@ namespace Mirb
 			value_t next = (value_t)((size_t)pos + size);
 
 			mirb_debug_assert(region->contains(next));
-			
+
 			if((size_t)next == (size_t)region->pos)
 				return step_region();
 			else
 			{
 				test(next);
-				
+
 				mirb_debug_assert(((size_t)next > (size_t)region) && ((size_t)next <= (size_t)region->pos));
 
 				pos = next;
-				
+
 				return true;
 			}
 		}
 	};
-	
+
 	template<bool backward> struct RegionAllocator
 	{
 		Collector::Region *region;
@@ -226,7 +226,7 @@ namespace Mirb
 			if(backward)
 				region->pos = (char_t *)pos;
 		}
-		
+
 		value_t allocate_region(size_t size)
 		{
 			update();
@@ -246,16 +246,16 @@ namespace Mirb
 		value_t allocate(size_t size)
 		{
 			value_t result = pos;
-			
+
 			mirb_debug_assert(region->area_contains(pos));
-			
+
 			value_t next = (value_t)((size_t)pos + size);
 
 			if((size_t)next > (size_t)region->end)
 				return allocate_region(size);
-			
+
 			mirb_debug_assert(region->area_contains(next));
-			
+
 			pos = next;
 
 			return result;
@@ -267,7 +267,7 @@ namespace Mirb
 		ThreadFunc func;
 
 		each_root(func);
-		
+
 		RegionAllocator<false> free;
 		RegionWalker obj;
 
@@ -276,7 +276,7 @@ namespace Mirb
 		value_t prev = nullptr;
 #endif
 		bool more;
-		
+
 		obj.load();
 
 		do
@@ -295,18 +295,20 @@ namespace Mirb
 				update<false>(i, pos);
 
 				thread_children(i);
-				
+
 #ifdef MIRB_GC_SKIP_BLOCKS
 				prev = nullptr;
 #endif
 			}
-#ifdef MIRB_GC_SKIP_BLOCKS
 			else
 			{
+				Value::virtual_do<FreeClass>(i->type, i);
+
+#ifdef MIRB_GC_SKIP_BLOCKS
 				if(prev)
 				{
 					prev->type = Value::FreeBlock;
-					
+
 					#ifdef DEBUG
 						prev->size = sizeof(FreeBlock);
 					#endif
@@ -318,8 +320,8 @@ namespace Mirb
 				{
 					prev = i;
 				}
-			}
 #endif
+			}
 
 		}
 		while(more);
@@ -342,7 +344,7 @@ namespace Mirb
 			thread_children(*i);
 		}
 	}
-	
+
 	void Collector::update_backward()
 	{
 		RegionAllocator<true> free;
@@ -361,7 +363,7 @@ namespace Mirb
 			if(i->marked)
 			{
 				value_t pos = free.allocate(size);
-				
+
 				update<true>(i, pos);
 				move(i, pos, size);
 
@@ -372,7 +374,7 @@ namespace Mirb
 					mirb_debug_assert(i->alive == true);
 					i->alive = false;
 				#endif
-			
+
 #ifdef MIRB_GC_SKIP_BLOCKS
 				if(i->type == Value::FreeBlock)
 				{
@@ -394,7 +396,7 @@ namespace Mirb
 
 		{
 			Region *current = Collector::current->entry.next;
-			
+
 			Collector::current->entry.next = nullptr;
 			Collector::regions.last = Collector::current;
 
@@ -409,11 +411,11 @@ namespace Mirb
 		}
 
 		pages = ((size_t)Collector::current->end - (size_t)Collector::current) / page_size;
-		
+
 		for(auto obj = heap_list.first; obj;)
 		{
 			auto next = obj->entry.next;
-			
+
 			Value::assert_valid_base(obj);
 			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
 
@@ -422,17 +424,17 @@ namespace Mirb
 			else
 			{
 				heap_list.remove(obj);
-				Value::virtual_do<FreeClass>(Value::type(obj), obj);
+				Value::virtual_do<FreeClass>(obj->type, obj);
 				std::free((void *)obj);
 			}
 
 			obj = next;
 		}
-		
+
 		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
 			update<true>(*i, *i);
 	}
-	
+
 	void Collector::compact()
 	{
 		update_forward();
@@ -440,7 +442,7 @@ namespace Mirb
 
 		#ifdef DEBUG
 		{
-		
+
 			RegionWalker obj;
 
 			if(!obj.load())
@@ -457,5 +459,20 @@ namespace Mirb
 			while(obj.step(size_of_value(obj.pos)));
 		}
 		#endif
+	};
+
+	void Collector::finalize_regions()
+	{
+		RegionWalker obj;
+
+		if(!obj.load())
+			return;
+
+		do
+		{
+			Value::assert_valid(obj.pos);
+			Value::virtual_do<FreeClass>(obj.pos->type, obj.pos);
+		}
+		while(obj.step(size_of_value(obj.pos)));
 	};
 };

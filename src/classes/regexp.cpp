@@ -12,6 +12,12 @@
 
 namespace Mirb
 {
+	Regexp::~Regexp()
+	{
+		if(re)
+			pcre_free(re);
+	}
+
 	value_t quote(String *str)
 	{
 		return str;

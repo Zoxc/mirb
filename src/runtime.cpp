@@ -559,44 +559,48 @@ namespace Mirb
 	
 	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input)
 	{
-		MemoryPool::Base memory_pool;
-		Document *document = Collector::allocate_pinned<Document>();
+		Block *block;
 
-		Parser parser(symbol_pool, memory_pool, document);
-
-		if(!free_input)
-			document->copy(input, length);
-		else
 		{
-			document->data = input;
-			document->length = length;
+			MemoryPool::Base memory_pool;
+			Document *document = Collector::allocate_pinned<Document>();
+
+			Parser parser(symbol_pool, memory_pool, document);
+
+			if(!free_input)
+				document->copy(input, length);
+			else
+			{
+				document->data = input;
+				document->length = length;
+			}
+
+			document->name = filename;
+
+			parser.load();
+
+			Tree::Scope *tree_scope = parser.parse_main();
+
+			if(!parser.messages.empty())
+			{
+				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
+					i().print();
+
+				return raise(context->syntax_error, "Unable to parse file '" + filename + "'");
+			}
+
+			OnStack<3> os(tree_scope, method_name, scope);
+
+			#ifdef MIRB_DEBUG_COMPILER
+				DebugPrinter printer;
+
+				std::cout << "Parsing done.\n-----\n";
+				std::cout << printer.print_node(tree_scope->group);
+				std::cout << "\n-----\n";
+			#endif
+
+			block = Compiler::compile(tree_scope, memory_pool);
 		}
-
-		document->name = filename;
-
-		parser.load();
-		
-		Tree::Scope *tree_scope = parser.parse_main();
-	
-		if(!parser.messages.empty())
-		{
-			for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-				i().print();
-
-			return raise(context->syntax_error, "Unable to parse file '" + filename + "'");
-		}
-
-		OnStack<3> os(tree_scope, method_name, scope);
-		
-		#ifdef MIRB_DEBUG_COMPILER
-			DebugPrinter printer;
-		
-			std::cout << "Parsing done.\n-----\n";
-			std::cout << printer.print_node(tree_scope->group);
-			std::cout << "\n-----\n";
-		#endif
-	
-		Block *block = Compiler::compile(tree_scope, memory_pool);
 
 		return call_code(block, self, method_name, scope, value_nil, 0, 0);
 	}

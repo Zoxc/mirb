@@ -11,6 +11,8 @@ namespace Mirb
 		public:
 			Document() : PinnedHeader(Value::InternalDocument) {}
 			
+			static const bool finalizer = true;
+
 			~Document()
 			{
 				std::free((void *)data);

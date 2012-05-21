@@ -156,7 +156,7 @@ namespace Mirb
 				bool marked : 1;
 				bool hashed : 1;
 				bool flag : 1; // Usable by subclasses
-				
+
 				#ifdef DEBUG
 					bool alive : 1;
 					size_t size;
@@ -179,6 +179,8 @@ namespace Mirb
 				#endif
 
 				static value_t dup(value_t obj);
+
+				static const bool finalizer = false;
 
 				size_t hash()
 				{

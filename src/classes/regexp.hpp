@@ -19,6 +19,10 @@ namespace Mirb
 		public:
 			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of), re(nullptr) {}
 
+			static const bool finalizer = true;
+
+			~Regexp();
+
 			real_pcre *re;
 			CharArray pattern;
 

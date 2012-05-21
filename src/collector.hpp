@@ -51,6 +51,8 @@ namespace Mirb
 			static void compact();
 			static void mark();
 			static void naive_mark();
+
+			static void finalize_regions();
 			
 			static void update_forward();
 			static void update_backward();

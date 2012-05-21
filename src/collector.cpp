@@ -254,6 +254,8 @@ namespace Mirb
 		}
 
 	#ifndef VALGRIND
+		finalize_regions();
+
 		for(auto region = regions.first; region;)
 		{
 			auto next = region->entry.next;

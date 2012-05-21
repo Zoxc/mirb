@@ -16,6 +16,16 @@ namespace Mirb
 	
 	Parser::~Parser()
 	{
+		Message *current = messages.first;
+
+		while(current)
+		{
+			Message *next = current->entry.next;
+
+			current->~Message();
+
+			current = next;
+		}
 	}
 
 	SourceLoc *Parser::capture()
@@ -32,7 +42,7 @@ namespace Mirb
 	
 	void Parser::report(const SourceLoc &range, std::string text, Message::Severity severity)
 	{
-		add_message(new (memory_pool) StringMessage(*this, range, severity, text), range);
+		add_message(new (memory_pool) Message(*this, range, severity, text), range);
 	}
 
 	bool Parser::is_constant(Symbol *symbol)
@@ -89,9 +99,9 @@ namespace Mirb
 		}
 		else
 		{
-			auto message = new (memory_pool) StringMessage(*this, range, Message::MESSAGE_ERROR, "Unterminated " + name);
+			auto message = new (memory_pool) Message(*this, range, Message::MESSAGE_ERROR, "Unterminated " + name);
 			
-			message->note = new (memory_pool) StringMessage(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected " + Lexeme::describe_type(what) + " here, but found " + lexer.lexeme.describe());
+			message->note = new (memory_pool) Message(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected " + Lexeme::describe_type(what) + " here, but found " + lexer.lexeme.describe());
 			
 			add_message(message, lexer.lexeme);
 
@@ -520,9 +530,9 @@ namespace Mirb
 				}
 				else
 				{
-					auto message = new (memory_pool) StringMessage(*this, range, Message::MESSAGE_ERROR, "Unterminated interpolate sequence of " +  Lexeme::describe_type(token));
+					auto message = new (memory_pool) Message(*this, range, Message::MESSAGE_ERROR, "Unterminated interpolate sequence of " +  Lexeme::describe_type(token));
 			
-					message->note = new (memory_pool) StringMessage(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected terminating " + Lexeme::describe_type(token) + " here, but found " + lexer.lexeme.describe());
+					message->note = new (memory_pool) Message(*this, lexer.lexeme, Message::MESSAGE_NOTE, "Expected terminating " + Lexeme::describe_type(token) + " here, but found " + lexer.lexeme.describe());
 			
 					add_message(message, lexer.lexeme);
 				}

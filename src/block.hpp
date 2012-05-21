@@ -126,6 +126,8 @@ namespace Mirb
 				}
 			};
 
+			static const bool finalizer = true;
+
 			typedef value_t (*executor_t)(Frame &frame);
 
 			union

@@ -19,7 +19,7 @@ namespace Mirb
 				SEVERITIES
 			};
 
-			Message(Parser &parser, const SourceLoc &range, Severity severity);
+			Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text);
 
 			static std::string severity_names[SEVERITIES];
 
@@ -28,24 +28,14 @@ namespace Mirb
 			Severity severity;
 			ListEntry<Message> entry;
 			Message *note;
-
-			virtual std::string string() = 0;
-			
-			std::string format();
-			void print();
-	};
-	
-	class StringMessage:
-		public Message
-	{
-		private:
 			std::string text;
-		public:
-			StringMessage(Parser &parser, const SourceLoc &range, Severity severity, std::string text) : Message(parser, range, severity), text(text) {}
 
 			std::string string()
 			{
 				return text;
 			}
+
+			std::string format();
+			void print();
 	};
 };

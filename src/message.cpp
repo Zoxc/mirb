@@ -14,7 +14,7 @@ namespace Mirb
 		"Note"
 	};
 	
-	Message::Message(Parser &parser, const SourceLoc &range, Severity severity) : parser(parser), range(range), severity(severity), note(nullptr)
+	Message::Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text) : parser(parser), range(range), severity(severity), note(nullptr), text(text)
 	{
 	}
 	

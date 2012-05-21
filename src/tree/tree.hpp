@@ -169,6 +169,8 @@ namespace Mirb
 				
 				Scope(Document *document, Fragment fragment, Scope *parent, Type type);
 
+				static const bool finalizer = true;
+
 				~Scope()
 				{
 					if(type == Tree::Scope::Closure || type == Tree::Scope::Method || type == Tree::Scope::Top)

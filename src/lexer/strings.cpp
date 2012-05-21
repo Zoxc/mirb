@@ -174,9 +174,9 @@ namespace Mirb
 
 			if(state->start)
 			{
-				auto message = new (memory_pool) StringMessage(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
+				auto message = new (memory_pool) Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
 			
-				message->note = new (memory_pool) StringMessage(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
+				message->note = new (memory_pool) Message(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
 			
 				parser.add_message(message, lexeme);
 			}
