@@ -774,6 +774,19 @@ namespace Mirb
 		{
 			switch(input)
 			{
+				case '-':
+					{
+						input++;
+
+						if(is_ident(input))
+							input++;
+
+						lexeme.stop = &input;
+						lexeme.type = Lexeme::GLOBAL;
+						lexeme.symbol = symbol_pool.get(lexeme);
+						break;
+					};
+
 				case '0':
 				case '1':
 				case '2':
@@ -786,6 +799,7 @@ namespace Mirb
 				case '9':
 				case ':':
 				case '>':
+				case '<':
 				case '\\':
 				case '/':
 				case '$':
@@ -793,7 +807,6 @@ namespace Mirb
 				case '&':
 				case '_':
 				case '+':
-				case '-':
 				case '.':
 				case ',':
 				case '~':
