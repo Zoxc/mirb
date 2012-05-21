@@ -82,7 +82,7 @@ namespace Mirb
 		{
 			struct stat buf;
 
-			if(!stat(buf, file))
+			if(!stat(buf, path))
 				return false;
 
 			return S_ISDIR(buf.st_mode);
@@ -92,7 +92,7 @@ namespace Mirb
 		{
 			struct stat buf;
 
-			if(!stat(buf, file))
+			if(!stat(buf, path))
 				return false;
 
 			return S_ISREG(buf.st_mode);

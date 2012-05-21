@@ -62,6 +62,9 @@ namespace Mirb
 			WIN32_FIND_DATA ffd;
 			HANDLE handle;
 
+			if(path.size() == 0)
+				throw Exception("Empty path");
+
 			to_tchar(to_win_path(File::join(expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
 				handle = FindFirstFile(buffer, &ffd);
 			});

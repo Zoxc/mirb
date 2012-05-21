@@ -15,9 +15,11 @@ namespace Mirb
 
 		result.localize();
 
+#ifdef WIN32
 		for(size_t i = 0; i < result.size(); ++i)
 			if(result[i] == '\\')
 				result[i] = '/';
+#endif
 
 		if(result[result.size()-1] == '/')
 			result.shrink(result.size() - 1);

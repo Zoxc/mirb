@@ -79,7 +79,7 @@ namespace Mirb
 
 		if(segments[i] == "**" && (i + 1 < segments.size()))
 		{
-			Platform::list_dir(path, true, [&](const CharArray &filename, bool directory) {
+			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool directory) {
 				if(directory)
 					glob(array, segments, i, join_path(filename));
 			});
@@ -88,14 +88,14 @@ namespace Mirb
 		}
 		else if(i + 1 < segments.size())
 		{
-			Platform::list_dir(path, true, [&](const CharArray &filename, bool directory) {
+			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool directory) {
 				if(directory && File::fnmatch(filename, segments[i]))
 					glob(array, segments, i + 1, join_path(filename));
 			});
 		}
 		else
 		{
-			Platform::list_dir(path, true, [&](const CharArray &filename, bool) {
+			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool) {
 				if(File::fnmatch(filename, segments[i]))
 					array->vector.push(String::get(join_path(filename)));
 			});
