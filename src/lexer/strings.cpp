@@ -80,9 +80,30 @@ namespace Mirb
 		switch(input)
 		{
 			case '0':
-				result += (char)0;
-				input++;
-				break;
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+				{
+					const char_t *start = &input;
+
+					input++;
+				
+					while(input.in('0', '7'))
+						input++;
+
+					size_t num = 0;
+					size_t power = 0;
+
+					for(const char_t *c = &input - 1; c >= start; --c, power += 3)
+						num += (*c - '0') << power;
+
+					result += (char)num;
+					break;
+				}
 						
 			case 'n':
 				result += (char)0xA;
