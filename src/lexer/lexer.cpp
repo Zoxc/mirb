@@ -201,9 +201,12 @@ namespace Mirb
 		
 		lexeme.start = input;
 		lexeme.current_line_start = input;
+		lexeme.line_start = input;
 		lexeme.current_line = 0;
+		lexeme.line = 0;
 		lexeme.allow_keywords = true;
 		
+		process_comment();
 		step();
 	}
 	

@@ -47,6 +47,7 @@ namespace Mirb
 			static void(Lexer::*jump_table[sizeof(char_t) << 8])();
 
 			bool process_null(const char_t *input, bool expected = false);
+			void process_comment();
 
 			void restep(bool whitespace = false);
 			
@@ -127,7 +128,7 @@ namespace Mirb
 			void unknown();
 			void null();
 			void newline();
-			void process_newline(bool no_heredoc = false);
+			void process_newline(bool no_heredoc, bool allow_comment);
 			void skip_line();
 			void carrige_return();
 			

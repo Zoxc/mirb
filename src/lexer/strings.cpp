@@ -28,7 +28,7 @@ namespace Mirb
 			{
 				case '\n':
 					result += input++;
-					process_newline();
+					process_newline(false, false);
 					break;
 						
 				case '\r':
@@ -37,7 +37,7 @@ namespace Mirb
 					if(input == '\n')
 						result += input++;
 					
-					process_newline();
+					process_newline(false, false);
 					break;
 
 				case '\\':
@@ -260,7 +260,7 @@ namespace Mirb
 						goto done;
 
 					result += input++;
-					process_newline(state->heredoc != 0);
+					process_newline(state->heredoc != 0, false);
 					break;
 						
 				case '\r':
@@ -272,7 +272,7 @@ namespace Mirb
 					if(input == '\n')
 						result += input++;
 					
-					process_newline(state->heredoc != 0);
+					process_newline(state->heredoc != 0, false);
 					break;
 
 				case '\\':

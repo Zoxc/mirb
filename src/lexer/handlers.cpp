@@ -395,8 +395,71 @@ namespace Mirb
 		input.set(start);
 		return false;
 	}
+	
+	void Lexer::process_comment()
+	{
+		if((std::strncmp((const char *)&input, "=begin", 6) == 0) && !is_ident((&input)[6]))
+		{
+			auto terminate = [&]() -> bool {
+				if((std::strncmp((const char *)&input, "=end", 4) == 0) && !is_ident((&input)[4]))
+				{
+					input.set(&input + 4);
+					return true;
+				}
+				else
+					return false;
+			};
 
-	void Lexer::process_newline(bool no_heredoc)
+			while(true)
+			{
+				switch(input)
+				{
+					case '\r':
+					{
+						if(input == '\n')
+							input++;
+						
+						lexeme.current_line++;
+						lexeme.current_line_start = &input;
+
+						if(terminate())
+							goto exit_comment;
+
+						break;
+					}
+					
+					case '\n':
+					{
+						input++;
+						
+						lexeme.current_line++;
+						lexeme.current_line_start = &input;
+
+						if(terminate())
+							goto exit_comment;
+
+						break;
+					}
+
+					case 0:
+						if(process_null(&input))
+						{
+							lexeme.stop = &input;
+							report(lexeme, "Unterminated multi-line comment");
+							goto exit_comment;
+						}
+						break;
+
+					default:
+						input++;
+						break;
+				}
+			}
+			exit_comment:;
+		}
+	}
+
+	void Lexer::process_newline(bool no_heredoc, bool allow_comment)
 	{
 		lexeme.current_line++;
 		lexeme.current_line_start = &input;
@@ -428,6 +491,9 @@ namespace Mirb
 
 			lexeme = old;
 		}
+
+		if(allow_comment)
+			process_comment();
 	}
 
 	void Lexer::newline()
@@ -435,7 +501,7 @@ namespace Mirb
 		input++;
 		lexeme.type = Lexeme::LINE;
 
-		process_newline();
+		process_newline(false, true);
 	
 		lexeme.start = &input;
 		lexeme.stop = &input;
@@ -449,7 +515,7 @@ namespace Mirb
 		if(input == '\n')
 			input++;
 
-		process_newline();
+		process_newline(false, true);
 
 		lexeme.start = &input;
 		lexeme.stop = &input;
