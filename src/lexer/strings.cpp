@@ -108,7 +108,59 @@ namespace Mirb
 					
 				process_newline(no_heredoc, false);
 				break;
+				
+			case 'c':
+				{
+					input++;
+					
+					if(input == '\\')
+					{
+						input++;
 
+						return parse_escape(result, capture_newline, no_heredoc);
+					}
+					else
+						return false;
+				}
+
+			case 'C':
+				{
+					input++;
+
+					if(input == '-')
+						input++;
+					else
+						report(range(&input - 1, &input), "Expected '-' after 'C'");
+
+					if(input == '\\')
+					{
+						input++;
+
+						return parse_escape(result, capture_newline, no_heredoc);
+					}
+					else
+						return false;
+				}
+				
+			case 'M':
+				{
+					input++;
+
+					if(input == '-')
+						input++;
+					else
+						report(range(&input - 1, &input), "Expected '-' after 'M'");
+
+					if(input == '\\')
+					{
+						input++;
+
+						return parse_escape(result, capture_newline, no_heredoc);
+					}
+					else
+						return false;
+				}
+					
 			case '0':
 			case '1':
 			case '2':
