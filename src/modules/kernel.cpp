@@ -108,6 +108,9 @@ namespace Mirb
 	
 	FILE *open_file(CharArray &filename, bool try_relative)
 	{
+		if(File::absolute_path(filename))
+			return try_file(filename, filename);
+
 		auto load_path = cast<Array>(get_global(Symbol::get("$:")));
 		FILE *result = nullptr;
 		
