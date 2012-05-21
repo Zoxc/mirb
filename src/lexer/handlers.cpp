@@ -707,7 +707,10 @@ namespace Mirb
 				case '\\':
 				case '/':
 				case '$':
+				case '`':
+				case '&':
 				case '_':
+				case '+':
 				case '-':
 				case '.':
 				case ',':
