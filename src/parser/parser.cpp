@@ -910,6 +910,63 @@ namespace Mirb
 				return result;
 			}
 			
+			case Lexeme::BLOCK_POINT:
+			{
+				auto result = new (fragment) Tree::BlockNode;
+				
+				auto scope_range = capture();
+
+				lexer.step();
+				
+				allocate_scope(Tree::Scope::Closure, [&] {
+					result->scope = scope;
+
+					if(lexeme() == Lexeme::PARENT_OPEN)
+					{
+						SourceLoc parent_open = lexer.lexeme;
+
+						step_lines();
+
+						if(lexeme() != Lexeme::PARENT_CLOSE)
+							parse_parameters(false);
+
+						close_pair("block parameters", parent_open, Lexeme::PARENT_CLOSE);
+					}
+				});
+
+				lexer.lexeme.prev_set(scope_range);
+
+				result->scope->range = scope_range;
+				
+				bool curly;
+
+				SourceLoc range = lexer.lexeme;
+		
+				switch(lexeme())
+				{
+					case Lexeme::CURLY_OPEN:
+						curly = true;
+						break;
+			
+					case Lexeme::KW_DO:
+						curly = false;
+						break;
+			
+					default:
+						return 0;
+				}
+		
+				enter_scope(result->scope, [&] {
+					step_lines();
+
+					scope->group = parse_group();
+				});
+		
+				close_pair("block", range, curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
+
+				return result;
+			}
+
 			case Lexeme::BINARY:
 			case Lexeme::OCTAL:
 			case Lexeme::HEX:
@@ -1338,7 +1395,7 @@ namespace Mirb
 					
 					return;
 				}
-				else if(!parameter && (node->subscript || (node->arguments.empty() && !node->block && !node->block_arg)))
+				else if(!parameter && (node->subscript || (node->arguments.empty() && !node->scope && !node->block_arg)))
 				{
 					Symbol *mutated = node->method;
 					
@@ -1580,7 +1637,7 @@ namespace Mirb
 				auto node = (Tree::CallNode *)input;
 					
 				if(!node->subscript)
-					if(!node->arguments.empty() || node->block || node->block_arg)
+					if(!node->arguments.empty() || node->scope || node->block_arg)
 						break;
 				
 				if(node->can_be_var)

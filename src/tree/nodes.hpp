@@ -316,7 +316,7 @@ namespace Mirb
 		};
 		
 		struct BlockNode:
-			public SimpleNode
+			public Node
 		{
 			NodeType type() { return Block; }
 			
@@ -338,12 +338,12 @@ namespace Mirb
 			
 			bool variadic;
 			CountedNodeList arguments;
-			BlockNode *block; // can be zero
+			Scope *scope; // can be zero
 			BlockArg *block_arg;
 
 			SourceLoc *range;
 
-			InvokeNode() : variadic(false), block(nullptr), block_arg(nullptr) {}
+			InvokeNode() : variadic(false), scope(nullptr), block_arg(nullptr) {}
 		};
 		
 		struct CallNode:

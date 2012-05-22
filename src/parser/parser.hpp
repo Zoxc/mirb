@@ -268,7 +268,7 @@ namespace Mirb
 			bool has_arguments();
 			bool is_lookup();
 			Tree::Node *parse_lookup(Tree::Node *child);
-			Tree::BlockNode *parse_block(bool allowed);
+			Tree::Scope *parse_block(bool allowed);
 			void parse_arguments(Tree::InvokeNode *node);
 			void parse_arguments(Tree::InvokeNode *node, bool *parenthesis);
 			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, SourceLoc *range, bool has_args, bool can_be_var = false);
@@ -379,6 +379,7 @@ namespace Mirb
 					case Lexeme::LEFT_SHIFT:
 					case Lexeme::INTEGER:
 					case Lexeme::HEX:
+					case Lexeme::BLOCK_POINT:
 					case Lexeme::OCTAL:
 					case Lexeme::BINARY:
 					case Lexeme::REAL:

@@ -308,14 +308,12 @@ namespace Mirb
 		
 		lexer.step();
 
-		node->block = new (fragment) Tree::BlockNode;
-
 		Tree::GroupNode *group;
 		
 		SourceLoc var_range = lexer.lexeme;
 
 		allocate_scope(Tree::Scope::Closure, [&] {
-			node->block->scope = scope;
+			node->scope = scope;
 
 			group = new (fragment) Tree::GroupNode;
 
@@ -369,7 +367,7 @@ namespace Mirb
 		node->range = new (fragment) SourceLoc(range);
 		lexer.lexeme.prev_set(node->range);
 
-		enter_scope(node->block->scope, [&] {
+		enter_scope(node->scope, [&] {
 			auto body = parse_group();
 
 			if(body)

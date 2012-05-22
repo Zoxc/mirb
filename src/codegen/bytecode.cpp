@@ -73,7 +73,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_range,
 			&ByteCodeGenerator::convert_array,
 			&ByteCodeGenerator::convert_hash,
-			0, // Block
+			&ByteCodeGenerator::convert_block,
 			0, // Invoke
 			&ByteCodeGenerator::convert_call,
 			&ByteCodeGenerator::convert_super,
@@ -544,6 +544,18 @@ namespace Mirb
 			location(&node->range);
 		}
 		
+		void ByteCodeGenerator::convert_block(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::BlockNode *)basic_node;
+			
+			if(var != no_var)
+			{
+				var_t result = block_arg(node->scope, no_var);
+			
+				gen<MoveOp>(var, result);
+			}
+		}
+		
 		void ByteCodeGenerator::convert_call(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::CallNode *)basic_node;
@@ -551,7 +563,7 @@ namespace Mirb
 			size_t argc;
 			var_t argv;
 
-			var_t closure = call_args(node, node->block ? node->block->scope : nullptr, argc, argv, var);
+			var_t closure = call_args(node, node->scope, argc, argv, var);
 			
 			var_t obj = reuse(var);
 			
@@ -571,7 +583,7 @@ namespace Mirb
 			
 			if(node->pass_args)
 			{
-				var_t closure = node->block ? block_arg(node->block->scope, var) : ref(scope->owner->block_parameter);
+				var_t closure = node->scope ? block_arg(node->scope, var) : ref(scope->owner->block_parameter);
 				
 				// push arguments
 

@@ -19,7 +19,7 @@ namespace Mirb
 		}
 	}
 
-	Tree::BlockNode *Parser::parse_block(bool allowed)
+	Tree::Scope *Parser::parse_block(bool allowed)
 	{
 		bool curly;
 
@@ -41,10 +41,10 @@ namespace Mirb
 		
 		lexer.step();
 		
-		auto result = new (fragment) Tree::BlockNode;
+		Tree::Scope *result;
 		
 		allocate_scope(Tree::Scope::Closure, [&] {
-			result->scope = scope;
+			result = scope;
 			
 			skip_lines();
 		
@@ -67,13 +67,13 @@ namespace Mirb
 			lexer.lexeme.prev_set(range);
 			scope->range = range;
 		
-			result->scope->group = parse_group();
+			scope->group = parse_group();
 		});
 		
-		close_pair("block", *result->scope->range, curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
+		close_pair("block", *result->range, curly ? Lexeme::CURLY_CLOSE : Lexeme::KW_END);
 
 		if(!allowed)
-			report(*result->scope->range, "Unexpected block after block argument");
+			report(*result->range, "Unexpected block after block argument");
 		
 		return result;
 	}
@@ -157,7 +157,7 @@ namespace Mirb
 				lexer.lexeme.prev_set(range);
 		}
 		
-		result->block = parse_block(result->block_arg == 0);
+		result->scope = parse_block(result->block_arg == 0);
 				
 		return result;
 	}
@@ -177,7 +177,7 @@ namespace Mirb
 		lexer.lexeme.prev_set(range);
 		result->range = range;
 		
-		result->block = parse_block(result->block_arg == 0);
+		result->scope = parse_block(result->block_arg == 0);
 		
 		if(result->arguments.empty() && !parenthesis)
 		{
@@ -322,8 +322,6 @@ namespace Mirb
 
 					if(lexeme() != Lexeme::SQUARE_CLOSE)
 						parse_arguments(result);
-
-					result->block = nullptr;
 
 					close_pair("square bracket arguments", *range, Lexeme::SQUARE_CLOSE);
 

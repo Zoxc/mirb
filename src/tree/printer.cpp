@@ -253,8 +253,8 @@ namespace Mirb
 				if(!target->arguments.empty())
 					result += "(" + join(target->arguments, ", ") + ")";
 					
-				if(target->block)
-					result += " " + print_node(target->block);
+				if(target->scope)
+					result += " " + print_node(target->scope->group);
 					
 				return result;
 			}
@@ -268,9 +268,9 @@ namespace Mirb
 				if(!target->arguments.empty())
 					result += "(" + join(target->arguments, ", ") + ")";
 				
-				if(target->block)
-					result += " " + print_node(target->block);
-				
+				if(target->scope)
+					result += " " + print_node(target->scope->group);
+
 				return result;
 			}
 			

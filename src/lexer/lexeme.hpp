@@ -44,6 +44,7 @@ namespace Mirb
 				
 				ASSOC,
 				BACKTICK,
+				BLOCK_POINT,
 				POWER,
 				
 				// order contiguous binary operators

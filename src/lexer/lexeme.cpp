@@ -26,6 +26,7 @@ namespace Mirb
 		
 		"=>",
 		"`",
+		"->",
 		"**",
 		
 		// order contiguous binary operators

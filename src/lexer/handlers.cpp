@@ -919,20 +919,32 @@ namespace Mirb
 	void Lexer::sub()
 	{
 		input++;
-		
-		if(input == '=')
+
+		switch(input)
 		{
-			input++;
-			lexeme.type = Lexeme::ASSIGN_SUB;
-		}
-		else if(input == '@')
-		{
-			input++;
-			lexeme.type = Lexeme::UNARY_SUB;
-		}
-		else
-		{
-			lexeme.type = Lexeme::SUB;
+			case '=':
+			{
+				input++;
+				lexeme.type = Lexeme::ASSIGN_SUB;
+				break;
+			}
+			
+			case '>':
+			{
+				input++;
+				lexeme.type = Lexeme::BLOCK_POINT;
+				break;
+			}
+
+			case '@':
+			{
+				input++;
+				lexeme.type = Lexeme::UNARY_SUB;
+				break;
+			}
+
+			default:
+				lexeme.type = Lexeme::SUB;
 		}
 
 		lexeme.stop = &input;

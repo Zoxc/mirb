@@ -372,9 +372,7 @@ skip_name:
 			{
 				SourceLoc parent_open = lexer.lexeme;
 
-				lexer.step();
-			
-				skip_lines();
+				step_lines();
 					
 				if(lexeme() != Lexeme::PARENT_CLOSE)
 					parse_parameters(false);
