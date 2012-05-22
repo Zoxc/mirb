@@ -174,6 +174,7 @@ namespace Mirb
 			case Lexeme::GREATER:
 			case Lexeme::GREATER_OR_EQUAL:
 			case Lexeme::EQUALITY:
+			case Lexeme::NO_EQUALITY:
 			case Lexeme::CASE_EQUALITY:
 			case Lexeme::MATCHES:
 			case Lexeme::NOT_MATCHES:
