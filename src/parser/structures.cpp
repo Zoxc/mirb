@@ -115,7 +115,7 @@ namespace Mirb
 		}
 	}
 	
-	void Parser::parse_parameter(bool block, bool nested)
+	void Parser::parse_parameter(bool block)
 	{
 		if(lexeme() == Lexeme::PARENT_OPEN)
 		{
@@ -226,9 +226,9 @@ namespace Mirb
 			scope->parameters.push(parameter);
 	}
 
-	void Parser::parse_parameters(bool block, bool nested)
+	void Parser::parse_parameters(bool block)
 	{
-		parse_parameter(block, nested);
+		parse_parameter(block);
 
 		while(lexeme() == Lexeme::COMMA)
 		{
@@ -249,7 +249,7 @@ namespace Mirb
 			}
 			
 			if(is_parameter())
-				parse_parameter(block, nested);
+				parse_parameter(block);
 			else
 			{
 				auto parameter = scope->alloc_var<Tree::Parameter>();

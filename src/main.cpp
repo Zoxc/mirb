@@ -75,8 +75,7 @@ int main(int argc, const char *argv[])
 				Parser parser(symbol_pool, memory_pool, document);
 
 				parser.load();
-		
-				Tree::Scope *scope = parser.parse_main();
+				parser.parse_main();
 
 				if(!parser.messages.empty())
 					result = 1;

@@ -279,8 +279,8 @@ namespace Mirb
 			
 			// structures
 			bool is_parameter();
-			void parse_parameter(bool block, bool nested);
-			void parse_parameters(bool block, bool nested = false);
+			void parse_parameter(bool block);
+			void parse_parameters(bool block);
 			Tree::Node *parse_class();
 			Tree::Node *parse_module();
 			Tree::Node *parse_method();
