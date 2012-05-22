@@ -178,12 +178,6 @@ namespace Mirb
 		else
 			error("Expected a parameter name");
 
-		if(scope->array_parameter && !scope->array_parameter->reported && !block_parameter)
-		{
-			scope->array_parameter->reported = true;
-			report(scope->array_parameter->range, "Array parameters must be last in the parameter list or right before a block parameter");
-		}
-
 		if(scope->block_parameter && !scope->block_parameter->reported)
 		{
 			scope->block_parameter->reported = true;
