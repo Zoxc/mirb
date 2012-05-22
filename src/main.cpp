@@ -48,6 +48,8 @@ int main(int argc, const char *argv[])
 		
 		if(strcmp(argv[index], "--syntax") == 0)
 		{
+			int result = 0;
+
 			for(int i = ++index; i < argc; ++i)
 			{
 				MemoryPool::Base memory_pool;
@@ -75,12 +77,15 @@ int main(int argc, const char *argv[])
 				parser.load();
 		
 				Tree::Scope *scope = parser.parse_main();
+
+				if(!parser.messages.empty())
+					result = 1;
 		
 				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
 					i().print();
 			}
 
-			return 0;
+			return result;
 		}
 
 		CharArray exec = CharArray((const char_t *)argv[index++]);
