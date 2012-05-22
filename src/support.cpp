@@ -78,6 +78,8 @@ namespace Mirb
 		value_t create_hash(size_t argc, value_t argv[])
 		{
 			Hash *hash = Collector::allocate<Hash>(context->hash_class);
+
+			OnStack<1> os(hash);
 			
 			for(size_t i = 0; i < argc; i += 2)
 			{

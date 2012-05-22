@@ -45,7 +45,7 @@ namespace Mirb
 				return owner;
 			}
 
-			template<typename O, typename Free, typename Match> static value_t search(O owner, value_t &key, Free free, Match match)
+			template<typename O, typename Free, typename Match> static value_t search(O &owner, value_t &key, Free free, Match match)
 			{
 				size_t mask = data(owner).mask;
 				size_t current = Value::hash(key) & mask;
@@ -81,17 +81,17 @@ namespace Mirb
 				}
 			}
 
-			template<typename O> static value_t &key_slot(O owner, size_t index)
+			template<typename O> static value_t &key_slot(O &owner, size_t index)
 			{
 				return (*ValueMapManipulator::data(owner).table)[index];
 			}
 			
-			template<typename O> static value_t &value_slot(O owner, size_t index)
+			template<typename O> static value_t &value_slot(O &owner, size_t index)
 			{
 				return (*ValueMapManipulator::data(owner).table)[index + 1];
 			}
 
-			template<bool can_expand, typename O> static value_t store(O owner, value_t &key, value_t &value)
+			template<bool can_expand, typename O> static value_t store(O &owner, value_t &key, value_t &value)
 			{
 				return search(owner, key, [&](size_t index) -> value_t {
 					ValueMapManipulator::key_slot(owner, index) = key;
@@ -133,7 +133,7 @@ namespace Mirb
 						{
 							value_t value = value_slot(owner, i << 1);
 
-							if(!store<false, ValueMapData &>(new_data, key, value))
+							if(!store<false>(new_data, key, value))
 								return 0;
 						}
 					}
@@ -152,7 +152,7 @@ namespace Mirb
 
 							OnStack<2> os2(key, value);
 
-							if(!store<false, ValueMapData &>(new_data, key, value))
+							if(!store<false>(new_data, key, value))
 								return 0;
 						}
 					}
