@@ -727,8 +727,11 @@ namespace Mirb
 					break;
 				else
 				{
+					auto result = lexer.lexeme.heredoc;
+
 					lexer.step();
-					return lexer.lexeme.heredoc;
+
+					return result;
 				}
 			}
 

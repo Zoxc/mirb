@@ -531,13 +531,16 @@ namespace Mirb
 			parser.enter_scope(heredoc->scope, [&] {
 				parse_interpolate_heredoc(heredoc);
 			});
-				
+			
+			old.current_line = lexeme.current_line;
+			old.current_line_start = lexeme.current_line_start;
+			lexeme = old;
+
 			if(input == '\n')
 				newline();
 			else if(input == '\r')
 				carrige_return();
 
-			lexeme = old;
 		}
 
 		if(allow_comment)
