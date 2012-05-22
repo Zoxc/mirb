@@ -269,7 +269,7 @@ namespace Mirb
 			bool is_lookup();
 			Tree::Node *parse_lookup(Tree::Node *child);
 			Tree::Scope *parse_block(bool allowed);
-			void parse_arguments(Tree::InvokeNode *node);
+			void parse_argument_list(Tree::InvokeNode *node, Lexeme::Type terminator);
 			void parse_arguments(Tree::InvokeNode *node, bool *parenthesis);
 			Tree::Node *alloc_call_node(Tree::Node *object, Symbol *symbol, SourceLoc *range, bool has_args, bool can_be_var = false);
 			Tree::Node *parse_call(Symbol *symbol, Tree::Node *child, SourceLoc *range, bool default_var);

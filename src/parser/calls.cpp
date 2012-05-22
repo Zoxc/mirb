@@ -125,7 +125,7 @@ namespace Mirb
 			skip_lines();
 					
 			if(lexeme() != Lexeme::PARENT_CLOSE)
-				parse_arguments(node);
+				parse_argument_list(node, Lexeme::PARENT_CLOSE);
 			
 			skip_lines();
 
@@ -136,7 +136,7 @@ namespace Mirb
 			if(parenthesis)
 				*parenthesis = false;
 			
-			parse_arguments(node);
+			parse_argument_list(node, Lexeme::NONE);
 		}
 	}
 
@@ -321,7 +321,7 @@ namespace Mirb
 					result->object = child;
 
 					if(lexeme() != Lexeme::SQUARE_CLOSE)
-						parse_arguments(result);
+						parse_argument_list(result, Lexeme::SQUARE_CLOSE);
 
 					close_pair("square bracket arguments", *range, Lexeme::SQUARE_CLOSE);
 

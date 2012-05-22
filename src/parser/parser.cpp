@@ -241,7 +241,7 @@ namespace Mirb
 		}
 	}
 	
-	void Parser::parse_arguments(Tree::InvokeNode *node)
+	void Parser::parse_argument_list(Tree::InvokeNode *node, Lexeme::Type terminator)
 	{
 		Tree::HashNode *hash = nullptr;
 		SourceLoc last_hash;
@@ -249,6 +249,9 @@ namespace Mirb
 		do
 		{
 			skip_lines();
+			
+			if(terminator != Lexeme::NONE && lexeme() == terminator)
+				return;
 
 			if(lexeme() == Lexeme::AMPERSAND)
 			{
