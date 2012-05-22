@@ -1,5 +1,6 @@
 #pragma once
 #include "../value.hpp"
+#include "../char-array.hpp"
 
 namespace Mirb
 {
@@ -17,6 +18,8 @@ namespace Mirb
 		value_t print(size_t argc, value_t argv[]);
 		value_t puts(size_t argc, value_t argv[]);
 		value_t raise(size_t argc, value_t argv[]);
+		
+		bool read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length);
 
 		void initialize();
 	};

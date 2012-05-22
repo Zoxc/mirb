@@ -137,54 +137,78 @@ namespace Mirb
 		else
 			return nullptr;
 	}
-
-	value_t run_file(value_t self, CharArray filename, bool try_relative, bool require)
+	
+	bool Kernel::read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length)
 	{
+		loaded = false;
+
 		FILE* file = open_file(filename, try_relative);
 
 		if(!file)
-			return raise(context->load_error, "Unable to find file '" + filename + "'");
-
-		CharArray full_path = File::expand_path(filename);
-
-		bool loaded = false;
+		{
+			raise(context->load_error, "Unable to find file '" + filename + "'");
+			return false;
+		}
+		
+		full_path = File::expand_path(filename);
 
 		loaded = !context->loaded.each([&](value_t path) { return cast<String>(path)->string != full_path; });
 
 		if(require && loaded)
-			return value_nil;
+		{
+			fclose(file);
+			return true;
+		}
 
 		if(!loaded)
 			context->loaded.push(full_path.to_string());
 
 		fseek(file, 0, SEEK_END);
 
-		size_t length = ftell(file);
+		length = ftell(file);
 
 		fseek(file, 0, SEEK_SET);
 
-		char *data = (char *)malloc(length + 1);
+		data = (char_t *)malloc(length + 1);
 
 		if(!data)
-			return raise(context->load_error, "Unable to allocate memory for file content '" + filename + "' (" + CharArray::uint(length) + " bytes)");
-
-		mirb_runtime_assert(data != 0);
+		{
+			fclose(file);
+			raise(context->load_error, "Unable to allocate memory for file content '" + filename + "' (" + CharArray::uint(length) + " bytes)");
+			return false;
+		}
 
 		if(fread(data, 1, length, file) != length)
 		{
 			free(data);
 			fclose(file);
 
-			return raise(context->load_error, "Unable to read content of file '" + filename + "'");
+			raise(context->load_error, "Unable to read content of file '" + filename + "'");
+			return false;
 		}
 
 		data[length] = 0;
 
-		value_t result = eval(self, Symbol::get("main"), context->object_scope, (char_t *)data, length, full_path);
-
-		free(data);
 		fclose(file);
-		
+
+		return true;
+	}
+	
+	value_t run_file(value_t self, CharArray filename, bool try_relative, bool require)
+	{
+		char_t *data;
+		size_t length;
+		bool loaded;
+		CharArray full_path;
+
+		if(!Kernel::read_file(filename, try_relative, require, full_path, loaded, data, length))
+			return 0;
+
+		if(require && loaded)
+			return value_nil;
+
+		value_t result = eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
+
 		if(result)
 		{
 			// TODO: Remove loaded file from loaded list

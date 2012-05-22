@@ -45,6 +45,43 @@ int main(int argc, const char *argv[])
 			std::cout << "mirb 0.1" << std::endl;
 			index++;
 		}
+		
+		if(strcmp(argv[index], "--syntax") == 0)
+		{
+			for(int i = ++index; i < argc; ++i)
+			{
+				MemoryPool::Base memory_pool;
+				CharArray filename = (const char_t *)argv[i];
+				
+				char_t *data;
+				size_t length;
+				bool loaded;
+				CharArray full_path;
+
+				if(!Kernel::read_file(filename, true, false, full_path, loaded, data, length))
+				{
+					report_exception();
+					return 1;
+				}
+
+				Document *document = Collector::allocate_pinned<Document>();
+
+				document->data = (const char_t *)data;
+				document->length = length;
+				document->name = full_path;
+
+				Parser parser(symbol_pool, memory_pool, document);
+
+				parser.load();
+		
+				Tree::Scope *scope = parser.parse_main();
+		
+				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
+					i().print();
+			}
+
+			return 0;
+		}
 
 		CharArray exec = CharArray((const char_t *)argv[index++]);
 		
