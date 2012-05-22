@@ -186,7 +186,7 @@ namespace Mirb
 			
 		if(matches(Lexeme::ASSIGN))
 		{
-			auto node = parse_operator_expression(false);
+			auto node = block ? parse_lookup_chain() : parse_operator_expression(false);
 
 			if(parameter)
 			{
