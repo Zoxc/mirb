@@ -226,10 +226,12 @@ namespace Mirb
 	{
 		SourceLoc *start;
 		Lexeme::Type type;
+		char_t opener;
 		char_t terminator;
 		Heredoc *heredoc;
+		size_t nested;
 
-		InterpolateState() : start(0), heredoc(0) {}
+		InterpolateState() : start(0), heredoc(0), nested(0) {}
 	};
 
 	struct InterpolateData

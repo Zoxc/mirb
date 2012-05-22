@@ -8,20 +8,28 @@ namespace Mirb
 	{
 		input++;
 		
-		parse_simple_string('\'');
+		parse_simple_string(0, '\'', false);
 	}
 
-	void Lexer::parse_simple_string(char_t terminator)
+	void Lexer::parse_simple_string(char_t opener, char_t terminator, bool has_opener)
 	{
 		lexeme.type = Lexeme::STRING;
 		std::string result;
+		size_t nested = 0;
 
 		while(true)
 		{
-			if(input == terminator)
+			if(has_opener && input == opener)
+				nested++;
+			else if(input == terminator)
 			{
-				input++;
-				goto done;
+				if(nested > 0)
+					nested--;
+				else
+				{
+					input++;
+					goto done;
+				}
 			}
 
 			switch(input)
@@ -43,7 +51,7 @@ namespace Mirb
 				case '\\':
 					input++;
 
-					if(input == '\\' || input == terminator)
+					if(input == '\\' || input == terminator || (has_opener && input == opener))
 						result += input++;
 					else
 						result += '\\';
@@ -323,10 +331,20 @@ namespace Mirb
 
 		while(true)
 		{
-			if(!state->heredoc && input == state->terminator)
+			if(!state->heredoc)
 			{
-				input++;
-				goto done;
+				if(state->opener != state->terminator && input == state->opener)
+					state->nested++;
+				else if(input == state->terminator)
+				{
+					if(state->nested > 0)
+						state->nested--;
+					else
+					{
+						input++;
+						goto done;
+					}
+				}
 			}
 
 			switch(input)
@@ -474,7 +492,7 @@ namespace Mirb
 		
 		InterpolateState state;
 
-		state.terminator = '"';
+		state.terminator = state.opener = '"';
 		state.type = Lexeme::STRING;
 
 		parse_interpolate(&state, false);
@@ -488,7 +506,7 @@ namespace Mirb
 		{
 			InterpolateState state;
 
-			state.terminator = '`';
+			state.terminator = state.opener = '`';
 			state.type = Lexeme::COMMAND;
 
 			parse_interpolate(&state, false);

@@ -67,6 +67,7 @@ namespace Mirb
 		InterpolateState state;
 		state.type = type;
 
+		state.opener = input;
 		state.terminator = delimiter_mapping.try_get(input, [&]{
 			return input;
 		});
@@ -193,19 +194,21 @@ namespace Mirb
 				{
 					input++;
 				
+					char_t opener = input;
 					char_t terminator = delimiter_mapping.try_get(input, [&]{
 						return input;
 					});
 
 					input++;
 
-					return parse_simple_string(terminator);
+					return parse_simple_string(opener, terminator, opener != terminator);
 				}
 				
 			case 'w':
 			{
 				input++;
 				
+				char_t opener = input;
 				char_t terminator = delimiter_mapping.try_get(input, [&]{
 					return input;
 				});
@@ -215,26 +218,60 @@ namespace Mirb
 
 				input++;
 
-				const char_t *start = &input;
+				std::string result;
+				size_t nested = 0;
 
-				while(input != terminator)
+				while(input != terminator || nested > 0)
 				{
-					if(input == 0 && process_null(&input))
-						return;
+					if(opener != terminator)
+					{
+						if(input == opener)
+							nested++;
+						else if(input == terminator)
+							nested--;
+					}
 
-					input++;
+					switch(input)
+					{
+						case '\n':
+							result += input++;
+							process_newline(false, false);
+							break;
+						
+						case '\r':
+							result += input++;
+
+							if(input == '\n')
+								result += input++;
+					
+							process_newline(false, false);
+							break;
+
+						case 0:
+							if(process_null(&input))
+							{
+								lexeme.stop = &input;
+								report(lexeme, "Unterminated array literal");
+								goto exit_array_literal;
+								return;
+							}
+				
+							// Fallthrough
+
+						default:
+							result += input++;	
+
+					}
 				}
 				
-				std::string result((const char *)start, (size_t)&input - (size_t)start);
+				input++;
 
+			exit_array_literal:
 				lexeme.stop = &input;
-
 				lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 				lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 				lexeme.type = Lexeme::ARRAY;
 				
-				input++;
-
 				return;
 			}
 
@@ -282,7 +319,7 @@ namespace Mirb
 
 		InterpolateState state;
 		state.type = Lexeme::REGEXP;
-		state.terminator = '/';
+		state.terminator = state.opener = '/';
 		parse_interpolate(&state, false);
 	}
 	
