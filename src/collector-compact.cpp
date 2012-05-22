@@ -412,23 +412,23 @@ namespace Mirb
 
 		pages = ((size_t)Collector::current->end - (size_t)Collector::current) / page_size;
 
-		for(auto obj = heap_list.first; obj;)
+		for(auto heap_obj = heap_list.first; heap_obj;)
 		{
-			auto next = obj->entry.next;
+			auto next = heap_obj->entry.next;
 
-			Value::assert_valid_base(obj);
-			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
+			Value::assert_valid_base(heap_obj);
+			mirb_debug_assert((heap_obj->*Value::Header::mark_list) == Value::Header::list_end);
 
-			if(obj->marked)
-				update<true>(obj, obj);
+			if(heap_obj->marked)
+				update<true>(heap_obj, heap_obj);
 			else
 			{
-				heap_list.remove(obj);
-				Value::virtual_do<FreeClass>(obj->type, obj);
-				std::free((void *)obj);
+				heap_list.remove(heap_obj);
+				Value::virtual_do<FreeClass>(heap_obj->type, heap_obj);
+				std::free((void *)heap_obj);
 			}
 
-			obj = next;
+			heap_obj = next;
 		}
 
 		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
