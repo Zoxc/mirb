@@ -160,7 +160,7 @@ namespace Mirb
 		else if(type >= keyword_start && type <= keyword_end)
 			result = "'" + names[type] + "' (keyword)";
 		else
-			result = "'" + range->get_line() + "' (" + names[type] + ")";
+			result = "'" + range->limited_string() + "' (" + names[type] + ")";
 		
 		return result;
 	}

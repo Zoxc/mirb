@@ -781,7 +781,7 @@ namespace Mirb
 	{
 		input++;
 
-		if(!is_start_ident(input) || !is_ident((&input)[1]))
+		if(!is_start_ident(input))
 		{
 			switch(input)
 			{

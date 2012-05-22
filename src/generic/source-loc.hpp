@@ -36,12 +36,36 @@ namespace Mirb
 		public:
 			const char_t *line_start;
 			size_t line;
+			
+			std::string limited_string()
+			{
+				const char_t *input = start;
 
+				while(input < stop)
+				{
+					switch(*input)
+					{
+						case 0:
+						case '\n':
+						case '\r':
+							goto done;
+							
+						default:
+							input++;	
+					}
+				}
+				done:
+					
+				std::string result((const char *)start, (size_t)(input - start));
+						
+				return result;
+			}
+	
 			std::string get_line()
 			{
 				const char_t *input = line_start;
 				
-				while(input)
+				while(true)
 					switch(*input)
 					{
 						case 0:

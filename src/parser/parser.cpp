@@ -1866,6 +1866,9 @@ namespace Mirb
 				group->statements.append(node);
 		}
 		
+		if (!is_sep())
+			return group;
+			
 		skip_seps();
 		
 		while(is_statement())
