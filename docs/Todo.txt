@@ -7,17 +7,17 @@
 [X] Arrays
 [X] Hashes
 [X] Multiple assignment
-[ ] Loops
-[ ] Ranges
+[X] Loops
+[X] Ranges
 [X] Class inheritance
 [X] Instance variables
-[ ] Singleton class of variable syntax
+[X] Singleton class of variable syntax
 [ ] Class variables
 [X] Global variables
 [X] Super
 [X] Exception handling
 [X] Garbage collection
-[ ] Argument splat operators
+[X] Argument splat operators
 [X] Modules
 [ ] BasicObject
 [X] Fix constant resolution path
@@ -26,7 +26,6 @@
 [X] Create some form of DSL to generate Ruby function from C++ functions. Support C++ methods too
 [X] Write a new precise garbage collector
 [X] Steal Rubinius' tagging scheme (almost)
-[ ] Use user defined literals from symbols ("to_s"intern) or some other way of passing string literals to templates (this might not be possible...)
 [ ] Fix &&=
 [ ] Skip lines where appropiate in the parser
-[ ] Make \ at the end of lines join tokes
+[ ] Ensure nothing swallows exceptions
