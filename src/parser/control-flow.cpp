@@ -167,9 +167,7 @@ namespace Mirb
 			SourceLoc range = lexer.lexeme;
 
 			typecheck(result, [&](Tree::Node *result) -> Tree::Node * {
-				lexer.step();
-
-				skip_lines();
+				step_lines();
 			
 				auto node = new (fragment) Tree::IfNode;
 			
@@ -202,7 +200,7 @@ namespace Mirb
 			
 				node->inverted = lexeme() == Lexeme::KW_UNLESS;
 			
-				lexer.step();
+				step_lines();
 			
 				node->middle = result;
 				node->left = typecheck(parse_tailing_loop());
@@ -228,7 +226,7 @@ namespace Mirb
 
 				auto rescue = new (fragment) Tree::RescueNode;
 			
-				lexer.step();
+				step_lines();
 
 				rescue->pattern = nullptr;
 				rescue->var = nullptr;
@@ -256,7 +254,7 @@ namespace Mirb
 
 				auto rescue = new (fragment) Tree::RescueNode;
 			
-				lexer.step();
+				step_lines();
 
 				rescue->pattern = nullptr;
 				rescue->var = nullptr;
@@ -288,7 +286,7 @@ namespace Mirb
 				
 				node->inverted = lexeme() == Lexeme::KW_UNTIL;
 			
-				lexer.step();
+				step_lines();
 			
 				node->body = result;
 				node->condition = typecheck(parse_tailing_loop());
@@ -306,7 +304,7 @@ namespace Mirb
 		
 		SourceLoc range = lexer.lexeme;
 		
-		lexer.step();
+		step_lines();
 
 		Tree::GroupNode *group;
 		
@@ -349,6 +347,8 @@ namespace Mirb
 
 		match(Lexeme::KW_IN);
 
+		skip_lines();
+
 		lexer.lexeme.prev_set(&var_range);
 
 		node->object = parse_expression();
@@ -387,7 +387,7 @@ namespace Mirb
 		
 		node->inverted = lexeme() == Lexeme::KW_UNTIL;
 		
-		lexer.step();
+		step_lines();
 		
 		node->condition = typecheck(parse_expression());
 				
@@ -416,7 +416,7 @@ namespace Mirb
 	{
 		SourceLoc range = lexer.lexeme;
 		
-		lexer.step();
+		step_lines();
 
 		auto result = new (fragment) Tree::IfNode;
 		

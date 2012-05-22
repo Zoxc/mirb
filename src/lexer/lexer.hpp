@@ -139,7 +139,6 @@ namespace Mirb
 			void curly_open();
 			void curly_close();
 
-			void add();
 			void sub();
 			
 			void ivar();
@@ -178,6 +177,7 @@ namespace Mirb
 			void div_to_regexp();
 			void left_shift_to_heredoc();
 			void question_to_character();
+			void expand_to_unary();
 			bool whitespace_after();
 
 			void load(const char_t *input, size_t length);

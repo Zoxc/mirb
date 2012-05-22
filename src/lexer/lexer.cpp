@@ -118,7 +118,7 @@ namespace Mirb
 		jump_table[(size_t)'\\'] = &Lexer::skip_line;
 		
 		// Arithmetic
-		jump_table[(size_t)'+'] = &Lexer::add;
+		jump_table[(size_t)'+'] = &Lexer::assign<Lexeme::ADD, Lexeme::ASSIGN_ADD>;
 		jump_table[(size_t)'-'] = &Lexer::sub;
 		jump_table[(size_t)'*'] = &Lexer::assign<Lexeme::MUL, Lexeme::ASSIGN_MUL, '*', Lexeme::POWER, Lexeme::ASSIGN_POWER>;
 		jump_table[(size_t)'/'] = &Lexer::assign<Lexeme::DIV, Lexeme::ASSIGN_DIV>;

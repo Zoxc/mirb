@@ -157,12 +157,24 @@ namespace Mirb
 				return range;
 			}
 			
+			case Lexeme::ADD:
+			case Lexeme::SUB:
+			{
+				lexer.expand_to_unary();
+
+				range = capture();
+
+				symbol = symbol_pool.get(lexer.lexeme);
+				
+				lexer.step();
+
+				return range;
+			};
+
 			case Lexeme::POWER:
 			case Lexeme::MUL:
 			case Lexeme::DIV:
 			case Lexeme::MOD:
-			case Lexeme::ADD:
-			case Lexeme::SUB:
 			case Lexeme::LEFT_SHIFT:
 			case Lexeme::RIGHT_SHIFT:
 			case Lexeme::AMPERSAND:
@@ -180,8 +192,6 @@ namespace Mirb
 			case Lexeme::NOT_MATCHES:
 			case Lexeme::BITWISE_NOT:
 			case Lexeme::LOGICAL_NOT:
-			case Lexeme::UNARY_ADD:
-			case Lexeme::UNARY_SUB:
 			case Lexeme::BACKTICK:
 			{
 				symbol = symbol_pool.get(lexer.lexeme);
@@ -1070,8 +1080,6 @@ namespace Mirb
 				return parse_call(symbol, new (fragment) Tree::SelfNode, range, true); // Function call, constant or local variable
 			}
 			
-			case Lexeme::UNARY_ADD:
-			case Lexeme::UNARY_SUB:
 			case Lexeme::EXT_IDENT:
 			{
 				auto symbol = symbol_pool.get(lexer.lexeme);

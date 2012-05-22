@@ -364,8 +364,6 @@ namespace Mirb
 				{
 					case Lexeme::IDENT:
 					case Lexeme::EXT_IDENT:
-					case Lexeme::UNARY_ADD:
-					case Lexeme::UNARY_SUB:
 					case Lexeme::CVAR:
 					case Lexeme::IVAR:
 					case Lexeme::GLOBAL:

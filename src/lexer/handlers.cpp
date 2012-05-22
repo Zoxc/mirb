@@ -62,6 +62,16 @@ namespace Mirb
 		unknown();
 	}
 
+	void Lexer::expand_to_unary()
+	{
+		if(input == '@')
+		{
+			input++;
+			lexeme.stop = &input;
+			lexeme.type = Lexeme::operator_to_unary(lexeme.type);
+		}
+	}
+
 	void Lexer::parse_delimited_data(Lexeme::Type type)
 	{
 		InterpolateState state;
@@ -898,28 +908,6 @@ namespace Mirb
 			report(lexeme, "Global variable names cannot start with a number");
 	}
 	
-	void Lexer::add()
-	{
-		input++;
-		
-		if(input == '=')
-		{
-			input++;
-			lexeme.type = Lexeme::ASSIGN_ADD;
-		}
-		else if(input == '@')
-		{
-			input++;
-			lexeme.type = Lexeme::UNARY_ADD;
-		}
-		else
-		{
-			lexeme.type = Lexeme::ADD;
-		}
-
-		lexeme.stop = &input;
-	}
-	
 	void Lexer::sub()
 	{
 		input++;
@@ -937,13 +925,6 @@ namespace Mirb
 			{
 				input++;
 				lexeme.type = Lexeme::BLOCK_POINT;
-				break;
-			}
-
-			case '@':
-			{
-				input++;
-				lexeme.type = Lexeme::UNARY_SUB;
 				break;
 			}
 
