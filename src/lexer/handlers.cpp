@@ -22,7 +22,7 @@ namespace Mirb
 	
 	bool Lexer::whitespace_after()
 	{
-		return is_white();
+		return input.in(1, 32);
 	}
 
 	void Lexer::unknown()
