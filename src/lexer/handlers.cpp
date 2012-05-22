@@ -853,6 +853,7 @@ namespace Mirb
 				case '<':
 				case '\\':
 				case '/':
+				case '@':
 				case '$':
 				case '`':
 				case '&':
