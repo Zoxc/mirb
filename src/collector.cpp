@@ -32,7 +32,7 @@ namespace Mirb
 	Collector::Region *Collector::current;
 	List<Collector::Region> Collector::regions;
 
-	std::atomic_bool pending_exception;
+	std::atomic<bool> pending_exception;
 	
 	#ifdef VALGRIND
 		LinkedList<Value::Header> Collector::heap_list;
