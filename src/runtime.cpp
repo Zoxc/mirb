@@ -106,27 +106,47 @@ namespace Mirb
 		return false;
 	}
 	
-	Class *define_class(value_t under, Symbol *name, Class *super)
+	value_t define_common(value_t under, Symbol *name, Value::Type type)
 	{
 		if(prelude_unlikely(!Value::of_type<Module>(under)))
 		{
-			raise(context->type_error, "Invalid constant scope '" + inspect_obj(under) + "'");
-			return nullptr;
+			String *under_str = inspect(under);
+
+			if(!under_str)
+				return 0;
+
+			raise(context->type_error, "Invalid constant scope '" + under_str->string + "'");
+			return 0;
 		}
 
 		value_t existing = get_var_raw(under, name);
-		
+
 		if(prelude_unlikely(existing != value_raise))
 		{
-			if(type(existing) != Value::Class)
+			if(Value::type(existing) != type)
 			{
-				raise(context->type_error,  "Constant already exists with type " + inspect_obj(real_class_of(existing)));
+				String *existing_str = inspect(real_class_of(existing));
 
-				return nullptr;
+				if(!existing_str)
+					return 0;
+
+				raise(context->type_error,  "Constant already exists with type " + existing_str->string);
+
+				return 0;
 			}
 			else
-				return auto_cast(existing);
+				return existing;
 		}
+
+		return value_undef;
+	}
+
+	Class *define_class(value_t under, Symbol *name, Class *super)
+	{
+		value_t result = define_common(under, name, Value::Class);
+
+		if(result != value_undef)
+			return auto_cast(result);
 
 		Class *obj = class_create_unnamed(auto_cast(super));
 		
@@ -142,25 +162,10 @@ namespace Mirb
 
 	Module *define_module(value_t under, Symbol *name)
 	{
-		if(prelude_unlikely(!Value::of_type<Module>(under)))
-		{
-			raise(context->type_error, "Invalid constant scope '" + inspect_obj(under) + "'");
-			return nullptr;
-		}
+		value_t result = define_common(under, name, Value::Module);
 
-		value_t existing = get_var_raw(under, name);
-
-		if(prelude_unlikely(existing != value_raise))
-		{
-			if(type(existing) != Value::Module)
-			{
-				raise(context->type_error,  "Constant already exists with type " + inspect_obj(real_class_of(existing)));
-
-				return nullptr;
-			}
-			else
-				return auto_cast(existing);
-		}
+		if(result != value_undef)
+			return auto_cast(result);
 
 		Module *obj = module_create_bare();
 		
@@ -294,7 +299,7 @@ namespace Mirb
 
 	CharArray inspect_obj(value_t obj)
 	{
-		value_t str = inspect(obj);
+		String *str = inspect(obj);
 		
 		if(!str)
 		{
@@ -302,12 +307,12 @@ namespace Mirb
 			return CharArray("");
 		}
 
-		return cast<String>(str)->string;
+		return str->string;
 	}
 	
 	bool append_inspect(CharArray &result, value_t obj)
 	{
-		value_t str = inspect(obj);
+		String *str = inspect(obj);
 
 		if(str)
 		{
@@ -321,7 +326,7 @@ namespace Mirb
 	
 	std::string inspect_object(value_t obj)
 	{
-		value_t str = inspect(obj);
+		String *str = inspect(obj);
 
 		if(!str)
 		{
@@ -329,10 +334,10 @@ namespace Mirb
 			return  "";
 		}
 
-		return cast<String>(str)->get_string();
+		return str->get_string();
 	}
 
-	value_t inspect(value_t obj)
+	String *inspect(value_t obj)
 	{
 		OnStack<1> os(obj);
 
@@ -347,16 +352,19 @@ namespace Mirb
 			return 0;
 
 		if(prelude_likely(Value::type(result) == Value::String))
-			return result;
+			return auto_cast(result);
 		else
-			return Object::to_s(obj);
+			return auto_cast(Object::to_s(obj));
 	}
 
 	CharArray pretty_inspect(value_t obj)
 	{
 		OnStack<1> os(obj);
+		CharArray left = inspect_obj(obj);
+		OnStackString<1> oss(left);
+		CharArray right = inspect_obj(real_class_of(obj));
 
-		return inspect_obj(obj) + ":" + inspect_obj(real_class_of(obj));
+		return left + ":" + right;
 	}
 
 	ValueMap *get_vars(value_t obj)
@@ -380,7 +388,12 @@ namespace Mirb
 			return true;
 		else
 		{
-			raise(context->name_error, "Object " + inspect_obj(obj) + " can not contain constants");
+			String *obj_str = inspect(obj);
+
+			if(!obj_str)
+				return false;
+
+			raise(context->name_error, "Object " + obj_str->string + " can not contain constants");
 
 			return false;
 		}
@@ -453,9 +466,16 @@ namespace Mirb
 		if(prelude_likely(value != nullptr))
 			return value;
 
-		raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + name->string);
+		OnStack<1> os(name);
 
-		return value_raise;
+		String *obj_str = inspect(obj);
+
+		if(!obj_str)
+			return 0;
+
+		raise(context->name_error, "Uninitialized constant " + obj_str->string + "::" + name->string);
+
+		return 0;
 	}
 
 	value_t get_const(Tuple<Module> *scope, Symbol *name)
@@ -527,16 +547,25 @@ namespace Mirb
 
 	value_t type_error(value_t value, const CharArray &expected)
 	{
-		return raise(context->type_error, pretty_inspect(value) + " was given when " + expected + " was expected");
+		OnStackString<1> os(expected);
+		CharArray value_str = pretty_inspect(value);
+
+		return raise(context->type_error, value_str + " was given when " + expected + " was expected");
 	}
 
 	bool type_error(value_t value, value_t expected)
 	{
 		value_t klass = real_class_of(value);
 
-		if(klass != expected)
+		if(prelude_unlikely(klass != expected))
 		{
-			raise(context->type_error, pretty_inspect(value) + " was given when a object of type " + inspect_obj(expected)  + " was expected");
+			CharArray value_str = pretty_inspect(value);
+
+			OnStackString<1> os(value_str);
+
+			CharArray expected_str = inspect_obj(expected);
+
+			raise(context->type_error, value_str + " was given when a object of type " + expected_str + " was expected");
 			return true;
 		}
 		else
@@ -627,7 +656,11 @@ namespace Mirb
 
 		if(prelude_unlikely(!result))
 		{
-			raise(context->name_error, "Undefined method '" + name->string + "' for " + pretty_inspect(obj));
+			OnStack<1> os(name);
+
+			CharArray obj_str = pretty_inspect(obj);
+
+			raise(context->name_error, "Undefined method '" + name->string + "' for " + obj_str);
 			return 0;
 		}
 
@@ -640,7 +673,11 @@ namespace Mirb
 
 		if(prelude_unlikely(!result))
 		{
-			raise(context->name_error, "No superclass method '" + name->string + "' for " + pretty_inspect(module));
+			OnStack<1> os(name);
+
+			CharArray module_value = pretty_inspect(module);
+
+			raise(context->name_error, "No superclass method '" + name->string + "' for " + module_value);
 			return 0;
 		}
 

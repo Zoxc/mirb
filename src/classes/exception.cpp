@@ -46,7 +46,11 @@ namespace Mirb
 		value_t class_of = real_class_of(self->obj);
 
 		if(class_of != module)
-			Platform::color<Platform::Gray>("(" + inspect_object(class_of) + ")");
+		{
+			Platform::color<Platform::Gray>("(");
+			Platform::color<Platform::Gray>(inspect_object(class_of));
+			Platform::color<Platform::Gray>(")");
+		}
 
 		Platform::color<Platform::Gray>("#");
 
@@ -105,7 +109,10 @@ namespace Mirb
 		value_t class_of = real_class_of(self->obj);
 
 		if(class_of != module)
-			result += "(" + inspect_obj(class_of) + ")";
+		{
+			result += "(";
+			result += inspect_obj(class_of) + ")";
+		}
 
 		result += "#" + self->name->string  + "(";
 

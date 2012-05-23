@@ -1,20 +1,27 @@
 #include "range.hpp"
 #include "fixnum.hpp"
+#include "string.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
 {
 	value_t Range::to_s(Range *obj)
 	{
-		OnStack<1> os(obj);
+		OnStack<1> os1(obj);
 
-		CharArray low = inspect_obj(obj->low);
+		String *low = inspect(obj->low);
 
-		OnStackString<1> oss(low);
+		if(!low)
+			return 0;
+
+		OnStack<1> os2(low);
 		
-		CharArray high = inspect_obj(obj->high);
+		String *high = inspect(obj->high);
 
-		return (low + (const char_t *)(obj->flag ? "..." : "..") + high).to_string();
+		if(!high)
+			return 0;
+
+		return (low->string + (const char_t *)(obj->flag ? "..." : "..") + high->string).to_string();
 	}
 	
 	bool Range::convert_to_index(size_t &start, size_t &length, size_t size)

@@ -154,8 +154,6 @@ int main(int argc, const char *argv[])
 		}
 
 		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
-		
-		OnStack<1> os1(result);
 
 		if(result == value_raise)
 		{

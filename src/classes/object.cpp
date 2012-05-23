@@ -25,7 +25,7 @@ namespace Mirb
 		return obj;
 	}
 	
-	value_t Object::inspect(value_t obj)
+	value_t Object::rb_inspect(value_t obj)
 	{
 		return call(obj, "to_s");
 	}
@@ -202,7 +202,7 @@ namespace Mirb
 		method<Arg::Self>(context->object_class, "object_id", &object_id);
 		method<Arg::Self>(context->object_class, "__id__", &object_id);
 		method<Arg::Count>(context->object_class, "initialize", &variadic_dummy);
-		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &inspect);
+		context->inspect_method = method<Arg::Self>(context->object_class, "inspect", &rb_inspect);
 		method(context->object_class, "nil?", &nil);
 		method<Arg::Self>(context->object_class, "to_s", &to_s);
 		method<Arg::Self>(context->object_class, "dup", &rb_dup);

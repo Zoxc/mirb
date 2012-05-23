@@ -1,5 +1,6 @@
 #include "class.hpp"
 #include "symbol.hpp"
+#include "string.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "../value-map.hpp"
@@ -165,7 +166,11 @@ namespace Mirb
 
 		if(prelude_unlikely(!method))
 		{
-			raise(context->name_error, "Unable to find method " + inspect_obj(old_name) + " on " + inspect_obj(obj));
+			OnStack<1> os(old_name);
+
+			CharArray obj_str = pretty_inspect(obj);
+
+			raise(context->name_error, "Undefined method '" + old_name->string + "' for " + obj_str);
 			return value_raise;
 		}
 
@@ -185,9 +190,14 @@ namespace Mirb
 	value_t Module::const_get(Module *obj, Symbol *constant)
 	{
 		return ValueMapAccess::get(get_vars(obj), constant, [&]() -> value_t {
-			OnStack<2> os(obj, constant);
+			OnStack<1> os(constant);
 
-			return raise(context->name_error, "Uninitialized constant " + inspect_obj(obj) + "::" + constant->string);
+			String *obj_str = inspect(obj);
+
+			if(!obj_str)
+				return 0;
+
+			return raise(context->name_error, "Uninitialized constant " + obj_str->string + "::" + constant->string);
 		});
 	}
 
@@ -201,22 +211,26 @@ namespace Mirb
 	{
 		Class *meta = class_of(obj);
 
-		OnStack<1> os(obj);
-
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i], context->symbol_class))
+			auto symbol = raise_cast<Symbol>(argv[i]);
+
+			if(!symbol)
 				return 0;
 			
-			auto method = obj->get_method(auto_cast(argv[i]));
+			auto method = obj->get_method(symbol);
 
 			if(prelude_unlikely(!method))
 			{
-				raise(context->name_error, "Unable to find method " + inspect_obj(argv[i]) + " on " + pretty_inspect(obj));
+				OnStack<1> os2(symbol);
+
+				CharArray obj_value = pretty_inspect(obj);
+
+				raise(context->name_error, "Unable to find method " + symbol->string + " on " + obj_value);
 				return value_raise;
 			}
 
-			meta->set_method(auto_cast(argv[i]), method);
+			meta->set_method(symbol, method);
 		}
 
 		return obj;

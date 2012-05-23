@@ -52,7 +52,7 @@ namespace Mirb
 	/*
 	 * inspect (calls Ruby code)
 	 */
-	value_t inspect(value_t obj);
+	String *inspect(value_t obj);
 	
 	/*
 	 * pretty_inspect (calls Ruby code)
