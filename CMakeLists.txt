@@ -20,6 +20,7 @@ file(GLOB MIRB_SOURCES
 add_executable(mirb ${MIRB_SOURCES})
 target_link_libraries(mirb pcre)
 
+set(CMAKE_CXX_FLAGS_ADDRESSSANITIZER "-fno-omit-frame-pointer -faddress-sanitizer -O1 -g")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
