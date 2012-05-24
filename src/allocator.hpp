@@ -267,3 +267,4 @@ namespace Mirb
 };
 
 void *operator new(size_t bytes, Mirb::Collector &) throw();
+static inline void operator delete(void *bytes, Mirb::Collector &) throw() {}

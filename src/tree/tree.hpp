@@ -290,4 +290,4 @@ namespace Mirb
 };
 
 void *operator new(size_t bytes, Mirb::Tree::Fragment fragment) throw();
-void *operator new[](size_t bytes, Mirb::Tree::Fragment fragment) throw();
+static inline void operator delete(void *bytes, Mirb::Tree::Fragment fragment) throw() {}
