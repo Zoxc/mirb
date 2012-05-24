@@ -168,7 +168,7 @@ namespace Mirb
 
 		heredocs.push(heredoc);
 		
-		heredoc->node = new (*heredoc->scope->fragment) Tree::HeredocNode;
+		heredoc->node = new (Tree::Fragment(*heredoc->scope->fragment)) Tree::HeredocNode;
 
 		lexeme.stop = &input;
 
