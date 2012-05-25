@@ -28,6 +28,8 @@ module Signal
 	end
 end
 
+ENV['HOME'] = File.expand_path('home', current_directory)
+
 require 'enumerable'
 require 'fileutils'
 require 'pp'
