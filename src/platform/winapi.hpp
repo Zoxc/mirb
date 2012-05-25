@@ -34,27 +34,23 @@ namespace Mirb
 
 				func(buffer, size);
 			#else
-				func((const TCHAR *)string.raw(), string.size());
+				func((TCHAR *)string.raw(), string.size());
 			#endif
 		}
 		
 		template<typename F> void to_short_win_path(const CharArray &path, F func)
 		{
-			#ifdef _UNICODE
-				to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size) {
+			to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size) {
+				#ifdef _UNICODE
 					if(size > MAX_PATH)
 					{
 						if(GetShortPathName(buffer, buffer, size + 1) == 0)
 							raise("Unable to convert long pathname to a short pathname");
 					}
+				#endif
 
-					func(buffer);
-				});
-			#else
-				to_tchar(to_win_path(expand_path(path)), [&](const TCHAR *buffer, size_t) {
-					func(buffer);
-				});
-			#endif
+				func(buffer);
+			});
 		}
 	
 		template<typename F> void list_dir(const CharArray &path, bool skip_special, F func)

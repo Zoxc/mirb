@@ -121,7 +121,7 @@ namespace Mirb
 
 				return normalize_separator_from(result);
 			#else
-				return path;
+				return normalize_separator_from(path);
 			#endif
 		}
 	
@@ -130,7 +130,7 @@ namespace Mirb
 			#ifdef _UNICODE
 				return "\\\\?\\" + normalize_separator_to(path);
 			#else
-				return path;
+				return normalize_separator_to(path);
 			#endif
 		}
 	
@@ -146,7 +146,7 @@ namespace Mirb
 
 				return from_win_path(from_tchar(long_buffer));
 			#else
-				return CharArray((const char_t *)buffer, std::strlen(buffer));
+				return from_win_path(from_tchar(buffer));
 			#endif
 		}
 	
