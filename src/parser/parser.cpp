@@ -684,7 +684,7 @@ namespace Mirb
 			auto add_inter = static_cast<Tree::InterpolateNode *>(add);
 			auto result_inter = static_cast<Tree::InterpolateNode *>(result);
 
-			if(add->type() == Tree::Node::Interpolate)
+			if(add->type() == Tree::Node::Interpolate && ! result->type() == Tree::Node::Interpolate)
 			{
 				new_result = new (fragment) Tree::InterpolateNode;
 				new_result->data = result->data;
@@ -693,7 +693,7 @@ namespace Mirb
 			else
 				new_result = result_inter;
 
-			if(add_inter->type() == Tree::Node::Interpolate && !add_inter->pairs.empty())
+			if(add->type() == Tree::Node::Interpolate && !add_inter->pairs.empty())
 			{
 				add_inter->pairs.first->string.set<Tree::Fragment>(result->data.get() + add_inter->pairs.first->string.get(), fragment);
 				new_result->data = add_inter->data;
