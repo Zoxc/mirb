@@ -48,6 +48,8 @@ namespace Mirb
 			Class *fixnum_class;
 
 			Class *exception_class;
+			
+			Class *system_stack_error;
 
 			Class *signal_exception;
 			Class *interrupt_class;

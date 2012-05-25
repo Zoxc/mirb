@@ -1,6 +1,7 @@
 #include "../common.hpp"
 #include "../char-array.hpp"
 #include "../classes/file.hpp"
+#include "../runtime.hpp"
 
 namespace Mirb
 {
@@ -39,7 +40,8 @@ namespace Mirb
 		
 		CharArray expand_path(CharArray relative);
 	
-		void initialize();
+		void initialize(bool console);
+		void finalize();
 	};
 };
 

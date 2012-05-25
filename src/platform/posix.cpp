@@ -105,9 +105,14 @@ namespace Mirb
 			Collector::signal();
 		}
 
-		void initialize()
+		void initialize(bool console)
 		{
-			signal(SIGINT, signal_handler);
+			if(console)
+				signal(SIGINT, signal_handler);
+		}
+		
+		void finalize()
+		{
 		}
 	};
 };

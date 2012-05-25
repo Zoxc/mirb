@@ -78,7 +78,7 @@ namespace Mirb
 	value_t get_global(Symbol *name);
 	void set_global(Symbol *name, value_t value);
 	
-	void initialize();
+	void initialize(bool console = false);
 	void finalize();
 	
 	/*
@@ -189,7 +189,7 @@ namespace Mirb
 	/*
 	 * backtrace
 	 */
-	Tuple<StackFrame> *backtrace();
+	Tuple<StackFrame> *backtrace(Frame *from = 0);
 	
 	/*
 	 * enforce_string (calls Ruby code)

@@ -839,11 +839,13 @@ namespace Mirb
 		return yield_argv(obj, value_nil, 0, 0);
 	}
 	
-	Tuple<StackFrame> *backtrace()
+	Tuple<StackFrame> *backtrace(Frame *from)
 	{
 		size_t index = 0;
+		
+		Frame *start = from ? from : context->frame;
 
-		Frame *current = context->frame;
+		Frame *current = start;
 		
 		while(current)
 		{
@@ -854,7 +856,7 @@ namespace Mirb
 
 		auto &result = *Tuple<StackFrame>::allocate(index);
 		
-		current = context->frame;
+		current = start;
 		index = 0;
 
 		while(current)
@@ -952,7 +954,7 @@ namespace Mirb
 		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);
 	}
 	
-	void initialize()
+	void initialize(bool console)
 	{
 		Collector::initialize();
 
@@ -960,7 +962,7 @@ namespace Mirb
 				
 		Value::initialize_type_table();
 		
-		Platform::initialize();
+		Platform::initialize(console);
 
 		Lexer::setup_jump_table();
 
@@ -1029,6 +1031,8 @@ namespace Mirb
 	{
 		for(size_t i = context->at_exits.size(); i-- > 0;)
 			Proc::call(context->at_exits[i], value_nil, 0, nullptr);
+
+		Platform::finalize();
 
 		Collector::free();
 	}

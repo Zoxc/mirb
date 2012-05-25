@@ -34,7 +34,7 @@ void report_exception()
 
 int main(int argc, const char *argv[])
 {
-	Mirb::initialize();
+	Mirb::initialize(true);
 	
 	if(argc > 1)
 	{

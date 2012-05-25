@@ -40,7 +40,7 @@ namespace Mirb
 		
 		template<typename F> void to_short_win_path(const CharArray &path, F func)
 		{
-			to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size) {
+			to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size prelude_unused) {
 				#ifdef _UNICODE
 					if(size > MAX_PATH)
 					{

@@ -2,6 +2,7 @@
 
 #ifdef WIN32
 
+#include "../classes/string.hpp"
 #include "../collector.hpp"
 #include "../runtime.hpp"
 
@@ -69,7 +70,7 @@ namespace Mirb
 			return from_tchar(buffer, _tcslen(buffer));
 		}
 
-		BOOL __stdcall ctrl_handler(DWORD ctrl_type) 
+		BOOL WINAPI ctrl_handler(DWORD ctrl_type) 
 		{ 
 			switch(ctrl_type) 
 			{ 
@@ -200,12 +201,38 @@ namespace Mirb
 			return ((attrib != INVALID_FILE_ATTRIBUTES) && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
 		}
 
-		void initialize()
-		{
-			SetConsoleTitle(TEXT("mirb"));
+		PVOID exception_handler;
 
-			if(!SetConsoleCtrlHandler(ctrl_handler, TRUE)) 
-				std::cerr << "Unable to register console handler" << std::endl; 
+		LONG CALLBACK vectored_handler(_EXCEPTION_POINTERS *info)
+		{
+			if(info->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW && context && context->frame)
+			{
+				throw Collector::allocate<Exception>(context->system_stack_error, String::get("Stack overflow"), backtrace(context->frame->prev));
+			}
+
+			return EXCEPTION_CONTINUE_SEARCH;
+		}
+
+		void initialize(bool console)
+		{
+			if(console)
+			{
+				SetConsoleTitle(TEXT("mirb"));
+
+				if(!SetConsoleCtrlHandler(ctrl_handler, TRUE)) 
+					std::cerr << "Unable to register console handler" << std::endl;
+			}
+
+			exception_handler = AddVectoredExceptionHandler(0, vectored_handler);
+
+			if(!exception_handler)
+				std::cerr << "Unable to register vectored exception handler" << std::endl;
+		}
+		
+		void finalize()
+		{
+			if(exception_handler)
+				RemoveVectoredExceptionHandler(exception_handler);
 		}
 	};
 };
