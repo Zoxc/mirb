@@ -46,7 +46,7 @@ namespace Mirb
 				};
 
 				auto skip_white = [&] {
-					while(is_white() && input < end)
+					while(input < end && is_white())
 						input++;
 				};
 				
