@@ -430,7 +430,7 @@ namespace Mirb
 		return result;
 	}
 
-	Tree::Node *Parser::parse_data(Lexeme::Type override)
+	Tree::Node *Parser::parse_data(Lexeme::Type override, bool allow_keywords)
 	{
 		Value::Type type;
 
@@ -542,6 +542,8 @@ namespace Mirb
 
 					result->data = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
 
+					lexer.lexeme.allow_keywords = allow_keywords;
+
 					lexer.step();
 				}
 				else
@@ -597,7 +599,7 @@ namespace Mirb
 		tail = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
 	}
 	
-	Tree::Node *Parser::parse_symbol()
+	Tree::Node *Parser::parse_symbol(bool allow_keywords)
 	{
 		switch(lexeme())
 		{
@@ -609,7 +611,7 @@ namespace Mirb
 
 				lexer.step();
 
-				lexer.lexeme.allow_keywords = true;
+				lexer.lexeme.allow_keywords = allow_keywords;
 
 				if(lexer.lexeme.whitespace)
 				{
@@ -632,7 +634,7 @@ namespace Mirb
 					}
 					
 					case Lexeme::STRING:
-						return parse_data(Lexeme::SYMBOL);
+						return parse_data(Lexeme::SYMBOL, allow_keywords);
 
 					default:
 					{
@@ -1872,18 +1874,19 @@ namespace Mirb
 		if(lexeme() == Lexeme::KW_ALIAS)
 		{
 			SourceLoc range = lexer.lexeme;
+
+			lexer.lexeme.allow_keywords = false;
+
 			lexer.step();
 			
 			auto node = new (fragment) Tree::AliasNode;
 
-			lexer.lexeme.allow_keywords = false;
-
-			auto parse_name = [&](Tree::Node *&node) {
+			auto parse_name = [&](Tree::Node *&node, bool allow_keywords) {
 				switch(lexeme())
 				{
 					case Lexeme::SYMBOL:
 					case Lexeme::COLON:
-						node = parse_symbol();
+						node = parse_symbol(allow_keywords);
 						break;
 						
 					default:
@@ -1897,11 +1900,10 @@ namespace Mirb
 				}
 			};
 			
-			parse_name(node->new_name);
+			parse_name(node->new_name, false);
+			parse_name(node->old_name, true);
 
 			lexer.lexeme.allow_keywords = true;
-
-			parse_name(node->old_name);
 
 			lexer.lexeme.prev_set(&range);
 

@@ -148,14 +148,14 @@ namespace Mirb
 			Tree::Node *typecheck(Tree::Node *result);
 
 			// expressions
-			Tree::Node *parse_symbol();
+			Tree::Node *parse_symbol(bool allow_keywords = true);
 			Tree::Node *parse_variable(Symbol *symbol, SourceLoc *range);
 			bool is_assignment_op();
 			bool is_equality_op();
 			bool is_sep();
 			void skip_seps();
 			Tree::Node *parse_hash();
-			Tree::Node *parse_data(Lexeme::Type override);
+			Tree::Node *parse_data(Lexeme::Type override, bool allow_keywords = true);
 			Tree::Node *parse_power();
 			Tree::Node *parse_splat_expression(bool allow_multiples, bool nested);
 			Tree::Node *process_rhs(Tree::Node *rhs);
