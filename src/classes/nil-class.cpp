@@ -27,8 +27,14 @@ namespace Mirb
 		return value_true;
 	}
 	
+	value_t NilClass::xor(value_t value)
+	{
+		return Value::test(value) ? value_true : value_false;
+	}
+	
 	void NilClass::initialize()
 	{
+		method<Arg::Value>(context->nil_class, "^", &xor);
 		method(context->nil_class, "to_i", &to_i);
 		method(context->nil_class, "to_s", &to_s);
 		method(context->nil_class, "inspect", &inspect);
