@@ -351,7 +351,12 @@ namespace Mirb
 
 		lexer.lexeme.prev_set(&var_range);
 
-		node->object = parse_expression();
+		{
+			
+			AllowDoState ads(this, false);
+			node->object = parse_expression();
+		}
+
 		node->method = Symbol::get("each");
 				
 		switch (lexeme())
@@ -388,8 +393,12 @@ namespace Mirb
 		node->inverted = lexeme() == Lexeme::KW_UNTIL;
 		
 		step_lines();
-		
-		node->condition = typecheck(parse_expression());
+
+		{
+			AllowDoState ads(this, false);
+
+			node->condition = parse_expression();
+		}
 				
 		switch (lexeme())
 		{

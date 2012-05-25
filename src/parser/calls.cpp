@@ -32,6 +32,9 @@ namespace Mirb
 				break;
 			
 			case Lexeme::KW_DO:
+				if(!allow_do)
+					return 0;
+
 				curly = false;
 				break;
 			
@@ -115,6 +118,8 @@ namespace Mirb
 	{
 		if(lexeme() == Lexeme::PARENT_OPEN && !lexer.lexeme.whitespace)
 		{
+			AllowDoState ads(this, true);
+			
 			if(parenthesis)
 				*parenthesis = true;
 			
@@ -135,6 +140,8 @@ namespace Mirb
 		{
 			if(parenthesis)
 				*parenthesis = false;
+
+			AllowDoState ads(this, false);
 			
 			parse_argument_list(node, Lexeme::NONE);
 		}

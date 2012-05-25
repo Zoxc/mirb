@@ -20,6 +20,29 @@ namespace Mirb
 
 			List<Message> messages;
 			Document &document;
+			bool allow_do;
+
+			struct AllowDoState
+			{
+				bool old;
+				Parser *parser;
+				
+				AllowDoState(Parser *parser, bool new_value) : parser(parser)
+				{
+					old = parser->allow_do;
+					parser->allow_do = new_value;
+				}
+
+				void restore()
+				{
+					parser->allow_do = old;
+				}
+
+				~AllowDoState()
+				{
+					restore();
+				}
+			};
 
 			void add_message(Message *message, const SourceLoc &range);
 
@@ -66,6 +89,8 @@ namespace Mirb
 				Tree::Scope *current_scope = scope;
 				Tree::Fragment current_fragment = fragment;
 				Tree::VoidTrapper *current_trapper = trapper;
+
+				AllowDoState ads(this, true);
 
 				fragment = *new_scope->fragment;
 				scope = new_scope;
@@ -145,6 +170,7 @@ namespace Mirb
 			Tree::Node *parse_unary();
 			Tree::Node *parse_alias();
 			Tree::Node *parse_boolean_unary();
+			Tree::Node *parse_string_tokens();
 			Tree::Node *parse_factor();
 			Tree::Node *parse_boolean();
 			
