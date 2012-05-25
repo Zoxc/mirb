@@ -74,6 +74,12 @@ namespace Mirb
 			
 			bool equal(size_t offset, size_t other_offset, const CharArray &other, size_t size) const;
 			
+			template<typename F> void each_char(F func)
+			{
+				for(size_t i = 0; i < length; ++i)
+					func((*this)[i], i);
+			}
+			
 			template<typename F> void split(F func, const CharArray &token) const
 			{
 				size_t last = 0;

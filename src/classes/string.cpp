@@ -177,6 +177,28 @@ namespace Mirb
 				return Fixnum::from_int(-1);
 		}
 	}
+	
+	value_t String::tr(String *self, String *from, String *to)
+	{
+		CharArray result = self->string;
+
+		if(!to->string.size() || !from->string.size())
+			return result.to_string();
+
+		result.each_char([&](char_t &input, size_t) {
+			from->string.each_char([&](char_t &from, size_t index) {
+				if(input == from)
+				{
+					if(index >= to->string.size())
+						input = to->string[to->string.size() - 1];
+					else
+						input = to->string[index];
+				}
+			});
+		});
+
+		return result.to_string();
+	}
 
 	void String::initialize()
 	{
@@ -200,6 +222,7 @@ namespace Mirb
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "concat", &concat);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "<<", &concat);
 		method<Arg::SelfClass<String>, Arg::Class<String>>(context->string_class, "+", &add);
+		method<Arg::SelfClass<String>, Arg::Class<String>, Arg::Class<String>>(context->string_class, "tr", &tr);
 	}
 };
 
