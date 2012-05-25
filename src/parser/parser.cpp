@@ -684,7 +684,7 @@ namespace Mirb
 			auto add_inter = static_cast<Tree::InterpolateNode *>(add);
 			auto result_inter = static_cast<Tree::InterpolateNode *>(result);
 
-			if(add->type() == Tree::Node::Interpolate && ! result->type() == Tree::Node::Interpolate)
+			if(add->type() == Tree::Node::Interpolate && !(result->type() == Tree::Node::Interpolate))
 			{
 				new_result = new (fragment) Tree::InterpolateNode;
 				new_result->data = result->data;
