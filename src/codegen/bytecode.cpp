@@ -1319,7 +1319,17 @@ namespace Mirb
 			final->min_args = 0;
 			final->max_args = 0;
 
-			for(size_t i = scope->parameters.size(); i-- >0;)
+			size_t regular_args = 0;
+			
+			for(size_t i = 0; i < scope->parameters.size(); i++)
+			{
+				if(!scope->parameters[i]->has_default_value)
+					regular_args++;
+			}
+			
+			size_t default_args = 0;
+
+			for(size_t i = 0; i < scope->parameters.size(); i++)
 			{
 				auto parameter = scope->parameters[i];
 
@@ -1329,27 +1339,28 @@ namespace Mirb
 				{
 					write_variable(parameter, [&](var_t store){
 						Label *skip = create_label();
-						branches.push(BranchInfo(gen<LoadArgBranchOp>(store, i), skip));
+						branches.push(BranchInfo(gen<LoadArgBranchOp>(store, i, regular_args + default_args + 1), skip));
 						to_bytecode(parameter->node, store);
 						gen(skip);
 					}, return_var);
+
+					default_args++;
 				}
 				else
 				{
-					final->min_args++;
+					auto store_param = [&](var_t store) {
+						if(default_args > 0)
+							gen<LoadArgFloatOp>(store, final->min_args, default_args);
+						else
+							gen<LoadArgOp>(store, i);
+					};
 
 					if(parameter->parameter_group)
-					{
-						write_node(parameter->node, [&](var_t store){
-							gen<LoadArgOp>(store, i);
-						}, return_var);
-					}
+						write_node(parameter->node, store_param, return_var);
 					else
-					{
-						write_variable(parameter, [&](var_t store){
-							gen<LoadArgOp>(store, i);
-						}, return_var);
-					}
+						write_variable(parameter, store_param, return_var);
+
+					final->min_args++;
 				}
 			}
 			

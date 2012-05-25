@@ -59,6 +59,10 @@ namespace Mirb
 			vars[op.var] = frame.argv[op.arg];
 		EndOp
 			
+		Op(LoadArgFloat)
+			vars[op.var] = frame.argv[op.prev_reg + std::min(frame.argc - frame.code->min_args, op.prev_def)];
+		EndOp
+			
 		Op(LoadArrayArg)
 			if(frame.argc > op.from_arg)
 			{
@@ -71,13 +75,13 @@ namespace Mirb
 		EndOp
 			
 		Op(LoadArgBranch)
-			if(frame.argc > op.arg)
+			if(frame.argc >= op.req_args)
 			{
 				vars[op.var] = frame.argv[op.arg];
 				ip = ip_start + op.pos;
 			}
 		EndOp
-
+			
 		Op(Move)
 			vars[op.dst] = vars[op.src];
 		EndOp

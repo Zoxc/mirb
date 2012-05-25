@@ -201,6 +201,15 @@ namespace Mirb
 					return var(op->var) + " = arg " + raw(op->arg);
 				}
 				
+				case Opcode::LoadArgFloat:
+				{
+					auto op = (LoadArgFloatOp *)opcode;
+
+					opcode += sizeof(LoadArgFloatOp);
+					
+					return var(op->var) + " = arg_float " + raw(op->prev_reg) + ", " + raw(op->prev_def);
+				}
+				
 				case Opcode::LoadArrayArg:
 				{
 					auto op = (LoadArrayArgOp *)opcode;
@@ -214,7 +223,7 @@ namespace Mirb
 				{
 					auto op = (LoadArgBranchOp *)opcode;
 					
-					result = var(op->var) + " = load_arg_branch " + label(opcode) + ", " + raw(op->arg);
+					result = var(op->var) + " = load_arg_branch " + label(opcode) + ", " + raw(op->arg) + ", " + raw(op->req_args);
 
 					opcode += sizeof(LoadArgBranchOp);
 

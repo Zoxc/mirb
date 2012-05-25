@@ -30,6 +30,7 @@ namespace Mirb
 				LoadNil,
 				LoadObject,
 				LoadArg,
+				LoadArgFloat,
 				LoadArrayArg,
 				LoadArgBranch,
 				LoadSymbol,
@@ -90,6 +91,7 @@ namespace Mirb
 				&&OpLoadNil, \
 				&&OpLoadObject, \
 				&&OpLoadArg, \
+				&&OpLoadArgFloat, \
 				&&OpLoadArrayArg, \
 				&&OpLoadArgBranch, \
 				&&OpLoadSymbol, \
@@ -227,6 +229,16 @@ namespace Mirb
 			LoadArgOp(var_t var, size_t arg) : var(var), arg(arg) {}
 		};
 		
+		struct LoadArgFloatOp:
+			public OpcodeWrapper<Opcode::LoadArgFloat>
+		{
+			var_t var;
+			size_t prev_reg;
+			size_t prev_def;
+
+			LoadArgFloatOp(var_t var, size_t prev_reg, size_t prev_def) : var(var), prev_reg(prev_reg), prev_def(prev_def) {}
+		};
+		
 		struct LoadArrayArgOp:
 			public OpcodeWrapper<Opcode::LoadArrayArg>
 		{
@@ -241,8 +253,9 @@ namespace Mirb
 		{
 			var_t var;
 			size_t arg;
+			size_t req_args;
 
-			LoadArgBranchOp(var_t var, size_t arg) : BranchOpcode(LoadArgBranch), var(var), arg(arg) {}
+			LoadArgBranchOp(var_t var, size_t arg, size_t req_args) : BranchOpcode(LoadArgBranch), var(var), arg(arg), req_args(req_args) {}
 		};
 		
 		struct LoadSymbolOp:

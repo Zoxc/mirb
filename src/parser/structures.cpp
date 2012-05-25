@@ -197,16 +197,6 @@ namespace Mirb
 			if(array_parameter || block_parameter)
 				report(range, (array_parameter ? "Array" : "Block") + std::string(" parameters cannot have default values"));
 		}
-		else if(!array_parameter && !block_parameter)
-		{
-			auto prev = scope->parameters.find([&](Tree::Parameter *param) -> bool { return param->has_default_value; }, nullptr);
-
-			if(prev && !prev->reported)
-			{
-				prev->reported = true;
-				report(prev->range, "Parameters with default values must come after regular parameters");
-			}
-		}
 
 		if(array_parameter)
 		{
