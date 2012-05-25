@@ -152,6 +152,7 @@ namespace Mirb
 
 			switch(input)
 			{
+				case '`':
 				case '"':
 				case '\'':
 					get_name();
@@ -402,7 +403,7 @@ namespace Mirb
 	void Lexer::parse_interpolate_heredoc(Heredoc *heredoc)
 	{
 		InterpolateState state;
-		state.type = Lexeme::STRING;
+		state.type = heredoc->type == '`' ? Lexeme::COMMAND : Lexeme::STRING;
 		state.heredoc = heredoc;
 
 		parse_interpolate(&state, false);
