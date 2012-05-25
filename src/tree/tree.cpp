@@ -234,7 +234,6 @@ void *operator new(size_t bytes, Mirb::Tree::Fragment fragment) throw()
 	return fragment.allocate(bytes);
 }
 
-void *operator new[](size_t bytes, Mirb::Tree::Fragment fragment) throw()
+void operator delete(void *, Mirb::Tree::Fragment) throw()
 {
-	return fragment.allocate(bytes);
 }

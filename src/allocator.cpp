@@ -28,3 +28,7 @@ void *operator new(size_t bytes, Mirb::Collector &) throw()
 
 	return result;
 }
+
+void operator delete(void *, Mirb::Collector &) throw()
+{
+}

@@ -40,4 +40,4 @@ namespace Mirb
 };
 
 void *operator new(size_t bytes, Mirb::MemoryPool memory_pool) throw();
-static inline void operator delete(void *bytes, Mirb::MemoryPool memory_pool) throw() {}
+void operator delete(void *, Mirb::MemoryPool) throw();
