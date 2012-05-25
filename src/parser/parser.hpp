@@ -304,6 +304,7 @@ namespace Mirb
 			Tree::Node *parse_super();
 			
 			// structures
+			void parse_declare_variables();
 			bool is_parameter();
 			void parse_parameter(bool block);
 			void parse_parameters(bool block);

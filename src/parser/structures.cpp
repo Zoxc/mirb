@@ -225,9 +225,57 @@ namespace Mirb
 		else if (parameter)
 			scope->parameters.push(parameter);
 	}
+	
+	void Parser::parse_declare_variables()
+	{
+		step_lines();
+
+		auto parse_var = [&] {
+			if(require(Lexeme::IDENT))
+			{
+				Symbol *symbol = lexer.lexeme.symbol;
+
+				if(scope->defined(symbol, false))
+					error("Variable " + lexer.lexeme.string() + " already defined");
+				else
+					scope->define<Tree::NamedVariable>(symbol);
+
+				lexer.step();
+			}
+		};
+
+		parse_var();
+
+		while(lexeme() == Lexeme::COMMA)
+		{
+			SourceLoc comma = lexer.lexeme;
+
+			step_lines();
+					
+			if(lexeme() == Lexeme::COMMA)
+			{
+				SourceLoc error;
+
+				while(lexeme() == Lexeme::COMMA)
+				{
+					step_lines();
+				}
+
+				report(error, "Unexpected multiple commas");
+			}
+			
+			parse_var();
+		}
+	}
 
 	void Parser::parse_parameters(bool block)
 	{
+		if(block && lexeme() == Lexeme::SEMICOLON)
+		{
+			parse_declare_variables();
+			return;
+		}
+
 		parse_parameter(block);
 
 		while(lexeme() == Lexeme::COMMA)
@@ -263,6 +311,9 @@ namespace Mirb
 					scope->array_parameter = parameter;
 			}
 		}
+		
+		if(block && lexeme() == Lexeme::SEMICOLON)
+			parse_declare_variables();
 	}
 
 	Tree::Node *Parser::parse_method()
