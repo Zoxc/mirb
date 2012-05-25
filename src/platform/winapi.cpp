@@ -203,11 +203,74 @@ namespace Mirb
 
 		PVOID exception_handler;
 
+		void __fastcall stack_overflow_handler(_EXCEPTION_POINTERS *info)
+		{
+			// Restore guard page as described on http://support.microsoft.com/kb/315937
+			
+			LPBYTE stack; 
+			SYSTEM_INFO system_info;
+			MEMORY_BASIC_INFORMATION mem_info;
+			DWORD old_protect;
+
+			// Get page size of system
+
+			GetSystemInfo(&system_info);
+				
+			#ifdef _AMD64_
+				stack = (LPBYTE)info->ContextRecord->Rsp;
+			#else
+				stack = (LPBYTE)info->ContextRecord->Esp;
+			#endif
+
+			// Get allocation base of stack
+
+			mirb_runtime_assert(VirtualQuery(stack, &mem_info, sizeof(mem_info)) != 0);
+
+			// Go to page beyond current page
+
+			stack = (LPBYTE)(mem_info.BaseAddress) - system_info.dwPageSize;
+
+			// Free portion of stack just abandoned
+
+			mirb_runtime_assert(VirtualFree(mem_info.AllocationBase, stack - (LPBYTE)mem_info.AllocationBase, MEM_DECOMMIT) != 0);
+
+			// Reintroduce the guard page
+
+			mirb_runtime_assert(VirtualProtect(stack, system_info.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &old_protect) != 0);
+
+			auto exception = Collector::allocate<Exception>(context->system_stack_error, String::get("Stack overflow"), backtrace(context->frame->prev));
+
+			throw exception;
+		}
+
+		const size_t overflow_stack_pages = 10;
+		
 		LONG CALLBACK vectored_handler(_EXCEPTION_POINTERS *info)
 		{
 			if(info->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW && context && context->frame)
 			{
-				throw Collector::allocate<Exception>(context->system_stack_error, String::get("Stack overflow"), backtrace(context->frame->prev));
+				static DWORD old_protect;
+
+				auto new_stack = VirtualAlloc(0, 0x1000 * (overflow_stack_pages + 2), MEM_COMMIT, PAGE_READWRITE);
+
+				mirb_runtime_assert(new_stack != 0);
+				
+				mirb_runtime_assert(VirtualProtect(new_stack, 0x1000, PAGE_GUARD | PAGE_READWRITE, &old_protect) != 0);
+
+				new_stack = (LPVOID)((char *)new_stack + 0x1000 * (overflow_stack_pages + 1));
+
+				mirb_runtime_assert(VirtualProtect(new_stack, 0x1000, PAGE_GUARD | PAGE_READWRITE, &old_protect) != 0);
+
+#ifdef _MSC_VER
+				__asm
+				{
+					mov ecx, info
+					mov esp, new_stack
+					call stack_overflow_handler
+				};
+#else
+				asm("mov %0, %%rcx\nmov %1, %%rsp\ncall *%2" :: "g" (info), "g" (new_stack), "r" (&stack_overflow_handler));
+#endif
 			}
 
 			return EXCEPTION_CONTINUE_SEARCH;
