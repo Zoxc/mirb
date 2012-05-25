@@ -31,6 +31,8 @@ namespace Mirb
 
 #define DeepOp(name) Op(name) frame.ip = ip;
 
+	static CodeGen::UnwindEnsureOp dummy_unwind;
+
 	value_t evaluate_block(Frame &frame)
 	{
 		const char *ip_start = frame.code->opcodes;
@@ -53,6 +55,9 @@ namespace Mirb
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
 
+	start_loop:
+		try
+		{
 		OpPrologue
 
 		Op(LoadArg)
@@ -623,5 +628,12 @@ exception_block_handler: // The test block will jump back here
 			else
 				goto handle_exception; // Handle parent frame
 		}
+
+		} catch(Exception *exception)
+		{
+			ip = (const char *)&dummy_unwind;
+			set_current_exception(exception);
+			goto start_loop;
+		};
 	}
 };

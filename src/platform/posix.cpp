@@ -16,7 +16,9 @@ namespace Mirb
 
 			CharArray error = (const char_t *)strerror(num);
 
-			throw Exception(message + "\nError #" + CharArray::uint(num) + ": " + error);
+			CharArray msg = message + "\nError #" + CharArray::uint(num) + ": " + error;
+
+			throw create_exception(context->system_call_error, msg);
 		}
 
 		std::string BenchmarkResult::format()

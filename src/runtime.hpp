@@ -91,6 +91,7 @@ namespace Mirb
 	 */
 	value_t type_error(value_t value, const CharArray &expected);
 	bool type_error(value_t value, value_t expected);
+	Exception *create_exception(Class *exception_class, const CharArray &message);
 	value_t raise(Class *exception_class, const CharArray &message);
 
 	value_t raise(value_t exception);

@@ -19,8 +19,8 @@ namespace Mirb
 			CharArray msg = message + "\nError #" + CharArray::uint(err_no) + ": "   + from_tchar(msg_buffer);
 
 			LocalFree(msg_buffer);
-
-			throw Exception(msg);
+			
+			throw create_exception(context->system_call_error, msg);
 		}
 		
 		std::string BenchmarkResult::format()

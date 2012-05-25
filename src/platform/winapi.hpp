@@ -59,7 +59,7 @@ namespace Mirb
 			HANDLE handle;
 
 			if(path.size() == 0)
-				throw Exception("Empty path");
+				throw create_exception(context->system_call_error, "Empty path");
 
 			to_tchar(to_win_path(File::join(expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
 				handle = FindFirstFile(buffer, &ffd);

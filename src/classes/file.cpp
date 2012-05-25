@@ -81,7 +81,7 @@ namespace Mirb
 			{
 				return join(Platform::cwd(), relative);
 			}
-			catch(const Platform::Exception &)
+			catch(Exception *)
 			{
 				return CharArray();
 			}

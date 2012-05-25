@@ -571,10 +571,15 @@ namespace Mirb
 		else
 			return false;
 	}
+	
+	Exception *create_exception(Class *exception_class, const CharArray &message)
+	{
+		return Collector::allocate<Exception>(exception_class, message.to_string(), backtrace());
+	}
 
 	value_t raise(Class *exception_class, const CharArray &message)
 	{
-		set_current_exception(Collector::allocate<Exception>(exception_class, message.to_string(), backtrace()));
+		set_current_exception(create_exception(exception_class, message));
 		
 		return value_raise;
 	}

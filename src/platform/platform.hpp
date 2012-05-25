@@ -16,27 +16,17 @@ namespace Mirb
 			Gray
 		};
 
-		class Exception
-		{
-			private:
-				CharArray message;
-
-			public:
-				Exception(const CharArray &message) : message(message) {}
-
-				value_t raise() const;
-		};
-		
 		template<typename F> value_t wrap(F func) throw()
 		{
 			try
 			{
 				return func();
 			}
-			catch(const Exception &exception)
+			catch(Exception *exception)
 			{
-				return exception.raise();
-			}
+				set_current_exception(exception);
+				return 0;
+			};
 		}
 		
 		void cd(const CharArray &path);
