@@ -238,8 +238,6 @@ namespace Mirb
 
 		while(lexeme() == Lexeme::COMMA)
 		{
-			SourceLoc comma = lexer.lexeme;
-
 			step_lines();
 					
 			if(lexeme() == Lexeme::COMMA)
