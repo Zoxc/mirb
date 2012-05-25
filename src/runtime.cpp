@@ -372,7 +372,7 @@ namespace Mirb
 		Value::assert_valid(obj);
 
 		if(prelude_unlikely(!Value::of_type<Object>(obj)))
-			mirb_runtime_abort("No value map on objects passed by value"); // TODO: Fix this
+			return context->dummy_map; // TODO: Turn a ValueMap per object
 
 		Object *object = auto_cast(obj);
 
@@ -959,6 +959,8 @@ namespace Mirb
 		Collector::initialize();
 
 		context = new Context;
+
+		context->dummy_map = Collector::allocate<ValueMap>();
 				
 		Value::initialize_type_table();
 		

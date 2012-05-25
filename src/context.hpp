@@ -80,6 +80,8 @@ namespace Mirb
 			Object *main;
 
 			Exception *exception;
+
+			ValueMap *dummy_map;
 			
 			Class *terminator;
 			
