@@ -21,6 +21,8 @@ namespace Mirb
 				var = bcg->var_count;
 				bcg->var_count += size;
 			}
+			else
+				var = no_var;
 		}
 
 		var_t VariableGroup::operator[](size_t index)

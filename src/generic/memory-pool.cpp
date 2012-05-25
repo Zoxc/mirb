@@ -96,7 +96,6 @@ void *operator new(size_t bytes, Mirb::MemoryPool memory_pool) throw()
 	return memory_pool.allocate(bytes);
 }
 
-void *operator new[](size_t bytes, Mirb::MemoryPool memory_pool) throw()
+void operator delete(void *, Mirb::MemoryPool) throw()
 {
-	return memory_pool.allocate(bytes);
 }
