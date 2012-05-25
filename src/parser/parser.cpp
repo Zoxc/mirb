@@ -90,6 +90,8 @@ namespace Mirb
 
 	bool Parser::close_pair(const std::string &name, const SourceLoc &range, Lexeme::Type what, bool skip)
 	{
+		skip_lines();
+
 		if(lexeme() == what)
 		{
 			if(skip)

@@ -132,8 +132,6 @@ namespace Mirb
 			if(lexeme() != Lexeme::PARENT_CLOSE)
 				parse_argument_list(node, Lexeme::PARENT_CLOSE);
 			
-			skip_lines();
-
 			close_pair("call arguments", range, Lexeme::PARENT_CLOSE);
 		}
 		else
