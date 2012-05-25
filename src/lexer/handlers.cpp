@@ -831,7 +831,7 @@ namespace Mirb
 	{
 		input++;
 
-		if(!is_start_ident(input))
+		if(!is_ident(input))
 		{
 			switch(input)
 			{
@@ -848,16 +848,6 @@ namespace Mirb
 						break;
 					};
 
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
 				case ':':
 				case '>':
 				case '<':
@@ -896,16 +886,11 @@ namespace Mirb
 			return;
 		}
 
-		bool error = !is_start_ident(input);
-		
 		skip_ident();
 			
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::GLOBAL;
 		lexeme.symbol = symbol_pool.get(lexeme);
-
-		if(error)
-			report(lexeme, "Global variable names cannot start with a number");
 	}
 	
 	void Lexer::sub()
