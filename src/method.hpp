@@ -180,8 +180,6 @@ namespace Mirb
 	{
 		Method *generate_block(size_t flags, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function);
 	
-		value_t wrapper(Frame &frame);
-	
 		Arg::Info fold(size_t num, ...);
 		
 		template<typename F> value_t wrapper(Frame &frame)
