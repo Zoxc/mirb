@@ -26,10 +26,12 @@ namespace Mirb
 		
 		size_t stack_start()
 		{
+			size_t offset = offsetof(NT_TIB, StackBase);
+
 			#ifdef _AMD64_
-				return (size_t)__readfsqword(offsetof(NT_TIB, StackBase));
+				return (size_t)__readfsqword(offset);
 			#else
-				return (size_t)__readfsdword(offsetof(NT_TIB, StackBase));
+				return (size_t)__readfsdword(offset);
 			#endif
 		}
 

@@ -11,14 +11,14 @@ namespace Mirb
 		return String::get("true");
 	}
 	
-	value_t TrueClass::xor(value_t value)
+	value_t TrueClass::rb_xor(value_t value)
 	{
 		return Value::test(value) ? value_false : value_true;
 	}
 	
 	void TrueClass::initialize()
 	{
-		method<Arg::Value>(context->true_class, "^", &xor);
+		method<Arg::Value>(context->true_class, "^", &rb_xor);
 		method(context->true_class, "to_s", &to_s);
 
 		set_const(context->object_class, Symbol::get("TRUE"), value_true);
