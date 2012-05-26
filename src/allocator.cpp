@@ -23,7 +23,7 @@ void *operator new(size_t bytes, Mirb::Collector &) throw()
 	Mirb::value_t result = (Mirb::value_t)Mirb::Collector::allocate_simple(bytes);
 
 #ifdef DEBUG
-	result->size = bytes;
+	result->block_size = bytes;
 #endif
 
 	return result;

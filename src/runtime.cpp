@@ -58,6 +58,21 @@ namespace Mirb
 		else
 			context->exception_frame_origin = 0;
 	}
+	
+	value_t coerce(value_t left, Symbol *name, value_t right)
+	{
+		auto result = raise_cast<Array>(call_argv(right, "coerce", 1, &left));
+
+		if(!result)
+			return 0;
+
+		if(result->size() != 2)
+			return raise(context->runtime_error, "Expected an array with a pair of values");
+
+		value_t last = result->get(1);
+
+		return call_argv(result->get(0), name, 1, &last);
+	}
 
 	Class *class_of(value_t obj)
 	{

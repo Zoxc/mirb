@@ -111,7 +111,7 @@ namespace Mirb
 
 	void move(value_t p, value_t new_p, size_t size)
 	{
-		mirb_debug(mirb_debug_assert(p->size == size));
+		mirb_debug(mirb_debug_assert(p->block_size == size));
 
 		if(p != new_p)
 			std::memmove(new_p, p, size);
@@ -310,7 +310,7 @@ namespace Mirb
 					prev->type = Value::FreeBlock;
 
 					#ifdef DEBUG
-						prev->size = sizeof(FreeBlock);
+						prev->block_size = sizeof(FreeBlock);
 					#endif
 
 					((FreeBlock *)prev)->next = (void *)obj.region;

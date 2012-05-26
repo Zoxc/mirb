@@ -14,12 +14,12 @@ namespace Mirb
 		value_t times(int_t obj, value_t block);
 		value_t upto(int_t obj, int_t arg, value_t block);
 		value_t neg(int_t obj);
-		value_t add(int_t obj, int_t other);
-		value_t sub(int_t obj, int_t other);
-		value_t mul(int_t obj, int_t other);
-		value_t div(int_t obj, int_t other);
-		value_t mod(int_t obj, int_t other);
-		value_t compare(int_t obj, int_t other);
+		value_t add(int_t obj, value_t other);
+		value_t sub(int_t obj, value_t other);
+		value_t mul(int_t obj, value_t other);
+		value_t div(int_t obj, value_t other);
+		value_t mod(int_t obj, value_t other);
+		value_t compare(int_t obj, value_t other);
 
 		value_t from_size_t(size_t value);
 		size_t to_size_t(value_t obj);

@@ -57,7 +57,7 @@ namespace Mirb
 		VariableBlock *result = new (Collector::allocate_simple(bytes)) VariableBlock(bytes);
 
 		#ifdef DEBUG		
-			result->size = bytes;
+			result->block_size = bytes;
 		#endif
 
 		#ifdef VALGRIND
@@ -88,7 +88,7 @@ namespace Mirb
 		VariableBlock *result = new (Collector::allocate_simple(bytes)) VariableBlock(bytes);
 
 		#ifdef DEBUG		
-			result->size = bytes;
+			result->block_size = bytes;
 		#endif
 
 		#ifdef VALGRIND
@@ -109,7 +109,7 @@ namespace Mirb
 	{
 		size_t size = Value::virtual_do<SizeOf>(value->type, value);
 
-		mirb_debug(mirb_debug_assert(size == value->size));
+		mirb_debug(mirb_debug_assert(size == value->block_size));
 
 		return size;
 	}

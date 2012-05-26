@@ -68,35 +68,43 @@ namespace Mirb
 
 		return from_int(obj);
 	}
-
-	value_t Fixnum::add(int_t obj, int_t other)
+	
+	template<typename F, size_t string_length> value_t coerce_op(intptr_t obj, value_t other, const char (&string)[string_length], F func)
 	{
-		return from_int(obj + other);
+		if(prelude_likely(Value::is_fixnum(other)))
+			return Fixnum::from_int(func(Fixnum::to_int(other)));
+		else
+			return coerce(Fixnum::from_int(obj), Symbol::get(string), other);
 	}
 	
-	value_t Fixnum::sub(int_t obj, int_t other)
+	value_t Fixnum::add(int_t obj, value_t other)
 	{
-		return from_int(obj - other);
+		return coerce_op(obj, other, "+", [&](int_t right) { return obj + right; });
 	}
 	
-	value_t Fixnum::mul(int_t obj, int_t other)
+	value_t Fixnum::sub(int_t obj, value_t other)
 	{
-		return from_int(obj * other);
+		return coerce_op(obj, other, "-", [&](int_t right) { return obj - right; });
 	}
 	
-	value_t Fixnum::div(int_t obj, int_t other)
+	value_t Fixnum::mul(int_t obj, value_t other)
 	{
-		return from_int(obj / other);
+		return coerce_op(obj, other, "*", [&](int_t right) { return obj * right; });
+	}
+	
+	value_t Fixnum::div(int_t obj, value_t other)
+	{
+		return coerce_op(obj, other, "/", [&](int_t right) { return obj / right; });
 	}
 
-	value_t Fixnum::mod(int_t obj, int_t other)
+	value_t Fixnum::mod(int_t obj, value_t other)
 	{
-		return from_int(obj % other);
+		return coerce_op(obj, other, "%", [&](int_t right) { return obj % right; });
 	}
 
-	value_t Fixnum::compare(int_t lhs, int_t rhs)
+	value_t Fixnum::compare(int_t obj, value_t other)
 	{
-		return from_int(lhs == rhs ? 0 : (lhs > rhs ? 1 : -1));
+		return coerce_op(obj, other, "<=>", [&](int_t right) { return obj == right ? 0 : (obj > right ? 1 : -1); });
 	}
 	
 	value_t Fixnum::neg(int_t obj)
@@ -113,12 +121,12 @@ namespace Mirb
 		
 		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "-@", &neg);
 
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "+", &add);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "-", &sub);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "*", &mul);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "/", &div);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "%", &mod);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum>(context->fixnum_class, "<=>", &compare);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "+", &add);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "-", &sub);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "*", &mul);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "/", &div);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "%", &mod);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "<=>", &compare);
 	}
 };
 

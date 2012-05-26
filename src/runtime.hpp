@@ -10,6 +10,8 @@ namespace Mirb
 	class Exception;
 	
 	void set_current_exception(Exception *exception);
+
+	value_t coerce(value_t left, Symbol *name, value_t right);
 	
 	bool subclass_of(Class *super, Class *c);
 	bool kind_of(Class *klass, value_t obj);
@@ -103,10 +105,10 @@ namespace Mirb
 
 	template<typename T> T *raise_cast(value_t obj)
 	{
-		if(Value::of_type<T>(obj))
-			return reinterpret_cast<T *>(obj);
-		else if(!obj)
+		if(!obj)
 			return 0;
+		else if(Value::of_type<T>(obj))
+			return reinterpret_cast<T *>(obj);
 		else
 		{
 			raise(context->type_error, "Invalid type passed");

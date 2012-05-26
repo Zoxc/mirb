@@ -93,7 +93,7 @@ namespace Mirb
 				static_assert(std::is_base_of<Value::Header, T>::value, "T must be a Value::Header");
 				
 				#ifdef DEBUG		
-					object->size = sizeof(T);
+					object->block_size = sizeof(T);
 				#endif
 
 				return object;
@@ -112,7 +112,7 @@ namespace Mirb
 				static_assert(std::is_base_of<PinnedHeader, T>::value, "T must be a PinnedHeader");
 				
 				#ifdef DEBUG		
-					object->size = sizeof(T);
+					object->block_size = sizeof(T);
 				#endif
 
 				heap_list.append(object);
@@ -190,7 +190,7 @@ namespace Mirb
 				auto tuple = new (allocate_simple(size)) Tuple<T>(entries);
 				
 				#ifdef DEBUG		
-					tuple->size = size;
+					tuple->block_size = size;
 				#endif
 
 				#ifdef VALGRIND

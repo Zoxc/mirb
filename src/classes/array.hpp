@@ -20,8 +20,8 @@ namespace Mirb
 			static value_t sub(Array *self, Array *other);
 			static value_t length(Array *self);
 			static value_t each(Array *self, value_t block);
-			static value_t get(Array *self, value_t index, value_t size);
-			static value_t set(Array *self, size_t index, value_t value);
+			static value_t rb_get(Array *self, value_t index, value_t size);
+			static value_t rb_set(Array *self, size_t index, value_t value);
 			static value_t join(Array *self, String *sep);
 
 		public:
@@ -36,6 +36,9 @@ namespace Mirb
 
 				vector.mark(mark);
 			}
+			
+			value_t get(size_t index);
+			size_t size();
 
 			template<typename F> static void parse(const char_t *input, size_t length, F func)
 			{

@@ -6,6 +6,16 @@
 
 namespace Mirb
 {
+	value_t Array::get(size_t index)
+	{
+		return vector[index];
+	}
+	
+	size_t Array::size()
+	{
+		return vector.size();
+	}
+
 	value_t Array::allocate(Class *instance_of)
 	{
 		return Collector::allocate<Array>(instance_of);
@@ -175,7 +185,7 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t Array::get(Array *self, value_t index, value_t size)
+	value_t Array::rb_get(Array *self, value_t index, value_t size)
 	{
 		if(size)
 		{
@@ -241,7 +251,7 @@ namespace Mirb
 			return type_error(index, "Range or Fixnum");
 	}
 	
-	value_t Array::set(Array *self, size_t index, value_t value)
+	value_t Array::rb_set(Array *self, size_t index, value_t value)
 	{
 		self->vector.expand_to(index + 1, value_nil);
 		self->vector[index] = value;
@@ -337,8 +347,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, Arg::Default<Arg::Class<String>>>(context->array_class, "join", &join);
 		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "to_s", &to_s);
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block>(context->array_class, "each", &each);
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Default<Arg::Value>>(context->array_class, "[]", &get);
-		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Default<Arg::Value>>(context->array_class, "[]", &rb_get);
+		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &rb_set);
 	}
 };
 

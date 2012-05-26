@@ -161,7 +161,7 @@ namespace Mirb
 
 				#ifdef DEBUG
 					bool alive : 1;
-					size_t size;
+					size_t block_size;
 					size_t magic;
 					value_t refs;
 				#endif
