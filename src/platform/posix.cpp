@@ -5,6 +5,7 @@
 #include "../collector.hpp"
 #include <signal.h>
 #include <unistd.h>
+#include <sys/resource.h>
 
 namespace Mirb
 {
@@ -33,7 +34,7 @@ namespace Mirb
 			struct rlimit rlim;
 
 			if(getrlimit(RLIMIT_STACK, &rlim) == 0)
-				return std::min(rlim.rlim_cur, 1024 * 1024 * 128);
+				return std::min(rlim.rlim_cur, (rlim_t)(1024 * 1024 * 128));
 			else
 				return 1024 * 64;
 		}
