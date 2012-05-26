@@ -146,13 +146,16 @@ namespace Mirb
 		EndOp
 			
 		Op(LoadObject)
-			vars[op.var] = auto_cast(context->object_class);
+			vars[op.var] = context->object_class;
 		EndOp
 
 		DeepOp(Class)
-			value_t super = op.super == no_var ? context->object_class : vars[op.super];
+			Class *super = op.super == no_var ? context->object_class : raise_cast<Class>(vars[op.super]);
 
-			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, auto_cast(super));
+			if(prelude_unlikely(!super))
+				goto handle_exception;
+
+			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super);
 			
 			if(prelude_unlikely(self == nullptr))
 				goto handle_exception;
@@ -414,7 +417,7 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(Alias)
-			value_t result = Module::alias_method(frame.scope->first(), auto_cast(vars[op.new_name]), auto_cast(vars[op.old_name]));
+			value_t result = Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
 
 			if(prelude_unlikely(!result))
 				goto handle_exception;

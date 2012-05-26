@@ -90,7 +90,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			String *desc = cast<String>(call(self->vector[i], "inspect"));
+			String *desc = inspect(self->vector[i]);
 
 			if(!desc)
 				return 0;
@@ -267,7 +267,7 @@ namespace Mirb
 	
 	value_t empty(Array *self)
 	{
-		return auto_cast(self->vector.size() == 0);
+		return Value::from_bool(self->vector.size() == 0);
 	}
 	
 	bool Array::sort(Array *&array)

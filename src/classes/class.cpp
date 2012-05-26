@@ -39,16 +39,12 @@ namespace Mirb
 		{
 			value_t real = get_var(self, context->syms.attached);
 
-			OnStack<1> os(real);
+			auto real_str = inspect(real);
 
-			real = call(real, "inspect");
-
-			if(!real)
+			if(!real_str)
 				return 0;
 
-			String *real_string = cast<String>(real);
-
-			CharArray result = "#<Class:" + real_string->string + ">";
+			CharArray result = "#<Class:" + real_str->string + ">";
 
 			return result.to_string();
 		}

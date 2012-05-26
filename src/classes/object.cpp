@@ -35,7 +35,7 @@ namespace Mirb
 		value_t c = real_class_of(obj);
 		value_t name = get_var(c, context->syms.classname);
 
-		if(Value::test(name))
+		if(name != value_nil)
 		{
 			auto classname = cast<String>(name);
 
@@ -68,17 +68,17 @@ namespace Mirb
 	
 	value_t Object::equal(value_t obj, value_t other)
 	{
-		return auto_cast(obj == other);
+		return Value::from_bool(obj == other);
 	}
 	
 	value_t Object::not_equal(value_t obj, value_t other)
 	{
-		return auto_cast(obj != other);
+		return Value::from_bool(obj != other);
 	}
 	
-	value_t Object::method_not(value_t obj)
+	value_t Object::rb_not(value_t obj)
 	{
-		return auto_cast(!Value::test(obj));
+		return Value::from_bool(!Value::test(obj));
 	}
 
 	value_t Object::instance_eval(value_t obj, String *string, value_t block)
@@ -128,7 +128,7 @@ namespace Mirb
 	
 	value_t Object::kind_of(value_t obj, Class *klass)
 	{
-		return auto_cast(Mirb::kind_of(klass, obj));
+		return Value::from_bool(Mirb::kind_of(klass, obj));
 	}
 	
 	value_t nil()
@@ -211,7 +211,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "==", &equal);
 		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "===", &equal);
 		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "!=", &not_equal);
-		method<Arg::Self<Arg::Value>>(context->object_class, "!", &method_not);
+		method<Arg::Self<Arg::Value>>(context->object_class, "!", &rb_not);
 		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
 
 		singleton_method<Arg::Self<Arg::Class<Class>>>(context->object_class, "allocate", &allocate);

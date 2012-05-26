@@ -12,7 +12,7 @@ namespace Mirb
 		return Collector::allocate<String>(symbol->string);
 	}
 	
-	value_t String::get(const CharArray &string)
+	String *String::get(const CharArray &string)
 	{
 		return Collector::allocate<String>(string);
 	}
@@ -72,7 +72,7 @@ namespace Mirb
 
 	value_t String::equal(String *self, String *other)
 	{
-		return auto_cast(self->string == other->string);
+		return Value::from_bool(self->string == other->string);
 	}
 	
 	value_t String::downcase(String *self)

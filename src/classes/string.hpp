@@ -27,17 +27,17 @@ namespace Mirb
 		public:
 			String(const String &other) : Object(other), string(other.string) {}
 			String(Class *instance_of) : Object(Value::String, instance_of) {}
-			String(const CharArray &char_array) : Object(Value::String, auto_cast(context->string_class)), string(char_array) {}
-			String(const char_t *c_str, size_t length) : Object(Value::String, auto_cast(context->string_class)), string(c_str, length) {}
+			String(const CharArray &char_array) : Object(Value::String, context->string_class), string(char_array) {}
+			String(const char_t *c_str, size_t length) : Object(Value::String, context->string_class), string(c_str, length) {}
 			
-			template<size_t length> String(const char (&string)[length]) : Object(Value::String, auto_cast(context->string_class)), string(string) {}
+			template<size_t length> String(const char (&string)[length]) : Object(Value::String, context->string_class), string(string) {}
 			
 			std::string get_string()
 			{
 				return string.get_string();
 			}
 			
-			static value_t get(const CharArray &string);
+			static String *get(const CharArray &string);
 
 			CharArray string;
 			

@@ -17,7 +17,7 @@ namespace Mirb
 	
 	value_t Float::zero(Float *obj)
 	{
-		return auto_cast(obj->value == 0.0);
+		return Value::from_bool(obj->value == 0.0);
 	}
 	
 	value_t Float::add(Float *obj, Float *other)

@@ -246,22 +246,22 @@ namespace Mirb
 	
 	value_t exists(String *path)
 	{
-		return auto_cast(Platform::file_exists(path->string));
+		return Value::from_bool(Platform::file_exists(path->string));
 	}
 	
 	value_t file(String *path)
 	{
-		return auto_cast(Platform::is_file(path->string));
+		return Value::from_bool(Platform::is_file(path->string));
 	}
 	
 	value_t directory(String *path)
 	{
-		return auto_cast(Platform::is_directory(path->string));
+		return Value::from_bool(Platform::is_directory(path->string));
 	}
 	
 	value_t rb_fnmatch(String *pattern, String *path)
 	{
-		return auto_cast(File::fnmatch(path->string, pattern->string));
+		return Value::from_bool(File::fnmatch(path->string, pattern->string));
 	}
 	
 	void File::initialize()

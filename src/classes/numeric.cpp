@@ -12,7 +12,7 @@ namespace Mirb
 		if(!result)
 			return 0;
 
-		return auto_cast(!Value::test(result));
+		return Value::from_bool(!Value::test(result));
 	}
 
 	void Numeric::initialize()

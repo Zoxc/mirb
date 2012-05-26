@@ -18,7 +18,7 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 				scopes[i] = argv[i];
 
-			return auto_cast(Collector::allocate<Proc>(context->proc_class, self, name, scope, block, &scopes));
+			return Collector::allocate<Proc>(context->proc_class, self, name, scope, block, &scopes);
 		}
 
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
@@ -32,7 +32,12 @@ namespace Mirb
 				value_t obj = argv[i];
 
 				if(prelude_unlikely(Value::type(obj) != Value::String))
+				{
 					obj = Mirb::call(obj, "to_s");
+
+					if(!obj)
+						return 0;
+				}
 
 				if(prelude_likely(Value::type(obj) == Value::String))
 					result += cast<String>(obj)->string;

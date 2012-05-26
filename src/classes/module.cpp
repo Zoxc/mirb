@@ -17,7 +17,7 @@ namespace Mirb
 	
 	Method *Module::get_method(Symbol *name)
 	{
-		return auto_cast_null(ValueMapAccess::get(get_methods(), name, [] { return nullptr; }));
+		return cast_null<Method>(ValueMapAccess::get(get_methods(), name, [] { return nullptr; }));
 	}
 
 	void Module::set_method(Symbol *name, Method *method)
@@ -167,7 +167,7 @@ namespace Mirb
 			return value_raise;
 		}
 
-		self->set_method(auto_cast(new_name), method);
+		self->set_method(new_name, method);
 
 		return self;
 	}
@@ -231,7 +231,7 @@ namespace Mirb
 	
 	value_t Module::method_defined(Module *obj, Symbol *name)
 	{
-		return auto_cast(lookup_method(obj, name) != 0);
+		return Value::from_bool(lookup_method(obj, name) != 0);
 	}
 
 	void Module::initialize()

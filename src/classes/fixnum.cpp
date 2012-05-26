@@ -28,7 +28,7 @@ namespace Mirb
 	
 	value_t Fixnum::zero(int_t obj)
 	{
-		return auto_cast(obj == 0);
+		return Value::from_bool(obj == 0);
 	}
 	
 	value_t Fixnum::to_s(int_t obj)

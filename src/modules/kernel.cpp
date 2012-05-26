@@ -29,7 +29,7 @@ namespace Mirb
 	
 	value_t Kernel::block_given()
 	{
-		return auto_cast(context->frame->prev->block != value_nil);
+		return Value::from_bool(context->frame->prev->block != value_nil);
 	}
 	
 	value_t Kernel::benchmark(value_t block)

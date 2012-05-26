@@ -11,7 +11,7 @@ namespace Mirb
 		if(!result)
 			return 0;
 
-		return auto_cast(func(Fixnum::to_int(result)));
+		return Value::from_bool(func(Fixnum::to_int(result)));
 	}
 	
 	value_t Comparable::less(value_t obj, value_t other)

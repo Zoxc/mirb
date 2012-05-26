@@ -501,68 +501,16 @@ namespace Mirb
 		
 		void initialize_type_table();
 		void initialize_class_table();
-	};
-	
-	struct auto_cast
-	{
-		value_t value;
-			
-		auto_cast(value_t value) : value(value)
-		{
-			Value::assert_valid(value);
-		}
 
-		auto_cast(bool value)
+		inline value_t from_bool(bool value)
 		{
-			this->value = value ? value_true : value_false;
-		}
-		
-		template<class T> auto_cast(T *obj) : value(reinterpret_cast<value_t>(obj))
-		{
-			mirb_debug_assert(Value::of_type<T>(value));
-		}
-
-		operator value_t() { return value; }
-		
-		template<class T> operator T *()
-		{
-			mirb_debug_assert(Value::of_type<T>(value));
-			return reinterpret_cast<T *>(value);
-		}
-	};
-	
-	struct auto_cast_null
-	{
-		value_t value;
-			
-		auto_cast_null(value_t value) : value(value)
-		{
-			if(value != value_raise)
-				Value::assert_valid(value);
-		}
-		
-		auto_cast_null(bool value)
-		{
-			this->value = value ? value_true : value_false;
-		}
-		
-		template<class T> auto_cast_null(T *obj) : value(static_cast<value_t>(obj))
-		{
-			mirb_debug_assert(value == value_raise || Value::of_type<T>(obj));
-		}
-
-		operator value_t() { return value; }
-		
-		template<class T> operator T *()
-		{
-			mirb_debug_assert(value == value_raise || Value::of_type<T>(value));
-			return reinterpret_cast<T *>(value);
+			return value ? value_true : value_false;
 		}
 	};
 	
 	template<typename T> T *cast_null(value_t obj)
 	{
-		mirb_debug_assert(obj == value_raise || Value::of_type<T>(obj));
+		mirb_debug_assert(obj == 0 || Value::of_type<T>(obj));
 		return reinterpret_cast<T *>(obj);
 	}
 

@@ -149,11 +149,11 @@ namespace Mirb
 		value_t result = define_common(under, name, Value::Class);
 
 		if(result != value_undef)
-			return auto_cast(result);
+			return cast<Class>(result);
 
-		Class *obj = class_create_unnamed(auto_cast(super));
+		Class *obj = class_create_unnamed(super);
 		
-		class_name(obj, auto_cast(under), name);
+		class_name(obj, cast<Module>(under), name);
 
 		return obj;
 	}
@@ -168,11 +168,11 @@ namespace Mirb
 		value_t result = define_common(under, name, Value::Module);
 
 		if(result != value_undef)
-			return auto_cast(result);
+			return cast<Module>(result);
 
 		Module *obj = module_create_bare();
 		
-		class_name(obj, auto_cast(under), name);
+		class_name(obj, cast<Module>(under), name);
 
 		return obj;
 	}
@@ -227,7 +227,7 @@ namespace Mirb
 	
 	Class *singleton_class(value_t object)
 	{
-		Class *c = auto_cast(class_of(object));
+		Class *c = class_of(object);
 
 		if(prelude_likely(c->singleton))
 			return c;
@@ -260,7 +260,7 @@ namespace Mirb
 	{
 		Class *obj = class_create_bare(super);
 		
-		class_create_singleton(obj, auto_cast(super->instance_of));
+		class_create_singleton(obj, super->instance_of);
 
 		return obj;
 	}
@@ -272,13 +272,13 @@ namespace Mirb
 
 	Class *class_create_singleton(value_t obj, Class *super)
 	{
-		if(!Value::object_ref(obj))
+		Object *object = try_cast<Object>(obj);
+
+		if(!object)
 		{
 			raise(context->type_error, "Unable to create singleton classes on immediate values.");
 			return nullptr;
 		}
-
-		Object *object = auto_cast(obj);
 
 		Class *singleton_class = class_create_bare(super);
 		
@@ -319,7 +319,7 @@ namespace Mirb
 
 		if(str)
 		{
-			result += cast<String>(str)->string;
+			result += str->string;
 
 			return true;
 		}
@@ -344,20 +344,27 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		Method *inspect = lookup_method(auto_cast(class_of(obj)), Symbol::from_string("inspect"));
+		Method *inspect = lookup_method(class_of(obj), Symbol::from_string("inspect"));
 
-		value_t result = value_nil;
+		value_t result = 0;
 
-		if(inspect && (inspect != context->inspect_method || lookup_method(auto_cast(class_of(obj)), Symbol::from_string("to_s"))))
+		if(inspect && (inspect != context->inspect_method || lookup_method(class_of(obj), Symbol::from_string("to_s"))))
+		{
 			result = call(obj, "inspect");
 
-		if(!result)
-			return 0;
+			if(!result)
+				return 0;
+		}
 
-		if(prelude_likely(Value::type(result) == Value::String))
-			return auto_cast(result);
+		if(!result)
+			return String::get("#<?>");
+
+		auto str_result = try_cast<String>(result);
+
+		if(str_result)
+			return str_result;
 		else
-			return auto_cast(Object::to_s(obj));
+			return cast<String>(Object::to_s(result));
 	}
 
 	CharArray pretty_inspect(value_t obj)
@@ -373,11 +380,11 @@ namespace Mirb
 	ValueMap *get_vars(value_t obj)
 	{
 		Value::assert_valid(obj);
+		
+		Object *object = try_cast<Object>(obj);
 
-		if(prelude_unlikely(!Value::of_type<Object>(obj)))
+		if(prelude_unlikely(!object))
 			return context->dummy_map; // TODO: Turn a ValueMap per object
-
-		Object *object = auto_cast(obj);
 
 		if(prelude_unlikely(!object->vars))
 			object->vars = Collector::allocate<ValueMap>();
@@ -385,20 +392,22 @@ namespace Mirb
 		return object->vars;
 	}
 	
-	bool can_have_consts(value_t obj)
+	Module *can_have_consts(value_t obj)
 	{
-		if(prelude_likely(Value::of_type<Module>(obj)))
-			return true;
+		auto module = try_cast<Module>(obj);
+
+		if(prelude_likely(module))
+			return module;
 		else
 		{
 			String *obj_str = inspect(obj);
 
 			if(!obj_str)
-				return false;
+				return 0;
 
 			raise(context->name_error, "Object " + obj_str->string + " can not contain constants");
 
-			return false;
+			return 0;
 		}
 	}
 
@@ -456,15 +465,17 @@ namespace Mirb
 		Value::assert_valid(obj);
 		Value::assert_valid(name);
 
-		if(!can_have_consts(obj))
-			return value_raise;
+		auto module = can_have_consts(obj);
+
+		if(!module)
+			return 0;
 
 		value_t value = get_var_raw(obj, name);
 
 		if(value)
 			return value;
 
-		value = lookup_const(auto_cast(obj), name);
+		value = lookup_const(module, name);
 		
 		if(prelude_likely(value != nullptr))
 			return value;
@@ -587,9 +598,9 @@ namespace Mirb
 		return value_raise;
 	}
 
-	value_t raise(value_t exception)
+	value_t raise(Exception *exception)
 	{
-		set_current_exception(auto_cast(exception));
+		set_current_exception(exception);
 
 		return value_raise;
 	}
@@ -927,18 +938,22 @@ namespace Mirb
 	
 	String *enforce_string(value_t obj)
 	{
-		if(prelude_likely(Value::type(obj) == Value::String))
-			return auto_cast(obj);
+		auto str_obj = try_cast<String>(obj);
+
+		if(prelude_likely(str_obj))
+			return str_obj;
 		
 		obj = call(obj, "to_s");
 
 		if(!obj)
 			swallow_exception();
 
-		if(prelude_unlikely(Value::type(obj) != Value::String))
-			return auto_cast(inspect(obj));
+		str_obj = try_cast<String>(obj);
 
-		return auto_cast(obj);
+		if(prelude_unlikely(!str_obj))
+			return inspect(obj);
+
+		return str_obj;
 	}
 
 	value_t main_to_s()
@@ -961,9 +976,9 @@ namespace Mirb
 		
 		context->syms.attached = Symbol::create_initial("__attached__");
 
-		metaclass = class_create_singleton(auto_cast(context->object_class), auto_cast(context->class_class));
-		metaclass = class_create_singleton(auto_cast(context->module_class), metaclass);
-		class_create_singleton(auto_cast(context->class_class), metaclass);
+		metaclass = class_create_singleton(context->object_class, context->class_class);
+		metaclass = class_create_singleton(context->module_class, metaclass);
+		class_create_singleton(context->class_class, metaclass);
 		
 		context->symbol_class = class_create_unnamed(context->object_class);
 
