@@ -17,6 +17,7 @@ namespace Mirb
 		class Header;
 	};
 	
+	class Global;
 	class Collector;
 	class FreeBlock;
 	class Document;
@@ -102,6 +103,7 @@ namespace Mirb
 			InternalDocument,
 			InternalBlock,
 			InternalScope,
+			InternalGlobal,
 			Float,
 			Range,
 			Fixnum,
@@ -247,9 +249,12 @@ namespace Mirb
 
 				case InternalBlock:
 					return T<InternalBlock>::func(std::forward<Arg>(arg));
-
+					
 				case InternalScope:
 					return T<InternalScope>::func(std::forward<Arg>(arg));
+					
+				case InternalGlobal:
+					return T<InternalGlobal>::func(std::forward<Arg>(arg));
 					
 				case Float:
 					return T<Float>::func(std::forward<Arg>(arg));
@@ -347,6 +352,7 @@ namespace Mirb
 		mirb_typeclass(InternalDocument, Document);
 		mirb_typeclass(InternalBlock, Block);
 		mirb_typeclass(InternalScope, Tree::Scope);
+		mirb_typeclass(InternalGlobal, Global);
 		mirb_typeclass(Float, Float);
 		mirb_typeclass(Range, Range);
 		mirb_typeclass(Fixnum, Value::Immediate<Fixnum>);

@@ -25,7 +25,11 @@ namespace Mirb
 				mirb_debug_assert(hash == char_array.hash());
 
 				hash_value = hash;
-				hashed = true;
+			}
+			
+			size_t hash()
+			{
+				return hash_value;
 			}
 
 			CharArray string;

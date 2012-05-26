@@ -204,7 +204,7 @@ namespace Mirb
 		{
 			NodeType type() { return Variable; }
 			
-			Tree::NamedVariable *var; // Might contain an unnamed variable if it's the implict block parameter. TODO: Make an own yield node to fix this.
+			Tree::NamedVariable *var; // Might contain an unnamed variable if it's the implict block parameter or a temporary variable.
 			
 			VariableNode() {}
 			VariableNode(Tree::NamedVariable *var) : var(var) {}

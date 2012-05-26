@@ -21,3 +21,4 @@
 #include "classes/float.hpp"
 #include "document.hpp"
 #include "tree/tree.hpp"
+#include "global.hpp"

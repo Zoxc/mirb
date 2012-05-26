@@ -4,6 +4,7 @@
 #include "parser/parser.hpp"
 #include "compiler.hpp"
 #include "document.hpp"
+#include "global.hpp"
 #include "classes/object.hpp"
 #include "classes/module.hpp"
 #include "classes/symbol.hpp"
@@ -40,6 +41,8 @@
 
 namespace Mirb
 {
+	Global *load_path_global;
+
 	prelude_thread size_t stack_stop;
 	prelude_thread size_t stack_continue;
 
@@ -302,7 +305,7 @@ namespace Mirb
 		
 		singleton_class->singleton = true;
 
-		object->instance_of = singleton_class; // TODO: Fix the case when object is not a instance of Object
+		object->instance_of = singleton_class;
 
 		set_var(singleton_class, context->syms.attached, object);
 
@@ -543,14 +546,39 @@ namespace Mirb
 		ValueMapAccess::set(get_vars(obj), name, value);
 	}
 	
+	Global *get_global_object(Symbol *name, bool force)
+	{
+		auto result = cast<Global>(GlobalAccess::get(context, name, [] { return nullptr; }));
+
+		if(!result && force)
+		{
+			result = new (collector) Global;
+			GlobalAccess::set(context, name, result);
+		}
+
+		return result;
+	}
+	
+	void set_global_object(Symbol *name, Global *global)
+	{
+		GlobalAccess::set(context, name, global);
+	}
+
 	value_t get_global(Symbol *name)
 	{
-		return GlobalAccess::get(context, name, [] { return value_nil; });
+		auto global = get_global_object(name);
+
+		if(!global)
+			return value_nil;
+
+		return global->get();
 	}
 
 	void set_global(Symbol *name, value_t value)
 	{
-		GlobalAccess::set(context, name, value);
+		auto global = get_global_object(name, true);
+
+		global->set(value);
 	}
 	
 	value_t compare(value_t left, value_t right)
@@ -1095,7 +1123,10 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
 
-		set_global(Symbol::get("$:"), Collector::allocate<Array>());
+		load_path_global = new (collector) Global;
+		load_path_global->value = Collector::allocate<Array>();
+		set_global_object(Symbol::get("$:"), load_path_global);
+		set_global_object(Symbol::get("$LOAD_PATH"), load_path_global);
 
 		set_global(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
 		set_global(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));

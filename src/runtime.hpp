@@ -8,6 +8,8 @@ namespace Mirb
 {
 	class CharArray;
 	class Exception;
+
+	extern Global *load_path_global;
 	
 	void set_current_exception(Exception *exception);
 
@@ -78,6 +80,9 @@ namespace Mirb
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);
 	
+	Global *get_global_object(Symbol *name, bool force = false);
+	void set_global_object(Symbol *name, Global *global);
+
 	value_t get_global(Symbol *name);
 	void set_global(Symbol *name, value_t value);
 	
