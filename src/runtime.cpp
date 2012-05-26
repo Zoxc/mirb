@@ -64,6 +64,8 @@ namespace Mirb
 	{
 		auto e = context->exception;
 		
+		Value::assert_valid(e);
+
 		#ifdef DEBUG
 			context->exception_frame_origin = 0;
 		#endif

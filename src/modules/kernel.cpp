@@ -202,10 +202,13 @@ namespace Mirb
 
 				return eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
 		}
-		catch(exception_t)
+		catch(exception_t e)
 		{
+			OnStack<1> os(e);
+
 			Array::rb_delete(context->loaded_files, full_path.to_string());
-			throw;
+
+			throw e;
 		}
 	}
 	
