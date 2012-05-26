@@ -219,19 +219,19 @@ namespace Mirb
 			return 0;
 	}
 	
-	value_t Kernel::load(value_t filename)
+	value_t Kernel::load(String *filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, true, false);
+		return run_file(context->main, filename->string, true, false);
 	}
 	
-	value_t Kernel::require(value_t filename)
+	value_t Kernel::require(String *filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, false, true);
+		return run_file(context->main, filename->string, false, true);
 	}
 	
-	value_t Kernel::require_relative(value_t filename)
+	value_t Kernel::require_relative(String *filename)
 	{
-		return run_file(context->main, cast<String>(filename)->string, true, true);
+		return run_file(context->main, filename->string, true, true);
 	}
 	
 	value_t Kernel::print(size_t argc, value_t argv[])
@@ -243,11 +243,12 @@ namespace Mirb
 			if(Value::type(arg) != Value::String)
 				arg = call(arg, "to_s");
 
-			if(!arg)
+			String *str = raise_cast<String>(arg);
+
+			if(!str)
 				return 0;
 			
-			if(Value::type(arg) == Value::String)
-				std::cout << cast<String>(arg)->string.get_string();
+			std::cout << str->string.get_string();
 		}
 		
 		return value_nil;
@@ -265,10 +266,12 @@ namespace Mirb
 			if(!arg)
 				return 0;
 			
-			if(Value::type(arg) == Value::String)
-				std::cout << cast<String>(arg)->string.get_string();
+			String *str = raise_cast<String>(arg);
 
-			std::cout << "\n";
+			if(!str)
+				return 0;
+			
+			std::cout << str->string.get_string() << "\n";
 		}
 		
 		return value_nil;
@@ -339,12 +342,12 @@ namespace Mirb
 		method<Arg::Block>(context->kernel_module, "lambda", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
 		method(context->kernel_module, "backtrace", &backtrace);
-		method<Arg::Self, Arg::Value>(context->kernel_module, "eval", &eval);
+		method<Arg::Self<Arg::Value>, Arg::Value>(context->kernel_module, "eval", &eval);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
-		method<Arg::Value>(context->kernel_module, "load", &load);
-		method<Arg::Value>(context->kernel_module, "require", &require);
-		method<Arg::Value>(context->kernel_module, "require_relative", &require_relative);
+		method<Arg::Class<String>>(context->kernel_module, "load", &load);
+		method<Arg::Class<String>>(context->kernel_module, "require", &require);
+		method<Arg::Class<String>>(context->kernel_module, "require_relative", &require_relative);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
 	}
 };

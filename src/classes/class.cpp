@@ -29,17 +29,15 @@ namespace Mirb
 		return result;
 	}
 
-	value_t Class::to_s(value_t obj)
+	value_t Class::to_s(Class *self)
 	{
-		auto self = cast<Class>(obj);
-
-		value_t name = get_var(obj, context->syms.classname);
+		value_t name = get_var(self, context->syms.classname);
 		
 		if(Value::test(name))
 			return name;
 		else if(self->singleton)
 		{
-			value_t real = get_var(obj, context->syms.attached);
+			value_t real = get_var(self, context->syms.attached);
 
 			OnStack<1> os(real);
 
@@ -56,15 +54,15 @@ namespace Mirb
 		}
 		else
 		{
-			CharArray result = "#<Class:0x" + CharArray::hex((size_t)obj) + ">";
+			CharArray result = "#<Class:0x" + CharArray::hex((size_t)self) + ">";
 
 			return result.to_string();
 		}
 	}
 	
-	value_t Class::method_superclass(value_t obj)
+	value_t Class::rb_superclass(Module *obj)
 	{
-		value_t super = real_class(cast<Module>(obj)->superclass);
+		value_t super = real_class(obj->superclass);
 
 		if(super)
 			return super;
@@ -72,7 +70,7 @@ namespace Mirb
 			return value_nil;
 	}
 
-	value_t Class::method_new(value_t obj, size_t argc, value_t argv[])
+	value_t Class::rb_new(value_t obj, size_t argc, value_t argv[])
 	{
 		value_t result = call(obj, "allocate");
 
@@ -89,8 +87,8 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		method<Arg::Self>(context->class_class, "to_s", &to_s);
-		method<Arg::Self>(context->class_class, "superclass", &method_superclass);
-		method<Arg::Self, Arg::Count, Arg::Values>(context->class_class, "new", &method_new);
+		method<Arg::Self<Arg::Class<Class>>>(context->class_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Module>>>(context->class_class, "superclass", &rb_superclass);
+		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->class_class, "new", &rb_new);
 	}
 };

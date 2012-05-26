@@ -9,18 +9,17 @@ namespace Mirb
 
 		static_assert(sizeof(int_t) == sizeof(size_t), "int_t must be pointer sized");
 		
-		value_t zero(value_t obj);
-		value_t to_s(value_t obj);
-		value_t times(value_t obj, value_t block);
-		value_t upto(value_t obj, value_t arg, value_t block);
-		value_t pos(value_t obj);
-		value_t neg(value_t obj);
-		value_t add(value_t obj, value_t other);
-		value_t sub(value_t obj, value_t other);
-		value_t mul(value_t obj, value_t other);
-		value_t div(value_t obj, value_t other);
-		value_t mod(value_t obj, value_t other);
-		value_t compare(value_t obj, value_t other);
+		value_t zero(int_t obj);
+		value_t to_s(int_t obj);
+		value_t times(int_t obj, value_t block);
+		value_t upto(int_t obj, int_t arg, value_t block);
+		value_t neg(int_t obj);
+		value_t add(int_t obj, int_t other);
+		value_t sub(int_t obj, int_t other);
+		value_t mul(int_t obj, int_t other);
+		value_t div(int_t obj, int_t other);
+		value_t mod(int_t obj, int_t other);
+		value_t compare(int_t obj, int_t other);
 
 		value_t from_size_t(size_t value);
 		size_t to_size_t(value_t obj);

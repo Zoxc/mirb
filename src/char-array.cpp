@@ -296,9 +296,9 @@ namespace Mirb
 		return std::memcmp(data + offset, other.data + other_offset, size) == 0;
 	}
 
-	value_t CharArray::to_string() const
+	String *CharArray::to_string() const
 	{
-		return auto_cast(Collector::allocate<String>(*this));
+		return Collector::allocate<String>(*this);
 	}
 	
 	CharArray CharArray::hex(size_t value)

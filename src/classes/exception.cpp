@@ -1,5 +1,6 @@
 #include "exception.hpp"
 #include "symbol.hpp"
+#include "string.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "class.hpp"
@@ -217,12 +218,12 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Arg::SelfClass<Class>>(context->exception_class, "allocate", &allocate);
+		singleton_method<Arg::Self<Arg::Class<Class>>>(context->exception_class, "allocate", &allocate);
 
-		method<Arg::SelfClass<Exception>, Arg::Value>(context->exception_class, "initialize", &rb_initialize);
-		method<Arg::SelfClass<Exception>>(context->exception_class, "backtrace", &rb_backtrace);
-		method<Arg::SelfClass<Exception>>(context->exception_class, "message", &to_s);
-		method<Arg::SelfClass<Exception>>(context->exception_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Exception>>, Arg::Value>(context->exception_class, "initialize", &rb_initialize);
+		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "backtrace", &rb_backtrace);
+		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "message", &to_s);
+		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "to_s", &to_s);
 	}
 };
 

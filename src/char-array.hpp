@@ -107,7 +107,7 @@ namespace Mirb
 			
 			size_t hash() const;
 			
-			value_t to_string() const;
+			String *to_string() const;
 			
 			const char *c_str_ref() const;
 			size_t c_str_length() const;

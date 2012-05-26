@@ -233,10 +233,12 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i], context->string_class))
+			auto string = raise_cast<String>(argv[i]);
+
+			if(!string)
 				return 0;
 
-			joiner.push(cast<String>(argv[i])->string);
+			joiner.push(string->string);
 		}
 
 		return joiner.join().to_string();
@@ -273,7 +275,7 @@ namespace Mirb
 		singleton_method<Arg::Class<String>, Arg::Class<String>>(context->file_class, "fnmatch?", &rb_fnmatch);
 		singleton_method<Arg::Class<String>, Arg::Class<String>>(context->file_class, "fnmatch", &rb_fnmatch);
 
-		singleton_method<Arg::Class<String>, Arg::DefaultClass<String>>(context->file_class, "expand_path", &rb_expand_path);
+		singleton_method<Arg::Class<String>, Arg::Default<Arg::Class<String>>>(context->file_class, "expand_path", &rb_expand_path);
 		singleton_method<Arg::Class<String>>(context->file_class, "dirname", &dirname);
 		singleton_method<Arg::Count, Arg::Values>(context->file_class, "join", &rb_join);
 

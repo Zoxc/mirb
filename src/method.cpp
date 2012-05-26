@@ -26,59 +26,65 @@ namespace Mirb
 			return *this;
 		}
 
-		const Info Self::info = {0, 0, false};
 		const Info Block::info = {0, 0, false};
 		const Info Count::info = {0, 0, true};
 		const Info Values::info = {0, 0, false};
-		const Info UInt::info = {1, 1, false};
-		const Info Value::info = {1, 1, false};
-		const Info Default::info = {0, 1, false};
 
-		Self::type Self::apply(Frame &frame, State &)
-		{
-			return frame.obj;
-		}
-		
-		Block::type Block::apply(Frame &frame, State &)
+		Block::Type Block::apply(Frame &frame, State &)
 		{
 			return frame.block;
 		}
 
-		Count::type Count::apply(Frame &frame, State &)
+		Count::Type Count::apply(Frame &frame, State &)
 		{
 			return frame.argc;
 		}
 
-		Values::type Values::apply(Frame &frame, State &)
+		Values::Type Values::apply(Frame &frame, State &)
 		{
 			return frame.argv;
 		}
 		
-		UInt::type UInt::apply(Frame &frame, State &state)
+		Fixnum::Type Fixnum::coerce(value_t value, State &state)
 		{
-			value_t result = frame.argv[state.index++];
-
-			if(Mirb::Value::is_fixnum(result))
-				return Fixnum::to_size_t(result);
+			if(Mirb::Value::is_fixnum(value))
+				return Mirb::Fixnum::to_int(value);
 			else
 			{
 				state.error = true;
-				type_error(result, context->fixnum_class);
-				return -1;
+				type_error(value, "Fixnum");
+				return 0;
 			}
 		}
-
-		Value::type Value::apply(Frame &frame, State &state)
+		
+		UInt::Type UInt::coerce(value_t value, State &state)
 		{
-			return frame.argv[state.index++];
-		}
+			if(Mirb::Value::is_fixnum(value))
+			{
+				auto result = Mirb::Fixnum::to_int(value);
 
-		Value::type Default::apply(Frame &frame, State &state)
-		{
-			if(state.index >= frame.argc)
-				return value_raise;
+				if(result < 0)
+				{
+					state.error = true;
+					raise(context->standard_error, "A value above zero was expected.");
+					return 0;
+				}
+				else
+					return result;
+			}
 			else
-				return frame.argv[state.index++];
+			{
+				state.error = true;
+				type_error(value, "Fixnum above zero");
+				return 0;
+			}
+		}
+		
+		const value_t Value::default_value = 0;
+
+		Value::Type Value::coerce(value_t value, State &state)
+		{
+			return value;
 		}
 	}
 	

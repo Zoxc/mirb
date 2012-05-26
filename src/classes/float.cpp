@@ -49,14 +49,14 @@ namespace Mirb
 	{
 		context->float_class = define_class("Float", context->numeric_class);
 		
-		method<Arg::SelfClass<Float>>(context->float_class, "to_s", &to_s);
-		method<Arg::SelfClass<Float>>(context->float_class, "zero?", &zero);
+		method<Arg::Self<Arg::Class<Float>>>(context->float_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Float>>>(context->float_class, "zero?", &zero);
 
-		method<Arg::SelfClass<Float>, Arg::Class<Float>>(context->float_class, "+", &add);
-		method<Arg::SelfClass<Float>, Arg::Class<Float>>(context->float_class, "-", &sub);
-		method<Arg::SelfClass<Float>, Arg::Class<Float>>(context->float_class, "*", &mul);
-		method<Arg::SelfClass<Float>, Arg::Class<Float>>(context->float_class, "/", &div);
-		method<Arg::SelfClass<Float>, Arg::Class<Float>>(context->float_class, "<=>", &compare);
+		method<Arg::Self<Arg::Class<Float>>, Arg::Class<Float>>(context->float_class, "+", &add);
+		method<Arg::Self<Arg::Class<Float>>, Arg::Class<Float>>(context->float_class, "-", &sub);
+		method<Arg::Self<Arg::Class<Float>>, Arg::Class<Float>>(context->float_class, "*", &mul);
+		method<Arg::Self<Arg::Class<Float>>, Arg::Class<Float>>(context->float_class, "/", &div);
+		method<Arg::Self<Arg::Class<Float>>, Arg::Class<Float>>(context->float_class, "<=>", &compare);
 	}
 };
 

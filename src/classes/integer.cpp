@@ -7,10 +7,16 @@ namespace Mirb
 	{
 		return obj;
 	}
-
+	
+	value_t Integer::pos(value_t obj)
+	{
+		return obj;
+	}
+	
 	void Integer::initialize()
 	{
-		method<Arg::Self>(context->integer_class, "to_i", &to_i);
+		method<Arg::Self<Arg::Value>>(context->integer_class, "+@", &pos);
+		method<Arg::Self<Arg::Value>>(context->integer_class, "to_i", &to_i);
 	}
 };
 

@@ -6,6 +6,7 @@
 #include "classes/exceptions.hpp"
 #include "generic/memory-pool.hpp"
 #include "codegen/opcodes.hpp"
+#include <algorithm>
 
 namespace Mirb
 {
@@ -46,157 +47,142 @@ namespace Mirb
 			}
 		};
 
-		class Self
+		template<class T, typename ResultType> class ValueBase
 		{
 			public:
-				typedef value_t type;
 				static const Info info;
 
-				static type apply(Frame &frame, State &state);
-		};
-		
-		template<class T> class SelfClass
-		{
-			public:
-				typedef T *type;
-				static const Info info;
+				typedef ResultType Type;
 
-				static type apply(Frame &frame, State &)
+				static Type apply(Frame &frame, State &state)
 				{
-					value_t result = frame.obj;
+					value_t value = frame.argv[state.index++];
 
-					mirb_runtime_assert(Mirb::Value::of_type<T>(result));
+					return T::coerce(value, state);
+				}
+		};
 
-					return auto_cast(result);
+		template<class T, typename ResultType> const Info ValueBase<T, ResultType>::info = {1, 1, false};
+		
+		template<class T> class Default
+		{
+			public:
+				static const Info info;
+				typedef typename T::Type Type;
+				
+				static Type apply(Frame &frame, State &state)
+				{
+					if(state.index >= frame.argc)
+						return T::default_value;
+
+					value_t result = frame.argv[state.index++];
+					
+					return T::coerce(result, state);
 				}
 		};
 		
-		template<class T> const Info SelfClass<T>::info = {0, 0, false};
+		template<class T> const Info Default<T>::info = {0, 1, false};
+
+		template<class T> class Self
+		{
+			public:
+				static const Info info;
+				typedef typename T::Type Type;
+				
+				static Type apply(Frame &frame, State &state)
+				{
+					return T::coerce(frame.obj, state);
+				}
+		};
+		
+		template<class T> const Info Self<T>::info = {0, 0, false};
 		
 		class Block
 		{
 			public:
-				typedef value_t type;
+				typedef value_t Type;
 				static const Info info;
 
-				static type apply(Frame &frame, State &state);
+				static Type apply(Frame &frame, State &state);
 		};
 		
 		class Count
 		{
 			public:
-				typedef size_t type;
+				typedef size_t Type;
 				static const Info info;
 
-				static type apply(Frame &frame, State &state);
+				static Type apply(Frame &frame, State &state);
 		};
 
 		class Values
 		{
 			public:
-				typedef value_t *type;
+				typedef value_t *Type;
 				static const Info info;
 
-				static type apply(Frame &frame, State &state);
+				static Type apply(Frame &frame, State &state);
 		};
 		
-		class UInt
+		class Fixnum:
+			public ValueBase<Fixnum, intptr_t>
 		{
 			public:
-				typedef size_t type;
-				static const Info info;
-
-				static type apply(Frame &frame, State &state);
+				static Type coerce(value_t value, State &state);
 		};
 		
-		class Value
+		class UInt:
+			public ValueBase<UInt, size_t>
 		{
 			public:
-				typedef value_t type;
-				static const Info info;
-
-				static type apply(Frame &frame, State &state);
+				static Type coerce(value_t value, State &state);
 		};
 		
-		class Default
+		class Value:
+			public ValueBase<Value, value_t>
 		{
 			public:
-				typedef value_t type;
-				static const Info info;
+				static const value_t default_value;
 
-				static type apply(Frame &frame, State &state);
+				static Type coerce(value_t value, State &state);
 		};
 		
-		template<class T> class Class
+		template<class T> class Class:
+			public ValueBase<Class<T>, T *>
 		{
 			public:
-				typedef T *type;
-				static const Info info;
+				static T *const default_value;
 
-				static type apply(Frame &frame, State &state)
+				static Type coerce(value_t value, State &state)
 				{
-					value_t result = frame.argv[state.index++];
-
-					if(!Mirb::Value::of_type<T>(result))
+					if(!Mirb::Value::of_type<T>(value))
 					{
 						state.error = true;
-						type_error(result, value_nil);
+						type_error(value, value_nil);
 						return nullptr;
 					}
 					else
-						return auto_cast(result);
+						return cast<T>(value);
 				}
 		};
 		
-		template<class T> const Info Class<T>::info = {1, 1, false};
+		template<class T> T *const Class<T>::default_value = 0;
 		
-		template<class T> class DefaultClass
+		template<Class *Context::*field> class InstanceOf:
+			public ValueBase<InstanceOf<field>, value_t>
 		{
 			public:
-				typedef T *type;
-				static const Info info;
-
-				static type apply(Frame &frame, State &state)
+				static Type coerce(value_t value, State &state)
 				{
-					if(state.index >= frame.argc)
-						return nullptr;
-
-					value_t result = frame.argv[state.index++];
-
-					if(!Mirb::Value::of_type<T>(result))
-					{
-						state.error = true;
-						type_error(result, value_nil);
-						return nullptr;
-					}
-					else
-						return auto_cast(result);
-				}
-		};
-		
-		template<class T> const Info DefaultClass<T>::info = {0, 1, false};
-		
-		template<class T> class SpecificClass
-		{
-			public:
-				typedef T *type;
-				static const Info info;
-
-				static type apply(Frame &frame, State &state)
-				{
-					value_t result = frame.argv[state.index++];
-
-					if(type_error(result, T::class_ref))
+					if(type_error(value, context->*field))
 					{
 						state.error = true;
 						return nullptr;
 					}
 					else
-						return auto_cast(result);
+						return value;
 				}
 		};
-
-		template<class T> const Info SpecificClass<T>::info = {1, 1, false};
 	};
 
 	namespace MethodGen
@@ -214,12 +200,12 @@ namespace Mirb
 			if(state.error)
 				return value_raise;
 		
-			typename Arg1::type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 		
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)(typename Arg1::type))frame.code->opcodes)(arg1);
+			return ((value_t (*)(typename Arg1::Type))frame.code->opcodes)(arg1);
 		}
 	
 		template<typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
@@ -229,17 +215,17 @@ namespace Mirb
 			if(state.error)
 				return value_raise;
 		
-			typename Arg1::type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg2::type arg2 = Arg2::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)(typename Arg1::type, typename Arg2::type))frame.code->opcodes)(arg1, arg2);
+			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type))frame.code->opcodes)(arg1, arg2);
 		}
 	
 		template<typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
@@ -249,81 +235,81 @@ namespace Mirb
 			if(state.error)
 				return value_raise;
 		
-			typename Arg1::type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg2::type arg2 = Arg2::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg3::type arg3 = Arg3::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)(typename Arg1::type, typename Arg2::type, typename Arg3::type))frame.code->opcodes)(arg1, arg2, arg3);
+			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type))frame.code->opcodes)(arg1, arg2, arg3);
 		}
 	
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
 		{
 			Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
 
-			typename Arg1::type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg2::type arg2 = Arg2::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg3::type arg3 = Arg3::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg4::type arg4 = Arg4::apply(frame, state);
+			typename Arg4::Type arg4 = Arg4::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type))frame.code->opcodes)(arg1, arg2, arg3, arg4);
+			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type))frame.code->opcodes)(arg1, arg2, arg3, arg4);
 		}
 
 		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> value_t wrapper(Frame &frame)
 		{
 			Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
 
-			typename Arg1::type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg2::type arg2 = Arg2::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg3::type arg3 = Arg3::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg4::type arg4 = Arg4::apply(frame, state);
+			typename Arg4::Type arg4 = Arg4::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			typename Arg5::type arg5 = Arg5::apply(frame, state);
+			typename Arg5::Type arg5 = Arg5::apply(frame, state);
 
 			if(state.error)
 				return value_raise;
 		
-			return ((value_t (*)(typename Arg1::type, typename Arg2::type, typename Arg3::type, typename Arg4::type, typename Arg5::type))frame.code->opcodes)(arg1, arg2, arg3, arg4, arg5);
+			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type))frame.code->opcodes)(arg1, arg2, arg3, arg4, arg5);
 		}
 
 		Method *generate_method(size_t flags, Module *module, Symbol *name, void *function);

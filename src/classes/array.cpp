@@ -317,28 +317,28 @@ namespace Mirb
 		
 		include_module(context->array_class, context->enumerable_module);
 		
-		singleton_method<Arg::SelfClass<Class>>(context->array_class, "allocate", &allocate);
+		singleton_method<Arg::Self<Arg::Class<Class>>>(context->array_class, "allocate", &allocate);
 		
-		method<Arg::SelfClass<Array>>(context->array_class, "sort", &rb_sort);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "sort", &rb_sort);
 
-		method<Arg::SelfClass<Array>>(context->array_class, "first", &first);
-		method<Arg::SelfClass<Array>>(context->array_class, "last", &last);
-		method<Arg::SelfClass<Array>>(context->array_class, "empty?", &empty);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "first", &first);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "last", &last);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "empty?", &empty);
 		
-		method<Arg::SelfClass<Array>>(context->array_class, "shift", &shift);
-		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
-		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
-		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "+", &add);
-		method<Arg::SelfClass<Array>, Arg::Class<Array>>(context->array_class, "-", &sub);
-		method<Arg::SelfClass<Array>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
-		method<Arg::SelfClass<Array>>(context->array_class, "pop", &pop);
-		method<Arg::SelfClass<Array>>(context->array_class, "length", &length);
-		method<Arg::SelfClass<Array>>(context->array_class, "size", &length);
-		method<Arg::SelfClass<Array>, Arg::DefaultClass<String>>(context->array_class, "join", &join);
-		method<Arg::SelfClass<Array>>(context->array_class, "to_s", &to_s);
-		method<Arg::SelfClass<Array>, Arg::Block>(context->array_class, "each", &each);
-		method<Arg::SelfClass<Array>, Arg::Value, Arg::Default>(context->array_class, "[]", &get);
-		method<Arg::SelfClass<Array>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "shift", &shift);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values>(context->array_class, "unshift", &unshift);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values>(context->array_class, "push", &push);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>>(context->array_class, "+", &add);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>>(context->array_class, "-", &sub);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values>(context->array_class, "<<", &push);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "pop", &pop);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "length", &length);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "size", &length);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Default<Arg::Class<String>>>(context->array_class, "join", &join);
+		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Block>(context->array_class, "each", &each);
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Default<Arg::Value>>(context->array_class, "[]", &get);
+		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value>(context->array_class, "[]=", &set);
 	}
 };
 
