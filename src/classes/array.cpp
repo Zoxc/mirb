@@ -16,6 +16,18 @@ namespace Mirb
 		return vector.size();
 	}
 
+	Array *Array::allocate_pair(value_t left, value_t right)
+	{
+		auto result = Collector::allocate<Array>(context->array_class);
+
+		result->vector.expand(2);
+		
+		result->vector.push(left);
+		result->vector.push(right);
+
+		return result;
+	}
+
 	value_t Array::allocate(Class *instance_of)
 	{
 		return Collector::allocate<Array>(instance_of);

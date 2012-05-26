@@ -28,6 +28,8 @@ namespace Mirb
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}
 			Array() : Object(Value::Array, context->array_class) {}
 
+			static Array *allocate_pair(value_t left, value_t right);
+
 			Vector<value_t, AllocatorBase, Allocator> vector;
 			
 			template<typename F> void mark(F mark)

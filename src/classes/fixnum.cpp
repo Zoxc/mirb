@@ -1,6 +1,7 @@
 #include "fixnum.hpp"
 #include "class.hpp"
 #include "string.hpp"
+#include "float.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
 
@@ -38,6 +39,11 @@ namespace Mirb
 		size_t length = sprintf((char *)buffer, "%d", (int)obj);
 
 		return CharArray(buffer, length).to_string();
+	}
+	
+	value_t Fixnum::to_f(int_t obj)
+	{
+		return Collector::allocate<Float>((double)obj);
 	}
 	
 	value_t Fixnum::times(int_t obj, value_t block)
@@ -115,6 +121,7 @@ namespace Mirb
 	void Fixnum::initialize()
 	{
 		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "to_f", &to_f);
 		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "zero?", &zero);
 		method<Arg::Self<Arg::Fixnum>, Arg::Block>(context->fixnum_class, "times", &times);
 		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum, Arg::Block>(context->fixnum_class, "upto", &upto);
