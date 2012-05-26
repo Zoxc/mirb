@@ -193,6 +193,8 @@ namespace Mirb
 		bool loaded;
 		CharArray full_path;
 		
+		OnStackString<1> oss(full_path);
+
 		try
 		{
 			Kernel::read_file(filename, try_relative, require, full_path, loaded, data, length);
@@ -200,7 +202,7 @@ namespace Mirb
 			if(require && loaded)
 				return value_nil;
 
-				return eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
+			return eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
 		}
 		catch(exception_t e)
 		{

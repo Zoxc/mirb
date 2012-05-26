@@ -170,13 +170,8 @@ namespace Mirb
 
 				typedef value_t *Header::*data_field;
 				
-				#ifdef DEBUG
-					static const data_field mark_list;
-					static const data_field thread_list;
-				#else
-					static const data_field mark_list;
-					static const data_field thread_list;
-				#endif
+				static const data_field mark_list;
+				static const data_field thread_list;
 				
 				#ifdef VALGRIND
 					LinkedListEntry<Header> entry;
