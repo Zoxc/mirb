@@ -59,16 +59,26 @@ namespace Mirb
 		else
 			context->exception_frame_origin = 0;
 	}
+
+	prelude_noreturn void throw_current_exception()
+	{
+		auto e = context->exception;
+		
+		#ifdef DEBUG
+			context->exception_frame_origin = 0;
+		#endif
+
+		context->exception = 0;
+
+		throw e;
+	}
 	
 	value_t coerce(value_t left, Symbol *name, value_t right)
 	{
 		auto result = raise_cast<Array>(call_argv(right, "coerce", 1, &left));
 
-		if(!result)
-			return 0;
-
 		if(result->size() != 2)
-			return raise(context->runtime_error, "Expected an array with a pair of values");
+			raise(context->runtime_error, "Expected an array with a pair of values");
 
 		value_t last = result->get(1);
 
@@ -132,12 +142,9 @@ namespace Mirb
 	{
 		if(prelude_unlikely(!Value::of_type<Module>(under)))
 		{
-			String *under_str = inspect(under);
+			auto under_str = inspect(under);
 
-			if(!under_str)
-				return 0;
-
-			raise(context->type_error, "Invalid constant scope '" + under_str->string + "'");
+			raise(context->type_error, "Invalid constant scope '" + under_str + "'");
 			return 0;
 		}
 
@@ -147,12 +154,9 @@ namespace Mirb
 		{
 			if(Value::type(existing) != type)
 			{
-				String *existing_str = inspect(class_of(existing));
+				auto existing_str = inspect(class_of(existing));
 
-				if(!existing_str)
-					return 0;
-
-				raise(context->type_error,  "Constant already exists with type " + existing_str->string);
+				raise(context->type_error,  "Constant already exists with type " + existing_str);
 
 				return 0;
 			}
@@ -294,10 +298,7 @@ namespace Mirb
 		Object *object = try_cast<Object>(obj);
 
 		if(!object)
-		{
 			raise(context->type_error, "Unable to create singleton classes on immediate values.");
-			return nullptr;
-		}
 
 		Class *singleton_class = class_create_bare(super);
 		
@@ -319,36 +320,17 @@ namespace Mirb
 		return singleton_class;
 	}
 
-	CharArray inspect_obj(value_t obj)
+	CharArray inspect(value_t obj)
 	{
-		String *str = inspect(obj);
-		
-		if(!str)
-			throw context->exception;
-
-		return str->string;
-	}
-	
-	bool append_inspect(CharArray &result, value_t obj)
-	{
-		String *str = inspect(obj);
-
-		if(str)
-		{
-			result += str->string;
-
-			return true;
-		}
-		else
-			return false;
+		return inspect_obj(obj)->string;
 	}
 	
 	std::string inspect_object(value_t obj)
 	{
-		return inspect_obj(obj).get_string();
+		return inspect(obj).get_string();
 	}
 
-	String *inspect(value_t obj)
+	String *inspect_obj(value_t obj)
 	{
 		OnStack<1> os(obj);
 
@@ -359,9 +341,6 @@ namespace Mirb
 		if(inspect && (inspect != context->inspect_method || lookup_method(internal_class_of(obj), Symbol::from_string("to_s"))))
 		{
 			result = call(obj, "inspect");
-
-			if(!result)
-				return 0;
 		}
 
 		if(!result)
@@ -378,9 +357,9 @@ namespace Mirb
 	CharArray pretty_inspect(value_t obj)
 	{
 		OnStack<1> os(obj);
-		CharArray left = inspect_obj(obj);
+		CharArray left = inspect(obj);
 		OnStackString<1> oss(left);
-		CharArray right = inspect_obj(class_of(obj));
+		CharArray right = inspect(class_of(obj));
 
 		return left + ":" + right;
 	}
@@ -408,14 +387,9 @@ namespace Mirb
 			return module;
 		else
 		{
-			String *obj_str = inspect(obj);
+			auto obj_str = inspect(obj);
 
-			if(!obj_str)
-				return 0;
-
-			raise(context->name_error, "Object " + obj_str->string + " can not contain constants");
-
-			return 0;
+			raise(context->name_error, "Object " + obj_str + " can not contain constants");
 		}
 	}
 
@@ -430,7 +404,7 @@ namespace Mirb
 
 		for(size_t i = scope->entries; i-- > 0;)
 		{
-			result += inspect_obj((*scope)[i]) + "::";
+			result += inspect((*scope)[i]) + "::";
 		}
 
 		return result;
@@ -475,9 +449,6 @@ namespace Mirb
 
 		auto module = can_have_consts(obj);
 
-		if(!module)
-			return 0;
-
 		value_t value = get_var_raw(obj, name);
 
 		if(value)
@@ -490,12 +461,9 @@ namespace Mirb
 
 		OnStack<1> os(name);
 
-		String *obj_str = inspect(obj);
+		auto obj_str = inspect(obj);
 
-		if(!obj_str)
-			return 0;
-
-		raise(context->name_error, "Uninitialized constant " + obj_str->string + "::" + name->string);
+		raise(context->name_error, "Uninitialized constant " + obj_str + "::" + name->string);
 
 		return 0;
 	}
@@ -511,17 +479,14 @@ namespace Mirb
 			return result;
 		
 		raise(context->name_error, "Uninitialized constant " + scope_path(scope) + name->string);
-
-		return value_raise;
 	}
 
 	value_t set_const(value_t obj, Symbol *name, value_t value)
 	{
 		Value::assert_valid(value);
 
-		if(!can_have_consts(obj))
-			return value_raise;
-		
+		can_have_consts(obj);
+
 		set_var(obj, name, value);
 
 		return value_true;
@@ -546,7 +511,7 @@ namespace Mirb
 	
 	Global *get_global_object(Symbol *name, bool force)
 	{
-		auto result = cast<Global>(GlobalAccess::get(context, name, [] { return nullptr; }));
+		auto result = cast_null<Global>(GlobalAccess::get(context, name, [] { return nullptr; }));
 
 		if(!result && force)
 		{
@@ -572,51 +537,43 @@ namespace Mirb
 		return global->get(name);
 	}
 
-	bool set_global(Symbol *name, value_t value)
+	void set_global(Symbol *name, value_t value)
 	{
 		auto global = get_global_object(name, true);
 
-		return global->set(name, value);
+		global->set(name, value);
 	}
 	
 	value_t compare(value_t left, value_t right)
 	{
 		value_t result = call_argv(left, context->syms.compare, value_nil, 1, &right);
 		
-		if(!result)
-			return 0;
-
 		if(!Value::is_fixnum(result))
-			return raise(context->type_error, "<=> must return a Fixnum");
+			raise(context->type_error, "<=> must return a Fixnum");
 
 		return result;
 	}
 
-	value_t type_error(value_t value, const CharArray &expected)
+	void type_error(value_t value, const CharArray &expected)
 	{
 		OnStackString<1> os(expected);
 		CharArray value_str = pretty_inspect(value);
 
-		return raise(context->type_error, value_str + " was given when " + expected + " was expected");
+		raise(context->type_error, value_str + " was given when " + expected + " was expected");
 	}
 
-	bool type_error(value_t value, value_t expected)
+	void type_error(value_t value, Class *expected)
 	{
-		value_t klass = class_of(value);
-
-		if(prelude_unlikely(klass != expected))
+		if(prelude_unlikely(!kind_of(expected, value)))
 		{
 			CharArray value_str = pretty_inspect(value);
 
 			OnStackString<1> os(value_str);
 
-			CharArray expected_str = inspect_obj(expected);
+			CharArray expected_str = inspect(expected);
 
 			raise(context->type_error, value_str + " was given when a object of type " + expected_str + " was expected");
-			return true;
 		}
-		else
-			return false;
 	}
 	
 	Exception *create_exception(Class *exception_class, const CharArray &message)
@@ -624,20 +581,11 @@ namespace Mirb
 		return Collector::allocate<Exception>(exception_class, message.to_string(), backtrace());
 	}
 
-	value_t raise(Class *exception_class, const CharArray &message)
+	void raise(Class *exception_class, const CharArray &message)
 	{
-		set_current_exception(create_exception(exception_class, message));
-		
-		return value_raise;
+		throw create_exception(exception_class, message);
 	}
 
-	value_t raise(Exception *exception)
-	{
-		set_current_exception(exception);
-
-		return value_raise;
-	}
-	
 	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input)
 	{
 		Block *block;
@@ -667,7 +615,7 @@ namespace Mirb
 				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
 					i().print();
 
-				return raise(context->syntax_error, "Unable to parse file '" + filename + "'");
+				raise(context->syntax_error, "Unable to parse file '" + filename + "'");
 			}
 
 			OnStack<3> os(tree_scope, method_name, scope);
@@ -683,7 +631,12 @@ namespace Mirb
 			block = Compiler::compile(tree_scope, memory_pool);
 		}
 
-		return call_code(block, self, method_name, scope, value_nil, 0, 0);
+		value_t result = call_code(block, self, method_name, scope, value_nil, 0, 0);
+
+		if(result)
+			return result;
+		else
+			throw_current_exception();
 	}
 	
 	Method *lookup_method(Module *module, Symbol *name)
@@ -712,7 +665,7 @@ namespace Mirb
 
 			CharArray obj_str = pretty_inspect(obj);
 
-			raise(context->name_error, "Undefined method '" + name->string + "' for " + obj_str);
+			set_current_exception(create_exception(context->name_error, "Undefined method '" + name->string + "' for " + obj_str));
 			return 0;
 		}
 
@@ -780,12 +733,16 @@ namespace Mirb
 
 	value_t call_frame(Frame &frame)
 	{
+#ifdef DEBUG
+		try
+		{
+#endif
 		if(frame.code->scope)
 			Value::assert_valid(frame.code->scope);
 
 		if(prelude_unlikely((size_t)&frame <= stack_stop))
 		{
-			raise(context->system_stack_error, "Stack overflow");
+			set_current_exception(create_exception(context->system_stack_error, "Stack overflow"));
 			return value_raise;
 		}
 
@@ -807,21 +764,23 @@ namespace Mirb
 		
 		if(prelude_unlikely(frame.argc < frame.code->min_args))
 		{
-			raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
+			set_current_exception(create_exception(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)"));
 			context->frame = frame.prev;
 			return value_raise;
 		}
 
 		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
 		{
-			raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
+			set_current_exception(create_exception(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")"));
 			context->frame = frame.prev;
 			return value_raise;
 		}
 
 		value_t result = frame.code->executor(frame);
-		
+
 		#ifdef DEBUG
+			mirb_debug_assert(result || context->exception);
+
 			if(!validate_return(result))
 				context->exception_frame_origin = frame.prev;
 		#endif
@@ -829,6 +788,15 @@ namespace Mirb
 		context->frame = frame.prev;
 
 		return result;
+
+#ifdef DEBUG
+		}
+		catch(exception_t e)
+		{
+			std::cerr << "Exception crossed call_frame: " << inspect(e).get_string() << std::endl;
+			mirb_runtime_abort("Exception crossed call_frame");
+		}
+#endif
 	}
 
 	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
@@ -852,9 +820,9 @@ namespace Mirb
 		Method *method = lookup(obj, name);
 
 		if(prelude_unlikely(!method))
-			return value_raise;
+			throw_current_exception();
 
-		return call_argv(method->block, obj, name, method->scope, block, argc, argv);
+		return call_argv(method, obj, name, block, argc, argv);
 	}
 	
 	template<typename F> bool on_stack_argv(size_t argc, value_t argv[], F func)
@@ -863,7 +831,7 @@ namespace Mirb
 
 		if(prelude_unlikely(!stack_memory))
 		{
-			raise(context->runtime_error, "Unable to allocate stack memory");
+			set_current_exception(create_exception(context->runtime_error, "Unable to allocate stack memory"));
 			return false;
 		}
 
@@ -886,7 +854,7 @@ namespace Mirb
 		return true;
 	}
 	
-	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	value_t call_argv_nothrow(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
 	{
 		value_t result;
 
@@ -900,13 +868,20 @@ namespace Mirb
 			return 0;
 	}
 	
+	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
+	{
+		value_t result = call_argv_nothrow(method->block, obj, name, method->scope, block, argc, argv);
+
+		if(!result)
+			throw_current_exception();
+		else
+			return result;
+	}
+	
 	Proc *get_proc(value_t obj)
 	{
 		if(prelude_unlikely(obj == value_nil))
-		{
 			raise(context->local_jump_error, "No block given");
-			return 0;
-		}
 
 		return raise_cast<Proc>(obj);
 	}
@@ -921,13 +896,13 @@ namespace Mirb
 		value_t result;
 
 		bool on_stack = on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
-			result = Proc::call(proc, block, argc, on_stack_argv);
+			result = trap_exception_as_value([&] { return Proc::call(proc, block, argc, on_stack_argv); });
 		});
 
-		if(on_stack)
+		if(on_stack && result)
 			return result;
 		else
-			return 0;
+			throw_current_exception();
 	}
 	
 	value_t yield_argv(value_t obj, size_t argc, value_t argv[])
@@ -1142,8 +1117,10 @@ namespace Mirb
 
 	void finalize()
 	{
-		for(size_t i = context->at_exits.size(); i-- > 0;)
-			Proc::call(cast<Proc>(context->at_exits[i]), value_nil, 0, nullptr);
+		trap_exception([&] {
+			for(size_t i = context->at_exits.size(); i-- > 0;)
+				Proc::call(cast<Proc>(context->at_exits[i]), value_nil, 0, nullptr);
+		});  // TODO: Print if this fails
 
 		Platform::finalize();
 

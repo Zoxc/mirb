@@ -88,7 +88,10 @@ namespace Mirb
 			
 			Class *terminator;
 			
+		#ifdef DEBUG
 			Frame *exception_frame_origin;
+		#endif
+
 			Frame *frame;
 			
 			ValueMapData globals;

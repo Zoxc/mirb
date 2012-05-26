@@ -63,8 +63,7 @@ namespace Mirb
 		{
 			regexp = call_argv(context->regexp_class, "new", value_nil, 1, &regexp);
 
-			if(!regexp || type_error(regexp, context->regexp_class))
-				return 0;
+			type_error(regexp, context->regexp_class);
 		}
 
 		return call_argv(regexp, "match", value_nil, 1, &self);
@@ -127,13 +126,12 @@ namespace Mirb
 
 			auto range = cast<Range>(index);
 
-			if(!range->convert_to_index(start, length, self->string.size()))
-				return 0;
+			range->convert_to_index(start, length, self->string.size());
 
 			return String::get(self->string.copy(start, length));
 		}
 		else
-			return type_error(index, "Range or Fixnum");
+			type_error(index, "Range or Fixnum");
 	}
 	
 	value_t String::ljust(String *self, size_t length, String *other)

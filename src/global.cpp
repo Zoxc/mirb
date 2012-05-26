@@ -4,7 +4,7 @@
 
 namespace Mirb
 {
-	bool Global::read_only_global(Global *global, Symbol *name, value_t value)
+	bool Global::read_only_global(Global *, Symbol *name, value_t)
 	{
 		raise(context->name_error, name->string + " is a read-only variable");
 		return false;

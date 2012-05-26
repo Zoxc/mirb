@@ -388,6 +388,7 @@ namespace Mirb
 		#define mirb_derived_from(base, super) template<> struct DerivedFrom<Mirb::base, Mirb::super> { static const bool value = true; }
 		
 		mirb_derived_from(StackFrame, StackFrame);
+		mirb_derived_from(Global, Global);
 
 		mirb_derived_from(Block, Block);
 

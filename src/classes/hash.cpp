@@ -40,15 +40,11 @@ namespace Mirb
 
 			OnStack<1> os(value);
 			
-			if(!append_inspect(result, key))
-				return false;
-
+			result += inspect(key);
 			result += "=>";
-
-			if(!append_inspect(result, value))
-				return false;
-			
+			result += inspect(value);
 			result += ", ";
+
 			return true;
 		}))
 			return 0;

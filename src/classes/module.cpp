@@ -185,12 +185,9 @@ namespace Mirb
 		return ValueMapAccess::get(get_vars(obj), constant, [&]() -> value_t {
 			OnStack<1> os(constant);
 
-			String *obj_str = inspect(obj);
+			CharArray obj_str = inspect(obj);
 
-			if(!obj_str)
-				return 0;
-
-			return raise(context->name_error, "Uninitialized constant " + obj_str->string + "::" + constant->string);
+			raise(context->name_error, "Uninitialized constant " + obj_str + "::" + constant->string);
 		});
 	}
 

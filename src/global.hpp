@@ -17,7 +17,7 @@ namespace Mirb
 			
 			Global() : Value::Header(Value::InternalGlobal), reader(0), writer(0), value(value_nil) {}
 
-			static bool read_only_global(Global *global, Symbol *name, value_t value);
+			static bool read_only_global(Global *, Symbol *name, value_t);
 
 			void read_only()
 			{

@@ -19,7 +19,7 @@ namespace Mirb
 		value_t puts(size_t argc, value_t argv[]);
 		value_t raise(value_t first, String *str);
 		
-		bool read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length);
+		void read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length);
 
 		void initialize();
 	};

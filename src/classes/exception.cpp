@@ -42,14 +42,14 @@ namespace Mirb
 
 		OnStack<1> os3(module);
 
-		Platform::color<Platform::Gray>(inspect_obj(module));
+		Platform::color<Platform::Gray>(Mirb::inspect(module));
 
 		value_t class_of_obj = class_of(self->obj);
 
 		if(class_of_obj != module)
 		{
 			Platform::color<Platform::Gray>("(");
-			Platform::color<Platform::Gray>(inspect_object(class_of_obj));
+			Platform::color<Platform::Gray>(Mirb::inspect(class_of_obj));
 			Platform::color<Platform::Gray>(")");
 		}
 
@@ -105,21 +105,21 @@ namespace Mirb
 
 		OnStack<1> os3(module);
 
-		result += inspect_obj(module);
+		result += Mirb::inspect(module);
 
 		value_t class_of_obj = class_of(self->obj);
 
 		if(class_of_obj != module)
 		{
 			result += "(";
-			result += inspect_obj(class_of_obj) + ")";
+			result += Mirb::inspect(class_of_obj) + ")";
 		}
 
 		result += "#" + self->name->string  + "(";
 
 		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			result += inspect_obj((*self->args)[i]);
+			result += Mirb::inspect((*self->args)[i]);
 			if(i < self->args->entries - 1)
 				result += ", ";
 		}
@@ -154,30 +154,23 @@ namespace Mirb
 	
 	String *StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
 	{
-		try
-		{
-			CharArray result;
+		CharArray result;
 
-			if(!backtrace)
-				return result.to_string();
-
-			OnStack<1> os1(backtrace);
-			OnStackString<1> os2(result);
-		
-			for(size_t i = 0; i < backtrace->entries; ++i)
-			{
-				if(i != 0)
-					result += "\n";
-
-				result += (*backtrace)[i]->inspect();
-			}
-
+		if(!backtrace)
 			return result.to_string();
 
-		} catch(Exception *)
+		OnStack<1> os1(backtrace);
+		OnStackString<1> os2(result);
+		
+		for(size_t i = 0; i < backtrace->entries; ++i)
 		{
-			return 0;
+			if(i != 0)
+				result += "\n";
+
+			result += (*backtrace)[i]->inspect();
 		}
+
+		return result.to_string();
 	}
 	
 	void StackFrame::print_backtrace(Tuple<StackFrame> *backtrace)

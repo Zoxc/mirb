@@ -17,19 +17,6 @@ namespace Mirb
 			Gray
 		};
 
-		template<typename F> value_t wrap(F func) throw()
-		{
-			try
-			{
-				return func();
-			}
-			catch(Exception *exception)
-			{
-				set_current_exception(exception);
-				return 0;
-			};
-		}
-		
 		size_t stack_start();
 		size_t stack_limit();
 		

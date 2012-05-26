@@ -148,7 +148,7 @@ namespace Mirb
 		
 			if(pending_exception.compare_exchange_strong(expected, false) && expected)
 			{
-				raise(context->interrupt_class, "Aborted");
+				set_current_exception(create_exception(context->interrupt_class, "Aborted"));
 
 				return true;
 			}

@@ -104,6 +104,7 @@ namespace Mirb
 			
 		Op(Return)
 			value_t result = vars[op.var];
+			mirb_debug_assert(result || context->exception);
 			validate_return(result);
 			return result;
 		EndOp
@@ -116,7 +117,7 @@ namespace Mirb
 			Method *method = lookup(obj, name);
 
 			if(prelude_unlikely(!method))
-				goto handle_call_exception;
+				goto handle_exception;
 
 			value_t result = call_code(method->block, obj, name, method->scope, block, op.argc, &vars[op.argv]);
 
@@ -162,7 +163,7 @@ namespace Mirb
 
 			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
 
-			if(prelude_unlikely(result == value_raise))
+			if(prelude_unlikely(!result))
 				goto handle_exception;
 
 			if(op.var != no_var)
@@ -177,7 +178,7 @@ namespace Mirb
 
 			value_t result = call_code(op.block, self, Symbol::get("singleton class"), frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
 
-			if(prelude_unlikely(result == value_raise))
+			if(prelude_unlikely(!result))
 				goto handle_exception;
 
 			if(op.var != no_var)
@@ -209,7 +210,7 @@ namespace Mirb
 
 			value_t result = call_code(method->block, frame.obj, frame.name, method->scope, block, op.argc, &vars[op.argv]);
 
-			if(prelude_unlikely(result == value_raise))
+			if(prelude_unlikely(!result))
 				goto handle_call_exception;
 
 			if(op.var != no_var)
@@ -226,11 +227,11 @@ namespace Mirb
 			Method *method = lookup(obj, name);
 
 			if(prelude_unlikely(!method))
-				goto handle_call_exception;
+				goto handle_exception;
 
-			value_t result = call_argv(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv_nothrow(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
 
-			if(prelude_unlikely(result == value_raise))
+			if(prelude_unlikely(!result))
 				goto handle_call_exception;
 
 			if(op.var != no_var)
@@ -247,9 +248,9 @@ namespace Mirb
 			if(prelude_unlikely(!method))
 				goto handle_exception;
 
-			value_t result = call_argv(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv_nothrow(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
 
-			if(prelude_unlikely(result == value_raise))
+			if(prelude_unlikely(!result))
 				goto handle_call_exception;
 
 			if(op.var != no_var)
@@ -348,32 +349,36 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(GetScopedConst)
-			value_t result = get_scoped_const(vars[op.obj], op.name);
-		
-			if(prelude_unlikely(result == value_raise))
-				goto handle_exception;
+			if(trap_exception([&] {
+				value_t result = get_scoped_const(vars[op.obj], op.name);
 
-			if(op.var != no_var)
-				vars[op.var] = result;
+				if(op.var != no_var)
+					vars[op.var] = result;
+			}))
+				goto handle_exception;
 		EndOp
 
 		DeepOp(SetScopedConst)
-			if((prelude_unlikely(set_const(vars[op.obj], op.name,  vars[op.var]) == value_raise)))
+			if(trap_exception([&] {
+				set_const(vars[op.obj], op.name,  vars[op.var]);
+			}))
 				goto handle_exception;
 		EndOp
 			
 		DeepOp(GetConst)
-			value_t result = get_const(frame.scope, op.name);
-		
-			if(prelude_unlikely(result == value_raise))
-				goto handle_exception;
+			if(trap_exception([&] {
+				value_t result = get_const(frame.scope, op.name);
 
-			if(op.var != no_var)
-				vars[op.var] = result;
+				if(op.var != no_var)
+					vars[op.var] = result;
+			}))
+				goto handle_exception;
 		EndOp
 
 		DeepOp(SetConst)
-			if((prelude_unlikely(set_const(frame.scope->first(), op.name,  vars[op.var]) == value_raise)))
+			if(trap_exception([&] {
+				set_const(frame.scope->first(), op.name,  vars[op.var]);
+			}))
 				goto handle_exception;
 		EndOp
 			
@@ -417,9 +422,9 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(Alias)
-			value_t result = Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
-
-			if(prelude_unlikely(!result))
+			if(trap_exception([&] {
+				Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
+			}))
 				goto handle_exception;
 		EndOp
 			
@@ -457,16 +462,16 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(GetGlobal)
-			value_t result = get_global(op.name);
-
-			if(prelude_unlikely(!result))
+			if(trap_exception([&] {
+				vars[op.var] = get_global(op.name);
+			}))
 				goto handle_exception;
-
-			vars[op.var] = result;
 		EndOp
 
 		DeepOp(SetGlobal)
-			if(prelude_unlikely(!set_global(op.name, vars[op.var])))
+			if(trap_exception([&] {
+				set_global(op.name, vars[op.var]);
+			}))
 				goto handle_exception;
 		EndOp
 

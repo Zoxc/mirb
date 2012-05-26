@@ -45,44 +45,32 @@ namespace Mirb
 			return frame.argv;
 		}
 		
-		Fixnum::Type Fixnum::coerce(value_t value, State &state)
+		Fixnum::Type Fixnum::coerce(value_t value)
 		{
 			if(Mirb::Value::is_fixnum(value))
 				return Mirb::Fixnum::to_int(value);
 			else
-			{
-				state.error = true;
 				type_error(value, "Fixnum");
-				return 0;
-			}
 		}
 		
-		UInt::Type UInt::coerce(value_t value, State &state)
+		UInt::Type UInt::coerce(value_t value)
 		{
 			if(Mirb::Value::is_fixnum(value))
 			{
 				auto result = Mirb::Fixnum::to_int(value);
 
 				if(result < 0)
-				{
-					state.error = true;
 					raise(context->standard_error, "A value above zero was expected.");
-					return 0;
-				}
 				else
 					return result;
 			}
 			else
-			{
-				state.error = true;
 				type_error(value, "Fixnum above zero");
-				return 0;
-			}
 		}
 		
 		const value_t Value::default_value = 0;
 
-		Value::Type Value::coerce(value_t value, State &)
+		Value::Type Value::coerce(value_t value)
 		{
 			return value;
 		}
@@ -104,17 +92,7 @@ namespace Mirb
 
 			return value;
 		};
-	
-		value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(0));
-
-			if(state.error)
-				return value_raise;
 		
-			return ((value_t (*)())frame.code->function)();
-		}
-
 		Method *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
 		{
 			Block *block = Collector::allocate_pinned<Block>(nullptr);
@@ -135,11 +113,6 @@ namespace Mirb
 			module->set_method(name, result);
 
 			return result;
-		}
-
-		Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
-		{
-			return generate_block(flags, module, name, fold(0), wrapper, function);
 		}
 	};
 };

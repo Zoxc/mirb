@@ -9,28 +9,19 @@ namespace Mirb
 	{
 		OnStack<1> os1(obj);
 
-		String *low = inspect(obj->low);
+		auto low = inspect(obj->low);
 
-		if(!low)
-			return 0;
-
-		OnStack<1> os2(low);
+		OnStackString<1> os2(low);
 		
-		String *high = inspect(obj->high);
+		auto high = inspect(obj->high);
 
-		if(!high)
-			return 0;
-
-		return (low->string + (const char_t *)(obj->flag ? "..." : "..") + high->string).to_string();
+		return (low + (const char_t *)(obj->flag ? "..." : "..") + high).to_string();
 	}
 	
-	bool Range::convert_to_index(size_t &start, size_t &length, size_t size)
+	void Range::convert_to_index(size_t &start, size_t &length, size_t size)
 	{
 		if(!Value::is_fixnum(low) || !Value::is_fixnum(high))
-		{
 			raise(context->runtime_error, "Expected Fixnum range attributes");
-			return false;
-		}
 		
 		intptr_t left = Fixnum::to_int(low);
 		intptr_t right = Fixnum::to_int(high);
@@ -44,7 +35,7 @@ namespace Mirb
 				start = 0;
 				length = 0;
 
-				return true;
+				return;
 			}
 			else
 				left = size - (size_t)left;
@@ -59,7 +50,7 @@ namespace Mirb
 				start = 0;
 				length = 0;
 
-				return true;
+				return;
 			}
 			else
 				right = size - (size_t)right;
@@ -70,7 +61,7 @@ namespace Mirb
 			start = 0;
 			length = 0;
 
-			return true;
+			return;
 		}
 		else
 		{
@@ -80,9 +71,8 @@ namespace Mirb
 			if(start + length > size)
 				length = size - start;
 
-			return true;
+			return;
 		}
-
 	}
 
 	Range *Range::allocate(value_t low, value_t high, bool exclusive)

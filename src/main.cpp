@@ -25,11 +25,18 @@ void report_exception()
 
 	OnStack<1> os(exception);
 
-	Platform::color<Platform::Red>(inspect_obj(class_of(exception)));
+	if(trap_exception([&] {
+		Platform::color<Platform::Red>(inspect(class_of(exception)));
 			
-	Platform::color<Platform::Bold>(": " + exception->message->string.get_string() + "\n");
+		Platform::color<Platform::Bold>(": " + exception->message->string.get_string() + "\n");
 
-	StackFrame::print_backtrace(exception->backtrace);
+		StackFrame::print_backtrace(exception->backtrace);
+	}))
+	{
+		std::cerr << "Unable to inspect exception";
+	}
+
+	std::cerr << "\n";
 }
 
 int main(int argc, const char *argv[])
@@ -60,7 +67,7 @@ int main(int argc, const char *argv[])
 				bool loaded;
 				CharArray full_path;
 
-				if(!Kernel::read_file(filename, true, false, full_path, loaded, data, length))
+				if(trap_exception([&] { Kernel::read_file(filename, true, false, full_path, loaded, data, length); }))
 				{
 					report_exception();
 					return 1;
@@ -155,22 +162,10 @@ int main(int argc, const char *argv[])
 
 		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
 
-		try
-		{
-			if(result == value_raise)
-			{
-				report_exception();
-				std::cerr << "\n";
-			}
-			else
-				std::cout << "=> " << inspect_object(result) << "\n";
-		} catch(Exception *e)
-		{
-			if(class_of(e) == context->interrupt_class)
-				std::cout << "Interrupted!\n";
-			else
-				std::cout << "Unable to inspect result" << "\n";
-		}
+		if(result)
+			std::cout << "=> " << inspect_object(result) << "\n";
+		else
+			report_exception();
 	}
 	
 	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;

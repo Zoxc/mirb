@@ -41,10 +41,7 @@ namespace Mirb
 
 			auto real_str = inspect(real);
 
-			if(!real_str)
-				return 0;
-
-			CharArray result = "#<Class:" + real_str->string + ">";
+			CharArray result = "#<Class:" + real_str + ">";
 
 			return result.to_string();
 		}

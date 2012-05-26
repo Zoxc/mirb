@@ -19,7 +19,7 @@ namespace Mirb
 
 			CharArray msg = message + "\nError #" + CharArray::uint(num) + ": " + error;
 
-			throw create_exception(context->system_call_error, msg);
+			raise(context->system_call_error, msg);
 		}
 		
 		size_t stack_start()

@@ -170,7 +170,7 @@ namespace Mirb
 	value_t instance_variable_set(value_t self, Symbol *name, value_t value)
 	{
 		if(name->string.size() == 0 || name->string[0] != '@')
-			return raise(context->standard_error, "Invalid instance variable name");
+			raise(context->standard_error, "Invalid instance variable name");
 
 		set_var(self, name, value);
 
@@ -180,7 +180,7 @@ namespace Mirb
 	value_t instance_variable_get(value_t self, Symbol *name)
 	{
 		if(name->string.size() == 0 || name->string[0] != '@')
-			return raise(context->standard_error, "Invalid instance variable name");
+			raise(context->standard_error, "Invalid instance variable name");
 
 		return get_var(self, name);
 	}
@@ -198,11 +198,11 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>>(context->object_class, "to_s", &to_s);
 		method<Arg::Self<Arg::Value>>(context->object_class, "dup", &rb_dup);
 		method<Arg::Self<Arg::Value>>(context->object_class, "class", &klass);
-		method<Arg::Self<Arg::Value>>(context->object_class, "freeze", &dummy);
+		method(context->object_class, "freeze", &dummy);
 		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "is_a?", &kind_of);
 		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
-		method<Arg::Self<Arg::Value>>(context->object_class, "frozen?", &dummy);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "=~", &pattern);
+		method(context->object_class, "frozen?", &dummy);
+		method<Arg::Value>(context->object_class, "=~", &pattern);
 		method<Arg::Value>(context->object_class, "initialize_copy", &initialize_copy);
 		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
 		method<Arg::Self<Arg::Value>, Arg::Block>(context->object_class, "tap", &tap);

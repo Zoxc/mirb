@@ -9,7 +9,10 @@ namespace Mirb
 	class CharArray;
 	class Exception;
 
+	typedef Exception *exception_t;
+	
 	void set_current_exception(Exception *exception);
+	prelude_noreturn void throw_current_exception();
 
 	value_t coerce(value_t left, Symbol *name, value_t right);
 	
@@ -49,13 +52,12 @@ namespace Mirb
 	/*
 	 * inspect_obj (calls Ruby code)
 	 */
-	CharArray inspect_obj(value_t obj);
-	bool append_inspect(CharArray &result, value_t obj);
+	CharArray inspect(value_t obj);
 
 	/*
 	 * inspect (calls Ruby code)
 	 */
-	String *inspect(value_t obj);
+	String *inspect_obj(value_t obj);
 	
 	/*
 	 * pretty_inspect (calls Ruby code)
@@ -85,7 +87,7 @@ namespace Mirb
 	 * get_global, set_global (calls Ruby code)
 	 */
 	value_t get_global(Symbol *name);
-	bool set_global(Symbol *name, value_t value);
+	void set_global(Symbol *name, value_t value);
 	
 	void initialize_thread();
 	void initialize(bool console = false);
@@ -95,31 +97,56 @@ namespace Mirb
 	 * compare (calls Ruby code)
 	 */
 	value_t compare(value_t left, value_t right);
+	
+	template<typename F> value_t trap_exception_as_value(F func)
+	{
+		try
+		{
+			value_t result = func();
+
+			mirb_debug_assert(result);
+
+			return result;
+		}
+		catch(exception_t e)
+		{
+			set_current_exception(e);
+			return nullptr;
+		}
+	}
+
+	template<typename F> bool trap_exception(F func)
+	{
+		try
+		{
+			func();
+			return false;
+		}
+		catch(exception_t e)
+		{
+			set_current_exception(e);
+			return true;
+		}
+	}
 
 	/*
 	 * raise
 	 */
-	value_t type_error(value_t value, const CharArray &expected);
-	bool type_error(value_t value, value_t expected);
+	prelude_noreturn void type_error(value_t value, const CharArray &expected);
+	void type_error(value_t value, Class *expected);
 	Exception *create_exception(Class *exception_class, const CharArray &message);
-	value_t raise(Class *exception_class, const CharArray &message);
-	value_t raise(Exception *exception);
+	prelude_noreturn void raise(Class *exception_class, const CharArray &message);
 
 	bool stack_no_reserve(Frame &frame);
 	
-	template<typename T> T *raise_cast(value_t obj) prelude_use_result;
+	template<typename T> T *raise_cast(value_t obj);
 
 	template<typename T> T *raise_cast(value_t obj)
 	{
-		if(!obj)
-			return 0;
-		else if(Value::of_type<T>(obj))
+		if(Value::of_type<T>(obj))
 			return reinterpret_cast<T *>(obj);
 		else
-		{
 			raise(context->type_error, "Invalid type passed");
-			return 0;
-		}
 	}
 
 	void swallow_exception();
@@ -129,7 +156,7 @@ namespace Mirb
 	/*
 	 * eval (calls Ruby code)
 	 */
-	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input = false) prelude_use_result;
+	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input = false);
 	
 	Method *lookup_method(Module *module, Symbol *name);
 
@@ -146,19 +173,20 @@ namespace Mirb
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]) prelude_use_result;
-	value_t call_frame(Frame &frame) prelude_use_result;
+	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
+	value_t call_frame(Frame &frame);
 	
 	/*
 	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]) prelude_use_result;
-	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t call_argv_nothrow(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
+	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
+	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	
 	/*
 	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	template<typename T> value_t call_argv(value_t obj, T &&name, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	template<typename T> value_t call_argv(value_t obj, T &&name, value_t block, size_t argc, value_t argv[]);
 	template<typename T> value_t call_argv(value_t obj, T &&name, value_t block, size_t argc, value_t argv[])
 	{
 		return call_argv(obj, symbol_cast(std::forward<T>(name)), block, argc, argv);
@@ -167,7 +195,7 @@ namespace Mirb
 	/*
 	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	template<typename T> value_t call_argv(value_t obj, T&& name, size_t argc, value_t argv[]) prelude_use_result;
+	template<typename T> value_t call_argv(value_t obj, T&& name, size_t argc, value_t argv[]);
 	template<typename T> value_t call_argv(value_t obj, T&& name, size_t argc, value_t argv[])
 	{
 		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, argc, argv);
@@ -176,7 +204,7 @@ namespace Mirb
 	/*
 	 * call (calls Ruby code, argv does not need to be marked)
 	 */
-	template<typename T> value_t call(value_t obj, T&& name) prelude_use_result;
+	template<typename T> value_t call(value_t obj, T&& name);
 	template<typename T> value_t call(value_t obj, T&& name)
 	{
 		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, 0, 0);
@@ -187,17 +215,17 @@ namespace Mirb
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[]) prelude_use_result;
+	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[]);
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield_argv(value_t obj, size_t argc, value_t argv[]) prelude_use_result;
+	value_t yield_argv(value_t obj, size_t argc, value_t argv[]);
 
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t yield(value_t obj) prelude_use_result;
+	value_t yield(value_t obj);
 	
 	/*
 	 * backtrace

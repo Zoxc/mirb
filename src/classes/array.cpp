@@ -138,12 +138,9 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			String *desc = inspect(self->vector[i]);
+			CharArray desc = inspect(self->vector[i]);
 
-			if(!desc)
-				return 0;
-
-			result += desc->string;
+			result += desc;
 
 			if(i != self->vector.size() - 1)
 				result += ", ";
@@ -216,8 +213,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			if(!yield_argv(block, 1, &self->vector[i]))
-				return 0;
+			yield_argv(block, 1, &self->vector[i]);
 		}
 
 		return self;
@@ -228,7 +224,7 @@ namespace Mirb
 		if(size)
 		{
 			if(!Value::is_fixnum(index) || !Value::is_fixnum(size))
-				return raise(context->type_error, "Arguments must be instances of Fixnum");
+				raise(context->type_error, "Arguments must be instances of Fixnum");
 
 			intptr_t start = Fixnum::to_size_t(index);
 			intptr_t length = Fixnum::to_size_t(size);
@@ -276,8 +272,7 @@ namespace Mirb
 
 			auto range = cast<Range>(index);
 
-			if(!range->convert_to_index(start, length, self->vector.size()))
-				return 0;
+			range->convert_to_index(start, length, self->vector.size());
 
 			auto result = Collector::allocate<Array>();
 
@@ -286,7 +281,7 @@ namespace Mirb
 			return result;
 		}
 		else
-			return type_error(index, "Range or Fixnum");
+			type_error(index, "Range or Fixnum");
 	}
 	
 	value_t Array::rb_set(Array *self, size_t index, value_t value)

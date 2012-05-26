@@ -68,8 +68,7 @@ namespace Mirb
 		{
 			value_t current = from_int(from);
 
-			if(!yield_argv(block, 1, &current))
-				return 0;
+			yield_argv(block, 1, &current);
 		}
 
 		return from_int(obj);

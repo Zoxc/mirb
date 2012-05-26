@@ -109,7 +109,7 @@ namespace Mirb
 		if(File::absolute_path(filename))
 			return try_file(filename, filename);
 
-		auto load_path = cast<Array>(context->load_paths); // TODO: Turn $: into a Array field in Context
+		auto load_path = cast<Array>(context->load_paths);
 		FILE *result = nullptr;
 		
 		load_path->vector.each([&](value_t path) -> bool {
@@ -137,17 +137,14 @@ namespace Mirb
 			return nullptr;
 	}
 	
-	bool Kernel::read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length)
+	void Kernel::read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length)
 	{
 		loaded = false;
 
 		FILE* file = open_file(filename, try_relative);
 
 		if(!file)
-		{
 			raise(context->load_error, "Unable to find file '" + filename + "'");
-			return false;
-		}
 		
 		full_path = File::expand_path(filename);
 
@@ -156,7 +153,7 @@ namespace Mirb
 		if(require && loaded)
 		{
 			fclose(file);
-			return true;
+			return;
 		}
 
 		if(!loaded)
@@ -174,7 +171,6 @@ namespace Mirb
 		{
 			fclose(file);
 			raise(context->load_error, "Unable to allocate memory for file content '" + filename + "' (" + CharArray::uint(length) + " bytes)");
-			return false;
 		}
 
 		if(fread(data, 1, length, file) != length)
@@ -183,14 +179,11 @@ namespace Mirb
 			fclose(file);
 
 			raise(context->load_error, "Unable to read content of file '" + filename + "'");
-			return false;
 		}
 
 		data[length] = 0;
 
 		fclose(file);
-
-		return true;
 	}
 	
 	value_t run_file(value_t self, CharArray filename, bool try_relative, bool require)
@@ -199,24 +192,20 @@ namespace Mirb
 		size_t length;
 		bool loaded;
 		CharArray full_path;
-
-		if(!Kernel::read_file(filename, try_relative, require, full_path, loaded, data, length))
-			return 0;
-
-		if(require && loaded)
-			return value_nil;
-
-		value_t result = eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
-
-		if(result)
+		
+		try
 		{
-			return value_nil;
+			Kernel::read_file(filename, try_relative, require, full_path, loaded, data, length);
+
+			if(require && loaded)
+				return value_nil;
+
+				return eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
 		}
-		else
+		catch(exception_t)
 		{
-			Array::rb_delete(context->loaded_files, context->loaded_files);
-
-			return 0;
+			Array::rb_delete(context->loaded_files, full_path.to_string());
+			throw;
 		}
 	}
 	
@@ -307,7 +296,7 @@ namespace Mirb
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 
-		return raise(exception);
+		throw exception;
 	}
 
 	value_t Kernel::backtrace()
@@ -325,7 +314,7 @@ namespace Mirb
 		auto method = lookup_method(internal_class_of(value), Symbol::get("to_a"));
 
 		if(method)
-			return raise_cast<Array>(call_argv(method->block, value, Symbol::get("to_a"), method->scope, value_nil, 0, 0));
+			return raise_cast<Array>(call_argv(method, value, Symbol::get("to_a"), value_nil, 0, 0));
 		else
 		{
 			array = new (collector) Array;

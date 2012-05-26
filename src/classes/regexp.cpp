@@ -63,7 +63,7 @@ namespace Mirb
 		else if(Value::of_type<String>(pattern))
 			obj->pattern = cast<String>(pattern)->string;
 		else
-			return raise(context->runtime_error, "Expected a valid pattern");
+			raise(context->runtime_error, "Expected a valid pattern");
 
 		if(!obj->compile_pattern())
 			return 0;

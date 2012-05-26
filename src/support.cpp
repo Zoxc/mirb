@@ -102,13 +102,9 @@ namespace Mirb
 
 		bool define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block)
 		{
-			Class *klass = singleton_class(obj);
-
-			if(!klass)
-				return false;
-
-			klass->set_method(name, Collector::allocate<Method>(block, scope));
-			return true;
+			return !trap_exception([&] {
+				singleton_class(obj)->set_method(name, Collector::allocate<Method>(block, scope));
+			});
 		}
 	};
 };

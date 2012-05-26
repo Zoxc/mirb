@@ -18,7 +18,12 @@ namespace Mirb
 		frame.argv = argv;
 		frame.scopes = self->scopes;
 
-		return call_frame(frame);
+		value_t result = call_frame(frame);
+
+		if(!result)
+			throw_current_exception();
+
+		return result;
 	}
 	
 	value_t Proc::call(Proc *self, value_t block, size_t argc, value_t argv[])

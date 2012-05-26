@@ -21,8 +21,8 @@ namespace Mirb
 		class Variable;
 	};
 
-	value_t raise(Class *exception_class, const CharArray &message);
-	bool type_error(value_t value, value_t expected);
+	void raise(Class *exception_class, const CharArray &message);
+	void type_error(value_t value, value_t expected);
 
 	namespace Arg
 	{
@@ -38,9 +38,8 @@ namespace Mirb
 		struct State
 		{
 			size_t index;
-			bool error;
 
-			State(Frame &frame prelude_unused, Info &&info prelude_unused) : index(0), error(false)
+			State(Frame &frame prelude_unused, Info &&info prelude_unused) : index(0)
 			{
 				mirb_debug_assert(frame.argc >= info.min);
 				mirb_debug_assert(info.any_arg || frame.argc <= info.max);
@@ -58,7 +57,7 @@ namespace Mirb
 				{
 					value_t value = frame.argv[state.index++];
 
-					return T::coerce(value, state);
+					return T::coerce(value);
 				}
 		};
 
@@ -77,7 +76,7 @@ namespace Mirb
 
 					value_t result = frame.argv[state.index++];
 					
-					return T::coerce(result, state);
+					return T::coerce(result);
 				}
 		};
 		
@@ -89,9 +88,9 @@ namespace Mirb
 				static const Info info;
 				typedef typename T::Type Type;
 				
-				static Type apply(Frame &frame, State &state)
+				static Type apply(Frame &frame, State &)
 				{
-					return T::coerce(frame.obj, state);
+					return T::coerce(frame.obj);
 				}
 		};
 		
@@ -128,14 +127,14 @@ namespace Mirb
 			public ValueBase<Fixnum, intptr_t>
 		{
 			public:
-				static Type coerce(value_t value, State &state);
+				static Type coerce(value_t value);
 		};
 		
 		class UInt:
 			public ValueBase<UInt, size_t>
 		{
 			public:
-				static Type coerce(value_t value, State &state);
+				static Type coerce(value_t value);
 		};
 		
 		class Value:
@@ -144,7 +143,7 @@ namespace Mirb
 			public:
 				static const value_t default_value;
 
-				static Type coerce(value_t value, State &state);
+				static Type coerce(value_t value);
 		};
 		
 		template<class T> class Class:
@@ -153,14 +152,10 @@ namespace Mirb
 			public:
 				static T *const default_value;
 
-				static T *coerce(value_t value, State &state)
+				static T *coerce(value_t value)
 				{
 					if(!Mirb::Value::of_type<T>(value))
-					{
-						state.error = true;
 						type_error(value, "internal class");
-						return nullptr;
-					}
 					else
 						return cast<T>(value);
 				}
@@ -172,15 +167,11 @@ namespace Mirb
 			public ValueBase<InstanceOf<field>, value_t>
 		{
 			public:
-				static value_t coerce(value_t value, State &state)
+				static value_t coerce(value_t value)
 				{
-					if(type_error(value, context->*field))
-					{
-						state.error = true;
-						return nullptr;
-					}
-					else
-						return value;
+					type_error(value, context->*field);
+
+					return value;
 				}
 		};
 	};
@@ -192,196 +183,154 @@ namespace Mirb
 		value_t wrapper(Frame &frame);
 	
 		Arg::Info fold(size_t num, ...);
-
-		template<typename Arg1> value_t wrapper(Frame &frame)
+		
+		template<typename F> value_t wrapper(Frame &frame)
 		{
-			Arg::State state(frame, fold(1, Arg1::info));
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(0));
 
-			if(state.error)
-				return value_raise;
-		
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-		
-			if(state.error)
-				return value_raise;
-		
-			return ((value_t (*)(typename Arg1::Type))frame.code->opcodes)(arg1);
+				return ((F)frame.code->function)();
+			});
 		}
 	
-		template<typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
+		template<typename F, typename Arg1> value_t wrapper(Frame &frame)
 		{
-			Arg::State state(frame, fold(2, Arg1::info, Arg2::info));
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(1, Arg1::info));
 
-			if(state.error)
-				return value_raise;
+				typename Arg1::Type arg1 = Arg1::apply(frame, state);
 		
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type))frame.code->opcodes)(arg1, arg2);
+				return ((F)frame.code->function)(arg1);
+			});
 		}
 	
-		template<typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
+		template<typename F, typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
 		{
-			Arg::State state(frame, fold(3, Arg1::info, Arg2::info, Arg3::info));
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(2, Arg1::info, Arg2::info));
 
-			if(state.error)
-				return value_raise;
-		
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
-			if(state.error)
-				return value_raise;
-		
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type))frame.code->opcodes)(arg1, arg2, arg3);
+				return ((F)frame.code->function)(arg1, arg2);
+			});
 		}
 	
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
+		template<typename F, typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
 		{
-			Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(3, Arg1::info, Arg2::info, Arg3::info));
 
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg2::Type arg2 = Arg2::apply(frame, state);
+				typename Arg3::Type arg3 = Arg3::apply(frame, state);
 
-			if(state.error)
-				return value_raise;
-		
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg4::Type arg4 = Arg4::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type))frame.code->opcodes)(arg1, arg2, arg3, arg4);
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
-
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg4::Type arg4 = Arg4::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			typename Arg5::Type arg5 = Arg5::apply(frame, state);
-
-			if(state.error)
-				return value_raise;
-		
-			return ((value_t (*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type))frame.code->opcodes)(arg1, arg2, arg3, arg4, arg5);
-		}
-
-		Method *generate_method(size_t flags, Module *module, Symbol *name, void *function);
-	
-		template<typename Arg1> Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
-		{
-			return generate_block(flags, module, name, fold(1, Arg1::info), wrapper<Arg1>, function);
+				return ((F)frame.code->function)(arg1, arg2, arg3);
+			});
 		}
 	
-		template<typename Arg1, typename Arg2> Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
+		template<typename F, typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
 		{
-			return generate_block(flags, module, name, fold(2, Arg1::info, Arg2::info), wrapper<Arg1, Arg2>, function);
-		}
-	
-		template<typename Arg1, typename Arg2, typename Arg3> Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
-		{
-			return generate_block(flags, module, name, fold(3, Arg1::info, Arg2::info, Arg3::info), wrapper<Arg1, Arg2, Arg3>, function);
-		}
-	
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
-		{
-			return generate_block(flags, module, name, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info), wrapper<Arg1, Arg2, Arg3, Arg4>, function);
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
+
+				typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg2::Type arg2 = Arg2::apply(frame, state);
+				typename Arg3::Type arg3 = Arg3::apply(frame, state);
+				typename Arg4::Type arg4 = Arg4::apply(frame, state);
+
+				return ((F)frame.code->function)(arg1, arg2, arg3, arg4);
+			});
 		}
 
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> Method *generate_method(size_t flags, Module *module, Symbol *name, void *function)
+		template<typename F, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> value_t wrapper(Frame &frame)
 		{
-			return generate_block(flags, module, name, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info), wrapper<Arg1, Arg2, Arg3, Arg4, Arg5>, function);
+			return trap_exception_as_value([&]() -> value_t {
+				Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
+
+				typename Arg1::Type arg1 = Arg1::apply(frame, state);
+				typename Arg2::Type arg2 = Arg2::apply(frame, state);
+				typename Arg3::Type arg3 = Arg3::apply(frame, state);
+				typename Arg4::Type arg4 = Arg4::apply(frame, state);
+				typename Arg5::Type arg5 = Arg5::apply(frame, state);
+
+				return ((F)frame.code->function)(arg1, arg2, arg3, arg4, arg5);
+			});
+		}
+
+		template<typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(0), wrapper<F>, (void *)function);
+		}
+	
+		template<typename Arg1, typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(1, Arg1::info), wrapper<F, Arg1>, (void *)function);
+		}
+	
+		template<typename Arg1, typename Arg2, typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(2, Arg1::info, Arg2::info), wrapper<F, Arg1, Arg2>, (void *)function);
+		}
+	
+		template<typename Arg1, typename Arg2, typename Arg3, typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(3, Arg1::info, Arg2::info, Arg3::info), wrapper<F, Arg1, Arg2, Arg3>, (void *)function);
+		}
+	
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info), wrapper<F, Arg1, Arg2, Arg3, Arg4>, (void *)function);
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename F> Method *generate_method(size_t flags, Module *module, Symbol *name, F function)
+		{
+			return generate_block(flags, module, name, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info), wrapper<F, Arg1, Arg2, Arg3, Arg4, Arg5>, (void *)function);
 		}
 	};
 
 	template<typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1>(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1>(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1, Arg2>(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1, Arg2>(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1, Arg2, Arg3>(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1, Arg2, Arg3>(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1, Arg2, Arg3, Arg4>(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1, Arg2, Arg3, Arg4>(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename N, typename F> Method *method(Module *module, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1, Arg2, Arg3, Arg4, Arg5>(flags, module, symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1, Arg2, Arg3, Arg4, Arg5>(flags, module, symbol_cast(name), function);
 	}
 	
 	template<typename N, typename F> Method *singleton_method(Object *obj, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method(flags, singleton_class(obj), symbol_cast(name),  (void *)function);
+		return MethodGen::generate_method(flags, singleton_class(obj), symbol_cast(name), function);
 	}
 	
 	template<typename Arg1, typename N, typename F> Method *singleton_method(Object *obj, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1>(flags, singleton_class(obj), symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1>(flags, singleton_class(obj), symbol_cast(name), function);
 	}
 
 	template<typename Arg1, typename Arg2, typename N, typename F> Method *singleton_method(Object *obj, N &&name, F function, size_t flags = 0)
 	{
-		return MethodGen::generate_method<Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name), (void *)function);
+		return MethodGen::generate_method<Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name), function);
 	}
 };
