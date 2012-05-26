@@ -361,7 +361,12 @@ namespace Mirb
 
 			case Lexeme::GLOBAL:
 			{
-				result->singleton = new (fragment) Tree::GlobalNode(lexer.lexeme.symbol);
+				auto global = new (fragment) Tree::GlobalNode;
+
+				global->range = lexer.lexeme;
+				global->name = lexer.lexeme.symbol;
+
+				result->singleton = global;
 			
 				lexer.step();
 

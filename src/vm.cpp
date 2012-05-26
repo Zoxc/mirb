@@ -456,12 +456,18 @@ namespace Mirb
 			goto handle_exception;
 		EndOp
 			
-		Op(GetGlobal)
-			vars[op.var] = get_global(op.name);
+		DeepOp(GetGlobal)
+			value_t result = get_global(op.name);
+
+			if(prelude_unlikely(!result))
+				goto handle_exception;
+
+			vars[op.var] = result;
 		EndOp
 
-		Op(SetGlobal)
-			set_global(op.name, vars[op.var]);
+		DeepOp(SetGlobal)
+			if(prelude_unlikely(!set_global(op.name, vars[op.var])))
+				goto handle_exception;
 		EndOp
 
 		OpEpilogue

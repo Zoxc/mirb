@@ -296,7 +296,8 @@ namespace Mirb
 							func(var);
 					
 							gen<SetGlobalOp>(variable->name, var);
-							
+							location(&variable->range);
+
 							return var;
 						}
 				

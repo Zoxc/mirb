@@ -300,6 +300,7 @@ namespace Mirb
 		auto push = [&](InterpolateData *data) {
 			auto entry = new (memory_pool) InterpolateData::AdvancedEntry;
 			entry->set<MemoryPool>(result, memory_pool);
+			entry->range = lexeme;
 			entry->type = lexeme.type;
 			entry->symbol = lexeme.symbol;
 			result = "";

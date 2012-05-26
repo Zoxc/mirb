@@ -8,6 +8,7 @@
 #include "../classes/file.hpp"
 #include "../platform/platform.hpp"
 #include "../char-array.hpp"
+#include "../global.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -108,20 +109,21 @@ namespace Mirb
 		if(File::absolute_path(filename))
 			return try_file(filename, filename);
 
-		auto load_path = cast<Array>(get_global(Symbol::get("$:"))); // TODO: Turn $: into a Array field in Context
+		auto load_path = cast<Array>(context->load_paths); // TODO: Turn $: into a Array field in Context
 		FILE *result = nullptr;
 		
 		load_path->vector.each([&](value_t path) -> bool {
-			auto str = cast<String>(path)->string;
-
+			auto str = try_cast<String>(path);
+			
+			if(!str)
+				return true;
+			
 			JoinSegments joiner;
 			
-			joiner.push(str);
+			joiner.push(str->string);
 			joiner.push(filename);
 
-			str = joiner.join();
-
-			result = try_file(str, filename);
+			result = try_file(joiner.join(), filename);
 
 			return result == nullptr;
 		});

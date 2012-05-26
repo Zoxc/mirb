@@ -41,8 +41,6 @@
 
 namespace Mirb
 {
-	Global *load_path_global;
-
 	prelude_thread size_t stack_stop;
 	prelude_thread size_t stack_continue;
 
@@ -571,14 +569,14 @@ namespace Mirb
 		if(!global)
 			return value_nil;
 
-		return global->get();
+		return global->get(name);
 	}
 
-	void set_global(Symbol *name, value_t value)
+	bool set_global(Symbol *name, value_t value)
 	{
 		auto global = get_global_object(name, true);
 
-		global->set(value);
+		return global->set(name, value);
 	}
 	
 	value_t compare(value_t left, value_t right)
@@ -1123,10 +1121,15 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
 
-		load_path_global = new (collector) Global;
-		load_path_global->value = Collector::allocate<Array>();
-		set_global_object(Symbol::get("$:"), load_path_global);
-		set_global_object(Symbol::get("$LOAD_PATH"), load_path_global);
+		{
+			context->load_paths = Collector::allocate<Array>();
+
+			auto global = new (collector) Global;
+			global->value = context->load_paths;
+			global->read_only();
+			set_global_object(Symbol::get("$:"), global);
+			set_global_object(Symbol::get("$LOAD_PATH"), global);
+		}
 
 		set_global(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
 		set_global(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));

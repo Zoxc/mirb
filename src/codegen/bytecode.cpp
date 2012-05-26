@@ -268,6 +268,7 @@ namespace Mirb
 			auto node = (Tree::GlobalNode *)basic_node;
 			
 			gen<GetGlobalOp>(var, node->name);
+			location(&node->range);
 		}
 		
 		void ByteCodeGenerator::convert_constant(Tree::Node *basic_node, var_t var)

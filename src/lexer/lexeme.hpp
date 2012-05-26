@@ -278,6 +278,7 @@ namespace Mirb
 		struct AdvancedEntry:
 			public Entry
 		{
+			SourceLoc range;
 			Lexeme::Type type;
 			Symbol *symbol;
 		};

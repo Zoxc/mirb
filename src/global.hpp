@@ -8,8 +8,8 @@ namespace Mirb
 		public Value::Header
 	{
 		public:
-			typedef value_t (*reader_t)(Global *global);
-			typedef void (*writer_t)(Global *global, value_t value);
+			typedef value_t (*reader_t)(Global *global, Symbol *name);
+			typedef bool (*writer_t)(Global *global, Symbol *name, value_t value);
 
 			reader_t reader;
 			writer_t writer;
@@ -17,18 +17,28 @@ namespace Mirb
 			
 			Global() : Value::Header(Value::InternalGlobal), reader(0), writer(0), value(value_nil) {}
 
-			void set(value_t new_value)
+			static bool read_only_global(Global *global, Symbol *name, value_t value);
+
+			void read_only()
+			{
+				writer = read_only_global;
+			}
+
+			bool set(Symbol *name, value_t new_value)
 			{
 				if(writer)
-					writer(this, new_value);
+					return writer(this, name, new_value);
 				else
+				{
 					value = new_value;
+					return true;
+				}
 			}
 			
-			value_t get()
+			value_t get(Symbol *name)
 			{
 				if(reader)
-					return reader(this);
+					return reader(this, name);
 				else
 					return value;
 			}

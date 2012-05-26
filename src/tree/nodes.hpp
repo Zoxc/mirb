@@ -231,13 +231,11 @@ namespace Mirb
 		};
 		
 		struct GlobalNode:
-			public Node
+			public LocationNode
 		{
 			NodeType type() { return Global; }
 			
 			Mirb::Symbol *name;
-			
-			GlobalNode(Mirb::Symbol *name) : name(name) {}
 		};
 		
 		struct ConstantNode:

@@ -9,8 +9,6 @@ namespace Mirb
 	class CharArray;
 	class Exception;
 
-	extern Global *load_path_global;
-	
 	void set_current_exception(Exception *exception);
 
 	value_t coerce(value_t left, Symbol *name, value_t right);
@@ -82,9 +80,12 @@ namespace Mirb
 	
 	Global *get_global_object(Symbol *name, bool force = false);
 	void set_global_object(Symbol *name, Global *global);
-
+	
+	/*
+	 * get_global, set_global (calls Ruby code)
+	 */
 	value_t get_global(Symbol *name);
-	void set_global(Symbol *name, value_t value);
+	bool set_global(Symbol *name, value_t value);
 	
 	void initialize_thread();
 	void initialize(bool console = false);

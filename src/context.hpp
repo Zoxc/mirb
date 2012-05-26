@@ -82,6 +82,8 @@ namespace Mirb
 			Exception *exception;
 
 			ValueMap *dummy_map;
+
+			Array *load_paths;
 			
 			Class *terminator;
 			

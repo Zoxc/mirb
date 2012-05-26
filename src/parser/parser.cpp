@@ -586,8 +586,16 @@ namespace Mirb
 					break;
 
 				case Lexeme::GLOBAL:
-					pair->group = new (fragment) Tree::GlobalNode(entry->symbol);
-					break;
+					{
+						auto global = new (fragment) Tree::GlobalNode;
+
+						global->name = entry->symbol;
+						global->range = entry->range;
+
+						pair->group = global;
+
+						break;
+					}
 
 				default:
 					mirb_debug_abort("Unknown string type");
@@ -1080,11 +1088,14 @@ namespace Mirb
 
 			case Lexeme::GLOBAL:
 			{
-				Symbol *symbol = lexer.lexeme.symbol;
-					
+				auto result = new (fragment) Tree::GlobalNode;
+
+				result->name = lexer.lexeme.symbol;
+				result->range = lexer.lexeme;
+
 				lexer.step();
 				
-				return new (fragment) Tree::GlobalNode(symbol);
+				return result;
 			}
 
 			case Lexeme::IDENT:
