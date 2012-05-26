@@ -107,8 +107,8 @@ int main(int argc, const char *argv[])
 		}
 
 		set_const(context->object_class, Symbol::get("ARGV"), new_argv);
-
-		if(!Kernel::load(exec.to_string()))
+		
+		if(trap_exception([&] { Kernel::load(exec.to_string()); }))
 		{
 			report_exception();
 			return 1;
