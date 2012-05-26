@@ -1121,6 +1121,8 @@ namespace Mirb
 		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
 		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
 
+		context->loaded_files = Collector::allocate<Array>();
+
 		{
 			context->load_paths = Collector::allocate<Array>();
 

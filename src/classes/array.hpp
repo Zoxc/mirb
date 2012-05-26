@@ -42,6 +42,8 @@ namespace Mirb
 			value_t get(size_t index);
 			size_t size();
 
+			static value_t rb_delete(Array *array, value_t obj);
+
 			template<typename F> static void parse(const char_t *input, size_t length, F func)
 			{
 				const char_t *end = input + length;

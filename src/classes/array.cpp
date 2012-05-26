@@ -15,6 +15,32 @@ namespace Mirb
 	{
 		return vector.size();
 	}
+	
+	value_t Array::rb_delete(Array *array, value_t obj)
+	{
+		OnStack<2> os(array, obj);
+
+		bool result = false;
+
+		for(size_t i = array->vector.size(); i-- > 0;)
+		{
+			value_t test = call_argv(obj, "==", 1, &array->vector[i]);
+
+			if(!test)
+				return 0;
+
+			if(Value::test(test))
+			{
+				result = true;
+				array->vector.remove(i);
+			}
+		}
+
+		if(result)
+			return obj;
+		else
+			return value_nil;
+	}
 
 	Array *Array::allocate_pair(value_t left, value_t right)
 	{
@@ -342,6 +368,8 @@ namespace Mirb
 		singleton_method<Arg::Self<Arg::Class<Class>>>(context->array_class, "allocate", &allocate);
 		
 		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "sort", &rb_sort);
+		
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value>(context->array_class, "delete", &rb_delete);
 
 		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "first", &first);
 		method<Arg::Self<Arg::Class<Array>>>(context->array_class, "last", &last);
