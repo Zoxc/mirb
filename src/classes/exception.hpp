@@ -64,7 +64,8 @@ namespace Mirb
 				if(message)
 					mark(message);
 
-				mark(backtrace);
+				if(backtrace)
+					mark(backtrace);
 			}
 
 			static void initialize();

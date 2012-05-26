@@ -3,11 +3,55 @@
 #include "document.hpp"
 #include "tree/tree.hpp"
 #include "runtime.hpp"
+#include "collector-common.hpp"
 
 namespace Mirb
 {
 	namespace Value
 	{
+		struct VerifyFunc
+		{
+			void operator()(const ValueStorage &storage)
+			{
+				assert_valid_light(storage.array);
+			}
+
+			void operator()(const CharArray &string)
+			{
+				char_t *data = Accesser::CharArray::data(string);
+
+				if(data && !Accesser::CharArray::static_data(string))
+					assert_valid_light(&VariableBlock::from_memory((const void *)data));
+			}
+
+			template<class T> void operator()(T *value)
+			{
+				assert_valid_light(value);
+			}
+		};
+
+		template<Value::Type type> struct VerifyClass
+		{
+			typedef void Result;
+			typedef typename Value::TypeClass<type>::Class Class;
+
+			static void func(value_t value)
+			{
+				VerifyFunc func;
+
+				if(!Value::immediate(type))
+					static_cast<Class *>(value)->mark(func);
+			}
+		};
+
+		void assert_valid_extended(value_t obj)
+		{
+			if(prelude_unlikely(context->bootstrap))
+				return;
+
+			Value::virtual_do<VerifyClass>(Value::type(obj), obj);
+		}
+
 		Type type_table[literal_count];
 
 		bool is_fixnum(value_t value)

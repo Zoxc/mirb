@@ -1006,6 +1006,8 @@ namespace Mirb
 		context->fixnum_class = define_class("Fixnum", context->integer_class);
 
 		Value::initialize_class_table();
+
+		context->bootstrap = false;
 	}
 
 	void setup_main()

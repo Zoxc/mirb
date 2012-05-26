@@ -6,7 +6,11 @@ namespace Mirb
 {
 	Context *context;
 
-	Context::Context() : exception_frame_origin(0), frame(0), globals(8)
+	Context::Context() :
+		bootstrap(true),
+		exception_frame_origin(0),
+		frame(0),
+		globals(8)
 	{
 		auto start = &object_class;
 

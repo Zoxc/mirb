@@ -88,6 +88,8 @@ namespace Mirb
 			
 			Class *terminator;
 			
+			bool bootstrap;
+
 		#ifdef DEBUG
 			Frame *exception_frame_origin;
 		#endif

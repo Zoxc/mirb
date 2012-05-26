@@ -26,9 +26,6 @@ namespace Mirb
 		{
 			value_t test = call_argv(obj, "==", 1, &array->vector[i]);
 
-			if(!test)
-				return 0;
-
 			if(Value::test(test))
 			{
 				result = true;

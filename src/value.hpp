@@ -476,8 +476,10 @@ namespace Mirb
 			mirb_debug(mirb_debug_assert(obj->alive));
 		}
 
-		inline void assert_valid(value_t obj) prelude_nonnull(1);
-		inline void assert_valid(value_t obj  prelude_unused)
+		void assert_valid_extended(value_t obj);
+
+		inline void assert_valid_light(value_t obj) prelude_nonnull(1);
+		inline void assert_valid_light(value_t obj)
 		{
 			if(object_ref(obj))
 			{
@@ -486,6 +488,17 @@ namespace Mirb
 				mirb_debug_assert((obj->*Header::mark_list) == Value::Header::list_end);
 				mirb_debug_assert((obj->*Header::thread_list) == Value::Header::list_end);
 			}
+		}
+
+		inline void assert_valid(value_t obj) prelude_nonnull(1);
+		inline void assert_valid(value_t obj prelude_unused)
+		{
+			#ifdef DEBUG
+				assert_valid_light(obj);
+
+				if(object_ref(obj))
+					assert_valid_extended(obj);
+			#endif
 		}
 
 		template<class T> bool of_type(value_t value) prelude_nonnull(1);
