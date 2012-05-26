@@ -805,13 +805,16 @@ namespace Mirb
 
 		return call_argv(method->block, obj, name, method->scope, block, argc, argv);
 	}
-
-	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	
+	template<typename F> bool on_stack_argv(size_t argc, value_t argv[], F func)
 	{
 		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
 		if(prelude_unlikely(!stack_memory))
-			return raise(context->runtime_error, "Unable to allocate stack memory");
+		{
+			raise(context->runtime_error, "Unable to allocate stack memory");
+			return false;
+		}
 
 		OnStackBlock<false> *os = new (stack_memory) OnStackBlock<false>();
 
@@ -825,11 +828,25 @@ namespace Mirb
 			os_array[argc + i] = argv[i];
 		}
 
-		value_t result = call_code(code, obj, name, scope, block, argc, &os_array[argc]);
+		func(&os_array[argc]);
 
 		os->~OnStackBlock<false>();
 
-		return result;
+		return true;
+	}
+	
+	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	{
+		value_t result;
+
+		bool on_stack = on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
+			result = call_code(code, obj, name, scope, block, argc, on_stack_argv);
+		});
+
+		if(on_stack)
+			return result;
+		else
+			return 0;
 	}
 	
 	Proc *get_proc(value_t obj)
@@ -849,8 +866,17 @@ namespace Mirb
 
 		if(prelude_unlikely(!proc))
 			return value_raise;
+		
+		value_t result;
 
-		return Proc::call(proc, block, argc, argv);
+		bool on_stack = on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
+			result = Proc::call(proc, block, argc, on_stack_argv);
+		});
+
+		if(on_stack)
+			return result;
+		else
+			return 0;
 	}
 	
 	value_t yield_argv(value_t obj, size_t argc, value_t argv[])
