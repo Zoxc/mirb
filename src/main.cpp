@@ -28,7 +28,10 @@ void report_exception()
 	if(trap_exception([&] {
 		Platform::color<Platform::Red>(inspect(class_of(exception)));
 			
-		Platform::color<Platform::Bold>(": " + exception->message->string.get_string() + "\n");
+		if(exception->message)
+			Platform::color<Platform::Bold>(": " + exception->message->string.get_string() );
+
+		std::cerr << "\n";
 
 		StackFrame::print_backtrace(exception->backtrace);
 	}))
