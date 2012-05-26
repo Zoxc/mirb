@@ -16,7 +16,7 @@ namespace Mirb
 		public Exception
 	{
 		public:
-			NextException(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace, value_t value) : Exception(type, instance_of, message, backtrace), value(value) {}
+			NextException(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace, value_t value) : Exception(type, instance_of, message, backtrace), value(value) {}
 			
 			value_t value;
 			
@@ -32,7 +32,7 @@ namespace Mirb
 		public Exception
 	{
 		public:
-			RedoException(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace, size_t pos) : Exception(type, instance_of, message, backtrace), pos(pos) {}
+			RedoException(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace, size_t pos) : Exception(type, instance_of, message, backtrace), pos(pos) {}
 			
 			size_t pos;
 	};
@@ -41,7 +41,7 @@ namespace Mirb
 		public NextException
 	{
 		public:
-			ReturnException(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value) : NextException(type, instance_of, message, backtrace, value), target(target) {}
+			ReturnException(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace, Block *target, value_t value) : NextException(type, instance_of, message, backtrace, value), target(target) {}
 			
 			Block *target;
 			
@@ -57,7 +57,7 @@ namespace Mirb
 		public ReturnException
 	{
 		public:
-			BreakException(Class *instance_of, value_t message, Tuple<StackFrame> *backtrace, Block *target, value_t value, var_t dst) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
+			BreakException(Class *instance_of, String *message, Tuple<StackFrame> *backtrace, Block *target, value_t value, var_t dst) : ReturnException(Value::BreakException, instance_of, message, backtrace, target, value), dst(dst) {}
 			
 			var_t dst;
 	};

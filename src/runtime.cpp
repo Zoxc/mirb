@@ -954,26 +954,6 @@ namespace Mirb
 		set_current_exception(nullptr);
 	}
 	
-	String *enforce_string(value_t obj)
-	{
-		auto str_obj = try_cast<String>(obj);
-
-		if(prelude_likely(str_obj != 0))
-			return str_obj;
-		
-		obj = call(obj, "to_s");
-
-		if(!obj)
-			swallow_exception();
-
-		str_obj = try_cast<String>(obj);
-
-		if(prelude_unlikely(!str_obj))
-			return inspect(obj);
-
-		return str_obj;
-	}
-
 	value_t main_to_s()
 	{
 		return String::get("main");

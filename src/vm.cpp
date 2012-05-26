@@ -447,12 +447,12 @@ namespace Mirb
 		EndOp
 			
 		Op(UnwindNext)
-			set_current_exception(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, value_nil, nullptr, vars[op.var]));
+			set_current_exception(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, nullptr, nullptr, vars[op.var]));
 			goto handle_exception;
 		EndOp
 
 		Op(UnwindRedo)
-			set_current_exception(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, value_nil, nullptr, op.pos));
+			set_current_exception(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, nullptr, nullptr, op.pos));
 			goto handle_exception;
 		EndOp
 			

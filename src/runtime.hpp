@@ -198,11 +198,6 @@ namespace Mirb
 	 */
 	Tuple<StackFrame> *backtrace(Frame *from = 0);
 	
-	/*
-	 * enforce_string (calls Ruby code)
-	 */
-	String *enforce_string(value_t obj);
-	
 	void setup_classes();
 };
 

@@ -27,7 +27,7 @@ void report_exception()
 
 	Platform::color<Platform::Red>(inspect_obj(real_class_of(exception)));
 			
-	Platform::color<Platform::Bold>(": " + enforce_string(exception->message)->string.get_string() + "\n");
+	Platform::color<Platform::Bold>(": " + exception->message->string.get_string() + "\n");
 
 	StackFrame::print_backtrace(exception->backtrace);
 }

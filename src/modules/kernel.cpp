@@ -275,11 +275,15 @@ namespace Mirb
 	value_t Kernel::raise(value_t first, String *str)
 	{
 		Class *instance_of = context->runtime_error;
-		value_t message = value_nil;
+		String *message = 0;
 
 		if(str)
 		{
-			instance_of = raise_cast<Class>(instance_of);
+			instance_of = raise_cast<Class>(first);
+
+			if(!instance_of)
+				return 0;
+
 			message = str;
 		}
 		else if(first)
@@ -294,9 +298,6 @@ namespace Mirb
 				return 0;
 			}
 		}
-
-		if(!message || !instance_of)
-			return 0;
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 

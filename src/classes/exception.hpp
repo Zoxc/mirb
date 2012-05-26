@@ -48,20 +48,22 @@ namespace Mirb
 			static value_t allocate(Class *instance_of);
 			static value_t to_s(Exception *obj);
 			static value_t rb_backtrace(Exception *self);
-			static value_t rb_initialize(Exception *obj, value_t message);
+			static value_t rb_initialize(Exception *obj, String *message);
 
 		public:
-			Exception(Value::Type type, Class *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(Class *instance_of, value_t message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
-			value_t message;
+			String *message;
 			Tuple<StackFrame> *backtrace;
 
 			template<typename F> void mark(F mark)
 			{
 				Object::mark(mark);
 
-				mark(message);
+				if(message)
+					mark(message);
+
 				mark(backtrace);
 			}
 

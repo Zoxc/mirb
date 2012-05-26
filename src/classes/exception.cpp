@@ -191,7 +191,7 @@ namespace Mirb
 	
 	value_t Exception::allocate(Class *instance_of)
 	{
-		return Collector::allocate<Exception>(Value::Exception, instance_of, value_nil, nullptr);
+		return Collector::allocate<Exception>(Value::Exception, instance_of, nullptr, nullptr);
 	}
 	
 	value_t Exception::to_s(Exception *self)
@@ -207,7 +207,7 @@ namespace Mirb
 			return value_nil;
 	}
 
-	value_t Exception::rb_initialize(Exception *self, value_t message)
+	value_t Exception::rb_initialize(Exception *self, String *message)
 	{
 		self->message = message;
 
@@ -220,7 +220,7 @@ namespace Mirb
 
 		singleton_method<Arg::Self<Arg::Class<Class>>>(context->exception_class, "allocate", &allocate);
 
-		method<Arg::Self<Arg::Class<Exception>>, Arg::Value>(context->exception_class, "initialize", &rb_initialize);
+		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<String>>(context->exception_class, "initialize", &rb_initialize);
 		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "backtrace", &rb_backtrace);
 		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "message", &to_s);
 		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "to_s", &to_s);
