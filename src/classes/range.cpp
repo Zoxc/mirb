@@ -32,8 +32,8 @@ namespace Mirb
 			return false;
 		}
 		
-		int left = Fixnum::to_int(low);
-		int right = Fixnum::to_int(high);
+		intptr_t left = Fixnum::to_int(low);
+		intptr_t right = Fixnum::to_int(high);
 		
 		if(left < 0)
 		{

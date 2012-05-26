@@ -16,39 +16,39 @@ namespace Mirb
 	
 	value_t Comparable::less(value_t obj, value_t other)
 	{
-		return compare(obj, other, [&](int v) { return v < 0; });
+		return compare(obj, other, [&](intptr_t v) { return v < 0; });
 	}
 
 	value_t Comparable::less_or_equal(value_t obj, value_t other)
 	{
-		return compare(obj, other, [&](int v) { return v <= 0; });
+		return compare(obj, other, [&](intptr_t v) { return v <= 0; });
 	}
 	
 	value_t Comparable::greater(value_t obj, value_t other)
 	{
-		return compare(obj, other, [&](int v) { return v > 0; });
+		return compare(obj, other, [&](intptr_t v) { return v > 0; });
 	}
 	
 	value_t Comparable::greater_or_equal(value_t obj, value_t other)
 	{
-		return compare(obj, other, [&](int v) { return v >= 0; });
+		return compare(obj, other, [&](intptr_t v) { return v >= 0; });
 	}
 
 	value_t Comparable::equal(value_t obj, value_t other)
 	{
-		return compare(obj, other, [&](int v) { return v == 0; });
+		return compare(obj, other, [&](intptr_t v) { return v == 0; });
 	}
 
 	value_t Comparable::between(value_t obj, value_t left, value_t right)
 	{
 		OnStack<2> os(obj, right);
 
-		left = compare(obj, left, [&](int v) { return v >= 0; });
+		left = compare(obj, left, [&](intptr_t v) { return v >= 0; });
 
 		if(!Value::test(left))
 			return left;
 
-		return compare(obj, left, [&](int v) { return v <= 0; });
+		return compare(obj, left, [&](intptr_t v) { return v <= 0; });
 	}
 
 	void Comparable::initialize()

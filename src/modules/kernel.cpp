@@ -277,8 +277,6 @@ namespace Mirb
 		Class *instance_of = context->runtime_error;
 		value_t message = value_nil;
 
-		size_t i = 0;
-
 		if(str)
 		{
 			instance_of = raise_cast<Class>(instance_of);

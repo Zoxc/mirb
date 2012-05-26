@@ -21,13 +21,18 @@ namespace Mirb
 		template<typename F> void to_tchar(const CharArray &string, F func)
 		{
 			#ifdef _UNICODE
-				size_t size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), nullptr, 0);
+				mirb_runtime_assert(string.size() < INT_MAX);
+
+				int size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), (int)string.size(), nullptr, 0);
+				
+				if(size < 0)
+					raise("Unable to convert UTF-8 pathname to UCS-2");
 
 				TCHAR *buffer = (TCHAR *)alloca((size + 1) * sizeof(TCHAR));
 
-				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), string.size(), buffer, size);
+				size = MultiByteToWideChar(CP_UTF8, 0, (const char *)string.raw(), (int)string.size(), buffer, size);
 
-				if(size == 0)
+				if(size <= 0)
 					raise("Unable to convert UTF-8 pathname to UCS-2");
 
 				buffer[size] = 0;
@@ -44,7 +49,11 @@ namespace Mirb
 				#ifdef _UNICODE
 					if(size > MAX_PATH)
 					{
-						if(GetShortPathName(buffer, buffer, size + 1) == 0)
+						size += 1;
+
+						mirb_runtime_assert(size < UINT_MAX);
+
+						if(GetShortPathName(buffer, buffer, (DWORD)size) == 0)
 							raise("Unable to convert long pathname to a short pathname");
 					}
 				#endif

@@ -182,8 +182,8 @@ namespace Mirb
 			if(!Value::is_fixnum(index) || !Value::is_fixnum(size))
 				return raise(context->type_error, "Arguments must be instances of Fixnum");
 
-			int start = Fixnum::to_size_t(index);
-			int length = Fixnum::to_size_t(size);
+			intptr_t start = Fixnum::to_size_t(index);
+			intptr_t length = Fixnum::to_size_t(size);
 			size_t vector_size = self->vector.size();
 
 			if(start < 0)

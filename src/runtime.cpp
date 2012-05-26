@@ -420,7 +420,7 @@ namespace Mirb
 		OnStack<1> os(scope);
 		OnStackString<1> oss(result);
 
-		for(int i = scope->entries - 1; i >= 0; --i)
+		for(size_t i = scope->entries; i-- > 0;)
 		{
 			result += inspect_obj((*scope)[i]) + "::";
 		}

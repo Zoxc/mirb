@@ -6,7 +6,7 @@ namespace Mirb
 {
 	void Object::generate_hash()
 	{
-		hash_value = hash_number((size_t)this); // Note: The first two bits are constant
+		hash_value = (size_t)hash_number((size_t)this); // Note: The first two bits are constant
 		this->hashed = true;
 	}
 	

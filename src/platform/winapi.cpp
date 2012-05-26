@@ -5,6 +5,7 @@
 #include "../classes/string.hpp"
 #include "../collector.hpp"
 #include "../runtime.hpp"
+#include <intrin.h>
 
 namespace Mirb
 {
@@ -29,9 +30,9 @@ namespace Mirb
 			size_t offset = offsetof(NT_TIB, StackBase);
 
 			#ifdef _AMD64_
-				return (size_t)__readfsqword(offset);
+				return (size_t)__readgsqword((DWORD)offset);
 			#else
-				return (size_t)__readfsdword(offset);
+				return (size_t)__readfsdword((DWORD)offset);
 			#endif
 		}
 
@@ -74,11 +75,13 @@ namespace Mirb
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars)
 		{
 			#ifdef _UNICODE
-				size_t size = WideCharToMultiByte(CP_UTF8, 0, buffer, tchars, nullptr, 0, NULL, NULL);
+				mirb_runtime_assert(tchars < INT_MAX);
+
+				int size = WideCharToMultiByte(CP_UTF8, 0, buffer, (int)tchars, nullptr, 0, NULL, NULL);
 
 				char *new_buffer = (char *)alloca(size);
 
-				size = WideCharToMultiByte(CP_UTF8, 0, buffer, tchars, new_buffer, size, NULL, NULL);
+				size = WideCharToMultiByte(CP_UTF8, 0, buffer, (int)tchars, new_buffer, size, NULL, NULL);
 
 				if(size == 0)
 					raise("Unable to convert UCS-2 pathname to UTF-8");
@@ -162,7 +165,7 @@ namespace Mirb
 		CharArray from_short_win_path(const TCHAR *buffer)
 		{
 			#ifdef _UNICODE
-				size_t size = GetLongPathName(buffer, 0, 0);
+				DWORD size = GetLongPathName(buffer, 0, 0);
 
 				TCHAR *long_buffer = (TCHAR *)alloca((size + 1) * sizeof(TCHAR));
 
@@ -188,7 +191,7 @@ namespace Mirb
 		
 		CharArray cwd()
 		{
-			size_t size = GetCurrentDirectory(0, 0);
+			DWORD size = GetCurrentDirectory(0, 0);
 
 			TCHAR *buffer = (TCHAR *)alloca(size * sizeof(TCHAR));
 
