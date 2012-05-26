@@ -284,7 +284,15 @@ namespace Mirb
 		}
 		else if(first)
 		{
-			message = raise_cast<String>(first);
+			if(Value::type(first) == Value::String)
+				message = cast<String>(first);
+			else if(Value::type(first) == Value::Class && subclass_of(context->exception_class, cast<Class>(first)))
+				instance_of = cast<Class>(first);
+			else
+			{
+				type_error(first, "Exception subclass or String");
+				return 0;
+			}
 		}
 
 		if(!message || !instance_of)

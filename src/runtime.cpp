@@ -89,10 +89,8 @@ namespace Mirb
 		return real_class(class_of(obj));
 	}
 	
-	bool kind_of(Class *klass, value_t obj)
+	bool subclass_of(Class *super, Class *c)
 	{
-		Class *c = class_of(obj);
-
 		while(c)
 		{
 			c = real_class(c);
@@ -100,13 +98,18 @@ namespace Mirb
 			if(!c)
 				break;
 
-			if(c == klass)
+			if(c == super)
 				return true;
 
 			c = c->superclass;
 		}
 
 		return false;
+	}
+
+	bool kind_of(Class *klass, value_t obj)
+	{
+		return subclass_of(klass, class_of(obj));
 	}
 	
 	value_t define_common(value_t under, Symbol *name, Value::Type type)

@@ -11,6 +11,7 @@ namespace Mirb
 	
 	void set_current_exception(Exception *exception);
 	
+	bool subclass_of(Class *super, Class *c);
 	bool kind_of(Class *klass, value_t obj);
 	Class *class_of(value_t obj) prelude_nonnull(1);
 	bool is_real_class(Class *obj);
