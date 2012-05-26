@@ -26,7 +26,9 @@ namespace Mirb
 		{
 			char dummy;
 
-			return (size_t)&dummy;
+			size_t result = (size_t)&dummy;
+
+			return result;
 		}
 
 		size_t stack_limit()
