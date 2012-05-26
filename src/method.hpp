@@ -153,7 +153,7 @@ namespace Mirb
 			public:
 				static T *const default_value;
 
-				static Type coerce(value_t value, State &state)
+				static T *coerce(value_t value, State &state)
 				{
 					if(!Mirb::Value::of_type<T>(value))
 					{
@@ -168,11 +168,11 @@ namespace Mirb
 		
 		template<class T> T *const Class<T>::default_value = 0;
 		
-		template<Class *Context::*field> class InstanceOf:
+		template<Mirb::Class *Context::*field> class InstanceOf:
 			public ValueBase<InstanceOf<field>, value_t>
 		{
 			public:
-				static Type coerce(value_t value, State &state)
+				static value_t coerce(value_t value, State &state)
 				{
 					if(type_error(value, context->*field))
 					{

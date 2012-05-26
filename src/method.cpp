@@ -82,7 +82,7 @@ namespace Mirb
 		
 		const value_t Value::default_value = 0;
 
-		Value::Type Value::coerce(value_t value, State &state)
+		Value::Type Value::coerce(value_t value, State &)
 		{
 			return value;
 		}

@@ -396,7 +396,7 @@ namespace Mirb
 	{
 		auto module = try_cast<Module>(obj);
 
-		if(prelude_likely(module))
+		if(prelude_likely(module != 0))
 			return module;
 		else
 		{
@@ -940,7 +940,7 @@ namespace Mirb
 	{
 		auto str_obj = try_cast<String>(obj);
 
-		if(prelude_likely(str_obj))
+		if(prelude_likely(str_obj != 0))
 			return str_obj;
 		
 		obj = call(obj, "to_s");
