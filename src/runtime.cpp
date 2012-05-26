@@ -323,10 +323,7 @@ namespace Mirb
 		String *str = inspect(obj);
 		
 		if(!str)
-		{
-			swallow_exception();
-			return CharArray("");
-		}
+			throw context->exception;
 
 		return str->string;
 	}
@@ -347,15 +344,7 @@ namespace Mirb
 	
 	std::string inspect_object(value_t obj)
 	{
-		String *str = inspect(obj);
-
-		if(!str)
-		{
-			swallow_exception();
-			return  "";
-		}
-
-		return str->get_string();
+		return inspect_obj(obj).get_string();
 	}
 
 	String *inspect(value_t obj)
@@ -743,7 +732,14 @@ namespace Mirb
 				current = current->prev;
 			}
 
-			std::cerr << "Function raised exception but didn't indicate it:\n" << StackFrame::get_backtrace(backtrace()).get_string() << std::endl;
+			std::cerr << "Function raised exception but didn't indicate it:\n";
+			
+			auto backtrace_str = StackFrame::get_backtrace(backtrace());
+
+			if(!backtrace_str)
+				return true;
+			
+			std::cerr << backtrace_str->string.get_string() << std::endl;
 
 			result = value_raise;
 		}

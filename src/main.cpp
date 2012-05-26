@@ -155,13 +155,22 @@ int main(int argc, const char *argv[])
 
 		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
 
-		if(result == value_raise)
+		try
 		{
-			report_exception();
-			std::cerr << "\n";
+			if(result == value_raise)
+			{
+				report_exception();
+				std::cerr << "\n";
+			}
+			else
+				std::cout << "=> " << inspect_object(result) << "\n";
+		} catch(Exception *e)
+		{
+			if(real_class_of(e) == context->interrupt_class)
+				std::cout << "Interrupted!\n";
+			else
+				std::cout << "Unable to inspect result" << "\n";
 		}
-		else
-			std::cout << "=> " << inspect_object(result) << "\n";
 	}
 	
 	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;

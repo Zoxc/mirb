@@ -306,7 +306,7 @@ namespace Mirb
 
 	value_t Kernel::backtrace()
 	{
-		return StackFrame::get_backtrace(Mirb::backtrace()).to_string();
+		return StackFrame::get_backtrace(Mirb::backtrace());
 	}
 	
 	value_t cast_array(value_t value)

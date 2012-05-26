@@ -35,7 +35,7 @@ namespace Mirb
 				mark(args);
 			}
 			
-			static CharArray get_backtrace(Tuple<StackFrame> *backtrace);
+			static String *get_backtrace(Tuple<StackFrame> *backtrace);
 			static void print_backtrace(Tuple<StackFrame> *backtrace);
 
 			CharArray inspect();

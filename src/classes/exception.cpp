@@ -152,25 +152,32 @@ namespace Mirb
 		return inspect_implementation(this);
 	}
 	
-	CharArray StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
+	String *StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
 	{
-		CharArray result;
-
-		if(!backtrace)
-			return result;
-		
-		OnStack<1> os1(backtrace);
-		OnStackString<1> os2(result);
-		
-		for(size_t i = 0; i < backtrace->entries; ++i)
+		try
 		{
-			if(i != 0)
-				result += "\n";
+			CharArray result;
 
-			result += (*backtrace)[i]->inspect();
+			if(!backtrace)
+				return result.to_string();
+
+			OnStack<1> os1(backtrace);
+			OnStackString<1> os2(result);
+		
+			for(size_t i = 0; i < backtrace->entries; ++i)
+			{
+				if(i != 0)
+					result += "\n";
+
+				result += (*backtrace)[i]->inspect();
+			}
+
+			return result.to_string();
+
+		} catch(Exception *e)
+		{
+			return 0;
 		}
-
-		return result;
 	}
 	
 	void StackFrame::print_backtrace(Tuple<StackFrame> *backtrace)
@@ -202,7 +209,7 @@ namespace Mirb
 	value_t Exception::rb_backtrace(Exception *self)
 	{
 		if(self->backtrace)
-			return StackFrame::get_backtrace(self->backtrace).to_string();
+			return StackFrame::get_backtrace(self->backtrace);
 		else
 			return value_nil;
 	}
