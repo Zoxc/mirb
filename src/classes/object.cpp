@@ -88,10 +88,12 @@ namespace Mirb
 
 		if(argc == 0)
 		{
-			if(Value::type(block) == Value::Proc)
-				return Proc::call_with_options(obj, context->frame->prev->scope, block, value_nil, 0, nullptr);
+			Proc *proc = get_proc(block);
+
+			if(!proc)
+				return 0;
 			else
-				return raise(context->type_error, "Expected block to evaluate");
+				return Proc::call_with_options(obj, context->frame->prev->scope, proc, value_nil, 0, nullptr);
 		}
 		else
 		{

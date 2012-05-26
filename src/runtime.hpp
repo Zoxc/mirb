@@ -173,6 +173,8 @@ namespace Mirb
 		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, 0, 0);
 	}
 	
+	Proc *get_proc(value_t obj);
+
 	/*
 	 * yield (calls Ruby code, argv does not need to be marked)
 	 */

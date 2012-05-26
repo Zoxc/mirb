@@ -832,15 +832,25 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[])
+	Proc *get_proc(value_t obj)
 	{
-		if(!Value::of_type<Proc>(obj))
+		if(prelude_unlikely(obj == value_nil))
 		{
 			raise(context->local_jump_error, "No block given");
-			return value_raise;
+			return 0;
 		}
 
-		return call_argv(obj, "call", block, argc, argv);
+		return raise_cast<Proc>(obj);
+	}
+	
+	value_t yield_argv(value_t obj, value_t block, size_t argc, value_t argv[])
+	{
+		Proc *proc = get_proc(obj);
+
+		if(prelude_unlikely(!proc))
+			return value_raise;
+
+		return Proc::call(proc, block, argc, argv);
 	}
 	
 	value_t yield_argv(value_t obj, size_t argc, value_t argv[])
@@ -1062,7 +1072,7 @@ namespace Mirb
 	void finalize()
 	{
 		for(size_t i = context->at_exits.size(); i-- > 0;)
-			Proc::call(context->at_exits[i], value_nil, 0, nullptr);
+			Proc::call(cast<Proc>(context->at_exits[i]), value_nil, 0, nullptr);
 
 		Platform::finalize();
 
