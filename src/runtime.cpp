@@ -40,6 +40,9 @@
 
 namespace Mirb
 {
+	prelude_thread size_t stack_stop;
+	prelude_thread size_t stack_continue;
+
 	void set_current_exception(Exception *exception)
 	{
 		if(exception)
@@ -718,11 +721,22 @@ namespace Mirb
 
 		return false;
 	}
+	
+	bool stack_no_reserve(Frame &frame)
+	{
+		return ((size_t)&frame <= stack_continue);
+	}
 
 	value_t call_frame(Frame &frame)
 	{
 		if(frame.code->scope)
 			Value::assert_valid(frame.code->scope);
+
+		if(prelude_unlikely((size_t)&frame <= stack_stop))
+		{
+			raise(context->system_stack_error, "Stack overflow");
+			return value_raise;
+		}
 
 		frame.prev = context->frame;
 		context->frame = &frame;
@@ -954,6 +968,20 @@ namespace Mirb
 		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);
 	}
 	
+	const size_t buffer_zone = 0x1000 * 16;
+	
+	void initialize_thread()
+	{
+		size_t stack_start = Platform::stack_start();
+		size_t limit = Platform::stack_limit();
+		
+		mirb_runtime_assert(stack_start > limit);
+		mirb_runtime_assert(limit > 3 * buffer_zone);
+		
+		stack_stop = stack_start - limit + buffer_zone;
+		stack_continue = stack_stop + buffer_zone;
+	}
+
 	void initialize(bool console)
 	{
 		Collector::initialize();
@@ -962,6 +990,8 @@ namespace Mirb
 
 		context->dummy_map = Collector::allocate<ValueMap>();
 				
+		initialize_thread();
+
 		Value::initialize_type_table();
 		
 		Platform::initialize(console);

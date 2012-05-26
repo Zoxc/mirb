@@ -78,6 +78,7 @@ namespace Mirb
 	value_t get_global(Symbol *name);
 	void set_global(Symbol *name, value_t value);
 	
+	void initialize_thread();
 	void initialize(bool console = false);
 	void finalize();
 	
@@ -93,8 +94,9 @@ namespace Mirb
 	bool type_error(value_t value, value_t expected);
 	Exception *create_exception(Class *exception_class, const CharArray &message);
 	value_t raise(Class *exception_class, const CharArray &message);
-
 	value_t raise(value_t exception);
+
+	bool stack_no_reserve(Frame &frame);
 	
 	template<typename T> T *raise_cast(value_t obj) prelude_use_result;
 

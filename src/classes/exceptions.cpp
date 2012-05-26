@@ -1,9 +1,14 @@
 #include "exceptions.hpp"
 #include "../runtime.hpp"
 #include "class.hpp"
+#include "string.hpp"
 
 namespace Mirb
 {
+	SystemStackError::SystemStackError() : Exception(context->system_stack_error, String::get("Stack oveflow"), Mirb::backtrace())
+	{
+	}
+
 	void initialize_exceptions()
 	{
 		context->standard_error = define_class("StandardError", context->exception_class);

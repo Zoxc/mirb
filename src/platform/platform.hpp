@@ -30,6 +30,9 @@ namespace Mirb
 			};
 		}
 		
+		size_t stack_start();
+		size_t stack_limit();
+		
 		void cd(const CharArray &path);
 		bool is_file(const CharArray &path);
 		bool is_directory(const CharArray &path);

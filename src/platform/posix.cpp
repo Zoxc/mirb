@@ -20,7 +20,24 @@ namespace Mirb
 
 			throw create_exception(context->system_call_error, msg);
 		}
+		
+		size_t stack_start()
+		{
+			char dummy;
 
+			return (size_t)&dummy;
+		}
+
+		size_t stack_limit()
+		{
+			struct rlimit rlim;
+
+			if(getrlimit(RLIMIT_STACK, &rlim) == 0)
+				return std::min(rlim.rlim_cur, 1024 * 1024 * 128);
+			else
+				return 1024 * 64;
+		}
+		
 		std::string BenchmarkResult::format()
 		{
 			std::stringstream result;

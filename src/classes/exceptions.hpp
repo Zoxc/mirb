@@ -5,6 +5,13 @@ namespace Mirb
 {
 	void initialize_exceptions();
 	
+	class SystemStackError:
+		public Exception
+	{
+		public:
+			SystemStackError();
+	};
+	
 	class NextException:
 		public Exception
 	{

@@ -483,6 +483,9 @@ handle_exception:
 		{
 			current_exception = context->exception;
 
+			if(current_exception->get_type() == Value::SystemStackError && stack_no_reserve(frame))
+				return value_raise;
+
 			if(!current_exception_block)
 			{
 				switch(current_exception->get_type())
@@ -528,10 +531,9 @@ handle_exception:
 				return value_raise;
 			}
 			
-			
 			loop_exception_block = current_exception_block;
 
-			if(current_exception->get_type() == Value::Exception)
+			if(current_exception->get_type() == Value::Exception || current_exception->get_type() == Value::SystemStackError)
 			{
 				current_exception_block = loop_exception_block->parent;
 

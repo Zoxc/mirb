@@ -24,6 +24,28 @@ namespace Mirb
 			throw create_exception(context->system_call_error, msg);
 		}
 		
+		size_t stack_start()
+		{
+			#ifdef _AMD64_
+				return (size_t)__readfsqword(offsetof(NT_TIB, StackBase));
+			#else
+				return (size_t)__readfsdword(offsetof(NT_TIB, StackBase));
+			#endif
+		}
+
+		size_t stack_limit()
+		{
+			auto module = GetModuleHandle(0);
+
+			mirb_runtime_assert(module != INVALID_HANDLE_VALUE);
+
+			auto dos_header = (IMAGE_DOS_HEADER *)module;
+
+			auto nt_headers = (IMAGE_NT_HEADERS *)((char *)dos_header + dos_header->e_lfanew);
+
+			return nt_headers->OptionalHeader.SizeOfStackReserve;
+		}
+		
 		std::string BenchmarkResult::format()
 		{
 			std::stringstream result;

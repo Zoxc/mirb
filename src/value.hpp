@@ -42,6 +42,7 @@ namespace Mirb
 	class BreakException;
 	class NextException;
 	class RedoException;
+	class SystemStackError;
 	class Proc;
 	class IO;
 	class File;
@@ -123,6 +124,7 @@ namespace Mirb
 			BreakException,
 			NextException,
 			RedoException,
+			SystemStackError,
 			IO,
 			File,
 			Types
@@ -314,6 +316,9 @@ namespace Mirb
 					
 				case NextException:
 					return T<NextException>::func(std::forward<Arg>(arg));
+
+				case SystemStackError:
+					return T<SystemStackError>::func(std::forward<Arg>(arg));
 					
 				case IO:
 					return T<IO>::func(std::forward<Arg>(arg));
@@ -364,6 +369,7 @@ namespace Mirb
 		mirb_typeclass(BreakException, BreakException);
 		mirb_typeclass(RedoException, RedoException);
 		mirb_typeclass(NextException, NextException);
+		mirb_typeclass(SystemStackError, SystemStackError);
 		mirb_typeclass(IO, IO);
 		mirb_typeclass(File, File);
 		mirb_typeclass(FreeBlock, FreeBlock);
@@ -424,8 +430,10 @@ namespace Mirb
 
 		mirb_derived_from(ReturnException, ReturnException);
 		mirb_derived_from(ReturnException, BreakException);
-
+		
 		mirb_derived_from(BreakException, BreakException);
+		
+		mirb_derived_from(SystemStackError, SystemStackError);
 		
 		mirb_derived_from(IO, IO);
 		mirb_derived_from(IO, File);
