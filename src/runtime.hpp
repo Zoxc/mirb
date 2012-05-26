@@ -15,10 +15,10 @@ namespace Mirb
 	
 	bool subclass_of(Class *super, Class *c);
 	bool kind_of(Class *klass, value_t obj);
-	Class *class_of(value_t obj) prelude_nonnull(1);
+	Class *internal_class_of(value_t obj) prelude_nonnull(1);
 	bool is_real_class(Class *obj);
 	Class *real_class(Class *obj) prelude_nonnull(1);
-	Class *real_class_of(value_t obj);
+	Class *class_of(value_t obj);
 
 	Class *singleton_class(value_t object);
 	

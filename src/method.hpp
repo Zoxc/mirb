@@ -158,7 +158,7 @@ namespace Mirb
 					if(!Mirb::Value::of_type<T>(value))
 					{
 						state.error = true;
-						type_error(value, value_nil);
+						type_error(value, "internal class");
 						return nullptr;
 					}
 					else

@@ -165,7 +165,7 @@ namespace Mirb
 		
 		value_t Header::dup(value_t obj)
 		{
-			CharArray obj_value = inspect_obj(real_class_of(obj));
+			CharArray obj_value = inspect_obj(class_of(obj));
 
 			return raise(context->type_error, "Unable to duplicate instances of " + obj_value);
 		}

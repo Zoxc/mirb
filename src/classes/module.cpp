@@ -202,7 +202,7 @@ namespace Mirb
 	
 	value_t Module::module_function(Module *obj, size_t argc, value_t argv[])
 	{
-		Class *meta = class_of(obj);
+		Class *meta = obj->instance_of;
 
 		for(size_t i = 0; i < argc; ++i)
 		{

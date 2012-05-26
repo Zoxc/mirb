@@ -44,12 +44,12 @@ namespace Mirb
 
 		Platform::color<Platform::Gray>(inspect_obj(module));
 
-		value_t class_of = real_class_of(self->obj);
+		value_t class_of_obj = class_of(self->obj);
 
-		if(class_of != module)
+		if(class_of_obj != module)
 		{
 			Platform::color<Platform::Gray>("(");
-			Platform::color<Platform::Gray>(inspect_object(class_of));
+			Platform::color<Platform::Gray>(inspect_object(class_of_obj));
 			Platform::color<Platform::Gray>(")");
 		}
 
@@ -107,12 +107,12 @@ namespace Mirb
 
 		result += inspect_obj(module);
 
-		value_t class_of = real_class_of(self->obj);
+		value_t class_of_obj = class_of(self->obj);
 
-		if(class_of != module)
+		if(class_of_obj != module)
 		{
 			result += "(";
-			result += inspect_obj(class_of) + ")";
+			result += inspect_obj(class_of_obj) + ")";
 		}
 
 		result += "#" + self->name->string  + "(";
@@ -174,7 +174,7 @@ namespace Mirb
 
 			return result.to_string();
 
-		} catch(Exception *e)
+		} catch(Exception *)
 		{
 			return 0;
 		}

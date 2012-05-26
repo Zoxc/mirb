@@ -14,7 +14,9 @@ namespace Mirb
 {
 	value_t Kernel::at_exit(value_t block)
 	{
-		if(type_error(block, context->proc_class))
+		auto proc = get_proc(block);
+
+		if(!proc)
 			return 0;
 
 		context->at_exits.push(block);
@@ -316,7 +318,7 @@ namespace Mirb
 		if(array)
 			return array;
 
-		auto method = lookup_method(class_of(value), Symbol::get("to_a"));
+		auto method = lookup_method(internal_class_of(value), Symbol::get("to_a"));
 
 		if(method)
 			return raise_cast<Array>(call_argv(method->block, value, Symbol::get("to_a"), method->scope, value_nil, 0, 0));

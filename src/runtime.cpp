@@ -74,7 +74,7 @@ namespace Mirb
 		return call_argv(result->get(0), name, 1, &last);
 	}
 
-	Class *class_of(value_t obj)
+	Class *internal_class_of(value_t obj)
 	{
 		Value::assert_valid(obj);
 
@@ -99,9 +99,9 @@ namespace Mirb
 		return obj;
 	}
 
-	Class *real_class_of(value_t obj)
+	Class *class_of(value_t obj)
 	{
-		return real_class(class_of(obj));
+		return real_class(internal_class_of(obj));
 	}
 	
 	bool subclass_of(Class *super, Class *c)
@@ -124,7 +124,7 @@ namespace Mirb
 
 	bool kind_of(Class *klass, value_t obj)
 	{
-		return subclass_of(klass, class_of(obj));
+		return subclass_of(klass, internal_class_of(obj));
 	}
 	
 	value_t define_common(value_t under, Symbol *name, Value::Type type)
@@ -146,7 +146,7 @@ namespace Mirb
 		{
 			if(Value::type(existing) != type)
 			{
-				String *existing_str = inspect(real_class_of(existing));
+				String *existing_str = inspect(class_of(existing));
 
 				if(!existing_str)
 					return 0;
@@ -245,7 +245,7 @@ namespace Mirb
 	
 	Class *singleton_class(value_t object)
 	{
-		Class *c = class_of(object);
+		Class *c = internal_class_of(object);
 
 		if(prelude_likely(c->singleton))
 			return c;
@@ -351,11 +351,11 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		Method *inspect = lookup_method(class_of(obj), Symbol::from_string("inspect"));
+		Method *inspect = lookup_method(internal_class_of(obj), Symbol::from_string("inspect"));
 
 		value_t result = 0;
 
-		if(inspect && (inspect != context->inspect_method || lookup_method(class_of(obj), Symbol::from_string("to_s"))))
+		if(inspect && (inspect != context->inspect_method || lookup_method(internal_class_of(obj), Symbol::from_string("to_s"))))
 		{
 			result = call(obj, "inspect");
 
@@ -379,7 +379,7 @@ namespace Mirb
 		OnStack<1> os(obj);
 		CharArray left = inspect_obj(obj);
 		OnStackString<1> oss(left);
-		CharArray right = inspect_obj(real_class_of(obj));
+		CharArray right = inspect_obj(class_of(obj));
 
 		return left + ":" + right;
 	}
@@ -576,7 +576,7 @@ namespace Mirb
 
 	bool type_error(value_t value, value_t expected)
 	{
-		value_t klass = real_class_of(value);
+		value_t klass = class_of(value);
 
 		if(prelude_unlikely(klass != expected))
 		{
@@ -678,7 +678,7 @@ namespace Mirb
 	
 	Method *lookup(value_t obj, Symbol *name)
 	{
-		Method *result = lookup_method(class_of(obj), name);
+		Method *result = lookup_method(internal_class_of(obj), name);
 
 		if(prelude_unlikely(!result))
 		{

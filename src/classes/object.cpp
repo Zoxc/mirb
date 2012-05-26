@@ -32,7 +32,7 @@ namespace Mirb
 	
 	value_t Object::to_s(value_t obj)
 	{
-		value_t c = real_class_of(obj);
+		value_t c = class_of(obj);
 		value_t name = get_var(c, context->syms.classname);
 
 		if(name != value_nil)
@@ -102,7 +102,7 @@ namespace Mirb
 	
 	value_t Object::klass(value_t obj)
 	{
-		return real_class_of(obj);
+		return class_of(obj);
 	}
 	
 	value_t Object::extend(value_t obj, size_t argc, value_t argv[])
