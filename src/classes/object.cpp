@@ -12,15 +12,15 @@ namespace Mirb
 	
 	value_t Object::allocate(Class *instance_of)
 	{
-		return auto_cast(Collector::allocate<Object>(instance_of));
+		return Collector::allocate<Object>(instance_of);
 	}
 	
 	value_t Object::tap(value_t obj, value_t block)
 	{
 		OnStack<1> os(obj);
 
-		if(yield_argv(block, 1, &obj) == value_raise)
-			return value_raise;
+		if(!yield_argv(block, 1, &obj))
+			return 0;
 
 		return obj;
 	}
@@ -81,12 +81,9 @@ namespace Mirb
 		return auto_cast(!Value::test(obj));
 	}
 
-	value_t Object::instance_eval(value_t obj, size_t argc, value_t argv[], value_t block)
+	value_t Object::instance_eval(value_t obj, String *string, value_t block)
 	{
-		if(argc > 1)
-			return raise(context->argument_error, "Too many arguments.");
-
-		if(argc == 0)
+		if(!string)
 		{
 			Proc *proc = get_proc(block);
 
@@ -97,14 +94,9 @@ namespace Mirb
 		}
 		else
 		{
-			if(Value::type(argv[0]) == Value::String)
-			{
-				CharArray code = cast<String>(argv[0])->string.c_str();
+			CharArray code = string->string.c_str();
 
-				return eval(obj, Symbol::get("in eval"), context->frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
-			}
-			else
-				return raise(context->type_error, "Expected string");
+			return eval(obj, Symbol::get("in eval"), context->frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
 		}
 	}
 	
@@ -119,9 +111,6 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i], context->module_class))
-				return 0;
-
 			if(!call_argv(argv[i], "extend_object", 1, &obj))
 				return 0;
 			
@@ -223,7 +212,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "===", &equal);
 		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "!=", &not_equal);
 		method<Arg::Self<Arg::Value>>(context->object_class, "!", &method_not);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
+		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
 
 		singleton_method<Arg::Self<Arg::Class<Class>>>(context->object_class, "allocate", &allocate);
 	}

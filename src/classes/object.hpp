@@ -19,7 +19,7 @@ namespace Mirb
 			static value_t initialize_copy(value_t other);
 			static value_t pattern(value_t obj);
 			static value_t rb_inspect(value_t obj);
-			static value_t instance_eval(value_t obj, size_t argc, value_t argv[], value_t block);
+			static value_t instance_eval(value_t obj, String *string, value_t block);
 			static value_t equal(value_t obj, value_t other);
 			static value_t not_equal(value_t obj, value_t other);
 			static value_t method_not(value_t obj);

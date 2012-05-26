@@ -37,20 +37,20 @@ namespace Mirb
 		return Object::to_s(obj); // TODO: Replace by super
 	}
 	
-	value_t Module::append_features(value_t obj, value_t mod)
+	value_t Module::append_features(Module *obj, Module *mod)
 	{
 		OnStack<1> os(obj);
 
-		include_module(auto_cast(mod), auto_cast(obj));
+		include_module(mod, obj);
 
 		return obj;
 	}
 	
-	value_t Module::extend_object(value_t self, value_t obj)
+	value_t Module::extend_object(Module *self, value_t obj)
 	{
 		OnStack<1> os(obj);
 
-		include_module(auto_cast(singleton_class(obj)), auto_cast(self));
+		include_module(singleton_class(obj), self);
 
 		return obj;
 	}
@@ -66,9 +66,6 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(type_error(argv[i], context->module_class))
-				return 0;
-
 			if(!call_argv(argv[i], "append_features", 1, &obj))
 				return 0;
 			
@@ -90,11 +87,8 @@ namespace Mirb
 		return get_var(frame.obj, frame.code->symbol);
 	}
 
-	void attr(value_t module, value_t sym, bool write)
+	void attr(Module *self, Symbol *name, bool write)
 	{
-		auto self = cast<Module>(module);
-		Symbol *name = cast<Symbol>(sym); 
-
 		Block *result = Collector::allocate_pinned<Block>(nullptr);
 		
 		result->symbol = Symbol::get("@" + name->string);
@@ -120,35 +114,35 @@ namespace Mirb
 		self->set_method(name, Collector::allocate<Method>(result, scope));
 	}
 	
-	value_t attr_setup(value_t obj, size_t argc, value_t argv[], bool read, bool write)
+	value_t attr_setup(Module *obj, size_t argc, value_t argv[], bool read, bool write)
 	{
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(Value::of_type<Symbol>(argv[i]))
-			{
-				if(read)
-					attr(obj, argv[i], false);
-				if(write)
-					attr(obj, argv[i], true);
-			}
-			else
-				return raise(context->type_error, "Expected symbol");
+			auto symbol = raise_cast<Symbol>(argv[i]);
+
+			if(!symbol)
+				return 0;
+
+			if(read)
+				attr(obj, symbol, false);
+			if(write)
+				attr(obj, symbol, true);
 		}
 
 		return value_nil;
 	}
 	
-	value_t attr_writer(value_t obj, size_t argc, value_t argv[])
+	value_t attr_writer(Module *obj, size_t argc, value_t argv[])
 	{
 		return attr_setup(obj, argc, argv, false, true);
 	}
 	
-	value_t attr_reader(value_t obj, size_t argc, value_t argv[])
+	value_t attr_reader(Module *obj, size_t argc, value_t argv[])
 	{
 		return attr_setup(obj, argc, argv, true, false);
 	}
 	
-	value_t attr_accessor(value_t obj, size_t argc, value_t argv[])
+	value_t attr_accessor(Module *obj, size_t argc, value_t argv[])
 	{
 		return attr_setup(obj, argc, argv, true, true);
 	}
@@ -158,25 +152,24 @@ namespace Mirb
 		return obj;
 	}
 	
-	value_t Module::alias_method(Module *obj, Symbol *new_name, Symbol *old_name)
+	value_t Module::alias_method(Module *self, Symbol *new_name, Symbol *old_name)
 	{
-		auto self = cast<Module>(obj);
-
 		auto method = lookup_method(self, old_name);
 
 		if(prelude_unlikely(!method))
 		{
 			OnStack<1> os(old_name);
 
-			CharArray obj_str = pretty_inspect(obj);
+			CharArray obj_str = pretty_inspect(self);
 
 			raise(context->name_error, "Undefined method '" + old_name->string + "' for " + obj_str);
+
 			return value_raise;
 		}
 
 		self->set_method(auto_cast(new_name), method);
 
-		return obj;
+		return self;
 	}
 
 	value_t Module::const_defined(Module *obj, Symbol *constant)
@@ -245,14 +238,14 @@ namespace Mirb
 	{
 		method<Arg::Self<Arg::Value>>(context->module_class, "to_s", &to_s);
 		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Class<Symbol>>(context->module_class, "alias_method", &alias_method);
-		method<Arg::Self<Arg::Value>, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
+		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Module>>(context->module_class, "append_features", &append_features);
 		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->module_class, "include", &include);
 		method<Arg::Value>(context->module_class, "included", &included);
 		method<Arg::Value>(context->module_class, "extended", &included);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->module_class, "extend_object", &extend_object);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->module_class, "attr_reader", &attr_reader);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);
+		method<Arg::Self<Arg::Class<Module>>, Arg::Value>(context->module_class, "extend_object", &extend_object);
+		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values>(context->module_class, "attr_reader", &attr_reader);
+		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values>(context->module_class, "attr_writer", &attr_writer);
+		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values>(context->module_class, "attr_accessor", &attr_accessor);
 		
 		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values>(context->module_class, "module_function", &module_function);
 		

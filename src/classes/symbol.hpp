@@ -44,7 +44,6 @@ namespace Mirb
 
 			static Symbol *from_cstr_string(const char *string);
 			static Symbol *from_string(const std::string &string);
-			static Symbol *from_char_array(const CharArray &char_array);
 			static Symbol *get(const CharArray &char_array);
 			static Symbol *create_initial(const CharArray &char_array);
 			

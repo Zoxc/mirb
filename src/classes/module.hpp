@@ -16,9 +16,9 @@ namespace Mirb
 			static value_t const_get(Module *obj, Symbol *constant);
 			static value_t const_set(Module *obj, Symbol *constant, value_t value);
 			static value_t to_s(value_t obj);
-			static value_t append_features(value_t obj, value_t mod);
+			static value_t append_features(Module *obj, Module *mod);
 			static value_t included(value_t obj);
-			static value_t extend_object(value_t self, value_t obj);
+			static value_t extend_object(Module *self, value_t obj);
 			static value_t module_function(Module *obj, size_t argc, value_t argv[]);
 			
 			Module(Value::Type type) : Object(type), methods(nullptr), superclass(nullptr) {}
@@ -39,7 +39,7 @@ namespace Mirb
 			Method *get_method(Symbol *name);
 			void set_method(Symbol *name, Method *method);
 
-			static value_t alias_method(Module *obj, Symbol *new_name, Symbol *old_name);
+			static value_t alias_method(Module *self, Symbol *new_name, Symbol *old_name);
 
 			template<typename F> void mark(F mark)
 			{

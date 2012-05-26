@@ -48,13 +48,8 @@ namespace Mirb
 		return exception ? 0 : result.to_string();
 	}
 	
-	value_t Kernel::eval(value_t obj, value_t code)
+	value_t Kernel::eval(value_t obj, String *input)
 	{
-		if(Value::type(code) != Value::String)
-			return value_nil;
-
-		String *input = cast<String>(code);
-
 		CharArray c_str = input->string.c_str();
 		CharArray filename("(eval)");
 
@@ -111,7 +106,7 @@ namespace Mirb
 		if(File::absolute_path(filename))
 			return try_file(filename, filename);
 
-		auto load_path = cast<Array>(get_global(Symbol::get("$:")));
+		auto load_path = cast<Array>(get_global(Symbol::get("$:"))); // TODO: Turn $: into a Array field in Context
 		FILE *result = nullptr;
 		
 		load_path->vector.each([&](value_t path) -> bool {
@@ -277,28 +272,25 @@ namespace Mirb
 		return value_nil;
 	}
 	
-	value_t Kernel::raise(size_t argc, value_t argv[])
+	value_t Kernel::raise(value_t first, String *str)
 	{
-		Class *instance_of;
-		value_t message;
+		Class *instance_of = context->runtime_error;
+		value_t message = value_nil;
 
 		size_t i = 0;
 
-		if((argc > i) && (Value::type(argv[i]) == Value::Class))
+		if(str)
 		{
-			instance_of = auto_cast(argv[i]);
-			i++;
+			instance_of = raise_cast<Class>(instance_of);
+			message = str;
 		}
-		else
-			instance_of = context->runtime_error;
-	
-		if(argc > i)
+		else if(first)
 		{
-			message = argv[i];
-			i++;
+			message = raise_cast<String>(first);
 		}
-		else
-			message = value_nil;
+
+		if(!message || !instance_of)
+			return 0;
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 
@@ -342,12 +334,12 @@ namespace Mirb
 		method<Arg::Block>(context->kernel_module, "lambda", &proc);
 		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
 		method(context->kernel_module, "backtrace", &backtrace);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->kernel_module, "eval", &eval);
+		method<Arg::Self<Arg::Value>, Arg::Class<String>>(context->kernel_module, "eval", &eval);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
 		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
 		method<Arg::Class<String>>(context->kernel_module, "load", &load);
 		method<Arg::Class<String>>(context->kernel_module, "require", &require);
 		method<Arg::Class<String>>(context->kernel_module, "require_relative", &require_relative);
-		method<Arg::Count, Arg::Values>(context->kernel_module, "raise", &raise);
+		method<Arg::Default<Arg::Value>, Arg::Default<Arg::Class<String>>>(context->kernel_module, "raise", &raise);
 	}
 };

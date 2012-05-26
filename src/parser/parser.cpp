@@ -1436,7 +1436,7 @@ namespace Mirb
 					Symbol *mutated = node->method;
 					
 					if(mutated)
-						mutated = Symbol::from_char_array(node->method->string + "=");
+						mutated = Symbol::get(node->method->string + "=");
 
 					node->method = mutated;
 
@@ -1683,7 +1683,7 @@ namespace Mirb
 					Symbol *mutated = node->method;
 					
 					if(mutated)
-						mutated = Symbol::from_char_array(node->method->string + "=");
+						mutated = Symbol::get(node->method->string + "=");
 
 					if(lexeme() == Lexeme::ASSIGN)
 					{

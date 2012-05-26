@@ -15,11 +15,6 @@ namespace Mirb
 		return symbol_pool.get(string);
 	}
 	
-	Symbol *Symbol::from_char_array(const CharArray &char_array)
-	{
-		return symbol_pool.get(char_array);
-	}
-	
 	Symbol *Symbol::get(const CharArray &char_array)
 	{
 		return symbol_pool.get(char_array);
