@@ -11,7 +11,10 @@ namespace Mirb
 
 	struct InternalException
 	{
-		InternalException(Exception *value) : value(value) {}
+		InternalException(Exception *value) : value(value)
+		{
+			Value::assert_valid((value_t)value);
+		}
 
 		Exception *value;
 	};

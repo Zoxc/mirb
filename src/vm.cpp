@@ -283,7 +283,9 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(AssertBlock)
-			if(trap_exception([&] { raise_cast<Proc>(vars[op.var]);  }))
+			value_t value = vars[op.var];
+
+			if(value != value_nil && trap_exception([&] { raise_cast<Proc>(value); }))
 				goto handle_exception;
 		EndOp
 			
