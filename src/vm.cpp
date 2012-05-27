@@ -224,7 +224,7 @@ namespace Mirb
 			value_t obj = vars[op.obj];
 			Symbol *name = op.method;
 			
-			Method *method = lookup(obj, name);
+			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup(obj, name); }));
 
 			if(prelude_unlikely(!method))
 				goto handle_exception;
@@ -243,7 +243,7 @@ namespace Mirb
 
 			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
 			
-			Method *method = lookup_super(frame.scope->first(), frame.name);
+			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup_super(frame.scope->first(), frame.name); }));
 
 			if(prelude_unlikely(!method))
 				goto handle_exception;

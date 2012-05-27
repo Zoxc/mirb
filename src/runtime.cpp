@@ -735,6 +735,14 @@ namespace Mirb
 	{
 		return ((size_t)&frame <= stack_continue);
 	}
+	
+	void assert_stack_space()
+	{
+		int local;
+
+		if(prelude_unlikely((size_t)&local <= stack_stop))
+			raise(context->system_stack_error, "Stack overflow");
+	}
 
 	value_t call_frame(Frame &frame)
 	{

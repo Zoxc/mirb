@@ -24,6 +24,8 @@ namespace Mirb
 	prelude_noreturn void throw_current_exception();
 
 	value_t coerce(value_t left, Symbol *name, value_t right);
+
+	void assert_stack_space();
 	
 	bool subclass_of(Class *super, Class *c);
 	bool kind_of(Class *klass, value_t obj);
