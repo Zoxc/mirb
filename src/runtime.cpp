@@ -76,6 +76,30 @@ namespace Mirb
 		throw InternalException(e);
 	}
 	
+	bool map_index(intptr_t index, size_t size, size_t &result)
+	{
+		if(index < 0)
+		{
+			index = -index;
+
+			if((size_t)index > size)
+			{
+				return false;
+			}
+
+			result = size - (size_t)index;
+
+			return true;
+		}
+		
+		if((size_t)index >= size)
+			return false;
+
+		result = (size_t)index;
+		
+		return true;
+	}
+	
 	value_t coerce(value_t left, Symbol *name, value_t right)
 	{
 		auto result = raise_cast<Array>(call_argv(right, "coerce", 1, &left));

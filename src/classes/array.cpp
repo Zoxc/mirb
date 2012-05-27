@@ -211,47 +211,33 @@ namespace Mirb
 	{
 		if(size)
 		{
-			if(!Value::is_fixnum(index) || !Value::is_fixnum(size))
-				raise(context->type_error, "Arguments must be instances of Fixnum");
+			size_t start;
 
-			intptr_t start = Fixnum::to_size_t(index);
-			intptr_t length = Fixnum::to_size_t(size);
-			size_t vector_size = self->vector.size();
-
-			if(start < 0)
-			{
-				start = -start;
-
-				if(prelude_unlikely((size_t)start > vector_size))
-					return value_nil;
-				else
-					start = vector_size - (size_t)start;
-			}
-
-			if(prelude_unlikely(length < 1))
+			if(!map_index(Fixnum::to_int(index), self->vector.size(), start))
 				return value_nil;
+			
+			auto length = Fixnum::to_int(raise_cast<Value::Fixnum>(size));
+
+			if(length < 0)
+				return value_nil;
+
+			length = std::min((size_t)length, self->vector.size() - start);
 
 			auto result = Collector::allocate<Array>();
 			
-			if((size_t)start < self->vector.size())
-			{
-				if((size_t)start + (size_t)length > vector_size)
-					length = vector_size - start;
-
-				result->vector.push_entries(&self->vector[start], length);
-			}
+			result->vector.push_entries(&self->vector[start], length);
 
 			return result;
 		}
 
 		if(Value::is_fixnum(index))
 		{
-			size_t i = Fixnum::to_size_t(index);
+			size_t i;
 
-			if(i < self->vector.size())
-				return self->vector[i];
-			else
+			if(!map_index(Fixnum::to_int(index), self->vector.size(), i))
 				return value_nil;
+
+			return self->vector[i];
 		}
 		else if(Value::of_type<Range>(index))
 		{

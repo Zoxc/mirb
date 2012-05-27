@@ -113,16 +113,31 @@ namespace Mirb
 			return value_nil;
 	}
 	
-	value_t String::rb_get(String *self, value_t index)
+	value_t String::rb_get(String *self, value_t index, value_t size)
 	{
+		if(size)
+		{
+			size_t i;
+
+			if(!map_index(Fixnum::to_int(raise_cast<Value::Fixnum>(index)), self->string.size(), i))
+				return String::get("");
+
+			auto length = Fixnum::to_int(raise_cast<Value::Fixnum>(size));
+			
+			if(length < 0)
+				return value_nil;
+
+			return self->string.copy(i, length).to_string();
+		}
+
 		if(Value::is_fixnum(index))
 		{
-			size_t i = Fixnum::to_size_t(index);
+			size_t i;
 
-			if(i < self->string.size())
-				return String::get(self->string[i]);
-			else
-				return String::get("");
+			if(!map_index(Fixnum::to_int(index), self->string.size(), i))
+				return value_nil;
+
+			return String::get(self->string[i]);
 		}
 		else if(Value::of_type<Range>(index))
 		{
@@ -299,7 +314,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
 		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
-		method<Arg::Self<Arg::Class<String>>, Arg::Value, &rb_get>(context->string_class, "[]");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, Arg::Default<Arg::Value>, &rb_get>(context->string_class, "[]");
 		
 		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "length");
 		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "size");
