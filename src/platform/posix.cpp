@@ -95,6 +95,13 @@ namespace Mirb
 				raise("Unable change the current directory to '" + path + "'");
 		}
 
+		bool is_executable(const CharArray &path)
+		{
+			CharArray path_cstr = path.c_str();
+
+			return eaccess(path_cstr.c_str_ref(), X_OK) == 0;
+		}
+
 		bool stat(struct stat &buf, const CharArray &file)
 		{
 			CharArray file_cstr = file.c_str();

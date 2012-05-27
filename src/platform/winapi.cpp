@@ -227,6 +227,11 @@ namespace Mirb
 			});
 		}
 
+		bool is_executable(const CharArray &path)
+		{
+			return false;
+		}
+
 		bool file_exists(const CharArray &path)
 		{
 			return (attributes(path) != INVALID_FILE_ATTRIBUTES);
