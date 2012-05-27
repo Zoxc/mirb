@@ -9,8 +9,13 @@ namespace Mirb
 	class CharArray;
 	class Exception;
 
-	typedef Exception *exception_t;
-	
+	struct InternalException
+	{
+		InternalException(Exception *value) : value(value) {}
+
+		Exception *value;
+	};
+
 	void set_current_exception(Exception *exception);
 	prelude_noreturn void throw_current_exception();
 
@@ -108,9 +113,9 @@ namespace Mirb
 
 			return result;
 		}
-		catch(exception_t e)
+		catch(InternalException e)
 		{
-			set_current_exception(e);
+			set_current_exception(e.value);
 			return nullptr;
 		}
 	}
@@ -122,9 +127,9 @@ namespace Mirb
 			func();
 			return false;
 		}
-		catch(exception_t e)
+		catch(InternalException e)
 		{
-			set_current_exception(e);
+			set_current_exception(e.value);
 			return true;
 		}
 	}

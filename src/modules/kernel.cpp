@@ -204,9 +204,9 @@ namespace Mirb
 
 			return eval(self, Symbol::get("main"), context->object_scope, data, length, full_path, true);
 		}
-		catch(exception_t e)
+		catch(InternalException e)
 		{
-			OnStack<1> os(e);
+			OnStack<1> os(e.value);
 
 			Array::rb_delete(context->loaded_files, full_path.to_string());
 
@@ -301,7 +301,7 @@ namespace Mirb
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 
-		throw exception;
+		throw InternalException(exception);
 	}
 
 	value_t Kernel::backtrace()

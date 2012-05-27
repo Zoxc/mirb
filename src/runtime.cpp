@@ -72,7 +72,7 @@ namespace Mirb
 
 		context->exception = 0;
 
-		throw e;
+		throw InternalException(e);
 	}
 	
 	value_t coerce(value_t left, Symbol *name, value_t right)
@@ -353,7 +353,7 @@ namespace Mirb
 		if(str_result)
 			return str_result;
 		else
-			return cast<String>(Object::to_s(result));
+			return cast<String>(Object::to_s(obj));
 	}
 
 	CharArray pretty_inspect(value_t obj)
@@ -585,7 +585,7 @@ namespace Mirb
 
 	void raise(Class *exception_class, const CharArray &message)
 	{
-		throw create_exception(exception_class, message);
+		throw InternalException(create_exception(exception_class, message));
 	}
 
 	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input)
@@ -798,9 +798,9 @@ namespace Mirb
 
 #ifdef DEBUG
 		}
-		catch(exception_t e)
+		catch(InternalException e)
 		{
-			std::cerr << "Exception crossed call_frame: " << inspect(e).get_string() << std::endl;
+			std::cerr << "Exception crossed call_frame: " << inspect(e.value).get_string() << std::endl;
 			mirb_runtime_abort("Exception crossed call_frame");
 		}
 #endif
