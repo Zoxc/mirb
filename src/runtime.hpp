@@ -13,6 +13,7 @@ namespace Mirb
 	{
 		InternalException(Exception *value) : value(value)
 		{
+			mirb_debug(mirb_debug_assert(context->can_throw));
 			Value::assert_valid((value_t)value);
 		}
 
@@ -105,9 +106,29 @@ namespace Mirb
 	 * compare (calls Ruby code)
 	 */
 	value_t compare(value_t left, value_t right);
+
+#ifdef DEBUG
+	struct CanThrowState
+	{
+		bool old;
+
+		CanThrowState(bool new_value)
+		{
+			old = context->can_throw;
+			context->can_throw = new_value;
+		}
+
+		~CanThrowState()
+		{
+			context->can_throw = old;
+		}
+	};
+#endif
 	
 	template<typename F> value_t trap_exception_as_value(F func)
 	{
+		mirb_debug(CanThrowState state(true));
+		
 		try
 		{
 			value_t result = func();
@@ -125,6 +146,8 @@ namespace Mirb
 
 	template<typename F> bool trap_exception(F func)
 	{
+		mirb_debug(CanThrowState state(true));
+		
 		try
 		{
 			func();

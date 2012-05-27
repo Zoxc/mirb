@@ -12,6 +12,8 @@ namespace Mirb
 		frame(0),
 		globals(8)
 	{
+		mirb_debug(can_throw = false);
+
 		auto start = &object_class;
 
 		while(start != &terminator)

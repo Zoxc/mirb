@@ -228,7 +228,7 @@ namespace Mirb
 		return CharArray(".").to_string();
 	}
 	
-	value_t do_join(JoinSegments &joiner, size_t argc, value_t argv[])
+	void do_join(JoinSegments &joiner, size_t argc, value_t argv[])
 	{
 		for(size_t i = 0; i < argc; ++i)
 		{
@@ -240,12 +240,7 @@ namespace Mirb
 				continue;
 			}
 
-			auto string = raise_cast<String>(argv[i]);
-
-			if(!string)
-				return 0;
-
-			joiner.push(string->string);
+			joiner.push(raise_cast<String>(argv[i])->string);
 		}
 	}
 	

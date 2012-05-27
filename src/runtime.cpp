@@ -670,7 +670,7 @@ namespace Mirb
 
 			CharArray obj_str = pretty_inspect(obj);
 
-			set_current_exception(create_exception(context->name_error, "Undefined method '" + name->string + "' for " + obj_str));
+			raise(context->name_error, "Undefined method '" + name->string + "' for " + obj_str);
 			return 0;
 		}
 
@@ -738,10 +738,8 @@ namespace Mirb
 
 	value_t call_frame(Frame &frame)
 	{
-#ifdef DEBUG
-		try
-		{
-#endif
+		mirb_debug(CanThrowState state(false));
+
 		if(frame.code->scope)
 			Value::assert_valid(frame.code->scope);
 
@@ -793,15 +791,6 @@ namespace Mirb
 		context->frame = frame.prev;
 
 		return result;
-
-#ifdef DEBUG
-		}
-		catch(InternalException e)
-		{
-			std::cerr << "Exception crossed call_frame: " << inspect(e.value).get_string() << std::endl;
-			mirb_runtime_abort("Exception crossed call_frame");
-		}
-#endif
 	}
 
 	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])

@@ -91,6 +91,8 @@ namespace Mirb
 			
 			bool bootstrap;
 
+			mirb_debug(bool can_throw);
+
 			Frame *exception_frame_origin;
 			Frame *frame;
 			
