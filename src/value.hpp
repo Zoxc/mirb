@@ -132,6 +132,8 @@ namespace Mirb
 			Types
 		};
 		
+		extern std::string names[Types];
+		
 		class Header
 		{
 			private:
@@ -336,8 +338,11 @@ namespace Mirb
 		}
 		
 		template<Type type> struct TypeClass {};
+		template<class T> struct TypeTag {};
 		
-		#define mirb_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; }
+		#define mirb_only_typeclass(tag, type) template<> struct TypeClass<tag> { typedef Mirb::type Class; };
+		#define mirb_only_typetag(tag, type) template<> struct TypeTag<Mirb::type> { static const Type value = tag; };
+		#define mirb_typeclass(tag, type) mirb_only_typeclass(tag, type); mirb_only_typetag(tag, type);
 		
 		mirb_typeclass(InternalValueMap, ValueMap);
 		mirb_typeclass(InternalStackFrame, StackFrame);
@@ -355,7 +360,7 @@ namespace Mirb
 		mirb_typeclass(False, Value::Immediate<False>);
 		mirb_typeclass(Nil, Value::Immediate<Nil>);
 		mirb_typeclass(Class, Class);
-		mirb_typeclass(IClass, Class);
+		mirb_only_typeclass(IClass, Class);
 		mirb_typeclass(Module, Module);
 		mirb_typeclass(Object, Object);
 		mirb_typeclass(Symbol, Symbol);

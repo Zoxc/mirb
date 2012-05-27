@@ -155,7 +155,7 @@ namespace Mirb
 				static T *coerce(value_t value)
 				{
 					if(!Mirb::Value::of_type<T>(value))
-						type_error(value, "internal class");
+						type_error(value, "an object of type " + Mirb::Value::names[Mirb::Value::TypeTag<T>::value]);
 					else
 						return cast<T>(value);
 				}

@@ -9,6 +9,45 @@ namespace Mirb
 {
 	namespace Value
 	{
+		std::string names[] = {
+			"None",
+			"FreeBlock",
+			"InternalValueMap",
+			"InternalStackFrame",
+			"InternalTuple",
+			"InternalValueTuple",
+			"InternalVariableBlock",
+			"InternalDocument",
+			"InternalBlock",
+			"InternalScope",
+			"InternalGlobal",
+			"Float",
+			"Range",
+			"Fixnum",
+			"True",
+			"False",
+			"Nil",
+			"Class",
+			"IClass",
+			"Module",
+			"Object",
+			"Symbol",
+			"String",
+			"Regexp",
+			"Array",
+			"Hash",
+			"Method",
+			"Proc",
+			"Exception",
+			"ReturnException",
+			"BreakException",
+			"NextException",
+			"RedoException",
+			"SystemStackError",
+			"IO",
+			"File"
+		};
+
 		struct VerifyFunc
 		{
 			void operator()(const ValueStorage &storage)

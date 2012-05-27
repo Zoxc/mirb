@@ -574,7 +574,7 @@ namespace Mirb
 
 			CharArray expected_str = inspect(expected);
 
-			raise(context->type_error, value_str + " was given when a object of type " + expected_str + " was expected");
+			raise(context->type_error, value_str + " was given when an object of type " + expected_str + " was expected");
 		}
 	}
 	
