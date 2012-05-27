@@ -222,10 +222,10 @@ namespace Mirb
 					return result;
 				}
 				else
-					return "/";
+					return CharArray("/");
 			}
 		
-		return ".";
+		return CharArray(".");
 	}
 	
 	value_t rb_dirname(String *path)

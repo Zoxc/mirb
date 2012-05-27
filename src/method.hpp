@@ -289,46 +289,46 @@ namespace Mirb
 
 	template<value_t(*function)(), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(), function>(flags, module, symbol_cast(name));
 	}
 	
 	template<typename Arg1, value_t(*function)(typename Arg1::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type), function, Arg1>(flags, module, symbol_cast(name));
 	}
 	
 	template<typename Arg1, typename Arg2, value_t(*function)(typename Arg1::Type, typename Arg2::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1, Arg2>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type), function, Arg1, Arg2>(flags, module, symbol_cast(name));
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1, Arg2, Arg3>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), function, Arg1, Arg2, Arg3>(flags, module, symbol_cast(name));
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1, Arg2, Arg3, Arg4>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type), function, Arg1, Arg2, Arg3, Arg4>(flags, module, symbol_cast(name));
 	}
 	
 	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1, Arg2, Arg3, Arg4, Arg5>(flags, module, symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type), function, Arg1, Arg2, Arg3, Arg4, Arg5>(flags, module, symbol_cast(name));
 	}
 	
 	template<value_t(*function)(), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function>(flags, singleton_class(obj), symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(), function>(flags, singleton_class(obj), symbol_cast(name));
 	}
 	
 	template<typename Arg1, value_t(*function)(typename Arg1::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1>(flags, singleton_class(obj), symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type), function, Arg1>(flags, singleton_class(obj), symbol_cast(name));
 	}
 
 	template<typename Arg1, typename Arg2, value_t(*function)(typename Arg1::Type, typename Arg2::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
 	{
-		return MethodGen::generate_method<decltype(function), function, Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name));
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type), function, Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name));
 	}
 };
