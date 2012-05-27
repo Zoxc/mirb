@@ -30,11 +30,18 @@ namespace Mirb
 	{
 		return call_with_options(self->self, self->scope, self, block, argc, argv);
 	}
+	
+	value_t Proc::rb_new(value_t block)
+	{
+		return get_proc(block);
+	}
 
 	void Proc::initialize()
 	{
 		context->proc_class = define_class("Proc", context->object_class);
 		
+		singleton_method<Arg::Block, &rb_new>(context->proc_class, "new");
+
 		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "call");
 		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "[]");
 	}
