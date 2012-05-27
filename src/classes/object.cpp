@@ -131,6 +131,11 @@ namespace Mirb
 		return Value::from_bool(Mirb::kind_of(klass, obj));
 	}
 	
+	value_t Object::respond_to(value_t obj, Symbol *name)
+	{
+		return Value::from_bool(Mirb::respond_to(obj, name) != 0);
+	}
+	
 	value_t nil()
 	{
 		return value_false;
@@ -199,6 +204,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>>(context->object_class, "dup", &rb_dup);
 		method<Arg::Self<Arg::Value>>(context->object_class, "class", &klass);
 		method(context->object_class, "freeze", &dummy);
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>>(context->object_class, "respond_to?", &respond_to);
 		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "is_a?", &kind_of);
 		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
 		method(context->object_class, "frozen?", &dummy);

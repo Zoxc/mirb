@@ -160,6 +160,13 @@ namespace Mirb
 	
 	Method *lookup_method(Module *module, Symbol *name);
 
+	Method *respond_to(value_t obj, Symbol *name);
+	
+	template<typename T> Method *respond_to(value_t obj, T &&name)
+	{
+		return respond_to(obj, symbol_cast(std::forward<T>(name)));
+	}
+
 	/*
 	 * lookup
 	 */

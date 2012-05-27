@@ -336,13 +336,13 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		Method *inspect = lookup_method(internal_class_of(obj), Symbol::from_string("inspect"));
+		Method *inspect = respond_to(obj, "inspect");
 
 		value_t result = 0;
 
-		if(inspect && (inspect != context->inspect_method || lookup_method(internal_class_of(obj), Symbol::from_string("to_s"))))
+		if(inspect && (inspect != context->inspect_method || respond_to(obj, "to_s")))
 		{
-			result = call(obj, "inspect");
+			result = call_argv(inspect, obj, Symbol::get("inspect"), value_nil, 0, 0);
 		}
 
 		if(!result)
@@ -657,6 +657,11 @@ namespace Mirb
 		return 0;
 	}
 	
+	Method *respond_to(value_t obj, Symbol *name)
+	{
+		return lookup_method(internal_class_of(obj), name);
+	}
+
 	Method *lookup(value_t obj, Symbol *name)
 	{
 		Method *result = lookup_method(internal_class_of(obj), name);
