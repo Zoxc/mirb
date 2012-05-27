@@ -362,8 +362,13 @@ namespace Mirb
 					}
 					else
 					{
-						func(ref(var));
-						return ref(var);
+						var_t store = reuse(temp);
+
+						func(store);
+
+						gen<MoveOp>(ref(var), store);
+
+						return store;
 					}
 				}
 		
