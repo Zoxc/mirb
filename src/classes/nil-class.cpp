@@ -34,11 +34,11 @@ namespace Mirb
 	
 	void NilClass::initialize()
 	{
-		method<Arg::Value>(context->nil_class, "^", &rb_xor);
-		method(context->nil_class, "to_i", &to_i);
-		method(context->nil_class, "to_s", &to_s);
-		method(context->nil_class, "inspect", &inspect);
-		method(context->nil_class, "nil", &nil);
+		method<Arg::Value, &rb_xor>(context->nil_class, "^");
+		method<&to_i>(context->nil_class, "to_i");
+		method<&to_s>(context->nil_class, "to_s");
+		method<&inspect>(context->nil_class, "inspect");
+		method<&nil>(context->nil_class, "nil?");
 
 		set_const(context->object_class, Symbol::get("NIL"), value_nil);
 	};

@@ -48,8 +48,8 @@ namespace Mirb
 	{
 		include_module(context->numeric_class, context->comparable_module);
 		
-		method<Arg::Self<Arg::Value>>(context->numeric_class, "nonzero?", &nonzero);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->numeric_class, "coerce", &coerce);
+		method<Arg::Self<Arg::Value>, &nonzero>(context->numeric_class, "nonzero?");
+		method<Arg::Self<Arg::Value>, Arg::Value, &coerce>(context->numeric_class, "coerce");
 	}
 };
 

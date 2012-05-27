@@ -93,13 +93,12 @@ namespace Mirb
 			return value;
 		};
 		
-		Method *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor, void *function)
+		Method *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor)
 		{
 			Block *block = Collector::allocate_pinned<Block>(nullptr);
 
 			Value::assert_valid(module);
 
-			block->function = function;
 			block->executor = executor;
 			block->min_args = info.min;
 			block->max_args = info.any_arg ? (size_t)-1 : info.max;

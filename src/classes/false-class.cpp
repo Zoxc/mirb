@@ -18,8 +18,8 @@ namespace Mirb
 	
 	void FalseClass::initialize()
 	{
-		method<Arg::Value>(context->false_class, "^", &rb_xor);
-		method(context->false_class, "to_s", &to_s);
+		method<Arg::Value, &rb_xor>(context->false_class, "^");
+		method<&to_s>(context->false_class, "to_s");
 
 		set_const(context->object_class, Symbol::get("FALSE"), value_false);
 	};

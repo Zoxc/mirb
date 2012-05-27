@@ -80,8 +80,8 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		method<Arg::Self<Arg::Class<Class>>>(context->class_class, "to_s", &to_s);
-		method<Arg::Self<Arg::Class<Module>>>(context->class_class, "superclass", &rb_superclass);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->class_class, "new", &rb_new);
+		method<Arg::Self<Arg::Class<Class>>, &to_s>(context->class_class, "to_s");
+		method<Arg::Self<Arg::Class<Module>>, &rb_superclass>(context->class_class, "superclass");
+		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &rb_new>(context->class_class, "new");
 	}
 };

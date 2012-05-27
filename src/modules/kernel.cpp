@@ -334,19 +334,19 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
-		method<Arg::Value>(context->kernel_module, "Array", &cast_array);
-		method(context->kernel_module, "block_given?", &block_given);
-		method<Arg::Block>(context->kernel_module, "at_exit", &at_exit);
-		method<Arg::Block>(context->kernel_module, "proc", &proc);
-		method<Arg::Block>(context->kernel_module, "lambda", &proc);
-		method<Arg::Block>(context->kernel_module, "benchmark", &benchmark);
-		method(context->kernel_module, "backtrace", &backtrace);
-		method<Arg::Self<Arg::Value>, Arg::Class<String>>(context->kernel_module, "eval", &eval);
-		method<Arg::Count, Arg::Values>(context->kernel_module, "print", &print);
-		method<Arg::Count, Arg::Values>(context->kernel_module, "puts", &puts);
-		method<Arg::Class<String>>(context->kernel_module, "load", &load);
-		method<Arg::Class<String>>(context->kernel_module, "require", &require);
-		method<Arg::Class<String>>(context->kernel_module, "require_relative", &require_relative);
-		method<Arg::Default<Arg::Value>, Arg::Default<Arg::Class<String>>>(context->kernel_module, "raise", &raise);
+		method<Arg::Value, &cast_array>(context->kernel_module, "Array");
+		method<&block_given>(context->kernel_module, "block_given?");
+		method<Arg::Block, &at_exit>(context->kernel_module, "at_exit");
+		method<Arg::Block, &proc>(context->kernel_module, "proc");
+		method<Arg::Block, &proc>(context->kernel_module, "lambda");
+		method<Arg::Block, &benchmark>(context->kernel_module, "benchmark");
+		method<&backtrace>(context->kernel_module, "backtrace");
+		method<Arg::Self<Arg::Value>, Arg::Class<String>, &eval>(context->kernel_module, "eval");
+		method<Arg::Count, Arg::Values, &print>(context->kernel_module, "print");
+		method<Arg::Count, Arg::Values, &puts>(context->kernel_module, "puts");
+		method<Arg::Class<String>, &load>(context->kernel_module, "load");
+		method<Arg::Class<String>, &require>(context->kernel_module, "require");
+		method<Arg::Class<String>, &require_relative>(context->kernel_module, "require_relative");
+		method<Arg::Default<Arg::Value>, Arg::Default<Arg::Class<String>>, &raise>(context->kernel_module, "raise");
 	}
 };

@@ -192,35 +192,35 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Value>(context->object_class, "instance_variable_set", &instance_variable_set);
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>>(context->object_class, "instance_variable_get", &instance_variable_get);
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Value, &instance_variable_set>(context->object_class, "instance_variable_set");
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, &instance_variable_get>(context->object_class, "instance_variable_get");
 
-		method<Arg::Self<Arg::Value>>(context->object_class, "object_id", &object_id);
-		method<Arg::Self<Arg::Value>>(context->object_class, "__id__", &object_id);
-		method<Arg::Count>(context->object_class, "initialize", &variadic_dummy);
-		context->inspect_method = method<Arg::Self<Arg::Value>>(context->object_class, "inspect", &rb_inspect);
-		method(context->object_class, "nil?", &nil);
-		method<Arg::Self<Arg::Value>>(context->object_class, "to_s", &to_s);
-		method<Arg::Self<Arg::Value>>(context->object_class, "dup", &rb_dup);
-		method<Arg::Self<Arg::Value>>(context->object_class, "class", &klass);
-		method(context->object_class, "freeze", &dummy);
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>>(context->object_class, "respond_to?", &respond_to);
-		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "is_a?", &kind_of);
-		method<Arg::Self<Arg::Value>, Arg::Class<Class>>(context->object_class, "kind_of?", &kind_of);
-		method(context->object_class, "frozen?", &dummy);
-		method<Arg::Value>(context->object_class, "=~", &pattern);
-		method<Arg::Value>(context->object_class, "initialize_copy", &initialize_copy);
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values>(context->object_class, "extend", &extend);
-		method<Arg::Self<Arg::Value>, Arg::Block>(context->object_class, "tap", &tap);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "equal?", &equal);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "eql?", &equal);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "==", &equal);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "===", &equal);
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->object_class, "!=", &not_equal);
-		method<Arg::Self<Arg::Value>>(context->object_class, "!", &rb_not);
-		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block>(context->object_class, "instance_eval", &instance_eval);
+		method<Arg::Self<Arg::Value>, &object_id>(context->object_class, "object_id");
+		method<Arg::Self<Arg::Value>, &object_id>(context->object_class, "__id__");
+		method<Arg::Count, &variadic_dummy>(context->object_class, "initialize");
+		context->inspect_method = method<Arg::Self<Arg::Value>, &rb_inspect>(context->object_class, "inspect");
+		method<&nil>(context->object_class, "nil?");
+		method<Arg::Self<Arg::Value>, &to_s>(context->object_class, "to_s");
+		method<Arg::Self<Arg::Value>, &rb_dup>(context->object_class, "dup");
+		method<Arg::Self<Arg::Value>, &klass>(context->object_class, "class");
+		method<&dummy>(context->object_class, "freeze");
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, &respond_to>(context->object_class, "respond_to?");
+		method<Arg::Self<Arg::Value>, Arg::Class<Class>, &kind_of>(context->object_class, "is_a?");
+		method<Arg::Self<Arg::Value>, Arg::Class<Class>, &kind_of>(context->object_class, "kind_of?");
+		method<&dummy>(context->object_class, "frozen?");
+		method<Arg::Value, &pattern>(context->object_class, "=~");
+		method<Arg::Value, &initialize_copy>(context->object_class, "initialize_copy");
+		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &extend>(context->object_class, "extend");
+		method<Arg::Self<Arg::Value>, Arg::Block, &tap>(context->object_class, "tap");
+		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "equal?");
+		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "eql?");
+		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "==");
+		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "===");
+		method<Arg::Self<Arg::Value>, Arg::Value, &not_equal>(context->object_class, "!=");
+		method<Arg::Self<Arg::Value>, &rb_not>(context->object_class, "!");
+		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
 
-		singleton_method<Arg::Self<Arg::Class<Class>>>(context->object_class, "allocate", &allocate);
+		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->object_class, "allocate");
 	}
 };
 

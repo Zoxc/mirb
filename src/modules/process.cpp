@@ -13,6 +13,6 @@ namespace Mirb
 	{
 		context->process_module = define_module("Process");
 
-		singleton_method<>(context->process_module, "pid", &pid);
+		singleton_method<&pid>(context->process_module, "pid");
 	}
 };

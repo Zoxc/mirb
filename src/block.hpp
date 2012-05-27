@@ -139,11 +139,7 @@ namespace Mirb
 			Document *document;
 			size_t var_words;
 
-			union
-			{
-				const char *opcodes;
-				void *function;
-			};
+			const char *opcodes;
 
 			size_t min_args;
 			size_t max_args;

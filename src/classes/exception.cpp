@@ -196,7 +196,10 @@ namespace Mirb
 	
 	value_t Exception::to_s(Exception *self)
 	{
-		return self->message;
+		if(self->message)
+			return self->message;
+		else
+			return value_nil;
 	}
 
 	value_t Exception::rb_backtrace(Exception *self)
@@ -218,12 +221,12 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Arg::Self<Arg::Class<Class>>>(context->exception_class, "allocate", &allocate);
+		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->exception_class, "allocate");
 
-		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<String>>(context->exception_class, "initialize", &rb_initialize);
-		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "backtrace", &rb_backtrace);
-		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "message", &to_s);
-		method<Arg::Self<Arg::Class<Exception>>>(context->exception_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<String>, &rb_initialize>(context->exception_class, "initialize");
+		method<Arg::Self<Arg::Class<Exception>>, &rb_backtrace>(context->exception_class, "backtrace");
+		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "message");
+		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "to_s");
 	}
 };
 

@@ -1019,8 +1019,8 @@ namespace Mirb
 	{
 		context->main = Collector::allocate<Object>(context->object_class);
 
-		singleton_method(context->main, "to_s", &main_to_s);
-		singleton_method<Arg::Count, Arg::Values>(context->main, "include", &main_include);
+		singleton_method<&main_to_s>(context->main, "to_s");
+		singleton_method<Arg::Count, Arg::Values, &main_include>(context->main, "include");
 	}
 	
 	const size_t buffer_zone = 0x1000 * 16;

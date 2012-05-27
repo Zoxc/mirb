@@ -114,12 +114,12 @@ namespace Mirb
 	{
 		context->regexp_class = define_class("Regexp", context->object_class);
 		
-		method<Arg::Self<Arg::Class<Regexp>>>(context->regexp_class, "to_s", &to_s);
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value>(context->regexp_class, "initialize", &rb_initialize);
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>>(context->regexp_class, "match", &match);
+		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
+		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
+		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &match>(context->regexp_class, "match");
 
-		singleton_method<Arg::Class<String>>(context->regexp_class, "quote", &quote);
-		singleton_method<Arg::Self<Arg::Class<Class>>>(context->regexp_class, "allocate", &rb_allocate);
+		singleton_method<Arg::Class<String>, &quote>(context->regexp_class, "quote");
+		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->regexp_class, "allocate");
 	}
 };
 

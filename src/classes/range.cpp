@@ -86,7 +86,7 @@ namespace Mirb
 	{
 		context->range_class = define_class("Range", context->object_class);
 		
-		method<Arg::Self<Arg::Class<Range>>>(context->range_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Class<Range>>, &to_s>(context->range_class, "to_s");
 	}
 };
 

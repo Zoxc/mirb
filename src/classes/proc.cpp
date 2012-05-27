@@ -35,8 +35,8 @@ namespace Mirb
 	{
 		context->proc_class = define_class("Proc", context->object_class);
 		
-		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values>(context->proc_class, "call", &call);
-		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values>(context->proc_class, "[]", &call);
+		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "call");
+		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "[]");
 	}
 };
 

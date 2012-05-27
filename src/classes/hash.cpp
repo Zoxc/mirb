@@ -78,13 +78,13 @@ namespace Mirb
 	{
 		context->hash_class = define_class("Hash", context->object_class);
 		
-		singleton_method<Arg::Self<Arg::Class<Class>>>(context->hash_class, "allocate", &allocate);
+		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->hash_class, "allocate");
 		
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Block>(context->hash_class, "each", &each);
+		method<Arg::Self<Arg::Class<Hash>>, Arg::Block, &each>(context->hash_class, "each");
 
-		method<Arg::Self<Arg::Class<Hash>>>(context->hash_class, "to_s", &to_s);
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Value>(context->hash_class, "[]", &get);
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, Arg::Value>(context->hash_class, "[]=", &set);
+		method<Arg::Self<Arg::Class<Hash>>, &to_s>(context->hash_class, "to_s");
+		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, &get>(context->hash_class, "[]");
+		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, Arg::Value, &set>(context->hash_class, "[]=");
 	}
 };
 

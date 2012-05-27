@@ -200,27 +200,27 @@ namespace Mirb
 
 	void String::initialize()
 	{
-		method<Arg::Self<Arg::Value>, Arg::Value>(context->string_class, "match", &match);
-		method<Arg::Self<Arg::Value>>(context->string_class, "to_s", &to_s);
+		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
+		method<Arg::Self<Arg::Value>, &to_s>(context->string_class, "to_s");
 		
-		method<Arg::Self<Arg::Class<String>>, Arg::Value>(context->string_class, "[]", &rb_get);
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, &rb_get>(context->string_class, "[]");
 
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "downcase", &downcase);
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "downcase!", &downcase_self);
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "upcase", &upcase);
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "upcase!", &upcase_self);
+		method<Arg::Self<Arg::Class<String>>, &downcase>(context->string_class, "downcase");
+		method<Arg::Self<Arg::Class<String>>, &downcase_self>(context->string_class, "downcase!");
+		method<Arg::Self<Arg::Class<String>>, &upcase>(context->string_class, "upcase");
+		method<Arg::Self<Arg::Class<String>>, &upcase_self>(context->string_class, "upcase!");
 		
-		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>>(context->string_class, "ljust", &ljust);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "split", &split);
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "inspect", &inspect);
-		method<Arg::Self<Arg::Class<String>>>(context->string_class, "to_sym", &to_sym);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "<=>", &String::compare);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "==", &equal);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "===", &equal);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "concat", &concat);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "<<", &concat);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>>(context->string_class, "+", &add);
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, Arg::Class<String>>(context->string_class, "tr", &tr);
+		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &split>(context->string_class, "split");
+		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
+		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &String::compare>(context->string_class, "<=>");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &equal>(context->string_class, "==");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &equal>(context->string_class, "===");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &concat>(context->string_class, "concat");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &concat>(context->string_class, "<<");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &add>(context->string_class, "+");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, Arg::Class<String>, &tr>(context->string_class, "tr");
 	}
 };
 

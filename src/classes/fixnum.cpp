@@ -119,20 +119,20 @@ namespace Mirb
 	
 	void Fixnum::initialize()
 	{
-		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "to_s", &to_s);
-		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "to_f", &to_f);
-		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "zero?", &zero);
-		method<Arg::Self<Arg::Fixnum>, Arg::Block>(context->fixnum_class, "times", &times);
-		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum, Arg::Block>(context->fixnum_class, "upto", &upto);
+		method<Arg::Self<Arg::Fixnum>, &to_s>(context->fixnum_class, "to_s");
+		method<Arg::Self<Arg::Fixnum>, &to_f>(context->fixnum_class, "to_f");
+		method<Arg::Self<Arg::Fixnum>, &zero>(context->fixnum_class, "zero?");
+		method<Arg::Self<Arg::Fixnum>, Arg::Block, &times>(context->fixnum_class, "times");
+		method<Arg::Self<Arg::Fixnum>, Arg::Fixnum, Arg::Block, &upto>(context->fixnum_class, "upto");
 		
-		method<Arg::Self<Arg::Fixnum>>(context->fixnum_class, "-@", &neg);
+		method<Arg::Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "+", &add);
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "-", &sub);
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "*", &mul);
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "/", &div);
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "%", &mod);
-		method<Arg::Self<Arg::Fixnum>, Arg::Value>(context->fixnum_class, "<=>", &compare);
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &add>(context->fixnum_class, "+");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &sub>(context->fixnum_class, "-");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &mul>(context->fixnum_class, "*");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &div>(context->fixnum_class, "/");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &mod>(context->fixnum_class, "%");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &compare>(context->fixnum_class, "<=>");
 	}
 };
 
