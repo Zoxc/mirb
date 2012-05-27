@@ -17,9 +17,6 @@ namespace Mirb
 	{
 		auto proc = get_proc(block);
 
-		if(!proc)
-			return 0;
-
 		context->at_exits.push(block);
 
 		return block;
@@ -258,14 +255,8 @@ namespace Mirb
 			if(Value::type(arg) != Value::String)
 				arg = call(arg, "to_s");
 			
-			if(!arg)
-				return 0;
-			
 			String *str = raise_cast<String>(arg);
 
-			if(!str)
-				return 0;
-			
 			std::cout << str->string.get_string() << "\n";
 		}
 		
@@ -281,9 +272,6 @@ namespace Mirb
 		{
 			instance_of = raise_cast<Class>(first);
 
-			if(!instance_of)
-				return 0;
-
 			message = str;
 		}
 		else if(first)
@@ -293,10 +281,7 @@ namespace Mirb
 			else if(Value::type(first) == Value::Class && subclass_of(context->exception_class, cast<Class>(first)))
 				instance_of = cast<Class>(first);
 			else
-			{
 				type_error(first, "Exception subclass or String");
-				return 0;
-			}
 		}
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());

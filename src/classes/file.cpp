@@ -208,10 +208,10 @@ namespace Mirb
 		
 		return result.copy(++i, result.size());
 	}
-
-	value_t dirname(String *path)
+	
+	CharArray File::dirname(CharArray path)
 	{
-		CharArray result = File::normalize_path(path->string);
+		CharArray result = File::normalize_path(path);
 
 		for(size_t i = result.size(); i-- > 0;)
 			if(result[i] == '/')
@@ -219,13 +219,18 @@ namespace Mirb
 				if(i)
 				{
 					result.shrink(i);
-					return result.to_string();
+					return result;
 				}
 				else
-					return CharArray("/").to_string();
+					return "/";
 			}
 		
-		return CharArray(".").to_string();
+		return ".";
+	}
+	
+	value_t rb_dirname(String *path)
+	{
+		return File::dirname(path->string).to_string();
 	}
 	
 	void do_join(JoinSegments &joiner, size_t argc, value_t argv[])
@@ -287,7 +292,7 @@ namespace Mirb
 		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch");
 
 		singleton_method<Arg::Class<String>, Arg::Default<Arg::Class<String>>, &rb_expand_path>(context->file_class, "expand_path");
-		singleton_method<Arg::Class<String>, &dirname>(context->file_class, "dirname");
+		singleton_method<Arg::Class<String>, &rb_dirname>(context->file_class, "dirname");
 		singleton_method<Arg::Count, Arg::Values, &rb_join>(context->file_class, "join");
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::get("/"));

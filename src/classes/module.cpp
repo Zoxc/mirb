@@ -66,11 +66,8 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(!call_argv(argv[i], "append_features", 1, &obj))
-				return 0;
-			
-			if(!call_argv(argv[i], "included", 1, &obj))
-				return 0;
+			call_argv(argv[i], "append_features", 1, &obj);
+			call_argv(argv[i], "included", 1, &obj);
 		}
 
 		return obj;
@@ -119,9 +116,6 @@ namespace Mirb
 		for(size_t i = 0; i < argc; ++i)
 		{
 			auto symbol = raise_cast<Symbol>(argv[i]);
-
-			if(!symbol)
-				return 0;
 
 			if(read)
 				attr(obj, symbol, false);
@@ -205,9 +199,6 @@ namespace Mirb
 		{
 			auto symbol = raise_cast<Symbol>(argv[i]);
 
-			if(!symbol)
-				return 0;
-			
 			auto method = obj->get_method(symbol);
 
 			if(prelude_unlikely(!method))

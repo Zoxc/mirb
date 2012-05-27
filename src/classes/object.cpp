@@ -19,8 +19,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		if(!yield_argv(block, 1, &obj))
-			return 0;
+		yield_argv(block, 1, &obj);
 
 		return obj;
 	}
@@ -89,10 +88,7 @@ namespace Mirb
 		{
 			Proc *proc = get_proc(block);
 
-			if(!proc)
-				return 0;
-			else
-				return Proc::call_with_options(obj, context->frame->prev->scope, proc, value_nil, 0, nullptr);
+			return Proc::call_with_options(obj, context->frame->prev->scope, proc, value_nil, 0, nullptr);
 		}
 		else
 		{
@@ -113,11 +109,8 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			if(!call_argv(argv[i], "extend_object", 1, &obj))
-				return 0;
-			
-			if(!call_argv(argv[i], "extended", 1, &obj))
-				return 0;
+			call_argv(argv[i], "extend_object", 1, &obj);
+			call_argv(argv[i], "extended", 1, &obj);
 		}
 
 		return obj;
@@ -158,13 +151,9 @@ namespace Mirb
 	{
 		value_t result = Value::virtual_do<DupObject>(Value::type(obj), obj);
 
-		if(!result)
-			return 0;
-
 		OnStack<1> os(result);
 
-		if(!call_argv(result, "initialize_copy", 1, &obj))
-			return 0;
+		call_argv(result, "initialize_copy", 1, &obj);
 
 		return result;
 	}

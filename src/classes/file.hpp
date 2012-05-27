@@ -33,6 +33,7 @@ namespace Mirb
 			static bool fnmatch(const CharArray &path, const CharArray &pattern);
 			static CharArray normalize_path(const CharArray &path);
 			static CharArray basename(CharArray path);
+			static CharArray dirname(CharArray path);
 			static value_t rb_expand_path(String *relative, String *absolute);
 			static CharArray expand_path(CharArray relative);
 			static CharArray expand_path(CharArray relative, CharArray from);

@@ -13,7 +13,6 @@ namespace Mirb
 	value_t ValueMapData::raise()
 	{
 		Mirb::raise(context->runtime_error, "Recursive function calls");
-		return 0;
 	}
 };
 

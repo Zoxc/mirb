@@ -59,7 +59,6 @@
     <ClInclude Include="..\..\src\modules\comparable.hpp" />
     <ClInclude Include="..\..\src\modules\enumerable.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
-    <ClInclude Include="..\..\src\modules\process.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\platform\platform.hpp" />
@@ -127,7 +126,6 @@
     <ClCompile Include="..\..\src\modules\comparable.cpp" />
     <ClCompile Include="..\..\src\modules\enumerable.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
-    <ClCompile Include="..\..\src\modules\process.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
@@ -178,9 +176,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\..\..\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\..\..\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

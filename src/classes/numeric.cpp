@@ -11,9 +11,6 @@ namespace Mirb
 	{
 		value_t result = call(obj, "zero?");
 
-		if(!result)
-			return 0;
-
 		return Value::from_bool(!Value::test(result));
 	}
 	
@@ -32,15 +29,8 @@ namespace Mirb
 		OnStack<1> os(obj);
 		
 		value_t left = convert(other);
-
-		if(!left)
-			return 0;
-
 		value_t right = convert(obj);
 		
-		if(!right)
-			return 0;
-
 		return Array::allocate_pair(left, right);
 	}
 

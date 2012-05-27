@@ -91,8 +91,7 @@ namespace Mirb
 			
 				for(size_t i = 0; i < argc; i += 2)
 				{
-					if(!HashAccess::set(hash, argv[i], argv[i + 1]))
-						return 0;
+					HashAccess::set(hash, argv[i], argv[i + 1]);
 				}
 
 				return hash;

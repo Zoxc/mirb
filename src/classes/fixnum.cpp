@@ -54,8 +54,7 @@ namespace Mirb
 			return from_int(obj);
 
 		while(obj--)
-			if(!yield(block))
-				return 0;
+			yield(block);
 
 		return from_int(obj);
 	}

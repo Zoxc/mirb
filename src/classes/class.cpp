@@ -72,13 +72,9 @@ namespace Mirb
 	{
 		value_t result = call(obj, "allocate");
 
-		if(!result)
-			return 0;
-
 		OnStack<1> os(result);
 
-		if(!call_argv(result, "initialize", argc, argv))
-			return 0;
+		call_argv(result, "initialize", argc, argv);
 
 		return result;
 	}

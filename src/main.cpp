@@ -42,6 +42,20 @@ void report_exception()
 	std::cerr << "\n";
 }
 
+bool load_core_lib(const char *executable)
+{
+	CharArray path = File::join(File::dirname(File::expand_path((const char_t *)executable)), "corelib");
+
+	if(trap_exception([&] {
+		Kernel::load(File::join(path, "core.rb").to_string());
+	}))
+	{
+		report_exception();
+		return false;
+	}
+	return true;
+}
+
 int main(int argc, const char *argv[])
 {
 	Mirb::initialize(true);
@@ -97,6 +111,8 @@ int main(int argc, const char *argv[])
 			return result;
 		}
 
+		load_core_lib(argv[0]);
+
 		CharArray exec = CharArray((const char_t *)argv[index++]);
 		
 		Array *new_argv = Collector::allocate<Array>();
@@ -117,6 +133,10 @@ int main(int argc, const char *argv[])
 		return 0;
 	}
 	
+	load_core_lib(argv[0]);
+
+	set_const(context->object_class, Symbol::get("ARGV"), new (collector) Array);
+
 	while(1)
 	{
 		mirb_debug(Collector::collect());

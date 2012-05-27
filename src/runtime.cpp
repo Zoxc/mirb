@@ -31,7 +31,6 @@
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
-#include "modules/process.hpp"
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
@@ -488,8 +487,6 @@ namespace Mirb
 		auto obj_str = inspect(obj);
 
 		raise(context->name_error, "Uninitialized constant " + obj_str + "::" + name->string);
-
-		return 0;
 	}
 
 	value_t get_const(Tuple<Module> *scope, Symbol *name)
@@ -695,7 +692,6 @@ namespace Mirb
 			CharArray obj_str = pretty_inspect(obj);
 
 			raise(context->name_error, "Undefined method '" + name->string + "' for " + obj_str);
-			return 0;
 		}
 
 		return result;
@@ -712,7 +708,6 @@ namespace Mirb
 			CharArray module_value = pretty_inspect(module);
 
 			raise(context->name_error, "No superclass method '" + name->string + "' for " + module_value);
-			return 0;
 		}
 
 		return result;
@@ -1164,8 +1159,6 @@ namespace Mirb
 		Dir::initialize();
 		Regexp::initialize();
 		
-		Process::initialize();
-		
 		setup_main();
 
 		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::get("mirb"));
@@ -1176,10 +1169,6 @@ namespace Mirb
 #else
 		set_const(context->object_class, Symbol::get("RUBY_PLATFORM"), String::get("mirb-posix"));
 #endif
-
-		set_const(context->object_class, Symbol::get("ARGV"), Collector::allocate<Array>());
-		set_const(context->object_class, Symbol::get("ENV"), Collector::allocate<Hash>());
-
 		context->loaded_files = Collector::allocate<Array>();
 
 		{
@@ -1191,10 +1180,6 @@ namespace Mirb
 			set_global_object(Symbol::get("$:"), global);
 			set_global_object(Symbol::get("$LOAD_PATH"), global);
 		}
-
-		set_global(Symbol::get("$stderr"), Collector::allocate<Object>(context->object_class));
-		set_global(Symbol::get("$stdout"), Collector::allocate<Object>(context->object_class));
-		set_global(Symbol::get("$stdin"), Collector::allocate<Object>(context->object_class));
 
 		mirb_debug(Collector::collect());
 	}

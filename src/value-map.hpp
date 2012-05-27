@@ -70,9 +70,6 @@ namespace Mirb
 					{
 						value_t test = ValueMapData::call(slot, &key);
 
-						if(!test)
-							return 0;
-
 						if(Value::test(test))
 							return match(index);
 					}

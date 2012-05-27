@@ -8,9 +8,6 @@ namespace Mirb
 	{
 		value_t result = compare(obj, other);
 		
-		if(!result)
-			return 0;
-
 		return Value::from_bool(func(Fixnum::to_int(result)));
 	}
 	

@@ -23,8 +23,7 @@ namespace Mirb
 	{
 		OnStack<1> os(value);
 
-		if(!HashAccess::set(self, key, value))
-			return 0;
+		HashAccess::set(self, key, value);
 
 		return value;
 	}
@@ -36,7 +35,7 @@ namespace Mirb
 		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
-		if(!HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
 
 			OnStack<1> os(value);
 			
@@ -46,8 +45,7 @@ namespace Mirb
 			result += ", ";
 
 			return true;
-		}))
-			return 0;
+		});
 
 		if(result.size() > 1)
 			result.shrink(result.size() - 2);
@@ -61,15 +59,15 @@ namespace Mirb
 	{
 		OnStack<2> os(self, block);
 
-		if(!HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
 			value_t argv[2];
 			
 			argv[0] = key;
 			argv[1] = value;
 			
-			return yield_argv(block, 2, argv) != 0; // TODO: Replace with variadic call
-		}))
-			return 0;
+			yield_argv(block, 2, argv);
+			return true;
+		});
 
 		return self;
 	}

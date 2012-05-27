@@ -85,9 +85,6 @@ namespace Mirb
 			{
 				value_t result = call_argv(self->vector[i], context->syms.equal, 1, &other->vector[j]);
 
-				if(!result)
-					return 0;
-
 				if(Value::test(result))
 				{
 					found = true;
@@ -179,9 +176,6 @@ namespace Mirb
 					else
 						desc = raise_cast<String>(call(value, "to_s"));
 
-					if(!desc)
-						return 0;
-					
 					result += desc->string;
 				}
 			}
@@ -322,8 +316,7 @@ namespace Mirb
 		
 		OnStack<1> os(result);
 
-		if(!sort(result))
-			return 0;
+		sort(result);
 
 		return result;
 	}
