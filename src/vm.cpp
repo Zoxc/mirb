@@ -600,8 +600,6 @@ exception_block_handler: // The test block will jump back here
 					ip = ip_start + handler->rescue_label.address;
 					OpContinue; // Execute rescue block
 				}
-
-				current_exception_block = loop_exception_block;
 			}
 			else if(current_exception_block->loop)
 			{
