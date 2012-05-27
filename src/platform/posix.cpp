@@ -22,6 +22,15 @@ namespace Mirb
 			raise(context->system_call_error, msg);
 		}
 		
+		double get_time()
+		{
+			timeval time;
+
+			gettimeofday(&time, 0);
+
+			return time.tv_sec + (double)time.tv_usec / 1000000;
+		}
+
 		size_t stack_start()
 		{
 			char dummy;

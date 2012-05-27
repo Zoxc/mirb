@@ -15,7 +15,7 @@ namespace Mirb
 {
 	value_t Kernel::at_exit(value_t block)
 	{
-		auto proc = get_proc(block);
+		get_proc(block);
 
 		context->at_exits.push(block);
 
