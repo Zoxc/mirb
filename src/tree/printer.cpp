@@ -166,7 +166,7 @@ namespace Mirb
 				
 			case Tree::SimpleNode::Global:
 			{
-				auto target = (Tree::IVarNode *)node;
+				auto target = (Tree::GlobalNode *)node;
 				
 				return print_symbol(target->name);
 			};
