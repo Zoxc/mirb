@@ -35,14 +35,14 @@ namespace Mirb
 			return frame.block;
 		}
 
-		Count::Type Count::apply(Frame &frame, State &)
+		Count::Type Count::apply(Frame &frame, State &state)
 		{
-			return frame.argc;
+			return frame.argc - state.index;
 		}
 
-		Values::Type Values::apply(Frame &frame, State &)
+		Values::Type Values::apply(Frame &frame, State &state)
 		{
-			return frame.argv;
+			return &frame.argv[state.index];
 		}
 		
 		Fixnum::Type Fixnum::coerce(value_t value)

@@ -190,6 +190,11 @@ namespace Mirb
 		return get_var(self, name);
 	}
 	
+	value_t rb_send(value_t self, Symbol *name, size_t argc, value_t argv[])
+	{
+		return call_argv(self, name, argc, argv);
+	}
+	
 	void Object::initialize()
 	{
 		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Value, &instance_variable_set>(context->object_class, "instance_variable_set");
@@ -219,6 +224,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value, &not_equal>(context->object_class, "!=");
 		method<Arg::Self<Arg::Value>, &rb_not>(context->object_class, "!");
 		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
+		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
 
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->object_class, "allocate");
 	}
