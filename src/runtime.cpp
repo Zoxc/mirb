@@ -5,29 +5,7 @@
 #include "compiler.hpp"
 #include "document.hpp"
 #include "global.hpp"
-#include "classes/object.hpp"
-#include "classes/module.hpp"
-#include "classes/symbol.hpp"
-#include "classes/class.hpp"
-#include "classes/hash.hpp"
-#include "classes/fixnum.hpp"
-#include "classes/numeric.hpp"
-#include "classes/integer.hpp"
-#include "classes/true-class.hpp"
-#include "classes/false-class.hpp"
-#include "classes/nil-class.hpp"
-#include "classes/string.hpp"
-#include "classes/regexp.hpp"
-#include "classes/proc.hpp"
-#include "classes/array.hpp"
-#include "classes/float.hpp"
-#include "classes/exception.hpp"
-#include "classes/exceptions.hpp"
-#include "classes/io.hpp"
-#include "classes/file.hpp"
-#include "classes/dir.hpp"
-#include "classes/range.hpp"
-#include "classes/time.hpp"
+#include "classes.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
@@ -1149,6 +1127,7 @@ namespace Mirb
 		Hash::initialize();
 		Range::initialize();
 		Exception::initialize();
+		Bignum::initialize();
 		Time::initialize();
 		initialize_exceptions();
 		

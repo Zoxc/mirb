@@ -32,6 +32,7 @@ namespace Mirb
 	class Symbol;
 	class String;
 	class Regexp;
+	class Bignum;
 	class Method;
 	class Array;
 	class Hash;
@@ -117,6 +118,7 @@ namespace Mirb
 			Symbol,
 			String,
 			Regexp,
+			Bignum,
 			Array,
 			Hash,
 			Method,
@@ -292,6 +294,9 @@ namespace Mirb
 				case Regexp:
 					return T<Regexp>::func(std::forward<Arg>(arg));
 
+				case Bignum:
+					return T<Bignum>::func(std::forward<Arg>(arg));
+
 				case Array:
 					return T<Array>::func(std::forward<Arg>(arg));
 
@@ -366,6 +371,7 @@ namespace Mirb
 		mirb_typeclass(Symbol, Symbol);
 		mirb_typeclass(String, String);
 		mirb_typeclass(Regexp, Regexp);
+		mirb_typeclass(Bignum, Bignum);
 		mirb_typeclass(Array, Array);
 		mirb_typeclass(Hash, Hash);
 		mirb_typeclass(Method, Method);
@@ -404,11 +410,13 @@ namespace Mirb
 		mirb_derived_from(Object, Exception);
 		mirb_derived_from(Object, ReturnException);
 		mirb_derived_from(Object, BreakException);
+		mirb_derived_from(Object, SystemStackError);
 		mirb_derived_from(Object, IO);
 		mirb_derived_from(Object, File);
 		mirb_derived_from(Object, Float);
 		mirb_derived_from(Object, Regexp);
 		mirb_derived_from(Object, Range);
+		mirb_derived_from(Object, Bignum);
 		
 		mirb_derived_from(Module, Module);
 		mirb_derived_from(Module, Class);
@@ -434,6 +442,7 @@ namespace Mirb
 		mirb_derived_from(Exception, Exception);
 		mirb_derived_from(Exception, ReturnException);
 		mirb_derived_from(Exception, BreakException);
+		mirb_derived_from(Exception, SystemStackError);
 
 		mirb_derived_from(ReturnException, ReturnException);
 		mirb_derived_from(ReturnException, BreakException);

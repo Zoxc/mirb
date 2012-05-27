@@ -15,6 +15,7 @@
     <ClInclude Include="..\..\src\char-array.hpp" />
     <ClInclude Include="..\..\src\classes.hpp" />
     <ClInclude Include="..\..\src\classes\array.hpp" />
+    <ClInclude Include="..\..\src\classes\bignum.hpp" />
     <ClInclude Include="..\..\src\classes\class.hpp" />
     <ClInclude Include="..\..\src\classes\dir.hpp" />
     <ClInclude Include="..\..\src\classes\exception.hpp" />
@@ -80,6 +81,7 @@
     <ClCompile Include="..\..\src\block.cpp" />
     <ClCompile Include="..\..\src\char-array.cpp" />
     <ClCompile Include="..\..\src\classes\array.cpp" />
+    <ClCompile Include="..\..\src\classes\bignum.cpp" />
     <ClCompile Include="..\..\src\classes\class.cpp" />
     <ClCompile Include="..\..\src\classes\dir.cpp" />
     <ClCompile Include="..\..\src\classes\exception.cpp" />
@@ -186,7 +188,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\Prelude\include;$(SolutionDir)..\..\..\Libraries\pcre;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\Prelude\include;$(SolutionDir)..\..\..\Libraries\pcre;$(SolutionDir)..\..\..\Libraries\libtommath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MIRB_GC_SKIP_BLOCKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
@@ -195,8 +197,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>pcred.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\Libraries\pcre\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pcred.lib;tommath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\Libraries\pcre\$(Configuration);$(SolutionDir)..\..\..\Libraries\libtommath\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -205,7 +207,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\Prelude\include;$(SolutionDir)..\..\..\Libraries\pcre;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\Prelude\include;$(SolutionDir)..\..\..\Libraries\pcre;$(SolutionDir)..\..\..\Libraries\libtommath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)%(Directory)%(Filename)%(Extension).obj</ObjectFileName>
       <UseFullPaths>true</UseFullPaths>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -222,8 +224,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>pcre.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\Libraries\pcre\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pcre.lib;tommath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\..\Libraries\pcre\$(Configuration);$(SolutionDir)..\..\..\Libraries\libtommath\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
