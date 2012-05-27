@@ -269,12 +269,17 @@ namespace Mirb
 	{
 		return Value::from_bool(Platform::is_file(path->string));
 	}
-	
+
 	value_t directory(String *path)
 	{
 		return Value::from_bool(Platform::is_directory(path->string));
 	}
-	
+
+	value_t executable(String *path)
+	{
+		return Value::from_bool(Platform::is_executable(path->string));
+	}
+
 	value_t rb_fnmatch(String *pattern, String *path)
 	{
 		return Value::from_bool(File::fnmatch(path->string, pattern->string));
@@ -288,6 +293,7 @@ namespace Mirb
 		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exist?");
 		singleton_method<Arg::Class<String>, &file>(context->file_class, "file?");
 		singleton_method<Arg::Class<String>, &directory>(context->file_class, "directory?");
+		singleton_method<Arg::Class<String>, &executable>(context->file_class, "executable?");
 		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch?");
 		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch");
 

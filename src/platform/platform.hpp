@@ -25,6 +25,7 @@ namespace Mirb
 		void cd(const CharArray &path);
 		bool is_file(const CharArray &path);
 		bool is_directory(const CharArray &path);
+		bool is_executable(const CharArray &path);
 		bool file_exists(const CharArray &path);
 		CharArray cwd();
 		void *allocate_region(size_t bytes);
