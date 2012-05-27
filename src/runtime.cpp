@@ -148,7 +148,6 @@ namespace Mirb
 			auto under_str = inspect(under);
 
 			raise(context->type_error, "Invalid constant scope '" + under_str + "'");
-			return 0;
 		}
 
 		value_t existing = get_var_raw(under, name);
@@ -160,21 +159,19 @@ namespace Mirb
 				auto existing_str = inspect(class_of(existing));
 
 				raise(context->type_error,  "Constant already exists with type " + existing_str);
-
-				return 0;
 			}
 			else
 				return existing;
 		}
 
-		return value_undef;
+		return 0;
 	}
 
 	Class *define_class(value_t under, Symbol *name, Class *super)
 	{
 		value_t result = define_common(under, name, Value::Class);
 
-		if(result != value_undef)
+		if(result)
 			return cast<Class>(result);
 
 		Class *obj = class_create_unnamed(super);
@@ -193,7 +190,7 @@ namespace Mirb
 	{
 		value_t result = define_common(under, name, Value::Module);
 
-		if(result != value_undef)
+		if(result)
 			return cast<Module>(result);
 
 		Module *obj = module_create_bare();

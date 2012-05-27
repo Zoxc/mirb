@@ -156,7 +156,7 @@ namespace Mirb
 			if(prelude_unlikely(!super))
 				goto handle_exception;
 
-			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super);
+			Module *self = cast_null<Module>(trap_exception_as_value([&] { return define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super); }));
 			
 			if(prelude_unlikely(self == nullptr))
 				goto handle_exception;
@@ -171,7 +171,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(SingletonClass)
-			Class *self = singleton_class(vars[op.singleton]);
+			Class *self = cast_null<Class>(trap_exception_as_value([&] { return singleton_class(vars[op.singleton]); }));
 			
 			if(prelude_unlikely(self == nullptr))
 				goto handle_exception;
@@ -186,7 +186,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Module)
-			Module *self = define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name);
+			Module *self = cast_null<Module>(trap_exception_as_value([&] { return define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name); }));
 		
 			if(prelude_unlikely(self == nullptr))
 				goto handle_exception;
