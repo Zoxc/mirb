@@ -8,8 +8,8 @@ class MSpecScript
   set :core, [
     'rubyspec/core',
 	
-    # 1.9
-    '^rubyspec/core/basicobject'
+    '^rubyspec/core/basicobject',
+    '^rubyspec/core/argf'
   ]
   
   # An ordered list of the directories containing specs to run
