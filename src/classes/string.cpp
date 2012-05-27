@@ -285,7 +285,12 @@ namespace Mirb
 	{
 		return Value::from_bool(self->string.size() == 0);
 	}
-
+	
+	value_t String::length(String *self)
+	{
+		return Fixnum::from_size_t(self->string.size());
+	}
+	
 	void String::initialize()
 	{
 		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
@@ -295,6 +300,9 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &rb_get>(context->string_class, "[]");
+		
+		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "length");
+		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "size");
 
 		method<Arg::Self<Arg::Class<String>>, &downcase>(context->string_class, "downcase");
 		method<Arg::Self<Arg::Class<String>>, &downcase_self>(context->string_class, "downcase!");

@@ -24,6 +24,7 @@ namespace Mirb
 			static value_t tr(String *self, String *from, String *to);
 			static value_t compare(String *self, String *other);
 			static value_t downcase(String *self);
+			static value_t length(String *self);
 			static value_t downcase_self(String *self);
 			static value_t upcase(String *self);
 			static value_t upcase_self(String *self);
