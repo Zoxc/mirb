@@ -20,6 +20,7 @@ namespace Mirb
 		value_t raise(value_t first, String *str);
 		value_t cast_array(value_t value);
 		value_t cast_string(value_t value);
+		value_t cast_integer(value_t value);
 		
 		void read_file(CharArray filename, bool try_relative, bool require, CharArray &full_path, bool& loaded, char_t *&data, size_t &length);
 

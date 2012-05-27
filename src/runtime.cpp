@@ -958,7 +958,7 @@ namespace Mirb
 		if(array)
 			return array;
 
-		auto method = lookup_method(internal_class_of(value), Symbol::get("to_a"));
+		auto method = respond_to(value, "to_a");
 
 		if(method)
 			return raise_cast<Array>(call_argv(method, value, Symbol::get("to_a"), value_nil, 0, 0));
@@ -977,7 +977,7 @@ namespace Mirb
 		if(string)
 			return string;
 
-		auto method = lookup_method(internal_class_of(value), Symbol::get("to_s"));
+		auto method = respond_to(value, "to_s");
 
 		if(method)
 			return raise_cast<String>(call_argv(method, value, Symbol::get("to_s"), value_nil, 0, 0));
@@ -986,6 +986,23 @@ namespace Mirb
 			CharArray obj = pretty_inspect(value);
 
 			raise(context->type_error, "Unable to convert " + obj + " to string");
+		}
+	}
+	
+	value_t cast_integer(value_t value)
+	{
+		if(Value::type(value) == Value::Fixnum)
+			return value;
+
+		auto method = respond_to(value, "to_i");
+
+		if(method)
+			return raise_cast<Value::Fixnum>(call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0));
+		else
+		{
+			CharArray obj = pretty_inspect(value);
+
+			raise(context->type_error, "Unable to convert " + obj + " to integer");
 		}
 	}
 

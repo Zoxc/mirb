@@ -319,6 +319,11 @@ namespace Mirb
 		return Mirb::cast_string(value);
 	}
 
+	value_t Kernel::cast_integer(value_t value)
+	{
+		return Mirb::cast_integer(value);
+	}
+
 	void Kernel::initialize()
 	{
 		context->kernel_module = define_module("Kernel");
@@ -327,6 +332,7 @@ namespace Mirb
 		
 		method<Arg::Value, &Kernel::cast_array>(context->kernel_module, "Array");
 		method<Arg::Value, &Kernel::cast_string>(context->kernel_module, "String");
+		method<Arg::Value, &Kernel::cast_integer>(context->kernel_module, "Integer");
 		method<&block_given>(context->kernel_module, "block_given?");
 		method<Arg::Block, &at_exit>(context->kernel_module, "at_exit");
 		method<Arg::Block, &proc>(context->kernel_module, "proc");

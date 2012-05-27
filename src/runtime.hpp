@@ -257,6 +257,7 @@ namespace Mirb
 	
 	Array *cast_array(value_t value);
 	String *cast_string(value_t value);
+	value_t cast_integer(value_t value);
 
 	void setup_classes();
 };
