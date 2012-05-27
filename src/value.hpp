@@ -70,9 +70,9 @@ namespace Mirb
 	};
 
 	typedef Value::Header *value_t;
-
-	const size_t fixnum_mask = 1;
 	
+	const size_t fixnum_mask = 1;
+
 	#define mirb_object_align 4
 
 	const size_t object_ref_mask = mirb_object_align - 1;

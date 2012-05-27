@@ -6,6 +6,13 @@ namespace Mirb
 	namespace Fixnum
 	{
 		typedef intptr_t int_t;
+		
+		const intptr_t high = INTPTR_MAX >> 1;
+		const intptr_t low = INTPTR_MIN >> 1;
+
+		bool fits(int_t value);
+		
+		value_t convert(int_t value);
 
 		static_assert(sizeof(int_t) == sizeof(size_t), "int_t must be pointer sized");
 		

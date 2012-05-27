@@ -40,7 +40,7 @@ namespace Mirb
 			return result.str();
 		}
 		
-		std::string ByteCodePrinter::raw(int imm)
+		std::string ByteCodePrinter::raw(intptr_t imm)
 		{
 			std::stringstream result;
 			
@@ -153,7 +153,7 @@ namespace Mirb
 
 					opcode += sizeof(LoadFixnumOp);
 					
-					return var(op->var) + " = " + raw(Fixnum::to_size_t(op->num));
+					return var(op->var) + " = " + raw(Fixnum::to_int(op->num));
 				}
 				
 				case Opcode::LoadTrue:

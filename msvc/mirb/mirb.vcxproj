@@ -60,6 +60,7 @@
     <ClInclude Include="..\..\src\modules\comparable.hpp" />
     <ClInclude Include="..\..\src\modules\enumerable.hpp" />
     <ClInclude Include="..\..\src\modules\kernel.hpp" />
+    <ClInclude Include="..\..\src\number.hpp" />
     <ClInclude Include="..\..\src\on-stack.hpp" />
     <ClInclude Include="..\..\src\parser\parser.hpp" />
     <ClInclude Include="..\..\src\platform\platform.hpp" />
@@ -128,6 +129,7 @@
     <ClCompile Include="..\..\src\modules\comparable.cpp" />
     <ClCompile Include="..\..\src\modules\enumerable.cpp" />
     <ClCompile Include="..\..\src\modules\kernel.cpp" />
+    <ClCompile Include="..\..\src\number.cpp" />
     <ClCompile Include="..\..\src\on-stack.cpp" />
     <ClCompile Include="..\..\src\parser\calls.cpp" />
     <ClCompile Include="..\..\src\parser\control-flow.cpp" />
