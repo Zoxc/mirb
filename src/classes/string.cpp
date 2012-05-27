@@ -46,9 +46,12 @@ namespace Mirb
 	{
 		auto result = Collector::allocate<Array>();
 
+		CharArray sep_str = sep ? sep->string : " ";
+
 		self->string.split([&](const CharArray &match) {
-			result->vector.push(match.to_string());
-		}, sep->string);
+			if(sep_str != " " || match.size())
+				result->vector.push(match.to_string());
+		}, sep_str);
 
 		return result;
 	}
@@ -350,7 +353,7 @@ namespace Mirb
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
 		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &rjust>(context->string_class, "rjust");
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &split>(context->string_class, "split");
+		method<Arg::Self<Arg::Class<String>>, Arg::Default<Arg::Class<String>>, &split>(context->string_class, "split");
 		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
 		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &String::compare>(context->string_class, "<=>");
