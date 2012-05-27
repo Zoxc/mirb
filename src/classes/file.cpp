@@ -2,6 +2,7 @@
 #include "../runtime.hpp"
 #include "../platform/platform.hpp"
 #include "string.hpp"
+#include "array.hpp"
 #include "fixnum.hpp"
 
 namespace Mirb
@@ -227,12 +228,18 @@ namespace Mirb
 		return CharArray(".").to_string();
 	}
 	
-	value_t rb_join(size_t argc, value_t argv[])
+	value_t do_join(JoinSegments &joiner, size_t argc, value_t argv[])
 	{
-		JoinSegments joiner;
-
 		for(size_t i = 0; i < argc; ++i)
 		{
+			auto array = try_cast<Array>(argv[i]);
+
+			if(array)
+			{
+				do_join(joiner, array->size(), array->vector.raw());
+				continue;
+			}
+
 			auto string = raise_cast<String>(argv[i]);
 
 			if(!string)
@@ -240,6 +247,13 @@ namespace Mirb
 
 			joiner.push(string->string);
 		}
+	}
+	
+	value_t rb_join(size_t argc, value_t argv[])
+	{
+		JoinSegments joiner;
+
+		do_join(joiner, argc, argv);
 
 		return joiner.join().to_string();
 	}
