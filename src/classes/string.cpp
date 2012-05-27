@@ -74,9 +74,14 @@ namespace Mirb
 		return call_argv(regexp, "match", value_nil, 1, &self);
 	}
 
-	value_t String::equal(String *self, String *other)
+	value_t String::equal(String *self, value_t other)
 	{
-		return Value::from_bool(self->string == other->string);
+		auto string = try_cast<String>(other);
+
+		if(!string)
+			return value_false;
+		else
+			return Value::from_bool(self->string == string->string);
 	}
 	
 	value_t String::downcase(String *self)
@@ -330,8 +335,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
 		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &String::compare>(context->string_class, "<=>");
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &equal>(context->string_class, "==");
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &equal>(context->string_class, "===");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, &equal>(context->string_class, "==");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, &equal>(context->string_class, "===");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &concat>(context->string_class, "concat");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &concat>(context->string_class, "<<");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &add>(context->string_class, "+");

@@ -20,7 +20,7 @@ namespace Mirb
 			static value_t rjust(String *self, size_t length, String *other);
 			static value_t concat(String *self, String *other);
 			static value_t add(String *self, String *other);
-			static value_t equal(String *self, String *other);
+			static value_t equal(String *self, value_t other);
 			static value_t tr(String *self, String *from, String *to);
 			static value_t compare(String *self, String *other);
 			static value_t downcase(String *self);
