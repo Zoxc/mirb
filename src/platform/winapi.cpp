@@ -25,6 +25,24 @@ namespace Mirb
 			raise(context->system_call_error, msg);
 		}
 		
+		double get_time()
+		{
+			SYSTEMTIME system_time;
+
+			GetSystemTime(&system_time);
+			
+			FILETIME file_time;
+
+			SystemTimeToFileTime(&system_time, &file_time);
+
+			ULARGE_INTEGER large_time;
+
+			large_time.LowPart = file_time.dwLowDateTime;
+			large_time.HighPart = file_time.dwHighDateTime;
+
+			return (double)(large_time.QuadPart - 116444736000000000) / 10000000;
+		}
+
 		size_t stack_start()
 		{
 			size_t offset = offsetof(NT_TIB, StackBase);

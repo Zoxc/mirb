@@ -37,6 +37,7 @@ namespace Mirb
 			Class *method_class;
 			Class *dir_class;
 			Class *range_class;
+			Class *time_class;
 			
 			Class *io_class;
 			Class *file_class;

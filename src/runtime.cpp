@@ -27,6 +27,7 @@
 #include "classes/file.hpp"
 #include "classes/dir.hpp"
 #include "classes/range.hpp"
+#include "classes/time.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
@@ -1080,6 +1081,7 @@ namespace Mirb
 		Hash::initialize();
 		Range::initialize();
 		Exception::initialize();
+		Time::initialize();
 		initialize_exceptions();
 		
 		Collector::enable_interrupts = true;

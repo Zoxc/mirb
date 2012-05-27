@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\src\classes\regexp.hpp" />
     <ClInclude Include="..\..\src\classes\string.hpp" />
     <ClInclude Include="..\..\src\classes\symbol.hpp" />
+    <ClInclude Include="..\..\src\classes\time.hpp" />
     <ClInclude Include="..\..\src\classes\true-class.hpp" />
     <ClInclude Include="..\..\src\codegen\bytecode.hpp" />
     <ClInclude Include="..\..\src\codegen\opcodes.hpp" />
@@ -101,6 +102,7 @@
     <ClCompile Include="..\..\src\classes\regexp.cpp" />
     <ClCompile Include="..\..\src\classes\string.cpp" />
     <ClCompile Include="..\..\src\classes\symbol.cpp" />
+    <ClCompile Include="..\..\src\classes\time.cpp" />
     <ClCompile Include="..\..\src\classes\true-class.cpp" />
     <ClCompile Include="..\..\src\codegen\bytecode.cpp" />
     <ClCompile Include="..\..\src\codegen\printer.cpp" />

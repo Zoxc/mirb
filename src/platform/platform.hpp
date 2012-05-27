@@ -19,6 +19,8 @@ namespace Mirb
 
 		size_t stack_start();
 		size_t stack_limit();
+
+		double get_time();
 		
 		void cd(const CharArray &path);
 		bool is_file(const CharArray &path);
