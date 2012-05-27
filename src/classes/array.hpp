@@ -11,6 +11,10 @@ namespace Mirb
 			static value_t allocate(Class *instance_of);
 			static value_t push(Array *self, size_t argc, value_t argv[]);
 			static value_t pop(Array *self);
+			static value_t reject_ex(Array *self, value_t block);
+			static value_t reject(Array *self, value_t block);
+			static value_t compact_ex(Array *self);
+			static value_t compact(Array *self);
 			static value_t shift(Array *self);
 			static value_t unshift(Array *self, size_t argc, value_t argv[]);
 			static value_t to_s(Array *self);
@@ -32,6 +36,24 @@ namespace Mirb
 
 			Vector<value_t, AllocatorBase, Allocator> vector;
 			
+			template<typename F> static bool delete_if(Array *self, F func)
+			{
+				OnStack<1> os(self);
+
+				bool changed = false;
+		
+				for(size_t i = self->vector.size(); i-- > 0;)
+				{
+					if(func(self->vector[i]))
+					{
+						changed = true;
+						self->vector.remove(i);
+					}
+				}
+
+				return changed;
+			}
+
 			template<typename F> void mark(F mark)
 			{
 				Object::mark(mark);

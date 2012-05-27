@@ -48,6 +48,8 @@ namespace Mirb
 			
 			void localize();
 			void append(const CharArray &other);
+
+			int to_i();
 			
 			const char_t &operator [](size_t index) const;
 			char_t &operator [](size_t index);
@@ -80,6 +82,9 @@ namespace Mirb
 					func((*this)[i], i);
 			}
 			
+			CharArray ljust(size_t length, const CharArray &padding);
+			CharArray rjust(size_t length, const CharArray &padding);
+
 			template<typename F> void split(F func, const CharArray &token) const
 			{
 				size_t last = 0;

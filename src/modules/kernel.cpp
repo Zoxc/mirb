@@ -309,23 +309,14 @@ namespace Mirb
 		return StackFrame::get_backtrace(Mirb::backtrace());
 	}
 	
-	value_t cast_array(value_t value)
+	value_t Kernel::cast_array(value_t value)
 	{
-		auto array = try_cast<Array>(value);
-
-		if(array)
-			return array;
-
-		auto method = lookup_method(internal_class_of(value), Symbol::get("to_a"));
-
-		if(method)
-			return raise_cast<Array>(call_argv(method, value, Symbol::get("to_a"), value_nil, 0, 0));
-		else
-		{
-			array = new (collector) Array;
-			array->vector.push(value);
-			return array;
-		}
+		return Mirb::cast_array(value);
+	}
+	
+	value_t Kernel::cast_string(value_t value)
+	{
+		return Mirb::cast_string(value);
 	}
 
 	void Kernel::initialize()
@@ -334,7 +325,8 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
-		method<Arg::Value, &cast_array>(context->kernel_module, "Array");
+		method<Arg::Value, &Kernel::cast_array>(context->kernel_module, "Array");
+		method<Arg::Value, &Kernel::cast_string>(context->kernel_module, "String");
 		method<&block_given>(context->kernel_module, "block_given?");
 		method<Arg::Block, &at_exit>(context->kernel_module, "at_exit");
 		method<Arg::Block, &proc>(context->kernel_module, "proc");

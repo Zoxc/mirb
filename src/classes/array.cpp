@@ -18,20 +18,11 @@ namespace Mirb
 	
 	value_t Array::rb_delete(Array *array, value_t obj)
 	{
-		OnStack<2> os(array, obj);
+		OnStack<1> os(obj);
 
-		bool result = false;
-
-		for(size_t i = array->vector.size(); i-- > 0;)
-		{
-			value_t test = call_argv(obj, "==", 1, &array->vector[i]);
-
-			if(Value::test(test))
-			{
-				result = true;
-				array->vector.remove(i);
-			}
-		}
+		bool result = delete_if(array, [&](value_t &value) {
+			return Value::test(call_argv(obj, "==", 1, &value));
+		});
 
 		if(result)
 			return obj;
@@ -351,12 +342,58 @@ namespace Mirb
 		return result;
 	}
 	
+	value_t Array::reject_ex(Array *self, value_t block)
+	{
+		OnStack<1> os(block);
+
+		return Value::from_bool(delete_if(self, [&](value_t &value) {
+			return Value::test(yield_argv(block, 1, &value));
+		}));
+	}
+	
+	value_t Array::reject(Array *self, value_t block)
+	{
+		OnStack<1> os(block);
+
+		auto result = Array::dup(self);
+
+		delete_if(result, [&](value_t &value) {
+			return Value::test(yield_argv(block, 1, &value));
+		});
+
+		return result;
+	}
+	
+	value_t Array::compact_ex(Array *self)
+	{
+		return Value::from_bool(delete_if(self, [&](value_t value) {
+			return value == value_nil;
+		}));
+	}
+	
+	value_t Array::compact(Array *self)
+	{
+		auto result = Array::dup(self);
+
+		delete_if(result, [&](value_t value) {
+			return value == value_nil;
+		});
+
+		return result;
+	}
+
 	void Array::initialize()
 	{
 		context->array_class = define_class("Array", context->object_class);
 		
 		include_module(context->array_class, context->enumerable_module);
 		
+		method<Arg::Self<Arg::Class<Array>>, &compact_ex>(context->array_class, "compact!");
+		method<Arg::Self<Arg::Class<Array>>, &compact>(context->array_class, "compact");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject>(context->array_class, "reject");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "reject!");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "delete_if");
+
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->array_class, "allocate");
 		
 		method<Arg::Self<Arg::Class<Array>>, &rb_sort>(context->array_class, "sort");

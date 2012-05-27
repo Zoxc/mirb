@@ -57,6 +57,11 @@ namespace Mirb
 		return self;
 	}
 	
+	value_t String::to_i(String *self)
+	{
+		return Fixnum::from_int(self->string.to_i());
+	}
+	
 	value_t match(value_t self, value_t regexp)
 	{
 		if(!Value::of_type<Regexp>(regexp))
@@ -136,16 +141,12 @@ namespace Mirb
 	
 	value_t String::ljust(String *self, size_t length, String *other)
 	{
-		CharArray padding = other ? other->string : " ";
-		CharArray result = self->string;
-
-		while(result.size() < length)
-		{
-			size_t remaining = length - self->string.size();
-			result += padding.copy(0, remaining);
-		}
-
-		return result.to_string();
+		return self->string.ljust(length, other ? other->string : " ").to_string();
+	}
+	
+	value_t String::rjust(String *self, size_t length, String *other)
+	{
+		return self->string.rjust(length, other ? other->string : " ").to_string();
 	}
 	
 	value_t to_sym(String *self)
@@ -198,10 +199,100 @@ namespace Mirb
 		return result.to_string();
 	}
 
+	value_t String::sprintf(String *self, value_t input)
+	{
+		CharArray s = self->string.c_str();
+		CharArray result;
+
+		OnStackString<2> oss(s, result);
+
+		auto array = cast_array(input);
+
+		OnStack<1> os(array);
+		
+		size_t i = 0;
+		size_t argi = 0;
+		size_t prev = 0;
+		size_t start;
+		int padding;
+		char pad_char;
+
+		auto arg = [&]() -> value_t {
+			if(argi >= array->size())
+				raise(context->argument_error, "Too few arguments");
+
+			return array->get(argi++);
+		};
+
+		auto push = [&](size_t to) {
+			result += s.copy(prev, to - prev);
+		};
+		
+		auto write = [&](value_t value) {
+			push(start);
+			auto str = raise_cast<String>(call(value, "to_s"));
+			result += str->string.rjust(padding, pad_char);
+			prev = ++i;
+		};
+
+		while(i < s.size() - 1)
+		{
+			if(s[i] == '%')
+			{
+				start = i;
+
+				++i;
+
+				pad_char = ' ';
+
+				if(s[i] == '0')
+				{
+					++i;
+					pad_char = '0';
+				}
+
+				size_t width = i;
+
+				while(s[i] >= '0' && s[i] <= '9')
+					++i;
+
+				padding = s.copy(width, i - width).to_i();
+
+				switch(s[i])
+				{
+					case 'd':
+						write(raise_cast<Value::Fixnum>(call(arg(), "to_i")));
+						break;
+
+					case 'f':
+						write(raise_cast<Value::Fixnum>(call(arg(), "to_f")));
+						break;
+
+					default:
+						break;
+				};
+			}
+			else
+				++i;
+		}
+
+		push(i);
+
+		return result.to_string();
+	};
+	
+	value_t String::empty(String *self)
+	{
+		return Value::from_bool(self->string.size() == 0);
+	}
+
 	void String::initialize()
 	{
 		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
 		method<Arg::Self<Arg::Value>, &to_s>(context->string_class, "to_s");
+		method<Arg::Self<Arg::Class<String>>, &to_i>(context->string_class, "to_i");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
+		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &rb_get>(context->string_class, "[]");
 
@@ -211,6 +302,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &upcase_self>(context->string_class, "upcase!");
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
+		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &rjust>(context->string_class, "rjust");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &split>(context->string_class, "split");
 		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
 		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");

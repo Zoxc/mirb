@@ -151,7 +151,15 @@ namespace Mirb
 		if(Value::of_type<T>(obj))
 			return reinterpret_cast<T *>(obj);
 		else
-			raise(context->type_error, "Invalid type passed");
+			type_error(obj, "an object of type " + Mirb::Value::names[Mirb::Value::TypeTag<T>::value]);
+	}
+	
+	template<Value::Type type> value_t raise_cast(value_t obj)
+	{
+		if(Value::type(obj) != type)
+			type_error(obj, "an object of type " + Mirb::Value::names[type]);
+
+		return obj;
 	}
 
 	void swallow_exception();
@@ -244,6 +252,9 @@ namespace Mirb
 	 */
 	Tuple<StackFrame> *backtrace(Frame *from = 0);
 	
+	Array *cast_array(value_t value);
+	String *cast_string(value_t value);
+
 	void setup_classes();
 };
 

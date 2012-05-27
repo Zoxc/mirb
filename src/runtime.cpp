@@ -953,6 +953,44 @@ namespace Mirb
 
 		return &result;
 	}
+	
+	Array *cast_array(value_t value)
+	{
+		auto array = try_cast<Array>(value);
+
+		if(array)
+			return array;
+
+		auto method = lookup_method(internal_class_of(value), Symbol::get("to_a"));
+
+		if(method)
+			return raise_cast<Array>(call_argv(method, value, Symbol::get("to_a"), value_nil, 0, 0));
+		else
+		{
+			array = new (collector) Array;
+			array->vector.push(value);
+			return array;
+		}
+	}
+	
+	String *cast_string(value_t value)
+	{
+		auto string = try_cast<String>(value);
+
+		if(string)
+			return string;
+
+		auto method = lookup_method(internal_class_of(value), Symbol::get("to_s"));
+
+		if(method)
+			return raise_cast<String>(call_argv(method, value, Symbol::get("to_s"), value_nil, 0, 0));
+		else
+		{
+			CharArray obj = pretty_inspect(value);
+
+			raise(context->type_error, "Unable to convert " + obj + " to string");
+		}
+	}
 
 	void swallow_exception()
 	{

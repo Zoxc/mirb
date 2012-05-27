@@ -104,6 +104,41 @@ namespace Mirb
 		return *this;
 	}
 
+	int CharArray::to_i()
+	{
+		CharArray str = c_str();
+
+		return atoi(str.c_str_ref());
+	}
+	
+	CharArray CharArray::ljust(size_t length, const CharArray &padding)
+	{
+		CharArray result = *this;
+
+		while(result.size() < length)
+		{
+			size_t remaining = length - size();
+			result += padding.copy(0, remaining);
+		}
+
+		return result;
+	}
+	
+	CharArray CharArray::rjust(size_t length, const CharArray &padding)
+	{
+		CharArray result;
+
+		while(result.size() < length - size())
+		{
+			size_t remaining = length - size();
+			result += padding.copy(0, remaining);
+		}
+
+		result += *this;
+
+		return result;
+	}
+	
 	void CharArray::localize()
 	{
 		if(shared)

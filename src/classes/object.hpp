@@ -60,7 +60,7 @@ namespace Mirb
 
 			static void initialize();
 			
-			template<class T> static value_t dup(T *other)
+			template<class T> static T *dup(T *other)
 			{
 				return new (collector) T(*other);
 			}
