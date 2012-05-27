@@ -183,6 +183,7 @@ namespace Mirb
 				gen_string(group[param++], node->data);
 			
 			gen<InterpolateOp>(var, group.size, group.use(), node->result_type);
+			location(&node->range);
 		}
 		
 		void ByteCodeGenerator::convert_integer(Tree::Node *basic_node, var_t var)

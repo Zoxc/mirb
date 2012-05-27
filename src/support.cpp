@@ -23,51 +23,53 @@ namespace Mirb
 
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
 		{
-			CharArray result;
+			return trap_exception_as_value([&]() -> value_t {
+				CharArray result;
 
-			OnStackString<1> os(result);
+				OnStackString<1> os(result);
 
-			for(size_t i = 0; i < argc; ++i)
-			{
-				value_t obj = argv[i];
-
-				if(prelude_unlikely(Value::type(obj) != Value::String))
+				for(size_t i = 0; i < argc; ++i)
 				{
-					obj = Mirb::call(obj, "to_s");
+					value_t obj = argv[i];
 
-					if(!obj)
-						return 0;
+					if(prelude_unlikely(Value::type(obj) != Value::String))
+					{
+						obj = Mirb::call(obj, "to_s");
+
+						if(!obj)
+							return (value_t)0;
+					}
+
+					if(prelude_likely(Value::type(obj) == Value::String))
+						result += cast<String>(obj)->string;
 				}
-
-				if(prelude_likely(Value::type(obj) == Value::String))
-					result += cast<String>(obj)->string;
-			}
 			
-			switch(type)
-			{
-				case Value::Symbol:
-					return symbol_pool.get(result);
-
-				case Value::String:
-					return result.to_string();
-
-				case Value::Regexp:
-					return Regexp::allocate(result);
-
-				case Value::Array:
+				switch(type)
 				{
-					Array *array = Collector::allocate<Array>();
+					case Value::Symbol:
+						return symbol_pool.get(result);
 
-					Array::parse(result.raw(), result.size(), [&](const std::string &str){
-						array->vector.push(CharArray(str).to_string());
-					});
+					case Value::String:
+						return result.to_string();
 
-					return array;
+					case Value::Regexp:
+						return Regexp::allocate(result);
+
+					case Value::Array:
+					{
+						Array *array = Collector::allocate<Array>();
+
+						Array::parse(result.raw(), result.size(), [&](const std::string &str){
+							array->vector.push(CharArray(str).to_string());
+						});
+
+						return array;
+					}
+
+					default:
+						mirb_debug_abort("Unknown data type");
 				}
-
-				default:
-					mirb_debug_abort("Unknown data type");
-			}
+			});
 		}
 		
 		value_t create_array(size_t argc, value_t argv[])
@@ -82,17 +84,19 @@ namespace Mirb
 		
 		value_t create_hash(size_t argc, value_t argv[])
 		{
-			Hash *hash = Collector::allocate<Hash>(context->hash_class);
+			return trap_exception_as_value([&]() -> value_t {
+				Hash *hash = Collector::allocate<Hash>(context->hash_class);
 
-			OnStack<1> os(hash);
+				OnStack<1> os(hash);
 			
-			for(size_t i = 0; i < argc; i += 2)
-			{
-				if(!HashAccess::set(hash, argv[i], argv[i + 1]))
-					return 0;
-			}
+				for(size_t i = 0; i < argc; i += 2)
+				{
+					if(!HashAccess::set(hash, argv[i], argv[i + 1]))
+						return 0;
+				}
 
-			return hash;
+				return hash;
+			});
 		}
 		
 		void define_method(Tuple<Module> *scope, Symbol *name, Block *block)

@@ -486,6 +486,7 @@ namespace Mirb
 					auto result = new (fragment) Tree::InterpolateNode;
 
 					result->result_type = type;
+					result->range = lexer.lexeme;
 
 					process_interpolate_entries(result, result->data);
 
@@ -554,6 +555,10 @@ namespace Mirb
 			
 					add_message(message, lexer.lexeme);
 				}
+
+				result->range = range;
+
+				lexer.lexeme.prev_set(&result->range);
 
 				return result;
 			}
@@ -695,11 +700,14 @@ namespace Mirb
 			if(add->type() == Tree::Node::Interpolate && !(result->type() == Tree::Node::Interpolate))
 			{
 				new_result = new (fragment) Tree::InterpolateNode;
+				new_result->range = result->range;
 				new_result->data = result->data;
 				new_result->result_type = Value::String;
 			}
 			else
 				new_result = result_inter;
+
+			new_result->range.expand(add->range);
 
 			if(add->type() == Tree::Node::Interpolate && !add_inter->pairs.empty())
 			{

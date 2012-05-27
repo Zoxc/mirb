@@ -424,8 +424,13 @@ namespace Mirb
 			vars[op.var] = result;
 		EndOp
 
-		Op(Interpolate)
-			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv], op.result);
+		DeepOp(Interpolate)
+			value_t result = Support::interpolate(op.argc, &vars[op.argv], op.result);
+
+			if(prelude_unlikely(!result))
+				goto handle_exception;
+
+			vars[op.var] = result;
 		EndOp
 			
 		DeepOp(Alias)
