@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "array.hpp"
 #include "fixnum.hpp"
+#include "regexp.hpp"
 #include "range.hpp"
 #include "../runtime.hpp"
 
@@ -311,12 +312,30 @@ namespace Mirb
 		return Fixnum::from_size_t(self->string.size());
 	}
 	
+	value_t String::gsub(String *self, Regexp *pattern, String *replacement)
+	{
+		bool changed;
+
+		return Regexp::gsub(self->string, pattern, replacement->string, changed).to_string();
+	}
+	
+	value_t String::gsub_ex(String *self, Regexp *pattern, String *replacement)
+	{
+		bool changed;
+
+		self->string = Regexp::gsub(self->string, pattern, replacement->string, changed);
+
+		return changed ? self : value_nil;
+	}
+	
 	void String::initialize()
 	{
 		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
 		method<Arg::Self<Arg::Value>, &to_s>(context->string_class, "to_s");
 		method<Arg::Self<Arg::Class<String>>, &to_i>(context->string_class, "to_i");
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub>(context->string_class, "gsub");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub_ex");
 		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, Arg::Default<Arg::Value>, &rb_get>(context->string_class, "[]");

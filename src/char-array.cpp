@@ -306,15 +306,13 @@ namespace Mirb
 
 	CharArray CharArray::copy(size_t offset, size_t size) const
 	{
-		if(offset + size > length)
-		{
-			if(offset >= length)
-				return CharArray("");
-			else
-				return CharArray(data + offset, length - offset);
-		}
-		else
-			return CharArray(data + offset, size);
+		if(offset >= length)
+			return CharArray("");
+
+		if((size > length) || (offset + size > length))
+			return CharArray(data + offset, length - offset);
+
+		return CharArray(data + offset, size);
 	}
 	
 	void CharArray::shrink(size_t new_size)

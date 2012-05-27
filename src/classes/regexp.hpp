@@ -16,6 +16,9 @@ namespace Mirb
 			static value_t rb_initialize(Regexp *obj, value_t pattern);
 			static value_t rb_allocate(Class *instance_of);
 			static value_t match(Regexp *obj, String *string);
+			
+			static const size_t vector_size;
+
 		public:
 			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of), re(nullptr) {}
 
@@ -26,7 +29,9 @@ namespace Mirb
 			real_pcre *re;
 			CharArray pattern;
 
-			bool compile_pattern();
+			void compile_pattern();
+			
+			static CharArray gsub(const CharArray &input, Regexp *pattern, const CharArray &replacement, bool &changed);
 
 			static Regexp *allocate(const CharArray &pattern);
 			

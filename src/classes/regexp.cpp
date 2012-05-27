@@ -23,10 +23,10 @@ namespace Mirb
 		return str;
 	}
 	
-	bool Regexp::compile_pattern()
+	void Regexp::compile_pattern()
 	{
 		if(re)
-			return true;
+			return;
 
 		CharArray pattern_cstr = pattern.c_str();
 		const char *error;
@@ -35,13 +35,7 @@ namespace Mirb
 		re = pcre_compile(pattern_cstr.c_str_ref(), 0, &error, &err_offset, 0);
 
 		if(!re)
-		{
 			raise(context->syntax_error, "Error in regular expression: " + CharArray((const char_t *)error));
-			return false;
-		}
-
-		return true;
-
 	}
 
 	Regexp *Regexp::allocate(const CharArray &pattern)
@@ -49,9 +43,7 @@ namespace Mirb
 		Regexp *result = Collector::allocate<Regexp>(context->regexp_class);
 
 		result->pattern = pattern;
-
-		if(!result->compile_pattern())
-			return 0;
+		result->compile_pattern();
 
 		return result;
 	}
@@ -65,8 +57,7 @@ namespace Mirb
 		else
 			raise(context->runtime_error, "Expected a valid pattern");
 
-		if(!obj->compile_pattern())
-			return 0;
+		obj->compile_pattern();
 
 		return value_nil;
 	}
@@ -80,13 +71,12 @@ namespace Mirb
 	{
 		return ("/" + obj->pattern  + "/").to_string();
 	}
+	
+	const size_t Regexp::vector_size = 16 * 3;
 
 	value_t Regexp::match(Regexp *obj, String *string)
 	{
-		if(!obj->compile_pattern())
-			return 0;
-
-		static const size_t vector_size = 16 * 3;
+		obj->compile_pattern();
 
 		int ovector[vector_size];
 		
@@ -94,7 +84,7 @@ namespace Mirb
 
 		value_t match_data;
 
-		if(result < 0)
+		if(result <= 0)
 			match_data = value_nil;
 		else
 		{
@@ -108,6 +98,49 @@ namespace Mirb
 		}
 
 		return match_data;
+	}
+	
+	CharArray Regexp::gsub(const CharArray &input, Regexp *pattern, const CharArray &replacement, bool &changed)
+	{
+		pattern->compile_pattern();
+		
+		int ovector[vector_size];
+
+		CharArray result;
+		int prev = 0;
+		
+		auto push = [&](int to) {
+			result += input.copy(prev, to - prev);
+		};
+
+		changed = false;
+		
+		while(true)
+		{
+			int groups = pcre_exec(pattern->re, 0, input.c_str_ref(), input.size(), prev, PCRE_NEWLINE_ANYCRLF, ovector, vector_size);
+
+			if(groups <= 0)
+			{
+				push(input.size());
+				return result;
+			}
+			else
+			{
+				changed = true;
+
+				int start = ovector[0];
+				int stop = ovector[1];
+
+				for (int i = 0; i < groups; i++) {
+					start = std::min(start, ovector[2 * i]);
+					stop = std::max(stop, ovector[2 * i + 1]);
+				}
+
+				push(start);
+				prev = stop;
+				result += replacement;
+			}
+		}
 	}
 	
 	void Regexp::initialize()
