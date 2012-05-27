@@ -73,7 +73,9 @@ namespace Mirb
 	
 	value_t Object::not_equal(value_t obj, value_t other)
 	{
-		return Value::from_bool(obj != other);
+		value_t result = call_argv(obj, "==", 1, &other);
+
+		return Value::from_bool(!Value::test(result));
 	}
 	
 	value_t Object::rb_not(value_t obj)
