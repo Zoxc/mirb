@@ -13,6 +13,7 @@ namespace Mirb
 			static value_t to_s(Class *self);
 			static value_t rb_superclass(Module *obj);
 			static value_t rb_new(value_t obj, size_t argc, value_t argv[]);
+			static value_t case_equal(Class *obj, value_t other);
 
 			Class(Value::Type type) : Module(type), singleton(false) {}
 

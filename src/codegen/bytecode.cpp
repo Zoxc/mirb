@@ -673,7 +673,7 @@ namespace Mirb
 						{
 							to_bytecode(expr->expression, test);
 			
-							gen<CallOp>(test, temp, Symbol::get("==="), no_var, 1, test);
+							gen<CallOp>(test, test, Symbol::get("==="), no_var, 1, temp);
 							location(&clause->range);
 							gen_if(run, test);
 						}
@@ -685,7 +685,7 @@ namespace Mirb
 					{
 						to_bytecode(clause->pattern, test);
 			
-						gen<CallOp>(test, temp, Symbol::get("==="), no_var, 1, test);
+						gen<CallOp>(test, test, Symbol::get("==="), no_var, 1, temp);
 						location(&clause->range);
 						gen_unless(skip, test);
 					}
