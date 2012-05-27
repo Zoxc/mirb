@@ -14,6 +14,7 @@ namespace Mirb
 			static value_t reject_ex(Array *self, value_t block);
 			static value_t reject(Array *self, value_t block);
 			static value_t compact_ex(Array *self);
+			static value_t replace(Array *self, Array *other);
 			static value_t compact(Array *self);
 			static value_t shift(Array *self);
 			static value_t unshift(Array *self, size_t argc, value_t argv[]);

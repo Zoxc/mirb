@@ -381,6 +381,14 @@ namespace Mirb
 
 		return result;
 	}
+	
+	value_t Array::replace(Array *self, Array *other)
+	{
+		if(self != other)
+			self->vector = other->vector;
+
+		return self;
+	}
 
 	void Array::initialize()
 	{
@@ -388,6 +396,8 @@ namespace Mirb
 		
 		include_module(context->array_class, context->enumerable_module);
 		
+		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &replace>(context->array_class, "replace");
+
 		method<Arg::Self<Arg::Class<Array>>, &compact_ex>(context->array_class, "compact!");
 		method<Arg::Self<Arg::Class<Array>>, &compact>(context->array_class, "compact");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject>(context->array_class, "reject");
