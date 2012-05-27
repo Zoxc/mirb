@@ -440,7 +440,7 @@ namespace Mirb
 		update_forward();
 		update_backward();
 
-		#ifdef DEBUG
+		#ifdef DEBUG_MEMORY
 		{
 
 			RegionWalker obj;
