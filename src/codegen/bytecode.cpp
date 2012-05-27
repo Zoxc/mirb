@@ -1513,6 +1513,8 @@ namespace Mirb
 			{
 				var_t result = create_var();
 				to_bytecode(node->block_arg->node, result);
+				gen<AssertBlockOp>(result);
+				location(&node->block_arg->range);
 				return result;
 			}
 			else

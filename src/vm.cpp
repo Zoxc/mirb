@@ -281,7 +281,12 @@ namespace Mirb
 		Op(LoadSymbol)
 			vars[op.var] = op.symbol;
 		EndOp
-
+			
+		DeepOp(AssertBlock)
+			if(trap_exception([&] { raise_cast<Proc>(vars[op.var]);  }))
+				goto handle_exception;
+		EndOp
+			
 		Op(Block)
 			vars[op.var] = frame.block;
 		EndOp

@@ -38,6 +38,7 @@ namespace Mirb
 				AssignArray,
 				Push,
 				PushArray,
+				AssertBlock,
 				Closure,
 				Class,
 				SingletonClass,
@@ -99,6 +100,7 @@ namespace Mirb
 				&&OpAssignArray, \
 				&&OpPush, \
 				&&OpPushArray, \
+				&&OpAssertBlock, \
 				&&OpClosure, \
 				&&OpClass, \
 				&&OpSingletonClass, \
@@ -305,6 +307,14 @@ namespace Mirb
 			var_t from;
 
 			PushArrayOp(var_t into, var_t from) : into(into), from(from) {}
+		};
+		
+		struct AssertBlockOp:
+			public OpcodeWrapper<Opcode::AssertBlock>
+		{
+			var_t var;
+
+			AssertBlockOp(var_t var) : var(var) {}
 		};
 		
 		struct ClosureOp:

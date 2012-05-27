@@ -275,6 +275,15 @@ namespace Mirb
 					return var(op->into) + " << *" + var(op->from);
 				}
 				
+				case Opcode::AssertBlock:
+				{
+					auto op = (AssertBlockOp *)opcode;
+
+					opcode += sizeof(AssertBlockOp);
+					
+					return "assert_block " + var(op->var);
+				}
+				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
