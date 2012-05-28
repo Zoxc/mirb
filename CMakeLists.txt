@@ -3,7 +3,7 @@ project (mirb)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -Wall -Wextra -Wunused")
 add_definitions(-DMIRB_THREADED -DMIRB_GC_SKIP_BLOCKS -DDEBUG)
 include_directories("${mirb_SOURCE_DIR}/../Prelude/include", "${mirb_SOURCE_DIR}/../Libraries/pcre", "${mirb_SOURCE_DIR}/../Libraries/libtommath")
-link_directories("${mirb_SOURCE_DIR}/../Libraries/pcre", "${mirb_SOURCE_DIR}/../Libraries/libtommath")
+link_directories("${mirb_SOURCE_DIR}/../Libraries/pcre ${mirb_SOURCE_DIR}/../Libraries/libtommath")
 
 file(GLOB MIRB_SOURCES
     "src/*.cpp"
