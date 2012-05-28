@@ -82,10 +82,23 @@ namespace Mirb
 		return result;
 	}
 	
+	value_t Range::first(Range *self)
+	{
+		return self->low;
+	}
+	
+	value_t Range::last(Range *self)
+	{
+		return self->high;
+	}
+	
 	void Range::initialize()
 	{
 		context->range_class = define_class("Range", context->object_class);
 		
+		method<Arg::Self<Arg::Class<Range>>, &first>(context->range_class, "first");
+		method<Arg::Self<Arg::Class<Range>>, &last>(context->range_class, "last");
+
 		method<Arg::Self<Arg::Class<Range>>, &to_s>(context->range_class, "to_s");
 	}
 };

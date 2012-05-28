@@ -9,6 +9,9 @@ namespace Mirb
 	{
 		private:
 			static value_t to_s(Range *obj);
+			static value_t first(Range *self);
+			static value_t last(Range *self);
+
 		public:
 			Range(value_t low, value_t high, bool exclusive) : Object(Value::Range, context->range_class), low(low), high(high)
 			{
