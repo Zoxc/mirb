@@ -4,6 +4,8 @@
 
 namespace Mirb
 {
+	class Bignum;
+
 	class Number
 	{
 		private:
@@ -12,14 +14,14 @@ namespace Mirb
 			static mp_int fixnum_high;
 			static mp_int fixnum_low;
 			
-			intptr_t swap_endian(intptr_t in);
+			static intptr_t swap_endian(intptr_t in);
 			static void check(int error);
 
-			template<typename F> Number op(const Number &other, F func)
+			template<typename F> Number op(const Number &other, F func) const
 			{
 				Number result;
 
-				check(func(const_cast<mp_int *>(&other.num), &result.num));
+				check(func(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num), &result.num));
 
 				return result;
 			};
@@ -29,6 +31,7 @@ namespace Mirb
 			Number(Number &&other);
 			Number(const Number &other);
 			Number(size_t input);
+			Number(unsigned long input);
 			Number(intptr_t input);
 			Number(const CharArray &string, size_t base = 10);
 			Number(const void *storage, size_t size);
@@ -36,6 +39,8 @@ namespace Mirb
 
 			static void initialize();
 			static void finalize();
+			
+			int compare(const Number &other) const;
 			
 			template<typename A> void to_binary(void *&storage, size_t &size, typename A::Reference ref = A::default_reference) const
 			{
@@ -45,15 +50,20 @@ namespace Mirb
 				check(mp_to_signed_bin((mp_int *)&num, (unsigned char *)storage));
 			}
 
-			bool can_be_fix();
+			bool can_be_fix() const;
 		
-			intptr_t to_intptr();
-			value_t to_value();
+			intptr_t to_intptr() const;
+			value_t to_value() const;
+			Bignum *to_bignum() const;
 
-			CharArray to_string(size_t base = 10);
+			CharArray to_string(size_t base = 10) const;
 
-			Number operator *(Number other);
+			Number neg() const;
+
+			Number operator *(const Number &other) const;
+			Number operator /(const Number &other) const;
+			Number operator +(const Number &other) const;
+			Number operator -(const Number &other) const;
+			Number mod(const Number &other) const;
 	};
-
-	//Number operator *(Number lhs, Number rhs);
 };

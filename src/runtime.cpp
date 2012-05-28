@@ -48,6 +48,19 @@ namespace Mirb
 		return true;
 	}
 	
+	void coerce_error(value_t left, value_t right)
+	{
+		OnStack<1> os(left);
+
+		CharArray left_str = pretty_inspect(left);
+		
+		OnStackString<1> oss(left_str);
+		
+		CharArray right_str = pretty_inspect(right);
+		
+		raise(context->type_error, "Unable to coerce values " + left_str + " and " + right_str);
+	}
+
 	value_t coerce(value_t left, Symbol *name, value_t right)
 	{
 		auto result = raise_cast<Array>(call_argv(right, "coerce", 1, &left));

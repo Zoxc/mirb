@@ -3,6 +3,7 @@
 #include "string.hpp"
 #include "float.hpp"
 #include "bignum.hpp"
+#include "array.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
 
@@ -142,6 +143,28 @@ namespace Mirb
 		return from_int(-obj);
 	}
 	
+	value_t Fixnum::coerce(int_t obj, value_t other)
+	{
+		switch(Value::type(other))
+		{
+			case Value::Bignum:
+			{
+				auto num = cast<Bignum>(other);
+
+				if(num->number.can_be_fix())
+					return Array::allocate_pair(from_int(num->number.to_intptr()), from_int(obj));
+				else
+					return Array::allocate_pair(num, Number(obj).to_bignum());
+			}
+
+			case Value::Fixnum:
+				return Array::allocate_pair(other, from_int(obj));
+
+			default:
+				coerce_error(other, from_int(obj));
+		};
+	}
+
 	void Fixnum::initialize()
 	{
 		method<Arg::Self<Arg::Fixnum>, &to_s>(context->fixnum_class, "to_s");
@@ -158,6 +181,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Fixnum>, Arg::Value, &div>(context->fixnum_class, "/");
 		method<Arg::Self<Arg::Fixnum>, Arg::Value, &mod>(context->fixnum_class, "%");
 		method<Arg::Self<Arg::Fixnum>, Arg::Value, &compare>(context->fixnum_class, "<=>");
+		method<Arg::Self<Arg::Fixnum>, Arg::Value, &coerce>(context->fixnum_class, "coerce");
 	}
 };
 

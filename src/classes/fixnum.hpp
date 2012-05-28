@@ -30,6 +30,7 @@ namespace Mirb
 		value_t div(int_t obj, value_t other);
 		value_t mod(int_t obj, value_t other);
 		value_t compare(int_t obj, value_t other);
+		value_t coerce(int_t obj, value_t other);
 
 		value_t from_size_t(size_t value);
 		size_t to_size_t(value_t obj);

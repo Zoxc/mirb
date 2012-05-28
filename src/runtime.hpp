@@ -124,6 +124,7 @@ namespace Mirb
 	 * raise
 	 */
 	prelude_noreturn void type_error(value_t value, const CharArray &expected);
+	prelude_noreturn void coerce_error(value_t left, value_t right);
 	void type_error(value_t value, Class *expected);
 	Exception *create_exception(Class *exception_class, const CharArray &message);
 	prelude_noreturn void raise(Class *exception_class, const CharArray &message);

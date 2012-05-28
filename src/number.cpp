@@ -33,12 +33,33 @@ namespace Mirb
 			raise(context->runtime_error, "Unable to perform Bignum operation: " + CharArray((const char_t *)mp_error_to_string(error)));
 	}
 	
-	bool Number::can_be_fix()
+	int Number::compare(const Number &other) const
 	{
-		if(mp_cmp(&num, &fixnum_high) == MP_GT)
+		int result = mp_cmp(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num));
+		check(result);
+
+		switch(result)
+		{
+			case MP_GT:
+				return 1;
+
+			case MP_EQ:
+				return 0;
+
+			case MP_LT:
+				return -1;
+
+			default:
+				mirb_debug_abort("Unknown result");
+		}
+	}
+			
+	bool Number::can_be_fix() const
+	{
+		if(mp_cmp(const_cast<mp_int *>(&num), &fixnum_high) == MP_GT)
 			return false;
 
-		if(mp_cmp(&num, &fixnum_low) == MP_LT)
+		if(mp_cmp(const_cast<mp_int *>(&num), &fixnum_low) == MP_LT)
 			return false;
 
 		return true;
@@ -76,7 +97,7 @@ namespace Mirb
 
 	Number::Number(const Number &other)
 	{
-		check(mp_init_copy(&num, (mp_int *)&other.num));
+		check(mp_init_copy(&num, const_cast<mp_int *>(&other.num)));
 	}
 	
 	Number::Number(size_t input)
@@ -92,6 +113,12 @@ namespace Mirb
 		intptr_t big = swap_endian((intptr_t)input);
 
 		mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big));
+	}
+	
+	Number::Number(unsigned long input)
+	{
+		check(mp_init(&num));
+		mp_set_int(&num, (unsigned long)input);
 	}
 
 	Number::Number(intptr_t input)
@@ -142,20 +169,20 @@ namespace Mirb
 		mp_read_signed_bin(&num, (const unsigned char *)storage, size);
 	}
 	
-	intptr_t Number::to_intptr()
+	intptr_t Number::to_intptr() const
 	{
 		if(sizeof(intptr_t) == sizeof(unsigned long))
-			return (intptr_t)mp_get_int(&num);
+			return (intptr_t)mp_get_int(const_cast<mp_int *>(&num));
 
 		unsigned long size = sizeof(intptr_t);
 
 		intptr_t result = 0;
 
-		int left = sizeof(intptr_t) - mp_unsigned_bin_size(&num);
+		int left = sizeof(intptr_t) - mp_unsigned_bin_size(const_cast<mp_int *>(&num));
 
 		mirb_debug_assert(left >= 0);
 
-		mp_to_unsigned_bin_n(&num, (unsigned char *)&result + left, &size);
+		mp_to_unsigned_bin_n(const_cast<mp_int *>(&num), (unsigned char *)&result + left, &size);
 
 		result = swap_endian(result);
 
@@ -164,34 +191,68 @@ namespace Mirb
 
 		return result;
 	}
+	
+	Bignum *Number::to_bignum() const
+	{
+		return new (collector) Bignum(*this);
+	}
 
-	value_t Number::to_value()
+	value_t Number::to_value() const
 	{
 		if(can_be_fix())
 			return Fixnum::from_int(to_intptr());
 		else
-			return new (collector) Bignum(*this);
+			return to_bignum();
 	}
 
-	CharArray Number::to_string(size_t base)
+	CharArray Number::to_string(size_t base) const
 	{
 		CharArray result;
 
 		int size;
 
-		check(mp_radix_size(&num, base, &size));
+		check(mp_radix_size(const_cast<mp_int *>(&num), base, &size));
 
 		result.buffer(size);
 		
-		check(mp_toradix_n(&num, (char *)result.str_ref(), base, size));
+		check(mp_toradix_n(const_cast<mp_int *>(&num), (char *)result.str_ref(), base, size));
 
 		result.shrink(result.size() - 1);
 
 		return result;
 	}
 
-	Number Number::operator *(Number other)
+	Number Number::operator *(const Number &other) const
 	{
-		return op(other, [&](mp_int *other, mp_int *result) { return mp_mul(&num, other, result); });
+		return op(other, [&](mp_int *self, mp_int *other, mp_int *result) { return mp_mul(self, other, result); });
+	}
+
+	Number Number::operator +(const Number &other) const
+	{
+		return op(other, [&](mp_int *self, mp_int *other, mp_int *result) { return mp_add(self, other, result); });
+	}
+
+	Number Number::operator -(const Number &other) const
+	{
+		return op(other, [&](mp_int *self, mp_int *other, mp_int *result) { return mp_sub(self, other, result); });
+	}
+
+	Number Number::operator /(const Number &other) const
+	{
+		return op(other, [&](mp_int *self, mp_int *other, mp_int *result) { return mp_div(self, other, result, 0); });
+	}
+
+	Number Number::mod(const Number &other) const
+	{
+		return op(other, [&](mp_int *self, mp_int *other, mp_int *result) { return mp_mod(self, other, result); });
+	}
+
+	Number Number::neg() const
+	{
+		Number result;
+
+		check(mp_neg(const_cast<mp_int *>(&num), &result.num));
+
+		return result;
 	}
 };
