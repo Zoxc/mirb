@@ -8,7 +8,7 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(Class *instance_of);
+			static value_t rb_allocate(Class *instance_of);
 			static value_t push(Array *self, size_t argc, value_t argv[]);
 			static value_t pop(Array *self);
 			static value_t reject_ex(Array *self, value_t block);
@@ -28,11 +28,13 @@ namespace Mirb
 			static value_t rb_get(Array *self, value_t index, value_t size);
 			static value_t rb_set(Array *self, size_t index, value_t value);
 			static value_t join(Array *self, String *sep);
+			static value_t values_at(Array *self, size_t argc, value_t argv[]);
 
 		public:
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}
 			Array() : Object(Value::Array, context->array_class) {}
-
+			
+			static Array *allocate();
 			static Array *allocate_pair(value_t left, value_t right);
 
 			Vector<value_t, AllocatorBase, Allocator> vector;

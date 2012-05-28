@@ -33,7 +33,7 @@ namespace Mirb
 
 	Array *Array::allocate_pair(value_t left, value_t right)
 	{
-		auto result = Collector::allocate<Array>(context->array_class);
+		auto result = allocate();
 
 		result->vector.expand(2);
 		
@@ -42,8 +42,13 @@ namespace Mirb
 
 		return result;
 	}
+	
+	Array *Array::allocate()
+	{
+		return Collector::allocate<Array>(context->array_class);
+	}
 
-	value_t Array::allocate(Class *instance_of)
+	value_t Array::rb_allocate(Class *instance_of)
 	{
 		return Collector::allocate<Array>(instance_of);
 	}
@@ -377,6 +382,41 @@ namespace Mirb
 
 		return self;
 	}
+	
+	value_t Array::values_at(Array *self, size_t argc, value_t argv[])
+	{
+		auto result = allocate();
+
+		for(size_t i = 0; i < argc; ++i)
+		{
+			value_t index = argv[i];
+			
+			if(Value::is_fixnum(index))
+			{
+				size_t i;
+
+				if(!map_index(Fixnum::to_int(index), self->vector.size(), i))
+					continue;
+
+				result->vector.push(self->vector[i]);
+			}
+			else if(Value::of_type<Range>(index))
+			{
+				size_t start;
+				size_t length;
+
+				auto range = cast<Range>(index);
+
+				range->convert_to_index(start, length, self->vector.size());
+
+				result->vector.push_entries(&self->vector[start], length);
+			}
+			else
+				type_error(index, "Range or Fixnum");
+		}
+		
+		return result;
+	}
 
 	void Array::initialize()
 	{
@@ -392,7 +432,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "reject!");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "delete_if");
 
-		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->array_class, "allocate");
+		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->array_class, "allocate");
 		
 		method<Arg::Self<Arg::Class<Array>>, &rb_sort>(context->array_class, "sort");
 		
@@ -405,6 +445,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, &shift>(context->array_class, "shift");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &unshift>(context->array_class, "unshift");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &push>(context->array_class, "push");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &values_at>(context->array_class, "values_at");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &add>(context->array_class, "+");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &sub>(context->array_class, "-");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &push>(context->array_class, "<<");
