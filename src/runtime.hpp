@@ -105,7 +105,7 @@ namespace Mirb
 	/*
 	 * compare (calls Ruby code)
 	 */
-	value_t compare(value_t left, value_t right);
+	int compare(value_t left, value_t right);
 
 	template<typename F> void trap_exception(Exception *&exception, F func)
 	{

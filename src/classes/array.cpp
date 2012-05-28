@@ -301,12 +301,9 @@ namespace Mirb
 
 		while(pos < array->vector.size())
 		{
-			value_t result = compare(array->vector[pos], array->vector[pos - 1]);
+			int result = compare(array->vector[pos], array->vector[pos - 1]);
 
-			if(!result)
-				return false;
-
-			if(Fixnum::to_int(result) >= 0)
+			if(result >= 0)
 				++pos;
 			else
 			{

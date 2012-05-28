@@ -528,14 +528,19 @@ namespace Mirb
 		global->set(name, value);
 	}
 	
-	value_t compare(value_t left, value_t right)
+	int compare(value_t left, value_t right)
 	{
 		value_t result = call_argv(left, context->syms.compare, value_nil, 1, &right);
 		
 		if(!Value::is_fixnum(result))
-			raise(context->type_error, "<=> must return a Fixnum");
+			raise(context->type_error, "<=> must return a Fixnum between -1 and 1");
 
-		return result;
+		intptr_t value = Fixnum::to_int(result);
+		
+		if((value < -1) || (value > 1))
+			raise(context->type_error, "<=> must return a Fixnum between -1 and 1");
+
+		return value;
 	}
 
 	void type_error(value_t value, const CharArray &expected)

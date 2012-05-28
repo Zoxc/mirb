@@ -6,9 +6,9 @@ namespace Mirb
 {
 	template<typename F> value_t compare(value_t obj, value_t other, F func)
 	{
-		value_t result = compare(obj, other);
+		int result = compare(obj, other);
 		
-		return Value::from_bool(func(Fixnum::to_int(result)));
+		return Value::from_bool(func(result));
 	}
 	
 	value_t Comparable::less(value_t obj, value_t other)
