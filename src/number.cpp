@@ -114,12 +114,6 @@ namespace Mirb
 
 		mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big));
 	}
-	
-	Number::Number(unsigned long input)
-	{
-		check(mp_init(&num));
-		mp_set_int(&num, (unsigned long)input);
-	}
 
 	Number::Number(intptr_t input)
 	{

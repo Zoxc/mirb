@@ -64,7 +64,7 @@ namespace Mirb
 	
 	value_t Bignum::zero(Bignum *obj)
 	{
-		return Value::from_bool(obj->number.compare(Number((unsigned long)0)) == 0);
+		return Value::from_bool(obj->number.compare(Number((intptr_t)0)) == 0);
 	}
 	
 	value_t Bignum::coerce(Bignum *obj, value_t other)

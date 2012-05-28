@@ -622,6 +622,9 @@ namespace Mirb
 	
 	Method *lookup_method(Module *module, Symbol *name)
 	{
+		Value::assert_valid(module);
+		Value::assert_valid(name);
+
 		do
 		{
 			Method *result = module->get_method(name);
@@ -643,6 +646,8 @@ namespace Mirb
 
 	Method *lookup(value_t obj, Symbol *name)
 	{
+		Value::assert_valid(obj);
+
 		Method *result = lookup_method(internal_class_of(obj), name);
 
 		if(prelude_unlikely(!result))

@@ -31,7 +31,6 @@ namespace Mirb
 			Number(Number &&other);
 			Number(const Number &other);
 			Number(size_t input);
-			Number(unsigned long input);
 			Number(intptr_t input);
 			Number(const CharArray &string, size_t base = 10);
 			Number(const void *storage, size_t size);
