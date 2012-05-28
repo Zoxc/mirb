@@ -136,6 +136,9 @@ namespace Mirb
 	
 	CharArray CharArray::rjust(size_t length, const CharArray &padding)
 	{
+		if(size() >= length)
+			return *this;
+
 		CharArray result;
 
 		while(result.size() < length - size())

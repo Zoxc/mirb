@@ -289,7 +289,7 @@ namespace Mirb
 						break;
 
 					case 'f':
-						write(raise_cast<Value::Fixnum>(call(arg(), "to_f")));
+						write(raise_cast<Value::Float>(call(arg(), "to_f")));
 						break;
 
 					default:
