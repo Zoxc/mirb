@@ -10,6 +10,14 @@ class MSpecScript
 	
     '^rubyspec/core/basicobject',
     '^rubyspec/core/argf'
+    '^rubyspec/core/complex'
+    '^rubyspec/core/continuation'
+    '^rubyspec/core/binding'
+    '^rubyspec/core/objectspace'
+    '^rubyspec/core/fiber'
+    '^rubyspec/core/threadgroup'
+    '^rubyspec/core/thread'
+    '^rubyspec/core/process'
   ]
   
   # An ordered list of the directories containing specs to run
