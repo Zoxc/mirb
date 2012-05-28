@@ -159,18 +159,18 @@ namespace Mirb
 						return no_var;
 				}
 				
-				void gen_string(var_t var, InterpolateData::Entry data)
+				void gen_string(var_t var, const DataEntry &data)
 				{
-					data = data.copy<Prelude::Allocator::Standard>();
-					strings.push(data.data);
-					gen<StringOp>(var, data);
+					auto str = data.copy<Prelude::Allocator::Standard>();
+					strings.push(str.data);
+					gen<StringOp>(var, str.data, str.length);
 				}
 				
-				void gen_regexp(var_t var, InterpolateData::Entry data)
+				void gen_regexp(var_t var, const DataEntry &data)
 				{
-					data = data.copy<Prelude::Allocator::Standard>();
-					strings.push(data.data);
-					gen<RegexpOp>(var, data);
+					auto str = data.copy<Prelude::Allocator::Standard>();
+					strings.push(str.data);
+					gen<RegexpOp>(var, str.data, str.length);
 				}
 				
 				void gen_if(Label *ltrue, var_t var)

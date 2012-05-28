@@ -571,7 +571,7 @@ namespace Mirb
 		}
 	}
 
-	void Parser::process_interpolate_entries(Tree::InterpolateNode *root, InterpolateData::Entry &tail)
+	void Parser::process_interpolate_entries(Tree::InterpolateNode *root, DataEntry &tail)
 	{
 		auto &entries = lexer.lexeme.data->entries;
 

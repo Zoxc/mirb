@@ -154,7 +154,7 @@ namespace Mirb
 			
 			Value::Type result_type;
 			
-			InterpolateData::Entry data;
+			DataEntry data;
 		};
 		
 		struct HeredocNode:
@@ -170,7 +170,7 @@ namespace Mirb
 		struct InterpolatePairNode
 		{
 			ListEntry<InterpolatePairNode> entry;
-			InterpolateData::Entry string;
+			DataEntry string;
 
 			Node *group;
 		};

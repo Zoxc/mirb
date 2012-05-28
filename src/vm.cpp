@@ -403,11 +403,11 @@ namespace Mirb
 		EndOp
 
 		Op(String)
-			vars[op.var] = CharArray(op.str.data, op.str.length).to_string();
+			vars[op.var] = CharArray(op.str, op.size).to_string();
 		EndOp
 
 		Op(Regexp)
-			value_t result = trap_exception_as_value([&] { return Regexp::allocate(CharArray(op.str.data, op.str.length)); });
+			value_t result = trap_exception_as_value([&] { return Regexp::allocate(CharArray(op.str, op.size)); });
 
 			if(prelude_unlikely(!result))
 				goto handle_exception;

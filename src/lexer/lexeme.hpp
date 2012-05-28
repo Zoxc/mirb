@@ -10,6 +10,7 @@ namespace Mirb
 	
 	struct InterpolateData;
 	struct InterpolateState;
+	struct DataEntry;
 
 	namespace Tree
 	{
@@ -208,6 +209,7 @@ namespace Mirb
 			{
 				Symbol *symbol;
 				InterpolateData *data;
+				DataEntry *number;
 				Tree::HeredocNode *heredoc;
 			};
 
@@ -234,49 +236,49 @@ namespace Mirb
 
 		InterpolateState() : start(0), heredoc(0), nested(0) {}
 	};
+	
+	struct DataEntry
+	{
+		const char_t *data;
+		size_t length;
 
+		DataEntry() : data(0), length(0) {}
+
+		template<typename A> DataEntry copy(typename A::Reference ref = A::default_reference) const
+		{
+			DataEntry result;
+
+			result.data = (const char_t *)A(ref).allocate(length);
+			std::memcpy((void *)result.data, data, length);
+			result.length = length;
+
+			return result;
+		}
+			
+		std::string get() const
+		{
+			return std::string((const char *)data, length);
+		}
+			
+		template<typename A> void add(const std::string &add, typename A::Reference ref = A::default_reference)
+		{
+			set<A>(get() + add, ref);
+		};
+
+		template<typename A> void set(const std::string &other, typename A::Reference ref = A::default_reference)
+		{
+			length = other.size();
+
+			data = (const char_t *)A(ref).allocate(length);
+
+			std::memcpy((void *)data, other.data(), length);
+		};
+	};
+	
 	struct InterpolateData
 	{
-		struct Entry
-		{
-			const char_t *data;
-			size_t length;
-
-			Entry() : data(0), length(0) {}
-
-			template<typename A> Entry copy(typename A::Reference ref = A::default_reference)
-			{
-				Entry result;
-
-				result.data = (const char_t *)A(ref).allocate(length);
-				std::memcpy((void *)result.data, data, length);
-				result.length = length;
-
-				return result;
-			}
-			
-			std::string get()
-			{
-				return std::string((const char *)data, length);
-			}
-			
-			template<typename A> void add(const std::string &add, typename A::Reference ref = A::default_reference)
-			{
-				set<A>(get() + add, ref);
-			};
-
-			template<typename A> void set(const std::string &other, typename A::Reference ref = A::default_reference)
-			{
-				length = other.size();
-
-				data = (const char_t *)A(ref).allocate(length);
-
-				std::memcpy((void *)data, other.data(), length);
-			};
-		};
-	
 		struct AdvancedEntry:
-			public Entry
+			public DataEntry
 		{
 			SourceLoc range;
 			Lexeme::Type type;
@@ -293,7 +295,7 @@ namespace Mirb
 			Ending
 		};
 
-		Entry tail;
+		DataEntry tail;
 		Type type;
 
 		bool beginning()

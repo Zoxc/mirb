@@ -128,7 +128,7 @@ namespace Mirb
 					gen<ArrayOp>(array, 0, 0);
 
 					Array::parse(node->data.data, node->data.length, [&](const std::string &str){
-						InterpolateData::Entry data;
+						DataEntry data;
 						data.data = (const char_t *)str.data();
 						data.length = str.length();
 						gen_string(element, data);

@@ -124,7 +124,7 @@ namespace Mirb
 			Tree::Node *parse_precedence_operator();
 			Tree::Node *parse_precedence_operator(Tree::Node *left, size_t min_precedence);
 			
-			void process_interpolate_entries(Tree::InterpolateNode *root, InterpolateData::Entry &tail);
+			void process_interpolate_entries(Tree::InterpolateNode *root, DataEntry &tail);
 			
 			template<typename F> void typecheck(Tree::Node *&result, F func)
 			{

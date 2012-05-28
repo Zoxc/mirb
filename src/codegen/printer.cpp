@@ -630,7 +630,7 @@ namespace Mirb
 
 					opcode += sizeof(StringOp);
 					
-					return var(op->var) + " = string '" + std::string((const char *)op->str.data, op->str.length) + "'";
+					return var(op->var) + " = string '" + std::string((const char *)op->str, op->size) + "'";
 				}
 				
 				case Opcode::Regexp:
@@ -639,7 +639,7 @@ namespace Mirb
 
 					opcode += sizeof(RegexpOp);
 					
-					return var(op->var) + " = regexp /" + std::string((const char *)op->str.data, op->str.length) + "/";
+					return var(op->var) + " = regexp /" + std::string((const char *)op->str, op->size) + "/";
 				}
 				
 				case Opcode::Range:

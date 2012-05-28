@@ -23,7 +23,7 @@ namespace Mirb
 	
 	struct Heredoc
 	{
-		InterpolateData::Entry name;
+		DataEntry name;
 		char_t type;
 		bool remove_ident;
 		Tree::HeredocNode *node;

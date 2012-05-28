@@ -674,18 +674,20 @@ namespace Mirb
 			public OpcodeWrapper<Opcode::String>
 		{
 			var_t var;
-			InterpolateData::Entry str;
+			const char_t *str;
+			size_t size;
 
-			StringOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
+			StringOp(var_t var, const char_t *str, size_t size) : var(var), str(str), size(size) {}
 		};
 		
 		struct RegexpOp:
 			public OpcodeWrapper<Opcode::Regexp>
 		{
 			var_t var;
-			InterpolateData::Entry str;
+			const char_t *str;
+			size_t size;
 
-			RegexpOp(var_t var, const InterpolateData::Entry &str) : var(var), str(str) {}
+			RegexpOp(var_t var, const char_t *str, size_t size) : var(var), str(str), size(size) {}
 		};
 		
 		struct RangeOp:
