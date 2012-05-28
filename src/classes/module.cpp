@@ -157,8 +157,6 @@ namespace Mirb
 			CharArray obj_str = pretty_inspect(self);
 
 			raise(context->name_error, "Undefined method '" + old_name->string + "' for " + obj_str);
-
-			return value_raise;
 		}
 
 		self->set_method(new_name, method);
@@ -208,7 +206,6 @@ namespace Mirb
 				CharArray obj_value = pretty_inspect(obj);
 
 				raise(context->name_error, "Unable to find method " + symbol->string + " on " + obj_value);
-				return value_raise;
 			}
 
 			meta->set_method(symbol, method);

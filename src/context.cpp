@@ -8,12 +8,9 @@ namespace Mirb
 
 	Context::Context() :
 		bootstrap(true),
-		exception_frame_origin(0),
 		frame(0),
 		globals(8)
 	{
-		mirb_debug(can_throw = false);
-
 		auto start = &object_class;
 
 		while(start != &terminator)

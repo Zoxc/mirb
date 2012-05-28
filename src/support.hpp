@@ -13,6 +13,6 @@ namespace Mirb
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type);
 
 		void define_method(Tuple<Module> *scope, Symbol *name, Block *block);
-		bool define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block);
+		void define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block);
 	};
 };

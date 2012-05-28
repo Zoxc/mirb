@@ -80,8 +80,6 @@ namespace Mirb
 	const size_t literal_mask = 0xF;
 	const size_t literal_count = (literal_mask + 1);
 	
-	const value_t value_raise = 0; // Used to indicate that an exception is raised. Also invalid returns from maps.
-	
 	const size_t value_nil_num = 2;
 	const size_t value_false_num = 6;
 	const size_t value_true_num = 10;

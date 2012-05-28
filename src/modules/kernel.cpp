@@ -237,9 +237,6 @@ namespace Mirb
 
 			String *str = raise_cast<String>(arg);
 
-			if(!str)
-				return 0;
-			
 			std::cout << str->string.get_string();
 		}
 		

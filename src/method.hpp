@@ -186,76 +186,64 @@ namespace Mirb
 		
 		template<typename F, F function> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(0));
+			Arg::State state(frame, fold(0));
 
-				return function();
-			});
+			return function();
 		}
 	
 		template<typename F, F function, typename Arg1> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(1, Arg1::info));
+			Arg::State state(frame, fold(1, Arg1::info));
 
-				typename Arg1::Type arg1 = Arg1::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
 		
-				return function(arg1);
-			});
+			return function(arg1);
 		}
 	
 		template<typename F, F function, typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(2, Arg1::info, Arg2::info));
+			Arg::State state(frame, fold(2, Arg1::info, Arg2::info));
 
-				typename Arg1::Type arg1 = Arg1::apply(frame, state);
-				typename Arg2::Type arg2 = Arg2::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
 
-				return function(arg1, arg2);
-			});
+			return function(arg1, arg2);
 		}
 	
 		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(3, Arg1::info, Arg2::info, Arg3::info));
+			Arg::State state(frame, fold(3, Arg1::info, Arg2::info, Arg3::info));
 
-				typename Arg1::Type arg1 = Arg1::apply(frame, state);
-				typename Arg2::Type arg2 = Arg2::apply(frame, state);
-				typename Arg3::Type arg3 = Arg3::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
 
-				return function(arg1, arg2, arg3);
-			});
+			return function(arg1, arg2, arg3);
 		}
 	
 		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
+			Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
 
-				typename Arg1::Type arg1 = Arg1::apply(frame, state);
-				typename Arg2::Type arg2 = Arg2::apply(frame, state);
-				typename Arg3::Type arg3 = Arg3::apply(frame, state);
-				typename Arg4::Type arg4 = Arg4::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
+			typename Arg4::Type arg4 = Arg4::apply(frame, state);
 
-				return function(arg1, arg2, arg3, arg4);
-			});
+			return function(arg1, arg2, arg3, arg4);
 		}
 
 		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> value_t wrapper(Frame &frame)
 		{
-			return trap_exception_as_value([&]() -> value_t {
-				Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
+			Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
 
-				typename Arg1::Type arg1 = Arg1::apply(frame, state);
-				typename Arg2::Type arg2 = Arg2::apply(frame, state);
-				typename Arg3::Type arg3 = Arg3::apply(frame, state);
-				typename Arg4::Type arg4 = Arg4::apply(frame, state);
-				typename Arg5::Type arg5 = Arg5::apply(frame, state);
+			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+			typename Arg2::Type arg2 = Arg2::apply(frame, state);
+			typename Arg3::Type arg3 = Arg3::apply(frame, state);
+			typename Arg4::Type arg4 = Arg4::apply(frame, state);
+			typename Arg5::Type arg5 = Arg5::apply(frame, state);
 
-				return function(arg1, arg2, arg3, arg4, arg5);
-			});
+			return function(arg1, arg2, arg3, arg4, arg5);
 		}
 
 		template<typename F, F function> Method *generate_method(size_t flags, Module *module, Symbol *name)

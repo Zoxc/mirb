@@ -113,7 +113,7 @@ namespace Mirb
 				JoiningBuffer<sizeof(MoveOp) * 32, MemoryPool> opcode;
 				
 				typedef std::pair<size_t, Label *> BranchInfo;
-				typedef std::pair<size_t, SourceLoc *> SourceInfo;
+				typedef std::pair<size_t, const SourceLoc *> SourceInfo;
 
 				Vector<BranchInfo, MemoryPool> branches;
 				Vector<SourceInfo, MemoryPool> source_locs;
@@ -166,11 +166,12 @@ namespace Mirb
 					gen<StringOp>(var, str.data, str.length);
 				}
 				
-				void gen_regexp(var_t var, const DataEntry &data)
+				void gen_regexp(var_t var, const DataEntry &data, const SourceLoc &range)
 				{
 					auto str = data.copy<Prelude::Allocator::Standard>();
 					strings.push(str.data);
 					gen<RegexpOp>(var, str.data, str.length);
+					location(&range);
 				}
 				
 				void gen_if(Label *ltrue, var_t var)
@@ -188,7 +189,7 @@ namespace Mirb
 					branches.push(BranchInfo(gen<BranchUnlessOp>(var), lfalse));
 				}
 				
-				void location(SourceLoc *range)
+				void location(const SourceLoc *range)
 				{
 					source_locs.push(SourceInfo(opcode.size(), range));
 				}

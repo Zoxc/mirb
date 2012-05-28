@@ -24,37 +24,6 @@ namespace Mirb
 	prelude_thread size_t stack_stop;
 	prelude_thread size_t stack_continue;
 
-	void set_current_exception(Exception *exception)
-	{
-		if(exception)
-		{
-			Value::assert_valid(exception);
-			Value::assert_valid(exception->instance_of);
-		}
-
-		context->exception = exception;
-
-		if(exception)
-			context->exception_frame_origin = context->frame;
-		else
-			context->exception_frame_origin = 0;
-	}
-
-	prelude_noreturn void throw_current_exception()
-	{
-		auto e = context->exception;
-		
-		Value::assert_valid(e);
-
-		#ifdef DEBUG
-			context->exception_frame_origin = 0;
-		#endif
-
-		context->exception = 0;
-
-		throw InternalException(e);
-	}
-	
 	bool map_index(intptr_t index, size_t size, size_t &result)
 	{
 		if(index < 0)
@@ -155,7 +124,7 @@ namespace Mirb
 
 		value_t existing = get_var_raw(under, name);
 
-		if(prelude_unlikely(existing != value_raise))
+		if(prelude_unlikely(existing != value_undef))
 		{
 			if(Value::type(existing) != type)
 			{
@@ -424,13 +393,13 @@ namespace Mirb
 		{
 			value_t value = get_var_raw(module, name);
 
-			if(value != value_raise)
+			if(value != value_undef)
 				return value;
 
 			module = module->superclass;
 		}
 		
-		return value_raise;
+		return value_undef;
 	}
 	
 	value_t test_const(Tuple<Module> *scope, Symbol *name)
@@ -441,7 +410,7 @@ namespace Mirb
 		{
 			value_t value = get_var_raw((*scope)[i], name);
 
-			if(value != value_raise)
+			if(value != value_undef)
 				return value;
 		}
 
@@ -462,7 +431,7 @@ namespace Mirb
 
 		value = lookup_const(module, name);
 		
-		if(prelude_likely(value != nullptr))
+		if(prelude_likely(value != value_undef))
 			return value;
 
 		OnStack<1> os(name);
@@ -479,7 +448,7 @@ namespace Mirb
 
 		value_t result = test_const(scope, name);
 
-		if(prelude_likely(result != value_raise))
+		if(prelude_likely(result != value_undef))
 			return result;
 		
 		raise(context->name_error, "Uninitialized constant " + scope_path(scope) + name->string);
@@ -498,7 +467,7 @@ namespace Mirb
 	
 	value_t get_var_raw(value_t obj, Symbol *name)
 	{
-		return ValueMapAccess::get(get_vars(obj), name, [] { return value_raise; });
+		return ValueMapAccess::get(get_vars(obj), name, [] { return value_undef; });
 	}
 
 	value_t get_var(value_t obj, Symbol *name)
@@ -635,12 +604,7 @@ namespace Mirb
 			block = Compiler::compile(tree_scope, memory_pool);
 		}
 
-		value_t result = call_code(block, self, method_name, scope, value_nil, 0, 0);
-
-		if(result)
-			return result;
-		else
-			throw_current_exception();
+		return call_code(block, self, method_name, scope, value_nil, 0, 0);
 	}
 	
 	Method *lookup_method(Module *module, Symbol *name)
@@ -696,43 +660,6 @@ namespace Mirb
 		return result;
 	}
 
-	bool validate_return(value_t &result)
-	{
-		OnStack<1> os(result);
-
-		if(result != value_raise)
-			Value::assert_valid(result);
-
-		if(context->exception && result != value_raise)
-		{
-			Frame *current = context->frame->prev;
-
-			while(true)
-			{
-				if(current == context->exception_frame_origin)
-					return true;
-
-				if(!current)
-					break;
-
-				current = current->prev;
-			}
-
-			std::cerr << "Function raised exception but didn't indicate it:\n";
-			
-			auto backtrace_str = StackFrame::get_backtrace(backtrace());
-
-			if(!backtrace_str)
-				return true;
-			
-			std::cerr << backtrace_str->string.get_string() << std::endl;
-
-			result = value_raise;
-		}
-
-		return false;
-	}
-	
 	bool stack_no_reserve(Frame &frame)
 	{
 		return ((size_t)&frame <= stack_continue);
@@ -746,61 +673,38 @@ namespace Mirb
 			raise(context->system_stack_error, "Stack overflow");
 	}
 
+	struct ContextState
+	{
+		Frame &frame;
+
+		ContextState(Frame &frame) : frame(frame)
+		{
+			frame.prev = context->frame;
+			context->frame = &frame;
+		}
+
+		~ContextState()
+		{
+			context->frame = frame.prev;
+		}
+	};
+
 	value_t call_frame(Frame &frame)
 	{
-		mirb_debug(CanThrowState state(false));
-
-		if(frame.code->scope)
-			Value::assert_valid(frame.code->scope);
-
 		if(prelude_unlikely((size_t)&frame <= stack_stop))
-		{
-			set_current_exception(create_exception(context->system_stack_error, "Stack overflow"));
-			return value_raise;
-		}
+			raise(context->system_stack_error, "Stack overflow");
 
-		frame.prev = context->frame;
-		context->frame = &frame;
+		ContextState frame_state(frame);
 
-		frame.vars = nullptr;
-
-		if(prelude_unlikely(Collector::check()))
-		{
-			context->frame = frame.prev;
-
-			#ifdef DEBUG
-				context->exception_frame_origin = context->frame;
-			#endif
-
-			return value_raise;
-		}
+		Collector::check();
 		
 		if(prelude_unlikely(frame.argc < frame.code->min_args))
-		{
-			set_current_exception(create_exception(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)"));
-			context->frame = frame.prev;
-			return value_raise;
-		}
+			raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
 
 		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
-		{
-			set_current_exception(create_exception(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")"));
-			context->frame = frame.prev;
-			return value_raise;
-		}
+			raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
 
-		value_t result = frame.code->executor(frame);
-
-		#ifdef DEBUG
-			mirb_debug_assert(result || context->exception);
-
-			if(!validate_return(result))
-				context->exception_frame_origin = frame.prev;
-		#endif
-
-		context->frame = frame.prev;
-
-		return result;
+		return frame.code->executor(frame);
 	}
 
 	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
@@ -814,7 +718,6 @@ namespace Mirb
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
-		frame.scopes = nullptr;
 
 		return call_frame(frame);
 	};
@@ -823,27 +726,36 @@ namespace Mirb
 	{
 		Method *method = lookup(obj, name);
 
-		if(prelude_unlikely(!method))
-			throw_current_exception();
-
 		return call_argv(method, obj, name, block, argc, argv);
 	}
 	
-	template<typename F> bool on_stack_argv(size_t argc, value_t argv[], F func)
+	struct OnStackState
+	{
+		OnStackBlock<false> *os;
+
+		OnStackState(void *stack_memory)
+		{
+			os = new (stack_memory) OnStackBlock<false>();
+		}
+
+		~OnStackState()
+		{
+			os->~OnStackBlock<false>();
+		}
+	};
+
+	template<typename F> void on_stack_argv(size_t argc, value_t argv[], F func)
 	{
 		void *stack_memory = alloca(sizeof(OnStackBlock<false>) + 2 * sizeof(value_t) * argc);
 
 		if(prelude_unlikely(!stack_memory))
-		{
-			set_current_exception(create_exception(context->runtime_error, "Unable to allocate stack memory"));
-			return false;
-		}
+			raise(context->runtime_error, "Unable to allocate stack memory");
 
-		OnStackBlock<false> *os = new (stack_memory) OnStackBlock<false>();
+		OnStackState oss(stack_memory);
 
-		os->size = argc;
+		oss.os->size = argc;
 
-		value_t *os_array = (value_t *)(os + 1);
+		value_t *os_array = (value_t *)(oss.os + 1);
 
 		for(size_t i = 0; i < argc; ++i)
 		{
@@ -852,34 +764,22 @@ namespace Mirb
 		}
 
 		func(&os_array[argc]);
-
-		os->~OnStackBlock<false>();
-
-		return true;
 	}
 	
-	value_t call_argv_nothrow(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
 	{
 		value_t result;
 
-		bool on_stack = on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
+		on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
 			result = call_code(code, obj, name, scope, block, argc, on_stack_argv);
 		});
 
-		if(on_stack)
-			return result;
-		else
-			return 0;
+		return result;
 	}
 	
 	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
-		value_t result = call_argv_nothrow(method->block, obj, name, method->scope, block, argc, argv);
-
-		if(!result)
-			throw_current_exception();
-		else
-			return result;
+		return call_argv(method->block, obj, name, method->scope, block, argc, argv);
 	}
 	
 	Proc *get_proc(value_t obj)
@@ -894,19 +794,13 @@ namespace Mirb
 	{
 		Proc *proc = get_proc(obj);
 
-		if(prelude_unlikely(!proc))
-			return value_raise;
-		
 		value_t result;
 
-		bool on_stack = on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
-			result = trap_exception_as_value([&] { return Proc::call(proc, block, argc, on_stack_argv); });
+		on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
+			result = Proc::call(proc, block, argc, on_stack_argv);
 		});
 
-		if(on_stack && result)
-			return result;
-		else
-			throw_current_exception();
+		return result;
 	}
 	
 	value_t yield_argv(value_t obj, size_t argc, value_t argv[])
@@ -1005,11 +899,6 @@ namespace Mirb
 		}
 	}
 
-	void swallow_exception()
-	{
-		set_current_exception(nullptr);
-	}
-	
 	value_t main_to_s()
 	{
 		return String::get("main");
@@ -1171,15 +1060,15 @@ namespace Mirb
 
 	void finalize()
 	{
-		trap_exception([&] {
+		Exception *e;
+
+		trap_exception(e, [&] {
 			for(size_t i = context->at_exits.size(); i-- > 0;)
 				Proc::call(cast<Proc>(context->at_exits[i]), value_nil, 0, nullptr);
 		});  // TODO: Print if this fails
 
 		Platform::finalize();
-
-		Collector::free();
-
+		Collector::finalize();
 		Number::finalize();
 	}
 };

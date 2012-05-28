@@ -13,15 +13,11 @@ namespace Mirb
 	{
 		InternalException(Exception *value) : value(value)
 		{
-			mirb_debug(mirb_debug_assert(context->can_throw));
 			Value::assert_valid((value_t)value);
 		}
 
 		Exception *value;
 	};
-
-	void set_current_exception(Exception *exception);
-	prelude_noreturn void throw_current_exception();
 
 	value_t coerce(value_t left, Symbol *name, value_t right);
 
@@ -111,56 +107,16 @@ namespace Mirb
 	 */
 	value_t compare(value_t left, value_t right);
 
-#ifdef DEBUG
-	struct CanThrowState
+	template<typename F> void trap_exception(Exception *&exception, F func)
 	{
-		bool old;
-
-		CanThrowState(bool new_value)
-		{
-			old = context->can_throw;
-			context->can_throw = new_value;
-		}
-
-		~CanThrowState()
-		{
-			context->can_throw = old;
-		}
-	};
-#endif
-	
-	template<typename F> value_t trap_exception_as_value(F func)
-	{
-		mirb_debug(CanThrowState state(true));
-		
-		try
-		{
-			value_t result = func();
-
-			mirb_debug_assert(result);
-
-			return result;
-		}
-		catch(InternalException e)
-		{
-			set_current_exception(e.value);
-			return nullptr;
-		}
-	}
-
-	template<typename F> bool trap_exception(F func)
-	{
-		mirb_debug(CanThrowState state(true));
-		
 		try
 		{
 			func();
-			return false;
+			exception = 0;
 		}
 		catch(InternalException e)
 		{
-			set_current_exception(e.value);
-			return true;
+			exception = e.value;
 		}
 	}
 
@@ -192,10 +148,6 @@ namespace Mirb
 		return obj;
 	}
 
-	void swallow_exception();
-
-	bool validate_return(value_t &result);
-	
 	/*
 	 * eval (calls Ruby code)
 	 */
@@ -229,7 +181,7 @@ namespace Mirb
 	/*
 	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t call_argv_nothrow(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
+	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
 	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	

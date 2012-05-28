@@ -116,8 +116,7 @@ namespace Mirb
 					break;
 
 				case Value::Regexp:
-					gen_regexp(var, node->data);
-					location(&node->range);
+					gen_regexp(var, node->data, node->range);
 					break;
 
 				case Value::Array:

@@ -18,15 +18,11 @@
 
 using namespace Mirb;
 
-void report_exception(bool recurse = true)
+void report_exception(Exception *exception, bool recurse = true)
 {
-	Exception *exception = context->exception;
-
-	swallow_exception();
-
 	OnStack<1> os(exception);
 
-	if(trap_exception([&] {
+	trap_exception(exception, [&] {
 		Platform::color<Platform::Red>(inspect(class_of(exception)));
 			
 		if(exception->message)
@@ -35,12 +31,14 @@ void report_exception(bool recurse = true)
 		std::cerr << "\n";
 
 		StackFrame::print_backtrace(exception->backtrace);
-	}))
+	});
+	
+	if(exception)
 	{
 		std::cerr << "Unable to inspect exception:\n";
 
 		if(recurse)
-			report_exception(false);
+			report_exception(exception, false);
 	}
 
 	std::cerr << "\n";
@@ -50,13 +48,18 @@ bool load_core_lib(const char *executable)
 {
 	CharArray path = File::join(File::dirname(File::expand_path((const char_t *)executable)), "corelib");
 
-	if(trap_exception([&] {
+	Exception *exception;
+
+	trap_exception(exception, [&] {
 		Kernel::load(File::join(path, "core.rb").to_string());
-	}))
+	});
+
+	if(exception)
 	{
-		report_exception();
+		report_exception(exception);
 		return false;
 	}
+
 	return true;
 }
 
@@ -88,9 +91,13 @@ int main(int argc, const char *argv[])
 				bool loaded;
 				CharArray full_path;
 
-				if(trap_exception([&] { Kernel::read_file(filename, true, false, full_path, loaded, data, length); }))
+				Exception *exception;
+
+				trap_exception(exception, [&] { Kernel::read_file(filename, true, false, full_path, loaded, data, length); });
+
+				if(exception)
 				{
-					report_exception();
+					report_exception(exception);
 					return 1;
 				}
 
@@ -128,9 +135,13 @@ int main(int argc, const char *argv[])
 
 		set_const(context->object_class, Symbol::get("ARGV"), new_argv);
 		
-		if(trap_exception([&] { Kernel::load(exec.to_string()); }))
+		Exception *exception;
+
+		trap_exception(exception, [&] { Kernel::load(exec.to_string()); });
+
+		if(exception)
 		{
-			report_exception();
+			report_exception(exception);
 			return 1;
 		}
 
@@ -187,18 +198,25 @@ int main(int argc, const char *argv[])
 			block = Compiler::compile(scope, memory_pool);
 		}
 
-		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
+		Exception *exception;
 
-		if(result)
-		{
-			if(trap_exception([&] { std::cout << "=> " << inspect_object(result) << "\n"; }))
+		trap_exception(exception, [&] { 
+			value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
+
+			if(result)
 			{
-				std::cerr << "Unable to inspect result:\n";
-				report_exception();
+				trap_exception(exception, [&] { std::cout << "=> " << inspect_object(result) << "\n"; });
+
+				if(exception)
+				{
+					std::cerr << "Unable to inspect result:\n";
+					report_exception(exception);
+				}
 			}
-		}
-		else
-			report_exception();
+		});
+
+		if(exception)
+			report_exception(exception);
 	}
 	
 	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;

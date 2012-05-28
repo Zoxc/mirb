@@ -32,6 +32,13 @@ namespace Mirb
 #endif
 
 #define DeepOp(name) Op(name) frame.ip = ip;
+	
+	size_t Frame::var_count(Block *code)
+	{
+		return code->var_words;
+	}
+
+	CodeGen::UnwindEnsureOp dummy_ensure;
 
 	value_t evaluate_block(Frame &frame)
 	{
@@ -41,7 +48,6 @@ namespace Mirb
 		ExceptionBlock *current_exception_block = nullptr;
 		ExceptionBlock *loop_exception_block = nullptr; // Does not need initialization
 		size_t loop_handler = 0; // Does not need initialization
-		Exception *current_exception = nullptr; // Does not need initialization
 
 #ifdef __GNUC__
 		value_t storage[frame.code->var_words];
@@ -54,6 +60,9 @@ namespace Mirb
 
 		for(size_t i = 0; i < frame.code->var_words; ++i)
 			vars[i] = value_nil;
+
+		start_loop:
+		try {
 
 		OpPrologue
 
@@ -105,10 +114,7 @@ namespace Mirb
 		EndOp
 			
 		Op(Return)
-			value_t result = vars[op.var];
-			mirb_debug_assert(result || context->exception);
-			validate_return(result);
-			return result;
+			return vars[op.var];
 		EndOp
 
 		DeepOp(Call)
@@ -116,15 +122,9 @@ namespace Mirb
 			value_t obj = vars[op.obj];
 			Symbol *name = op.method;
 			
-			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup(obj, name); }));
-
-			if(prelude_unlikely(!method))
-				goto handle_exception;
+			Method *method = lookup(obj, name);
 
 			value_t result = call_code(method->block, obj, name, method->scope, block, op.argc, &vars[op.argv]);
-
-			if(prelude_unlikely(result == value_raise))
-				goto handle_call_exception;
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -155,48 +155,27 @@ namespace Mirb
 		DeepOp(Class)
 			Class *super = op.super == no_var ? context->object_class : raise_cast<Class>(vars[op.super]);
 
-			if(prelude_unlikely(!super))
-				goto handle_exception;
-
-			Module *self = cast_null<Module>(trap_exception_as_value([&] { return define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super); }));
+			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super);
 			
-			if(prelude_unlikely(self == nullptr))
-				goto handle_exception;
-
 			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
-
-			if(prelude_unlikely(!result))
-				goto handle_exception;
 
 			if(op.var != no_var)
 				vars[op.var] = result;
 		EndOp
 
 		DeepOp(SingletonClass)
-			Class *self = cast_null<Class>(trap_exception_as_value([&] { return singleton_class(vars[op.singleton]); }));
+			Class *self = singleton_class(vars[op.singleton]);
 			
-			if(prelude_unlikely(self == nullptr))
-				goto handle_exception;
-
 			value_t result = call_code(op.block, self, Symbol::get("singleton class"), frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
-
-			if(prelude_unlikely(!result))
-				goto handle_exception;
 
 			if(op.var != no_var)
 				vars[op.var] = result;
 		EndOp
 
 		DeepOp(Module)
-			Module *self = cast_null<Module>(trap_exception_as_value([&] { return define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name); }));
+			Module *self = define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name);
 		
-			if(prelude_unlikely(self == nullptr))
-				goto handle_exception;
-
 			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
-
-			if(prelude_unlikely(result == value_raise))
-				goto handle_exception;
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -205,15 +184,9 @@ namespace Mirb
 		DeepOp(Super)
 			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
 			
-			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup_super(frame.scope->first(), frame.name); }));
-
-			if(prelude_unlikely(!method))
-				goto handle_exception;
+			Method *method = lookup_super(frame.scope->first(), frame.name);
 
 			value_t result = call_code(method->block, frame.obj, frame.name, method->scope, block, op.argc, &vars[op.argv]);
-
-			if(prelude_unlikely(!result))
-				goto handle_call_exception;
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -226,15 +199,9 @@ namespace Mirb
 			value_t obj = vars[op.obj];
 			Symbol *name = op.method;
 			
-			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup(obj, name); }));
+			Method *method = lookup(obj, name);
 
-			if(prelude_unlikely(!method))
-				goto handle_exception;
-
-			value_t result = call_argv_nothrow(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
-
-			if(prelude_unlikely(!result))
-				goto handle_call_exception;
+			value_t result = call_argv(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -245,15 +212,9 @@ namespace Mirb
 
 			value_t block = op.block_var != no_var ? vars[op.block_var] : value_nil;
 			
-			Method *method = cast_null<Method>(trap_exception_as_value([&] { return lookup_super(frame.scope->first(), frame.name); }));
+			Method *method = lookup_super(frame.scope->first(), frame.name);
 
-			if(prelude_unlikely(!method))
-				goto handle_exception;
-
-			value_t result = call_argv_nothrow(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
-
-			if(prelude_unlikely(!result))
-				goto handle_call_exception;
+			value_t result = call_argv(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -264,8 +225,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(SingletonMethod)
-			if(prelude_unlikely(!Support::define_singleton_method(frame.scope, vars[op.singleton], op.name, op.block)))
-				goto handle_exception;
+			Support::define_singleton_method(frame.scope, vars[op.singleton], op.name, op.block);
 		EndOp
 			
 		Op(LoadFloat)
@@ -286,9 +246,7 @@ namespace Mirb
 			
 		DeepOp(AssertBlock)
 			value_t value = vars[op.var];
-
-			if(value != value_nil && trap_exception([&] { raise_cast<Proc>(value); }))
-				goto handle_exception;
+			raise_cast<Proc>(value);
 		EndOp
 			
 		Op(Block)
@@ -358,37 +316,25 @@ namespace Mirb
 		EndOp
 			
 		DeepOp(GetScopedConst)
-			if(trap_exception([&] {
-				value_t result = get_scoped_const(vars[op.obj], op.name);
+			value_t result = get_scoped_const(vars[op.obj], op.name);
 
-				if(op.var != no_var)
-					vars[op.var] = result;
-			}))
-				goto handle_exception;
+			if(op.var != no_var)
+				vars[op.var] = result;
 		EndOp
 
 		DeepOp(SetScopedConst)
-			if(trap_exception([&] {
-				set_const(vars[op.obj], op.name,  vars[op.var]);
-			}))
-				goto handle_exception;
+			set_const(vars[op.obj], op.name,  vars[op.var]);
 		EndOp
 			
 		DeepOp(GetConst)
-			if(trap_exception([&] {
-				value_t result = get_const(frame.scope, op.name);
+			value_t result = get_const(frame.scope, op.name);
 
-				if(op.var != no_var)
-					vars[op.var] = result;
-			}))
-				goto handle_exception;
+			if(op.var != no_var)
+				vars[op.var] = result;
 		EndOp
 
 		DeepOp(SetConst)
-			if(trap_exception([&] {
-				set_const(frame.scope->first(), op.name,  vars[op.var]);
-			}))
-				goto handle_exception;
+			set_const(frame.scope->first(), op.name,  vars[op.var]);
 		EndOp
 			
 		Op(Array)
@@ -396,58 +342,31 @@ namespace Mirb
 		EndOp
 
 		DeepOp(Hash)
-			value_t result = Support::create_hash(op.argc, &vars[op.argv]);
-		
-			if(prelude_unlikely(!result))
-				goto handle_exception;
-
-			vars[op.var] = result;
+			vars[op.var] = Support::create_hash(op.argc, &vars[op.argv]);
 		EndOp
 
 		Op(String)
 			vars[op.var] = CharArray(op.str, op.size).to_string();
 		EndOp
 
-		Op(Regexp)
-			value_t result = trap_exception_as_value([&] { return Regexp::allocate(CharArray(op.str, op.size)); });
-
-			if(prelude_unlikely(!result))
-				goto handle_exception;
-
-			vars[op.var] = result;
+		DeepOp(Regexp)
+			vars[op.var] = Regexp::allocate(CharArray(op.str, op.size));
 		EndOp
 			
 		DeepOp(Range)
-			value_t result = Range::allocate(vars[op.low], vars[op.high], op.exclusive);
-
-			if(prelude_unlikely(!result))
-				goto handle_exception;
-
-			vars[op.var] = result;
+			vars[op.var] = Range::allocate(vars[op.low], vars[op.high], op.exclusive);
 		EndOp
 
 		DeepOp(Interpolate)
-			value_t result = Support::interpolate(op.argc, &vars[op.argv], op.result);
-
-			if(prelude_unlikely(!result))
-				goto handle_exception;
-
-			vars[op.var] = result;
+			vars[op.var] = Support::interpolate(op.argc, &vars[op.argv], op.result);
 		EndOp
 			
 		DeepOp(Alias)
-			if(trap_exception([&] {
-				Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
-			}))
-				goto handle_exception;
+			Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
 		EndOp
 			
-		Op(LoadBignum)
-			if(trap_exception([&] {
-				vars[op.var] = new (collector) Bignum(Number(op.data, op.length));
-			}))
-				goto handle_exception;
-			
+		DeepOp(LoadBignum)
+			vars[op.var] = new (collector) Bignum(Number(op.data, op.length));
 		EndOp
 			
 		Op(Handler)
@@ -455,7 +374,7 @@ namespace Mirb
 		EndOp
 			
 		Op(UnwindEnsure)
-			if(prelude_unlikely(context->exception != 0))
+			if(prelude_unlikely(frame.exception != 0))
 				goto handle_exception;
 		EndOp
 
@@ -464,73 +383,45 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			set_current_exception(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::get("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
-			goto handle_exception;
+			throw InternalException(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::get("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
 		EndOp
 
 		DeepOp(UnwindBreak)
-			set_current_exception(Collector::allocate<BreakException>(context->local_jump_error, String::get("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
-			goto handle_exception;
+			throw InternalException(Collector::allocate<BreakException>(context->local_jump_error, String::get("Unhandled break from block"), backtrace(), op.code, vars[op.var], op.parent_dst));
 		EndOp
 			
 		Op(UnwindNext)
-			set_current_exception(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, nullptr, nullptr, vars[op.var]));
-			goto handle_exception;
+			throw InternalException(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, nullptr, nullptr, vars[op.var]));
 		EndOp
 
 		Op(UnwindRedo)
-			set_current_exception(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, nullptr, nullptr, op.pos));
-			goto handle_exception;
+			throw InternalException(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, nullptr, nullptr, op.pos));
 		EndOp
 			
 		DeepOp(GetGlobal)
-			if(trap_exception([&] {
-				vars[op.var] = get_global(op.name);
-			}))
-				goto handle_exception;
+			vars[op.var] = get_global(op.name);
 		EndOp
 
 		DeepOp(SetGlobal)
-			if(trap_exception([&] {
-				set_global(op.name, vars[op.var]);
-			}))
-				goto handle_exception;
+			set_global(op.name, vars[op.var]);
 		EndOp
 
 		OpEpilogue
 
-handle_call_exception:
-		{
-			BreakException *exception = (BreakException *)context->exception;
-
-			if(prelude_unlikely(exception->get_type() == Value::BreakException && exception->target == frame.code))
-			{
-				if(exception->dst != no_var)
-					vars[exception->dst] = exception->value;
-
-				set_current_exception(0);
-				OpContinue;
-			}
-		}
-
-		// Fallthrough
-
 handle_exception:
+		if(frame.exception->get_type() == Value::SystemStackError && stack_no_reserve(frame))
+			throw InternalException(frame.exception);
+
 		{
-			current_exception = context->exception;
-
-			if(current_exception->get_type() == Value::SystemStackError && stack_no_reserve(frame))
-				return value_raise;
-
 			if(!current_exception_block)
 			{
-				switch(current_exception->get_type())
+				switch(frame.exception->get_type())
 				{
 					case Value::RedoException:
 					{
-						auto error = (RedoException *)current_exception;
-
-						set_current_exception(0);
+						auto error = (RedoException *)frame.exception;
+						
+						frame.exception = 0;
 
 						ip = ip_start + error->pos;
 						OpContinue; // Restart block
@@ -539,22 +430,22 @@ handle_exception:
 
 					case Value::NextException:
 					{
-						auto error = (NextException *)current_exception;
+						auto error = (NextException *)frame.exception;
 
 						value_t result = error->value;
-						set_current_exception(0);
+						frame.exception = 0;
 						return result;
 					}
 					break;
 
 					case Value::ReturnException:
 					{
-						auto error = (ReturnException *)current_exception;
+						auto error = (ReturnException *)frame.exception;
 
 						if(error->target == frame.code)
 						{
 							value_t result = error->value;
-							set_current_exception(0);
+							frame.exception = 0;
 							return result;
 						}
 					}
@@ -564,60 +455,58 @@ handle_exception:
 						break;
 				}
 
-				return value_raise;
+				throw InternalException(frame.exception);
 			}
 			
 			loop_exception_block = current_exception_block;
 
-			if(current_exception->get_type() == Value::Exception || current_exception->get_type() == Value::SystemStackError)
-			{
-				current_exception_block = loop_exception_block->parent;
+			current_exception_block = current_exception_block->parent;
 
-				for(loop_handler = 0; loop_handler < loop_exception_block->handlers.size(); ++loop_handler)
+			for(loop_handler = 0; loop_handler < loop_exception_block->handlers.size(); ++loop_handler)
+			{
+				switch(loop_exception_block->handlers[loop_handler]->type)
 				{
-					switch(loop_exception_block->handlers[loop_handler]->type)
+					case FilterException:
 					{
-						case FilterException:
-						{
-							ip = ip_start + static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->test_label.address;
-							OpContinue; // Execute test block
+						ip = ip_start + static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->test_label.address;
+						OpContinue; // Execute test block
 
 exception_block_handler: // The test block will jump back here
-							auto klass = try_cast<Class>(vars[static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->result]);
+						auto klass = try_cast<Class>(vars[static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->result]);
 
-							if(!klass || !kind_of(klass, current_exception))
-								continue;
-							else
-								break;
-						}
-
-						case StandardException:
-						{
-							if(!kind_of(context->standard_error, current_exception))
-								continue;
-							else
-								break;
-						}
+						if(!klass || !kind_of(klass, frame.exception))
+							continue;
+						else
+							break;
 					}
-					
-					auto handler = loop_exception_block->handlers[loop_handler];
 
-					if(handler->var != no_var)
-						vars[handler->var] = current_exception;
-					
-					set_current_exception(0);
-
-					ip = ip_start + handler->rescue_label.address;
-					OpContinue; // Execute rescue block
+					case StandardException:
+					{
+						if(!kind_of(context->standard_error, frame.exception))
+							continue;
+						else
+							break;
+					}
 				}
+					
+				auto handler = loop_exception_block->handlers[loop_handler];
+
+				if(handler->var != no_var)
+					vars[handler->var] = frame.exception;
+					
+				frame.exception = 0;
+
+				ip = ip_start + handler->rescue_label.address;
+				OpContinue; // Execute rescue block
 			}
-			else if(current_exception_block->loop)
+
+			if(loop_exception_block->loop)
 			{
-				switch(current_exception->get_type())
+				switch(frame.exception->get_type())
 				{
 					case Value::BreakException:
 					{
-						set_current_exception(0);
+						frame.exception = 0;
 						
 						ip = ip_start + loop_exception_block->loop->break_label.address;
 						OpContinue; // Exit loop
@@ -626,9 +515,9 @@ exception_block_handler: // The test block will jump back here
 
 					case Value::RedoException:
 					{
-						auto error = (RedoException *)current_exception;
+						auto error = (RedoException *)frame.exception;
 
-						set_current_exception(0);
+						frame.exception = 0;
 
 						ip = ip_start + error->pos;
 						OpContinue; // Restart loop
@@ -637,7 +526,7 @@ exception_block_handler: // The test block will jump back here
 
 					case Value::NextException:
 					{
-						set_current_exception(0);
+						frame.exception = 0;
 
 						ip = ip_start + loop_exception_block->loop->next_label.address;
 						OpContinue; // Try next iteration
@@ -658,6 +547,27 @@ exception_block_handler: // The test block will jump back here
 			}
 			else
 				goto handle_exception; // Handle parent frame
+		}
+
+		} catch(InternalException e)
+		{
+			if(frame.exception) // We are rethrowing
+				throw;
+
+			auto break_exception = (BreakException *)e.value;
+
+			if(prelude_unlikely(e.value->get_type() == Value::BreakException && break_exception->target == frame.code))
+			{
+				if(break_exception->dst != no_var)
+					vars[break_exception->dst] = break_exception->value;
+
+				goto start_loop;
+			}
+			
+			frame.exception = e.value;
+
+			ip = (const char *)&dummy_ensure;
+			goto start_loop;
 		}
 	}
 };

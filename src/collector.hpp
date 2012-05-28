@@ -131,11 +131,11 @@ namespace Mirb
 			*/
 			static void signal();
 
-			static bool collect();
+			static void collect();
 			static void initialize();
-			static void free();
+			static void finalize();
 
-			static bool check()
+			static void check()
 			{
 #ifdef DEBUG_MEMORY
 				collect();
@@ -144,10 +144,8 @@ namespace Mirb
 				if(prelude_unlikely(pending))
 				{
 					pending = false;
-					return collect();
+					collect();
 				}
-				else
-					return false;
 			}
 			
 			static void *allocate_simple(size_t bytes)

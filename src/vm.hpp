@@ -20,7 +20,37 @@ namespace Mirb
 			value_t *vars;
 			const char *ip;
 			Frame *prev;
+			Exception *exception;
 			Tuple<> *scopes;
+
+			Frame() : vars(0), exception(0), scopes(0) {}
+
+			size_t var_count(Block *code);
+
+			template<typename F> void mark(F mark)
+			{
+				auto code_block = code;
+
+				mark(code);
+				mark(obj);
+				mark(name);
+				mark(scope);
+				mark(block);
+				
+				if(scopes)
+					mark(scopes);
+			
+				if(exception)
+					mark(exception);
+			
+				if(vars)
+				{
+					for(size_t i = 0; i < var_count(code_block); ++i)
+					{
+						mark(vars[i]);
+					}
+				}
+			}
 
 			CharArray inspect();
 	};

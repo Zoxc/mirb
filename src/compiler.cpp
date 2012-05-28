@@ -9,11 +9,17 @@ namespace Mirb
 {
 	Block *Compiler::compile(Tree::Scope *scope, MemoryPool memory_pool)
 	{
-		Value::assert_valid(scope);
+		try
+		{
+			Value::assert_valid(scope);
 
-		CodeGen::ByteCodeGenerator generator(memory_pool, scope);
+			CodeGen::ByteCodeGenerator generator(memory_pool, scope);
 		
-		return generator.generate();
+			return generator.generate();
+		} catch(InternalException)
+		{
+			mirb_runtime_abort("Something threw an exception in the compiler");
+		}
 	}
 
 	value_t Compiler::deferred_block(Frame &frame)

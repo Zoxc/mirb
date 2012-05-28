@@ -74,24 +74,7 @@ namespace Mirb
 
 		while(frame)
 		{
-			Block *code = frame->code;
-
-			mark(frame->code);
-			mark(frame->obj);
-			mark(frame->name);
-			mark(frame->scope);
-			mark(frame->block);
-
-			if(frame->scopes)
-				mark(frame->scopes);
-			
-			if(code->executor == &evaluate_block && frame->vars)
-			{
-				for(size_t i = 0; i < code->var_words; ++i)
-				{
-					mark(frame->vars[i]);
-				}
-			}
+			frame->mark(mark);
 
 			frame = frame->prev;
 		}

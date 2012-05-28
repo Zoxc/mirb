@@ -140,18 +140,14 @@ namespace Mirb
 		Value::virtual_do<TestSize, bool>(Value::None, true);
 	}
 
-	bool Collector::collect()
+	void Collector::collect()
 	{
 		if(enable_interrupts)
 		{
 			bool expected = true;
 		
 			if(pending_exception.compare_exchange_strong(expected, false) && expected)
-			{
-				set_current_exception(create_exception(context->interrupt_class, "Aborted"));
-
-				return true;
-			}
+				raise(context->interrupt_class, "Aborted");
 		}
 
 		mark();
@@ -179,8 +175,6 @@ namespace Mirb
 		#endif
 
 		collections++;
-
-		return false;
 	}
 
 	Collector::Region *Collector::allocate_region(size_t bytes)
@@ -242,7 +236,7 @@ namespace Mirb
 		current = allocate_region(pages * page_size);
 	}
 
-	void Collector::free()
+	void Collector::finalize()
 	{
 		for(auto obj = heap_list.first; obj;)
 		{

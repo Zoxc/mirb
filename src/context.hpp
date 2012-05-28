@@ -81,8 +81,6 @@ namespace Mirb
 
 			Object *main;
 
-			Exception *exception;
-
 			ValueMap *dummy_map;
 
 			Array *load_paths;
@@ -92,9 +90,6 @@ namespace Mirb
 			
 			bool bootstrap;
 
-			mirb_debug(bool can_throw);
-
-			Frame *exception_frame_origin;
 			Frame *frame;
 			
 			ValueMapData globals;
