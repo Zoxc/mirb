@@ -124,7 +124,7 @@ namespace Mirb
 			
 			Method *method = lookup(obj, name);
 
-			value_t result = call_code(method->block, obj, name, method->scope, block, op.argc, &vars[op.argv]);
+			value_t result = call_code(method->block, obj, name, method->scope, method->scopes, block, op.argc, &vars[op.argv]);
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -157,7 +157,7 @@ namespace Mirb
 
 			Module *self = define_class(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name, super);
 			
-			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), 0, value_nil, 0, nullptr);
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -166,7 +166,7 @@ namespace Mirb
 		DeepOp(SingletonClass)
 			Class *self = singleton_class(vars[op.singleton]);
 			
-			value_t result = call_code(op.block, self, Symbol::get("singleton class"), frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, Symbol::get("singleton class"), frame.scope->copy_and_prepend(self), 0, value_nil, 0, nullptr);
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -175,7 +175,7 @@ namespace Mirb
 		DeepOp(Module)
 			Module *self = define_module(op.scope == no_var ? frame.scope->first() : vars[op.scope], op.name);
 		
-			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), value_nil, 0, nullptr);
+			value_t result = call_code(op.block, self, op.name, frame.scope->copy_and_prepend(self), 0, value_nil, 0, nullptr);
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -186,7 +186,7 @@ namespace Mirb
 			
 			Method *method = lookup_super(frame.scope->first(), frame.name);
 
-			value_t result = call_code(method->block, frame.obj, frame.name, method->scope, block, op.argc, &vars[op.argv]);
+			value_t result = call_code(method->block, frame.obj, frame.name, method->scope, method->scopes, block, op.argc, &vars[op.argv]);
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -201,7 +201,7 @@ namespace Mirb
 			
 			Method *method = lookup(obj, name);
 
-			value_t result = call_argv(method->block, obj, name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv(method, obj, name, block, array->vector.size(), array->vector.raw());
 
 			if(op.var != no_var)
 				vars[op.var] = result;
@@ -214,7 +214,7 @@ namespace Mirb
 			
 			Method *method = lookup_super(frame.scope->first(), frame.name);
 
-			value_t result = call_argv(method->block, frame.obj, frame.name, method->scope, block, array->vector.size(), array->vector.raw());
+			value_t result = call_argv(method, frame.obj, frame.name, block, array->vector.size(), array->vector.raw());
 
 			if(op.var != no_var)
 				vars[op.var] = result;

@@ -201,7 +201,7 @@ int main(int argc, const char *argv[])
 		Exception *exception;
 
 		trap_exception(exception, [&] { 
-			value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
+			value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, 0, value_nil, 0, 0);
 
 			if(result)
 			{

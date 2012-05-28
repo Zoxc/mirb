@@ -5,25 +5,9 @@
 
 namespace Mirb
 {
-	value_t Proc::call_with_options(value_t self_value, Tuple<Module> *scope, Proc *self, value_t block, size_t argc, value_t argv[])
-	{
-		Frame frame;
-
-		frame.code = self->block;
-		frame.obj = self_value;
-		frame.name = self->name;
-		frame.scope = scope;
-		frame.block = block;
-		frame.argc = argc;
-		frame.argv = argv;
-		frame.scopes = self->scopes;
-
-		return call_frame(frame);
-	}
-	
 	value_t Proc::call(Proc *self, value_t block, size_t argc, value_t argv[])
 	{
-		return call_with_options(self->self, self->scope, self, block, argc, argv);
+		return call_code(self->block, self->self, self->name, self->scope, self->scopes, block, argc, argv);
 	}
 	
 	value_t Proc::rb_new(value_t block)

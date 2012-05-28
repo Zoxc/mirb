@@ -95,7 +95,7 @@ namespace Mirb
 		{
 			Proc *proc = get_proc(block);
 
-			return Proc::call_with_options(obj, context->frame->prev->scope, proc, value_nil, 0, nullptr);
+			return call_code(proc->block, obj, proc->name, context->frame->prev->scope, proc->scopes, block, 0, nullptr);
 		}
 		else
 		{

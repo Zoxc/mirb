@@ -23,7 +23,7 @@ namespace Mirb
 			Exception *exception;
 			Tuple<> *scopes;
 
-			Frame() : vars(0), exception(0), scopes(0) {}
+			Frame() : vars(0), exception(0) {}
 
 			size_t var_count(Block *code);
 

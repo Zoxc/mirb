@@ -9,8 +9,6 @@ namespace Mirb
 		private:
 			static value_t rb_new(value_t block);
 
-			static value_t call_with_options(value_t self_value, Tuple<Module> *scope, Proc *self, value_t block, size_t argc, value_t argv[]);
-
 			friend class Object;
 
 		public:

@@ -176,13 +176,12 @@ namespace Mirb
 	/*
 	 * call_code (calls Ruby code)
 	 */
-	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
+	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, Tuple<> *scopes, value_t block, size_t argc, value_t argv[]);
 	value_t call_frame(Frame &frame);
 	
 	/*
 	 * call_argv (calls Ruby code, argv does not need to be marked)
 	 */
-	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[]);
 	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	value_t call_argv(value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[]);
 	

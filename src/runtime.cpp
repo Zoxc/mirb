@@ -620,7 +620,7 @@ namespace Mirb
 			block = Compiler::compile(tree_scope, memory_pool);
 		}
 
-		return call_code(block, self, method_name, scope, value_nil, 0, 0);
+		return call_code(block, self, method_name, scope, 0, value_nil, 0, 0);
 	}
 	
 	Method *lookup_method(Module *module, Symbol *name)
@@ -630,10 +630,15 @@ namespace Mirb
 
 		do
 		{
-			Method *result = module->get_method(name);
+			auto result = module->get_method(name);
 
-			if(result)
-				return result;
+			if(prelude_likely(result))
+			{
+				if(prelude_likely(result != value_undef))
+					return cast<Method>(result);
+
+				return 0;
+			}
 
 			module = module->superclass;
 		}
@@ -728,7 +733,7 @@ namespace Mirb
 		return frame.code->executor(frame);
 	}
 
-	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	value_t call_code(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, Tuple<> *scopes, value_t block, size_t argc, value_t argv[])
 	{
 		Frame frame;
 
@@ -739,6 +744,7 @@ namespace Mirb
 		frame.block = block;
 		frame.argc = argc;
 		frame.argv = argv;
+		frame.scopes = scopes;
 
 		return call_frame(frame);
 	};
@@ -787,20 +793,15 @@ namespace Mirb
 		func(&os_array[argc]);
 	}
 	
-	value_t call_argv(Block *code, value_t obj, Symbol *name, Tuple<Module> *scope, value_t block, size_t argc, value_t argv[])
+	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
 	{
 		value_t result;
 
 		on_stack_argv(argc, argv, [&](value_t *on_stack_argv) {
-			result = call_code(code, obj, name, scope, block, argc, on_stack_argv);
+			result = call_code(method->block, obj, name, method->scope, method->scopes, block, argc, on_stack_argv);
 		});
 
 		return result;
-	}
-	
-	value_t call_argv(Method *method, value_t obj, Symbol *name, value_t block, size_t argc, value_t argv[])
-	{
-		return call_argv(method->block, obj, name, method->scope, block, argc, argv);
 	}
 	
 	Proc *get_proc(value_t obj)

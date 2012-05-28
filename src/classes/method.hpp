@@ -17,12 +17,13 @@ namespace Mirb
 			};
 
 		public:
-			Method(Class *instance_of) : Object(Value::Method, instance_of), block(0), scope(0) {}
-
-			Method(Block *block, Tuple<Module> *scope) : Object(Value::Method, context->method_class), block(block), scope(scope) {}
+			Method(Class *instance_of) : Object(Value::Method, instance_of), block(0), scope(0), scopes(0) {}
 			
+			Method(Block *block, Tuple<Module> *scope, Tuple<> *scopes = 0) : Object(Value::Method, context->method_class), block(block), scope(scope), scopes(scopes) {}
+
 			Block *block;
 			Tuple<Module> *scope;
+			Tuple<> *scopes;
 			
 			template<typename F> void mark(F mark)
 			{
@@ -30,6 +31,9 @@ namespace Mirb
 
 				mark(block);
 				mark(scope);
+
+				if(scopes)
+					mark(scopes);
 			}
 
 			static void initialize();

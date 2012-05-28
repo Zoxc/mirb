@@ -1,6 +1,7 @@
 #include "class.hpp"
 #include "symbol.hpp"
 #include "string.hpp"
+#include "proc.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "../value-map.hpp"
@@ -15,12 +16,12 @@ namespace Mirb
 		return methods;
 	}
 	
-	Method *Module::get_method(Symbol *name)
+	value_t Module::get_method(Symbol *name)
 	{
-		return cast_null<Method>(ValueMapAccess::get(get_methods(), name, [] { return nullptr; }));
+		return ValueMapAccess::get(get_methods(), name, [] { return nullptr; });
 	}
 
-	void Module::set_method(Symbol *name, Method *method)
+	void Module::set_method(Symbol *name, value_t method)
 	{
 		Value::assert_valid(method);
 
@@ -199,7 +200,7 @@ namespace Mirb
 
 			auto method = obj->get_method(symbol);
 
-			if(prelude_unlikely(!method))
+			if(prelude_unlikely(!method || method == value_undef))
 			{
 				OnStack<1> os2(symbol);
 
@@ -219,10 +220,31 @@ namespace Mirb
 		return Value::from_bool(lookup_method(obj, name) != 0);
 	}
 
+	value_t Module::define_method(Module *obj, Symbol *name, Proc *proc, value_t block)
+	{
+		if(!proc)
+			proc = get_proc(block);
+
+		auto method = new (collector) Method(proc->block, proc->scope, proc->scopes);
+
+		obj->set_method(name, method);
+
+		return proc;
+	}
+	
+	value_t Module::undef_method(Module *obj, Symbol *name)
+	{
+		obj->set_method(name, value_undef);
+
+		return obj;
+	}
+
 	void Module::initialize()
 	{
 		method<Arg::Self<Arg::Value>, &to_s>(context->module_class, "to_s");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Class<Symbol>, &alias_method>(context->module_class, "alias_method");
+		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &undef_method>(context->module_class, "undef_method");
+		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Optional<Arg::Class<Proc>>, Arg::Block, &define_method>(context->module_class, "define_method");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Module>, &append_features>(context->module_class, "append_features");
 		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &include>(context->module_class, "include");
 		method<Arg::Value, &included>(context->module_class, "included");
