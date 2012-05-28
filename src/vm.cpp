@@ -246,7 +246,9 @@ namespace Mirb
 			
 		DeepOp(AssertBlock)
 			value_t value = vars[op.var];
-			raise_cast<Proc>(value);
+
+			if(value != value_nil)
+				raise_cast<Proc>(value);
 		EndOp
 			
 		Op(Block)
