@@ -4,7 +4,19 @@
 
 namespace Mirb
 {
-	template<void *, bool raise = true, size_t count = 0> class RecursionDetector
+	struct RecursionType
+	{
+		enum Type
+		{
+			Inspect,
+			Array_to_s,
+			Array_join,
+			Hash_to_s,
+			File_join
+		};
+	};
+
+	template<RecursionType::Type, bool raise = true, size_t count = 0> class RecursionDetector
 	{
 		private:
 			static prelude_thread RecursionDetector *current;
@@ -55,5 +67,5 @@ namespace Mirb
 			}
 	};
 	
-	template<void *func, bool raise, size_t count> prelude_thread RecursionDetector<func, raise, count> *RecursionDetector<func, raise, count>::current = nullptr;
+	template<RecursionType::Type type, bool raise, size_t count> prelude_thread RecursionDetector<type, raise, count> *RecursionDetector<type, raise, count>::current = nullptr;
 };

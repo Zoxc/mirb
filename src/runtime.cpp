@@ -336,7 +336,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		RecursionDetector<&inspect_obj, true, 1> rd(obj);
+		RecursionDetector<RecursionType::Inspect, true, 1> rd(obj);
 
 		Method *inspect = respond_to(obj, "inspect");
 		Method *to_s = respond_to(obj, "to_s");

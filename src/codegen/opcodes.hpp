@@ -274,7 +274,7 @@ namespace Mirb
 		{
 			var_t var;
 			var_t array;
-			int index;
+			intptr_t index;
 			size_t size;
 
 			AssignOp(var_t var, var_t array, int index, size_t size) : var(var), array(array), index(index), size(size) {}

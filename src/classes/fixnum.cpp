@@ -15,7 +15,7 @@ namespace Mirb
 	
 	value_t Fixnum::from_size_t(size_t value)
 	{
-		if(value > high)
+		if(value > (size_t)high)
 			return new (collector) Bignum(value);
 		else
 			return from_int(value);

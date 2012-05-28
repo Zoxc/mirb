@@ -31,7 +31,7 @@ namespace Mirb
 	
 	value_t Hash::to_s(Hash *self)
 	{
-		RecursionDetector<&to_s, false> rd(self);
+		RecursionDetector<RecursionType::Hash_to_s, false> rd(self);
 
 		if(rd.recursion())
 			return String::get("{...}");

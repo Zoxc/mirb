@@ -122,7 +122,7 @@ namespace Mirb
 		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
-		RecursionDetector<&to_s, false> rd(self);
+		RecursionDetector<RecursionType::Array_to_s, false> rd(self);
 
 		if(rd.recursion())
 			return String::get("[...]");
@@ -164,7 +164,7 @@ namespace Mirb
 			{
 				auto array = try_cast<Array>(value);
 				
-				RecursionDetector<&join, false> rd(array);
+				RecursionDetector<RecursionType::Array_join, false> rd(array);
 
 				if(rd.recursion())
 				{

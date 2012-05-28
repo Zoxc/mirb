@@ -87,7 +87,7 @@ namespace Mirb
 			ListEntry<MultipleExpressionNode> entry;
 			Node *expression;
 			SourceLoc range;
-			int index;
+			intptr_t index;
 			size_t size;
 
 			MultipleExpressionNode(Node *expression, const SourceLoc &range) : expression(expression), range(range) {}
@@ -101,7 +101,7 @@ namespace Mirb
 			SourceLoc *range;
 			List<MultipleExpressionNode> expressions;
 			SourceLoc *extended;
-			size_t splat_index;
+			intptr_t splat_index;
 			size_t expression_count;
 
 			MultipleExpressionsNode() : extended(nullptr) {}

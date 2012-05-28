@@ -1487,10 +1487,10 @@ namespace Mirb
 	void Parser::process_multiple_lhs(Tree::MultipleExpressionsNode *node, bool parameter)
 	{
 		bool seen_splat = false;
-		int size = 0;
-		int index = 0;
-		int offset = 1;
-		int splat_index = -1;
+		size_t size = 0;
+		intptr_t index = 0;
+		intptr_t offset = 1;
+		intptr_t splat_index = -1;
 
 		for(auto expr: node->expressions)
 		{

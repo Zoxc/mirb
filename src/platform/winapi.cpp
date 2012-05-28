@@ -227,7 +227,7 @@ namespace Mirb
 			});
 		}
 
-		bool is_executable(const CharArray &path)
+		bool is_executable(const CharArray &)
 		{
 			return false;
 		}

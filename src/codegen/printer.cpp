@@ -657,7 +657,7 @@ namespace Mirb
 
 					opcode += sizeof(InterpolateOp);
 					
-					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc) + ", " + raw(op->result);
+					return var(op->var) + " = interpolate " + var(op->argv) + ", " + raw(op->argc) + ", " + raw((size_t)op->result);
 				}
 
 				default:

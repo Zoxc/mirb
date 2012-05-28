@@ -244,7 +244,7 @@ namespace Mirb
 
 			if(array)
 			{
-				RecursionDetector<&do_join> rd(array);
+				RecursionDetector<RecursionType::File_join> rd(array);
 
 				do_join(joiner, array->size(), array->vector.raw());
 				continue;

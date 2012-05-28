@@ -38,7 +38,9 @@ void report_exception(bool recurse = true)
 	}))
 	{
 		std::cerr << "Unable to inspect exception:\n";
-		report_exception(false);
+
+		if(recurse)
+			report_exception(false);
 	}
 
 	std::cerr << "\n";
