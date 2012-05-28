@@ -77,6 +77,13 @@ namespace Mirb
 		return Value::from_bool(!Value::test(result));
 	}
 	
+	value_t Object::not_match(value_t obj, value_t other)
+	{
+		value_t result = call_argv(obj, "=~", 1, &other);
+
+		return Value::from_bool(!Value::test(result));
+	}
+	
 	value_t Object::rb_not(value_t obj)
 	{
 		return Value::from_bool(!Value::test(obj));
@@ -213,6 +220,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "==");
 		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "===");
 		method<Arg::Self<Arg::Value>, Arg::Value, &not_equal>(context->object_class, "!=");
+		method<Arg::Self<Arg::Value>, Arg::Value, &not_match>(context->object_class, "!~");
 		method<Arg::Self<Arg::Value>, &rb_not>(context->object_class, "!");
 		method<Arg::Self<Arg::Value>, Arg::Optional<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
 		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");

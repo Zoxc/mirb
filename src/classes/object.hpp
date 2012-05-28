@@ -22,6 +22,7 @@ namespace Mirb
 			static value_t instance_eval(value_t obj, String *string, value_t block);
 			static value_t equal(value_t obj, value_t other);
 			static value_t not_equal(value_t obj, value_t other);
+			static value_t not_match(value_t obj, value_t other);
 			static value_t rb_not(value_t obj);
 			static value_t extend(value_t obj, size_t argc, value_t argv[]);
 			static value_t kind_of(value_t obj, Class *klass);
