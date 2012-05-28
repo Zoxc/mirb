@@ -66,6 +66,7 @@
     <ClInclude Include="..\..\src\platform\platform.hpp" />
     <ClInclude Include="..\..\src\platform\posix.hpp" />
     <ClInclude Include="..\..\src\platform\winapi.hpp" />
+    <ClInclude Include="..\..\src\recursion-detector.hpp" />
     <ClInclude Include="..\..\src\runtime.hpp" />
     <ClInclude Include="..\..\src\support.hpp" />
     <ClInclude Include="..\..\src\symbol-pool.hpp" />

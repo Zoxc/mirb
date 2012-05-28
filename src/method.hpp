@@ -127,6 +127,8 @@ namespace Mirb
 			public ValueBase<Fixnum, intptr_t>
 		{
 			public:
+				static const intptr_t default_value;
+
 				static Type coerce(value_t value);
 		};
 		

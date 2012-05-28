@@ -1,5 +1,6 @@
 #include "number.hpp"
 #include "runtime.hpp"
+#include "classes/bignum.hpp"
 
 #ifdef _MSC_VER
 	#include <intrin.h>
@@ -40,6 +41,7 @@ namespace Mirb
 	
 	Number::Number(Number &&other) : num(other.num)
 	{
+		other.num.dp = 0;
 	}
 
 	Number::Number(const Number &other)
@@ -85,5 +87,36 @@ namespace Mirb
 	Number::Number(const CharArray &string, size_t base)
 	{
 		check(mp_init(&num));
+
+		CharArray null_str = string.c_str();
+
+		check(mp_read_radix(&num, null_str.c_str_ref(), base));
+	}
+	
+	value_t Number::to_value()
+	{
+		return new (collector) Bignum(*this);
+	}
+
+	CharArray Number::to_string(size_t base)
+	{
+		CharArray result;
+
+		int size;
+
+		check(mp_radix_size(&num, base, &size));
+
+		result.buffer(size);
+		
+		check(mp_toradix_n(&num, (char *)result.str_ref(), base, size));
+
+		result.shrink(result.size() - 1);
+
+		return result;
+	}
+
+	Number Number::operator *(Number other)
+	{
+		return op(other, [&](mp_int *other, mp_int *result) { return mp_mul(&num, other, result); });
 	}
 };

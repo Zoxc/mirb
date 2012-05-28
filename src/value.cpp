@@ -34,6 +34,7 @@ namespace Mirb
 			"Symbol",
 			"String",
 			"Regexp",
+			"Bignum",
 			"Array",
 			"Hash",
 			"Method",

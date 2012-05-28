@@ -2,6 +2,7 @@
 #include "string.hpp"
 #include "fixnum.hpp"
 #include "range.hpp"
+#include "../recursion-detector.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -121,6 +122,11 @@ namespace Mirb
 		OnStack<1> os1(self);
 		OnStackString<1> os2(result);
 
+		RecursionDetector<&to_s, false> rd(self);
+
+		if(rd.recursion())
+			return String::get("[...]");
+
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
 			CharArray desc = inspect(self->vector[i]);
@@ -157,27 +163,30 @@ namespace Mirb
 			else
 			{
 				auto array = try_cast<Array>(value);
+				
+				RecursionDetector<&join, false> rd(array);
 
-				if(array == self)
-					result += "[...]";
-				else
+				if(rd.recursion())
 				{
-					String *desc;
-
-					if(array)
-					{
-						value_t vsep = sep;
-					
-						if(sep)
-							desc = raise_cast<String>(call_argv(array, "join", 1, &vsep)); // TODO: Replace with variadic call
-						else
-							desc = raise_cast<String>(call(array, "join"));
-					}
-					else
-						desc = raise_cast<String>(call(value, "to_s"));
-
-					result += desc->string;
+					result += "[...]";
+					continue;
 				}
+
+				String *desc;
+
+				if(array)
+				{
+					value_t vsep = sep;
+					
+					if(sep)
+						desc = raise_cast<String>(call_argv(array, "join", 1, &vsep));
+					else
+						desc = raise_cast<String>(call(array, "join"));
+				}
+				else
+					desc = raise_cast<String>(call(value, "to_s"));
+
+				result += desc->string;
 			}
 		}
 

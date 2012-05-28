@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "array.hpp"
 #include "fixnum.hpp"
+#include "../recursion-detector.hpp"
 
 namespace Mirb
 {
@@ -243,6 +244,8 @@ namespace Mirb
 
 			if(array)
 			{
+				RecursionDetector<&do_join> rd(array);
+
 				do_join(joiner, array->size(), array->vector.raw());
 				continue;
 			}

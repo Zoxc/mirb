@@ -418,6 +418,8 @@ namespace Mirb
 		mirb_derived_from(Object, Range);
 		mirb_derived_from(Object, Bignum);
 		
+		mirb_derived_from(Bignum, Bignum);
+
 		mirb_derived_from(Module, Module);
 		mirb_derived_from(Module, Class);
 

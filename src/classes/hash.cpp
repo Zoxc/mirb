@@ -1,6 +1,7 @@
 #include "hash.hpp"
 #include "string.hpp"
 #include "../runtime.hpp"
+#include "../recursion-detector.hpp"
 
 namespace Mirb
 {
@@ -30,6 +31,11 @@ namespace Mirb
 	
 	value_t Hash::to_s(Hash *self)
 	{
+		RecursionDetector<&to_s, false> rd(self);
+
+		if(rd.recursion())
+			return String::get("{...}");
+
 		CharArray result = "{";
 
 		OnStack<1> os1(self);

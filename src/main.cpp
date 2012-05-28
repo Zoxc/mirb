@@ -10,6 +10,7 @@
 #include "platform/platform.hpp"
 #include "block.hpp"
 #include "document.hpp"
+#include "number.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
@@ -17,7 +18,7 @@
 
 using namespace Mirb;
 
-void report_exception()
+void report_exception(bool recurse = true)
 {
 	Exception *exception = context->exception;
 
@@ -36,7 +37,8 @@ void report_exception()
 		StackFrame::print_backtrace(exception->backtrace);
 	}))
 	{
-		std::cerr << "Unable to inspect exception";
+		std::cerr << "Unable to inspect exception:\n";
+		report_exception(false);
 	}
 
 	std::cerr << "\n";
@@ -186,7 +188,13 @@ int main(int argc, const char *argv[])
 		value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, value_nil, 0, 0);
 
 		if(result)
-			std::cout << "=> " << inspect_object(result) << "\n";
+		{
+			if(trap_exception([&] { std::cout << "=> " << inspect_object(result) << "\n"; }))
+			{
+				std::cerr << "Unable to inspect result:\n";
+				report_exception();
+			}
+		}
 		else
 			report_exception();
 	}

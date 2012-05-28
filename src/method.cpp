@@ -45,6 +45,8 @@ namespace Mirb
 			return &frame.argv[state.index];
 		}
 		
+		const intptr_t Fixnum::default_value = Mirb::Fixnum::undef;
+
 		Fixnum::Type Fixnum::coerce(value_t value)
 		{
 			if(Mirb::Value::is_fixnum(value))

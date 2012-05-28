@@ -151,6 +151,8 @@ namespace Mirb
 			{
 				return std::string((const char *)data, length);
 			}
+
+			void buffer(size_t size);
 			
 			static CharArray hex(size_t value);
 			static CharArray uint(size_t value);

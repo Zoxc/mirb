@@ -10,6 +10,8 @@ namespace Mirb
 		const intptr_t high = INTPTR_MAX >> 1;
 		const intptr_t low = INTPTR_MIN >> 1;
 
+		const intptr_t undef = low - 1;
+
 		bool fits(int_t value);
 		
 		value_t convert(int_t value);

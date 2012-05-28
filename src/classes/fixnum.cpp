@@ -108,9 +108,18 @@ namespace Mirb
 		return coerce_op(obj, other, "-", [&](int_t right) { return Fixnum::convert(obj - right); });
 	}
 	
+	const intptr_t sqrt_long_max = (intptr_t)1 << ((sizeof(intptr_t) * CHAR_BIT - 1) / 2);
+
 	value_t Fixnum::mul(int_t obj, value_t other)
 	{
-		return coerce_op(obj, other, "*", [&](int_t right) { return Fixnum::from_int(obj * right); });
+		return coerce_op(obj, other, "*", [&](int_t right) -> value_t {
+			auto fit_sqrt = [](int_t value)  { return (value < sqrt_long_max) && (value > -sqrt_long_max); };
+
+			if(fit_sqrt(obj) && fit_sqrt(right))
+				return Fixnum::from_int(obj * right);
+			else
+				return (Number(obj) * Number(right)).to_value();
+		});
 	}
 	
 	value_t Fixnum::div(int_t obj, value_t other)

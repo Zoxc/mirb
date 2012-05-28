@@ -12,6 +12,7 @@
 #include "platform/platform.hpp"
 #include "vm.hpp"
 #include "context.hpp"
+#include "recursion-detector.hpp"
 
 #ifdef MIRB_DEBUG_COMPILER
 	#include "tree/printer.hpp"
@@ -335,14 +336,17 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
+		RecursionDetector<&inspect_obj, true, 1> rd(obj);
+
 		Method *inspect = respond_to(obj, "inspect");
+		Method *to_s = respond_to(obj, "to_s");
 
 		value_t result = 0;
 
-		if(inspect && (inspect != context->inspect_method || respond_to(obj, "to_s")))
-		{
+		if(inspect && (inspect != context->inspect_method))
 			result = call_argv(inspect, obj, Symbol::get("inspect"), value_nil, 0, 0);
-		}
+		else if(to_s)
+			result = call_argv(to_s, obj, Symbol::get("to_s"), value_nil, 0, 0);
 
 		if(!result)
 			return String::get("#<?>");

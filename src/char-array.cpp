@@ -32,6 +32,16 @@ namespace Mirb
 		shared = false;
 		static_data = false;
 	}
+	
+	void CharArray::buffer(size_t size)
+	{
+		length = size;
+
+		data = (char_t *)Collector::allocate(size);
+
+		shared = false;
+		static_data = false;
+	}
 
 	CharArray::CharArray(const std::string &string)
 	{
