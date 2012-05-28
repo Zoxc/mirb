@@ -1,6 +1,7 @@
 #include "exception.hpp"
 #include "symbol.hpp"
 #include "string.hpp"
+#include "array.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "class.hpp"
@@ -90,6 +91,34 @@ namespace Mirb
 		}
 	}
 	
+	CharArray StackFrame::inspect_plain_implementation(StackFrame *self)
+	{
+		CharArray result;
+
+		if(self->code->executor == &evaluate_block)
+		{
+			SourceLoc *range;
+
+			if(self->vars)
+				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
+			else
+				range = self->code->range;
+
+			if(range)
+			{
+				result += self->code->document->name + ":" + CharArray::uint(range->line + 1) + ":";
+			}
+			else
+				result += self->code->document->name + ":unknown:";
+		}
+		else
+				result += "mirb:native:";
+
+		result += "in `" + self->name->string + "'";
+
+		return result;
+	}
+	
 	CharArray StackFrame::inspect_implementation(StackFrame *self)
 	{
 		OnStack<1> os(self);
@@ -152,6 +181,28 @@ namespace Mirb
 		return inspect_implementation(this);
 	}
 	
+	CharArray StackFrame::inspect_plain()
+	{
+		return inspect_plain_implementation(this);
+	}
+	
+	Array *StackFrame::get_plain_backtrace(Tuple<StackFrame> *backtrace)
+	{
+		auto result = Array::allocate();
+
+		if(!backtrace)
+			return result;
+
+		OnStack<2> os(backtrace, result);
+		
+		for(size_t i = 0; i < backtrace->entries; ++i)
+		{
+			result->vector.push((*backtrace)[i]->inspect_plain().to_string());
+		}
+
+		return result;
+	}
+	
 	String *StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
 	{
 		CharArray result;
@@ -202,10 +253,18 @@ namespace Mirb
 			return value_nil;
 	}
 
-	value_t Exception::rb_backtrace(Exception *self)
+	value_t Exception::awesome_backtrace(Exception *self)
 	{
 		if(self->backtrace)
 			return StackFrame::get_backtrace(self->backtrace);
+		else
+			return value_nil;
+	}
+	
+	value_t Exception::rb_backtrace(Exception *self)
+	{
+		if(self->backtrace)
+			return StackFrame::get_plain_backtrace(self->backtrace);
 		else
 			return value_nil;
 	}
@@ -224,6 +283,7 @@ namespace Mirb
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->exception_class, "allocate");
 
 		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<String>, &rb_initialize>(context->exception_class, "initialize");
+		method<Arg::Self<Arg::Class<Exception>>, &awesome_backtrace>(context->exception_class, "awesome_backtrace");
 		method<Arg::Self<Arg::Class<Exception>>, &rb_backtrace>(context->exception_class, "backtrace");
 		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "message");
 		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "to_s");

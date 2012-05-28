@@ -21,6 +21,7 @@ namespace Mirb
 			bool vars;
 			
 			static CharArray inspect_implementation(StackFrame *self);
+			static CharArray inspect_plain_implementation(StackFrame *self);
 			static void print(StackFrame *self);
 		public:
 			StackFrame(Frame *frame);
@@ -36,9 +37,11 @@ namespace Mirb
 			}
 			
 			static String *get_backtrace(Tuple<StackFrame> *backtrace);
+			static Array *get_plain_backtrace(Tuple<StackFrame> *backtrace);
 			static void print_backtrace(Tuple<StackFrame> *backtrace);
 
 			CharArray inspect();
+			CharArray inspect_plain();
 	};
 
 	class Exception:
@@ -47,6 +50,7 @@ namespace Mirb
 		private:
 			static value_t allocate(Class *instance_of);
 			static value_t to_s(Exception *obj);
+			static value_t awesome_backtrace(Exception *self);
 			static value_t rb_backtrace(Exception *self);
 			static value_t rb_initialize(Exception *obj, String *message);
 
