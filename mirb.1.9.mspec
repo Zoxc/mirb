@@ -9,14 +9,14 @@ class MSpecScript
     'rubyspec/core',
 	
     '^rubyspec/core/basicobject',
-    '^rubyspec/core/argf'
-    '^rubyspec/core/complex'
-    '^rubyspec/core/continuation'
-    '^rubyspec/core/binding'
-    '^rubyspec/core/objectspace'
-    '^rubyspec/core/fiber'
-    '^rubyspec/core/threadgroup'
-    '^rubyspec/core/thread'
+    '^rubyspec/core/argf',
+    '^rubyspec/core/complex',
+    '^rubyspec/core/continuation',
+    '^rubyspec/core/binding',
+    '^rubyspec/core/objectspace',
+    '^rubyspec/core/fiber',
+    '^rubyspec/core/threadgroup',
+    '^rubyspec/core/thread',
     '^rubyspec/core/process'
   ]
   
