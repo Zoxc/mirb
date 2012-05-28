@@ -36,7 +36,6 @@ namespace Mirb
 	int Number::compare(const Number &other) const
 	{
 		int result = mp_cmp(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num));
-		check(result);
 
 		switch(result)
 		{
@@ -50,6 +49,7 @@ namespace Mirb
 				return -1;
 
 			default:
+				check(result);
 				mirb_debug_abort("Unknown result");
 		}
 	}
