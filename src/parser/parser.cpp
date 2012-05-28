@@ -1,6 +1,7 @@
 #include "parser.hpp"
 #include "../compiler.hpp"
 #include "../document.hpp"
+#include "../number.hpp"
 
 namespace Mirb
 {
@@ -1021,11 +1022,44 @@ namespace Mirb
 			case Lexeme::INTEGER:
 			{
 				auto result = new (fragment) Tree::IntegerNode;
-					
-				std::string str = lexer.lexeme.string();
-					
-				result->value = std::atoi(str.c_str()); // TODO: Parse octal/hex/binary and longer numbers correctly
-					
+				
+				size_t base;
+
+				switch(lexeme())
+				{
+					case Lexeme::BINARY:
+						base = 2;
+						break;
+
+					case Lexeme::OCTAL:
+						base = 8;
+						break;
+
+					case Lexeme::HEX:
+						base = 16;
+						break;
+
+					case Lexeme::INTEGER:
+						base = 10;
+						break;
+
+					default:
+						mirb_debug_abort("Wrong token type");
+				}
+
+				Number value(lexer.lexeme.number->get(), base);
+
+				if(value.can_be_fix())
+				{
+					result->value = (void *)value.to_intptr();
+					result->length = 0;
+				}
+				else
+				{
+					value.to_binary<Tree::Fragment>(result->value, result->length, fragment);
+					mirb_debug_assert(result->length);
+				}
+
 				lexer.step();
 					
 				return result;

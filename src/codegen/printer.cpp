@@ -1,6 +1,7 @@
 #include "../tree/tree.hpp"
 #include "../runtime.hpp"
 #include "../classes/fixnum.hpp"
+#include "../number.hpp"
 #include "printer.hpp"
 #include "opcodes.hpp"
 #include "bytecode.hpp"
@@ -153,7 +154,16 @@ namespace Mirb
 
 					opcode += sizeof(LoadFixnumOp);
 					
-					return var(op->var) + " = " + raw(Fixnum::to_int(op->num));
+					return var(op->var) + " = fixnum " + raw(Fixnum::to_int(op->num));
+				}
+				
+				case Opcode::LoadBignum:
+				{
+					auto op = (LoadBignumOp *)opcode;
+
+					opcode += sizeof(LoadBignumOp);
+					
+					return var(op->var) + " = bignum " + Number(op->data, op->length).to_string().get_string();
 				}
 				
 				case Opcode::LoadTrue:

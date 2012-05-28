@@ -188,7 +188,8 @@ namespace Mirb
 		{
 			NodeType type() { return Integer; }
 			
-			int value;
+			void *value;
+			size_t length;
 		};
 
 		struct FloatNode:

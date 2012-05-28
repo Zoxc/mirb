@@ -192,7 +192,18 @@ namespace Mirb
 			{
 				auto node = (Tree::IntegerNode *)basic_node;
 				
-				gen<LoadFixnumOp>(var, Fixnum::from_int(node->value));
+				if(node->length)
+				{
+					DataEntry str;
+
+					str.set<Prelude::Allocator::Standard>(std::string((const char *)node->value, node->length));
+
+					strings.push(str.data);
+
+					gen<LoadBignumOp>(var, str.data, node->length);
+				}
+				else
+					gen<LoadFixnumOp>(var, Fixnum::from_int((intptr_t)node->value));
 			}
 		}
 		

@@ -6,6 +6,7 @@
 #include "document.hpp"
 #include "global.hpp"
 #include "classes.hpp"
+#include "number.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
@@ -1090,6 +1091,7 @@ namespace Mirb
 
 	void initialize(bool console)
 	{
+		Number::initialize();
 		Collector::initialize();
 
 		context = new Context;
@@ -1177,6 +1179,8 @@ namespace Mirb
 		Platform::finalize();
 
 		Collector::free();
+
+		Number::finalize();
 	}
 };
 

@@ -66,14 +66,14 @@ namespace Mirb
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
 			
-			template<typename F> void skip_numbers(F test)
+			template<typename F> void skip_numbers(std::string &result, F test)
 			{
 				bool trailing = false;
 				const char_t *pos = nullptr;
 
 				while(test())
 				{
-					input++;
+					result += input++;
 
 					if(input == '_')
 					{
@@ -102,7 +102,9 @@ namespace Mirb
 
 			template<Lexeme::Type type, char_t high> void get_number()
 			{
-				skip_numbers([&]() mutable { return input.in('0', high); });
+				std::string result;
+
+				skip_numbers(result, [&]() mutable { return input.in('0', high); });
 				
 				if(input.in('0', '9'))
 				{
@@ -112,6 +114,8 @@ namespace Mirb
 				}
 				else
 				{
+					lexeme.number = new (memory_pool) DataEntry;
+					lexeme.number->set<MemoryPool>(result, memory_pool);
 					lexeme.type = type;
 					lexeme.stop = &input;
 				}

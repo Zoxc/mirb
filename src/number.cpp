@@ -1,5 +1,6 @@
 #include "number.hpp"
 #include "runtime.hpp"
+#include "classes/fixnum.hpp"
 #include "classes/bignum.hpp"
 
 #ifdef _MSC_VER
@@ -8,13 +9,42 @@
 
 namespace Mirb
 {
+	mp_int Number::fixnum_high;
+	mp_int Number::fixnum_low;
+
+	void Number::initialize()
+	{
+		Number high(Fixnum::high);
+		Number low(Fixnum::low);
+		
+		check(mp_init_copy(&fixnum_high, &high.num));
+		check(mp_init_copy(&fixnum_low, &low.num));
+	}
+	
+	void Number::finalize()
+	{
+		mp_clear(&fixnum_high);
+		mp_clear(&fixnum_low);
+	}
+
 	void Number::check(int error)
 	{
 		if(error != MP_OKAY)
 			raise(context->runtime_error, "Unable to perform Bignum operation: " + CharArray((const char_t *)mp_error_to_string(error)));
 	}
+	
+	bool Number::can_be_fix()
+	{
+		if(mp_cmp(&num, &fixnum_high) == MP_GT)
+			return false;
 
-	intptr_t Number::to_big_endian(intptr_t in)
+		if(mp_cmp(&num, &fixnum_low) == MP_LT)
+			return false;
+
+		return true;
+	}
+
+	intptr_t Number::swap_endian(intptr_t in)
 	{
 #ifdef _MSC_VER
 		if(sizeof(intptr_t) == 8)
@@ -52,36 +82,48 @@ namespace Mirb
 	Number::Number(size_t input)
 	{
 		check(mp_init(&num));
-
-		if(sizeof(intptr_t) == 8)
+		
+		if(sizeof(intptr_t) == sizeof(unsigned long))
 		{
-			intptr_t big = to_big_endian((intptr_t)input);
-
-			mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big));
+			mp_set_int(&num, (unsigned long)input);
+			return;
 		}
-		else
-			mp_set_int(&num, input);
+
+		intptr_t big = swap_endian((intptr_t)input);
+
+		mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big));
 	}
 
 	Number::Number(intptr_t input)
 	{
 		check(mp_init(&num));
 
-		if(sizeof(intptr_t) == 8)
+		if(sizeof(intptr_t) == sizeof(unsigned long))
 		{
-			intptr_t big = to_big_endian(input);
-
-			if(big < 0)
+			if(input < 0)
 			{
-				big = -big;
-				check(mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big)));
+				input = -input;
+				mp_set_int(&num, (unsigned long)input);
 				check(mp_neg(&num, &num));
 			}
 			else
-				mp_read_unsigned_bin(&num, (const unsigned char *)&big, sizeof(big));
+				mp_set_int(&num, (unsigned long)input);
+
+			return;
+		}
+
+		if(input < 0)
+		{
+			input = -input;
+			input = swap_endian(input);
+			check(mp_read_unsigned_bin(&num, (const unsigned char *)&input, sizeof(intptr_t)));
+			check(mp_neg(&num, &num));
 		}
 		else
-			mp_set(&num, (unsigned int)input);
+		{
+			input = swap_endian(input);
+			mp_read_unsigned_bin(&num, (const unsigned char *)&input, sizeof(intptr_t));
+		}
 	}
 
 	Number::Number(const CharArray &string, size_t base)
@@ -92,10 +134,43 @@ namespace Mirb
 
 		check(mp_read_radix(&num, null_str.c_str_ref(), base));
 	}
+
+	Number::Number(const void *storage, size_t size)
+	{
+		check(mp_init(&num));
+
+		mp_read_signed_bin(&num, (const unsigned char *)storage, size);
+	}
 	
+	intptr_t Number::to_intptr()
+	{
+		if(sizeof(intptr_t) == sizeof(unsigned long))
+			return (intptr_t)mp_get_int(&num);
+
+		unsigned long size = sizeof(intptr_t);
+
+		intptr_t result = 0;
+
+		int left = sizeof(intptr_t) - mp_unsigned_bin_size(&num);
+
+		mirb_debug_assert(left >= 0);
+
+		mp_to_unsigned_bin_n(&num, (unsigned char *)&result + left, &size);
+
+		result = swap_endian(result);
+
+		if(SIGN(&num))
+			result = -result;
+
+		return result;
+	}
+
 	value_t Number::to_value()
 	{
-		return new (collector) Bignum(*this);
+		if(can_be_fix())
+			return Fixnum::from_int(to_intptr());
+		else
+			return new (collector) Bignum(*this);
 	}
 
 	CharArray Number::to_string(size_t base)

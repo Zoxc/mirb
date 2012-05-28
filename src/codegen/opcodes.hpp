@@ -24,6 +24,7 @@ namespace Mirb
 			{
 				Move,
 				LoadFixnum,
+				LoadBignum,
 				LoadFloat,
 				LoadTrue,
 				LoadFalse,
@@ -86,6 +87,7 @@ namespace Mirb
 			#define MIRB_OPCODES \
 				&&OpMove, \
 				&&OpLoadFixnum, \
+				&&OpLoadBignum, \
 				&&OpLoadFloat, \
 				&&OpLoadTrue, \
 				&&OpLoadFalse, \
@@ -188,6 +190,16 @@ namespace Mirb
 			value_t num;
 
 			LoadFixnumOp(var_t var, value_t num) : var(var), num(num) {}
+		};
+		
+		struct LoadBignumOp:
+			public OpcodeWrapper<Opcode::LoadBignum>
+		{
+			var_t var;
+			const void *data;
+			size_t length;
+
+			LoadBignumOp(var_t var, const void *data, size_t length) : var(var), data(data), length(length) {}
 		};
 		
 		struct LoadTrueOp:

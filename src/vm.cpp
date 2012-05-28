@@ -2,6 +2,7 @@
 #include "runtime.hpp"
 #include "support.hpp"
 #include "document.hpp"
+#include "number.hpp"
 #include "generic/source-loc.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"
@@ -10,6 +11,7 @@
 #include "classes/array.hpp"
 #include "classes/float.hpp"
 #include "classes/range.hpp"
+#include "classes/bignum.hpp"
 
 namespace Mirb
 {
@@ -438,6 +440,14 @@ namespace Mirb
 				Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
 			}))
 				goto handle_exception;
+		EndOp
+			
+		Op(LoadBignum)
+			if(trap_exception([&] {
+				vars[op.var] = new (collector) Bignum(Number(op.data, op.length));
+			}))
+				goto handle_exception;
+			
 		EndOp
 			
 		Op(Handler)

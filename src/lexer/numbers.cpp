@@ -12,7 +12,8 @@ namespace Mirb
 			if(input == '+' || input == '-')
 				input++;
 
-			skip_numbers([&] { return input.in('0', '9'); });
+			std::string result;
+			skip_numbers(result, [&] { return input.in('0', '9'); });
 			
 			lexeme.type = Lexeme::REAL;
 			lexeme.stop = &input;
@@ -46,6 +47,8 @@ namespace Mirb
 
 				input--;
 				
+				lexeme.number = new (memory_pool) DataEntry;
+				lexeme.number->set<MemoryPool>("0", memory_pool);
 				lexeme.type = Lexeme::INTEGER;
 				lexeme.stop = &input;
 				break;
@@ -83,6 +86,8 @@ namespace Mirb
 				break;
 
 			default: // Single 0
+				lexeme.number = new (memory_pool) DataEntry;
+				lexeme.number->set<MemoryPool>("0", memory_pool);
 				lexeme.type = Lexeme::INTEGER;
 				lexeme.stop = &input;
 
@@ -103,11 +108,15 @@ namespace Mirb
 
 	void Lexer::number()
 	{
-		skip_numbers([&] { return input.in('0', '9'); });
+		std::string result;
+
+		skip_numbers(result, [&] { return input.in('0', '9'); });
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::INTEGER;
-		
+		lexeme.number = new (memory_pool) DataEntry;
+		lexeme.number->set<MemoryPool>(result, memory_pool);
+
 		if(exponent() || input != '.')
 			return;
 		
@@ -119,7 +128,7 @@ namespace Mirb
 			return;
 		}
 
-		skip_numbers([&] { return input.in('0', '9'); });
+		skip_numbers(result, [&] { return input.in('0', '9'); });
 		
 		lexeme.stop = &input;
 		lexeme.type = Lexeme::REAL;
@@ -133,7 +142,9 @@ namespace Mirb
 		
 		if(input.in('0', '9'))
 		{
-			skip_numbers([&] { return input.in('0', '9'); });
+			std::string result;
+
+			skip_numbers(result, [&] { return input.in('0', '9'); });
 
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::REAL;
@@ -184,7 +195,12 @@ namespace Mirb
 
 		if(is_hex())
 		{
-			skip_numbers(is_hex);
+			std::string result;
+
+			skip_numbers(result, is_hex);
+			
+			lexeme.number = new (memory_pool) DataEntry;
+			lexeme.number->set<MemoryPool>(result, memory_pool);
 
 			lexeme.stop = &input;
 			lexeme.type = Lexeme::HEX;
