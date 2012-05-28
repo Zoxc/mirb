@@ -205,6 +205,7 @@ namespace Mirb
 		method<&nil>(context->object_class, "nil?");
 		method<Arg::Self<Arg::Value>, &to_s>(context->object_class, "to_s");
 		method<Arg::Self<Arg::Value>, &rb_dup>(context->object_class, "dup");
+		method<Arg::Self<Arg::Value>, &rb_dup>(context->object_class, "clone");
 		method<Arg::Self<Arg::Value>, &klass>(context->object_class, "class");
 		method<&dummy>(context->object_class, "freeze");
 		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, &respond_to>(context->object_class, "respond_to?");
