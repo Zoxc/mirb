@@ -148,6 +148,14 @@ namespace Mirb
 
 		return result;
 	}
+
+	CharArray CharArray::trim(size_t cut, CharArray append)
+	{
+		if(length <= cut)
+			return *this;
+
+		return copy(0, cut) + append;
+	}
 	
 	void CharArray::localize()
 	{

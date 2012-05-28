@@ -307,7 +307,7 @@ namespace Mirb
 
 	CharArray inspect(value_t obj)
 	{
-		return inspect_obj(obj)->string;
+		return inspect_obj(obj)->string.trim(300, "<....>");
 	}
 	
 	std::string inspect_object(value_t obj)

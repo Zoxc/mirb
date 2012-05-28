@@ -29,6 +29,8 @@ namespace Mirb
 			CharArray(const CharArray &char_array);
 			CharArray(CharArray &&char_array);
 
+			CharArray trim(size_t cut, CharArray append);
+
 			template<size_t length> CharArray(const char (&string)[length])
 			{
 				set_literal(string);
