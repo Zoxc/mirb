@@ -365,6 +365,10 @@ namespace Mirb
 			Module::alias_method(frame.scope->first(), cast<Symbol>(vars[op.new_name]), cast<Symbol>(vars[op.old_name]));
 		EndOp
 			
+		DeepOp(Undef)
+			Module::undef_method(frame.scope->first(), cast<Symbol>(vars[op.name]));
+		EndOp
+			
 		DeepOp(LoadBignum)
 			vars[op.var] = new (collector) Bignum(Number(op.data, op.length));
 		EndOp

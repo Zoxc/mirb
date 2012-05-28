@@ -623,7 +623,7 @@ namespace Mirb
 		return call_code(block, self, method_name, scope, 0, value_nil, 0, 0);
 	}
 	
-	Method *lookup_method(Module *module, Symbol *name)
+	Method *lookup_module(Module *module, Symbol *name)
 	{
 		Value::assert_valid(module);
 		Value::assert_valid(name);
@@ -647,32 +647,38 @@ namespace Mirb
 		return 0;
 	}
 	
+	void method_error(Symbol *name, value_t obj, bool in)
+	{
+		OnStack<1> os(name);
+
+		CharArray obj_str = pretty_inspect(obj);
+
+		raise(context->name_error, "Undefined method '" + name->string + (in ? CharArray("' in ") :  CharArray("' for ")) + obj_str);
+	}
+	
+	Method *lookup_method(Module *module, Symbol *name, value_t obj)
+	{
+		Method *result = lookup_module(module, name);
+
+		if(!result)
+			method_error(name, obj, false);
+
+		return result;
+	}
+	
 	Method *respond_to(value_t obj, Symbol *name)
 	{
-		return lookup_method(internal_class_of(obj), name);
+		return lookup_module(internal_class_of(obj), name);
 	}
 
 	Method *lookup(value_t obj, Symbol *name)
 	{
-		Value::assert_valid(obj);
-
-		Method *result = lookup_method(internal_class_of(obj), name);
-
-		if(prelude_unlikely(!result))
-		{
-			OnStack<1> os(name);
-
-			CharArray obj_str = pretty_inspect(obj);
-
-			raise(context->name_error, "Undefined method '" + name->string + "' for " + obj_str);
-		}
-
-		return result;
+		return lookup_method(internal_class_of(obj), name, obj);
 	}
 
 	Method *lookup_super(Module *module, Symbol *name)
 	{
-		Method *result = lookup_method(module->superclass, name);
+		Method *result = lookup_module(module->superclass, name);
 
 		if(prelude_unlikely(!result))
 		{

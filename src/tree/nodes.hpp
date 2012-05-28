@@ -526,5 +526,20 @@ namespace Mirb
 			Node *new_name;
 			Node *old_name;
 		};
+		
+		struct UndefEntry
+		{
+			Node *name;
+			SourceLoc range;
+			ListEntry<UndefEntry> entry;
+		};
+
+		struct UndefNode:
+			public Node
+		{
+			NodeType type() { return Undef; }
+			
+			List<UndefEntry> entries;
+		};
 	};
 };

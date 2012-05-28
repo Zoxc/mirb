@@ -47,6 +47,7 @@ namespace Mirb
 				Method,
 				SingletonMethod,
 				Alias,
+				Undef,
 				Call,
 				Super,
 				VariadicCall,
@@ -110,6 +111,7 @@ namespace Mirb
 				&&OpMethod, \
 				&&OpSingletonMethod, \
 				&&OpAlias, \
+				&&OpUndef, \
 				&&OpCall, \
 				&&OpSuper, \
 				&&OpVariadicCall, \
@@ -399,6 +401,14 @@ namespace Mirb
 			var_t old_name;
 			
 			AliasOp(var_t new_name, var_t old_name) : new_name(new_name), old_name(old_name) {}
+		};
+		
+		struct UndefOp:
+			public OpcodeWrapper<Opcode::Undef>
+		{
+			var_t name;
+			
+			UndefOp(var_t name) : name(name) {}
 		};
 		
 		struct CallOp:

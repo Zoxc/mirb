@@ -53,6 +53,7 @@ namespace Mirb
 				Module,
 				Method,
 				Alias,
+				Undef,
 				Rescue,
 				Handler,
 				Splat,

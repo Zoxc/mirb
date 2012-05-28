@@ -116,6 +116,8 @@ namespace Mirb
 				enter_scope(new_scope, func);
 			}
 			
+			void step_comma();
+
 			static bool is_constant(Symbol *symbol);
 						
 			static size_t operator_precedences[];
@@ -168,7 +170,9 @@ namespace Mirb
 			Tree::Node *parse_array();
 			Tree::Node *parse_range(bool allow_multiple);
 			Tree::Node *parse_unary();
+			Tree::Node *parse_method_name_or_symbol(bool allow_keywords);
 			Tree::Node *parse_alias();
+			Tree::Node *parse_undef();
 			Tree::Node *parse_boolean_unary();
 			Tree::Node *parse_string_tokens();
 			Tree::Node *parse_factor();
@@ -458,6 +462,7 @@ namespace Mirb
 				switch(lexeme())
 				{
 					case Lexeme::KW_ALIAS:
+					case Lexeme::KW_UNDEF:
 						return true;
 
 					default:

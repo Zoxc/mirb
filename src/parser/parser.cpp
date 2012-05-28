@@ -1582,19 +1582,7 @@ namespace Mirb
 			{
 				SourceLoc comma = lexer.lexeme;
 
-				step_lines();
-					
-				if(lexeme() == Lexeme::COMMA)
-				{
-					SourceLoc error;
-
-					while(lexeme() == Lexeme::COMMA)
-					{
-						step_lines();
-					}
-
-					report(error, "Unexpected multiple commas");
-				}
+				step_comma();
 
 				if(is_expression())
 				{
@@ -1922,6 +1910,43 @@ namespace Mirb
 		return result;
 	}
 	
+	Tree::Node *Parser::parse_method_name_or_symbol(bool allow_keywords)
+	{
+		switch(lexeme())
+		{
+			case Lexeme::SYMBOL:
+			case Lexeme::COLON:
+				return parse_symbol(allow_keywords);
+				break;
+						
+			default:
+			{
+				auto symbol = new (fragment) Tree::SymbolNode;
+
+				parse_method_name(symbol->symbol);
+
+				return symbol;
+			}
+		}
+	}
+	
+	void Parser::step_comma()
+	{
+		step_lines();
+
+		if(lexeme() == Lexeme::COMMA)
+		{
+			SourceLoc error;
+
+			while(lexeme() == Lexeme::COMMA)
+			{
+				step_lines();
+			}
+
+			report(error, "Unexpected multiple commas");
+		}
+	}
+			
 	Tree::Node *Parser::parse_alias()
 	{
 		if(lexeme() == Lexeme::KW_ALIAS)
@@ -1930,31 +1955,12 @@ namespace Mirb
 
 			lexer.lexeme.allow_keywords = false;
 
-			lexer.step();
+			step_lines();
 			
 			auto node = new (fragment) Tree::AliasNode;
 
-			auto parse_name = [&](Tree::Node *&node, bool allow_keywords) {
-				switch(lexeme())
-				{
-					case Lexeme::SYMBOL:
-					case Lexeme::COLON:
-						node = parse_symbol(allow_keywords);
-						break;
-						
-					default:
-					{
-						auto symbol = new (fragment) Tree::SymbolNode;
-
-						parse_method_name(symbol->symbol);
-
-						node = symbol;
-					}
-				}
-			};
-			
-			parse_name(node->new_name, false);
-			parse_name(node->old_name, true);
+			node->new_name = parse_method_name_or_symbol(false);
+			node->old_name = parse_method_name_or_symbol(true);
 
 			lexer.lexeme.allow_keywords = true;
 
@@ -1966,6 +1972,42 @@ namespace Mirb
 		}
 		else
 			return parse_boolean();
+	}
+	
+	Tree::Node *Parser::parse_undef()
+	{
+		if(lexeme() == Lexeme::KW_UNDEF)
+		{
+			auto result = new (fragment) Tree::UndefNode;
+
+			lexer.lexeme.allow_keywords = false;
+
+			step_lines();
+			
+			while(true)
+			{
+				auto entry = new (fragment) Tree::UndefEntry;
+				entry->range = lexer.lexeme;
+				entry->name = parse_method_name_or_symbol(true); 
+				lexer.lexeme.prev_set(&entry->range);
+
+				result->entries.append(entry);
+
+				if(lexeme() == Lexeme::COMMA)
+				{
+					lexer.lexeme.allow_keywords = false;
+					step_comma();
+				}
+				else
+					break;
+			}
+
+			lexer.lexeme.allow_keywords = true;
+
+			return result;
+		}
+		else
+			return parse_alias();
 	}
 	
 	Tree::Node *Parser::parse_statements()

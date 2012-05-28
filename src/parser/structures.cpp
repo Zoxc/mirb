@@ -238,19 +238,7 @@ namespace Mirb
 
 		while(lexeme() == Lexeme::COMMA)
 		{
-			step_lines();
-					
-			if(lexeme() == Lexeme::COMMA)
-			{
-				SourceLoc error;
-
-				while(lexeme() == Lexeme::COMMA)
-				{
-					step_lines();
-				}
-
-				report(error, "Unexpected multiple commas");
-			}
+			step_comma();
 			
 			parse_var();
 		}

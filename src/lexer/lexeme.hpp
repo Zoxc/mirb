@@ -150,6 +150,7 @@ namespace Mirb
 				KW_MODULE,
 				KW_DEF,
 				KW_ALIAS,
+				KW_UNDEF,
 				KW_DEFINED,
 				KW_SELF,
 				KW_DO,

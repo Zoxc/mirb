@@ -128,6 +128,7 @@ namespace Mirb
 		"module",
 		"def",
 		"alias",
+		"undef",
 		"defined?",
 		"self",
 		"do",

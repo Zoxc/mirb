@@ -21,7 +21,6 @@ namespace Mirb
 			static value_t extend_object(Module *self, value_t obj);
 			static value_t module_function(Module *obj, size_t argc, value_t argv[]);
 			static value_t define_method(Module *obj, Symbol *name, Proc *proc, value_t block);
-			static value_t undef_method(Module *obj, Symbol *name);
 			
 			Module(Value::Type type) : Object(type), methods(nullptr), superclass(nullptr) {}
 
@@ -35,6 +34,7 @@ namespace Mirb
 			Class *superclass;
 
 			static value_t include(value_t obj, size_t argc, value_t argv[]);
+			static value_t undef_method(Module *obj, Symbol *name);
 
 			ValueMap *get_methods();
 			

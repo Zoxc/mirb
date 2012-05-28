@@ -354,7 +354,16 @@ namespace Mirb
 
 					opcode += sizeof(AliasOp);
 					
-					return "alias " + var(op->new_name)+ ", " + var(op->old_name);
+					return "alias " + var(op->new_name) + ", " + var(op->old_name);
+				}
+				
+				case Opcode::Undef:
+				{
+					auto op = (UndefOp *)opcode;
+
+					opcode += sizeof(UndefOp);
+					
+					return "undef " + var(op->name);
 				}
 				
 				case Opcode::Call:

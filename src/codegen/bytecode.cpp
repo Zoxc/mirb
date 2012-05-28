@@ -92,6 +92,7 @@ namespace Mirb
 			&ByteCodeGenerator::convert_module,
 			&ByteCodeGenerator::convert_method,
 			&ByteCodeGenerator::convert_alias,
+			&ByteCodeGenerator::convert_undef,
 			0, // Rescue
 			&ByteCodeGenerator::convert_handler,
 			0, // Splat
@@ -973,6 +974,24 @@ namespace Mirb
 
 			gen<AliasOp>(new_name, old_name);
 			location(&node->range);
+
+			if(is_var(var))
+				gen<LoadNilOp>(var);
+		}
+		
+		void ByteCodeGenerator::convert_undef(Tree::Node *basic_node, var_t var)
+		{
+			auto node = (Tree::UndefNode *)basic_node;
+
+			var_t name = reuse(var);
+
+			for(auto entry: node->entries)
+			{
+				to_bytecode(entry->name, name);
+
+				gen<UndefOp>(name);
+				location(&entry->range);
+			}
 
 			if(is_var(var))
 				gen<LoadNilOp>(var);
