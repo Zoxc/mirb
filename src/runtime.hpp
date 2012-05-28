@@ -83,7 +83,7 @@ namespace Mirb
 	value_t test_const(Tuple<Module> *scope, Symbol *name);
 	value_t get_scoped_const(value_t obj, Symbol *name);
 	value_t get_const(Tuple<Module> *scope, Symbol *name);
-	value_t set_const(value_t obj, Symbol *name, value_t value);
+	void set_const(value_t obj, Symbol *name, value_t value);
 	
 	value_t get_var_raw(value_t obj, Symbol *name);
 	value_t get_var(value_t obj, Symbol *name);

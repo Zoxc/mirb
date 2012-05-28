@@ -406,7 +406,7 @@ namespace Mirb
 		{
 			value_t value = get_var_raw(module, name);
 
-			if(value != value_undef)
+			if(prelude_likely(value != value_undef))
 				return value;
 
 			module = module->superclass;
@@ -423,7 +423,7 @@ namespace Mirb
 		{
 			value_t value = get_var_raw((*scope)[i], name);
 
-			if(value != value_undef)
+			if(prelude_likely(value != value_undef))
 				return value;
 		}
 
@@ -439,7 +439,7 @@ namespace Mirb
 
 		value_t value = get_var_raw(obj, name);
 
-		if(value)
+		if(prelude_likely(value != value_undef))
 			return value;
 
 		value = lookup_const(module, name);
@@ -467,15 +467,13 @@ namespace Mirb
 		raise(context->name_error, "Uninitialized constant " + scope_path(scope) + name->string);
 	}
 
-	value_t set_const(value_t obj, Symbol *name, value_t value)
+	void set_const(value_t obj, Symbol *name, value_t value)
 	{
 		Value::assert_valid(value);
 
 		can_have_consts(obj);
 
 		set_var(obj, name, value);
-
-		return value_true;
 	}
 	
 	value_t get_var_raw(value_t obj, Symbol *name)
