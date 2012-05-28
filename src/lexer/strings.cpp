@@ -338,12 +338,15 @@ namespace Mirb
 					state->nested++;
 				else if(input == state->terminator)
 				{
-					if(state->nested > 0)
-						state->nested--;
-					else
+					if(input != '\0' || !process_null(&input, true))
 					{
-						input++;
-						goto done;
+						if(state->nested > 0)
+							state->nested--;
+						else
+						{
+							input++;
+							goto done;
+						}
 					}
 				}
 			}

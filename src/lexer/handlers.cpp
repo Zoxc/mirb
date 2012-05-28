@@ -82,7 +82,8 @@ namespace Mirb
 			return input;
 		});
 
-		input++;
+		if(input != '\0' || !process_null(&input, true))
+			input++;
 
 		parse_interpolate(&state, false);
 	}
