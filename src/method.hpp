@@ -63,7 +63,7 @@ namespace Mirb
 
 		template<class T, typename ResultType> const Info ValueBase<T, ResultType>::info = {1, 1, false};
 		
-		template<class T> class Default
+		template<class T> class Optional
 		{
 			public:
 				static const Info info;
@@ -80,7 +80,7 @@ namespace Mirb
 				}
 		};
 		
-		template<class T> const Info Default<T>::info = {0, 1, false};
+		template<class T> const Info Optional<T>::info = {0, 1, false};
 
 		template<class T> class Self
 		{

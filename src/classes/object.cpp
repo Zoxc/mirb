@@ -214,7 +214,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "===");
 		method<Arg::Self<Arg::Value>, Arg::Value, &not_equal>(context->object_class, "!=");
 		method<Arg::Self<Arg::Value>, &rb_not>(context->object_class, "!");
-		method<Arg::Self<Arg::Value>, Arg::Default<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
+		method<Arg::Self<Arg::Value>, Arg::Optional<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
 		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
 		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
 

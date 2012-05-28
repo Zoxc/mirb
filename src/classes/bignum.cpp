@@ -20,7 +20,7 @@ namespace Mirb
 	{
 		context->bignum_class = define_class("Bignum", context->integer_class);
 
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Default<Arg::Fixnum>, &to_s>(context->bignum_class, "to_s");
+		method<Arg::Self<Arg::Class<Bignum>>, Arg::Optional<Arg::Fixnum>, &to_s>(context->bignum_class, "to_s");
 	}
 };
 

@@ -330,6 +330,6 @@ namespace Mirb
 		method<Arg::Class<String>, &load>(context->kernel_module, "load");
 		method<Arg::Class<String>, &require>(context->kernel_module, "require");
 		method<Arg::Class<String>, &require_relative>(context->kernel_module, "require_relative");
-		method<Arg::Default<Arg::Value>, Arg::Default<Arg::Class<String>>, &raise>(context->kernel_module, "raise");
+		method<Arg::Optional<Arg::Value>, Arg::Optional<Arg::Class<String>>, &raise>(context->kernel_module, "raise");
 	}
 };

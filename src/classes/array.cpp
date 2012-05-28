@@ -411,10 +411,10 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, &pop>(context->array_class, "pop");
 		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "length");
 		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "size");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Default<Arg::Class<String>>, &join>(context->array_class, "join");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Optional<Arg::Class<String>>, &join>(context->array_class, "join");
 		method<Arg::Self<Arg::Class<Array>>, &to_s>(context->array_class, "to_s");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &each>(context->array_class, "each");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Default<Arg::Value>, &rb_get>(context->array_class, "[]");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Optional<Arg::Value>, &rb_get>(context->array_class, "[]");
 		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value, &rb_set>(context->array_class, "[]=");
 	}
 };

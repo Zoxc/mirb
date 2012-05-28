@@ -300,7 +300,7 @@ namespace Mirb
 		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch?");
 		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch");
 
-		singleton_method<Arg::Class<String>, Arg::Default<Arg::Class<String>>, &rb_expand_path>(context->file_class, "expand_path");
+		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, &rb_expand_path>(context->file_class, "expand_path");
 		singleton_method<Arg::Class<String>, &rb_dirname>(context->file_class, "dirname");
 		singleton_method<Arg::Count, Arg::Values, &rb_join>(context->file_class, "join");
 

@@ -341,7 +341,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub_ex");
 		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
-		method<Arg::Self<Arg::Class<String>>, Arg::Value, Arg::Default<Arg::Value>, &rb_get>(context->string_class, "[]");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, Arg::Optional<Arg::Value>, &rb_get>(context->string_class, "[]");
 		
 		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "length");
 		method<Arg::Self<Arg::Class<String>>, &length>(context->string_class, "size");
@@ -351,9 +351,9 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &upcase>(context->string_class, "upcase");
 		method<Arg::Self<Arg::Class<String>>, &upcase_self>(context->string_class, "upcase!");
 		
-		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
-		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Default<Arg::Class<String>>, &rjust>(context->string_class, "rjust");
-		method<Arg::Self<Arg::Class<String>>, Arg::Default<Arg::Class<String>>, &split>(context->string_class, "split");
+		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Optional<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
+		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Optional<Arg::Class<String>>, &rjust>(context->string_class, "rjust");
+		method<Arg::Self<Arg::Class<String>>, Arg::Optional<Arg::Class<String>>, &split>(context->string_class, "split");
 		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
 		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &String::compare>(context->string_class, "<=>");
