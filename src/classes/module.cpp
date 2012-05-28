@@ -228,6 +228,7 @@ namespace Mirb
 		method<Arg::Value, &included>(context->module_class, "included");
 		method<Arg::Value, &included>(context->module_class, "extended");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Value, &extend_object>(context->module_class, "extend_object");
+		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr_reader");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
