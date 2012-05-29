@@ -176,7 +176,7 @@ namespace Mirb
 			#ifdef _UNICODE
 				return "\\\\?\\" + normalize_separator_to(native_path(path));
 			#else
-				return normalize_separator_to(access(path));
+				return normalize_separator_to(native_path(path));
 			#endif
 		}
 	
