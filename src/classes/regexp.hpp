@@ -16,9 +16,9 @@ namespace Mirb
 			static value_t source(Regexp *obj);
 			static value_t rb_initialize(Regexp *obj, value_t pattern);
 			static value_t rb_allocate(Class *instance_of);
-			static value_t match(Regexp *obj, String *string);
+			static value_t rb_match(Regexp *obj, String *string);
 			
-			static const size_t vector_size;
+			static const size_t vector_size = 16 * 3;
 
 		public:
 			Regexp(Class *instance_of) : Object(Value::Regexp, instance_of), re(nullptr) {}
@@ -42,6 +42,47 @@ namespace Mirb
 
 				mark(pattern);
 			}
+			
+			int Regexp::match(const CharArray &input, int *ovector, size_t offset);
+			
+			template<typename F1, typename F2> void split(const CharArray &input, F1 data, F2 split)
+			{
+				compile_pattern();
+		
+				int ovector[vector_size];
+
+				size_t prev = 0;
+		
+				while(true)
+				{
+					int groups = match(input, ovector, prev);
+
+					if(groups <= 0)
+					{
+						if(prev < input.size())
+							data(input.copy(prev, input.size() - prev));
+
+						return;
+					}
+					else
+					{
+						int start = ovector[0];
+						int stop = ovector[1];
+
+						for (int i = 0; i < groups; i++) {
+							start = std::min(start, ovector[2 * i]);
+							stop = std::max(stop, ovector[2 * i + 1]);
+						}
+
+						data(input.copy(prev, (size_t)start - prev));
+
+						split(start, stop);
+
+						prev = stop;
+					}
+				}
+			}
+	
 			
 			static void initialize();
 	};

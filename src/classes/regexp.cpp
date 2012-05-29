@@ -77,15 +77,19 @@ namespace Mirb
 		return ("/" + obj->pattern  + "/").to_string();
 	}
 	
-	const size_t Regexp::vector_size = 16 * 3;
+	int Regexp::match(const CharArray &input, int *ovector, size_t offset)
+	{
+		mirb_runtime_assert(offset <= INT_MAX);
+		return pcre_exec(re, 0, input.c_str_ref(), input.size(), (int)offset, PCRE_NEWLINE_ANYCRLF, ovector, vector_size);
+	}
 
-	value_t Regexp::match(Regexp *obj, String *string)
+	value_t Regexp::rb_match(Regexp *obj, String *string)
 	{
 		obj->compile_pattern();
 
 		int ovector[vector_size];
 		
-		int result = pcre_exec(obj->re, 0, string->string.c_str_ref(), string->string.size(), 0, PCRE_NEWLINE_ANYCRLF, ovector, vector_size);
+		int result = obj->match(string->string, ovector, 0);
 
 		value_t match_data;
 
@@ -107,45 +111,13 @@ namespace Mirb
 	
 	CharArray Regexp::gsub(const CharArray &input, Regexp *pattern, const CharArray &replacement, bool &changed)
 	{
-		pattern->compile_pattern();
-		
-		int ovector[vector_size];
-
 		CharArray result;
-		int prev = 0;
 		
-		auto push = [&](int to) {
-			result += input.copy(prev, to - prev);
-		};
-
 		changed = false;
-		
-		while(true)
-		{
-			int groups = pcre_exec(pattern->re, 0, input.c_str_ref(), input.size(), prev, PCRE_NEWLINE_ANYCRLF, ovector, vector_size);
 
-			if(groups <= 0)
-			{
-				push(input.size());
-				return result;
-			}
-			else
-			{
-				changed = true;
+		pattern->split(input, [&](const CharArray &data) { result += data; }, [&](size_t start, size_t stop) { changed = true; result += replacement; });
 
-				int start = ovector[0];
-				int stop = ovector[1];
-
-				for (int i = 0; i < groups; i++) {
-					start = std::min(start, ovector[2 * i]);
-					stop = std::max(stop, ovector[2 * i + 1]);
-				}
-
-				push(start);
-				prev = stop;
-				result += replacement;
-			}
-		}
+		return result;
 	}
 	
 	void Regexp::initialize()
@@ -155,7 +127,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Regexp>>, &source>(context->regexp_class, "source");
 		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &match>(context->regexp_class, "match");
+		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_match>(context->regexp_class, "match");
 
 		singleton_method<Arg::Class<String>, &quote>(context->regexp_class, "quote");
 		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->regexp_class, "allocate");

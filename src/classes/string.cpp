@@ -42,11 +42,27 @@ namespace Mirb
 		return String::get(self->string + other->string);
 	}
 	
-	value_t split(String *self, String *sep)
+	value_t split(String *self, value_t sep)
 	{
 		auto result = Collector::allocate<Array>();
 
-		CharArray sep_str = sep ? sep->string : " ";
+		CharArray sep_str;
+
+		if(sep)
+		{
+			auto regexp = try_cast<Regexp>(sep);
+
+			if(regexp)
+			{
+				regexp->split(self->string, [&](const CharArray &data) { result->vector.push(data.to_string()); }, [&](size_t start, size_t stop) {});
+
+				return result;
+			}
+			else
+				sep_str = raise_cast<String>(sep)->string;
+		}
+		else
+			sep_str = " ";
 
 		self->string.split([&](const CharArray &match) {
 			if(sep_str != " " || match.size())
@@ -353,7 +369,7 @@ namespace Mirb
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Optional<Arg::Class<String>>, &ljust>(context->string_class, "ljust");
 		method<Arg::Self<Arg::Class<String>>, Arg::UInt, Arg::Optional<Arg::Class<String>>, &rjust>(context->string_class, "rjust");
-		method<Arg::Self<Arg::Class<String>>, Arg::Optional<Arg::Class<String>>, &split>(context->string_class, "split");
+		method<Arg::Self<Arg::Class<String>>, Arg::Optional<Arg::Value>, &split>(context->string_class, "split");
 		method<Arg::Self<Arg::Class<String>>, &inspect>(context->string_class, "inspect");
 		method<Arg::Self<Arg::Class<String>>, &to_sym>(context->string_class, "to_sym");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<String>, &String::compare>(context->string_class, "<=>");
