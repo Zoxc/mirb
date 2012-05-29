@@ -1,5 +1,6 @@
 #include "io.hpp"
 #include "string.hpp"
+#include "fixnum.hpp"
 #include "../runtime.hpp"
 #include "../stream.hpp"
 
@@ -43,7 +44,7 @@ namespace Mirb
 
 		return value_nil;
 	}
-
+	
 	value_t IO::rb_puts(IO *io, size_t argc, value_t argv[])
 	{
 		io->assert_stream();
@@ -54,11 +55,31 @@ namespace Mirb
 		return value_nil;
 	}
 
+	value_t rb_read(IO *io, intptr_t length)
+	{
+		io->assert_stream();
+
+		CharArray result;
+		
+		if(length == Fixnum::undef)
+			io->stream->read(result);
+		else
+		{
+			if(length < 0)
+				raise(context->argument_error, "Can't read a negative size");
+
+			io->stream->read(result, (size_t)length);
+		}
+
+		return result.to_string();
+	}
+
 	void IO::initialize()
 	{
 		context->io_class = define_class("IO", context->object_class);
 		
 		method<Arg::Self<Arg::Class<IO>>, &rb_close>(context->io_class, "close");
+		method<Arg::Self<Arg::Class<IO>>, Arg::Optional<Arg::Fixnum>, &rb_read>(context->io_class, "read");
 		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_print>(context->io_class, "print");
 		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_puts>(context->io_class, "puts");
 	}

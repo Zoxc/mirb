@@ -344,9 +344,71 @@ namespace Mirb
 			CloseHandle(handle);
 		}
 		
+		void NativeStream::read(CharArray &out, size_t length)
+		{
+			DWORD read;
+			out.buffer(length);
+
+			if(!ReadFile(handle, out.str_ref(), out.size(), &read, 0))
+				raise("Unable to read from handle");
+
+			out.shrink(read);
+		}
+
+		Stream::pos_t NativeStream::pos()
+		{
+			LARGE_INTEGER size;
+			LARGE_INTEGER move;
+			
+			move.QuadPart = 0;
+
+			if(!SetFilePointerEx(handle, move, &size, FILE_CURRENT))
+				raise("Unable to get stream position");
+
+			return size.QuadPart;
+		}
+
+		Stream::pos_t NativeStream::size()
+		{
+			LARGE_INTEGER size;
+
+			if(!GetFileSizeEx(handle, &size))
+				raise("Unable to get file size from handle");
+
+			return size.QuadPart;
+		}
+
+		void NativeStream::seek(pos_t val, PosType type)
+		{
+			DWORD pos;
+
+			switch(type)
+			{
+				case FromStart:
+					pos = FILE_BEGIN;
+					break;
+
+				case FromCurrent:
+					pos = FILE_CURRENT;
+					break;
+
+				case FromEnd:
+					pos = FILE_END;
+					break;
+			};
+
+			LARGE_INTEGER move;
+
+			move.QuadPart = val;
+
+			if(!SetFilePointerEx(handle, move, 0, pos))
+				raise("Unable to seek stream");
+		}
+
 		void NativeStream::print(const CharArray &string)
 		{
 			DWORD out;
+
 			if(!WriteFile(handle, string.str_ref(), string.size(), &out, 0))
 				raise("Unable to write to handle");
 		}

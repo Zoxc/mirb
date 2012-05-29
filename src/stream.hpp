@@ -18,10 +18,24 @@ namespace Mirb
 	class Stream
 	{
 		public:
-			void puts(const CharArray &string);
-		
+			enum PosType
+			{
+				FromStart,
+				FromCurrent,
+				FromEnd
+			};
+
+			typedef int64_t pos_t ;
+
+			virtual void puts(const CharArray &string);
+			virtual void read(CharArray &out);
+			virtual void read(CharArray &out, size_t length);
+			virtual void seek(pos_t val, PosType type = FromCurrent);
+			virtual pos_t pos();
+			virtual pos_t size();
+			virtual void gets(CharArray &out);
 			virtual void color(Color color, const CharArray &string);
-			virtual void print(const CharArray &string) =  0;
+			virtual void print(const CharArray &string) = 0;
 
 			virtual ~Stream() {}
 	};
