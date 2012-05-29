@@ -68,6 +68,13 @@ namespace Mirb
 		return self;
 	}
 	
+	value_t Array::concat(Array *self, Array *other)
+	{
+		self->vector.push(other->vector);
+
+		return self;
+	}
+	
 	value_t Array::add(Array *self, Array *other)
 	{
 		auto result = new (collector) Array(*self);
@@ -421,6 +428,7 @@ namespace Mirb
 		
 		include_module(context->array_class, context->enumerable_module);
 		
+		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &concat>(context->array_class, "concat");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &replace>(context->array_class, "replace");
 
 		method<Arg::Self<Arg::Class<Array>>, &compact_ex>(context->array_class, "compact!");

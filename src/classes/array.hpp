@@ -11,6 +11,7 @@ namespace Mirb
 			static value_t rb_allocate(Class *instance_of);
 			static value_t push(Array *self, size_t argc, value_t argv[]);
 			static value_t pop(Array *self);
+			static value_t concat(Array *self, Array *other);
 			static value_t reject_ex(Array *self, value_t block);
 			static value_t reject(Array *self, value_t block);
 			static value_t compact_ex(Array *self);
