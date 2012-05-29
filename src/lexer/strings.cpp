@@ -85,11 +85,16 @@ namespace Mirb
 		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
-	bool Lexer::parse_escape(std::string &result, bool capture_newline, bool no_heredoc)
+	bool Lexer::parse_escape(std::string &result, bool capture_newline, bool no_heredoc, bool &newline)
 	{
+		bool dummy;
+		newline = false;
+
 		switch(input)
 		{
 			case '\n':
+				newline = true;
+
 				if(capture_newline)
 					result += input++;
 				else
@@ -99,6 +104,8 @@ namespace Mirb
 				break;
 						
 			case '\r':
+				newline = true;
+
 				if(capture_newline)
 				{
 					input++;
@@ -125,7 +132,7 @@ namespace Mirb
 					{
 						input++;
 
-						return parse_escape(result, capture_newline, no_heredoc);
+						return parse_escape(result, capture_newline, no_heredoc, dummy);
 					}
 					else
 						return false;
@@ -144,7 +151,7 @@ namespace Mirb
 					{
 						input++;
 
-						return parse_escape(result, capture_newline, no_heredoc);
+						return parse_escape(result, capture_newline, no_heredoc, dummy);
 					}
 					else
 						return false;
@@ -163,7 +170,7 @@ namespace Mirb
 					{
 						input++;
 
-						return parse_escape(result, capture_newline, no_heredoc);
+						return parse_escape(result, capture_newline, no_heredoc, dummy);
 					}
 					else
 						return false;
@@ -338,7 +345,7 @@ namespace Mirb
 					state->nested++;
 				else if(input == state->terminator)
 				{
-					if(input != '\0' || !process_null(&input, true))
+					if(input != 0 || !process_null(&input, true))
 					{
 						if(state->nested > 0)
 							state->nested--;
@@ -443,13 +450,29 @@ namespace Mirb
 					break;
 
 				case '\\':
-					input++;
-					if(!parse_escape(result, false, state->heredoc != 0))
 					{
-						if(input != 0)
-							result += input++;
+						const char_t *start = &input;
+
+						input++;
+
+						std::string escape;
+						bool new_line;
+
+						if(!parse_escape(escape, false, state->heredoc != 0, new_line))
+						{
+							if(input == 0 && process_null(&input))
+								return report_end();
+							else
+								escape += input++;
+						}
+
+						if(state->type != Lexeme::REGEXP || new_line)
+							result += escape;
+						else
+							result += std::string((const char *)start, (size_t)(&input - start));
+
+						break;
 					}
-					break;
 
 				case 0:
 					if(process_null(&input))

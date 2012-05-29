@@ -47,6 +47,11 @@ namespace Mirb
 
 		return result;
 	}
+	
+	value_t Regexp::source(Regexp *obj)
+	{
+		return obj->pattern.to_string();
+	}
 
 	value_t Regexp::rb_initialize(Regexp *obj, value_t pattern)
 	{
@@ -147,6 +152,7 @@ namespace Mirb
 	{
 		context->regexp_class = define_class("Regexp", context->object_class);
 		
+		method<Arg::Self<Arg::Class<Regexp>>, &source>(context->regexp_class, "source");
 		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &match>(context->regexp_class, "match");

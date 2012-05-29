@@ -13,6 +13,7 @@ namespace Mirb
 	{
 		private:
 			static value_t to_s(Regexp *obj);
+			static value_t source(Regexp *obj);
 			static value_t rb_initialize(Regexp *obj, value_t pattern);
 			static value_t rb_allocate(Class *instance_of);
 			static value_t match(Regexp *obj, String *string);

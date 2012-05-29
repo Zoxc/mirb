@@ -343,7 +343,9 @@ namespace Mirb
 		{
 			input++;
 
-			if(!parse_escape(result, true, false))
+			bool dummy;
+
+			if(!parse_escape(result, true, false, dummy))
 			{
 				if(input == 0 && process_null(&input))
 				{

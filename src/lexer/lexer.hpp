@@ -53,7 +53,7 @@ namespace Mirb
 			void regexp_options();
 			
 			void parse_interpolate_heredoc(Heredoc *heredoc);
-			bool parse_escape(std::string &result, bool capture_newline, bool no_heredoc);
+			bool parse_escape(std::string &result, bool capture_newline, bool no_heredoc, bool &newline);
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
 			void parse_simple_string(char_t opener, char_t terminator, bool has_opener);
