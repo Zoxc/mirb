@@ -632,7 +632,7 @@ namespace Mirb
 		{
 			auto result = module->get_method(name);
 
-			if(prelude_likely(result))
+			if(prelude_likely(result != 0))
 			{
 				if(prelude_likely(result != value_undef))
 					return cast<Method>(result);

@@ -43,7 +43,7 @@ namespace Mirb
 				mark(pattern);
 			}
 			
-			int Regexp::match(const CharArray &input, int *ovector, size_t offset);
+			int match(const CharArray &input, int *ovector, size_t offset);
 			
 			template<typename F1, typename F2> void split(const CharArray &input, F1 data, F2 split)
 			{

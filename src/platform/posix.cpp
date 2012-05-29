@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/resource.h>
+#include <sys/stat.h>
 
 namespace Mirb
 {
@@ -97,7 +98,15 @@ namespace Mirb
 			return str;
 		}
 		
-		bool is_executable(const CharArray *path)
+		void mkdir(const CharArray &path)
+		{
+			auto dir = native_null_path(path);
+
+			if(::mkdir(dir.c_str_ref(), 0777) != 0)
+				raise("Unable to create directory '" + path + "'");
+		}
+
+		bool is_executable(const CharArray &path) throw()
 		{
 			try
 			{
@@ -107,7 +116,7 @@ namespace Mirb
 			}
 			catch(empty_path_error)
 			{
-				return false
+				return false;
 			}
 		}
 
@@ -115,24 +124,24 @@ namespace Mirb
 		{
 			try
 			{
-				auto path = native_null_path(path);
+				auto path = native_null_path(file);
 
 				return ::stat(path.c_str_ref(), &buf) == 0;
 			}
 			catch(empty_path_error)
 			{
-				return false
+				return false;
 			}
 		}
 
-		bool file_exists(const CharArray &file)
+		bool file_exists(const CharArray &file) throw()
 		{
 			struct stat buf;
 
 			return stat(buf, file);
 		}
 
-		bool is_directory(const CharArray &path)
+		bool is_directory(const CharArray &path) throw()
 		{
 			struct stat buf;
 
@@ -142,7 +151,7 @@ namespace Mirb
 			return S_ISDIR(buf.st_mode);
 		}
 
-		bool is_file(const CharArray &path)
+		bool is_file(const CharArray &path) throw()
 		{
 			struct stat buf;
 

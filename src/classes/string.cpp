@@ -54,7 +54,7 @@ namespace Mirb
 
 			if(regexp)
 			{
-				regexp->split(self->string, [&](const CharArray &data) { result->vector.push(data.to_string()); }, [&](size_t start, size_t stop) {});
+				regexp->split(self->string, [&](const CharArray &data) { result->vector.push(data.to_string()); }, [&](size_t, size_t) {});
 
 				return result;
 			}

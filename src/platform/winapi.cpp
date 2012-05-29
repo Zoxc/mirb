@@ -234,24 +234,24 @@ namespace Mirb
 			});
 		}
 		
-		bool is_executable(const CharArray &)
+		bool is_executable(const CharArray &) throw()
 		{
 			return false;
 		}
 
-		bool file_exists(const CharArray &path)
+		bool file_exists(const CharArray &path) throw()
 		{
 			return (attributes(path) != INVALID_FILE_ATTRIBUTES);
 		}
 		
-		bool is_directory(const CharArray &path)
+		bool is_directory(const CharArray &path) throw()
 		{
 			DWORD attrib = attributes(path); 
 
 			return ((attrib != INVALID_FILE_ATTRIBUTES) && (attrib & FILE_ATTRIBUTE_DIRECTORY));
 		}
 
-		bool is_file(const CharArray &path)
+		bool is_file(const CharArray &path) throw()
 		{
 			DWORD attrib = attributes(path); 
 

@@ -3,6 +3,7 @@
 #include "string.hpp"
 #include "array.hpp"
 #include "../runtime.hpp"
+#include <climits>
 
 #ifdef WIN32
 	#define PCRE_STATIC 1
