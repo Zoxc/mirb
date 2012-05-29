@@ -1,3 +1,4 @@
+#pragma once
 #include <tchar.h>
 
 namespace Mirb
@@ -14,9 +15,14 @@ namespace Mirb
 		
 		void raise(const CharArray &message);
 
+		typedef HANDLE io_t;
+
+		extern io_t invalid_io;
+
 		CharArray to_win_path(const CharArray &path);
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars);
 		CharArray from_tchar(const TCHAR *buffer);
+		CharArray normalize_separator_to(const CharArray &path);
 
 		template<typename F> void to_tchar(const CharArray &string, F func)
 		{

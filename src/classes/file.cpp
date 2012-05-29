@@ -273,16 +273,109 @@ namespace Mirb
 	{
 		return Value::from_bool(Platform::is_executable(path->string));
 	}
-
+	
 	value_t rb_fnmatch(String *pattern, String *path)
 	{
 		return Value::from_bool(File::fnmatch(path->string, pattern->string));
+	}
+	
+	IO *File::open(String *path, String *mode)
+	{
+		Platform::io_t file;
+		
+		size_t access = 0;
+		Platform::Mode create_mode;
+
+		if(!mode)
+		{
+			access = Platform::Read;
+			create_mode = Platform::Open;
+		}
+		else
+		{
+			size_t len = 0;
+
+			if(!mode->string.size())
+				raise(context->argument_error, "Invalid mode string");
+
+			auto set_mode = [&](size_t new_access, Platform::Mode new_mode, size_t alt_access)
+			{
+				len++;
+
+				access |= new_access;
+				create_mode = new_mode;
+
+				if(len < mode->string.size() && mode->string[len] == '+')
+				{
+					len++;
+					access |= alt_access;
+				}
+			};
+
+			while(len < mode->string.size())
+			{
+				switch(mode->string[len])
+				{
+					case 'r':
+						set_mode(Platform::Read, Platform::Open, Platform::Write);
+						break;
+				
+					case 'w':
+						set_mode(Platform::Write, Platform::CreateTruncate, Platform::Read);
+						break;
+			
+					case 'a':
+						set_mode(Platform::Write, Platform::CreateAppend, Platform::Read);
+						break;
+						
+					case 'b':
+					case 't':
+						len++;
+						break;
+
+					default:
+						raise(context->argument_error, "Unknown mode '" + CharArray(mode->string[len]) + "'");
+				}
+			}
+		}
+
+		Platform::wrap([&] {
+			file = Platform::open(path->string, access, create_mode);
+		});
+
+		return new (collector) IO(file, context->file_class);
+	}
+	
+	value_t rb_open(String *path, String *mode, value_t block)
+	{
+		auto result = File::open(path, mode);
+
+		if(block)
+		{
+			Finally finally([&]{
+				result->close();
+			});
+
+			value_t arg = result;
+
+			return yield_argv(block, 1, &arg);
+		}
+		else
+			return result;
+	}
+	
+	value_t rb_new(String *path, String *mode)
+	{
+		return File::open(path, mode);
 	}
 	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
 		
+		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, &rb_new>(context->file_class, "new");
+		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, Arg::Block, &rb_open>(context->file_class, "open");
+
 		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exists?");
 		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exist?");
 		singleton_method<Arg::Class<String>, &file>(context->file_class, "file?");

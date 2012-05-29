@@ -45,8 +45,7 @@ namespace Mirb
 			"NextException",
 			"RedoException",
 			"SystemStackError",
-			"IO",
-			"File"
+			"IO"
 		};
 
 		struct VerifyFunc

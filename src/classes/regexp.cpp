@@ -116,7 +116,7 @@ namespace Mirb
 		
 		changed = false;
 
-		pattern->split(input, [&](const CharArray &data) { result += data; }, [&](size_t start, size_t stop) { changed = true; result += replacement; });
+		pattern->split(input, [&](const CharArray &data) { result += data; }, [&](size_t, size_t) { changed = true; result += replacement; });
 
 		return result;
 	}

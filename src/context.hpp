@@ -72,6 +72,7 @@ namespace Mirb
 			Class *interrupt_class;
 
 			Class *standard_error;
+			Class *io_error;
 			Class *name_error;
 			Class *type_error;
 			Class *syntax_error;

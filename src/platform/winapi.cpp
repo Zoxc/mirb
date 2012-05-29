@@ -11,6 +11,8 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		io_t invalid_io = INVALID_HANDLE_VALUE;
+
 		void raise(const CharArray &message)
 		{
 			TCHAR *msg_buffer;
@@ -256,6 +258,53 @@ namespace Mirb
 			DWORD attrib = attributes(path); 
 
 			return ((attrib != INVALID_FILE_ATTRIBUTES) && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
+		}
+
+		io_t open(const CharArray &path, size_t access, Mode mode)
+		{
+			io_t result;
+
+			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+				DWORD __access = 0;
+				DWORD share = FILE_SHARE_READ;
+				DWORD create;
+
+				switch(mode)
+				{
+					case Open:
+						create = OPEN_EXISTING;
+						break;
+					
+					case CreateTruncate:
+						create = CREATE_ALWAYS;
+						break;
+
+					case CreateAppend:
+						create = OPEN_ALWAYS;
+						break;
+				}
+
+				if(access & Read)
+					__access |= GENERIC_READ;
+
+				if(access & Write)
+				{
+					__access |= GENERIC_WRITE;
+					share &= ~FILE_SHARE_READ;
+				}
+
+				result = CreateFile(buffer, __access, share, 0, create, FILE_ATTRIBUTE_NORMAL, 0);
+
+				if(result == invalid_io)
+					raise("Unable to open file '" + path + "'");
+			});
+
+			return result;
+		}
+		
+		void close(io_t handle)
+		{
+			CloseHandle(handle);
 		}
 
 		void initialize(bool console)

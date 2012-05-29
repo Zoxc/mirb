@@ -17,27 +17,20 @@ namespace Mirb
 		CharArray join();
 	};
 	
-	class File:
-		public IO
+	namespace File
 	{
-		public:
-			File() : IO(Value::File, context->file_class) {}
+		bool absolute_path(const CharArray &path);
+		CharArray join(const CharArray &left, const CharArray &right);
+		bool fnmatch(const CharArray &path, const CharArray &pattern);
+		CharArray normalize_path(const CharArray &path);
+		CharArray basename(CharArray path);
+		CharArray dirname(CharArray path);
+		value_t rb_expand_path(String *relative, String *absolute);
+		CharArray expand_path(CharArray relative);
+		CharArray expand_path(CharArray relative, CharArray from);
+		
+		IO *open(String *path, String *mode);
 
-			template<typename F> void mark(F mark)
-			{
-				IO::mark(mark);
-			}
-			
-			static bool absolute_path(const CharArray &path);
-			static CharArray join(const CharArray &left, const CharArray &right);
-			static bool fnmatch(const CharArray &path, const CharArray &pattern);
-			static CharArray normalize_path(const CharArray &path);
-			static CharArray basename(CharArray path);
-			static CharArray dirname(CharArray path);
-			static value_t rb_expand_path(String *relative, String *absolute);
-			static CharArray expand_path(CharArray relative);
-			static CharArray expand_path(CharArray relative, CharArray from);
-
-			static void initialize();
+		void initialize();
 	};
 };

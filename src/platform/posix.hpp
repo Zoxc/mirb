@@ -1,3 +1,4 @@
+#pragma once
 #include <sys/time.h>
 #include <dirent.h>
 #include <fcntl.h>

@@ -14,7 +14,8 @@ namespace Mirb
 		context->standard_error = define_class("StandardError", context->exception_class);
 
 		context->system_stack_error = define_class("SystemStackError", context->exception_class);
-
+		
+		context->io_error = define_class("IOError", context->standard_error);
 		context->name_error = define_class("NameError", context->standard_error);
 		context->type_error = define_class("TypeError", context->standard_error);
 		context->syntax_error = define_class("SyntaxError", context->standard_error);

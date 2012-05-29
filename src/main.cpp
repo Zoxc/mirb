@@ -6,6 +6,7 @@
 #include "classes/string.hpp"
 #include "classes/array.hpp"
 #include "classes/fixnum.hpp"
+#include "classes/file.hpp"
 #include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "block.hpp"

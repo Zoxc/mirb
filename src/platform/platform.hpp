@@ -1,6 +1,6 @@
+#pragma once
 #include "../common.hpp"
 #include "../char-array.hpp"
-#include "../classes/file.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -15,6 +15,19 @@ namespace Mirb
 			Purple,
 			Blue,
 			Gray
+		};
+
+		enum Access
+		{
+			Read = 1,
+			Write = 2
+		};
+		
+		enum Mode
+		{
+			Open,
+			CreateTruncate,
+			CreateAppend
 		};
 
 		size_t stack_start();
@@ -60,3 +73,13 @@ namespace Mirb
 #else
 	#include "posix.hpp"
 #endif
+
+namespace Mirb
+{
+	namespace Platform
+	{
+		io_t open(const CharArray &path, size_t access, Mode mode);
+		void close(io_t handle);
+	};
+};
+

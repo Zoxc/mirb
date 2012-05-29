@@ -47,7 +47,6 @@ namespace Mirb
 	class SystemStackError;
 	class Proc;
 	class IO;
-	class File;
 
 	/* Format for tagged pointers
 	 *
@@ -128,7 +127,6 @@ namespace Mirb
 			RedoException,
 			SystemStackError,
 			IO,
-			File,
 			Types
 		};
 		
@@ -328,9 +326,6 @@ namespace Mirb
 				case IO:
 					return T<IO>::func(std::forward<Arg>(arg));
 					
-				case File:
-					return T<File>::func(std::forward<Arg>(arg));
-					
 				case FreeBlock:
 					return T<FreeBlock>::func(std::forward<Arg>(arg));
 					
@@ -381,7 +376,6 @@ namespace Mirb
 		mirb_typeclass(NextException, NextException);
 		mirb_typeclass(SystemStackError, SystemStackError);
 		mirb_typeclass(IO, IO);
-		mirb_typeclass(File, File);
 		mirb_typeclass(FreeBlock, FreeBlock);
 
 		template<class B, class D> struct DerivedFrom
@@ -410,7 +404,6 @@ namespace Mirb
 		mirb_derived_from(Object, BreakException);
 		mirb_derived_from(Object, SystemStackError);
 		mirb_derived_from(Object, IO);
-		mirb_derived_from(Object, File);
 		mirb_derived_from(Object, Float);
 		mirb_derived_from(Object, Regexp);
 		mirb_derived_from(Object, Range);
@@ -452,9 +445,6 @@ namespace Mirb
 		mirb_derived_from(SystemStackError, SystemStackError);
 		
 		mirb_derived_from(IO, IO);
-		mirb_derived_from(IO, File);
-
-		mirb_derived_from(File, File);
 
 		mirb_derived_from(Array, Array);
 

@@ -1,5 +1,6 @@
 #include "platform.hpp"
 #include "../runtime.hpp"
+#include "../classes/file.hpp"
 
 namespace Mirb
 {

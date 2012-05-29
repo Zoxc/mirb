@@ -321,4 +321,9 @@ namespace Mirb
 	{
 		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type), function, Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name));
 	}
+
+	template<typename Arg1, typename Arg2, typename Arg3, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
+	{
+		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), function, Arg1, Arg2, Arg3>(flags, singleton_class(obj), symbol_cast(name));
+	}
 };
