@@ -295,6 +295,16 @@ namespace Mirb
 
 				if(result == INVALID_HANDLE_VALUE)
 					raise("Unable to open file '" + path + "'");
+
+				if(mode == CreateAppend)
+				{
+					if(SetFilePointer(result, 0, 0, FILE_END) == INVALID_SET_FILE_POINTER)
+					{
+						CloseHandle(result);
+
+						raise("Unable to seek to end of file '" + path + "'");
+					}
+				}
 			});
 
 			return new NativeStream(result);
