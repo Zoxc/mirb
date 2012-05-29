@@ -161,6 +161,121 @@ namespace Mirb
 			return S_ISREG(buf.st_mode);
 		}
 
+		NativeStream *open(const CharArray &path, size_t access, Mode mode)
+		{
+			auto file = native_null_path(path);
+
+			int flags = 0;
+
+			if(access & Read && access & Write)
+				flags = O_RDWR;
+			else if(access & Read)
+				flags = O_RDONLY;
+
+			else if(access & Write)
+				flags = O_WRONLY;
+			else
+				mirb_debug_assert("No access specified");
+
+			if(mode != Open)
+				flags |= O_CREAT;
+
+			int fd = ::open(file.c_str_ref(), flags);
+
+			if(fd == -1)
+				raise("Unable to open file '" + path + "'");
+
+			switch(mode)
+			{
+				case CreateTruncate:
+					if(ftruncate(fd, 0) == -1)
+					{
+						close(fd);
+						raise("Unable to truncate file '" + path + "'");
+					}
+					break;
+
+				case CreateAppend:
+					if(lseek(fd, 0, SEEK_END) == -1)
+					{
+						close(fd);
+						raise("Unable to seek to end of file '" + path + "'");
+					}
+					break;
+
+				default:
+					break;
+			}
+
+			return new NativeStream(fd);
+		}
+
+		NativeStream::NativeStream(int fd) : fd(fd)
+		{
+		}
+
+		NativeStream::~NativeStream()
+		{
+			close(fd);
+		}
+
+		void NativeStream::print(const CharArray &string)
+		{
+			if(write(fd, string.str_ref(), string.size()) == -1)
+				raise("Unable to write to file descriptor");
+		}
+
+		ConsoleStream *console_stream(ConsoleStreamType type)
+		{
+			int fd;
+
+			switch(type)
+			{
+				case StandardInput:
+					fd = fcntl(STDIN_FILENO, F_DUPFD, 0);
+					break;
+
+				case StandardOutput:
+					fd = fcntl(STDOUT_FILENO, F_DUPFD, 0);
+					break;
+
+				case StandardError:
+					fd = fcntl(STDERR_FILENO, F_DUPFD, 0);
+					break;
+			}
+
+			if(fd == -1)
+				raise("Unable to get console stream");
+
+			return new ConsoleStream(fd);
+		}
+
+		void ConsoleStream::color(Color color, const CharArray &string)
+		{
+			switch(color)
+			{
+				case Red:
+					print("\033[1;31m" + string + "\033[0m");
+					break;
+
+				case Blue:
+					print("\033[1;34m" + string + "\033[0m");
+					break;
+
+				case Green:
+					print("\033[1;32m" + string + "\033[0m");
+					break;
+
+				case Bold:
+					print("\033[1m" + string + "\033[0m");
+					break;
+
+				default:
+					print(string);
+					return;
+			};
+		}
+
 		void signal_handler(int)
 		{
 			Collector::signal();

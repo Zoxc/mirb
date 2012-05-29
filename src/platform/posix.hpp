@@ -12,30 +12,26 @@ namespace Mirb
 		CharArray native_null_path(const CharArray &path);
 		CharArray ruby_path_from_null(const char *path);
 
-		template<Color input> void color(const CharArray &string)
+		class NativeStream:
+			public Stream
 		{
-			switch(input)
-			{
-				case Red:
-					std::cerr << ("\033[1;31m" + string + "\033[0m").get_string();
-					break;
+			protected:
+				int fd;
 
-				case Blue:
-					std::cerr << ("\033[1;34m" + string + "\033[0m").get_string();
-					break;
+			public:
+				virtual void print(const CharArray &string);
 
-				case Green:
-					std::cerr << ("\033[1;32m" + string + "\033[0m").get_string();
-					break;
+				NativeStream(int fd);
+				~NativeStream();
+		};
 
-				case Bold:
-					std::cerr << ("\033[1m" + string + "\033[0m").get_string();
-					break;
+		class ConsoleStream:
+			public NativeStream
+		{
+			public:
+				virtual void color(Color color, const CharArray &string);
 
-				default:
-					std::cerr << string.get_string();
-					return;
-			};
+				ConsoleStream(int fd) : NativeStream(fd) {}
 		};
 
 		class BenchmarkResult
@@ -91,7 +87,7 @@ namespace Mirb
 				CharArray name = (const char_t *)dir->d_name;
 
 				if(fstatat(fd, dir->d_name, &st, AT_NO_AUTOMOUNT | AT_SYMLINK_NOFOLLOW) != 0)
-					raise("Unable to stat file: '" + File::join(path, name) + "'");
+					raise("Unable to stat file: '" + join(path, name) + "'");
 
 				func(name, S_ISDIR(st.st_mode));
 			}

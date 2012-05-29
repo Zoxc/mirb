@@ -7,6 +7,11 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		CharArray join(const CharArray &left, const CharArray &right)
+		{
+			return File::join(left, right);
+		}
+
 		CharArray native_path(const CharArray &path)
 		{
 			if(!path.size())

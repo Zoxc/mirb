@@ -50,6 +50,7 @@ namespace Mirb
 			void print(const CharArray &string);
 		};
 
+		CharArray join(const CharArray &left, const CharArray &right);
 		CharArray native_path(const CharArray &path);
 		CharArray ruby_path(const CharArray &path);
 		

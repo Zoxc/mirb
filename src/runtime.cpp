@@ -7,6 +7,7 @@
 #include "global.hpp"
 #include "classes.hpp"
 #include "number.hpp"
+#include "stream.hpp"
 #include "modules/kernel.hpp"
 #include "modules/comparable.hpp"
 #include "modules/enumerable.hpp"
