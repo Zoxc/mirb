@@ -19,15 +19,5 @@ namespace Mirb
 		{
 			return path;
 		}
-
-		void ColorWrapperBase::print(const CharArray &string)
-		{
-			auto out_str = try_cast<String>(output);
-
-			if(out_str)
-				out_str->string += string;
-			else
-				std::cerr << string.get_string();
-		}
 	};
 };

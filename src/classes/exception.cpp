@@ -61,7 +61,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			out.print(inspect_object((*self->args)[i]));
+			out.print(Mirb::inspect((*self->args)[i]));
 			if(i < self->args->entries - 1)
 				out.print(", ");
 		}

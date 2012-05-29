@@ -69,11 +69,6 @@ namespace Mirb
 	Class *class_create_singleton(value_t object, Class *super);
 	
 	/*
-	 * inspect_object (calls Ruby code)
-	 */
-	std::string inspect_object(value_t obj);
-
-	/*
 	 * inspect_obj (calls Ruby code)
 	 */
 	CharArray inspect(value_t obj);

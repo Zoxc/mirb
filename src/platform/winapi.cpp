@@ -336,7 +336,8 @@ namespace Mirb
 		
 		void NativeStream::print(const CharArray &string)
 		{
-			if(!WriteFile(handle, string.str_ref(), string.size(), 0, 0))
+			DWORD out;
+			if(!WriteFile(handle, string.str_ref(), string.size(), &out, 0))
 				raise("Unable to write to handle");
 		}
 		

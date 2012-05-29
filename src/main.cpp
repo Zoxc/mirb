@@ -77,7 +77,7 @@ int main(int argc, const char *argv[])
 
 		if(strcmp(argv[index], "-v") == 0)
 		{
-			std::cout << "mirb 0.1" << std::endl;
+			context->console_output->puts("mirb 0.1");
 			index++;
 		}
 		
@@ -174,11 +174,11 @@ int main(int argc, const char *argv[])
 
 			if(result)
 			{
-				trap_exception(exception, [&] { std::cout << "=> " << inspect_object(result) << "\n"; });
+				trap_exception(exception, [&] { context->console_output->puts("=> " + inspect(result)); });
 
 				if(exception)
 				{
-					std::cerr << "Unable to inspect result:\n";
+					context->console_error->puts("Unable to inspect result:");
 					report_exception(exception);
 				}
 			}
@@ -188,11 +188,11 @@ int main(int argc, const char *argv[])
 			report_exception(exception);
 	}
 	
-	std::cout << std::endl << "Number of collections: " << Collector::collections << std::endl;
-	std::cout << "Memory allocated: " << (Collector::memory / 1024) <<  " KiB" << std::endl;
-	std::cout << "Regions allocated: " << Collector::region_count << std::endl;
-	std::cout << "Regions freed: " << Collector::region_free_count << std::endl;
-	std::cout << "Exiting gracefully..." << std::endl;
+	context->console_output->puts("\nNumber of collections: " + CharArray::uint(Collector::collections));
+	context->console_output->puts("Memory allocated: " + CharArray::uint((size_t)(Collector::memory / 1024)) + " KiB");
+	context->console_output->puts("Regions allocated: " + CharArray::uint(Collector::region_count));
+	context->console_output->puts("Regions freed: " + CharArray::uint(Collector::region_free_count));
+	context->console_output->puts("Exiting gracefully...");
 	
 	Mirb::finalize();
 	

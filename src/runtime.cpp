@@ -310,11 +310,6 @@ namespace Mirb
 		return inspect_obj(obj)->string.trim(300, "<....>");
 	}
 	
-	std::string inspect_object(value_t obj)
-	{
-		return inspect(obj).get_string();
-	}
-
 	String *inspect_obj(value_t obj)
 	{
 		OnStack<1> os(obj);
@@ -607,9 +602,9 @@ namespace Mirb
 			#ifdef MIRB_DEBUG_COMPILER
 				DebugPrinter printer;
 
-				std::cout << "Parsing done.\n-----\n";
-				std::cout << printer.print_node(tree_scope->group);
-				std::cout << "\n-----\n";
+				context->standard_output->puts("Parsing done.\n-----");
+				context->standard_output->puts(printer.print_node(tree_scope->group));
+				context->standard_output->puts("-----");
 			#endif
 
 			block = Compiler::compile(tree_scope, memory_pool);

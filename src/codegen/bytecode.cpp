@@ -1419,7 +1419,7 @@ namespace Mirb
 			#ifdef MIRB_DEBUG_COMPILER
 				CodeGen::ByteCodePrinter printer(this);
 
-				std::cout << printer.print() << std::endl;
+				context->console_output->puts(printer.print());
 			#endif
 			
 			finalize();
