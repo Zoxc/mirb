@@ -352,6 +352,8 @@ namespace Mirb
 
 		if(block)
 		{
+			OnStack<1> os(result);
+
 			Finally finally([&]{
 				result->close();
 			});
