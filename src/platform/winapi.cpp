@@ -344,15 +344,17 @@ namespace Mirb
 			CloseHandle(handle);
 		}
 		
-		void NativeStream::read(CharArray &out, size_t length)
+		CharArray NativeStream::read(size_t length)
 		{
 			DWORD read;
-			out.buffer(length);
+			CharArray result;
+			result.buffer(length);
 
-			if(!ReadFile(handle, out.str_ref(), out.size(), &read, 0))
+			if(!ReadFile(handle, result.str_ref(), result.size(), &read, 0))
 				raise("Unable to read from handle");
 
-			out.shrink(read);
+			result.shrink(read);
+			return result;
 		}
 
 		Stream::pos_t NativeStream::pos()

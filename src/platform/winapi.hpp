@@ -25,7 +25,7 @@ namespace Mirb
 				virtual void print(const CharArray &string);
 				virtual pos_t pos();
 				virtual pos_t size();
-				virtual void read(CharArray &out, size_t length);
+				virtual CharArray read(size_t length);
 				virtual void seek(pos_t val, PosType type);
 
 				NativeStream(HANDLE handle);

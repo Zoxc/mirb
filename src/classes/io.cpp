@@ -59,19 +59,49 @@ namespace Mirb
 	{
 		io->assert_stream();
 
-		CharArray result;
-		
 		if(length == Fixnum::undef)
-			io->stream->read(result);
+			return io->stream->read().to_string();
 		else
 		{
 			if(length < 0)
 				raise(context->argument_error, "Can't read a negative size");
 
-			io->stream->read(result, (size_t)length);
+			return io->stream->read((size_t)length).to_string();
+		}
+	}
+	
+	value_t rb_gets(IO *io)
+	{
+		io->assert_stream();
+
+		auto result = io->stream->gets();
+
+		if(result.size())
+			return result.to_string();
+		else
+			return value_nil;
+	}
+	
+	value_t rb_each_line(IO *io, value_t block)
+	{
+		OnStack<2> os(io, block);
+
+		while(true)
+		{
+			io->assert_stream();
+
+			CharArray line = io->stream->gets();
+
+			if(line.size())
+			{
+				value_t arg = line.to_string();
+				yield_argv(block, 1, &arg);
+			}
+			else
+				break;
 		}
 
-		return result.to_string();
+		return io;
 	}
 
 	void IO::initialize()
@@ -80,8 +110,10 @@ namespace Mirb
 		
 		method<Arg::Self<Arg::Class<IO>>, &rb_close>(context->io_class, "close");
 		method<Arg::Self<Arg::Class<IO>>, Arg::Optional<Arg::Fixnum>, &rb_read>(context->io_class, "read");
+		method<Arg::Self<Arg::Class<IO>>, Arg::Block, &rb_each_line>(context->io_class, "each_line");
 		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_print>(context->io_class, "print");
 		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_puts>(context->io_class, "puts");
+		method<Arg::Self<Arg::Class<IO>>, &rb_gets>(context->io_class, "gets");
 	}
 };
 

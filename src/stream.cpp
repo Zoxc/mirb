@@ -9,27 +9,27 @@ namespace Mirb
 		print(string + "\n");
 	}
 
-	void Stream::read(CharArray &out, size_t length)
+	CharArray Stream::read(size_t length)
 	{
-		raise(context->system_call_error, "Reading not supported by stream");
+		raise(context->io_error, "Reading not supported by stream");
 	}
 
 	void Stream::seek(pos_t val, PosType type)
 	{
-		raise(context->system_call_error, "Seeking not supported by stream");
+		raise(context->io_error, "Seeking not supported by stream");
 	}
 
 	Stream::pos_t Stream::pos()
 	{
-		raise(context->system_call_error, "Getting position not supported by stream");
+		raise(context->io_error, "Getting position not supported by stream");
 	}
 
 	Stream::pos_t Stream::size()
 	{
-		raise(context->system_call_error, "Getting size not supported by stream");
+		raise(context->io_error, "Getting size not supported by stream");
 	}
 
-	void Stream::read(CharArray &out)
+	CharArray Stream::read()
 	{
 		pos_t remaining = size() - pos();
 
@@ -38,31 +38,35 @@ namespace Mirb
 		if(remaining > SIZE_MAX)
 			raise(context->system_call_error, "Stream is too large to read");
 
-		read(out, (size_t)remaining);
+		return read((size_t)remaining);
 	}
 
-	void Stream::gets(CharArray &out)
+	CharArray Stream::gets()
 	{
-		CharArray c;
+		CharArray result, c;
 
 		while(true)
 		{
-			read(c, 1);
+			c = read(1);
 
 			if(!c.size())
-				return;
+				return result;
 
-			out += c;
+			result += c;
 
 			if(c == "\n")
 			{
-				read(c, 1);
+				c = read(1);
 
-				if(c != "\r")
-					seek(-1);
+				if(c == "\r")
+					result += c;
+				else
+					seek(-c.size());
+
+				return result;
 			}
 			else if (c == "\r")
-				return;
+				return result;
 		}
 	}
 

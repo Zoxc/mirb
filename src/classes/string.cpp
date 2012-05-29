@@ -25,9 +25,30 @@ namespace Mirb
 	
 	value_t String::inspect(String *self)
 	{
-		CharArray result = "\"" + self->string + "\"";
+		CharArray result = "\"";
 
-		return result.to_string();
+		for(size_t i = 0; i < self->string.size(); ++i)
+		{
+			switch(self->string[i])
+			{
+				case '\\':
+					result += "\\";
+					break;
+
+				case '\n':
+					result += "\\n";
+					break;
+
+				case '\r':
+					result += "\\r";
+					break;
+
+				default:
+					result += self->string[i];
+			}
+		}
+		
+		return (result + "\"").to_string();
 	}
 	
 	value_t String::concat(String *self, String *other)
