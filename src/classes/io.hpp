@@ -11,6 +11,8 @@ namespace Mirb
 	{
 		private:
 			static value_t rb_close(IO *io);
+			static value_t rb_print(IO *io, size_t argc, value_t argv[]);
+			static value_t rb_puts(IO *io, size_t argc, value_t argv[]);
 		public:
 			IO(Stream *stream, Class *instance_of, bool owner = true) : Object(Value::IO, instance_of), stream(stream) { flag = owner; }
 			~IO();
