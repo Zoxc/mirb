@@ -43,7 +43,8 @@ namespace Mirb
 		bool is_directory(const CharArray &path) throw();
 		bool is_executable(const CharArray &path) throw();
 		bool file_exists(const CharArray &path) throw();
-
+		
+		void mkdir(const CharArray &path);
 		CharArray cwd();
 
 		void *allocate_region(size_t bytes);

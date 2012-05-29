@@ -225,6 +225,14 @@ namespace Mirb
 
 			return from_short_win_path(buffer);
 		}
+
+		void mkdir(const CharArray &path)
+		{
+			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+				if(CreateDirectory(buffer, 0) == 0)
+					raise("Unable to create directory '" + path + "'");
+			});
+		}
 		
 		bool is_executable(const CharArray &)
 		{

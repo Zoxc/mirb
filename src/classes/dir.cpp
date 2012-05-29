@@ -31,6 +31,15 @@ namespace Mirb
 		return yield(block);
 	}
 	
+	value_t mkdir(String *path)
+	{
+		Platform::wrap([&] {
+			Platform:: mkdir(path->string);
+		});
+
+		return Fixnum::from_int(0);
+	}
+	
 	value_t entries(String *path)
 	{
 		auto array = new (collector) Array;
@@ -127,6 +136,7 @@ namespace Mirb
 	{
 		context->dir_class = define_class("Dir", context->object_class);
 		
+		singleton_method<Arg::Class<String>, &mkdir>(context->dir_class, "mkdir");
 		singleton_method<Arg::Class<String>, Arg::Block, &chdir>(context->dir_class, "chdir");
 		singleton_method<Arg::Class<String>, &entries>(context->dir_class, "entries");
 		singleton_method<Arg::Class<String>, &rb_glob>(context->dir_class, "glob");
