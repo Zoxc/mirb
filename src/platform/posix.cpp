@@ -11,6 +11,16 @@ namespace Mirb
 {
 	namespace Platform
 	{
+		CharArray native_null_path(const CharArray &path)
+		{
+			return native_path(path).c_str();
+		}
+		
+		CharArray ruby_path_from_null(const char *path)
+		{
+			return ruby_path(CharArray((const char_t *)path, std::strlen(path)));
+		}
+
 		void raise(const CharArray &message)
 		{
 			int num = errno;
@@ -80,33 +90,39 @@ namespace Mirb
 			if(!result)
 				raise("Unable to get the current directory");
 
-			CharArray str((const char_t *)result, std::strlen(result));
+			CharArray str = ruby_path_from_null(result);
 
 			std::free(result);
 
 			return str;
 		}
 		
-		void cd(const CharArray &path)
+		bool is_executable(const CharArray *path)
 		{
-			CharArray path_cstr = path.c_str();
+			try
+			{
+				auto file = native_null_path(path);
 
-			if(chdir(path_cstr.c_str_ref()) == -1)
-				raise("Unable change the current directory to '" + path + "'");
-		}
-
-		bool is_executable(const CharArray &path)
-		{
-			CharArray path_cstr = path.c_str();
-
-			return eaccess(path_cstr.c_str_ref(), X_OK) == 0;
+				return eaccess(file.c_str_ref(), X_OK) == 0;
+			}
+			catch(empty_path_error)
+			{
+				return false
+			}
 		}
 
 		bool stat(struct stat &buf, const CharArray &file)
 		{
-			CharArray file_cstr = file.c_str();
+			try
+			{
+				auto path = native_null_path(path);
 
-			return ::stat(file_cstr.c_str_ref(), &buf) == 0;
+				return ::stat(path.c_str_ref(), &buf) == 0;
+			}
+			catch(empty_path_error)
+			{
+				return false
+			}
 		}
 
 		bool file_exists(const CharArray &file)

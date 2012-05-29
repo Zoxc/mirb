@@ -994,8 +994,10 @@ namespace Mirb
 	
 	const size_t buffer_zone = 0x1000 * 16;
 	
-	void initialize_thread()
+	void initialize_thread_initial()
 	{
+		mirb_runtime_assert(thread_context == 0);
+
 		size_t stack_start = Platform::stack_start();
 		size_t limit = Platform::stack_limit();
 		
@@ -1004,6 +1006,23 @@ namespace Mirb
 		
 		stack_stop = stack_start - limit + buffer_zone;
 		stack_continue = stack_stop + buffer_zone;
+
+		thread_context = new ThreadContext;
+
+		thread_contexts.append(thread_context);
+	}
+	
+	void initialize_thread_later()
+	{
+		Platform::wrap([&] {
+			thread_context->current_directory = File::normalize_path(Platform::cwd());
+		});
+	}
+
+	void initialize_thread()
+	{
+		initialize_thread_initial();
+		initialize_thread_later();
 	}
 
 	void initialize(bool console)
@@ -1015,7 +1034,7 @@ namespace Mirb
 
 		context->dummy_map = Collector::allocate<ValueMap>();
 				
-		initialize_thread();
+		initialize_thread_initial();
 
 		Value::initialize_type_table();
 		
@@ -1060,7 +1079,7 @@ namespace Mirb
 		File::initialize();
 		Dir::initialize();
 		Regexp::initialize();
-		
+
 		setup_main();
 
 		set_const(context->object_class, Symbol::get("RUBY_ENGINE"), String::get("mirb"));
@@ -1082,6 +1101,8 @@ namespace Mirb
 			set_global_object(Symbol::get("$:"), global);
 			set_global_object(Symbol::get("$LOAD_PATH"), global);
 		}
+
+		initialize_thread_later();
 
 		mirb_debug(Collector::collect());
 	}

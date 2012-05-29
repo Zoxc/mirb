@@ -10,30 +10,35 @@ namespace Mirb
 {
 	value_t pwd()
 	{
-		return Platform::cwd().to_string();
+		return thread_context->current_directory.to_string();
 	}
 	
 	value_t chdir(String *path, value_t block)
 	{
-		CharArray cwd = Platform::cwd();
+		CharArray old = thread_context->current_directory;
 
-		Platform::cd(path->string);
+		if(!Platform::is_directory(path->string))
+			raise(context->system_call_error, "'"+ path->string + "' in not a directory");
+
+		thread_context->current_directory = path->string;
 		
-		OnStackString<1> os(cwd);
+		OnStackString<1> os(old);
 
-		value_t result = yield(block);
+		Finally finally([&] {
+			thread_context->current_directory = old;
+		});
 
-		Platform::cd(cwd);
-		
-		return result;
+		return yield(block);
 	}
 	
 	value_t entries(String *path)
 	{
 		auto array = new (collector) Array;
-
-		Platform::list_dir(path->string, false, [&](const CharArray &filename, bool) {
-			array->vector.push(filename.to_string());
+		
+		Platform::wrap([&] {
+			Platform::list_dir(path->string, false, [&](const CharArray &filename, bool) {
+				array->vector.push(filename.to_string());
+			});
 		});
 
 		return array;
@@ -73,7 +78,7 @@ namespace Mirb
 
 		if(segments[i] == "**" && (i + 1 < segments.size()))
 		{
-			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool directory) {
+			Platform::list_dir(File::expand_path(path), true, [&](const CharArray &filename, bool directory) {
 				if(directory)
 					glob(array, segments, i, join_path(filename));
 			});
@@ -82,14 +87,14 @@ namespace Mirb
 		}
 		else if(i + 1 < segments.size())
 		{
-			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool directory) {
+			Platform::list_dir(File::expand_path(path), true, [&](const CharArray &filename, bool directory) {
 				if(directory && File::fnmatch(filename, segments[i]))
 					glob(array, segments, i + 1, join_path(filename));
 			});
 		}
 		else
 		{
-			Platform::list_dir(Platform::expand_path(path), true, [&](const CharArray &filename, bool) {
+			Platform::list_dir(File::expand_path(path), true, [&](const CharArray &filename, bool) {
 				if(File::fnmatch(filename, segments[i]))
 					array->vector.push(String::get(join_path(filename)));
 			});
@@ -99,19 +104,21 @@ namespace Mirb
 	value_t rb_glob(String *pattern)
 	{
 		auto array = new (collector) Array;
+		
+		Platform::wrap([&] {
+			std::vector<CharArray> segments;
 
-		std::vector<CharArray> segments;
+			CharArray path = File::normalize_path(pattern->string);
 
-		CharArray path = File::normalize_path(pattern->string);
+			path.split([&](const CharArray &part) {
+				segments.push_back(part);
+			}, CharArray("/"));
 
-		path.split([&](const CharArray &part) {
-			segments.push_back(part);
-		}, CharArray("/"));
-
-		if(File::absolute_path(path))
-			glob(array, segments, 1, segments[0].size() ? segments[0] : "/");
-		else
-			glob(array, segments, 0, "");
+			if(File::absolute_path(path))
+				glob(array, segments, 1, segments[0].size() ? segments[0] : "/");
+			else
+				glob(array, segments, 0, "");
+		});
 
 		return array;
 	}

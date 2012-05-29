@@ -21,18 +21,34 @@ namespace Mirb
 		size_t stack_limit();
 
 		double get_time();
+
+		struct empty_path_error {};
+
+		template<typename F> void wrap(F func)
+		{
+			try
+			{
+				func();
+			}
+			catch(empty_path_error)
+			{
+				raise(context->system_call_error, "Empty path");
+			}
+		}
 		
-		void cd(const CharArray &path);
-		bool is_file(const CharArray &path);
-		bool is_directory(const CharArray &path);
-		bool is_executable(const CharArray &path);
-		bool file_exists(const CharArray &path);
+		CharArray native_path(const CharArray &path);
+		CharArray ruby_path(const CharArray &path);
+		
+		bool is_file(const CharArray &path) throw();
+		bool is_directory(const CharArray &path) throw();
+		bool is_executable(const CharArray &path) throw();
+		bool file_exists(const CharArray &path) throw();
+
 		CharArray cwd();
+
 		void *allocate_region(size_t bytes);
 		void free_region(void *region, size_t bytes);
 		
-		CharArray expand_path(CharArray relative);
-	
 		void initialize(bool console);
 		void finalize();
 	};

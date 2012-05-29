@@ -45,19 +45,23 @@ namespace Mirb
 		
 		template<typename F> void to_short_win_path(const CharArray &path, F func)
 		{
-			to_tchar(to_win_path(expand_path(path)), [&](TCHAR *buffer, size_t size prelude_unused) {
-				#ifdef _UNICODE
-					if(size > MAX_PATH)
-					{
-						size += 1;
+			CharArray input = normalize_separator_to(native_path(path));
 
+			#ifdef _UNICODE
+				if(input.size() > MAX_PATH)
+				{
+					to_tchar("\\\\?\\" + input, [&](TCHAR *buffer, size_t size prelude_unused) {
 						mirb_runtime_assert(size < UINT_MAX);
 
 						if(GetShortPathName(buffer, buffer, (DWORD)size) == 0)
 							raise("Unable to convert long pathname to a short pathname");
-					}
-				#endif
 
+						func(buffer);
+					});
+				}
+			#endif
+
+			to_tchar(input, [&](TCHAR *buffer, size_t size prelude_unused) {
 				func(buffer);
 			});
 		}
@@ -67,10 +71,7 @@ namespace Mirb
 			WIN32_FIND_DATA ffd;
 			HANDLE handle;
 
-			if(path.size() == 0)
-				throw create_exception(context->system_call_error, "Empty path");
-
-			to_tchar(to_win_path(File::join(expand_path(path), '*')), [&](const TCHAR *buffer, size_t) {
+			to_tchar(to_win_path(path) + "\\*", [&](const TCHAR *buffer, size_t) {
 				handle = FindFirstFile(buffer, &ffd);
 			});
 

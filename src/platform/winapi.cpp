@@ -165,18 +165,18 @@ namespace Mirb
 			#ifdef _UNICODE
 				CharArray result = (path.copy(0, 4) == "\\\\?\\") ? path.copy(4, path.size()) : path;
 
-				return normalize_separator_from(result);
+				return ruby_path(normalize_separator_from(result));
 			#else
-				return normalize_separator_from(path);
+				return ruby_path(normalize_separator_from(path));
 			#endif
 		}
 	
 		CharArray to_win_path(const CharArray &path)
 		{
 			#ifdef _UNICODE
-				return "\\\\?\\" + normalize_separator_to(path);
+				return "\\\\?\\" + normalize_separator_to(native_path(path));
 			#else
-				return normalize_separator_to(path);
+				return normalize_separator_to(access(path));
 			#endif
 		}
 	
@@ -190,19 +190,26 @@ namespace Mirb
 				if(GetLongPathName(buffer, long_buffer, size + 1) == 0)
 					raise("Unable to convert short pathname to a long pathname");
 
-				return from_win_path(from_tchar(long_buffer));
+				return ruby_path(normalize_separator_from(from_tchar(long_buffer)));
 			#else
-				return from_win_path(from_tchar(buffer));
+				return ruby_path(normalize_separator_from(from_tchar(buffer)));
 			#endif
 		}
 	
 		DWORD attributes(const CharArray &path)
 		{
 			DWORD attrib; 
-
-			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
-				attrib = GetFileAttributes(buffer);
-			});
+			
+			try
+			{
+				to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+					attrib = GetFileAttributes(buffer);
+				});
+			}
+			catch(empty_path_error)
+			{
+				attrib = INVALID_FILE_ATTRIBUTES;
+			}
 
 			return attrib;
 		}
@@ -219,14 +226,6 @@ namespace Mirb
 			return from_short_win_path(buffer);
 		}
 		
-		void cd(const CharArray &path)
-		{
-			to_short_win_path(path, [&](const TCHAR *buffer) {
-				if(SetCurrentDirectory(buffer) == 0)
-					raise("Unable change the current directory to '" + path + "'");
-			});
-		}
-
 		bool is_executable(const CharArray &)
 		{
 			return false;

@@ -8,6 +8,9 @@ namespace Mirb
 	{
 		void raise(const CharArray &message);
 
+		CharArray native_null_path(const CharArray &path);
+		CharArray ruby_path_from_null(const char *path);
+
 		template<Color input> void color(const CharArray &string)
 		{
 			switch(input)
@@ -64,7 +67,7 @@ namespace Mirb
 			DIR *d;
 			dirent *dir;
 
-			CharArray path_cstr = path.c_str();
+			auto path_cstr = native_null_path(path);
 
 			d = opendir(path_cstr.c_str_ref());
 

@@ -5,6 +5,8 @@
 namespace Mirb
 {
 	Context *context;
+	LinkedList<ThreadContext> thread_contexts;
+	prelude_thread ThreadContext *thread_context;
 
 	Context::Context() :
 		bootstrap(true),

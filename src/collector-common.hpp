@@ -39,6 +39,9 @@ namespace Mirb
 	{
 		context->mark(mark);
 
+		for(auto thread_context: thread_contexts)
+			thread_context->mark(mark);
+
 		{
 			OnStackBlock<false> *on_stack = OnStackBlock<false>::current;
 		

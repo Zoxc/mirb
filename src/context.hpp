@@ -1,11 +1,26 @@
 #pragma once
 #include "allocator.hpp"
 #include <Prelude/Vector.hpp>
+#include <Prelude/LinkedList.hpp>
 #include "value-map.hpp"
+#include "char-array.hpp"
 
 namespace Mirb
 {
 	class Frame;
+
+	class ThreadContext
+	{
+		public:
+			LinkedListEntry<ThreadContext> entry;
+
+			CharArray current_directory;
+
+			template<typename F> void mark(F mark)
+			{
+				mark(current_directory);
+			}
+	};
 
 	class Context
 	{
@@ -91,7 +106,7 @@ namespace Mirb
 			bool bootstrap;
 
 			Frame *frame;
-			
+
 			ValueMapData globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;
 
@@ -122,6 +137,8 @@ namespace Mirb
 	};
 	
 	typedef ValueMapManipulator<true, Context, &Context::globals> GlobalAccess;
-
+	
 	extern Context *context;
+	extern LinkedList<ThreadContext> thread_contexts;
+	extern prelude_thread ThreadContext *thread_context;
 };

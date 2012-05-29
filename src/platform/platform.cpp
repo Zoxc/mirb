@@ -5,13 +5,17 @@ namespace Mirb
 {
 	namespace Platform
 	{
-		CharArray expand_path(CharArray relative)
+		CharArray native_path(const CharArray &path)
 		{
-			if(!File::absolute_path(relative))
-				return File::join(cwd(), relative);
-			else
-				return relative;
-		};
-	
+			if(!path.size())
+				raise(context->system_call_error, "Empty path");
+
+			return File::expand_path(path);
+		}
+
+		CharArray ruby_path(const CharArray &path)
+		{
+			return path;
+		}
 	};
 };
