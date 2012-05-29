@@ -82,6 +82,24 @@ namespace Mirb
 		return Fixnum::from_int(self->string.to_i());
 	}
 	
+	value_t chomp(String *self)
+	{
+		return self->string.chomp().to_string();
+	}
+	
+	value_t chomp_ex(String *self)
+	{
+		CharArray chomp = self->string.chomp();
+
+		if(self->string == chomp)
+			return value_nil;
+		else
+		{
+			self->string = chomp;
+			return self;
+		}
+	}
+	
 	value_t match(value_t self, value_t regexp)
 	{
 		if(!Value::of_type<Regexp>(regexp))
@@ -352,6 +370,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
 		method<Arg::Self<Arg::Value>, &to_s>(context->string_class, "to_s");
 		method<Arg::Self<Arg::Class<String>>, &to_i>(context->string_class, "to_i");
+		method<Arg::Self<Arg::Class<String>>, &chomp>(context->string_class, "chomp");
+		method<Arg::Self<Arg::Class<String>>, &chomp_ex>(context->string_class, "chomp!");
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub>(context->string_class, "gsub");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub_ex");

@@ -121,6 +121,18 @@ namespace Mirb
 		return atoi(str.c_str_ref());
 	}
 	
+	CharArray CharArray::chomp()
+	{
+		CharArray result = *this;
+
+		if(result.length && result.data[result.length - 1] == '\n')
+			result.length--;
+
+		if(result.length && result.data[result.length - 1] == '\r')
+			result.length--;
+
+		return result;
+	}
 	CharArray CharArray::ljust(size_t length, const CharArray &padding)
 	{
 		CharArray result = *this;
