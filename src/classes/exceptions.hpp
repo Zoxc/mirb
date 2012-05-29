@@ -1,9 +1,48 @@
 #pragma once
 #include "exception.hpp"
+#include "../message.hpp"
 
 namespace Mirb
 {
 	void initialize_exceptions();
+	
+	class Parser;
+	class Message;
+	
+	class SyntaxError:
+		public Exception
+	{
+		public:
+			List<Message> messages;
+
+			static value_t print(SyntaxError *self, IO *io);
+			
+			static const bool finalizer = true;
+
+			SyntaxError(const Parser &parser);
+
+			~SyntaxError()
+			{
+				auto *c = messages.first;
+			
+				while(c)
+				{
+					auto next = c->entry.next;
+
+					delete c;
+
+					c = next;
+				}
+			}
+
+			template<typename F> void mark(F mark)
+			{
+				Exception::mark(mark);
+				
+				for(auto entry: messages)
+					entry->mark(mark);
+			}
+	};
 	
 	class SystemStackError:
 		public Exception

@@ -15,9 +15,27 @@ namespace Mirb
 		
 		void raise(const CharArray &message);
 
-		typedef HANDLE io_t;
+		class NativeStream:
+			public Stream
+		{
+			protected:
+				HANDLE handle;
 
-		extern io_t invalid_io;
+			public:
+				virtual void print(const CharArray &string);
+
+				NativeStream(HANDLE handle);
+				~NativeStream();
+		};
+		
+		class ConsoleStream:
+			public NativeStream
+		{
+			public:
+				virtual void color(Color color, const CharArray &string);
+
+				ConsoleStream(HANDLE handle) : NativeStream(handle) {}
+		};
 
 		CharArray to_win_path(const CharArray &path);
 		CharArray from_tchar(const TCHAR *buffer, size_t tchars);
@@ -94,52 +112,6 @@ namespace Mirb
 
 			FindClose(handle);
 		}
-
-		template<Color input> void color(const CharArray &string)
-		{
-			WORD flags;
-			
-			HANDLE console = GetStdHandle(STD_ERROR_HANDLE);
-
-			CONSOLE_SCREEN_BUFFER_INFO info;
-			
-			GetConsoleScreenBufferInfo(console, &info);
-			
-			switch(input)
-			{
-				case Red:
-					flags = FOREGROUND_RED;
-					break;
-					
-				case Purple:
-					flags = FOREGROUND_RED | FOREGROUND_BLUE;
-					break;
-					
-				case Blue:
-					flags = FOREGROUND_BLUE;
-					break;
-					
-				case Green:
-					flags = FOREGROUND_GREEN;
-					break;
-					
-				case Gray:
-					flags = FOREGROUND_INTENSITY;
-					break;
-
-				default:
-					std::cerr << string.get_string();
-					return;
-			};
-
-			SetConsoleTextAttribute(console, flags | (info.wAttributes & ~(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY)));
-			
-			std::cerr << std::flush << string.get_string();
-
-			SetConsoleTextAttribute(console, info.wAttributes);
-			
-			std::cerr << std::flush;
-		};
 
 		template<typename T> BenchmarkResult benchmark(T work)
 		{

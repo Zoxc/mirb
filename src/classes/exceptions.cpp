@@ -1,10 +1,34 @@
 #include "exceptions.hpp"
 #include "../runtime.hpp"
+#include "../parser/parser.hpp"
+#include "../platform/platform.hpp"
+#include "../document.hpp"
 #include "class.hpp"
+#include "io.hpp"
 #include "string.hpp"
 
 namespace Mirb
 {
+	SyntaxError::SyntaxError(const Parser &parser) : Exception(Value::SyntaxError, context->syntax_error, String::get("Unable to parse file '" + parser.document.name + "'"), Mirb::backtrace())
+	{
+		messages = parser.messages;
+	}
+	
+	value_t SyntaxError::print(SyntaxError *self, IO *io)
+	{
+		Exception::print(self, io);
+
+		for(auto message: self->messages)
+		{
+			message->print(*io->stream);
+
+			if(message->entry.next)
+				io->stream->print("\n");
+		}
+
+		return value_nil;
+	}
+
 	SystemStackError::SystemStackError() : Exception(context->system_stack_error, String::get("Stack oveflow"), Mirb::backtrace())
 	{
 	}
@@ -27,6 +51,8 @@ namespace Mirb
 		
 		context->signal_exception = define_class("SignalException", context->exception_class);
 		context->interrupt_class = define_class("Interrupt", context->signal_exception);
+
+		method<Arg::Self<Arg::Class<SyntaxError>>, Arg::Class<IO>, &SyntaxError::print>(context->syntax_error, "print");
 	}
 };
 

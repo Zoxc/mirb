@@ -319,17 +319,17 @@ namespace Mirb
 
 			if(state->heredoc)
 			{
-				auto message = new (memory_pool) Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated heredoc");
+				auto message = new Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated heredoc");
 			
-				message->note = new (memory_pool) Message(parser, state->heredoc->range, Message::MESSAGE_NOTE, "Starting here");
+				message->note = new Message(parser, state->heredoc->range, Message::MESSAGE_NOTE, "Starting here");
 			
 				parser.add_message(message, lexeme);
 			}
 			else if(state->start)
 			{
-				auto message = new (memory_pool) Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
+				auto message = new Message(parser, lexeme, Message::MESSAGE_ERROR, "Unterminated interpolated " + Lexeme::describe_type(state->type));
 			
-				message->note = new (memory_pool) Message(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
+				message->note = new Message(parser, *state->start, Message::MESSAGE_NOTE, "Starting here");
 			
 				parser.add_message(message, lexeme);
 			}

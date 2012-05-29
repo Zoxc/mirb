@@ -52,6 +52,7 @@
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
     <ClInclude Include="..\..\src\generic\source-loc.hpp" />
     <ClInclude Include="..\..\src\global.hpp" />
+    <ClInclude Include="..\..\src\stream.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />
     <ClInclude Include="..\..\src\lexer\lexer.hpp" />
@@ -119,6 +120,7 @@
     <ClCompile Include="..\..\src\document.cpp" />
     <ClCompile Include="..\..\src\generic\memory-pool.cpp" />
     <ClCompile Include="..\..\src\global.cpp" />
+    <ClCompile Include="..\..\src\stream.cpp" />
     <ClCompile Include="..\..\src\lexer\handlers.cpp" />
     <ClCompile Include="..\..\src\lexer\lexeme.cpp" />
     <ClCompile Include="..\..\src\lexer\lexer.cpp" />

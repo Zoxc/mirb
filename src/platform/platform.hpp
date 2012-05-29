@@ -2,21 +2,12 @@
 #include "../common.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
+#include "../stream.hpp"
 
 namespace Mirb
 {
 	namespace Platform
 	{
-		enum Color
-		{
-			Green,
-			Bold,
-			Red,
-			Purple,
-			Blue,
-			Gray
-		};
-
 		enum Access
 		{
 			Read = 1,
@@ -49,9 +40,34 @@ namespace Mirb
 			}
 		}
 		
+		struct ColorWrapperBase
+		{
+			value_t output;
+			OnStack<1> os;
+
+			ColorWrapperBase(value_t output) : output(output), os(output) {}
+
+			void print(const CharArray &string);
+		};
+
 		CharArray native_path(const CharArray &path);
 		CharArray ruby_path(const CharArray &path);
 		
+		class NativeStream;
+
+		NativeStream *open(const CharArray &path, size_t access, Mode mode);
+		
+		class ConsoleStream;
+
+		enum ConsoleStreamType
+		{
+			StandardInput,
+			StandardOutput,
+			StandardError
+		};
+
+		ConsoleStream *console_stream(ConsoleStreamType type);
+
 		bool is_file(const CharArray &path) throw();
 		bool is_directory(const CharArray &path) throw();
 		bool is_executable(const CharArray &path) throw();
@@ -73,13 +89,4 @@ namespace Mirb
 #else
 	#include "posix.hpp"
 #endif
-
-namespace Mirb
-{
-	namespace Platform
-	{
-		io_t open(const CharArray &path, size_t access, Mode mode);
-		void close(io_t handle);
-	};
-};
 

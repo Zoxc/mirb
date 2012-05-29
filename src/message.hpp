@@ -6,6 +6,7 @@
 namespace Mirb
 {
 	class Parser;
+	class Stream;
 
 	class Message
 	{
@@ -29,19 +30,23 @@ namespace Mirb
 
 			static std::string severity_names[SEVERITIES];
 
-			Parser &parser;
+			Document *document;
 			SourceLoc range;
 			Severity severity;
-			ListEntry<Message> entry;
 			Message *note;
-			std::string text;
+			CharArray message;
 
-			std::string string()
+			ListEntry<Message> entry;
+			 
+			template<typename F> void mark(F mark)
 			{
-				return text;
+				mark(document);
+				mark(message);
+
+				if(note)
+					note->mark(mark);
 			}
 
-			std::string format();
-			void print();
+			void print(Stream &out);
 	};
 };

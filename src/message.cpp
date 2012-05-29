@@ -14,49 +14,40 @@ namespace Mirb
 		"Note"
 	};
 	
-	Message::Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text) : parser(parser), range(range), severity(severity), note(nullptr), text(text)
+	Message::Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text) : document(&parser.document), range(range), severity(severity), note(nullptr), message(text)
 	{
 	}
 	
-	void Message::print()
+	void Message::print(Stream &out)
 	{
 		CharArray line_prefix = (const char_t *)(severity == MESSAGE_NOTE ? "  " : "");
 
-		std::cerr << line_prefix.get_string();
+		out.print(line_prefix);
+
 		switch(severity)
 		{
 			case MESSAGE_ERROR:
-				Platform::color<Platform::Red>(severity_names[severity]);
+				out.color(Red, severity_names[severity]);
 				break;
 
 			case MESSAGE_NOTE:
-				Platform::color<Platform::Blue>(severity_names[severity]);
+				out.color(Blue, severity_names[severity]);
 				break;
 
 			default:
-				std::cerr << severity_names[severity];
+				out.print(severity_names[severity]);
 		}
 
-		Platform::color<Platform::Bold>(": " + string() + "\n");
+		out.color(Bold, ": " + message + "\n");
 
-		CharArray prefix = line_prefix + File::basename(parser.document.name) + "[" + CharArray::uint(range.line + 1) + "]: ";
+		CharArray prefix = line_prefix + File::basename(document->name) + "[" + CharArray::uint(range.line + 1) + "]: ";
 		
-		Platform::color<Platform::Bold>(prefix);
+		out.color(Bold, prefix);
 
-		std::cerr << range.get_line() << "\n";
-		Platform::color<Platform::Green>(CharArray(" ") * prefix.size() + range.indicator());
-		std::cerr << std::endl;
+		out.print(range.get_line() + "\n");
+		out.color(Green, CharArray(" ") * prefix.size() + range.indicator());
 
 		if(note)
-			note->print();
-	}
-
-	std::string Message::format()
-	{
-		std::stringstream result;
-
-		result << parser.document.name.get_string() << "[" << range.line + 1 << "]: " << severity_names[severity] << ": " << string() << std::endl << range.get_line() << std::endl;
-		
-		return result.str() + range.indicator().get_string();
+			note->print(out);
 	}
 };

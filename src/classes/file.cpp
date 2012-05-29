@@ -281,7 +281,7 @@ namespace Mirb
 	
 	IO *File::open(String *path, String *mode)
 	{
-		Platform::io_t file;
+		Stream *file;
 		
 		size_t access = 0;
 		Platform::Mode create_mode;

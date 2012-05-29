@@ -8,6 +8,7 @@
 namespace Mirb
 {
 	class Frame;
+	class Stream;
 
 	class ThreadContext
 	{
@@ -107,6 +108,10 @@ namespace Mirb
 			bool bootstrap;
 
 			Frame *frame;
+
+			Stream *console_input;
+			Stream *console_output;
+			Stream *console_error;
 
 			ValueMapData globals;
 			Vector<value_t, AllocatorBase, Allocator> at_exits;

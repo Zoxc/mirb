@@ -600,12 +600,7 @@ namespace Mirb
 			Tree::Scope *tree_scope = parser.parse_main();
 
 			if(!parser.messages.empty())
-			{
-				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-					i().print();
-
-				raise(context->syntax_error, "Unable to parse file '" + filename + "'");
-			}
+				throw InternalException(new (collector) SyntaxError(parser));
 
 			OnStack<3> os(tree_scope, method_name, scope);
 
@@ -1033,7 +1028,7 @@ namespace Mirb
 		context = new Context;
 
 		context->dummy_map = Collector::allocate<ValueMap>();
-				
+
 		initialize_thread_initial();
 
 		Value::initialize_type_table();
@@ -1103,7 +1098,11 @@ namespace Mirb
 		}
 
 		initialize_thread_later();
-
+		
+		context->console_input = Platform::console_stream(Platform::StandardInput);
+		context->console_output = Platform::console_stream(Platform::StandardOutput);
+		context->console_error = Platform::console_stream(Platform::StandardError);
+				
 		mirb_debug(Collector::collect());
 	}
 
@@ -1115,6 +1114,15 @@ namespace Mirb
 			for(size_t i = context->at_exits.size(); i-- > 0;)
 				Proc::call(cast<Proc>(context->at_exits[i]), value_nil, 0, nullptr);
 		});  // TODO: Print if this fails
+		
+		if(context->console_input)
+			delete context->console_input;
+		
+		if(context->console_output)
+			delete context->console_output;
+
+		if(context->console_error)
+			delete context->console_error;
 
 		Platform::finalize();
 		Collector::finalize();

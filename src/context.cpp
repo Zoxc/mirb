@@ -11,6 +11,9 @@ namespace Mirb
 	Context::Context() :
 		bootstrap(true),
 		frame(0),
+		console_input(0),
+		console_output(0),
+		console_error(0),
 		globals(8)
 	{
 		auto start = &object_class;

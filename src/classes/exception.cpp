@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "array.hpp"
+#include "io.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "class.hpp"
@@ -30,11 +31,11 @@ namespace Mirb
 			(*args)[i] = frame->argv[i];
 	}
 	
-	void StackFrame::print(StackFrame *self)
+	void StackFrame::print(StackFrame *self, Stream &out)
 	{
 		OnStack<1> os(self);
 
-		Platform::color<Platform::Gray>("  in ");
+		out.color(Gray, "  in ");
 
 		Module *module = self->scope->first();
 
@@ -43,29 +44,29 @@ namespace Mirb
 
 		OnStack<1> os3(module);
 
-		Platform::color<Platform::Gray>(Mirb::inspect(module));
+		out.color(Gray, Mirb::inspect(module));
 
 		value_t class_of_obj = class_of(self->obj);
 
 		if(class_of_obj != module)
 		{
-			Platform::color<Platform::Gray>("(");
-			Platform::color<Platform::Gray>(Mirb::inspect(class_of_obj));
-			Platform::color<Platform::Gray>(")");
+			out.color(Gray, "(");
+			out.color(Gray, Mirb::inspect(class_of_obj));
+			out.color(Gray, ")");
 		}
 
-		Platform::color<Platform::Gray>("#");
+		out.color(Gray, "#");
 
-		std::cerr << self->name->get_string()  << "(";
+		out.print(self->name->string + "(");
 
 		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			std::cerr << inspect_object((*self->args)[i]);
+			out.print(inspect_object((*self->args)[i]));
 			if(i < self->args->entries - 1)
-				std::cerr << ", ";
+				out.print(", ");
 		}
 			
-		std::cerr <<  ")";
+		out.print(")");
 
 		if(self->code->executor == &evaluate_block || self->code->executor == &Compiler::deferred_block)
 		{
@@ -80,14 +81,14 @@ namespace Mirb
 			{
 				CharArray prefix = self->code->document->name + "[" + CharArray::uint(range->line + 1) + "]: ";
 				
-				Platform::color<Platform::Bold>("\n" + prefix);
+				out.color(Bold, "\n" + prefix);
 
-				std::cerr << range->get_line() << "\n";
+				out.print(range->get_line() + "\n");
 				
-				Platform::color<Platform::Green>(CharArray(" ") * prefix.size() + range->indicator());
+				out.color(Green, CharArray(" ") * prefix.size() + range->indicator());
 			}
 			else
-				Platform::color<Platform::Bold>("\n" + self->code->document->name + "[?]: Unknown");
+				out.color(Bold, "\n" + self->code->document->name + "[?]: Unknown");
 		}
 	}
 	
@@ -119,66 +120,15 @@ namespace Mirb
 		return result;
 	}
 	
-	CharArray StackFrame::inspect_implementation(StackFrame *self)
-	{
-		OnStack<1> os(self);
-
-		CharArray result = "  in ";
-
-		OnStackString<1> os2(result);
-		
-		Module *module = self->scope->first();
-
-		if(Value::type(module) == Value::IClass)
-			module = module->original_module;
-
-		OnStack<1> os3(module);
-
-		result += Mirb::inspect(module);
-
-		value_t class_of_obj = class_of(self->obj);
-
-		if(class_of_obj != module)
-		{
-			result += "(";
-			result += Mirb::inspect(class_of_obj) + ")";
-		}
-
-		result += "#" + self->name->string  + "(";
-
-		for(size_t i = 0; i < self->args->entries; ++i)
-		{
-			result += Mirb::inspect((*self->args)[i]);
-			if(i < self->args->entries - 1)
-				result += ", ";
-		}
-			
-		result += ")";
-
-		if(self->code->executor == &evaluate_block)
-		{
-			SourceLoc *range;
-
-			if(self->vars)
-				range = self->code->source_location.get((size_t)(self->ip - self->code->opcodes));
-			else
-				range = self->code->range;
-
-			if(range)
-			{
-				CharArray prefix = self->code->document->name + "[" + CharArray::uint(range->line + 1) + "]: ";
-				result += "\n" + prefix + range->get_line() + "\n" +  CharArray(" ") * prefix.size() + range->indicator();
-			}
-			else
-				result += "\n" + self->code->document->name + "[?]: Unknown";
-		}
-
-		return result;
-	}
-	
 	CharArray StackFrame::inspect()
 	{
-		return inspect_implementation(this);
+		CharArray result;
+
+		CharArrayStream stream(result);
+
+		print(this, stream);
+
+		return result;
 	}
 	
 	CharArray StackFrame::inspect_plain()
@@ -203,28 +153,7 @@ namespace Mirb
 		return result;
 	}
 	
-	String *StackFrame::get_backtrace(Tuple<StackFrame> *backtrace)
-	{
-		CharArray result;
-
-		if(!backtrace)
-			return result.to_string();
-
-		OnStack<1> os1(backtrace);
-		OnStackString<1> os2(result);
-		
-		for(size_t i = 0; i < backtrace->entries; ++i)
-		{
-			if(i != 0)
-				result += "\n";
-
-			result += (*backtrace)[i]->inspect();
-		}
-
-		return result.to_string();
-	}
-	
-	void StackFrame::print_backtrace(Tuple<StackFrame> *backtrace)
+	void StackFrame::print_backtrace(Tuple<StackFrame> *backtrace, Stream &out)
 	{
 		if(!backtrace)
 			return;
@@ -234,9 +163,9 @@ namespace Mirb
 		for(size_t i = 0; i < backtrace->entries; ++i)
 		{
 			if(i != 0)
-				std::cerr << "\n";
+				out.print("\n");
 
-			print((*backtrace)[i]);
+			print((*backtrace)[i], out);
 		}
 	}
 	
@@ -253,14 +182,16 @@ namespace Mirb
 			return value_nil;
 	}
 
-	value_t Exception::awesome_backtrace(Exception *self)
+	value_t Exception::print(Exception *self, IO *io)
 	{
-		if(self->backtrace)
-			return StackFrame::get_backtrace(self->backtrace);
-		else
-			return value_nil;
+		io->assert_stream();
+			
+		if(self->message)
+			io->stream->print(self->message->string);
+
+		return value_nil;
 	}
-	
+
 	value_t Exception::rb_backtrace(Exception *self)
 	{
 		if(self->backtrace)
@@ -283,10 +214,10 @@ namespace Mirb
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->exception_class, "allocate");
 
 		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<String>, &rb_initialize>(context->exception_class, "initialize");
-		method<Arg::Self<Arg::Class<Exception>>, &awesome_backtrace>(context->exception_class, "awesome_backtrace");
 		method<Arg::Self<Arg::Class<Exception>>, &rb_backtrace>(context->exception_class, "backtrace");
 		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "message");
 		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "to_s");
+		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<IO>, &print>(context->exception_class, "print");
 	}
 };
 

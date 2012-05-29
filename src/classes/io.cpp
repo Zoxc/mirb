@@ -1,14 +1,31 @@
 #include "io.hpp"
 #include "../runtime.hpp"
+#include "../stream.hpp"
 
 namespace Mirb
 {
-	void IO::assert_handle()
+	void IO::assert_stream()
 	{
-		if(handle == Platform::invalid_io)
+		if(!stream)
 			raise(context->io_error, "IO object is closed");
 	}
-
+	
+	IO::~IO()
+	{
+		if(stream && flag)
+			delete stream;
+	}
+	
+	void IO::close()
+	{
+		if(stream)
+		{
+			if(flag)
+				delete stream;
+			stream = 0;
+		}
+	}
+			
 	value_t IO::rb_close(IO *io)
 	{
 		io->close();

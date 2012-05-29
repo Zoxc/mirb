@@ -229,16 +229,7 @@ namespace Mirb
 	value_t Kernel::print(size_t argc, value_t argv[])
 	{
 		for(size_t i = 0; i < argc; ++i)
-		{
-			value_t arg = argv[i];
-
-			if(Value::type(arg) != Value::String)
-				arg = call(arg, "to_s");
-
-			String *str = raise_cast<String>(arg);
-
-			std::cout << str->string.get_string();
-		}
+			context->console_output->print(cast_string(argv[i])->string);
 		
 		return value_nil;
 	}
@@ -246,16 +237,7 @@ namespace Mirb
 	value_t Kernel::puts(size_t argc, value_t argv[])
 	{
 		for(size_t i = 0; i < argc; ++i)
-		{
-			value_t arg = argv[i];
-
-			if(Value::type(arg) != Value::String)
-				arg = call(arg, "to_s");
-			
-			String *str = raise_cast<String>(arg);
-
-			std::cout << str->string.get_string() << "\n";
-		}
+			context->console_output->puts(cast_string(argv[i])->string);
 		
 		return value_nil;
 	}
@@ -288,22 +270,22 @@ namespace Mirb
 
 	value_t Kernel::backtrace()
 	{
-		return StackFrame::get_backtrace(Mirb::backtrace());
+		return StackFrame::get_plain_backtrace(Mirb::backtrace());
 	}
 	
-	value_t Kernel::cast_array(value_t value)
+	value_t Kernel::rb_cast_array(value_t value)
 	{
-		return Mirb::cast_array(value);
+		return cast_array(value);
 	}
 	
-	value_t Kernel::cast_string(value_t value)
+	value_t Kernel::rb_cast_string(value_t value)
 	{
-		return Mirb::cast_string(value);
+		return cast_string(value);
 	}
 
-	value_t Kernel::cast_integer(value_t value)
+	value_t Kernel::rb_cast_integer(value_t value)
 	{
-		return Mirb::cast_integer(value);
+		return cast_integer(value);
 	}
 
 	void Kernel::initialize()
@@ -312,9 +294,9 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
-		method<Arg::Value, &Kernel::cast_array>(context->kernel_module, "Array");
-		method<Arg::Value, &Kernel::cast_string>(context->kernel_module, "String");
-		method<Arg::Value, &Kernel::cast_integer>(context->kernel_module, "Integer");
+		method<Arg::Value, &Kernel::rb_cast_array>(context->kernel_module, "Array");
+		method<Arg::Value, &Kernel::rb_cast_string>(context->kernel_module, "String");
+		method<Arg::Value, &Kernel::rb_cast_integer>(context->kernel_module, "Integer");
 		method<&block_given>(context->kernel_module, "block_given?");
 		method<Arg::Block, &at_exit>(context->kernel_module, "at_exit");
 		method<Arg::Block, &proc>(context->kernel_module, "proc");

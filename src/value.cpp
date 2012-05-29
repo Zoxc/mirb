@@ -45,6 +45,7 @@ namespace Mirb
 			"NextException",
 			"RedoException",
 			"SystemStackError",
+			"SyntaxError",
 			"IO"
 		};
 

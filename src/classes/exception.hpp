@@ -4,6 +4,8 @@
 namespace Mirb
 {
 	class Frame;
+	class IO;
+	class Stream;
 
 	class StackFrame:
 		public Value::Header
@@ -22,7 +24,7 @@ namespace Mirb
 			
 			static CharArray inspect_implementation(StackFrame *self);
 			static CharArray inspect_plain_implementation(StackFrame *self);
-			static void print(StackFrame *self);
+			static void print(StackFrame *self, Stream &out);
 		public:
 			StackFrame(Frame *frame);
 		
@@ -36,9 +38,8 @@ namespace Mirb
 				mark(args);
 			}
 			
-			static String *get_backtrace(Tuple<StackFrame> *backtrace);
 			static Array *get_plain_backtrace(Tuple<StackFrame> *backtrace);
-			static void print_backtrace(Tuple<StackFrame> *backtrace);
+			static void print_backtrace(Tuple<StackFrame> *backtrace, Stream &out);
 
 			CharArray inspect();
 			CharArray inspect_plain();
@@ -50,9 +51,11 @@ namespace Mirb
 		private:
 			static value_t allocate(Class *instance_of);
 			static value_t to_s(Exception *obj);
-			static value_t awesome_backtrace(Exception *self);
 			static value_t rb_backtrace(Exception *self);
 			static value_t rb_initialize(Exception *obj, String *message);
+			
+		protected:
+			static value_t print(Exception *self, IO *io);
 
 		public:
 			Exception(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}

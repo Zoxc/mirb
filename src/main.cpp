@@ -24,14 +24,17 @@ void report_exception(Exception *exception, bool recurse = true)
 	OnStack<1> os(exception);
 
 	trap_exception(exception, [&] {
-		Platform::color<Platform::Red>(inspect(class_of(exception)));
+		context->console_error->color(Red, inspect(class_of(exception)));
 			
-		if(exception->message)
-			Platform::color<Platform::Bold>(": " + exception->message->string.get_string() );
+		context->console_error->print(": ");
 
-		std::cerr << "\n";
+		value_t io = new (collector) IO(context->console_error, context->io_class, false);
 
-		StackFrame::print_backtrace(exception->backtrace);
+		call_argv(exception, "print", 1, &io);
+
+		context->console_error->print("\n");
+
+		StackFrame::print_backtrace(exception->backtrace, *context->console_error);
 	});
 	
 	if(exception)
@@ -117,7 +120,7 @@ int main(int argc, const char *argv[])
 					result = 1;
 		
 				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-					i().print();
+					i().print(*context->console_error);
 			}
 
 			return result;
@@ -161,48 +164,13 @@ int main(int argc, const char *argv[])
 		
 		std::getline(std::cin, line);
 
-		Block *block;
-
-		{
-			MemoryPool::Base memory_pool;
-			Document *document = Collector::allocate_pinned<Document>();
-
-			document->copy((const char_t *)line.c_str(), line.length());
-		
-			document->name = "Input";
-
-			Parser parser(symbol_pool, memory_pool, document);
-
-			parser.load();
-		
-			if(parser.lexeme() == Lexeme::END && parser.messages.empty())
-				break;
-		
-			Tree::Scope *scope = parser.parse_main();
-		
-			if(!parser.messages.empty())
-			{
-				for(auto i = parser.messages.begin(); i != parser.messages.end(); ++i)
-					i().print();
-				
-				continue;
-			}
-	
-			#ifdef MIRB_DEBUG_COMPILER
-				DebugPrinter printer;
-			
-				std::cout << "Parsing done.\n-----\n";
-				std::cout << printer.print_node(scope->group);
-				std::cout << "\n-----\n";
-			#endif
-		
-			block = Compiler::compile(scope, memory_pool);
-		}
+		if(line == "")
+			break;
 
 		Exception *exception;
 
 		trap_exception(exception, [&] { 
-			value_t result = call_code(block, context->main, Symbol::get("main"), context->object_scope, 0, value_nil, 0, 0);
+			value_t result = eval(context->main, Symbol::get("main"), context->object_scope, (const char_t *)line.c_str(), line.length(), "Input", false);
 
 			if(result)
 			{

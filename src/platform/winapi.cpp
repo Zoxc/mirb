@@ -11,8 +11,6 @@ namespace Mirb
 {
 	namespace Platform
 	{
-		io_t invalid_io = INVALID_HANDLE_VALUE;
-
 		void raise(const CharArray &message)
 		{
 			TCHAR *msg_buffer;
@@ -260,9 +258,9 @@ namespace Mirb
 			return ((attrib != INVALID_FILE_ATTRIBUTES) && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
 		}
 
-		io_t open(const CharArray &path, size_t access, Mode mode)
+		NativeStream *open(const CharArray &path, size_t access, Mode mode)
 		{
-			io_t result;
+			HANDLE result;
 
 			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
 				DWORD __access = 0;
@@ -295,16 +293,94 @@ namespace Mirb
 
 				result = CreateFile(buffer, __access, share, 0, create, FILE_ATTRIBUTE_NORMAL, 0);
 
-				if(result == invalid_io)
+				if(result == INVALID_HANDLE_VALUE)
 					raise("Unable to open file '" + path + "'");
 			});
 
-			return result;
+			return new NativeStream(result);
 		}
 		
-		void close(io_t handle)
+		ConsoleStream *console_stream(ConsoleStreamType type)
+		{
+			HANDLE result;
+
+			switch(type)
+			{
+				case StandardInput:
+					result = GetStdHandle(STD_INPUT_HANDLE);
+					break;
+
+				case StandardOutput:
+					result = GetStdHandle(STD_OUTPUT_HANDLE);
+					break;
+
+				case StandardError:
+					result = GetStdHandle(STD_ERROR_HANDLE);
+					break;
+			}
+
+			if(result == INVALID_HANDLE_VALUE)
+				raise("Unable to get console stream");
+
+			return new ConsoleStream(result);
+		}
+		
+		NativeStream::NativeStream(HANDLE handle) : handle(handle)
+		{
+		}
+
+		NativeStream::~NativeStream()
 		{
 			CloseHandle(handle);
+		}
+		
+		void NativeStream::print(const CharArray &string)
+		{
+			if(!WriteFile(handle, string.str_ref(), string.size(), 0, 0))
+				raise("Unable to write to handle");
+		}
+		
+		void ConsoleStream::color(Color color, const CharArray &string)
+		{
+			CONSOLE_SCREEN_BUFFER_INFO info;
+			WORD flags;
+			
+			GetConsoleScreenBufferInfo(handle, &info);
+			
+			switch(color)
+			{
+				case Red:
+					flags = FOREGROUND_RED;
+					break;
+					
+				case Purple:
+					flags = FOREGROUND_RED | FOREGROUND_BLUE;
+					break;
+					
+				case Blue:
+					flags = FOREGROUND_BLUE;
+					break;
+					
+				case Green:
+					flags = FOREGROUND_GREEN;
+					break;
+					
+				case Gray:
+					flags = FOREGROUND_INTENSITY;
+					break;
+
+				default:
+					print(string);
+					return;
+			};
+
+			SetConsoleTextAttribute(handle, flags | (info.wAttributes & ~(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY)));
+
+			Finally finally([&] {
+				SetConsoleTextAttribute(handle, info.wAttributes);
+			});
+			
+			print(string);
 		}
 
 		void initialize(bool console)
