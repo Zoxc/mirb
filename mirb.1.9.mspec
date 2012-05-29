@@ -27,8 +27,6 @@ class MSpecScript
   set :ci_files, get(:files)
 
   set :tags_patterns, [
-                        [%r(language/),     'rubyspec/tags/1.9/language/'],
-                        [%r(core/),         'rubyspec/tags/1.9/core/'],
-                        [/_spec.rb$/,       '_tags.txt']
+                        [%r(rubyspec/),     'tags/'],
                       ]
 end
