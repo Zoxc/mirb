@@ -11,6 +11,7 @@ namespace Mirb
 			Inspect,
 			Array_to_s,
 			Array_join,
+			Array_equal,
 			Hash_to_s,
 			File_join
 		};

@@ -205,6 +205,32 @@ namespace Mirb
 		return result.to_string();
 	}
 	
+	value_t Array::equal(Array *self, value_t other)
+	{
+		auto array = try_cast<Array>(other);
+
+		if(!array)
+			return value_false;
+
+		if(self->size() != array->size())
+			return value_false;
+		
+		RecursionDetector<RecursionType::Array_equal> rd(self);
+
+		OnStack<2> os(self, array);
+
+		for(size_t i = 0; i < self->vector.size(); ++i)
+		{
+			if(i >= array->size()) // Check for when the size has been modified
+				return value_false;
+
+			if(!Value::test(call_argv(self->vector[i], "==", 1, &array->vector[i])))
+				return value_false;
+		}
+
+		return Value::from_bool(self->size() == array->size()); // Check for when the size has been modified
+	}
+	
 	value_t Array::length(Array *self)
 	{
 		return Fixnum::from_size_t(self->vector.size());
@@ -446,6 +472,9 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, &first>(context->array_class, "first");
 		method<Arg::Self<Arg::Class<Array>>, &last>(context->array_class, "last");
 		method<Arg::Self<Arg::Class<Array>>, &empty>(context->array_class, "empty?");
+		
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value, &equal>(context->array_class, "eql?");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Value, &equal>(context->array_class, "==");
 		
 		method<Arg::Self<Arg::Class<Array>>, &shift>(context->array_class, "shift");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &unshift>(context->array_class, "unshift");
