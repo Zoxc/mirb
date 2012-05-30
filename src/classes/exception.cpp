@@ -195,12 +195,6 @@ namespace Mirb
 			io->stream->print(": ");
 			io->stream->print(self->message->string);
 		}
-		
-		if(self->backtrace)
-		{
-			io->stream->print("\n");
-			StackFrame::print_backtrace(self->backtrace, *io->stream);
-		}
 	}
 	
 	void Exception::print_backtrace(Exception *self, IO *io)
@@ -208,6 +202,8 @@ namespace Mirb
 		if(self->backtrace)
 		{
 			io->assert_stream();
+			
+			io->stream->print("\n");
 
 			StackFrame::print_backtrace(self->backtrace, *io->stream);
 		}
@@ -219,17 +215,9 @@ namespace Mirb
 
 		OnStack<2> os(self, io);
 		
-		io->stream->color(Red, inspect(class_of(self)));
-
-		if(self->message)
-		{
-			io->stream->print(": ");
-			io->stream->print(self->message->string);
-		}
+		print_main(self, io);
+		print_backtrace(self, io);
 		
-		if(self->backtrace)
-			StackFrame::print_backtrace(self->backtrace, *io->stream);
-
 		return value_nil;
 	}
 
