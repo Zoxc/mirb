@@ -3,6 +3,7 @@
 #include "../tree/tree.hpp"
 #include "../compiler.hpp"
 #include "../block.hpp"
+#include "../stream.hpp"
 #include "../classes/fixnum.hpp"
 #include "../classes/array.hpp"
 
@@ -740,6 +741,8 @@ namespace Mirb
 			{
 				auto handler = new (memory_pool) Tree::HandlerNode;
 		
+				node->trap_exceptions = false;
+
 				handler->code = node;
 				handler->loop = node;
 		
@@ -835,7 +838,7 @@ namespace Mirb
 			if(node->target)
 			{
 				if(node->in_ensure)
-					gen<UnwindBreakOp>(temp, final, 0);
+					gen<UnwindBreakOp>(temp, nullptr, no_var);
 				else
 					gen_branch(node->target->label_end);
 			}

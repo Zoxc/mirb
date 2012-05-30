@@ -61,7 +61,7 @@ namespace Mirb
 				if(c == "\r")
 					result += c;
 				else
-					seek(-c.size());
+					seek(-(pos_t)c.size());
 
 				return result;
 			}

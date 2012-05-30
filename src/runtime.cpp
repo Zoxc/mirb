@@ -603,9 +603,9 @@ namespace Mirb
 			#ifdef MIRB_DEBUG_COMPILER
 				DebugPrinter printer;
 
-				context->standard_output->puts("Parsing done.\n-----");
-				context->standard_output->puts(printer.print_node(tree_scope->group));
-				context->standard_output->puts("-----");
+				context->console_output->puts("Parsing done.\n-----");
+				context->console_output->puts(printer.print_node(tree_scope->group));
+				context->console_output->puts("-----");
 			#endif
 
 			block = Compiler::compile(tree_scope, memory_pool);
