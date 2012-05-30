@@ -13,6 +13,11 @@ namespace Mirb
 		return Collector::allocate<String>(symbol->string);
 	}
 	
+	value_t String::rb_allocate(Class *instance_of)
+	{
+		return Collector::allocate<String>(instance_of);
+	}
+	
 	String *String::get(const CharArray &string)
 	{
 		return Collector::allocate<String>(string);
@@ -399,6 +404,8 @@ namespace Mirb
 	
 	void String::initialize()
 	{
+		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->string_class, "allocate");
+
 		method<Arg::Self<Arg::Value>, Arg::Value, &match>(context->string_class, "match");
 		method<Arg::Self<Arg::Value>, &to_s>(context->string_class, "to_s");
 		method<Arg::Self<Arg::Class<String>>, &to_i>(context->string_class, "to_i");

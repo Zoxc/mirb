@@ -10,6 +10,7 @@ namespace Mirb
 		public Object
 	{
 		private:
+			static value_t rb_allocate(Class *instance_of);
 			static value_t rb_get(String *self, value_t index, value_t size);
 			static value_t inspect(String *self);
 			static value_t to_s(value_t self);
