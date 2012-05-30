@@ -375,6 +375,11 @@ namespace Mirb
 			vars[op.var] = new (collector) Bignum(Number(op.data, op.length));
 		EndOp
 			
+		DeepOp(CaseBranch)
+			if(Support::case_match(vars[op.value], vars[op.list]))
+				ip = ip_start + op.pos;
+		EndOp
+		
 		Op(Handler)
 			current_exception_block = op.block;
 		EndOp

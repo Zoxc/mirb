@@ -12,6 +12,8 @@ namespace Mirb
 		value_t create_hash(size_t argc, value_t argv[]);
 		value_t interpolate(size_t argc, value_t argv[], Value::Type type);
 
+		bool case_match(value_t value, value_t list);
+
 		void define_method(Tuple<Module> *scope, Symbol *name, Block *block);
 		void define_singleton_method(Tuple<Module> *scope, value_t obj, Symbol *name, Block *block);
 	};

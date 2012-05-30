@@ -682,13 +682,22 @@ namespace Mirb
 
 						auto multi = static_cast<Tree::MultipleExpressionsNode *>(clause->pattern);
 						
-						for(auto expr: multi->expressions) // TODO: Handle splat expressions
+						for(auto expr: multi->expressions)
 						{
-							to_bytecode(expr->expression, test);
+							if(expr->expression->type() == Tree::Node::Splat)
+							{
+								to_bytecode(static_cast<Tree::SplatNode *>(expr->expression)->expression, test);
+								branches.push(BranchInfo(gen<CaseBranchOp>(temp, test), run));
+								location(&clause->range);
+							}
+							else
+							{
+								to_bytecode(expr->expression, test);
 			
-							gen<CallOp>(test, test, Symbol::get("==="), no_var, 1, temp);
-							location(&clause->range);
-							gen_if(run, test);
+								gen<CallOp>(test, test, Symbol::get("==="), no_var, 1, temp);
+								location(&clause->range);
+								gen_if(run, test);
+							}
 						}
 						
 						gen_branch(skip);

@@ -69,6 +69,24 @@ namespace Mirb
 					mirb_debug_abort("Unknown data type");
 			}
 		}
+
+		bool case_match(value_t value, value_t list)
+		{
+			auto array = try_cast<Array>(list);
+
+			if(!array)
+				return Value::test(call_argv(list, "===", 1, &value));
+
+			OnStack<1> os(array);
+
+			for(size_t i = 0; i < array->size(); ++i)
+			{
+				if(Value::test(call_argv(array->get(i), "===", 1, &value)))
+					return true;
+			}
+
+			return false;
+		}
 		
 		value_t create_array(size_t argc, value_t argv[])
 		{

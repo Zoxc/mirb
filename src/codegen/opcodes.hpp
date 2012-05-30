@@ -40,6 +40,7 @@ namespace Mirb
 				Push,
 				PushArray,
 				AssertBlock,
+				CaseBranch,
 				Closure,
 				Class,
 				SingletonClass,
@@ -104,6 +105,7 @@ namespace Mirb
 				&&OpPush, \
 				&&OpPushArray, \
 				&&OpAssertBlock, \
+				&&OpCaseBranch, \
 				&&OpClosure, \
 				&&OpClass, \
 				&&OpSingletonClass, \
@@ -329,6 +331,15 @@ namespace Mirb
 			var_t var;
 
 			AssertBlockOp(var_t var) : var(var) {}
+		};
+		
+		struct CaseBranchOp:
+			public BranchOpcode
+		{
+			var_t value;
+			var_t list;
+
+			CaseBranchOp(var_t value, var_t list) : BranchOpcode(CaseBranch), value(value), list(list) {}
 		};
 		
 		struct ClosureOp:

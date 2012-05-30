@@ -294,6 +294,17 @@ namespace Mirb
 					return "assert_block " + var(op->var);
 				}
 				
+				case Opcode::CaseBranch:
+				{
+					auto op = (CaseBranchOp *)opcode;
+					
+					result = "branch " + label(opcode) + " if_any " + var(op->list) + " matches " + var(op->value);
+
+					opcode += sizeof(CaseBranchOp);
+
+					break;
+				}
+				
 				case Opcode::Closure:
 				{
 					auto op = (ClosureOp *)opcode;
