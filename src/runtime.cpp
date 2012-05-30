@@ -621,10 +621,9 @@ namespace Mirb
 	
 	Method *lookup_module(Module *module, Symbol *name)
 	{
-		Value::assert_valid(module);
 		Value::assert_valid(name);
 
-		do
+		while(module != nullptr)
 		{
 			auto result = module->get_method(name);
 
@@ -638,7 +637,6 @@ namespace Mirb
 
 			module = module->superclass;
 		}
-		while(module != nullptr);
 
 		return 0;
 	}
