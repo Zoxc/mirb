@@ -232,7 +232,7 @@ namespace Mirb
 			#endif
 		}
 
-		Header::Header(const Header &other) : type(other.type), hashed(other.hashed), flag(other.flag)
+		Header::Header(const Header &other) : type(other.type), hashed(other.hashed), flag(other.flag), flag2(other.flag2)
 		{
 			setup();
 		}

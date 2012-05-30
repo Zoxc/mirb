@@ -161,7 +161,10 @@ namespace Mirb
 				Type type : type_bits;
 				bool marked : 1;
 				bool hashed : 1;
-				bool flag : 1; // Usable by subclasses
+
+				// Usable by subclasses
+				bool flag : 1; 
+				bool flag2 : 1;
 
 				#ifdef DEBUG
 					bool alive : 1;

@@ -68,13 +68,13 @@ namespace Mirb
 		return Value::from_bool(Mirb::kind_of(obj, other));
 	}
 
-	value_t Class::rb_new(value_t obj, size_t argc, value_t argv[])
+	value_t Class::rb_new(value_t obj, size_t argc, value_t argv[], value_t block)
 	{
 		value_t result = call(obj, "allocate");
 
 		OnStack<1> os(result);
 
-		call_argv(result, "initialize", argc, argv);
+		call_argv(result, "initialize", block, argc, argv);
 
 		return result;
 	}
@@ -84,6 +84,6 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Class>>, Arg::Value, &case_equal>(context->class_class, "===");
 		method<Arg::Self<Arg::Class<Class>>, &to_s>(context->class_class, "to_s");
 		method<Arg::Self<Arg::Class<Module>>, &rb_superclass>(context->class_class, "superclass");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &rb_new>(context->class_class, "new");
+		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, Arg::Block, &rb_new>(context->class_class, "new");
 	}
 };

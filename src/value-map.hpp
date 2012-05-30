@@ -194,12 +194,14 @@ namespace Mirb
 						return ValueMapData::raise();
 				
 					owner->accessing(true);
+
+					Finally finally([&] {
+						owner->accessing(false);
+					});
 					
 					OnStack<3> os(owner, std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
 
 					value_t result = func();
-
-					owner->accessing(false);
 
 					return result;
 				}
@@ -228,6 +230,9 @@ namespace Mirb
 			{
 				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {
 					return ValueMapManipulator::search(owner, key, [&](size_t) {
+						if(!light)
+							owner->accessing(false);
+
 						return create_value();
 					}, [&](size_t index) {
 						return ValueMapManipulator::value_slot(owner, index);

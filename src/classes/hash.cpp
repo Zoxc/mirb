@@ -1,6 +1,7 @@
 #include "hash.hpp"
 #include "string.hpp"
 #include "array.hpp"
+#include "bignum.hpp"
 #include "../runtime.hpp"
 #include "../recursion-detector.hpp"
 
@@ -13,9 +14,18 @@ namespace Mirb
 
 	value_t Hash::get(Hash *self, value_t key)
 	{
+		OnStack<2> os(self, key);
+
 		return HashAccess::get(self, key, [&]() -> value_t {
 			if(self->flag)
-				return yield(self->default_value);
+			{
+				value_t args[2];
+
+				args[0] = self;
+				args[1] = key;
+
+				return yield_argv(self->default_value, 2, args);
+			}
 			else
 				return self->default_value;
 		});
@@ -105,11 +115,29 @@ namespace Mirb
 		return array;
 	}
 
+	value_t Hash::rb_initialize(Hash *obj, value_t def, value_t block)
+	{
+		if(def)
+		{
+			obj->default_value = def;
+		}
+		else if(block)
+		{
+			obj->default_value = block;
+			obj->flag = true;
+		}
+
+		return value_nil;
+	}
+	
+
 	void Hash::initialize()
 	{
 		context->hash_class = define_class("Hash", context->object_class);
 		
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->hash_class, "allocate");
+
+		method<Arg::Self<Arg::Class<Hash>>, Arg::Optional<Arg::Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
 		method<Arg::Self<Arg::Class<Hash>>, &keys>(context->hash_class, "keys");
 		method<Arg::Self<Arg::Class<Hash>>, &values>(context->hash_class, "values");
