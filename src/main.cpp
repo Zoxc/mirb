@@ -25,6 +25,8 @@ void report_exception(Exception *exception, bool recurse = true)
 
 	trap_exception(exception, [&] {
 		value_t io = context->io_err;
+		
+		context->console_error->print("\n");
 
 		call_argv(exception, "print", 1, &io);
 
