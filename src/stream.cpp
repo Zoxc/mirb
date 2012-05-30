@@ -9,12 +9,12 @@ namespace Mirb
 		print(string + "\n");
 	}
 
-	CharArray Stream::read(size_t length)
+	CharArray Stream::read(size_t)
 	{
 		raise(context->io_error, "Reading not supported by stream");
 	}
 
-	void Stream::seek(pos_t val, PosType type)
+	void Stream::seek(pos_t, PosType)
 	{
 		raise(context->io_error, "Seeking not supported by stream");
 	}
@@ -35,7 +35,7 @@ namespace Mirb
 
 		mirb_debug_assert(remaining > 0);
 
-		if(remaining > SIZE_MAX)
+		if((size_t)remaining > SIZE_MAX)
 			raise(context->system_call_error, "Stream is too large to read");
 
 		return read((size_t)remaining);
