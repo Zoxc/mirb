@@ -28,7 +28,7 @@ void report_exception(Exception *exception, bool recurse = true)
 			
 		context->console_error->print(": ");
 
-		value_t io = new (collector) IO(context->console_error, context->io_class, false);
+		value_t io = context->io_err;
 
 		call_argv(exception, "print", 1, &io);
 
