@@ -13,7 +13,10 @@ namespace Mirb
 				return false;
 				
 			case Lexeme::COLON:
-				return !lexer.whitespace_after();
+				if(allow_colon)
+					return lexer.lexeme.whitespace;
+				else
+					return !lexer.whitespace_after();
 				
 			default:
 				return is_expression();
@@ -174,7 +177,12 @@ namespace Mirb
 				node->inverted = false;
 			
 				node->left = result;
-				node->middle = parse_operator_expression(allow_multiples);
+
+				{
+					State state(this);
+					allow_colon = false;
+					node->middle = parse_operator_expression(allow_multiples);
+				}
 			
 				close_pair("ternary if", range, Lexeme::COLON);
 
@@ -342,8 +350,8 @@ namespace Mirb
 		lexer.lexeme.prev_set(&var_range);
 
 		{
-			
-			AllowDoState ads(this, false);
+			State state(this);
+			allow_do = false;
 			node->object = parse_expression();
 		}
 
@@ -385,8 +393,8 @@ namespace Mirb
 		step_lines();
 
 		{
-			AllowDoState ads(this, false);
-
+			State state(this);
+			allow_do = false;
 			node->condition = parse_expression();
 		}
 				

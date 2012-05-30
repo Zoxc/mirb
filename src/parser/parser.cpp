@@ -334,6 +334,9 @@ namespace Mirb
 		
 		lexer.step();
 		
+		State state(this);
+		allow_colon = true;
+		
 		do
 		{
 			skip_lines();
@@ -394,6 +397,9 @@ namespace Mirb
 		auto result = new (fragment) Tree::ArrayNode;
 
 		result->variadic = false;
+		
+		State state(this);
+		allow_colon = true;
 		
 		SourceLoc range = lexer.lexeme;
 
@@ -738,7 +744,9 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_factor()
 	{
-		AllowDoState ads(this, true);
+		State state(this);
+		allow_do = true;
+		allow_colon = false;
 
 		switch (lexeme())
 		{
@@ -773,7 +781,7 @@ namespace Mirb
 				
 				lexer.step();
 
-				AllowDoState ads(this, false);
+				allow_do = false;
 
 				parse_block(true);
 
@@ -798,7 +806,7 @@ namespace Mirb
 				}
 				else
 				{
-					ads.restore();
+					state.restore();
 					node = parse_operator_expression();
 				}
 				
@@ -908,7 +916,7 @@ namespace Mirb
 
 			case Lexeme::KW_SUPER:
 			{
-				ads.restore();
+				state.restore();
 				return parse_super();
 			}
 
@@ -1096,7 +1104,7 @@ namespace Mirb
 			{
 				auto range = capture();
 
-				ads.restore();
+				state.restore();
 
 				lexer.step();
 
@@ -1171,8 +1179,8 @@ namespace Mirb
 			{
 				Symbol *symbol = lexer.lexeme.symbol;
 				auto range = capture();
-
-				ads.restore();
+				
+				state.restore();
 
 				lexer.step();
 				
@@ -1184,7 +1192,7 @@ namespace Mirb
 				auto symbol = symbol_pool.get(lexer.lexeme);
 				auto range = capture();
 				
-				ads.restore();
+				state.restore();
 
 				lexer.step();
 				

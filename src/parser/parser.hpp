@@ -20,25 +20,28 @@ namespace Mirb
 
 			List<Message> messages;
 			Document &document;
+			bool allow_colon;
 			bool allow_do;
 
-			struct AllowDoState
+			struct State
 			{
-				bool old;
+				bool old_colon;
+				bool old_do;
 				Parser *parser;
 				
-				AllowDoState(Parser *parser, bool new_value) : parser(parser)
+				State(Parser *parser) : parser(parser)
 				{
-					old = parser->allow_do;
-					parser->allow_do = new_value;
+					old_colon = parser->allow_colon;
+					old_do = parser->allow_do;
 				}
 
 				void restore()
 				{
-					parser->allow_do = old;
+					parser->allow_colon = old_colon;
+					parser->allow_do = old_do;
 				}
 
-				~AllowDoState()
+				~State()
 				{
 					restore();
 				}
@@ -90,7 +93,9 @@ namespace Mirb
 				Tree::Fragment current_fragment = fragment;
 				Tree::VoidTrapper *current_trapper = trapper;
 
-				AllowDoState ads(this, true);
+				State state(this);
+				allow_do = true;
+				allow_colon = false;
 
 				fragment = *new_scope->fragment;
 				scope = new_scope;
