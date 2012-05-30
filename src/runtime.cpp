@@ -538,6 +538,11 @@ namespace Mirb
 
 		return value;
 	}
+	
+	void zero_division_error()
+	{
+		raise(context->zero_division_error, "Division by zero");
+	}
 
 	void type_error(value_t value, const CharArray &expected)
 	{

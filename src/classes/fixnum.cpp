@@ -125,12 +125,22 @@ namespace Mirb
 	
 	value_t Fixnum::div(int_t obj, value_t other)
 	{
-		return coerce_op(obj, other, "/", [&](int_t right) { return Fixnum::from_int(obj / right); });
+		return coerce_op(obj, other, "/", [&](int_t right) {
+			if(prelude_unlikely(right == 0))
+				zero_division_error();
+
+			return Fixnum::from_int(obj / right);
+		});
 	}
 
 	value_t Fixnum::mod(int_t obj, value_t other)
 	{
-		return coerce_op(obj, other, "%", [&](int_t right) { return Fixnum::from_int(obj % right); });
+		return coerce_op(obj, other, "%", [&](int_t right) {
+			if(prelude_unlikely(right == 0))
+				zero_division_error();
+
+			return Fixnum::from_int(obj % right);
+		});
 	}
 
 	value_t Fixnum::compare(int_t obj, value_t other)

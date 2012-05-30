@@ -11,9 +11,12 @@ namespace Mirb
 {
 	mp_int Number::fixnum_high;
 	mp_int Number::fixnum_low;
+	Number Number::zero;
 
 	void Number::initialize()
 	{
+		zero = Number((size_t)0);
+
 		Number high(Fixnum::high);
 		Number low(Fixnum::low);
 		

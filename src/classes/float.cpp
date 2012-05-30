@@ -52,7 +52,12 @@ namespace Mirb
 	
 	value_t Float::div(Float *obj, value_t other)
 	{
-		return coerce_op(obj, other, "/", [&](double right) { return Collector::allocate<Float>(obj->value / right); });
+		return coerce_op(obj, other, "/", [&](double right) {
+			if(prelude_unlikely(right == 0.0))
+				zero_division_error();
+
+			return Collector::allocate<Float>(obj->value / right);
+		});
 	}
 
 	value_t Float::compare(Float *obj, value_t other)

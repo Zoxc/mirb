@@ -44,6 +44,7 @@ namespace Mirb
 		context->type_error = define_class("TypeError", context->standard_error);
 		context->syntax_error = define_class("SyntaxError", context->standard_error);
 		context->argument_error = define_class("ArgumentError", context->standard_error);
+		context->zero_division_error = define_class("ZeroDivisionError", context->standard_error);
 		context->runtime_error = define_class("RuntimeError", context->standard_error);
 		context->local_jump_error = define_class("LocalJumpError", context->standard_error);
 		context->load_error = define_class("LoadError", context->standard_error);

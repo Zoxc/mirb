@@ -49,12 +49,23 @@ namespace Mirb
 
 	value_t Bignum::div(Bignum *obj, value_t other)
 	{
-		return coerce_op(obj, other, "/", [&](const Number &right) { return (obj->number / right).to_value(); });
+		return coerce_op(obj, other, "/", [&](const Number &right) {
+			
+			if(prelude_unlikely(right == Number::zero))
+				zero_division_error();
+
+			return (obj->number / right).to_value();
+		});
 	}
 
 	value_t Bignum::mod(Bignum *obj, value_t other)
 	{
-		return coerce_op(obj, other, "%", [&](const Number &right) { return (obj->number.mod(right)).to_value(); });
+		return coerce_op(obj, other, "%", [&](const Number &right) {
+			if(prelude_unlikely(right == Number::zero))
+				zero_division_error();
+
+			return (obj->number.mod(right)).to_value();
+		});
 	}
 
 	value_t Bignum::compare(Bignum *obj, value_t other)
@@ -64,7 +75,7 @@ namespace Mirb
 	
 	value_t Bignum::zero(Bignum *obj)
 	{
-		return Value::from_bool(obj->number.compare(Number((intptr_t)0)) == 0);
+		return Value::from_bool(obj->number == Number::zero);
 	}
 	
 	value_t Bignum::coerce(Bignum *obj, value_t other)

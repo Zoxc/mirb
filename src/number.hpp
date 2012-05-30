@@ -27,6 +27,8 @@ namespace Mirb
 			};
 
 		public:
+			static Number zero;
+
 			Number();
 			Number(Number &&other);
 			Number(const Number &other);
@@ -48,7 +50,12 @@ namespace Mirb
 
 				check(mp_to_signed_bin((mp_int *)&num, (unsigned char *)storage));
 			}
-
+			
+			bool operator ==(const Number &other) const
+			{
+				return compare(other) == 0;
+			}
+			
 			bool can_be_fix() const;
 		
 			intptr_t to_intptr() const;
