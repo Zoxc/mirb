@@ -88,7 +88,8 @@ namespace Mirb
 			{
 				NextException::mark(mark);
 
-				mark(target);
+				if(target)
+					mark(target);
 			}
 	};
 	
