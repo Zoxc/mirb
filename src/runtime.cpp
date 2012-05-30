@@ -246,7 +246,7 @@ namespace Mirb
 
 	void class_name(value_t obj, Module *under, Symbol *name)
 	{
-		value_t under_path = get_var(under, context->syms.classpath);
+		String *under_path = try_cast<String>(get_var(under, context->syms.classpath));
 		
 		CharArray new_path;
 		
@@ -256,7 +256,10 @@ namespace Mirb
 		}
 		else
 		{
-			new_path = cast<String>(under_path)->string + "::" + name->string;
+			if(!under_path)
+				return;
+		
+			new_path = under_path->string + "::" + name->string;
 		}
 
 		set_var(obj, context->syms.classname, String::from_symbol(name));

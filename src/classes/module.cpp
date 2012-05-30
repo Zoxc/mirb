@@ -229,9 +229,27 @@ namespace Mirb
 
 		return obj;
 	}
+	
+	value_t Module::module_eval(Module *obj, String *string, value_t block)
+	{
+		if(!string)
+		{
+			Proc *proc = get_proc(block);
 
+			return call_code(proc->block, obj, proc->name, context->frame->scope->copy_and_prepend(obj), proc->scopes, block, 0, nullptr);
+		}
+		else
+		{
+			CharArray code = string->string.c_str();
+
+			return eval(obj, Symbol::get("in eval"), context->frame->scope->copy_and_prepend(obj), code.str_ref(), code.str_length(), "(eval)");
+		}
+	}
+	
 	void Module::initialize()
 	{
+		method<Arg::Self<Arg::Class<Module>>, Arg::Optional<Arg::Class<String>>, Arg::Block, &module_eval>(context->object_class, "module_eval");
+		method<Arg::Self<Arg::Class<Module>>, Arg::Optional<Arg::Class<String>>, Arg::Block, &module_eval>(context->object_class, "class_eval");
 		method<Arg::Self<Arg::Value>, &to_s>(context->module_class, "to_s");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Class<Symbol>, &alias_method>(context->module_class, "alias_method");
 		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &undef_method>(context->module_class, "undef_method");

@@ -91,17 +91,19 @@ namespace Mirb
 
 	value_t Object::instance_eval(value_t obj, String *string, value_t block)
 	{
+		auto klass = singleton_class(obj);
+
 		if(!string)
 		{
 			Proc *proc = get_proc(block);
 
-			return call_code(proc->block, obj, proc->name, context->frame->prev->scope, proc->scopes, block, 0, nullptr);
+			return call_code(proc->block, obj, proc->name, context->frame->scope->copy_and_prepend(klass), proc->scopes, block, 0, nullptr);
 		}
 		else
 		{
 			CharArray code = string->string.c_str();
 
-			return eval(obj, Symbol::get("in eval"), context->frame->prev->scope, code.str_ref(), code.str_length(), "(eval)");
+			return eval(obj, Symbol::get("in eval"), context->frame->scope->copy_and_prepend(klass), code.str_ref(), code.str_length(), "(eval)");
 		}
 	}
 	
