@@ -1,5 +1,6 @@
 #include "hash.hpp"
 #include "string.hpp"
+#include "array.hpp"
 #include "../runtime.hpp"
 #include "../recursion-detector.hpp"
 
@@ -77,6 +78,32 @@ namespace Mirb
 
 		return self;
 	}
+	
+	value_t Hash::keys(Hash *self)
+	{
+		auto array = Array::allocate();
+
+		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+			array->vector.push(key);
+
+			return true;
+		});
+
+		return array;
+	}
+	
+	value_t Hash::values(Hash *self)
+	{
+		auto array = Array::allocate();
+
+		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+			array->vector.push(value);
+
+			return true;
+		});
+
+		return array;
+	}
 
 	void Hash::initialize()
 	{
@@ -84,6 +111,9 @@ namespace Mirb
 		
 		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->hash_class, "allocate");
 		
+		method<Arg::Self<Arg::Class<Hash>>, &keys>(context->hash_class, "keys");
+		method<Arg::Self<Arg::Class<Hash>>, &values>(context->hash_class, "values");
+
 		method<Arg::Self<Arg::Class<Hash>>, Arg::Block, &each>(context->hash_class, "each");
 
 		method<Arg::Self<Arg::Class<Hash>>, &to_s>(context->hash_class, "to_s");

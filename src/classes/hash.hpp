@@ -10,6 +10,8 @@ namespace Mirb
 		private:
 			static value_t allocate(Class *instance_of);
 			static value_t to_s(Hash *self);
+			static value_t keys(Hash *self);
+			static value_t values(Hash *self);
 			static value_t each(Hash *self, value_t block);
 			static value_t get(Hash *self, value_t key);
 			static value_t set(Hash *self, value_t key, value_t value);
