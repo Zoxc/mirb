@@ -133,9 +133,12 @@ namespace Mirb
 
 		return result;
 	}
+
 	CharArray CharArray::ljust(size_t length, const CharArray &padding)
 	{
 		CharArray result = *this;
+
+		mirb_debug_assert(padding.size());
 
 		while(result.size() < length)
 		{
@@ -150,6 +153,8 @@ namespace Mirb
 	{
 		if(size() >= length)
 			return *this;
+		
+		mirb_debug_assert(padding.size());
 
 		CharArray result;
 

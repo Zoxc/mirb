@@ -93,6 +93,8 @@ namespace Mirb
 				size_t last = 0;
 				size_t i = 0;
 
+				mirb_debug_assert(token.size());
+
 				while(i < length - token.size() + 1)
 				{
 					if(equal(i, 0, token, token.size()))

@@ -74,11 +74,24 @@ namespace Mirb
 							stop = std::max(stop, ovector[2 * i + 1]);
 						}
 
-						data(input.copy(prev, (size_t)start - prev));
+						if(stop == prev)
+						{
+							split(start, stop);
 
-						split(start, stop);
+							data(input.copy(prev, 1));
 
-						prev = stop;
+							prev += 1;
+						}
+						else
+						{
+							data(input.copy(prev, (size_t)start - prev));
+
+							split(start, stop);
+
+								stop += 1;
+
+							prev = stop;
+						}
 					}
 				}
 			}

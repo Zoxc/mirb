@@ -85,10 +85,15 @@ namespace Mirb
 		else
 			sep_str = " ";
 
-		self->string.split([&](const CharArray &match) {
-			if(sep_str != " " || match.size())
-				result->vector.push(match.to_string());
-		}, sep_str);
+		if(sep_str.size())
+		{
+			self->string.split([&](const CharArray &match) {
+				if(sep_str != " " || match.size())
+					result->vector.push(match.to_string());
+			}, sep_str);
+		}
+		else
+			self->string.each_char([&](char_t c, size_t) { result->vector.push(CharArray(c).to_string()); });
 
 		return result;
 	}
@@ -220,11 +225,17 @@ namespace Mirb
 	
 	value_t String::ljust(String *self, size_t length, String *other)
 	{
+		if(other && !other->string.size())
+			raise(context->argument_error, "Empty padding string");
+
 		return self->string.ljust(length, other ? other->string : " ").to_string();
 	}
 	
 	value_t String::rjust(String *self, size_t length, String *other)
 	{
+		if(other && !other->string.size())
+			raise(context->argument_error, "Empty padding string");
+
 		return self->string.rjust(length, other ? other->string : " ").to_string();
 	}
 	
