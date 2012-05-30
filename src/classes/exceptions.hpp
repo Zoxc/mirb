@@ -15,7 +15,7 @@ namespace Mirb
 		public:
 			List<Message> messages;
 
-			static value_t print(SyntaxError *self, IO *io);
+			static value_t print(Exception *self, IO *io);
 			
 			static const bool finalizer = true;
 

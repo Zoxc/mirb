@@ -29,10 +29,6 @@ void report_exception(Exception *exception, bool recurse = true)
 		context->console_error->print("\n");
 
 		call_argv(exception, "print", 1, &io);
-
-		context->console_error->print("\n");
-
-		StackFrame::print_backtrace(exception->backtrace, *context->console_error);
 	});
 	
 	if(exception)

@@ -54,9 +54,11 @@ namespace Mirb
 			static value_t rb_backtrace(Exception *self);
 			static value_t rb_initialize(Exception *obj, String *message);
 			static value_t rb_inspect(Exception *self);
+			static value_t print(Exception *self, IO *io);
 			
 		protected:
-			static value_t print(Exception *self, IO *io);
+			static void print_main(Exception *self, IO *io);
+			static void print_backtrace(Exception *self, IO *io);
 
 		public:
 			Exception(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}

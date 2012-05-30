@@ -14,18 +14,25 @@ namespace Mirb
 		messages = parser.messages;
 	}
 	
-	value_t SyntaxError::print(SyntaxError *self, IO *io)
+	value_t SyntaxError::print(Exception *self, IO *io)
 	{
 		OnStack<2> os(self, io);
 
-		Exception::print(self, io);
+		print_main(self, io);
 
-		for(auto message: self->messages)
+		auto syntax_error = try_cast<SyntaxError>(self);
+		
+		if(syntax_error)
 		{
-			io->stream->print("\n");
+			for(auto message: syntax_error->messages)
+			{
+				io->stream->print("\n");
 
-			message->print(*io->stream);
+				message->print(*io->stream);
+			}
 		}
+
+		print_backtrace(self, io);
 
 		return value_nil;
 	}
@@ -54,7 +61,7 @@ namespace Mirb
 		context->signal_exception = define_class("SignalException", context->exception_class);
 		context->interrupt_class = define_class("Interrupt", context->signal_exception);
 
-		method<Arg::Self<Arg::Class<SyntaxError>>, Arg::Class<IO>, &SyntaxError::print>(context->syntax_error, "print");
+		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<IO>, &SyntaxError::print>(context->syntax_error, "print");
 	}
 };
 
