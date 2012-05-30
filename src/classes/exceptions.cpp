@@ -20,10 +20,9 @@ namespace Mirb
 
 		for(auto message: self->messages)
 		{
-			message->print(*io->stream);
+			io->stream->print("\n");
 
-			if(message->entry.next)
-				io->stream->print("\n");
+			message->print(*io->stream);
 		}
 
 		return value_nil;
