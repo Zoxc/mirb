@@ -88,8 +88,6 @@ namespace Mirb
 
 							split(start, stop);
 
-								stop += 1;
-
 							prev = stop;
 						}
 					}

@@ -406,7 +406,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &chomp_ex>(context->string_class, "chomp!");
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub>(context->string_class, "gsub");
-		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub_ex");
+		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub!");
 		method<Arg::Self<Arg::Class<String>>, &empty>(context->string_class, "empty?");
 		
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, Arg::Optional<Arg::Value>, &rb_get>(context->string_class, "[]");
