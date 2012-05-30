@@ -184,6 +184,28 @@ namespace Mirb
 				// TODO: Pass on allow_multiples and return an error if multiple expressions are used in an assignment
 				// TODO: Also disallow splash assignments
 			}
+
+			Tree::MultipleExpressionsNode *parse_ensure_multiple_expressions(bool nested)
+			{
+				SourceLoc range = lexer.lexeme;
+
+				auto result = process_rhs(parse_multiple_expressions(true, nested));
+
+				if(result && result->type() != Tree::Node::MultipleExpressions)
+				{
+					auto node = new (fragment) Tree::MultipleExpressionsNode;
+
+					node->range = new (fragment) SourceLoc(range);
+
+					lexer.lexeme.prev_set(node->range);
+
+					node->expressions.append(new (fragment) Tree::MultipleExpressionNode(result, *node->range));
+
+					return node;
+				}
+				else
+					return (Tree::MultipleExpressionsNode *)result;
+			}
 			
 			Tree::Node *parse_splat_operator_expression()
 			{

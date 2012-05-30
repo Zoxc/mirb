@@ -1043,14 +1043,16 @@ namespace Mirb
 			to_bytecode(node->code, var);
 			
 			gen<HandlerOp>(exception_block->parent);
+			
+			Label *ok_label = create_label();
+			Label *else_label = create_label();
 
 			if(!node->rescues.empty())
 			{
 				/*
 				 * Skip the rescue block
 				 */
-				Label *ok_label = create_label();
-				gen_branch(ok_label);
+				gen_branch(else_label);
 				
 				/*
 				 * Output rescue nodes. TODO: Check for duplicate nodes
@@ -1105,8 +1107,6 @@ namespace Mirb
 					
 					gen_branch(ok_label);
 				}
-				
-				gen(ok_label);
 			}
 			else if(node->loop)
 			{
@@ -1120,8 +1120,14 @@ namespace Mirb
 			 */
 			current_exception_block = exception_block->parent;
 			
+			gen(else_label);
+
 			if(node->else_group)
+			{
 				to_bytecode(node->else_group, no_var);
+			}
+			
+			gen(ok_label);
 
 			/*
 			 * Check for ensure node

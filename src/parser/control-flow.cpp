@@ -89,7 +89,7 @@ namespace Mirb
 			lexer.step();
 
 			if(!is_sep() && lexeme() != Lexeme::KW_THEN && lexeme() != Lexeme::ASSOC)
-				rescue->pattern = process_rhs(parse_multiple_expressions(true, true));
+				rescue->pattern = process_rhs(parse_ensure_multiple_expressions(true));
 			else
 				rescue->pattern = nullptr;
 			
@@ -318,27 +318,17 @@ namespace Mirb
 			scope->group = group;
 			scope->array_parameter = scope->alloc_var<Tree::Parameter>();
 			
-			auto variables = parse_multiple_expressions(true, false);
+			auto variables = parse_ensure_multiple_expressions(false);
 			lexer.lexeme.prev_set(&var_range);
 
-			Tree::MultipleExpressionsNode *men;
-
-			if(variables->type() == Tree::Node::MultipleExpressions)
-				men = (Tree::MultipleExpressionsNode *)variables;
-			else
-			{
-				men = new (fragment) Tree::MultipleExpressionsNode;
-				men->range = new (fragment) SourceLoc(var_range);
-				men->expressions.append(new (fragment) Tree::MultipleExpressionNode(variables, var_range));
-			}
-
-			process_multiple_lhs(men, false);
+			if(variables)
+				process_multiple_lhs(variables, false);
 
 			scope->range = new (fragment) SourceLoc(var_range);
 			
 			auto assignment = new (fragment) Tree::AssignmentNode;
 
-			assignment->left = men;
+			assignment->left = variables;
 			assignment->op = Lexeme::ASSIGN;
 			assignment->right = new (fragment) Tree::VariableNode(scope->array_parameter);
 

@@ -483,12 +483,20 @@ handle_exception:
 						OpContinue; // Execute test block
 
 exception_block_handler: // The test block will jump back here
-						auto klass = try_cast<Class>(vars[static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->result]);
+						auto list = try_cast<Array>(vars[static_cast<FilterExceptionHandler *>(loop_exception_block->handlers[loop_handler])->result]);
 
-						if(!klass || !kind_of(klass, frame.exception))
+						if(!list)
 							continue;
-						else
-							break;
+
+						for(size_t i = 0; i < list->size(); ++i)
+						{
+							auto klass = try_cast<Class>(list->get(i));
+
+							if(klass && kind_of(klass, frame.exception))
+								goto run_handler;
+						}
+
+						continue;
 					}
 
 					case StandardException:
@@ -499,7 +507,9 @@ exception_block_handler: // The test block will jump back here
 							break;
 					}
 				}
-					
+
+				run_handler:
+				
 				auto handler = loop_exception_block->handlers[loop_handler];
 
 				if(handler->var != no_var)
