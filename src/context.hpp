@@ -88,8 +88,12 @@ namespace Mirb
 			Module *comparable_module;
 			Module *enumerable_module;
 			Module *process_module;
-
+			
 			Method *inspect_method;
+			
+			IO *io_in;
+			IO *io_out;
+			IO *io_err;
 
 			Tuple<Module> *object_scope;
 

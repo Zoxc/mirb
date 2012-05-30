@@ -1102,6 +1102,18 @@ namespace Mirb
 		context->console_input = Platform::console_stream(Platform::StandardInput);
 		context->console_output = Platform::console_stream(Platform::StandardOutput);
 		context->console_error = Platform::console_stream(Platform::StandardError);
+		
+		context->io_in = new (collector) IO(context->console_input, context->io_class, false);
+		context->io_out = new (collector) IO(context->console_output, context->io_class, false);
+		context->io_err = new (collector) IO(context->console_error, context->io_class, false);
+		
+		set_global(Symbol::get("$stdin"), context->io_in);
+		set_global(Symbol::get("$stdout"), context->io_out);
+		set_global(Symbol::get("$stderr"), context->io_err);
+		
+		set_const(context->object_class, Symbol::get("STDIN"), context->io_in);
+		set_const(context->object_class, Symbol::get("STDOUT"), context->io_out);
+		set_const(context->object_class, Symbol::get("STDERR"), context->io_err);
 				
 		mirb_debug(Collector::collect());
 	}
