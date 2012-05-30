@@ -70,6 +70,8 @@ namespace Mirb
 			
 			static Region *current;
 			static size_t pages;
+			
+			static size_t region_allocs_since_collection;
 
 			#ifdef VALGRIND
 				static LinkedList<Value::Header> heap_list;

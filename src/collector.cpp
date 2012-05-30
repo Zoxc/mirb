@@ -25,6 +25,7 @@ namespace Mirb
 	size_t Collector::collections = 0;
 	size_t Collector::region_count = 0;
 	size_t Collector::region_free_count = 0;
+	size_t Collector::region_allocs_since_collection = 0;
 	unsigned long long Collector::memory = 0;
 	bool Collector::pending = false;
 	bool Collector::enable_interrupts = false;
@@ -142,6 +143,8 @@ namespace Mirb
 
 	void Collector::collect()
 	{
+		region_allocs_since_collection = 0;
+
 		if(enable_interrupts)
 		{
 			bool expected = true;
@@ -205,7 +208,7 @@ namespace Mirb
 		Region *region;
 		char_t *result;
 
-		size_t max_page_alloc = 1;// pages >> 3;
+		size_t max_page_alloc = 1;
 
 		if(prelude_unlikely(bytes > max_page_alloc * page_size))
 		{
@@ -218,10 +221,15 @@ namespace Mirb
 			return result;
 		}
 		else
-			pending = true;
+		{
+			region_allocs_since_collection++;
+
+			if(region_allocs_since_collection > 2)
+				pending = true;
+		}
 
 		region = allocate_region(pages * page_size);
-		pages += max_page_alloc;
+		pages += pages >> 2;
 
 		result = region->pos;
 
