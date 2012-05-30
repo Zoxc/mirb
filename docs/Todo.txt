@@ -28,4 +28,3 @@
 [X] Steal Rubinius' tagging scheme (almost)
 [ ] Fix &&=
 [ ] Skip lines where appropiate in the parser
-[ ] Ensure nothing swallows exceptions
