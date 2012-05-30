@@ -18,12 +18,7 @@ namespace Mirb
 		if(re)
 			pcre_free(re);
 	}
-
-	value_t quote(String *str)
-	{
-		return str;
-	}
-	
+		
 	void Regexp::compile_pattern()
 	{
 		if(re)
@@ -52,6 +47,22 @@ namespace Mirb
 	value_t Regexp::source(Regexp *obj)
 	{
 		return obj->pattern.to_string();
+	}
+
+	value_t Regexp::escape(String *str)
+	{
+		CharArray result;
+
+		str->string.each_char([&](char_code_t c, size_t) {
+			if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+				result += CharArray(c);
+			else
+			{
+				result +=  "\\" + CharArray(c);
+			}
+		});
+		
+		return result.to_string();
 	}
 
 	value_t Regexp::rb_initialize(Regexp *obj, value_t pattern)
@@ -129,8 +140,9 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_match>(context->regexp_class, "match");
-
-		singleton_method<Arg::Class<String>, &quote>(context->regexp_class, "quote");
+		
+		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "escape");
+		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "quote");
 		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->regexp_class, "allocate");
 	}
 };

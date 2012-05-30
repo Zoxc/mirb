@@ -31,10 +31,9 @@ namespace Mirb
 	value_t String::inspect(String *self)
 	{
 		CharArray result = "\"";
-
-		for(size_t i = 0; i < self->string.size(); ++i)
-		{
-			switch(self->string[i])
+		
+		self->string.each_char([&](char_code_t c, size_t) {
+			switch(c)
 			{
 				case '\\':
 					result += "\\";
@@ -49,9 +48,9 @@ namespace Mirb
 					break;
 
 				default:
-					result += self->string[i];
+					result += c;
 			}
-		}
+		});
 		
 		return (result + "\"").to_string();
 	}

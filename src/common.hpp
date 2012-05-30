@@ -37,6 +37,7 @@ namespace Mirb
 	using namespace Prelude;
 
 	typedef uint8_t char_t;
+	typedef char_t char_code_t;
 
 	#ifdef DEBUG
 		#define mirb_debug(expression)  expression
