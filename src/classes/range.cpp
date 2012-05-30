@@ -101,13 +101,22 @@ namespace Mirb
 	{
 		OnStack<2> os(self, value);
 
-		if(compare(self->low, value) > 0)
-			return value_false;
+		try
+		{
+			if(compare(self->low, value) > 0)
+				return value_false;
 
-		if(self->flag)
-			return Value::from_bool(compare(self->high, value) > 0);
-		else
-			return Value::from_bool(compare(self->high, value) >= 0);
+			if(self->flag)
+				return Value::from_bool(compare(self->high, value) > 0);
+			else
+				return Value::from_bool(compare(self->high, value) >= 0);
+		} catch(const InternalException &e)
+		{
+			if(!Mirb::kind_of(context->standard_error, e.value))
+				throw;
+
+			return value_false;
+		}
 	}
 	
 	void Range::initialize()
@@ -115,6 +124,7 @@ namespace Mirb
 		context->range_class = define_class("Range", context->object_class);
 		
 		method<Arg::Self<Arg::Class<Range>>, Arg::Value, &include>(context->range_class, "include?");
+		method<Arg::Self<Arg::Class<Range>>, Arg::Value, &include>(context->range_class, "===");
 		method<Arg::Self<Arg::Class<Range>>, &exclude_end>(context->range_class, "exclude_end?");
 		method<Arg::Self<Arg::Class<Range>>, &first>(context->range_class, "first");
 		method<Arg::Self<Arg::Class<Range>>, &last>(context->range_class, "last");
