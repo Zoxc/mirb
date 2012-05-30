@@ -449,6 +449,9 @@ namespace Mirb
 					case Lexeme::KW_TRUE:
 					case Lexeme::KW_FALSE:
 					case Lexeme::KW_SPECIAL_FILE:
+					case Lexeme::KW_SPECIAL_LINE:
+					case Lexeme::KW_SPECIAL_BEGIN:
+					case Lexeme::KW_SPECIAL_END:
 					case Lexeme::KW_NIL:
 					case Lexeme::KW_YIELD:
 					case Lexeme::KW_RETURN:

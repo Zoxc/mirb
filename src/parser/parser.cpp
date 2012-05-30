@@ -2,6 +2,7 @@
 #include "../compiler.hpp"
 #include "../document.hpp"
 #include "../number.hpp"
+#include "../classes/fixnum.hpp"
 
 namespace Mirb
 {
@@ -751,6 +752,32 @@ namespace Mirb
 				lexer.step();
 
 				return result;
+			}
+			
+			case Lexeme::KW_SPECIAL_LINE:
+			{
+				auto result = new (fragment) Tree::IntegerNode;
+
+				result->value = (void *)((intptr_t)lexer.lexeme.line + 1);
+				result->length = 0;
+
+				lexer.step();
+
+				return result;
+			}
+			
+			case Lexeme::KW_SPECIAL_BEGIN:
+			case Lexeme::KW_SPECIAL_END:
+			{
+				report(lexer.lexeme, (lexeme() == Lexeme::KW_SPECIAL_BEGIN ? std::string("BEGIN") : std::string("END")) + " is not supported.");
+				
+				lexer.step();
+
+				AllowDoState ads(this, false);
+
+				parse_block(true);
+
+				return 0;
 			}
 			
 			case Lexeme::KW_DEFINED:

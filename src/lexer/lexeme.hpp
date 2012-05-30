@@ -167,6 +167,9 @@ namespace Mirb
 				KW_AND,
 				KW_OR,
 				KW_SPECIAL_FILE,
+				KW_SPECIAL_LINE,
+				KW_SPECIAL_BEGIN,
+				KW_SPECIAL_END,
 				KW_END,
 				TYPES
 			};

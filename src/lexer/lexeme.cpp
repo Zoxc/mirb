@@ -145,6 +145,9 @@ namespace Mirb
 		"and",
 		"or",
 		"__FILE__",
+		"__LINE__",
+		"BEGIN",
+		"END",
 		"end",
 	};
 
