@@ -67,11 +67,15 @@ namespace Mirb
 		OpPrologue
 
 		Op(LoadArg)
-			vars[op.var] = frame.argv[op.arg];
+			if(frame.argc > op.arg)
+				vars[op.var] = frame.argv[op.arg];
 		EndOp
 			
 		Op(LoadArgFloat)
-			vars[op.var] = frame.argv[op.prev_reg + std::min(frame.argc - frame.code->min_args, op.prev_def)];
+			size_t pos = op.prev_reg + std::min(frame.argc - frame.code->min_args, op.prev_def);
+		
+			if(frame.argc > pos)
+				vars[op.var] = frame.argv[pos];
 		EndOp
 			
 		Op(LoadArrayArg)
@@ -86,6 +90,8 @@ namespace Mirb
 		EndOp
 			
 		Op(LoadArgBranch)
+			mirb_debug_assert(op.req_args >= op.arg);
+
 			if(frame.argc >= op.req_args)
 			{
 				vars[op.var] = frame.argv[op.arg];

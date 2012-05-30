@@ -1185,6 +1185,7 @@ namespace Mirb
 		
 		void ByteCodeGenerator::early_finalize(Block *block, Tree::Scope *scope)
 		{
+			block->block = scope->type == Tree::Scope::Closure;
 			block->min_args = 0;
 			block->max_args = 0;
 
@@ -1196,7 +1197,7 @@ namespace Mirb
 					block->min_args++;
 			}
 			
-			if(scope->type == Tree::Scope::Closure || scope->array_parameter)
+			if(scope->array_parameter)
 				block->max_args = (size_t)-1;
 
 			if(scope->range)
@@ -1365,6 +1366,7 @@ namespace Mirb
 				}, return_var);
 			}
 
+			final->block = scope->type == Tree::Scope::Closure;
 			final->min_args = 0;
 			final->max_args = 0;
 
@@ -1413,9 +1415,6 @@ namespace Mirb
 				}
 			}
 			
-			if(scope->type == Tree::Scope::Closure)
-				final->max_args = (size_t)-1;
-
 			if(scope->array_parameter)
 			{
 				final->max_args = (size_t)-1;

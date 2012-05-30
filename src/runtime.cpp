@@ -723,12 +723,15 @@ namespace Mirb
 		ContextState frame_state(frame);
 
 		Collector::check();
-		
-		if(prelude_unlikely(frame.argc < frame.code->min_args))
-			raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
 
-		if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
-			raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
+		if(prelude_likely(!frame.code->block))
+		{
+			if(prelude_unlikely(frame.argc < frame.code->min_args))
+				raise(context->argument_error, "Too few arguments passed to function (" + CharArray::uint(frame.code->min_args) + " required)");
+
+			if(prelude_unlikely(frame.code->max_args != (size_t)-1 && frame.argc > frame.code->max_args))
+				raise(context->argument_error, "Too many arguments passed to function (max " + CharArray::uint(frame.code->max_args) + ")");
+		}
 
 		return frame.code->executor(frame);
 	}

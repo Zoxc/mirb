@@ -86,6 +86,7 @@ namespace Mirb
 				scope(nullptr),
 				document(document),
 				opcodes(nullptr),
+				block(false),
 				exception_blocks(nullptr),
 				strings(nullptr),
 				range(nullptr),
@@ -140,6 +141,8 @@ namespace Mirb
 			size_t var_words;
 
 			const char *opcodes;
+
+			bool block;
 
 			size_t min_args;
 			size_t max_args;
