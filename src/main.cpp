@@ -24,10 +24,6 @@ void report_exception(Exception *exception, bool recurse = true)
 	OnStack<1> os(exception);
 
 	trap_exception(exception, [&] {
-		context->console_error->color(Red, inspect(class_of(exception)));
-			
-		context->console_error->print(": ");
-
 		value_t io = context->io_err;
 
 		call_argv(exception, "print", 1, &io);

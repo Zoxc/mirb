@@ -53,6 +53,7 @@ namespace Mirb
 			static value_t to_s(Exception *obj);
 			static value_t rb_backtrace(Exception *self);
 			static value_t rb_initialize(Exception *obj, String *message);
+			static value_t rb_inspect(Exception *self);
 			
 		protected:
 			static value_t print(Exception *self, IO *io);

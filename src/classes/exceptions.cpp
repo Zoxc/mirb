@@ -16,6 +16,8 @@ namespace Mirb
 	
 	value_t SyntaxError::print(SyntaxError *self, IO *io)
 	{
+		OnStack<2> os(self, io);
+
 		Exception::print(self, io);
 
 		for(auto message: self->messages)
