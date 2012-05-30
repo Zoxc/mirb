@@ -1090,6 +1090,7 @@ namespace Mirb
 			global->value = context->load_paths;
 			global->read_only();
 			set_global_object(Symbol::get("$:"), global);
+			set_global_object(Symbol::get("$-I"), global);
 			set_global_object(Symbol::get("$LOAD_PATH"), global);
 		}
 
