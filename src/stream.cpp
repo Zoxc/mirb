@@ -43,30 +43,54 @@ namespace Mirb
 
 	CharArray Stream::gets()
 	{
-		CharArray result, c;
+		static const size_t buffer_size = 0x200;
+
+		CharArray result, buffer;
 
 		while(true)
 		{
-			c = read(1);
+			pos_t p = pos();
+			buffer = read(buffer_size);
 
-			if(!c.size())
-				return result;
-
-			result += c;
-
-			if(c == "\n")
+			for(size_t i = 0; i < buffer.size(); ++i)
 			{
-				c = read(1);
+				if(buffer[i] == '\r')
+				{
+					++i;
 
-				if(c == "\r")
-					result += c;
-				else
-					seek(-(pos_t)c.size());
+					if(i < buffer.size())
+					{
+						if(buffer[i] == '\n')
+							++i;
 
-				return result;
+						seek(p + i, FromStart);
+						return result + buffer.copy(0, i);
+					}
+					else
+					{
+						CharArray c = read(1);
+
+						if(c == "\n")
+							buffer += c;
+						else
+							seek(-(pos_t)c.size());
+
+						return result + buffer;
+					}
+				}
+				else if(buffer[i] == '\n')
+				{
+					++i;
+
+					seek(p + i, FromStart);
+					return result + buffer.copy(0, i);
+				}
 			}
-			else if (c == "\r")
-				return result;
+
+			if(buffer.size() < buffer_size)
+				return result + buffer;
+
+			result += buffer;
 		}
 	}
 
