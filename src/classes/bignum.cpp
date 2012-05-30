@@ -51,7 +51,7 @@ namespace Mirb
 	{
 		return coerce_op(obj, other, "/", [&](const Number &right) {
 			
-			if(prelude_unlikely(right == Number::zero))
+			if(prelude_unlikely(right == *Number::zero))
 				zero_division_error();
 
 			return (obj->number / right).to_value();
@@ -61,7 +61,7 @@ namespace Mirb
 	value_t Bignum::mod(Bignum *obj, value_t other)
 	{
 		return coerce_op(obj, other, "%", [&](const Number &right) {
-			if(prelude_unlikely(right == Number::zero))
+			if(prelude_unlikely(right == *Number::zero))
 				zero_division_error();
 
 			return (obj->number.mod(right)).to_value();
@@ -75,7 +75,7 @@ namespace Mirb
 	
 	value_t Bignum::zero(Bignum *obj)
 	{
-		return Value::from_bool(obj->number == Number::zero);
+		return Value::from_bool(obj->number == *Number::zero);
 	}
 	
 	value_t Bignum::coerce(Bignum *obj, value_t other)

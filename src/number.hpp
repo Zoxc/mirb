@@ -27,7 +27,7 @@ namespace Mirb
 			};
 
 		public:
-			static Number zero;
+			static Number *zero;
 
 			Number();
 			Number(Number &&other);
