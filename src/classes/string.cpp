@@ -4,6 +4,7 @@
 #include "fixnum.hpp"
 #include "regexp.hpp"
 #include "range.hpp"
+#include "../number.hpp"
 #include "../runtime.hpp"
 
 namespace Mirb
@@ -36,7 +37,7 @@ namespace Mirb
 			switch(c)
 			{
 				case '\\':
-					result += "\\";
+					result += "\\\\";
 					break;
 
 				case '\n':
@@ -48,7 +49,13 @@ namespace Mirb
 					break;
 
 				default:
-					result += c;
+				{
+					if(c < 32 || c > 127)
+						result +=  "\\x" + Number((intptr_t)c).to_string(16).rjust(2, "0");
+					else
+						result += c;
+					break;
+				}
 			}
 		});
 		

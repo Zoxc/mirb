@@ -4,6 +4,7 @@
 #include "array.hpp"
 #include "fixnum.hpp"
 #include "../runtime.hpp"
+#include "../number.hpp"
 #include <climits>
 
 #ifdef WIN32
@@ -59,7 +60,10 @@ namespace Mirb
 				result += CharArray(c);
 			else
 			{
-				result +=  "\\" + CharArray(c);
+				if(c < 32 || c > 127)
+					result +=  "\\x" + Number((intptr_t)c).to_string(16).rjust(2, "0");
+				else
+					result +=  "\\" + CharArray(c);
 			}
 		});
 		
