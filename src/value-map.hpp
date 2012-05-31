@@ -1,6 +1,7 @@
 #pragma once
 #include "allocator.hpp"
 #include "on-stack.hpp"
+#include "finally.hpp"
 
 namespace Mirb
 {
