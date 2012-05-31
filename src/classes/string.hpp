@@ -31,6 +31,7 @@ namespace Mirb
 			static value_t downcase_self(String *self);
 			static value_t upcase(String *self);
 			static value_t upcase_self(String *self);
+			static value_t pattern(String *self, value_t other);
 			
 		public:
 			String(const String &other) : Object(other), string(other.string) {}

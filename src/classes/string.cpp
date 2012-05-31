@@ -142,6 +142,26 @@ namespace Mirb
 		return call_argv(regexp, "match", value_nil, 1, &self);
 	}
 
+	value_t String::pattern(String *self, value_t other)
+	{
+		auto regexp = try_cast<Regexp>(other);
+
+		if(!regexp)
+		{
+			value_t obj = self;
+			return call_argv(other, "=~", 1, &obj);
+		}
+		
+		int ovector[Regexp::vector_size];
+		
+		int result = regexp->match(self->string, ovector, 0);
+
+		if(result <= 0)
+			return value_nil;
+
+		return Fixnum::from_int(ovector[0]);
+	}
+
 	value_t String::equal(String *self, value_t other)
 	{
 		auto string = try_cast<String>(other);
@@ -410,6 +430,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<String>>, &to_i>(context->string_class, "to_i");
 		method<Arg::Self<Arg::Class<String>>, &chomp>(context->string_class, "chomp");
 		method<Arg::Self<Arg::Class<String>>, &chomp_ex>(context->string_class, "chomp!");
+		method<Arg::Self<Arg::Class<String>>, Arg::Value, &pattern>(context->string_class, "=~");
 		method<Arg::Self<Arg::Class<String>>, Arg::Value, &sprintf>(context->string_class, "%");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub>(context->string_class, "gsub");
 		method<Arg::Self<Arg::Class<String>>, Arg::Class<Regexp>, Arg::Class<String>, &gsub_ex>(context->string_class, "gsub!");

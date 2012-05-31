@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "array.hpp"
+#include "fixnum.hpp"
 #include "../runtime.hpp"
 #include <climits>
 
@@ -121,6 +122,32 @@ namespace Mirb
 		return match_data;
 	}
 	
+	value_t Regexp::case_equal(Regexp *self, value_t other)
+	{
+		auto str = try_cast<String>(other);
+
+		if(!str)
+			return value_false;
+		
+		int ovector[Regexp::vector_size];
+		
+		int result = self->match(str->string, ovector, 0);
+
+		return Value::from_bool(result > 0);
+	}
+
+	value_t Regexp::rb_pattern(Regexp *self, String *str)
+	{
+		int ovector[Regexp::vector_size];
+		
+		int result = self->match(str->string, ovector, 0);
+
+		if(result <= 0)
+			return value_nil;
+
+		return Fixnum::from_int(ovector[0]);
+	}
+
 	CharArray Regexp::gsub(const CharArray &input, Regexp *pattern, const CharArray &replacement, bool &changed)
 	{
 		CharArray result;
@@ -140,6 +167,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
 		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_match>(context->regexp_class, "match");
+		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_pattern>(context->regexp_class, "=~");
+		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &case_equal>(context->regexp_class, "===");
 		
 		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "escape");
 		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "quote");
