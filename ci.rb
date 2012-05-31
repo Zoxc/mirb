@@ -1,3 +1,3 @@
-ARGV.unshift ':core', ':language', '-f', 's' 
+ARGV.unshift '-f', 's' 
 
 load "mspec/bin/mspec-ci"
