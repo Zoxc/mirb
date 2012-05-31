@@ -54,7 +54,7 @@ namespace Mirb
 		CharArray result;
 
 		str->string.each_char([&](char_code_t c, size_t) {
-			if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+			if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == ' ')
 				result += CharArray(c);
 			else
 			{

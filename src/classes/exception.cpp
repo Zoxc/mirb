@@ -179,7 +179,7 @@ namespace Mirb
 		if(self->message)
 			return self->message;
 		else
-			return value_nil;
+			return String::get(inspect(class_of(self)));
 	}
 	
 	void Exception::print_main(Exception *self, IO *io)
