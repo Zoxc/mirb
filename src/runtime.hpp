@@ -4,7 +4,6 @@
 #include "on-stack.hpp"
 #include "finally.hpp"
 #include "classes/symbol.hpp"
-#include <functional>
 
 namespace Mirb
 {
@@ -107,12 +106,12 @@ namespace Mirb
 	
 	template<typename T> value_t get_global(T &&name)
 	{
-		return get_global(scope, symbol_cast(std::forward<T>(name)));
+		return get_global(symbol_cast(std::forward<T>(name)));
 	}
 	
 	template<typename T> void set_global(T &&name, value_t value)
 	{
-		return set_global(obj, symbol_cast(std::forward<T>(name)), value);
+		return set_global(symbol_cast(std::forward<T>(name)), value);
 	}
 
 	void initialize_thread();

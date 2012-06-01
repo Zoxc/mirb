@@ -49,6 +49,7 @@
     <ClInclude Include="..\..\src\compiler.hpp" />
     <ClInclude Include="..\..\src\context.hpp" />
     <ClInclude Include="..\..\src\document.hpp" />
+    <ClInclude Include="..\..\src\finally.hpp" />
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
     <ClInclude Include="..\..\src\generic\source-loc.hpp" />
     <ClInclude Include="..\..\src\global.hpp" />
