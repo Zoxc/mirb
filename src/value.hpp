@@ -46,6 +46,7 @@ namespace Mirb
 	class RedoException;
 	class SystemStackError;
 	class SyntaxError;
+	class SystemExit;
 	class Proc;
 	class IO;
 
@@ -126,6 +127,7 @@ namespace Mirb
 			BreakException,
 			NextException,
 			RedoException,
+			SystemExit,
 			SystemStackError,
 			SyntaxError,
 			IO,
@@ -325,6 +327,9 @@ namespace Mirb
 				case NextException:
 					return T<NextException>::func(std::forward<Arg>(arg));
 					
+				case SystemExit:
+					return T<SystemExit>::func(std::forward<Arg>(arg));
+					
 				case SystemStackError:
 					return T<SystemStackError>::func(std::forward<Arg>(arg));
 					
@@ -382,6 +387,7 @@ namespace Mirb
 		mirb_typeclass(BreakException, BreakException);
 		mirb_typeclass(RedoException, RedoException);
 		mirb_typeclass(NextException, NextException);
+		mirb_typeclass(SystemExit, SystemExit);
 		mirb_typeclass(SystemStackError, SystemStackError);
 		mirb_typeclass(SyntaxError, SyntaxError);
 		mirb_typeclass(IO, IO);
@@ -411,6 +417,7 @@ namespace Mirb
 		mirb_derived_from(Object, Exception);
 		mirb_derived_from(Object, ReturnException);
 		mirb_derived_from(Object, BreakException);
+		mirb_derived_from(Object, SystemExit);
 		mirb_derived_from(Object, SystemStackError);
 		mirb_derived_from(Object, SyntaxError);
 		mirb_derived_from(Object, IO);
@@ -445,6 +452,7 @@ namespace Mirb
 		mirb_derived_from(Exception, Exception);
 		mirb_derived_from(Exception, ReturnException);
 		mirb_derived_from(Exception, BreakException);
+		mirb_derived_from(Exception, SystemExit);
 		mirb_derived_from(Exception, SystemStackError);
 		mirb_derived_from(Exception, SyntaxError);
 
@@ -454,6 +462,8 @@ namespace Mirb
 		mirb_derived_from(BreakException, BreakException);
 		
 		mirb_derived_from(SystemStackError, SystemStackError);
+		
+		mirb_derived_from(SystemExit, SystemExit);
 		
 		mirb_derived_from(SyntaxError, SyntaxError);
 		

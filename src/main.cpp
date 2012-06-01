@@ -139,11 +139,29 @@ int main(int argc, const char *argv[])
 
 		if(exception)
 		{
+			auto system_exit = try_cast<SystemExit>(exception);
+
+			if(system_exit)
+			{
+				int result = system_exit->result;
+
+				Mirb::finalize();
+
+				return result;
+			}
+
 			report_exception(exception);
+
+			Mirb::finalize();
+
 			return 1;
 		}
-
-		return 0;
+		else
+		{
+			Mirb::finalize();
+	
+			return 0;
+		}
 	}
 	
 	load_core_lib(argv[0]);
@@ -179,7 +197,14 @@ int main(int argc, const char *argv[])
 		});
 
 		if(exception)
-			report_exception(exception);
+		{
+			auto system_exit = try_cast<SystemExit>(exception);
+
+			if(system_exit)
+				context->console_error->puts("Code exited with value: " + Number((intptr_t)system_exit->result).to_string());
+			else
+				report_exception(exception);
+		}
 	}
 	
 	context->console_output->puts("\nNumber of collections: " + CharArray::uint(Collector::collections));

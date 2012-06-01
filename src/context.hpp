@@ -67,6 +67,8 @@ namespace Mirb
 
 			Class *exception_class;
 			
+			Class *system_exit_class;
+
 			Class *system_stack_error;
 
 			Class *signal_exception;

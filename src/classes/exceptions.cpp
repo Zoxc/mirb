@@ -9,6 +9,10 @@
 
 namespace Mirb
 {
+	SystemExit::SystemExit(int result) : Exception(Value::SystemExit, context->system_exit_class, 0, Mirb::backtrace()), result(result)
+	{
+	}
+	
 	SyntaxError::SyntaxError(const Parser &parser) : Exception(Value::SyntaxError, context->syntax_error, String::get("Unable to parse file '" + parser.document.name + "'"), Mirb::backtrace())
 	{
 		messages = parser.messages;
@@ -44,7 +48,8 @@ namespace Mirb
 	void initialize_exceptions()
 	{
 		context->standard_error = define_class("StandardError", context->exception_class);
-
+		
+		context->system_exit_class = define_class("SystemExit", context->exception_class);
 		context->system_stack_error = define_class("SystemStackError", context->exception_class);
 		
 		context->io_error = define_class("IOError", context->standard_error);
@@ -57,7 +62,7 @@ namespace Mirb
 		context->local_jump_error = define_class("LocalJumpError", context->standard_error);
 		context->load_error = define_class("LoadError", context->standard_error);
 		context->system_call_error = define_class("SystemCallError", context->standard_error);
-		
+
 		context->signal_exception = define_class("SignalException", context->exception_class);
 		context->interrupt_class = define_class("Interrupt", context->signal_exception);
 

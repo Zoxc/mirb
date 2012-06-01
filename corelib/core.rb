@@ -8,15 +8,6 @@ $stderr = Object.new
 $stdout = Object.new
 $stdin = Object.new
 
-class SystemExit < Exception
-end
-
-module Kernel
-	def exit(errnum = 1)
-		raise SystemExit
-	end
-end
-
 module Process
 	def self.pid
 		1

@@ -6,6 +6,7 @@
 #include "../classes/exception.hpp"
 #include "../classes/exceptions.hpp"
 #include "../classes/file.hpp"
+#include "../classes/fixnum.hpp"
 #include "../platform/platform.hpp"
 #include "../char-array.hpp"
 #include "../global.hpp"
@@ -267,6 +268,11 @@ namespace Mirb
 
 		throw InternalException(exception);
 	}
+	
+	value_t Kernel::exit(intptr_t result)
+	{
+		throw InternalException(Collector::allocate<SystemExit>(result == Fixnum::undef ? 0 : result));
+	}
 
 	value_t Kernel::backtrace()
 	{
@@ -304,6 +310,7 @@ namespace Mirb
 		method<Arg::Block, &benchmark>(context->kernel_module, "benchmark");
 		method<&backtrace>(context->kernel_module, "backtrace");
 		method<Arg::Self<Arg::Value>, Arg::Class<String>, &eval>(context->kernel_module, "eval");
+		method<Arg::Optional<Arg::Fixnum>, &exit>(context->kernel_module, "exit");
 		method<Arg::Count, Arg::Values, &print>(context->kernel_module, "print");
 		method<Arg::Count, Arg::Values, &puts>(context->kernel_module, "puts");
 		method<Arg::Class<String>, &load>(context->kernel_module, "load");

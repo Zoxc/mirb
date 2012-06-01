@@ -158,8 +158,6 @@ namespace Mirb
 	{
 		RecursionDetector<RecursionType::Array_flatten> rd(this);
 
-		auto result = Array::allocate();
-		
 		for(size_t i = 0; i < size(); ++i)
 		{
 			auto array = try_cast<Array>(get(i));

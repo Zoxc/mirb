@@ -9,6 +9,15 @@ namespace Mirb
 	class Parser;
 	class Message;
 	
+	class SystemExit:
+		public Exception
+	{
+		public:
+			int result;
+
+			SystemExit(int result);
+	};
+	
 	class SyntaxError:
 		public Exception
 	{
