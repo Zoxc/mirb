@@ -1,4 +1,5 @@
 #pragma once
+#include "macros.hpp"
 #include "value.hpp"
 #include "block.hpp"
 #include "on-stack.hpp"
@@ -231,6 +232,19 @@ namespace Mirb
 		return call_argv(obj, symbol_cast(std::forward<T>(name)), value_nil, 0, 0);
 	}
 	
+	#define MIRB_CALL_ARG(i, l) Value *arg##i
+	#define MIRB_CALL_STATEMENT(i, l) argv[l] = arg##i;
+	
+	#define MIRB_CALL(i) \
+		template<typename T> value_t call(value_t obj, T&& name MIRB_COMMA_BEFORE_LIST(MIRB_CALL_ARG, i)) \
+		{ \
+			value_t argv[i]; \
+			MIRB_LOCAL_STATEMENT_LIST(MIRB_CALL_STATEMENT, i) \
+			return call_argv(obj, std::forward<T>(name), i, argv); \
+		};
+
+	MIRB_STATEMENT_LIST_NO_ZERO(MIRB_CALL, MIRB_STATEMENT_MAX);
+		
 	Proc *get_proc(value_t obj);
 
 	/*
@@ -248,6 +262,16 @@ namespace Mirb
 	 */
 	value_t yield(value_t obj);
 	
+	#define MIRB_YIELD(i) \
+		template<typename T> value_t call(value_t obj MIRB_COMMA_BEFORE_LIST(MIRB_CALL_ARG, i)) \
+		{ \
+			value_t argv[i]; \
+			MIRB_LOCAL_STATEMENT_LIST(MIRB_CALL_STATEMENT, i) \
+			return yield_argv(obj, i, argv); \
+		};
+
+	MIRB_STATEMENT_LIST_NO_ZERO(MIRB_YIELD, MIRB_STATEMENT_MAX);
+		
 	/*
 	 * backtrace
 	 */

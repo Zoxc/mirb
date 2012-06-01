@@ -213,58 +213,52 @@ namespace Mirb
 	{
 		Method *generate_block(size_t flags, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor);
 	
-		#define MIRB_METHOD_TYPENAME_ARG(i) typename Arg##i
-		#define MIRB_METHOD_ARG(i) Arg##i
+		#define MIRB_METHOD_TYPENAME_ARG(i, l) typename Arg##i
+		#define MIRB_METHOD_ARG(i, l) Arg##i
 		
-		#define MIRB_METHOD_FOLD_STATEMENT(i) value += Arg##i::info
+		#define MIRB_METHOD_FOLD_STATEMENT(i, l) value += Arg##i::info
 		
-		#define MIRB_METHOD_STATEMENT_LIST_OPT_0(macro)
-		#define MIRB_METHOD_STATEMENT_LIST_OPT_1(macro, sep) macro(1);
-		#define MIRB_METHOD_STATEMENT_LIST_OPT_SEP()
-		#define MIRB_METHOD_STATEMENT_LIST_OPT_AFTER() ;
-		#define MIRB_METHOD_STATEMENT_LIST(macro, i) MIRB_MACRO_LIST(macro, MIRB_METHOD_STATEMENT_LIST_OPT, i)
-
 		#define MIRB_METHOD_FOLD(i) \
-			template<bool dummy MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> Arg::Info fold() \
+			template<bool dummy MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> Arg::Info fold() \
 			{ \
 				Arg::Info value = {0, 0, false}; \
-				MIRB_METHOD_STATEMENT_LIST(MIRB_METHOD_FOLD_STATEMENT, i) \
+				MIRB_LOCAL_STATEMENT_LIST(MIRB_METHOD_FOLD_STATEMENT, i) \
 				return value; \
 			};
 		
-		MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_FOLD, MIRB_MACRO_STATEMENT_MAX)
+		MIRB_STATEMENT_LIST(MIRB_METHOD_FOLD, MIRB_STATEMENT_MAX)
 		
-		#define MIRB_METHOD_WRAPPER_STATEMENT(i) typename Arg##i::Type arg##i = Arg##i::apply(frame, state);
-		#define MIRB_METHOD_WRAPPER_ARG(i) arg##i
+		#define MIRB_METHOD_WRAPPER_STATEMENT(i, l) typename Arg##i::Type arg##i = Arg##i::apply(frame, state);
+		#define MIRB_METHOD_WRAPPER_ARG(i, l) arg##i
 		
 		#define MIRB_METHOD_WRAPPER(i) \
-			template<typename F, F function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> value_t wrapper(Frame &frame) \
+			template<typename F, F function MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> value_t wrapper(Frame &frame) \
 			{ \
-				Arg::State state(frame, fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>()); \
+				Arg::State state(frame, fold<false MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>()); \
 				\
-				MIRB_METHOD_STATEMENT_LIST(MIRB_METHOD_WRAPPER_STATEMENT, i) \
+				MIRB_LOCAL_STATEMENT_LIST(MIRB_METHOD_WRAPPER_STATEMENT, i) \
 				\
-				return function(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_WRAPPER_ARG, i)); \
+				return function(MIRB_COMMA_LIST(MIRB_METHOD_WRAPPER_ARG, i)); \
 			}
 		
-		MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_WRAPPER, MIRB_MACRO_STATEMENT_MAX)
+		MIRB_STATEMENT_LIST(MIRB_METHOD_WRAPPER, MIRB_STATEMENT_MAX)
 	};
 
-	#define MIRB_METHOD_ARG_TYPE(i) typename Arg##i::template Arg<Arg##i>::Type
+	#define MIRB_METHOD_ARG_TYPE(i, l) typename Arg##i::template Arg<Arg##i>::Type
 
 	#define MIRB_METHOD_METHOD(i) \
-		template<MIRB_MACRO_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *method(Module *module, N &&name, size_t flags = 0) \
+		template<MIRB_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *method(Module *module, N &&name, size_t flags = 0) \
 		{ \
-			return MethodGen::generate_block(flags, module, symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
+			return MethodGen::generate_block(flags, module, symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
 		}
 		
-	MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_METHOD, MIRB_MACRO_STATEMENT_MAX)
+	MIRB_STATEMENT_LIST(MIRB_METHOD_METHOD, MIRB_STATEMENT_MAX)
 		
 	#define MIRB_METHOD_SINGLETON(i) \
-		template<MIRB_MACRO_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0) \
+		template<MIRB_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0) \
 		{ \
-			return MethodGen::generate_block(flags, singleton_class(obj), symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
+			return MethodGen::generate_block(flags, singleton_class(obj), symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
 		}
 
-	MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_SINGLETON, MIRB_MACRO_STATEMENT_MAX)
+	MIRB_STATEMENT_LIST(MIRB_METHOD_SINGLETON, MIRB_STATEMENT_MAX)
 };
