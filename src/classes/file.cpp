@@ -227,8 +227,6 @@ namespace Mirb
 	
 	void do_join(JoinSegments &joiner, size_t argc, value_t argv[])
 	{
-		assert_stack_space();
-
 		for(size_t i = 0; i < argc; ++i)
 		{
 			auto array = try_cast<Array>(argv[i]);

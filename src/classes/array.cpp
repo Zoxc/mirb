@@ -154,6 +154,50 @@ namespace Mirb
 		return result.to_string();
 	}
 	
+	void Array::flatten(VectorType &vector, bool &mod)
+	{
+		RecursionDetector<RecursionType::Array_flatten> rd(this);
+
+		auto result = Array::allocate();
+		
+		for(size_t i = 0; i < size(); ++i)
+		{
+			auto array = try_cast<Array>(get(i));
+
+			if(array)
+			{
+				mod = true;
+				array->flatten(vector, mod);
+			}
+			else
+				vector.push(get(i));
+		}
+	}
+
+	value_t Array::rb_flatten(Array *self)
+	{
+		auto result = Array::allocate();
+
+		bool mod;
+
+		self->flatten(result->vector, mod);
+
+		return result;
+	}
+
+	value_t Array::rb_flatten_ex(Array *self)
+	{
+		bool mod;
+
+		VectorType new_vector;
+
+		self->flatten(new_vector, mod);
+
+		self->vector = std::move(new_vector);
+
+		return mod ? self : value_nil;
+	}
+
 	value_t Array::join(Array *self, String *sep)
 	{
 		CharArray result;
@@ -486,6 +530,8 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, &pop>(context->array_class, "pop");
 		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "length");
 		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "size");
+		method<Arg::Self<Arg::Class<Array>>, &rb_flatten>(context->array_class, "flatten");
+		method<Arg::Self<Arg::Class<Array>>, &rb_flatten_ex>(context->array_class, "flatten!");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Optional<Arg::Class<String>>, &join>(context->array_class, "join");
 		method<Arg::Self<Arg::Class<Array>>, &to_s>(context->array_class, "to_s");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &each>(context->array_class, "each");

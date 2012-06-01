@@ -29,8 +29,14 @@ namespace Mirb
 			static value_t each(Array *self, value_t block);
 			static value_t rb_get(Array *self, value_t index, value_t size);
 			static value_t rb_set(Array *self, size_t index, value_t value);
+			static value_t rb_flatten(Array *self);
+			static value_t rb_flatten_ex(Array *self);
 			static value_t join(Array *self, String *sep);
 			static value_t values_at(Array *self, size_t argc, value_t argv[]);
+			
+			typedef Vector<value_t, AllocatorBase, Allocator> VectorType;
+
+			void flatten(VectorType &vector, bool &mod);
 
 		public:
 			Array(Class *instance_of) : Object(Value::Array, instance_of) {}
@@ -39,7 +45,7 @@ namespace Mirb
 			static Array *allocate();
 			static Array *allocate_pair(value_t left, value_t right);
 
-			Vector<value_t, AllocatorBase, Allocator> vector;
+			VectorType vector;
 			
 			template<typename F> static bool delete_if(Array *self, F func)
 			{

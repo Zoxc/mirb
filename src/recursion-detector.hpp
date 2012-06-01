@@ -11,13 +11,15 @@ namespace Mirb
 			Inspect,
 			Array_to_s,
 			Array_join,
+			Array_flatten,
 			Array_equal,
 			Hash_to_s,
-			File_join
+			File_join,
+			User
 		};
 	};
 
-	template<RecursionType::Type, bool raise = true, size_t count = 0> class RecursionDetector
+	template<size_t, bool raise = true, size_t count = 0> class RecursionDetector
 	{
 		private:
 			static prelude_thread RecursionDetector *current;
@@ -55,6 +57,8 @@ namespace Mirb
 				}
 
 				current = this;
+
+				assert_stack_space();
 			}
 
 			bool recursion()
@@ -68,5 +72,5 @@ namespace Mirb
 			}
 	};
 	
-	template<RecursionType::Type type, bool raise, size_t count> prelude_thread RecursionDetector<type, raise, count> *RecursionDetector<type, raise, count>::current = nullptr;
+	template<size_t type, bool raise, size_t count> prelude_thread RecursionDetector<type, raise, count> *RecursionDetector<type, raise, count>::current = nullptr;
 };
