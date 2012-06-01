@@ -1158,9 +1158,23 @@ namespace Mirb
 		if(context->console_error)
 			delete context->console_error;
 
+		auto thread_context = thread_contexts.first;
+
+		while(thread_context)
+		{
+			auto next = thread_context->entry.next;
+
+			delete thread_context;
+
+			thread_context = next;
+		}
+
+		delete context;
+
 		Platform::finalize();
 		Collector::finalize();
 		Number::finalize();
+
 	}
 };
 

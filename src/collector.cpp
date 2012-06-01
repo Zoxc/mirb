@@ -252,6 +252,8 @@ namespace Mirb
 			
 			Type::action<FreeClass>(obj->type(), obj);
 
+			std::free(obj);
+
 			obj = next;
 		}
 
