@@ -85,6 +85,7 @@
 module FileUtils
 
   def self.private_module_function(name)   #:nodoc:
+    module_function name
   end
 
   # This hash table holds command options.
@@ -98,8 +99,10 @@ module FileUtils
   def pwd
     Dir.pwd
   end
+  module_function :pwd
 
   alias getwd pwd
+  module_function :getwd
 
   #
   # Options: verbose
@@ -121,8 +124,10 @@ module FileUtils
     Dir.chdir(dir, &block)
     fu_output_message 'cd -' if options[:verbose] and block
   end
+  module_function :cd
 
   alias chdir cd
+  module_function :chdir
 
   OPT_TABLE['cd']    =
   OPT_TABLE['chdir'] = [:verbose]
@@ -148,6 +153,7 @@ module FileUtils
     end
     true
   end
+  module_function :uptodate?
 
   #
   # Options: mode noop verbose
@@ -169,6 +175,7 @@ module FileUtils
       fu_mkdir dir, options[:mode]
     end
   end
+  module_function :mkdir
 
   OPT_TABLE['mkdir'] = [:mode, :noop, :verbose]
 
@@ -219,9 +226,12 @@ module FileUtils
 
     return *list
   end
+  module_function :mkdir_p
 
   alias mkpath    mkdir_p
   alias makedirs  mkdir_p
+  module_function :mkpath
+  module_function :makedirs
 
   OPT_TABLE['mkdir_p']  =
   OPT_TABLE['mkpath']   =
@@ -266,6 +276,7 @@ module FileUtils
       end
     end
   end
+  module_function :rmdir
 
   OPT_TABLE['rmdir'] = [:parents, :noop, :verbose]
 
@@ -300,8 +311,10 @@ module FileUtils
       File.link s, d
     end
   end
+  module_function :ln
 
   alias link ln
+  module_function :link
 
   OPT_TABLE['ln']   =
   OPT_TABLE['link'] = [:force, :noop, :verbose]
@@ -337,8 +350,10 @@ module FileUtils
       File.symlink s, d
     end
   end
+  module_function :ln_s
 
   alias symlink ln_s
+  module_function :symlink
 
   OPT_TABLE['ln_s']    =
   OPT_TABLE['symlink'] = [:force, :noop, :verbose]
@@ -355,6 +370,7 @@ module FileUtils
     options[:force] = true
     ln_s src, dest, options
   end
+  module_function :ln_sf
 
   OPT_TABLE['ln_sf'] = [:noop, :verbose]
 
@@ -379,8 +395,10 @@ module FileUtils
       copy_file s, d, options[:preserve]
     end
   end
+  module_function :cp
 
   alias copy cp
+  module_function :copy
 
   OPT_TABLE['cp']   =
   OPT_TABLE['copy'] = [:preserve, :noop, :verbose]
@@ -418,6 +436,7 @@ module FileUtils
       copy_entry s, d, options[:preserve], options[:dereference_root], options[:remove_destination]
     end
   end
+  module_function :cp_r
 
   OPT_TABLE['cp_r'] = [:preserve, :noop, :verbose,
                        :dereference_root, :remove_destination]
@@ -446,6 +465,8 @@ module FileUtils
       ent.copy_metadata destent.path if preserve
     end
   end
+  module_function :copy_entry
+
   #
   # Copies file contents of +src+ to +dest+.
   # Both of +src+ and +dest+ must be a path name.
@@ -455,6 +476,7 @@ module FileUtils
     ent.copy_file dest
     ent.copy_metadata dest if preserve
   end
+  module_function :copy_file
 
   #
   # Copies stream +src+ to +dest+.
@@ -464,6 +486,7 @@ module FileUtils
   def copy_stream(src, dest)
     IO.copy_stream(src, dest)
   end
+  module_function :copy_stream
 
   #
   # Options: force noop verbose
@@ -506,8 +529,10 @@ module FileUtils
       end
     end
   end
+  module_function :mv
 
   alias move mv
+  module_function :move
 
   OPT_TABLE['mv']   =
   OPT_TABLE['move'] = [:force, :noop, :verbose, :secure]
@@ -537,8 +562,10 @@ module FileUtils
       remove_file path, options[:force]
     end
   end
+  module_function :rm
 
   alias remove rm
+  module_function :remove
 
   OPT_TABLE['rm']     =
   OPT_TABLE['remove'] = [:force, :noop, :verbose]
@@ -556,8 +583,10 @@ module FileUtils
     options[:force] = true
     rm list, options
   end
+  module_function :rm_f
 
   alias safe_unlink rm_f
+  module_function :safe_unlink
 
   OPT_TABLE['rm_f']        =
   OPT_TABLE['safe_unlink'] = [:noop, :verbose]
@@ -597,6 +626,7 @@ module FileUtils
       end
     end
   end
+  module_function :rm_r
 
   OPT_TABLE['rm_r'] = [:force, :noop, :verbose, :secure]
 
@@ -616,8 +646,10 @@ module FileUtils
     options[:force] = true
     rm_r list, options
   end
+  module_function :rm_rf
 
   alias rmtree rm_rf
+  module_function :rmtree
 
   OPT_TABLE['rm_rf']  =
   OPT_TABLE['rmtree'] = [:noop, :verbose, :secure]
@@ -708,6 +740,7 @@ module FileUtils
   rescue
     raise unless force
   end
+  module_function :remove_entry_secure
 
   def fu_have_symlink?   #:nodoc:
     File.symlink nil, nil
@@ -741,6 +774,7 @@ module FileUtils
   rescue
     raise unless force
   end
+  module_function :remove_entry
 
   #
   # Removes a file +path+.
@@ -751,6 +785,7 @@ module FileUtils
   rescue
     raise unless force
   end
+  module_function :remove_file
 
   #
   # Removes a directory +dir+ and its contents recursively.
@@ -759,6 +794,7 @@ module FileUtils
   def remove_dir(path, force = false)
     remove_entry path, force   # FIXME?? check if it is a directory
   end
+  module_function :remove_dir
 
   #
   # Returns true if the contents of a file A and a file B are identical.
@@ -774,9 +810,12 @@ module FileUtils
       }
     }
   end
+  module_function :compare_file
 
   alias identical? compare_file
   alias cmp compare_file
+  module_function :identical?
+  module_function :cmp
 
   #
   # Returns true if the contents of a stream +a+ and +b+ are identical.
@@ -795,6 +834,7 @@ module FileUtils
     end
     false
   end
+  module_function :compare_stream
 
   #
   # Options: mode preserve noop verbose
@@ -819,6 +859,7 @@ module FileUtils
       end
     end
   end
+  module_function :install
 
   OPT_TABLE['install'] = [:mode, :preserve, :noop, :verbose]
 
@@ -928,6 +969,7 @@ module FileUtils
       Entry_.new(path).chmod(fu_mode(mode, path))
     end
   end
+  module_function :chmod
 
   OPT_TABLE['chmod'] = [:noop, :verbose]
 
@@ -957,6 +999,7 @@ module FileUtils
       end
     end
   end
+  module_function :chmod_R
 
   OPT_TABLE['chmod_R'] = [:noop, :verbose, :force]
 
@@ -985,6 +1028,7 @@ module FileUtils
       Entry_.new(path).chown uid, gid
     end
   end
+  module_function :chown
 
   OPT_TABLE['chown'] = [:noop, :verbose]
 
@@ -1021,6 +1065,7 @@ module FileUtils
       end
     end
   end
+  module_function :chown_R
 
   OPT_TABLE['chown_R'] = [:noop, :verbose, :force]
 
@@ -1099,6 +1144,7 @@ module FileUtils
       end
     end
   end
+  module_function :touch
 
   OPT_TABLE['touch'] = [:noop, :verbose, :mtime, :nocreate]
 
