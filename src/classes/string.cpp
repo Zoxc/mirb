@@ -39,6 +39,14 @@ namespace Mirb
 				case '\\':
 					result += "\\\\";
 					break;
+					
+				case '"':
+					result += "\\\"";
+					break;
+
+				case '#':
+					result += "\\#";
+					break;
 
 				case '\n':
 					result += "\\n";
