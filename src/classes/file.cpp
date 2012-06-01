@@ -378,6 +378,11 @@ namespace Mirb
 		return get_var(file, "@path");
 	}
 	
+	value_t path(String *str)
+	{
+		return str;
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
@@ -389,6 +394,7 @@ namespace Mirb
 
 		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exists?");
 		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exist?");
+		singleton_method<Arg::Class<String>, &path>(context->file_class, "path");
 		singleton_method<Arg::Class<String>, &file>(context->file_class, "file?");
 		singleton_method<Arg::Class<String>, &directory>(context->file_class, "directory?");
 		singleton_method<Arg::Class<String>, &executable>(context->file_class, "executable?");
