@@ -28,7 +28,7 @@ namespace Mirb
 			return default_value;
 	}
 
-	value_t Hash::rb_delete(Hash *self, value_t key)
+	value_t Hash::rb_delete(Hash *self, value_t key, value_t block)
 	{
 		OnStack<2> os(self, key);
 
@@ -36,6 +36,8 @@ namespace Mirb
 
 		if(value != value_undef)
 			return value;
+		else if(block->test())
+			return yield(block, key);
 		else
 			return self->get_default(key);
 	}
@@ -157,7 +159,7 @@ namespace Mirb
 		method<Self<Hash>, Optional<Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
 		method<Self<Hash>, &rb_empty>(context->hash_class, "empty?");
-		method<Self<Hash>, Value, &rb_delete>(context->hash_class, "delete");
+		method<Self<Hash>, Value, Arg::Block, &rb_delete>(context->hash_class, "delete");
 		method<Self<Hash>, &keys>(context->hash_class, "keys");
 		method<Self<Hash>, &values>(context->hash_class, "values");
 

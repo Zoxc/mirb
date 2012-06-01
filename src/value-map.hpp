@@ -64,6 +64,8 @@ namespace Mirb
 				size_t free = index;
 				size_t mask = data(owner).mask;
 				size_t current = index;
+				
+				data(owner).entries--;
 
 				do
 				{
@@ -143,7 +145,18 @@ namespace Mirb
 					size_t mask = ValueMapManipulator::data(owner).mask;
 
 					if(prelude_unlikely(can_expand && (ValueMapManipulator::data(owner).entries > mask)))
-						return ValueMapManipulator::expand(owner);
+					{
+						try
+						{
+							return ValueMapManipulator::expand(owner);
+						} catch(const InternalException &) // Restore slot if we failed to expand
+						{
+							ValueMapManipulator::key_slot(owner, index) = value_undef;
+							ValueMapManipulator::value_slot(owner, index) = value_undef;
+							ValueMapManipulator::data(owner).entries--;
+							return value_false;
+						}
+					}
 					else
 						return value_false;
 				}, [&](size_t index) -> value_t {
