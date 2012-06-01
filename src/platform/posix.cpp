@@ -98,6 +98,14 @@ namespace Mirb
 			return str;
 		}
 		
+		void remove_dir(const CharArray &path)
+		{
+			auto dir = native_null_path(path);
+
+			if(::rmdir(dir.c_str_ref()) != 0)
+				raise("Unable to remove directory '" + path + "'");
+		}
+
 		void mkdir(const CharArray &path)
 		{
 			auto dir = native_null_path(path);
