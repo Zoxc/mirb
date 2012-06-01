@@ -53,8 +53,8 @@ namespace Mirb
 				{
 					Array *array = Collector::allocate<Array>();
 
-					Array::parse(result.raw(), result.size(), [&](const std::string &str){
-						array->vector.push(CharArray(str).to_string());
+					Array::parse(result.raw(), result.size(), [&](const CharArray &str){
+						array->vector.push(str.to_string());
 					});
 
 					return array;

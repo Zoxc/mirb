@@ -53,12 +53,12 @@ namespace Mirb
 			void regexp_options();
 			
 			void parse_interpolate_heredoc(Heredoc *heredoc);
-			bool parse_escape(std::string &result, bool capture_newline, bool no_heredoc, bool &newline);
+			bool parse_escape(CharArray &result, bool capture_newline, bool no_heredoc, bool &newline);
 			void parse_interpolate(InterpolateState *state, bool continuing);
 			void parse_delimited_data(Lexeme::Type type);
 			void parse_simple_string(char_t opener, char_t terminator, bool has_opener);
 
-			void report(const SourceLoc &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
+			void report(const SourceLoc &range, const CharArray &text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
 			SourceLoc range(const char_t *start, const char_t *stop); 
 
@@ -66,7 +66,7 @@ namespace Mirb
 			template<Lexeme::Type type, Lexeme::Type assign_type> void assign();
 			template<Lexeme::Type type, Lexeme::Type assign_type, char_t match, Lexeme::Type match_type, Lexeme::Type match_assign> void assign();
 			
-			template<typename F> void skip_numbers(std::string &result, F test)
+			template<typename F> void skip_numbers(CharArray &result, F test)
 			{
 				bool trailing = false;
 				const char_t *pos = nullptr;
@@ -102,7 +102,7 @@ namespace Mirb
 
 			template<Lexeme::Type type, char_t high> void get_number()
 			{
-				std::string result;
+				CharArray result;
 
 				skip_numbers(result, [&]() mutable { return input.in('0', high); });
 				

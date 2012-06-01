@@ -39,7 +39,7 @@ namespace Mirb
 			public:
 				uint64_t time; 
 
-				std::string format();
+				CharArray format();
 		};
 
 		template<typename T> BenchmarkResult benchmark(T work)

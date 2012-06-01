@@ -13,7 +13,7 @@ namespace Mirb
 		std::string ByteCodePrinter::var_name(Tree::NamedVariable *var)
 		{
 			if(var->name)
-				return var->name->get_string();
+				return var->name->string.get_string();
 			else
 			{
 				std::stringstream result;
@@ -26,7 +26,7 @@ namespace Mirb
 		
 		std::string ByteCodePrinter::imm(Symbol *imm)
 		{
-			return imm->get_string();
+			return imm->string.get_string();
 		};
 				
 		std::string ByteCodePrinter::var(var_t var)

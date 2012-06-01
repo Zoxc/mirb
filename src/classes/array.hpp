@@ -98,7 +98,7 @@ namespace Mirb
 					while(input < end && !is_white())
 						input++;
 
-					std::string out((const char *)start, (size_t)input - (size_t)start);
+					CharArray out(start, (size_t)input - (size_t)start);
 
 					func(out);
 				};

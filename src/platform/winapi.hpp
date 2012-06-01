@@ -10,7 +10,7 @@ namespace Mirb
 			public:
 				LARGE_INTEGER time, freq;
 
-				std::string format();
+				CharArray format();
 		};
 		
 		void raise(const CharArray &message);

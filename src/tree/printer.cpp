@@ -46,7 +46,7 @@ namespace Mirb
 		if(symbol)
 		{
 			symbol->assert_valid();
-			return symbol->get_string();
+			return symbol->string.get_string();
 		}
 		else
 			return "<null_symbol>";

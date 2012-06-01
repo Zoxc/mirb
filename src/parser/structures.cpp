@@ -195,7 +195,7 @@ namespace Mirb
 			}
 
 			if(array_parameter || block_parameter)
-				report(range, (array_parameter ? "Array" : "Block") + std::string(" parameters cannot have default values"));
+				report(range, (array_parameter ? "Array" : "Block") + CharArray(" parameters cannot have default values"));
 		}
 
 		if(array_parameter)

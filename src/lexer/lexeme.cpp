@@ -156,35 +156,35 @@ namespace Mirb
 		range->stop = prev;
 	}
 	
-	std::string Lexeme::describe(SourceLoc *range, Type type)
+	CharArray Lexeme::describe(SourceLoc *range, Type type)
 	{
-		std::string result;
+		CharArray result;
 		
 		if((type >= values_end && type < keyword_start))
-			result = "'" + names[type] + "'";
+			result = "'" + CharArray(names[type]) + "'";
 		else if(type >= keyword_start && type <= keyword_end)
-			result = "'" + names[type] + "' (keyword)";
+			result = "'" + CharArray(names[type]) + "' (keyword)";
 		else
-			result = "'" + range->limited_string() + "' (" + names[type] + ")";
+			result = "'" + range->limited_string() + "' (" + CharArray(names[type]) + ")";
 		
 		return result;
 	}
 	
-	std::string Lexeme::describe()
+	CharArray Lexeme::describe()
 	{
 		return describe(this, this->type);
 	}
 
-	std::string Lexeme::describe_type(Type type)
+	CharArray Lexeme::describe_type(Type type)
 	{
-		std::string result;
+		CharArray result;
 		
 		if((type >= values_end && type < keyword_start))
-			result = "'" + names[type] + "'";
+			result = "'" + CharArray(names[type]) + "'";
 		else if(type >= keyword_start && type <= keyword_end)
-			result = "'" + names[type] + "' (keyword)";
+			result = "'" + CharArray(names[type]) + "' (keyword)";
 		else
-			result = names[type];
+			result = CharArray(names[type]);
 		
 		return result;
 	}

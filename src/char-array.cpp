@@ -57,7 +57,21 @@ namespace Mirb
 	{
 		*this = char_array;
 	}
-	
+
+	CharArray& CharArray::operator=(char_t c)
+	{
+		length = 1;
+
+		data = (char_t *)Collector::allocate(1);
+
+		*data = c;
+
+		shared = false;
+		static_data = false;
+
+		return *this;
+	}
+
 	CharArray& CharArray::operator=(const char_t *c_str)
 	{
 		length = std::strlen((const char *)c_str);
@@ -259,6 +273,13 @@ namespace Mirb
 		length += other.length;
 	}
 
+	CharArray &CharArray::operator+=(char_t other)
+	{
+		append(CharArray(other));
+
+		return *this;
+	}
+
 	CharArray &CharArray::operator+=(const CharArray& other)
 	{
 		append(other);
@@ -328,7 +349,7 @@ namespace Mirb
 		char_array.append(rhs);
 		return char_array;
 	}
-	
+
 	CharArray operator+(const char_t *lhs, const CharArray &rhs)
 	{
 		CharArray char_array((const char_t *)lhs);
@@ -342,7 +363,21 @@ namespace Mirb
 		char_array.append(CharArray((const char_t *)rhs));
 		return char_array;
 	}
-	
+
+	CharArray operator+(char_t lhs, const CharArray &rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(rhs);
+		return char_array;
+	}
+
+	CharArray operator+(const CharArray &lhs, char_t rhs)
+	{
+		CharArray char_array(lhs);
+		char_array.append(CharArray(rhs));
+		return char_array;
+	}
+
 	const char_t &CharArray::operator [](size_t index) const
 	{
 		mirb_debug_assert(index < length);

@@ -38,16 +38,6 @@ namespace Mirb
 
 			LinkedListEntry<Symbol> entry;
 
-			std::string get_string()
-			{
-				if(this == 0)
-					return "<null>";
-				else
-					return string.get_string();
-			}
-
-			static Symbol *from_cstr_string(const char *string);
-			static Symbol *from_string(const std::string &string);
 			static Symbol *get(const CharArray &char_array);
 			static Symbol *create_initial(const CharArray &char_array);
 			

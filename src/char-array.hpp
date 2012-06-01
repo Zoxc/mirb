@@ -38,6 +38,7 @@ namespace Mirb
 				set_literal(string);
 			}
 			
+			CharArray& operator=(char_t c);
 			CharArray& operator=(const char_t *c_str);
 			CharArray& operator=(const std::string &string);
 			CharArray& operator=(const CharArray &other);
@@ -64,6 +65,7 @@ namespace Mirb
 				append(char_array);
 			}
 			
+			CharArray &operator+=(char_t c);
 			CharArray &operator+=(const CharArray &other);
 			
 			template<size_t length> CharArray &operator+=(const char (&string)[length])
@@ -183,4 +185,6 @@ namespace Mirb
 	CharArray operator+(const CharArray &lhs, const CharArray &rhs);
 	CharArray operator+(const char_t *lhs, const CharArray &rhs);
 	CharArray operator+(const CharArray &lhs, const char_t *rhs);
+	CharArray operator+(const CharArray &lhs, char_t rhs);
+	CharArray operator+(char_t lhs, const CharArray &rhs);
 };

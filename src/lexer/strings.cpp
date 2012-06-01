@@ -14,7 +14,7 @@ namespace Mirb
 	void Lexer::parse_simple_string(char_t opener, char_t terminator, bool has_opener)
 	{
 		lexeme.type = Lexeme::STRING;
-		std::string result;
+		CharArray result;
 		size_t nested = 0;
 
 		while(true)
@@ -85,7 +85,7 @@ namespace Mirb
 		lexeme.data->tail.set<MemoryPool>(result, memory_pool);
 	}
 	
-	bool Lexer::parse_escape(std::string &result, bool capture_newline, bool no_heredoc, bool &newline)
+	bool Lexer::parse_escape(CharArray &result, bool capture_newline, bool no_heredoc, bool &newline)
 	{
 		bool dummy;
 		newline = false;
@@ -295,7 +295,7 @@ namespace Mirb
 	void Lexer::parse_interpolate(InterpolateState *state, bool continuing)
 	{
 		lexeme.type = state->type;
-		std::string result;
+		CharArray result;
 
 		lexeme.data = new (memory_pool) InterpolateData(memory_pool);
 
@@ -455,7 +455,7 @@ namespace Mirb
 
 						input++;
 
-						std::string escape;
+						CharArray escape;
 						bool new_line;
 
 						if(!parse_escape(escape, false, state->heredoc != 0, new_line))
@@ -469,7 +469,7 @@ namespace Mirb
 						if(state->type != Lexeme::REGEXP || new_line)
 							result += escape;
 						else
-							result += std::string((const char *)start, (size_t)(&input - start));
+							result += CharArray(start, (size_t)(&input - start));
 
 						break;
 					}

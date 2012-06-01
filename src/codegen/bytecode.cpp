@@ -110,7 +110,7 @@ namespace Mirb
 			switch(node->result_type)
 			{
 				case Type::Symbol:
-					gen<LoadSymbolOp>(var, symbol_pool.get(node->data.data, node->data.length));
+					gen<LoadSymbolOp>(var, symbol_pool.get(CharArray(node->data.data, node->data.length)));
 					break;
 					
 				case Type::String:
@@ -128,10 +128,10 @@ namespace Mirb
 
 					gen<ArrayOp>(array, 0, 0);
 
-					Array::parse(node->data.data, node->data.length, [&](const std::string &str){
+					Array::parse(node->data.data, node->data.length, [&](const CharArray &str){
 						DataEntry data;
-						data.data = (const char_t *)str.data();
-						data.length = str.length();
+						data.data = str.raw();
+						data.length = str.size();
 						gen_string(element, data);
 						gen<PushOp>(array, element);
 					});
@@ -197,7 +197,7 @@ namespace Mirb
 				{
 					DataEntry str;
 
-					str.set<Prelude::Allocator::Standard>(std::string((const char *)node->value, node->length));
+					str.set<Prelude::Allocator::Standard>(CharArray((const char_t *)node->value, node->length));
 
 					strings.push(str.data);
 
@@ -314,7 +314,7 @@ namespace Mirb
 			
 			to_bytecode(node->value, temp);
 			
-			gen<CallOp>(var, temp, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, (size_t)0, no_var);
+			gen<CallOp>(var, temp, Symbol::get(Lexeme::names[node->op]), no_var, (size_t)0, no_var);
 			location(node->range);
 		}
 		
@@ -365,7 +365,7 @@ namespace Mirb
 			
 			to_bytecode(node->right, group[0]);
 			
-			gen<CallOp>(var, left, Symbol::from_string(Lexeme::names[node->op].c_str()), no_var, group.size, group.use());
+			gen<CallOp>(var, left, Symbol::get(Lexeme::names[node->op]), no_var, group.size, group.use());
 			location(&node->range);
 		}
 		
@@ -457,7 +457,7 @@ namespace Mirb
 			auto node = (Tree::SymbolNode *)basic_node;
 
 			if(is_var(var))
-				gen<LoadSymbolOp>(var,  node->symbol);
+				gen<LoadSymbolOp>(var, node->symbol);
 		}
 		
 		void ByteCodeGenerator::convert_range(Tree::Node *basic_node, var_t var)

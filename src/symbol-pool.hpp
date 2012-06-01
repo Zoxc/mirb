@@ -91,35 +91,7 @@ namespace Mirb
 				return SymbolPoolHashTable::get(char_array);
 			}
 
-			Symbol *get(const char *string)
-			{
-				CharArray key((const char_t *)string);
-
-				return SymbolPoolHashTable::get(key);
-			}
-
-			Symbol *get(const std::string &string)
-			{
-				CharArray key(string);
-
-				return SymbolPoolHashTable::get(key);
-			}
-
-			Symbol *get(const char_t *string, size_t length)
-			{
-				CharArray key(string, length);
-
-				return SymbolPoolHashTable::get(key);
-			}
-
 			Symbol *get(SourceLoc &range);
-
-			Symbol *get(const char_t *start, const char_t *stop)
-			{
-				CharArray key(start, stop - start);
-
-				return SymbolPoolHashTable::get(key);
-			}
 	};
 	
 	extern SymbolPool symbol_pool;

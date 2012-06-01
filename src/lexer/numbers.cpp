@@ -12,7 +12,7 @@ namespace Mirb
 			if(input == '+' || input == '-')
 				input++;
 
-			std::string result;
+			CharArray result;
 			skip_numbers(result, [&] { return input.in('0', '9'); });
 			
 			lexeme.type = Lexeme::REAL;
@@ -108,7 +108,7 @@ namespace Mirb
 
 	void Lexer::number()
 	{
-		std::string result;
+		CharArray result;
 
 		skip_numbers(result, [&] { return input.in('0', '9'); });
 		
@@ -142,7 +142,7 @@ namespace Mirb
 		
 		if(input.in('0', '9'))
 		{
-			std::string result;
+			CharArray result;
 
 			skip_numbers(result, [&] { return input.in('0', '9'); });
 
@@ -195,7 +195,7 @@ namespace Mirb
 
 		if(is_hex())
 		{
-			std::string result;
+			CharArray result;
 
 			skip_numbers(result, is_hex);
 			

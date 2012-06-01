@@ -221,10 +221,10 @@ namespace Mirb
 			
 			static std::string names[TYPES];
 			
-			std::string describe();
+			CharArray describe();
 			
-			static std::string describe(SourceLoc *range, Type type);
-			static std::string describe_type(Type type);
+			static CharArray describe(SourceLoc *range, Type type);
+			static CharArray describe_type(Type type);
 	};
 	
 	struct Heredoc;
@@ -259,23 +259,23 @@ namespace Mirb
 			return result;
 		}
 			
-		std::string get() const
+		CharArray get() const
 		{
-			return std::string((const char *)data, length);
+			return CharArray(data, length);
 		}
 			
-		template<typename A> void add(const std::string &add, typename A::Reference ref = A::default_reference)
+		template<typename A> void add(const CharArray &add, typename A::Reference ref = A::default_reference)
 		{
 			set<A>(get() + add, ref);
 		};
 
-		template<typename A> void set(const std::string &other, typename A::Reference ref = A::default_reference)
+		template<typename A> void set(const CharArray &other, typename A::Reference ref = A::default_reference)
 		{
 			length = other.size();
 
 			data = (const char_t *)A(ref).allocate(length);
 
-			std::memcpy((void *)data, other.data(), length);
+			std::memcpy((void *)data, other.raw(), length);
 		};
 	};
 	

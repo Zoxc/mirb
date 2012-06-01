@@ -102,7 +102,7 @@ namespace Mirb
 		else
 			heredoc->remove_ident = false;
 		
-		std::string name;
+		CharArray name;
 
 		if(is_ident(input))
 		{
@@ -230,7 +230,7 @@ namespace Mirb
 
 				input++;
 
-				std::string result;
+				CharArray result;
 				size_t nested = 0;
 
 				while(input != terminator || nested > 0)
@@ -318,7 +318,7 @@ namespace Mirb
 					break;
 
 				default:
-					report(range(&input, &input + 1), "Unknown regular expression option '" + std::string((const char *)&input, 1) + "'");
+					report(range(&input, &input + 1), "Unknown regular expression option '" + CharArray(&input, 1) + "'");
 			}
 
 			input++;
@@ -337,7 +337,7 @@ namespace Mirb
 	
 	void Lexer::question_to_character()
 	{
-		std::string result;
+		CharArray result;
 
 		if(input == '\\')
 		{

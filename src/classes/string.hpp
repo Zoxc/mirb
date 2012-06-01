@@ -40,12 +40,7 @@ namespace Mirb
 			String(const char_t *c_str, size_t length) : Object(Type::String, context->string_class), string(c_str, length) {}
 			
 			template<size_t length> String(const char (&string)[length]) : Object(Type::String, context->string_class), string(string) {}
-			
-			std::string get_string()
-			{
-				return string.get_string();
-			}
-			
+
 			static String *get(const CharArray &string);
 
 			CharArray string;

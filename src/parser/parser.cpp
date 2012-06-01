@@ -778,7 +778,7 @@ namespace Mirb
 			case Lexeme::KW_SPECIAL_BEGIN:
 			case Lexeme::KW_SPECIAL_END:
 			{
-				report(lexer.lexeme, (lexeme() == Lexeme::KW_SPECIAL_BEGIN ? std::string("BEGIN") : std::string("END")) + " is not supported.");
+				report(lexer.lexeme, (lexeme() == Lexeme::KW_SPECIAL_BEGIN ? CharArray("BEGIN") : CharArray("END")) + " is not supported.");
 				
 				lexer.step();
 
@@ -986,9 +986,9 @@ namespace Mirb
 			{
 				auto result = new (fragment) Tree::FloatNode;
 					
-				std::string str = lexer.lexeme.string();
+				auto str = lexer.lexeme.string().c_str();
 					
-				result->value = std::atof(str.c_str()); // TODO: Parse to double
+				result->value = std::atof(str.c_str_ref()); // TODO: Parse to double
 					
 				lexer.step();
 					
@@ -1505,7 +1505,7 @@ namespace Mirb
 			case Tree::Node::Variable:
 				{
 					if(parameter)
-						error("Variable " + static_cast<Tree::VariableNode *>(lhs)->var->name->get_string() + " already defined");
+						error("Variable " + static_cast<Tree::VariableNode *>(lhs)->var->name->string + " already defined");
 
 					return;
 				}

@@ -5,16 +5,6 @@
 
 namespace Mirb
 {
-	Symbol *Symbol::from_cstr_string(const char *string)
-	{
-		return symbol_pool.get(string);
-	}
-	
-	Symbol *Symbol::from_string(const std::string &string)
-	{
-		return symbol_pool.get(string);
-	}
-	
 	Symbol *Symbol::get(const CharArray &char_array)
 	{
 		return symbol_pool.get(char_array);

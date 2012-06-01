@@ -13,7 +13,7 @@ namespace Mirb
 	void(Lexer::*Lexer::jump_table[sizeof(char_t) << 8])();
 	Map<char_t, char_t> Lexer::delimiter_mapping(2);
 	
-	void Lexer::report(const SourceLoc &range, std::string text, Message::Severity severity)
+	void Lexer::report(const SourceLoc &range, const CharArray &text, Message::Severity severity)
 	{
 		parser.report(range, text, severity);
 	}
