@@ -5,6 +5,8 @@
 
 namespace Mirb
 {
+	struct InternalException;
+
 	struct ValueMapData
 	{
 		Tuple<> *table;
