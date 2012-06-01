@@ -53,6 +53,7 @@
     <ClInclude Include="..\..\src\generic\memory-pool.hpp" />
     <ClInclude Include="..\..\src\generic\source-loc.hpp" />
     <ClInclude Include="..\..\src\global.hpp" />
+    <ClInclude Include="..\..\src\macros.hpp" />
     <ClInclude Include="..\..\src\stream.hpp" />
     <ClInclude Include="..\..\src\lexer\input.hpp" />
     <ClInclude Include="..\..\src\lexer\lexeme.hpp" />

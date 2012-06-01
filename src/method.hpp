@@ -6,6 +6,7 @@
 #include "classes/exceptions.hpp"
 #include "generic/memory-pool.hpp"
 #include "codegen/opcodes.hpp"
+#include "macros.hpp"
 #include <algorithm>
 
 namespace Mirb
@@ -49,6 +50,11 @@ namespace Mirb
 		template<class T, typename ResultType> class ValueBase
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				static const Info info;
 
 				typedef ResultType Type;
@@ -66,6 +72,11 @@ namespace Mirb
 		template<class T> class Optional
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				static const Info info;
 				typedef typename T::Type Type;
 				
@@ -85,6 +96,11 @@ namespace Mirb
 		template<class T> class Self
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				static const Info info;
 				typedef typename T::Type Type;
 				
@@ -99,6 +115,11 @@ namespace Mirb
 		class Block
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				typedef value_t Type;
 				static const Info info;
 
@@ -108,6 +129,11 @@ namespace Mirb
 		class Count
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				typedef size_t Type;
 				static const Info info;
 
@@ -117,6 +143,11 @@ namespace Mirb
 		class Values
 		{
 			public:
+				template<class A> struct Arg
+				{
+					typedef typename A::Type Type;
+				};
+
 				typedef value_t *Type;
 				static const Info info;
 
@@ -182,148 +213,58 @@ namespace Mirb
 	{
 		Method *generate_block(size_t flags, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor);
 	
-		Arg::Info fold(size_t num, ...);
+		#define MIRB_METHOD_TYPENAME_ARG(i) typename Arg##i
+		#define MIRB_METHOD_ARG(i) Arg##i
 		
-		template<typename F, F function> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(0));
-
-			return function();
-		}
-	
-		template<typename F, F function, typename Arg1> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(1, Arg1::info));
-
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
+		#define MIRB_METHOD_FOLD_STATEMENT(i) value += Arg##i::info
 		
-			return function(arg1);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(2, Arg1::info, Arg2::info));
+		#define MIRB_METHOD_STATEMENT_LIST_OPT_0(macro)
+		#define MIRB_METHOD_STATEMENT_LIST_OPT_1(macro, sep) macro(1);
+		#define MIRB_METHOD_STATEMENT_LIST_OPT_SEP()
+		#define MIRB_METHOD_STATEMENT_LIST_OPT_AFTER() ;
+		#define MIRB_METHOD_STATEMENT_LIST(macro, i) MIRB_MACRO_LIST(macro, MIRB_METHOD_STATEMENT_LIST_OPT, i)
 
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-
-			return function(arg1, arg2);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(3, Arg1::info, Arg2::info, Arg3::info));
-
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-
-			return function(arg1, arg2, arg3);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info));
-
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-			typename Arg4::Type arg4 = Arg4::apply(frame, state);
-
-			return function(arg1, arg2, arg3, arg4);
-		}
-
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> value_t wrapper(Frame &frame)
-		{
-			Arg::State state(frame, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info));
-
-			typename Arg1::Type arg1 = Arg1::apply(frame, state);
-			typename Arg2::Type arg2 = Arg2::apply(frame, state);
-			typename Arg3::Type arg3 = Arg3::apply(frame, state);
-			typename Arg4::Type arg4 = Arg4::apply(frame, state);
-			typename Arg5::Type arg5 = Arg5::apply(frame, state);
-
-			return function(arg1, arg2, arg3, arg4, arg5);
-		}
-
-		template<typename F, F function> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(0), wrapper<F, function>);
-		}
-	
-		template<typename F, F function, typename Arg1> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(1, Arg1::info), wrapper<F, function, Arg1>);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(2, Arg1::info, Arg2::info), wrapper<F, function, Arg1, Arg2>);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(3, Arg1::info, Arg2::info, Arg3::info), wrapper<F, function, Arg1, Arg2, Arg3>);
-		}
-	
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(4, Arg1::info, Arg2::info, Arg3::info, Arg4::info), wrapper<F, function, Arg1, Arg2, Arg3, Arg4>);
-		}
-
-		template<typename F, F function, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5> Method *generate_method(size_t flags, Module *module, Symbol *name)
-		{
-			return generate_block(flags, module, name, fold(5, Arg1::info, Arg2::info, Arg3::info, Arg4::info, Arg5::info), wrapper<F, function, Arg1, Arg2, Arg3, Arg4, Arg5>);
-		}
+		#define MIRB_METHOD_FOLD(i) \
+			template<bool dummy MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> Arg::Info fold() \
+			{ \
+				Arg::Info value = {0, 0, false}; \
+				MIRB_METHOD_STATEMENT_LIST(MIRB_METHOD_FOLD_STATEMENT, i) \
+				return value; \
+			};
+		
+		MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_FOLD, MIRB_MACRO_STATEMENT_MAX)
+		
+		#define MIRB_METHOD_WRAPPER_STATEMENT(i) typename Arg##i::Type arg##i = Arg##i::apply(frame, state);
+		#define MIRB_METHOD_WRAPPER_ARG(i) arg##i
+		
+		#define MIRB_METHOD_WRAPPER(i) \
+			template<typename F, F function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> value_t wrapper(Frame &frame) \
+			{ \
+				Arg::State state(frame, fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>()); \
+				\
+				MIRB_METHOD_STATEMENT_LIST(MIRB_METHOD_WRAPPER_STATEMENT, i) \
+				\
+				return function(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_WRAPPER_ARG, i)); \
+			}
+		
+		MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_WRAPPER, MIRB_MACRO_STATEMENT_MAX)
 	};
 
-	template<value_t(*function)(), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(), function>(flags, module, symbol_cast(name));
-	}
-	
-	template<typename Arg1, value_t(*function)(typename Arg1::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type), function, Arg1>(flags, module, symbol_cast(name));
-	}
-	
-	template<typename Arg1, typename Arg2, value_t(*function)(typename Arg1::Type, typename Arg2::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type), function, Arg1, Arg2>(flags, module, symbol_cast(name));
-	}
-	
-	template<typename Arg1, typename Arg2, typename Arg3, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), function, Arg1, Arg2, Arg3>(flags, module, symbol_cast(name));
-	}
-	
-	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type), function, Arg1, Arg2, Arg3, Arg4>(flags, module, symbol_cast(name));
-	}
-	
-	template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type), typename N> Method *method(Module *module, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type, typename Arg4::Type, typename Arg5::Type), function, Arg1, Arg2, Arg3, Arg4, Arg5>(flags, module, symbol_cast(name));
-	}
-	
-	template<value_t(*function)(), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(), function>(flags, singleton_class(obj), symbol_cast(name));
-	}
-	
-	template<typename Arg1, value_t(*function)(typename Arg1::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type), function, Arg1>(flags, singleton_class(obj), symbol_cast(name));
-	}
+	#define MIRB_METHOD_ARG_TYPE(i) typename Arg##i::template Arg<Arg##i>::Type
 
-	template<typename Arg1, typename Arg2, value_t(*function)(typename Arg1::Type, typename Arg2::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type), function, Arg1, Arg2>(flags, singleton_class(obj), symbol_cast(name));
-	}
+	#define MIRB_METHOD_METHOD(i) \
+		template<MIRB_MACRO_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *method(Module *module, N &&name, size_t flags = 0) \
+		{ \
+			return MethodGen::generate_block(flags, module, symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
+		}
+		
+	MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_METHOD, MIRB_MACRO_STATEMENT_MAX)
+		
+	#define MIRB_METHOD_SINGLETON(i) \
+		template<MIRB_MACRO_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0) \
+		{ \
+			return MethodGen::generate_block(flags, singleton_class(obj), symbol_cast(std::forward<N>(name)), MethodGen::fold<false MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>(), MethodGen::wrapper<value_t(*)(MIRB_MACRO_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), function MIRB_MACRO_COMMA_BEFORE_LIST(MIRB_METHOD_ARG, i)>); \
+		}
 
-	template<typename Arg1, typename Arg2, typename Arg3, value_t(*function)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), typename N> Method *singleton_method(Object *obj, N &&name, size_t flags = 0)
-	{
-		return MethodGen::generate_method<value_t(*)(typename Arg1::Type, typename Arg2::Type, typename Arg3::Type), function, Arg1, Arg2, Arg3>(flags, singleton_class(obj), symbol_cast(name));
-	}
+	MIRB_MACRO_STATEMENT_LIST(MIRB_METHOD_SINGLETON, MIRB_MACRO_STATEMENT_MAX)
 };

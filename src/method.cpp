@@ -80,21 +80,6 @@ namespace Mirb
 	
 	namespace MethodGen
 	{
-		Arg::Info fold(size_t num, ...)
-		{
-			va_list ap;
-			Arg::Info value = {0, 0, false};
- 
-			va_start(ap, num);
-
-			for(size_t i = 0; i < num; ++i)
-				value += va_arg(ap, Arg::Info);
-
-			va_end(ap);
-
-			return value;
-		};
-		
 		Method *generate_block(size_t flags prelude_unused, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor)
 		{
 			Block *block = Collector::allocate_pinned<Block>(nullptr);
