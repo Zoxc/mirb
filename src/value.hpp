@@ -41,6 +41,11 @@ namespace Mirb
 	const value_t value_false = (value_t)value_false_num;
 	const value_t value_true = (value_t)value_true_num;
 	const value_t value_undef = (value_t)14; // Used to mark words in vectors containing no references.
+	
+	namespace Arg
+	{
+		template<class T> class Class;
+	};
 
 	class Value
 	{
@@ -57,6 +62,11 @@ namespace Mirb
 	public:
 		Value(const Value &other);
 		Value(Type::Enum type);
+
+		template<class A> struct ArgumentWrapper
+		{
+			typedef typename Arg::Class<A> Real;
+		};
 		
 		static const size_t type_bits = 7;
 

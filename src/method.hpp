@@ -50,9 +50,9 @@ namespace Mirb
 		template<class T, typename ResultType> class ValueBase
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef T Real;
 				};
 
 				static const Info info;
@@ -72,9 +72,9 @@ namespace Mirb
 		template<class T> class Optional
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef Optional Real;
 				};
 
 				static const Info info;
@@ -96,9 +96,9 @@ namespace Mirb
 		template<class T> class Self
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef Self Real;
 				};
 
 				static const Info info;
@@ -115,9 +115,9 @@ namespace Mirb
 		class Block
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef Block Real;
 				};
 
 				typedef value_t Type;
@@ -129,9 +129,9 @@ namespace Mirb
 		class Count
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef Count Real;
 				};
 
 				typedef size_t Type;
@@ -143,9 +143,9 @@ namespace Mirb
 		class Values
 		{
 			public:
-				template<class A> struct Arg
+				template<class A> struct ArgumentWrapper
 				{
-					typedef typename A::Type Type;
+					typedef Values Real;
 				};
 
 				typedef value_t *Type;
@@ -216,7 +216,7 @@ namespace Mirb
 		#define MIRB_METHOD_TYPENAME_ARG(i, l) typename Arg##i
 		#define MIRB_METHOD_ARG(i, l) Arg##i
 		
-		#define MIRB_METHOD_FOLD_STATEMENT(i, l) value += Arg##i::info
+		#define MIRB_METHOD_FOLD_STATEMENT(i, l) value += Arg##i::template ArgumentWrapper<Arg##i>::Real::info
 		
 		#define MIRB_METHOD_FOLD(i) \
 			template<bool dummy MIRB_COMMA_BEFORE_LIST(MIRB_METHOD_TYPENAME_ARG, i)> Arg::Info fold() \
@@ -228,7 +228,7 @@ namespace Mirb
 		
 		MIRB_STATEMENT_LIST(MIRB_METHOD_FOLD, MIRB_STATEMENT_MAX)
 		
-		#define MIRB_METHOD_WRAPPER_STATEMENT(i, l) typename Arg##i::Type arg##i = Arg##i::apply(frame, state);
+		#define MIRB_METHOD_WRAPPER_STATEMENT(i, l) typename Arg##i::template ArgumentWrapper<Arg##i>::Real::Type arg##i = Arg##i::template ArgumentWrapper<Arg##i>::Real::apply(frame, state);
 		#define MIRB_METHOD_WRAPPER_ARG(i, l) arg##i
 		
 		#define MIRB_METHOD_WRAPPER(i) \
@@ -244,7 +244,7 @@ namespace Mirb
 		MIRB_STATEMENT_LIST(MIRB_METHOD_WRAPPER, MIRB_STATEMENT_MAX)
 	};
 
-	#define MIRB_METHOD_ARG_TYPE(i, l) typename Arg##i::template Arg<Arg##i>::Type
+	#define MIRB_METHOD_ARG_TYPE(i, l) typename Arg##i::template ArgumentWrapper<Arg##i>::Real::Type
 
 	#define MIRB_METHOD_METHOD(i) \
 		template<MIRB_COMMA_AFTER_LIST(MIRB_METHOD_TYPENAME_ARG, i) value_t(*function)(MIRB_COMMA_LIST(MIRB_METHOD_ARG_TYPE, i)), typename N> Method *method(Module *module, N &&name, size_t flags = 0) \
