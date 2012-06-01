@@ -372,16 +372,18 @@ namespace Mirb
 		void ByteCodeGenerator::convert_boolean_op(Tree::Node *basic_node, var_t var)
 		{
 			auto node = (Tree::BinaryOpNode *)basic_node;
+
+			var_t temp = reuse(var);
 			
-			to_bytecode(node->left, var);
+			to_bytecode(node->left, temp);
 			
 			Label *label_end = create_label();
 			Label *body = create_label();
 			
 			if(node->op == Lexeme::KW_OR || node->op == Lexeme::LOGICAL_OR)
-				gen_if(label_end, var);
+				gen_if(label_end, temp);
 			else
-				gen_unless(label_end, var);
+				gen_unless(label_end, temp);
 
 			gen(body);
 			
