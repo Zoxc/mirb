@@ -236,7 +236,15 @@ namespace Mirb
 
 			return from_short_win_path(buffer);
 		}
-
+		
+		void remove_dir(const CharArray &path)
+		{
+			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+				if(RemoveDirectory(buffer) == 0)
+					raise("Unable to remove directory '" + path + "'");
+			});
+		}
+		
 		void mkdir(const CharArray &path)
 		{
 			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {

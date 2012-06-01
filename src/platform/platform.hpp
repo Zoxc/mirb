@@ -74,6 +74,7 @@ namespace Mirb
 		bool is_executable(const CharArray &path) throw();
 		bool file_exists(const CharArray &path) throw();
 		
+		void remove_dir(const CharArray &path);
 		void mkdir(const CharArray &path);
 		CharArray cwd();
 
