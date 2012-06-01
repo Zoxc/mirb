@@ -155,7 +155,11 @@ namespace Mirb
 		return value_nil;
 	}
 	
-
+	value_t Hash::rb_empty(Hash *self)
+	{
+		return Value::from_bool(self->data.entries == 0);
+	}
+	
 	void Hash::initialize()
 	{
 		context->hash_class = define_class("Hash", context->object_class);
@@ -164,6 +168,7 @@ namespace Mirb
 
 		method<Arg::Self<Arg::Class<Hash>>, Arg::Optional<Arg::Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
+		method<Arg::Self<Arg::Class<Hash>>, &rb_empty>(context->hash_class, "empty?");
 		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, &rb_delete>(context->hash_class, "delete");
 		method<Arg::Self<Arg::Class<Hash>>, &keys>(context->hash_class, "keys");
 		method<Arg::Self<Arg::Class<Hash>>, &values>(context->hash_class, "values");

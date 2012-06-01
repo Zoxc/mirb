@@ -17,6 +17,7 @@ namespace Mirb
 			static value_t set(Hash *self, value_t key, value_t value);
 			static value_t rb_delete(Hash *self, value_t key);
 			static value_t rb_initialize(Hash *obj, value_t def, value_t block);
+			static value_t rb_empty(Hash *self);
 
 			value_t get_default(value_t key);
 
