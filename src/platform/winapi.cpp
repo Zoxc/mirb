@@ -170,6 +170,12 @@ namespace Mirb
 				return ruby_path(normalize_separator_from(path));
 			#endif
 		}
+		
+		#ifdef _UNICODE
+			size_t root_size = 4 + 2;
+		#else
+			size_t root_size = 2;
+		#endif
 	
 		CharArray to_win_path(const CharArray &path)
 		{
@@ -202,7 +208,12 @@ namespace Mirb
 			
 			try
 			{
-				to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+				CharArray name = to_win_path(path);
+
+				if(name.size() == root_size) // Drives must have trailing slashes
+					name += "\\";
+
+				to_tchar(name , [&](const TCHAR *buffer, size_t) {
 					attrib = GetFileAttributes(buffer);
 				});
 			}
