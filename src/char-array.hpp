@@ -30,6 +30,7 @@ namespace Mirb
 			CharArray(CharArray &&char_array);
 			
 			CharArray chomp();
+			CharArray chomp(const CharArray &seperator);
 			CharArray trim(size_t cut, CharArray append);
 
 			template<size_t length> CharArray(const char (&string)[length])

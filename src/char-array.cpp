@@ -133,6 +133,19 @@ namespace Mirb
 
 		return result;
 	}
+	
+	CharArray CharArray::chomp(const CharArray &seperator)
+	{
+		CharArray result = *this;
+
+		if(result.size() < seperator.size())
+			return result;
+
+		if(equal(result.size() - seperator.size(), 0, seperator, seperator.size()))
+			result.length -= seperator.size();
+
+		return result;
+	}
 
 	CharArray CharArray::ljust(size_t length, const CharArray &padding)
 	{
