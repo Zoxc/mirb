@@ -15,7 +15,10 @@ namespace Mirb
 			static value_t each(Hash *self, value_t block);
 			static value_t get(Hash *self, value_t key);
 			static value_t set(Hash *self, value_t key, value_t value);
+			static value_t rb_delete(Hash *self, value_t key);
 			static value_t rb_initialize(Hash *obj, value_t def, value_t block);
+
+			value_t get_default(value_t key);
 
 		public:
 			Hash() : Object(Value::Hash, context->hash_class), data(8), default_value(value_nil) {}
@@ -40,6 +43,8 @@ namespace Mirb
 				flag2 = value;
 			}
 			
+			static Hash *dup(Hash *other);
+
 			template<typename F> void mark(F mark)
 			{
 				Object::mark(mark);

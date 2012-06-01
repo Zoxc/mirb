@@ -11,23 +11,48 @@ namespace Mirb
 	{
 		return Collector::allocate<Hash>(instance_of);
 	}
+	
+	Hash *Hash::dup(Hash *other)
+	{
+		if(other->accessing())
+			raise(context->runtime_error, "Cannot duplicate hash during operations");
+
+		return new (collector) Hash(*other);
+	}
+			
+	value_t Hash::get_default(value_t key)
+	{
+		if(flag)
+		{
+			value_t args[2];
+
+			args[0] = this;
+			args[1] = key;
+
+			return yield_argv(this, 2, args);
+		}
+		else
+			return default_value;
+	}
+
+	value_t Hash::rb_delete(Hash *self, value_t key)
+	{
+		OnStack<2> os(self, key);
+
+		value_t value = HashAccess::remove(self, key);
+
+		if(value != value_undef)
+			return value;
+		else
+			return self->get_default(key);
+	}
 
 	value_t Hash::get(Hash *self, value_t key)
 	{
 		OnStack<2> os(self, key);
 
 		return HashAccess::get(self, key, [&]() -> value_t {
-			if(self->flag)
-			{
-				value_t args[2];
-
-				args[0] = self;
-				args[1] = key;
-
-				return yield_argv(self->default_value, 2, args);
-			}
-			else
-				return self->default_value;
+			return self->get_default(key);
 		});
 	}
 	
@@ -139,6 +164,7 @@ namespace Mirb
 
 		method<Arg::Self<Arg::Class<Hash>>, Arg::Optional<Arg::Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
+		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, &rb_delete>(context->hash_class, "delete");
 		method<Arg::Self<Arg::Class<Hash>>, &keys>(context->hash_class, "keys");
 		method<Arg::Self<Arg::Class<Hash>>, &values>(context->hash_class, "values");
 

@@ -23,6 +23,18 @@ namespace Mirb
 				(*table)[i] = value_undef;
 		}
 		
+		ValueMapData(const ValueMapData &other) :
+			mask(other.mask),
+			entries(other.entries)
+		{
+			size_t size = (mask + 1) << 1;
+
+			table = Tuple<>::allocate(size);
+			
+			for(size_t i = 0; i < size; ++i)
+				(*table)[i] = (*other.table)[i];
+		}
+		
 		template<typename F> void mark(F mark)
 		{
 			mark(table);
@@ -43,6 +55,38 @@ namespace Mirb
 			static ValueMapData &data(ValueMapData &owner)
 			{
 				return owner;
+			}
+			
+			template<typename O> static void remove_index(O &owner, value_t &key, size_t index)
+			{
+				size_t hash = Value::hash(key);
+				size_t free = index;
+				size_t mask = data(owner).mask;
+				size_t current = index;
+
+				do
+				{
+					current = (current + 1) & mask;
+
+					mirb_debug_assert(current != index);  // Detect loops in case the free slot is gone
+
+					value_t current_key = key_slot(owner, current);
+
+					if(current_key == value_undef)
+					{
+						key_slot(owner, free) = value_undef;
+						value_slot(owner, free) = value_undef;
+						return;
+					}
+					
+					if(Value::hash(current_key) == hash)
+					{
+						key_slot(owner, free) = current_key;
+						value_slot(owner, free) = value_slot(owner, current);
+
+						free = current;
+					}
+				} while(true);
 			}
 
 			template<typename O, typename Free, typename Match> static value_t search(O &owner, value_t &key, Free free, Match match)
@@ -226,6 +270,21 @@ namespace Mirb
 				return true;
 			}
 		
+			static value_t remove(Owner *owner, value_t key)
+			{
+				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {
+					return ValueMapManipulator::search(owner, key, [&](size_t) {
+						return value_undef;
+					}, [&](size_t index) {
+						value_t result = ValueMapManipulator::value_slot(owner, index);
+
+						ValueMapManipulator::remove_index(owner, key, index);
+
+						return result;
+					});
+				});
+			}
+			
 			template<typename func> static value_t get(Owner *owner, value_t key, func create_value)
 			{
 				return ValueMapManipulator::enter(owner, key, [&]() -> value_t {
