@@ -21,8 +21,8 @@ namespace Mirb
 		
 		singleton_method<Arg::Block, &rb_new>(context->proc_class, "new");
 
-		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "call");
-		method<Arg::Self<Arg::Class<Proc>>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "[]");
+		method<Self<Proc>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "call");
+		method<Self<Proc>, Arg::Block, Arg::Count, Arg::Values, &call>(context->proc_class, "[]");
 	}
 };
 

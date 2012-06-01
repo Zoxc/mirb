@@ -69,49 +69,6 @@ namespace Mirb
 
 		template<class T, typename ResultType> const Info ValueBase<T, ResultType>::info = {1, 1, false};
 		
-		template<class T> class Optional
-		{
-			public:
-				template<class A> struct ArgumentWrapper
-				{
-					typedef Optional Real;
-				};
-
-				static const Info info;
-				typedef typename T::Type Type;
-				
-				static Type apply(Frame &frame, State &state)
-				{
-					if(state.index >= frame.argc)
-						return T::default_value;
-
-					value_t result = frame.argv[state.index++];
-					
-					return T::coerce(result);
-				}
-		};
-		
-		template<class T> const Info Optional<T>::info = {0, 1, false};
-
-		template<class T> class Self
-		{
-			public:
-				template<class A> struct ArgumentWrapper
-				{
-					typedef Self Real;
-				};
-
-				static const Info info;
-				typedef typename T::Type Type;
-				
-				static Type apply(Frame &frame, State &)
-				{
-					return T::coerce(frame.obj);
-				}
-		};
-		
-		template<class T> const Info Self<T>::info = {0, 0, false};
-		
 		class Block
 		{
 			public:
@@ -208,7 +165,52 @@ namespace Mirb
 				}
 		};
 	};
+	
+	template<class T> class Optional
+	{
+		public:
+			template<class A> struct ArgumentWrapper
+			{
+				typedef Optional Real;
+			};
 
+			static const Arg::Info info;
+			typedef typename T::template ArgumentWrapper<T>::Real Real;
+			typedef typename Real::Type Type;
+				
+			static Type apply(Frame &frame, Arg::State &state)
+			{
+				if(state.index >= frame.argc)
+					return Real::default_value;
+
+				value_t result = frame.argv[state.index++];
+					
+				return Real::coerce(result);
+			}
+	};
+	
+	template<class T> const Arg::Info Optional<T>::info = {0, 1, false};
+
+	template<class T> class Self
+	{
+		public:
+			template<class A> struct ArgumentWrapper
+			{
+				typedef Self Real;
+			};
+
+			static const Arg::Info info;
+			typedef typename T::template ArgumentWrapper<T>::Real Real;
+			typedef typename Real::Type Type;
+				
+			static Type apply(Frame &frame, Arg::State &)
+			{
+				return Real::coerce(frame.obj);
+			}
+	};
+	
+	template<class T> const Arg::Info Self<T>::info = {0, 0, false};
+		
 	namespace MethodGen
 	{
 		Method *generate_block(size_t flags, Module *module, Symbol *name, Arg::Info &&info, Block::executor_t executor);

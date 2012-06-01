@@ -251,14 +251,14 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->exception_class, "allocate");
+		singleton_method<Self<Class>, &allocate>(context->exception_class, "allocate");
 
-		method<Arg::Self<Arg::Class<Exception>>, Arg::Optional<Arg::Class<String>>, &rb_initialize>(context->exception_class, "initialize");
-		method<Arg::Self<Arg::Class<Exception>>, &rb_backtrace>(context->exception_class, "backtrace");
-		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "message");
-		method<Arg::Self<Arg::Class<Exception>>, &to_s>(context->exception_class, "to_s");
-		method<Arg::Self<Arg::Class<Exception>>, &rb_inspect>(context->exception_class, "inspect");
-		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<IO>, &print>(context->exception_class, "print");
+		method<Self<Exception>, Optional<String>, &rb_initialize>(context->exception_class, "initialize");
+		method<Self<Exception>, &rb_backtrace>(context->exception_class, "backtrace");
+		method<Self<Exception>, &to_s>(context->exception_class, "message");
+		method<Self<Exception>, &to_s>(context->exception_class, "to_s");
+		method<Self<Exception>, &rb_inspect>(context->exception_class, "inspect");
+		method<Self<Exception>, IO, &print>(context->exception_class, "print");
 	}
 };
 

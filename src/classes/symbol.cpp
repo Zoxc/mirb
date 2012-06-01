@@ -55,9 +55,9 @@ namespace Mirb
 
 	void Symbol::initialize()
 	{
-		method<Arg::Self<Arg::Class<Symbol>>, &to_s>(context->symbol_class, "to_s");
-		method<Arg::Self<Arg::Value>, &to_sym>(context->symbol_class, "to_sym");
-		method<Arg::Self<Arg::Class<Symbol>>, &inspect>(context->symbol_class, "inspect");
+		method<Self<Symbol>, &to_s>(context->symbol_class, "to_s");
+		method<Self<Value>, &to_sym>(context->symbol_class, "to_sym");
+		method<Self<Symbol>, &inspect>(context->symbol_class, "inspect");
 	}
 };
 

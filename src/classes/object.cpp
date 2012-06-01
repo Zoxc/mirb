@@ -197,39 +197,39 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Value, &instance_variable_set>(context->object_class, "instance_variable_set");
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, &instance_variable_get>(context->object_class, "instance_variable_get");
+		method<Self<Value>, Symbol, Value, &instance_variable_set>(context->object_class, "instance_variable_set");
+		method<Self<Value>, Symbol, &instance_variable_get>(context->object_class, "instance_variable_get");
 
-		method<Arg::Self<Arg::Value>, &object_id>(context->object_class, "object_id");
-		method<Arg::Self<Arg::Value>, &object_id>(context->object_class, "__id__");
+		method<Self<Value>, &object_id>(context->object_class, "object_id");
+		method<Self<Value>, &object_id>(context->object_class, "__id__");
 		method<Arg::Count, &variadic_dummy>(context->object_class, "initialize");
-		context->inspect_method = method<Arg::Self<Arg::Value>, &rb_inspect>(context->object_class, "inspect");
+		context->inspect_method = method<Self<Value>, &rb_inspect>(context->object_class, "inspect");
 		method<&nil>(context->object_class, "nil?");
-		method<Arg::Self<Arg::Value>, &to_s>(context->object_class, "to_s");
-		method<Arg::Self<Arg::Value>, &rb_dup>(context->object_class, "dup");
-		method<Arg::Self<Arg::Value>, &rb_dup>(context->object_class, "clone");
-		method<Arg::Self<Arg::Value>, &klass>(context->object_class, "class");
+		method<Self<Value>, &to_s>(context->object_class, "to_s");
+		method<Self<Value>, &rb_dup>(context->object_class, "dup");
+		method<Self<Value>, &rb_dup>(context->object_class, "clone");
+		method<Self<Value>, &klass>(context->object_class, "class");
 		method<&dummy>(context->object_class, "freeze");
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, &respond_to>(context->object_class, "respond_to?");
-		method<Arg::Self<Arg::Value>, Arg::Class<Class>, &kind_of>(context->object_class, "is_a?");
-		method<Arg::Self<Arg::Value>, Arg::Class<Class>, &kind_of>(context->object_class, "kind_of?");
+		method<Self<Value>, Symbol, &respond_to>(context->object_class, "respond_to?");
+		method<Self<Value>, Class, &kind_of>(context->object_class, "is_a?");
+		method<Self<Value>, Class, &kind_of>(context->object_class, "kind_of?");
 		method<&dummy>(context->object_class, "frozen?");
-		method<Arg::Value, &pattern>(context->object_class, "=~");
-		method<Arg::Value, &initialize_copy>(context->object_class, "initialize_copy");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &extend>(context->object_class, "extend");
-		method<Arg::Self<Arg::Value>, Arg::Block, &tap>(context->object_class, "tap");
-		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "equal?");
-		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "eql?");
-		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "==");
-		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->object_class, "===");
-		method<Arg::Self<Arg::Value>, Arg::Value, &not_equal>(context->object_class, "!=");
-		method<Arg::Self<Arg::Value>, Arg::Value, &not_match>(context->object_class, "!~");
-		method<Arg::Self<Arg::Value>, &rb_not>(context->object_class, "!");
-		method<Arg::Self<Arg::Value>, Arg::Optional<Arg::Class<String>>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
-		method<Arg::Self<Arg::Value>, Arg::Class<Symbol>, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
+		method<Value, &pattern>(context->object_class, "=~");
+		method<Value, &initialize_copy>(context->object_class, "initialize_copy");
+		method<Self<Value>, Arg::Count, Arg::Values, &extend>(context->object_class, "extend");
+		method<Self<Value>, Arg::Block, &tap>(context->object_class, "tap");
+		method<Self<Value>, Value, &equal>(context->object_class, "equal?");
+		method<Self<Value>, Value, &equal>(context->object_class, "eql?");
+		method<Self<Value>, Value, &equal>(context->object_class, "==");
+		method<Self<Value>, Value, &equal>(context->object_class, "===");
+		method<Self<Value>, Value, &not_equal>(context->object_class, "!=");
+		method<Self<Value>, Value, &not_match>(context->object_class, "!~");
+		method<Self<Value>, &rb_not>(context->object_class, "!");
+		method<Self<Value>, Optional<String>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
+		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
+		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
 
-		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->object_class, "allocate");
+		singleton_method<Self<Class>, &allocate>(context->object_class, "allocate");
 	}
 };
 

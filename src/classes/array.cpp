@@ -511,46 +511,46 @@ namespace Mirb
 		
 		include_module(context->array_class, context->enumerable_module);
 		
-		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &concat>(context->array_class, "concat");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &replace>(context->array_class, "replace");
+		method<Self<Array>, Array, &concat>(context->array_class, "concat");
+		method<Self<Array>, Array, &replace>(context->array_class, "replace");
 
-		method<Arg::Self<Arg::Class<Array>>, &compact_ex>(context->array_class, "compact!");
-		method<Arg::Self<Arg::Class<Array>>, &compact>(context->array_class, "compact");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject>(context->array_class, "reject");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "reject!");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reject_ex>(context->array_class, "delete_if");
+		method<Self<Array>, &compact_ex>(context->array_class, "compact!");
+		method<Self<Array>, &compact>(context->array_class, "compact");
+		method<Self<Array>, Arg::Block, &reject>(context->array_class, "reject");
+		method<Self<Array>, Arg::Block, &reject_ex>(context->array_class, "reject!");
+		method<Self<Array>, Arg::Block, &reject_ex>(context->array_class, "delete_if");
 
-		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->array_class, "allocate");
+		singleton_method<Self<Class>, &rb_allocate>(context->array_class, "allocate");
 		
-		method<Arg::Self<Arg::Class<Array>>, &rb_sort>(context->array_class, "sort");
+		method<Self<Array>, &rb_sort>(context->array_class, "sort");
 		
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, &rb_delete>(context->array_class, "delete");
+		method<Self<Array>, Value, &rb_delete>(context->array_class, "delete");
 
-		method<Arg::Self<Arg::Class<Array>>, &first>(context->array_class, "first");
-		method<Arg::Self<Arg::Class<Array>>, &last>(context->array_class, "last");
-		method<Arg::Self<Arg::Class<Array>>, &empty>(context->array_class, "empty?");
+		method<Self<Array>, &first>(context->array_class, "first");
+		method<Self<Array>, &last>(context->array_class, "last");
+		method<Self<Array>, &empty>(context->array_class, "empty?");
 		
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, &equal>(context->array_class, "eql?");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, &equal>(context->array_class, "==");
+		method<Self<Array>, Value, &equal>(context->array_class, "eql?");
+		method<Self<Array>, Value, &equal>(context->array_class, "==");
 		
-		method<Arg::Self<Arg::Class<Array>>, &shift>(context->array_class, "shift");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &unshift>(context->array_class, "unshift");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &push>(context->array_class, "push");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &values_at>(context->array_class, "values_at");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &add>(context->array_class, "+");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Class<Array>, &sub>(context->array_class, "-");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Count, Arg::Values, &push>(context->array_class, "<<");
-		method<Arg::Self<Arg::Class<Array>>, &pop>(context->array_class, "pop");
-		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "length");
-		method<Arg::Self<Arg::Class<Array>>, &length>(context->array_class, "size");
-		method<Arg::Self<Arg::Class<Array>>, &rb_flatten>(context->array_class, "flatten");
-		method<Arg::Self<Arg::Class<Array>>, &rb_flatten_ex>(context->array_class, "flatten!");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Optional<Arg::Class<String>>, &join>(context->array_class, "join");
-		method<Arg::Self<Arg::Class<Array>>, &to_s>(context->array_class, "to_s");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &each>(context->array_class, "each");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reverse_each>(context->array_class, "reverse_each");
-		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Optional<Arg::Value>, &rb_get>(context->array_class, "[]");
-		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value, &rb_set>(context->array_class, "[]=");
+		method<Self<Array>, &shift>(context->array_class, "shift");
+		method<Self<Array>, Arg::Count, Arg::Values, &unshift>(context->array_class, "unshift");
+		method<Self<Array>, Arg::Count, Arg::Values, &push>(context->array_class, "push");
+		method<Self<Array>, Arg::Count, Arg::Values, &values_at>(context->array_class, "values_at");
+		method<Self<Array>, Array, &add>(context->array_class, "+");
+		method<Self<Array>, Array, &sub>(context->array_class, "-");
+		method<Self<Array>, Arg::Count, Arg::Values, &push>(context->array_class, "<<");
+		method<Self<Array>, &pop>(context->array_class, "pop");
+		method<Self<Array>, &length>(context->array_class, "length");
+		method<Self<Array>, &length>(context->array_class, "size");
+		method<Self<Array>, &rb_flatten>(context->array_class, "flatten");
+		method<Self<Array>, &rb_flatten_ex>(context->array_class, "flatten!");
+		method<Self<Array>, Optional<String>, &join>(context->array_class, "join");
+		method<Self<Array>, &to_s>(context->array_class, "to_s");
+		method<Self<Array>, Arg::Block, &each>(context->array_class, "each");
+		method<Self<Array>, Arg::Block, &reverse_each>(context->array_class, "reverse_each");
+		method<Self<Array>, Value, Optional<Value>, &rb_get>(context->array_class, "[]");
+		method<Self<Array>, Arg::UInt, Value, &rb_set>(context->array_class, "[]=");
 	}
 };
 

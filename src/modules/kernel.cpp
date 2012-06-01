@@ -300,22 +300,22 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
-		method<Arg::Value, &Kernel::rb_cast_array>(context->kernel_module, "Array");
-		method<Arg::Value, &Kernel::rb_cast_string>(context->kernel_module, "String");
-		method<Arg::Value, &Kernel::rb_cast_integer>(context->kernel_module, "Integer");
+		method<Value, &Kernel::rb_cast_array>(context->kernel_module, "Array");
+		method<Value, &Kernel::rb_cast_string>(context->kernel_module, "String");
+		method<Value, &Kernel::rb_cast_integer>(context->kernel_module, "Integer");
 		method<&block_given>(context->kernel_module, "block_given?");
 		method<Arg::Block, &at_exit>(context->kernel_module, "at_exit");
 		method<Arg::Block, &proc>(context->kernel_module, "proc");
 		method<Arg::Block, &proc>(context->kernel_module, "lambda");
 		method<Arg::Block, &benchmark>(context->kernel_module, "benchmark");
 		method<&backtrace>(context->kernel_module, "backtrace");
-		method<Arg::Self<Arg::Value>, Arg::Class<String>, &eval>(context->kernel_module, "eval");
-		method<Arg::Optional<Arg::Fixnum>, &exit>(context->kernel_module, "exit");
+		method<Self<Value>, String, &eval>(context->kernel_module, "eval");
+		method<Optional<Arg::Fixnum>, &exit>(context->kernel_module, "exit");
 		method<Arg::Count, Arg::Values, &print>(context->kernel_module, "print");
 		method<Arg::Count, Arg::Values, &puts>(context->kernel_module, "puts");
-		method<Arg::Class<String>, &load>(context->kernel_module, "load");
-		method<Arg::Class<String>, &require>(context->kernel_module, "require");
-		method<Arg::Class<String>, &require_relative>(context->kernel_module, "require_relative");
-		method<Arg::Optional<Arg::Value>, Arg::Optional<Arg::Class<String>>, &raise>(context->kernel_module, "raise");
+		method<String, &load>(context->kernel_module, "load");
+		method<String, &require>(context->kernel_module, "require");
+		method<String, &require_relative>(context->kernel_module, "require_relative");
+		method<Optional<Value>, Optional<String>, &raise>(context->kernel_module, "raise");
 	}
 };

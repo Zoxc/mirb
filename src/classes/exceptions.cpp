@@ -66,7 +66,7 @@ namespace Mirb
 		context->signal_exception = define_class("SignalException", context->exception_class);
 		context->interrupt_class = define_class("Interrupt", context->signal_exception);
 
-		method<Arg::Self<Arg::Class<Exception>>, Arg::Class<IO>, &SyntaxError::print>(context->syntax_error, "print");
+		method<Self<Exception>, IO, &SyntaxError::print>(context->syntax_error, "print");
 	}
 };
 

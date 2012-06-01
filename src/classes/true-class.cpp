@@ -18,7 +18,7 @@ namespace Mirb
 	
 	void TrueClass::initialize()
 	{
-		method<Arg::Value, &rb_xor>(context->true_class, "^");
+		method<Value, &rb_xor>(context->true_class, "^");
 		method<&to_s>(context->true_class, "to_s");
 
 		set_const(context->object_class, Symbol::get("TRUE"), value_true);

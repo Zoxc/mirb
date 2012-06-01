@@ -81,9 +81,9 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		method<Arg::Self<Arg::Class<Class>>, Arg::Value, &case_equal>(context->class_class, "===");
-		method<Arg::Self<Arg::Class<Class>>, &to_s>(context->class_class, "to_s");
-		method<Arg::Self<Arg::Class<Module>>, &rb_superclass>(context->class_class, "superclass");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, Arg::Block, &rb_new>(context->class_class, "new");
+		method<Self<Class>, Value, &case_equal>(context->class_class, "===");
+		method<Self<Class>, &to_s>(context->class_class, "to_s");
+		method<Self<Module>, &rb_superclass>(context->class_class, "superclass");
+		method<Self<Value>, Arg::Count, Arg::Values, Arg::Block, &rb_new>(context->class_class, "new");
 	}
 };

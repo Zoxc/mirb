@@ -248,33 +248,33 @@ namespace Mirb
 	
 	void Module::initialize()
 	{
-		method<Arg::Self<Arg::Class<Module>>, Arg::Optional<Arg::Class<String>>, Arg::Block, &module_eval>(context->object_class, "module_eval");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Optional<Arg::Class<String>>, Arg::Block, &module_eval>(context->object_class, "class_eval");
-		method<Arg::Self<Arg::Value>, &to_s>(context->module_class, "to_s");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Class<Symbol>, &alias_method>(context->module_class, "alias_method");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &undef_method>(context->module_class, "undef_method");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Optional<Arg::Class<Proc>>, Arg::Block, &define_method>(context->module_class, "define_method");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Module>, &append_features>(context->module_class, "append_features");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &include>(context->module_class, "include");
-		method<Arg::Value, &included>(context->module_class, "included");
-		method<Arg::Value, &included>(context->module_class, "extended");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Value, &extend_object>(context->module_class, "extend_object");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr_reader");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
+		method<Self<Module>, Optional<String>, Arg::Block, &module_eval>(context->object_class, "module_eval");
+		method<Self<Module>, Optional<String>, Arg::Block, &module_eval>(context->object_class, "class_eval");
+		method<Self<Value>, &to_s>(context->module_class, "to_s");
+		method<Self<Module>, Symbol, Symbol, &alias_method>(context->module_class, "alias_method");
+		method<Self<Module>, Symbol, &undef_method>(context->module_class, "undef_method");
+		method<Self<Module>, Symbol, Optional<Proc>, Arg::Block, &define_method>(context->module_class, "define_method");
+		method<Self<Module>, Module, &append_features>(context->module_class, "append_features");
+		method<Self<Value>, Arg::Count, Arg::Values, &include>(context->module_class, "include");
+		method<Value, &included>(context->module_class, "included");
+		method<Value, &included>(context->module_class, "extended");
+		method<Self<Module>, Value, &extend_object>(context->module_class, "extend_object");
+		method<Self<Module>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr");
+		method<Self<Module>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr_reader");
+		method<Self<Module>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
+		method<Self<Module>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
 		
-		method<Arg::Self<Arg::Class<Module>>, Arg::Count, Arg::Values, &module_function>(context->module_class, "module_function");
+		method<Self<Module>, Arg::Count, Arg::Values, &module_function>(context->module_class, "module_function");
 		
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private");
-		method<Arg::Self<Arg::Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "protected");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "protected");
 		
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &const_defined>(context->module_class, "const_defined?");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &const_get>(context->module_class, "const_get");
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, Arg::Value, &const_set>(context->module_class, "const_set");
+		method<Self<Module>, Symbol, &const_defined>(context->module_class, "const_defined?");
+		method<Self<Module>, Symbol, &const_get>(context->module_class, "const_get");
+		method<Self<Module>, Symbol, Value, &const_set>(context->module_class, "const_set");
 
-		method<Arg::Self<Arg::Class<Module>>, Arg::Class<Symbol>, &method_defined>(context->module_class, "method_defined?");
+		method<Self<Module>, Symbol, &method_defined>(context->module_class, "method_defined?");
 	}
 };
 

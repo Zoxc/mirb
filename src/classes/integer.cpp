@@ -15,8 +15,8 @@ namespace Mirb
 	
 	void Integer::initialize()
 	{
-		method<Arg::Self<Arg::Value>, &pos>(context->integer_class, "+@");
-		method<Arg::Self<Arg::Value>, &to_i>(context->integer_class, "to_i");
+		method<Self<Value>, &pos>(context->integer_class, "+@");
+		method<Self<Value>, &to_i>(context->integer_class, "to_i");
 	}
 };
 

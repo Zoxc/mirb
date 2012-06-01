@@ -167,16 +167,16 @@ namespace Mirb
 	{
 		context->regexp_class = define_class("Regexp", context->object_class);
 		
-		method<Arg::Self<Arg::Class<Regexp>>, &source>(context->regexp_class, "source");
-		method<Arg::Self<Arg::Class<Regexp>>, &to_s>(context->regexp_class, "to_s");
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &rb_initialize>(context->regexp_class, "initialize");
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_match>(context->regexp_class, "match");
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Class<String>, &rb_pattern>(context->regexp_class, "=~");
-		method<Arg::Self<Arg::Class<Regexp>>, Arg::Value, &case_equal>(context->regexp_class, "===");
+		method<Self<Regexp>, &source>(context->regexp_class, "source");
+		method<Self<Regexp>, &to_s>(context->regexp_class, "to_s");
+		method<Self<Regexp>, Value, &rb_initialize>(context->regexp_class, "initialize");
+		method<Self<Regexp>, String, &rb_match>(context->regexp_class, "match");
+		method<Self<Regexp>, String, &rb_pattern>(context->regexp_class, "=~");
+		method<Self<Regexp>, Value, &case_equal>(context->regexp_class, "===");
 		
-		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "escape");
-		singleton_method<Arg::Class<String>, &escape>(context->regexp_class, "quote");
-		singleton_method<Arg::Self<Arg::Class<Class>>, &rb_allocate>(context->regexp_class, "allocate");
+		singleton_method<String, &escape>(context->regexp_class, "escape");
+		singleton_method<String, &escape>(context->regexp_class, "quote");
+		singleton_method<Self<Class>, &rb_allocate>(context->regexp_class, "allocate");
 	}
 };
 

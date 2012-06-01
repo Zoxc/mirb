@@ -108,12 +108,12 @@ namespace Mirb
 	{
 		context->io_class = define_class("IO", context->object_class);
 		
-		method<Arg::Self<Arg::Class<IO>>, &rb_close>(context->io_class, "close");
-		method<Arg::Self<Arg::Class<IO>>, Arg::Optional<Arg::Fixnum>, &rb_read>(context->io_class, "read");
-		method<Arg::Self<Arg::Class<IO>>, Arg::Block, &rb_each_line>(context->io_class, "each_line");
-		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_print>(context->io_class, "print");
-		method<Arg::Self<Arg::Class<IO>>, Arg::Count, Arg::Values, &rb_puts>(context->io_class, "puts");
-		method<Arg::Self<Arg::Class<IO>>, &rb_gets>(context->io_class, "gets");
+		method<Self<IO>, &rb_close>(context->io_class, "close");
+		method<Self<IO>, Optional<Arg::Fixnum>, &rb_read>(context->io_class, "read");
+		method<Self<IO>, Arg::Block, &rb_each_line>(context->io_class, "each_line");
+		method<Self<IO>, Arg::Count, Arg::Values, &rb_print>(context->io_class, "print");
+		method<Self<IO>, Arg::Count, Arg::Values, &rb_puts>(context->io_class, "puts");
+		method<Self<IO>, &rb_gets>(context->io_class, "gets");
 	}
 };
 

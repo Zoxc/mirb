@@ -387,22 +387,22 @@ namespace Mirb
 	{
 		context->file_class = define_class("File", context->io_class);
 		
-		method<Arg::Self<Arg::Value>, &rb_path>(context->file_class, "path");
+		method<Self<Value>, &rb_path>(context->file_class, "path");
 
-		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, &rb_new>(context->file_class, "new");
-		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, Arg::Block, &rb_open>(context->file_class, "open");
+		singleton_method<String, Optional<String>, &rb_new>(context->file_class, "new");
+		singleton_method<String, Optional<String>, Arg::Block, &rb_open>(context->file_class, "open");
 
-		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exists?");
-		singleton_method<Arg::Class<String>, &exists>(context->file_class, "exist?");
-		singleton_method<Arg::Class<String>, &path>(context->file_class, "path");
-		singleton_method<Arg::Class<String>, &file>(context->file_class, "file?");
-		singleton_method<Arg::Class<String>, &directory>(context->file_class, "directory?");
-		singleton_method<Arg::Class<String>, &executable>(context->file_class, "executable?");
-		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch?");
-		singleton_method<Arg::Class<String>, Arg::Class<String>, &rb_fnmatch>(context->file_class, "fnmatch");
+		singleton_method<String, &exists>(context->file_class, "exists?");
+		singleton_method<String, &exists>(context->file_class, "exist?");
+		singleton_method<String, &path>(context->file_class, "path");
+		singleton_method<String, &file>(context->file_class, "file?");
+		singleton_method<String, &directory>(context->file_class, "directory?");
+		singleton_method<String, &executable>(context->file_class, "executable?");
+		singleton_method<String, String, &rb_fnmatch>(context->file_class, "fnmatch?");
+		singleton_method<String, String, &rb_fnmatch>(context->file_class, "fnmatch");
 
-		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, &rb_expand_path>(context->file_class, "expand_path");
-		singleton_method<Arg::Class<String>, &rb_dirname>(context->file_class, "dirname");
+		singleton_method<String, Optional<String>, &rb_expand_path>(context->file_class, "expand_path");
+		singleton_method<String, &rb_dirname>(context->file_class, "dirname");
 		singleton_method<Arg::Count, Arg::Values, &rb_join>(context->file_class, "join");
 
 		set_const(context->file_class, Symbol::get("SEPARATOR"), String::get("/"));

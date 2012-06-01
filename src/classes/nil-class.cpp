@@ -34,7 +34,7 @@ namespace Mirb
 	
 	void NilClass::initialize()
 	{
-		method<Arg::Value, &rb_xor>(context->nil_class, "^");
+		method<Value, &rb_xor>(context->nil_class, "^");
 		method<&to_i>(context->nil_class, "to_i");
 		method<&to_s>(context->nil_class, "to_s");
 		method<&inspect>(context->nil_class, "inspect");

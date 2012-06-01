@@ -45,6 +45,7 @@ namespace Mirb
 	namespace Arg
 	{
 		template<class T> class Class;
+		class Value;
 	};
 
 	class Value
@@ -146,7 +147,12 @@ namespace Mirb
 
 		static bool is_fixnum(value_t value);
 	};
-
+	
+	template<> struct Value::ArgumentWrapper<Value>
+	{
+		typedef Arg::Value Real;
+	};
+		
 	template<Type::Enum type> struct Immediate:
 		public Value
 	{

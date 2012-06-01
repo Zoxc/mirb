@@ -123,13 +123,13 @@ namespace Mirb
 	{
 		context->range_class = define_class("Range", context->object_class);
 		
-		method<Arg::Self<Arg::Class<Range>>, Arg::Value, &include>(context->range_class, "include?");
-		method<Arg::Self<Arg::Class<Range>>, Arg::Value, &include>(context->range_class, "===");
-		method<Arg::Self<Arg::Class<Range>>, &exclude_end>(context->range_class, "exclude_end?");
-		method<Arg::Self<Arg::Class<Range>>, &first>(context->range_class, "first");
-		method<Arg::Self<Arg::Class<Range>>, &last>(context->range_class, "last");
+		method<Self<Range>, Value, &include>(context->range_class, "include?");
+		method<Self<Range>, Value, &include>(context->range_class, "===");
+		method<Self<Range>, &exclude_end>(context->range_class, "exclude_end?");
+		method<Self<Range>, &first>(context->range_class, "first");
+		method<Self<Range>, &last>(context->range_class, "last");
 
-		method<Arg::Self<Arg::Class<Range>>, &to_s>(context->range_class, "to_s");
+		method<Self<Range>, &to_s>(context->range_class, "to_s");
 	}
 };
 

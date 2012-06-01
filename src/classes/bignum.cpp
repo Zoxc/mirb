@@ -102,18 +102,18 @@ namespace Mirb
 	{
 		context->bignum_class = define_class("Bignum", context->integer_class);
 
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Optional<Arg::Fixnum>, &to_s>(context->bignum_class, "to_s");
+		method<Self<Bignum>, Optional<Arg::Fixnum>, &to_s>(context->bignum_class, "to_s");
 		
-		method<Arg::Self<Arg::Class<Bignum>>, &zero>(context->bignum_class, "zero?");
-		method<Arg::Self<Arg::Class<Bignum>>, &neg>(context->bignum_class, "-@");
+		method<Self<Bignum>, &zero>(context->bignum_class, "zero?");
+		method<Self<Bignum>, &neg>(context->bignum_class, "-@");
 
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &add>(context->bignum_class, "+");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &sub>(context->bignum_class, "-");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &mul>(context->bignum_class, "*");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &div>(context->bignum_class, "/");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &mod>(context->bignum_class, "%");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &compare>(context->bignum_class, "<=>");
-		method<Arg::Self<Arg::Class<Bignum>>, Arg::Value, &coerce>(context->bignum_class, "coerce");
+		method<Self<Bignum>, Value, &add>(context->bignum_class, "+");
+		method<Self<Bignum>, Value, &sub>(context->bignum_class, "-");
+		method<Self<Bignum>, Value, &mul>(context->bignum_class, "*");
+		method<Self<Bignum>, Value, &div>(context->bignum_class, "/");
+		method<Self<Bignum>, Value, &mod>(context->bignum_class, "%");
+		method<Self<Bignum>, Value, &compare>(context->bignum_class, "<=>");
+		method<Self<Bignum>, Value, &coerce>(context->bignum_class, "coerce");
 	}
 };
 

@@ -164,20 +164,20 @@ namespace Mirb
 	{
 		context->hash_class = define_class("Hash", context->object_class);
 		
-		singleton_method<Arg::Self<Arg::Class<Class>>, &allocate>(context->hash_class, "allocate");
+		singleton_method<Self<Class>, &allocate>(context->hash_class, "allocate");
 
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Optional<Arg::Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
+		method<Self<Hash>, Optional<Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
-		method<Arg::Self<Arg::Class<Hash>>, &rb_empty>(context->hash_class, "empty?");
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, &rb_delete>(context->hash_class, "delete");
-		method<Arg::Self<Arg::Class<Hash>>, &keys>(context->hash_class, "keys");
-		method<Arg::Self<Arg::Class<Hash>>, &values>(context->hash_class, "values");
+		method<Self<Hash>, &rb_empty>(context->hash_class, "empty?");
+		method<Self<Hash>, Value, &rb_delete>(context->hash_class, "delete");
+		method<Self<Hash>, &keys>(context->hash_class, "keys");
+		method<Self<Hash>, &values>(context->hash_class, "values");
 
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Block, &each>(context->hash_class, "each");
+		method<Self<Hash>, Arg::Block, &each>(context->hash_class, "each");
 
-		method<Arg::Self<Arg::Class<Hash>>, &to_s>(context->hash_class, "to_s");
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, &get>(context->hash_class, "[]");
-		method<Arg::Self<Arg::Class<Hash>>, Arg::Value, Arg::Value, &set>(context->hash_class, "[]=");
+		method<Self<Hash>, &to_s>(context->hash_class, "to_s");
+		method<Self<Hash>, Value, &get>(context->hash_class, "[]");
+		method<Self<Hash>, Value, Value, &set>(context->hash_class, "[]=");
 	}
 };
 

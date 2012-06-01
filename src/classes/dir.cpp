@@ -136,11 +136,11 @@ namespace Mirb
 	{
 		context->dir_class = define_class("Dir", context->object_class);
 		
-		singleton_method<Arg::Class<String>, &mkdir>(context->dir_class, "mkdir");
-		singleton_method<Arg::Class<String>, Arg::Block, &chdir>(context->dir_class, "chdir");
-		singleton_method<Arg::Class<String>, &entries>(context->dir_class, "entries");
-		singleton_method<Arg::Class<String>, &rb_glob>(context->dir_class, "glob");
-		singleton_method<Arg::Class<String>, &rb_glob>(context->dir_class, "[]");
+		singleton_method<String, &mkdir>(context->dir_class, "mkdir");
+		singleton_method<String, Arg::Block, &chdir>(context->dir_class, "chdir");
+		singleton_method<String, &entries>(context->dir_class, "entries");
+		singleton_method<String, &rb_glob>(context->dir_class, "glob");
+		singleton_method<String, &rb_glob>(context->dir_class, "[]");
 
 		singleton_method<&pwd>(context->dir_class, "pwd");
 	}

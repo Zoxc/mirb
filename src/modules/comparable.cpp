@@ -52,11 +52,11 @@ namespace Mirb
 	{
 		context->comparable_module = define_module("Comparable");
 
-		method<Arg::Self<Arg::Value>, Arg::Value, &less>(context->comparable_module, "<");
-		method<Arg::Self<Arg::Value>, Arg::Value, &less_or_equal>(context->comparable_module, "<=");
-		method<Arg::Self<Arg::Value>, Arg::Value, &greater>(context->comparable_module, ">");
-		method<Arg::Self<Arg::Value>, Arg::Value, &greater_or_equal>(context->comparable_module, ">=");
-		method<Arg::Self<Arg::Value>, Arg::Value, &equal>(context->comparable_module, "==");
-		method<Arg::Self<Arg::Value>, Arg::Value, Arg::Value, &between>(context->comparable_module, "between?");
+		method<Self<Value>, Value, &less>(context->comparable_module, "<");
+		method<Self<Value>, Value, &less_or_equal>(context->comparable_module, "<=");
+		method<Self<Value>, Value, &greater>(context->comparable_module, ">");
+		method<Self<Value>, Value, &greater_or_equal>(context->comparable_module, ">=");
+		method<Self<Value>, Value, &equal>(context->comparable_module, "==");
+		method<Self<Value>, Value, Value, &between>(context->comparable_module, "between?");
 	}
 };
