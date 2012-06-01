@@ -99,7 +99,7 @@ namespace Mirb
 		{
 			Block *block = Collector::allocate_pinned<Block>(nullptr);
 
-			Value::assert_valid(module);
+			module->assert_valid();
 
 			block->executor = executor;
 			block->min_args = info.min;

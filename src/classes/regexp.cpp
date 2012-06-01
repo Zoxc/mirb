@@ -72,9 +72,9 @@ namespace Mirb
 
 	value_t Regexp::rb_initialize(Regexp *obj, value_t pattern)
 	{
-		if(Value::of_type<Regexp>(pattern))
+		if(of_type<Regexp>(pattern))
 			obj->pattern = cast<Regexp>(pattern)->pattern;
-		else if(Value::of_type<String>(pattern))
+		else if(of_type<String>(pattern))
 			obj->pattern = cast<String>(pattern)->string;
 		else
 			raise(context->runtime_error, "Expected a valid pattern");

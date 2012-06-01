@@ -141,12 +141,12 @@ namespace Mirb
 		EndOp
 
 		Op(BranchUnless)
-			if(!Value::test(vars[op.var]))
+			if(!vars[op.var]->test())
 				ip = ip_start + op.pos;
 		EndOp
 
 		Op(BranchIf)
-			if(Value::test(vars[op.var]))
+			if(vars[op.var]->test())
 				ip = ip_start + op.pos;
 		EndOp
 
@@ -288,7 +288,7 @@ namespace Mirb
 		Op(PushArray)
 			value_t value = vars[op.from];
 			
-			if(Value::of_type<Array>(value))
+			if(of_type<Array>(value))
 				cast<Array>(vars[op.into])->vector.push(cast<Array>(value)->vector);
 			else
 				cast<Array>(vars[op.into])->vector.push(value);
@@ -400,7 +400,7 @@ namespace Mirb
 		EndOp
 
 		DeepOp(UnwindReturn)
-			throw InternalException(Collector::allocate<ReturnException>(Value::ReturnException, context->local_jump_error, String::get("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
+			throw InternalException(Collector::allocate<ReturnException>(Type::ReturnException, context->local_jump_error, String::get("Unhandled return from block"), backtrace(), op.code, vars[op.var]));
 		EndOp
 
 		DeepOp(UnwindBreak)
@@ -408,11 +408,11 @@ namespace Mirb
 		EndOp
 			
 		Op(UnwindNext)
-			throw InternalException(Collector::allocate<NextException>(Value::NextException, context->local_jump_error, nullptr, nullptr, vars[op.var]));
+			throw InternalException(Collector::allocate<NextException>(Type::NextException, context->local_jump_error, nullptr, nullptr, vars[op.var]));
 		EndOp
 
 		Op(UnwindRedo)
-			throw InternalException(Collector::allocate<RedoException>(Value::RedoException, context->local_jump_error, nullptr, nullptr, op.pos));
+			throw InternalException(Collector::allocate<RedoException>(Type::RedoException, context->local_jump_error, nullptr, nullptr, op.pos));
 		EndOp
 			
 		DeepOp(GetGlobal)
@@ -426,15 +426,15 @@ namespace Mirb
 		OpEpilogue
 
 handle_exception:
-		if(frame.exception->get_type() == Value::SystemStackError && stack_no_reserve(frame))
+		if(frame.exception->type() == Type::SystemStackError && stack_no_reserve(frame))
 			throw InternalException(frame.exception);
 
 		{
 			if(!current_exception_block)
 			{
-				switch(frame.exception->get_type())
+				switch(frame.exception->type())
 				{
-					case Value::RedoException:
+					case Type::RedoException:
 					{
 						auto error = (RedoException *)frame.exception;
 						
@@ -445,7 +445,7 @@ handle_exception:
 					}
 					break;
 
-					case Value::NextException:
+					case Type::NextException:
 					{
 						auto error = (NextException *)frame.exception;
 
@@ -455,7 +455,7 @@ handle_exception:
 					}
 					break;
 
-					case Value::ReturnException:
+					case Type::ReturnException:
 					{
 						auto error = (ReturnException *)frame.exception;
 
@@ -529,9 +529,9 @@ exception_block_handler: // The test block will jump back here
 
 			if(loop_exception_block->loop)
 			{
-				switch(frame.exception->get_type())
+				switch(frame.exception->type())
 				{
-					case Value::BreakException:
+					case Type::BreakException:
 					{
 						frame.exception = 0;
 						
@@ -540,7 +540,7 @@ exception_block_handler: // The test block will jump back here
 					}
 					break;
 
-					case Value::RedoException:
+					case Type::RedoException:
 					{
 						auto error = (RedoException *)frame.exception;
 
@@ -551,7 +551,7 @@ exception_block_handler: // The test block will jump back here
 					}
 					break;
 
-					case Value::NextException:
+					case Type::NextException:
 					{
 						frame.exception = 0;
 
@@ -583,7 +583,7 @@ exception_block_handler: // The test block will jump back here
 
 			auto break_exception = (BreakException *)e.value;
 
-			if(prelude_unlikely(e.value->get_type() == Value::BreakException && break_exception->target == frame.code))
+			if(prelude_unlikely(e.value->type() == Type::BreakException && break_exception->target == frame.code))
 			{
 				if(break_exception->dst != no_var)
 					vars[break_exception->dst] = break_exception->value;

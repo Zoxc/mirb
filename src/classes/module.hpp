@@ -23,14 +23,14 @@ namespace Mirb
 			static value_t define_method(Module *obj, Symbol *name, Proc *proc, value_t block);
 			static value_t module_eval(Module *obj, String *string, value_t block);
 			
-			Module(Value::Type type) : Object(type), methods(nullptr), superclass(nullptr) {}
+			Module(Type::Enum type) : Object(type), methods(nullptr), superclass(nullptr) {}
 
 			friend class Class;
 		protected:
 			ValueMap *methods;
 
 		public:
-			Module(Value::Type type, Class *instance_of, Class *superclass) : Object(type, instance_of), methods(nullptr), superclass(superclass) {}
+			Module(Type::Enum type, Class *instance_of, Class *superclass) : Object(type, instance_of), methods(nullptr), superclass(superclass) {}
 
 			Class *superclass;
 

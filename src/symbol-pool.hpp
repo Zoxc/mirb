@@ -43,7 +43,7 @@ namespace Mirb
 			static void verify_value(Symbol *value)
 			{
 				if(value)
-					Value::assert_valid(value);
+					value->assert_valid();
 			}
 
 			static bool valid_key(const CharArray &)

@@ -40,8 +40,8 @@ namespace Mirb
 			void flatten(VectorType &vector, bool &mod);
 
 		public:
-			Array(Class *instance_of) : Object(Value::Array, instance_of) {}
-			Array() : Object(Value::Array, context->array_class) {}
+			Array(Class *instance_of) : Object(Type::Array, instance_of) {}
+			Array() : Object(Type::Array, context->array_class) {}
 			
 			static Array *allocate();
 			static Array *allocate_pair(value_t left, value_t right);

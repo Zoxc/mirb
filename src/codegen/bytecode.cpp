@@ -109,19 +109,19 @@ namespace Mirb
 
 			switch(node->result_type)
 			{
-				case Value::Symbol:
+				case Type::Symbol:
 					gen<LoadSymbolOp>(var, symbol_pool.get(node->data.data, node->data.length));
 					break;
 					
-				case Value::String:
+				case Type::String:
 					gen_string(var, node->data);
 					break;
 
-				case Value::Regexp:
+				case Type::Regexp:
 					gen_regexp(var, node->data, node->range);
 					break;
 
-				case Value::Array:
+				case Type::Array:
 				{
 					var_t array = reuse(var);
 					var_t element = create_var();
@@ -1318,7 +1318,7 @@ namespace Mirb
 			var_count(scope->variable_list.size()),
 			memory_pool(memory_pool)
 		{
-			Value::assert_valid(scope);
+			scope->assert_valid();
 
 			#ifdef MIRB_DEBUG_COMPILER
 				label_count = 0;
@@ -1327,7 +1327,7 @@ namespace Mirb
 
 		Block *ByteCodeGenerator::generate()
 		{
-			Value::assert_valid(scope);
+			scope->assert_valid();
 
 			if(scope->final)
 				final = scope->final;
@@ -1512,7 +1512,7 @@ namespace Mirb
 			Tree::CountedNodeList &arguments = node->arguments;
 
 			if(scope)
-				Value::assert_valid(scope);
+				scope->assert_valid();
 
 			if(node->variadic)
 			{

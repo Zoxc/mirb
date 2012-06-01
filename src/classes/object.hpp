@@ -8,7 +8,7 @@ namespace Mirb
 	class ValueMap;
 
 	class Object:
-		public Value::Header
+		public Value
 	{
 		private:
 			static value_t tap(value_t obj, value_t block);
@@ -30,21 +30,21 @@ namespace Mirb
 			
 			void generate_hash();
 			
-			Object(Value::Type type) : Value::Header(type), instance_of(nullptr), vars(nullptr) {}
+			Object(Type::Enum type) : Value(type), instance_of(nullptr), vars(nullptr) {}
 			
 			friend class Module;
 			friend class Symbol;
 		public:
-			Object(const Object &other) : Value::Header(other), instance_of(other.instance_of), vars(nullptr), hash_value(other.hash_value) {}
+			Object(const Object &other) : Value(other), instance_of(other.instance_of), vars(nullptr), hash_value(other.hash_value) {}
 
-			Object(Value::Type type, Class *instance_of) : Value::Header(type), instance_of(instance_of), vars(nullptr)
+			Object(Type::Enum type, Class *instance_of) : Value(type), instance_of(instance_of), vars(nullptr)
 			{
-				Value::verify(instance_of);
+				verify(instance_of);
 			}
 
-			Object(Class *instance_of) : Value::Header(Value::Object), instance_of(instance_of), vars(nullptr)
+			Object(Class *instance_of) : Value(Type::Object), instance_of(instance_of), vars(nullptr)
 			{
-				Value::verify(instance_of);
+				verify(instance_of);
 			}
 			
 			static value_t allocate(Class *instance_of);

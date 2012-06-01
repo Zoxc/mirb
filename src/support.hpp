@@ -10,7 +10,7 @@ namespace Mirb
 		value_t create_closure(Block *block, value_t self, Symbol *name, Tuple<Module> *scope, size_t argc, value_t argv[]);
 		value_t create_array(size_t argc, value_t argv[]);
 		value_t create_hash(size_t argc, value_t argv[]);
-		value_t interpolate(size_t argc, value_t argv[], Value::Type type);
+		value_t interpolate(size_t argc, value_t argv[], Type::Enum type);
 
 		bool case_match(value_t value, value_t list);
 

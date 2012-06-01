@@ -440,7 +440,7 @@ namespace Mirb
 
 	Tree::Node *Parser::parse_data(Lexeme::Type override, bool allow_keywords)
 	{
-		Value::Type type;
+		Type::Enum type;
 
 		switch(override)
 		{
@@ -463,20 +463,21 @@ namespace Mirb
 
 				return result;
 			}
+
 			case Lexeme::STRING:
-				type = Value::String;
+				type = Type::String;
 				break;
 				
 			case Lexeme::REGEXP:
-				type = Value::Regexp;
+				type = Type::Regexp;
 				break;
 				
 			case Lexeme::SYMBOL:
-				type = Value::Symbol;
+				type = Type::Symbol;
 				break;
 
 			case Lexeme::ARRAY:
-				type = Value::Array;
+				type = Type::Array;
 				break;
 
 			default:
@@ -710,7 +711,7 @@ namespace Mirb
 				new_result = new (fragment) Tree::InterpolateNode;
 				new_result->range = result->range;
 				new_result->data = result->data;
-				new_result->result_type = Value::String;
+				new_result->result_type = Type::String;
 			}
 			else
 				new_result = result_inter;
@@ -754,7 +755,7 @@ namespace Mirb
 			{
 				auto result = new (fragment) Tree::DataNode;
 
-				result->result_type = Value::String;
+				result->result_type = Type::String;
 				result->data.set<Tree::Fragment>(document.name.get_string(), fragment);
 
 				lexer.step();
@@ -817,7 +818,7 @@ namespace Mirb
 					case Tree::Node::Variable:
 					{
 						auto result = new (fragment) Tree::DataNode;
-						result->result_type = Value::String;
+						result->result_type = Type::String;
 						result->data.set<Tree::Fragment>("local-variable", fragment);
 						return result;
 					}
@@ -932,7 +933,7 @@ namespace Mirb
 
 				auto result = new (fragment) Tree::DataNode;
 				
-				result->result_type = Value::String;
+				result->result_type = Type::String;
 					
 				result->data = lexer.lexeme.data->tail.copy<Tree::Fragment>(fragment);
 					

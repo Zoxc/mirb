@@ -18,7 +18,7 @@ namespace Mirb
 			static value_t compare(Float *obj, value_t other);
 
 		public:
-			Float(double value) : Object(Value::Float, context->float_class), value(value) {}
+			Float(double value) : Object(Type::Float, context->float_class), value(value) {}
 
 			double value;
 

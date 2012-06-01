@@ -45,7 +45,7 @@ namespace Mirb
 	{
 		if(symbol)
 		{
-			Value::assert_valid(symbol);
+			symbol->assert_valid();
 			return symbol->get_string();
 		}
 		else

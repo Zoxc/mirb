@@ -13,7 +13,7 @@ namespace Mirb
 	
 	value_t TrueClass::rb_xor(value_t value)
 	{
-		return Value::test(value) ? value_false : value_true;
+		return value->test() ? value_false : value_true;
 	}
 	
 	void TrueClass::initialize()

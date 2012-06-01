@@ -18,7 +18,7 @@ namespace Mirb
 		thread_pointer(reinterpret_cast<value_t *>(&value));
 	};
 
-	template<> void template_thread<Value::Header>(Value::Header *&value)
+	template<> void template_thread<Value>(Value *&value)
 	{
 		thread_value(&value);
 	}
@@ -45,10 +45,10 @@ namespace Mirb
 		}
 	};
 
-	template<Value::Type type> struct ThreadClass
+	template<Type::Enum type> struct ThreadClass
 	{
 		typedef void Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static void func(value_t value)
 		{
@@ -60,20 +60,20 @@ namespace Mirb
 
 	void thread_value(value_t *node)
 	{
-		if(Value::object_ref(*node))
+		if((*node)->object_ref())
 			thread_pointer(node);
 	}
 
 	void thread_data(value_t *node, value_t temp)
 	{
-		mirb_debug_assert((*node != (value_t)Value::Header::list_end) && "We have seen this field before");
+		mirb_debug_assert((*node != (value_t)Value::list_end) && "We have seen this field before");
 
-		Value::assert_alive(temp);
+		temp->assert_alive();
 		mirb_debug_assert(temp->marked == true);
-		mirb_debug_assert((temp->*Value::Header::mark_list) == Value::Header::list_end);
+		mirb_debug_assert((temp->*Value::mark_list) == Value::list_end);
 
-		*node = (value_t)(temp->*Value::Header::thread_list);
-		temp->*Value::Header::thread_list = node;
+		*node = (value_t)(temp->*Value::thread_list);
+		temp->*Value::thread_list = node;
 	}
 
 	void thread_pointer(value_t *node)
@@ -92,12 +92,12 @@ namespace Mirb
 			node->marked = false;
 		}
 
-		if(node->type == Value::InternalVariableBlock)
+		if(node->value_type == Type::InternalVariableBlock)
 			free = (value_t)((size_t)free + sizeof(VariableBlock));
 
-		value_t *current = (node->*Value::Header::thread_list);
+		value_t *current = (node->*Value::thread_list);
 
-		while(current != Value::Header::list_end)
+		while(current != Value::list_end)
 		{
 			mirb_debug_assert(((value_t)current != *current) && "Infinite loop detected!");
 
@@ -106,7 +106,7 @@ namespace Mirb
 			current = temp;
 		}
 
-		(node->*Value::Header::thread_list) = Value::Header::list_end;
+		(node->*Value::thread_list) = Value::list_end;
 	}
 
 	void move(value_t p, value_t new_p, size_t size)
@@ -119,7 +119,7 @@ namespace Mirb
 
 	void thread_children(value_t obj)
 	{
-		Value::virtual_do<ThreadClass>(obj->type, obj);
+		Type::action<ThreadClass>(obj->value_type, obj);
 	}
 
 	struct RegionWalker
@@ -134,10 +134,10 @@ namespace Mirb
 
 		void test(value_t obj prelude_unused)
 		{
-			mirb_debug(mirb_debug_assert(obj->magic == Value::Header::magic_value));
-			mirb_debug_assert(obj->type != Value::None);
+			mirb_debug(mirb_debug_assert(obj->magic == Value::magic_value));
+			mirb_debug_assert(obj->value_type != Type::None);
 			mirb_debug(mirb_debug_assert(obj->alive));
-			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
+			mirb_debug_assert((obj->*Value::mark_list) == Value::list_end);
 		}
 
 		bool load()
@@ -302,19 +302,19 @@ namespace Mirb
 			}
 			else
 			{
-				Value::virtual_do<FreeClass>(i->type, i);
+				Type::action<FreeClass>(i->value_type, i);
 
 #ifdef MIRB_GC_SKIP_BLOCKS
 				if(prev)
 				{
-					prev->type = Value::FreeBlock;
+					prev->value_type = Type::FreeBlock;
 
 					#ifdef DEBUG
 						prev->block_size = sizeof(FreeBlock);
 					#endif
 
 					((FreeBlock *)prev)->next = (void *)obj.region;
-					prev->*Value::Header::thread_list = (value_t *)obj.pos;
+					prev->*Value::thread_list = (value_t *)obj.pos;
 				}
 				else
 				{
@@ -328,8 +328,8 @@ namespace Mirb
 
 		for(auto i = heap_list.begin(); i != heap_list.end(); ++i)
 		{
-			Value::assert_valid_base(*i);
-			mirb_debug_assert(((*i)->*Value::Header::mark_list) == Value::Header::list_end);
+			(*i)->assert_valid_base();
+			mirb_debug_assert(((*i)->*Value::mark_list) == Value::list_end);
 
 			if(i().marked)
 			{
@@ -376,9 +376,9 @@ namespace Mirb
 				#endif
 
 #ifdef MIRB_GC_SKIP_BLOCKS
-				if(i->type == Value::FreeBlock)
+				if(i->value_type == Type::FreeBlock)
 				{
-					if(prelude_unlikely(!obj.jump((value_t)(i->*Value::Header::thread_list), (Region *)((FreeBlock *)i)->next)))
+					if(prelude_unlikely(!obj.jump((value_t)(i->*Value::thread_list), (Region *)((FreeBlock *)i)->next)))
 						break;
 					else
 						goto start;
@@ -416,15 +416,15 @@ namespace Mirb
 		{
 			auto next = heap_obj->entry.next;
 
-			Value::assert_valid_base(heap_obj);
-			mirb_debug_assert((heap_obj->*Value::Header::mark_list) == Value::Header::list_end);
+			heap_obj->assert_valid_base();
+			mirb_debug_assert((heap_obj->*Value::mark_list) == Value::list_end);
 
 			if(heap_obj->marked)
 				update<true>(heap_obj, heap_obj);
 			else
 			{
 				heap_list.remove(heap_obj);
-				Value::virtual_do<FreeClass>(heap_obj->type, heap_obj);
+				Type::action<FreeClass>(heap_obj->value_type, heap_obj);
 				std::free((void *)heap_obj);
 			}
 
@@ -470,8 +470,8 @@ namespace Mirb
 
 		do
 		{
-			Value::assert_valid(obj.pos);
-			Value::virtual_do<FreeClass>(obj.pos->type, obj.pos);
+			obj.pos->assert_valid();
+			Type::action<FreeClass>(obj.pos->value_type, obj.pos);
 		}
 		while(obj.step(size_of_value(obj.pos)));
 	};

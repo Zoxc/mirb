@@ -17,10 +17,10 @@ namespace Mirb
 			static value_t to_s(Symbol *self);
 			static value_t inspect(Symbol *self);
 
-			Symbol() : Object(Value::Symbol) {}
+			Symbol() : Object(Type::Symbol) {}
 			
 		public:
-			Symbol(const CharArray &char_array, size_t hash) : Object(Value::Symbol, context->symbol_class), string(char_array)
+			Symbol(const CharArray &char_array, size_t hash) : Object(Type::Symbol, context->symbol_class), string(char_array)
 			{
 				mirb_debug_assert(hash == char_array.hash());
 

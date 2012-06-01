@@ -256,9 +256,9 @@ namespace Mirb
 		}
 		else if(first)
 		{
-			if(Value::type(first) == Value::String)
+			if(first->type() == Type::String)
 				message = cast<String>(first);
-			else if(Value::type(first) == Value::Class && subclass_of(context->exception_class, cast<Class>(first)))
+			else if(first->type() == Type::Class && subclass_of(context->exception_class, cast<Class>(first)))
 				instance_of = cast<Class>(first);
 			else
 				type_error(first, "Exception subclass or String");

@@ -17,9 +17,9 @@ namespace Mirb
 			};
 
 		public:
-			Method(Class *instance_of) : Object(Value::Method, instance_of), block(0), scope(0), scopes(0) {}
+			Method(Class *instance_of) : Object(Type::Method, instance_of), block(0), scope(0), scopes(0) {}
 			
-			Method(Block *block, Tuple<Module> *scope, Tuple<> *scopes = 0) : Object(Value::Method, context->method_class), block(block), scope(scope), scopes(scopes) {}
+			Method(Block *block, Tuple<Module> *scope, Tuple<> *scopes = 0) : Object(Type::Method, context->method_class), block(block), scope(scope), scopes(scopes) {}
 
 			Block *block;
 			Tuple<Module> *scope;

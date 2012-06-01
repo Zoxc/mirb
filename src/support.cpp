@@ -21,7 +21,7 @@ namespace Mirb
 			return Collector::allocate<Proc>(context->proc_class, self, name, scope, block, &scopes);
 		}
 
-		value_t interpolate(size_t argc, value_t argv[], Value::Type type)
+		value_t interpolate(size_t argc, value_t argv[], Type::Enum type)
 		{
 			CharArray result;
 
@@ -30,31 +30,26 @@ namespace Mirb
 			for(size_t i = 0; i < argc; ++i)
 			{
 				value_t obj = argv[i];
+				String *str = try_cast<String>(obj);
 
-				if(prelude_unlikely(Value::type(obj) != Value::String))
-				{
-					obj = Mirb::call(obj, "to_s");
+				if(prelude_unlikely(!str))
+					str = raise_cast<String>(Mirb::call(obj, "to_s"));
 
-					if(!obj)
-						return (value_t)0;
-				}
-
-				if(prelude_likely(Value::type(obj) == Value::String))
-					result += cast<String>(obj)->string;
+				result += str->string;
 			}
 			
 			switch(type)
 			{
-				case Value::Symbol:
+				case Type::Symbol:
 					return symbol_pool.get(result);
 
-				case Value::String:
+				case Type::String:
 					return result.to_string();
 
-				case Value::Regexp:
+				case Type::Regexp:
 					return Regexp::allocate(result);
 
-				case Value::Array:
+				case Type::Array:
 				{
 					Array *array = Collector::allocate<Array>();
 
@@ -75,13 +70,13 @@ namespace Mirb
 			auto array = try_cast<Array>(list);
 
 			if(!array)
-				return Value::test(call_argv(list, "===", 1, &value));
+				return call_argv(list, "===", 1, &value)->test();
 
 			OnStack<1> os(array);
 
 			for(size_t i = 0; i < array->size(); ++i)
 			{
-				if(Value::test(call_argv(array->get(i), "===", 1, &value)))
+				if(call_argv(array->get(i), "===", 1, &value)->test())
 					return true;
 			}
 

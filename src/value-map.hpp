@@ -60,7 +60,7 @@ namespace Mirb
 			
 			template<typename O> static void remove_index(O &owner, value_t &key, size_t index)
 			{
-				size_t hash = Value::hash(key);
+				size_t hash = hash_value(key);
 				size_t free = index;
 				size_t mask = data(owner).mask;
 				size_t current = index;
@@ -80,7 +80,7 @@ namespace Mirb
 						return;
 					}
 					
-					if(Value::hash(current_key) == hash)
+					if(hash_value(current_key) == hash)
 					{
 						key_slot(owner, free) = current_key;
 						value_slot(owner, free) = value_slot(owner, current);
@@ -93,7 +93,7 @@ namespace Mirb
 			template<typename O, typename Free, typename Match> static value_t search(O &owner, value_t &key, Free free, Match match)
 			{
 				size_t mask = data(owner).mask;
-				size_t current = Value::hash(key) & mask;
+				size_t current = hash_value(key) & mask;
 				
 				mirb_debug_assert(mask >= data(owner).entries);
 				
@@ -115,7 +115,7 @@ namespace Mirb
 					{
 						value_t test = ValueMapData::call(slot, &key);
 
-						if(Value::test(test))
+						if(test->test())
 							return match(index);
 					}
 
@@ -320,10 +320,10 @@ namespace Mirb
 	};
 	
 	class ValueMap:
-		public Value::Header
+		public Value
 	{
 		public:
-			ValueMap() : Value::Header(Value::InternalValueMap), data(8) {}
+			ValueMap() : Value(Type::InternalValueMap), data(8) {}
 			
 			ValueMapData data;
 

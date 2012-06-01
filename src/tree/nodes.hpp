@@ -152,7 +152,7 @@ namespace Mirb
 		{
 			NodeType type() { return Data; }
 			
-			Value::Type result_type;
+			Type::Enum result_type;
 			
 			DataEntry data;
 		};

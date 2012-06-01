@@ -8,7 +8,7 @@ namespace Mirb
 	class Stream;
 
 	class StackFrame:
-		public Value::Header
+		public Value
 	{
 		private:
 			Block *code;
@@ -61,8 +61,8 @@ namespace Mirb
 			static void print_backtrace(Exception *self, IO *io);
 
 		public:
-			Exception(Value::Type type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
-			Exception(Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(Value::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Type::Enum type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(Type::Exception, instance_of), message(message), backtrace(backtrace) {}
 			
 			String *message;
 			Tuple<StackFrame> *backtrace;

@@ -7,7 +7,7 @@
 
 namespace Mirb
 {
-	value_t mark_list = (value_t)Value::Header::list_end;
+	value_t mark_list = (value_t)Value::list_end;
 	value_t mark_parent;
 	
 	bool mark_value(value_t obj);
@@ -42,10 +42,10 @@ namespace Mirb
 		}
 	};
 
-	template<Value::Type type> struct MarkClass
+	template<Type::Enum type> struct MarkClass
 	{
 		typedef void Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static void func(value_t value)
 		{
@@ -56,19 +56,20 @@ namespace Mirb
 		}
 	};
 				
-	template<> bool template_mark<Value::Header>(Value::Header *value)
+	template<> bool template_mark<Value>(Value *value)
 	{
 		return mark_value(value);
 	}
 
 	bool mark_pointer(value_t obj)
 	{
-		Value::assert_alive(obj);
-		mirb_debug_assert((obj->*Value::Header::thread_list) == Value::Header::list_end);
+		obj->assert_alive();
+
+		mirb_debug_assert((obj->*Value::thread_list) == Value::list_end);
 
 		if(!obj->marked)
 		{
-			mirb_debug_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
+			mirb_debug_assert((obj->*Value::mark_list) == Value::list_end);
 
 			obj->marked = true;
 			
@@ -76,7 +77,7 @@ namespace Mirb
 				obj->refs = mark_parent;
 			#endif
 
-			(obj->*Value::Header::mark_list) = (value_t *)mark_list;
+			(obj->*Value::mark_list) = (value_t *)mark_list;
 			mark_list = obj;
 
 			return true;
@@ -87,7 +88,7 @@ namespace Mirb
 	
 	bool mark_value(value_t obj)
 	{
-		if(Value::object_ref(obj))
+		if(obj->object_ref())
 			return mark_pointer(obj);
 		else
 			return false;
@@ -99,17 +100,17 @@ namespace Mirb
 			mark_parent = nullptr;
 		#endif
 
-		while(mark_list != (value_t)Value::Header::list_end)
+		while(mark_list != (value_t)Value::list_end)
 		{
 			value_t current = mark_list;
-			mark_list = (value_t)(mark_list->*Value::Header::mark_list);
-			(current->*Value::Header::mark_list) = Value::Header::list_end;
+			mark_list = (value_t)(mark_list->*Value::mark_list);
+			(current->*Value::mark_list) = Value::list_end;
 
 			#ifdef DEBUG
 				mark_parent = current;
 			#endif
 
-			Value::virtual_do<MarkClass>(Value::type(current), current);
+			Type::action<MarkClass>(current->type(), current);
 			
 			#ifdef DEBUG
 				current->refs = 0;

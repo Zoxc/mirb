@@ -76,6 +76,7 @@
     <ClInclude Include="..\..\src\tree\nodes.hpp" />
     <ClInclude Include="..\..\src\tree\printer.hpp" />
     <ClInclude Include="..\..\src\tree\tree.hpp" />
+    <ClInclude Include="..\..\src\type.hpp" />
     <ClInclude Include="..\..\src\value-map.hpp" />
     <ClInclude Include="..\..\src\value.hpp" />
     <ClInclude Include="..\..\src\vm.hpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="..\..\src\tree\nodes.cpp" />
     <ClCompile Include="..\..\src\tree\printer.cpp" />
     <ClCompile Include="..\..\src\tree\tree.cpp" />
+    <ClCompile Include="..\..\src\type.cpp" />
     <ClCompile Include="..\..\src\value-map.cpp" />
     <ClCompile Include="..\..\src\value.cpp" />
     <ClCompile Include="..\..\src\vm.cpp" />

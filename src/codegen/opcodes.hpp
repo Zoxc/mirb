@@ -434,7 +434,7 @@ namespace Mirb
 
 			CallOp(var_t var, var_t obj, Symbol *method, var_t block_var, size_t argc, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), argc(argc), argv(argv)
 			{
-				Value::assert_valid(method);
+				method->assert_valid();
 			}
 		};
 		
@@ -460,7 +460,7 @@ namespace Mirb
 
 			VariadicCallOp(var_t var, var_t obj, Symbol *method, var_t block_var, var_t argv) : var(var), obj(obj), method(method), block_var(block_var), argv(argv)
 			{
-				Value::assert_valid(method);
+				method->assert_valid();
 			}
 		};
 		
@@ -740,9 +740,9 @@ namespace Mirb
 			var_t var;
 			size_t argc;
 			var_t argv;
-			Value::Type result;
+			Mirb::Type::Enum result;
 
-			InterpolateOp(var_t var, size_t argc, var_t argv, Value::Type result) : var(var), argc(argc), argv(argv), result(result) {}
+			InterpolateOp(var_t var, size_t argc, var_t argv, Mirb::Type::Enum result) : var(var), argc(argc), argv(argv), result(result) {}
 		};
 	};
 };

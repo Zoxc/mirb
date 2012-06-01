@@ -23,10 +23,10 @@ namespace Mirb
 		public:
 			Number number;
 
-			Bignum(intptr_t value) : Object(Value::Bignum, context->bignum_class), number(value) {}
-			Bignum(size_t value) : Object(Value::Bignum, context->bignum_class), number(value) {}
-			Bignum(const Number &value) : Object(Value::Bignum, context->bignum_class), number(value) {}
-			Bignum(Number &&value) : Object(Value::Bignum, context->bignum_class), number(value) {}
+			Bignum(intptr_t value) : Object(Type::Bignum, context->bignum_class), number(value) {}
+			Bignum(size_t value) : Object(Type::Bignum, context->bignum_class), number(value) {}
+			Bignum(const Number &value) : Object(Type::Bignum, context->bignum_class), number(value) {}
+			Bignum(Number &&value) : Object(Type::Bignum, context->bignum_class), number(value) {}
 			
 			static const bool finalizer = true;
 

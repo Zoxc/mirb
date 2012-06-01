@@ -21,10 +21,10 @@ namespace Mirb
 		};
 	};
 
-	template<Value::Type type> struct FreeClass
+	template<Type::Enum type> struct FreeClass
 	{
 		typedef void Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static void func(value_t value)
 		{
@@ -83,10 +83,10 @@ namespace Mirb
 		}
 	}
 	
-	template<Value::Type type> struct SizeOf
+	template<Type::Enum type> struct SizeOf
 	{
 		typedef size_t Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static size_t func(value_t)
 		{
@@ -94,7 +94,7 @@ namespace Mirb
 		}
 	};
 	
-	template<> struct SizeOf<Value::InternalValueTuple>
+	template<> struct SizeOf<Type::InternalValueTuple>
 	{
 		typedef size_t Result;
 
@@ -104,7 +104,7 @@ namespace Mirb
 		}
 	};
 
-	template<> struct SizeOf<Value::InternalTuple>
+	template<> struct SizeOf<Type::InternalTuple>
 	{
 		typedef size_t Result;
 
@@ -114,7 +114,7 @@ namespace Mirb
 		}
 	};
 
-	template<> struct SizeOf<Value::InternalVariableBlock>
+	template<> struct SizeOf<Type::InternalVariableBlock>
 	{
 		typedef size_t Result;
 

@@ -5,7 +5,7 @@
 namespace Mirb
 {
 	class Global:
-		public Value::Header
+		public Value
 	{
 		public:
 			typedef value_t (*reader_t)(Global *global, Symbol *name);
@@ -15,7 +15,7 @@ namespace Mirb
 			writer_t writer;
 			value_t value;
 			
-			Global() : Value::Header(Value::InternalGlobal), reader(0), writer(0), value(value_nil) {}
+			Global() : Value(Type::InternalGlobal), reader(0), writer(0), value(value_nil) {}
 
 			static bool read_only_global(Global *, Symbol *name, value_t);
 

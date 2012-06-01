@@ -23,7 +23,7 @@ namespace Mirb
 
 	void Module::set_method(Symbol *name, value_t method)
 	{
-		Value::assert_valid(method);
+		method->assert_valid();
 
 		ValueMapAccess::set(get_methods(), name, method);
 	}
@@ -32,7 +32,7 @@ namespace Mirb
 	{
 		value_t name = get_var(obj, context->syms.classname);
 
-		if(Value::test(name))
+		if(name->test())
 			return name;
 
 		return Object::to_s(obj); // TODO: Replace by super

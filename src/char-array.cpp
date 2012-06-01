@@ -382,11 +382,7 @@ namespace Mirb
 
 	String *CharArray::to_string() const
 	{
-		auto result = Collector::allocate<String>(*this);
-
-		Value::assert_valid(result);
-
-		return result;
+		return Collector::allocate<String>(*this);
 	}
 	
 	CharArray CharArray::hex(size_t value)

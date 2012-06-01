@@ -36,10 +36,10 @@ namespace Mirb
 		}
 	};
 
-	template<Value::Type type> struct NaiveMarkClass
+	template<Type::Enum type> struct NaiveMarkClass
 	{
 		typedef void Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static void func(value_t value)
 		{
@@ -50,23 +50,23 @@ namespace Mirb
 		}
 	};
 	
-	template<> bool template_naive_mark<Value::Header>(Value::Header *value)
+	template<> bool template_naive_mark<Value>(Value *value)
 	{
 		return naive_mark_value(value);
 	}
 
 	bool naive_mark_pointer(value_t obj)
 	{
-		Value::assert_alive(obj);
-		mirb_runtime_assert((obj->*Value::Header::thread_list) == Value::Header::list_end);
-		mirb_runtime_assert((obj->*Value::Header::mark_list) == Value::Header::list_end);
+		obj->assert_alive();
+		mirb_runtime_assert((obj->*Value::thread_list) == Value::list_end);
+		mirb_runtime_assert((obj->*Value::mark_list) == Value::list_end);
 
 		if(!obj->marked)
 		{
 
 			obj->marked = true;
 
-			Value::virtual_do<NaiveMarkClass>(Value::type(obj), obj);
+			Type::action<NaiveMarkClass>(obj->type(), obj);
 
 			return true;
 		}
@@ -76,7 +76,7 @@ namespace Mirb
 	
 	bool naive_mark_value(value_t obj)
 	{
-		if(Value::object_ref(obj))
+		if(obj->object_ref())
 			return naive_mark_pointer(obj);
 		else
 			return false;

@@ -9,11 +9,11 @@
 
 namespace Mirb
 {
-	SystemExit::SystemExit(int result) : Exception(Value::SystemExit, context->system_exit_class, 0, Mirb::backtrace()), result(result)
+	SystemExit::SystemExit(int result) : Exception(Type::SystemExit, context->system_exit_class, 0, Mirb::backtrace()), result(result)
 	{
 	}
 	
-	SyntaxError::SyntaxError(const Parser &parser) : Exception(Value::SyntaxError, context->syntax_error, String::get("Unable to parse file '" + parser.document.name + "'"), Mirb::backtrace())
+	SyntaxError::SyntaxError(const Parser &parser) : Exception(Type::SyntaxError, context->syntax_error, String::get("Unable to parse file '" + parser.document.name + "'"), Mirb::backtrace())
 	{
 		messages = parser.messages;
 	}

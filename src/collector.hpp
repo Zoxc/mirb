@@ -12,7 +12,7 @@
 namespace Mirb
 {
 	class FreeBlock:
-		public Value::Header
+		public Value
 	{
 		public:
 			void *next;
@@ -92,7 +92,7 @@ namespace Mirb
 			
 			template<class T> static T *setup_object(T *object)
 			{
-				static_assert(std::is_base_of<Value::Header, T>::value, "T must be a Value::Header");
+				static_assert(std::is_base_of<Value, T>::value, "T must be a Value::Header");
 				
 				#ifdef DEBUG		
 					object->block_size = sizeof(T);
@@ -102,7 +102,7 @@ namespace Mirb
 			}
 			
 			friend class Class;
-			friend class Value::Header;
+			friend class Value;
 			
 			template<class T> static void *allocate_pinned_object()
 			{

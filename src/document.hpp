@@ -9,7 +9,7 @@ namespace Mirb
 		public PinnedHeader
 	{
 		public:
-			Document() : PinnedHeader(Value::InternalDocument) {}
+			Document() : PinnedHeader(Type::InternalDocument) {}
 			
 			static const bool finalizer = true;
 

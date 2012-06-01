@@ -75,7 +75,7 @@ namespace Mirb
 			{
 				auto &block = VariableBlock::from_memory(memory);
 
-				Value::assert_valid(&block);
+				(&block)->assert_valid();
 
 				size_t old_block_size = block.bytes - sizeof(VariableBlock);
 
@@ -108,7 +108,7 @@ namespace Mirb
 	
 	size_t size_of_value(value_t value)
 	{
-		size_t size = Value::virtual_do<SizeOf>(value->type, value);
+		size_t size = Type::action<SizeOf>(value->value_type, value);
 
 		mirb_debug(mirb_debug_assert(size == value->block_size));
 
@@ -126,10 +126,10 @@ namespace Mirb
 		typedef Test<sizeof(T)> Run;
 	};
 
-	template<Value::Type type> struct TestSize
+	template<Type::Enum type> struct TestSize
 	{
 		typedef void Result;
-		typedef Aligned<typename Value::TypeClass<type>::Class> Run;
+		typedef Aligned<typename Type::ToClass<type>::Class> Run;
 
 		static void func(bool) {}
 	};
@@ -138,7 +138,7 @@ namespace Mirb
 	{
 		typedef Aligned<Region> Run;
 
-		Value::virtual_do<TestSize, bool>(Value::None, true);
+		Type::action<TestSize, bool>(Type::None, true);
 	}
 
 	void Collector::collect()
@@ -250,7 +250,7 @@ namespace Mirb
 		{
 			auto next = obj->entry.next;
 			
-			Value::virtual_do<FreeClass>(Value::type(obj), obj);
+			Type::action<FreeClass>(obj->type(), obj);
 
 			obj = next;
 		}

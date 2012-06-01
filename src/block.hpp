@@ -82,7 +82,7 @@ namespace Mirb
 	{
 		public:
 			Block(Document *document) :
-				PinnedHeader(Value::InternalBlock),
+				PinnedHeader(Type::InternalBlock),
 				scope(nullptr),
 				document(document),
 				opcodes(nullptr),

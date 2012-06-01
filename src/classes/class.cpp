@@ -7,7 +7,7 @@ namespace Mirb
 {
 	Class *Class::create_initial(Class *superclass)
 	{
-		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Value::Class));
+		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Type::Class));
 
 		result->superclass = superclass;
 
@@ -16,10 +16,10 @@ namespace Mirb
 
 	Class *Class::create_include_class(Module *module, Class *superclass)
 	{
-		if(Value::type(module) == Value::IClass)
+		if(module->type() == Type::IClass)
 			module = module->original_module;
 
-		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Value::IClass));
+		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Type::IClass));
 
 		result->superclass = superclass;
 		result->original_module = module;
@@ -33,7 +33,7 @@ namespace Mirb
 	{
 		value_t name = get_var(self, context->syms.classname);
 		
-		if(Value::test(name))
+		if(name->test())
 			return name;
 		else if(self->singleton)
 		{

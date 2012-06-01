@@ -11,16 +11,16 @@ namespace Mirb
 	{
 		value_t result = call(obj, "zero?");
 
-		return Value::from_bool(!Value::test(result));
+		return Value::from_bool(!result->test());
 	}
 	
 	value_t Numeric::coerce(value_t obj, value_t other)
 	{
-		if(Value::type(obj) == Value::type(other))
+		if(obj->type() == other->type())
 			return Array::allocate_pair(other, obj);
 
 		auto convert = [&](value_t input) -> value_t {
-			if(Value::type(input) == Value::Float)
+			if(input->type() == Type::Float)
 				return input;
 
 			return raise_cast<Float>(call(input, "to_f"));

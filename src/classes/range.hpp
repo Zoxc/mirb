@@ -15,7 +15,7 @@ namespace Mirb
 			static value_t include(Range *self, value_t value);
 
 		public:
-			Range(value_t low, value_t high, bool exclusive) : Object(Value::Range, context->range_class), low(low), high(high)
+			Range(value_t low, value_t high, bool exclusive) : Object(Type::Range, context->range_class), low(low), high(high)
 			{
 				flag = exclusive;
 			}

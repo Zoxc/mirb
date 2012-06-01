@@ -14,7 +14,7 @@ namespace Mirb
 	{
 		InternalException(Exception *value) : value(value)
 		{
-			Value::assert_valid((value_t)value);
+			((Value *)value)->assert_valid();
 		}
 
 		Exception *value;
@@ -153,16 +153,16 @@ namespace Mirb
 
 	template<typename T> T *raise_cast(value_t obj)
 	{
-		if(Value::of_type<T>(obj))
+		if(of_type<T>(obj))
 			return reinterpret_cast<T *>(obj);
 		else
-			type_error(obj, "an object of type " + Mirb::Value::names[Mirb::Value::TypeTag<T>::value]);
+			type_error(obj, "an object of type " + Type::names[Type::ToTag<T>::value]);
 	}
 	
-	template<Value::Type type> value_t raise_cast(value_t obj)
+	template<Type::Enum type> value_t raise_cast(value_t obj)
 	{
-		if(Value::type(obj) != type)
-			type_error(obj, "an object of type " + Mirb::Value::names[type]);
+		if(obj->type() != type)
+			type_error(obj, "an object of type " + Type::names[type]);
 
 		return obj;
 	}

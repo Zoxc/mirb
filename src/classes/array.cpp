@@ -22,7 +22,7 @@ namespace Mirb
 		OnStack<1> os(obj);
 
 		bool result = delete_if(array, [&](value_t &value) {
-			return Value::test(call_argv(obj, "==", 1, &value));
+			return call_argv(obj, "==", 1, &value)->test();
 		});
 
 		if(result)
@@ -98,7 +98,7 @@ namespace Mirb
 			{
 				value_t result = call_argv(self->vector[i], context->syms.equal, 1, &other->vector[j]);
 
-				if(Value::test(result))
+				if(result->test())
 				{
 					found = true;
 					break;
@@ -266,7 +266,7 @@ namespace Mirb
 			if(i >= array->size()) // Check for when the size has been modified
 				return value_false;
 
-			if(!Value::test(call_argv(self->vector[i], "==", 1, &array->vector[i])))
+			if(!call_argv(self->vector[i], "==", 1, &array->vector[i])->test())
 				return value_false;
 		}
 
@@ -314,7 +314,7 @@ namespace Mirb
 			if(!map_index(Fixnum::to_int(index), self->vector.size(), start))
 				return value_nil;
 			
-			auto length = Fixnum::to_int(raise_cast<Value::Fixnum>(size));
+			auto length = Fixnum::to_int(raise_cast<Type::Fixnum>(size));
 
 			if(length < 0)
 				return value_nil;
@@ -337,7 +337,7 @@ namespace Mirb
 
 			return self->vector[i];
 		}
-		else if(Value::of_type<Range>(index))
+		else if(of_type<Range>(index))
 		{
 			size_t start;
 			size_t length;
@@ -427,7 +427,7 @@ namespace Mirb
 		OnStack<1> os(block);
 
 		return Value::from_bool(delete_if(self, [&](value_t &value) {
-			return Value::test(yield_argv(block, 1, &value));
+			return yield_argv(block, 1, &value)->test();
 		}));
 	}
 	
@@ -438,7 +438,7 @@ namespace Mirb
 		auto result = Array::dup(self);
 
 		delete_if(result, [&](value_t &value) {
-			return Value::test(yield_argv(block, 1, &value));
+			return yield_argv(block, 1, &value)->test();
 		});
 
 		return result;
@@ -487,7 +487,7 @@ namespace Mirb
 
 				result->vector.push(self->vector[i]);
 			}
-			else if(Value::of_type<Range>(index))
+			else if(of_type<Range>(index))
 			{
 				size_t start;
 				size_t length;

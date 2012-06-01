@@ -11,7 +11,7 @@ namespace Mirb
 	{
 		try
 		{
-			Value::assert_valid(scope);
+			scope->assert_valid();
 
 			CodeGen::ByteCodeGenerator generator(memory_pool, scope);
 		

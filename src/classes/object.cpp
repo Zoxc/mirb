@@ -74,19 +74,19 @@ namespace Mirb
 	{
 		value_t result = call_argv(obj, "==", 1, &other);
 
-		return Value::from_bool(!Value::test(result));
+		return Value::from_bool(!result->test());
 	}
 	
 	value_t Object::not_match(value_t obj, value_t other)
 	{
 		value_t result = call_argv(obj, "=~", 1, &other);
 
-		return Value::from_bool(!Value::test(result));
+		return Value::from_bool(!result->test());
 	}
 	
 	value_t Object::rb_not(value_t obj)
 	{
-		return Value::from_bool(!Value::test(obj));
+		return Value::from_bool(!obj->test());
 	}
 
 	value_t Object::instance_eval(value_t obj, String *string, value_t block)
@@ -127,7 +127,7 @@ namespace Mirb
 	
 	value_t object_id(value_t obj)
 	{
-		return Fixnum::from_size_t(Value::hash(obj)); // TODO: Make a proper object_id
+		return Fixnum::from_size_t(hash_value(obj)); // TODO: Make a proper object_id
 	}
 	
 	value_t Object::kind_of(value_t obj, Class *klass)
@@ -145,10 +145,10 @@ namespace Mirb
 		return value_false;
 	}
 	
-	template<Value::Type type> struct DupObject
+	template<Type::Enum type> struct DupObject
 	{
 		typedef value_t Result;
-		typedef typename Value::TypeClass<type>::Class Class;
+		typedef typename Type::ToClass<type>::Class Class;
 
 		static value_t func(value_t value)
 		{
@@ -158,7 +158,7 @@ namespace Mirb
 	
 	value_t Object::rb_dup(value_t obj)
 	{
-		value_t result = Value::virtual_do<DupObject>(Value::type(obj), obj);
+		value_t result = Type::action<DupObject>(obj->type(), obj);
 
 		OnStack<1> os(result);
 

@@ -147,7 +147,7 @@ namespace Mirb
 	
 	value_t match(value_t self, value_t regexp)
 	{
-		if(!Value::of_type<Regexp>(regexp))
+		if(!of_type<Regexp>(regexp))
 		{
 			regexp = call_argv(context->regexp_class, "new", value_nil, 1, &regexp);
 
@@ -227,10 +227,10 @@ namespace Mirb
 		{
 			size_t i;
 
-			if(!map_index(Fixnum::to_int(raise_cast<Value::Fixnum>(index)), self->string.size(), i))
+			if(!map_index(Fixnum::to_int(raise_cast<Type::Fixnum>(index)), self->string.size(), i))
 				return String::get("");
 
-			auto length = Fixnum::to_int(raise_cast<Value::Fixnum>(size));
+			auto length = Fixnum::to_int(raise_cast<Type::Fixnum>(size));
 			
 			if(length < 0)
 				return value_nil;
@@ -247,7 +247,7 @@ namespace Mirb
 
 			return String::get(self->string[i]);
 		}
-		else if(Value::of_type<Range>(index))
+		else if(of_type<Range>(index))
 		{
 			size_t start;
 			size_t length;
@@ -390,11 +390,11 @@ namespace Mirb
 				switch(s[i])
 				{
 					case 'd':
-						write(raise_cast<Value::Fixnum>(call(arg(), "to_i")));
+						write(raise_cast<Type::Fixnum>(call(arg(), "to_i")));
 						break;
 
 					case 'f':
-						write(raise_cast<Value::Float>(call(arg(), "to_f")));
+						write(raise_cast<Type::Float>(call(arg(), "to_f")));
 						break;
 
 					default:

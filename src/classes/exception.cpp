@@ -16,7 +16,7 @@
 namespace Mirb
 {
 	StackFrame::StackFrame(Frame *frame) :
-		Value::Header(Value::InternalStackFrame),
+		Value(Type::InternalStackFrame),
 		code(frame->code),
 		obj(frame->obj),
 		name(frame->name),
@@ -39,7 +39,7 @@ namespace Mirb
 
 		Module *module = self->scope->first();
 
-		if(Value::type(module) == Value::IClass)
+		if(module->type() == Type::IClass)
 			module = module->original_module;
 
 		OnStack<1> os3(module);
@@ -171,7 +171,7 @@ namespace Mirb
 	
 	value_t Exception::allocate(Class *instance_of)
 	{
-		return Collector::allocate<Exception>(Value::Exception, instance_of, nullptr, nullptr);
+		return Collector::allocate<Exception>(Type::Exception, instance_of, nullptr, nullptr);
 	}
 	
 	value_t Exception::to_s(Exception *self)

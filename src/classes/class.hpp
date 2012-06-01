@@ -15,10 +15,10 @@ namespace Mirb
 			static value_t rb_new(value_t obj, size_t argc, value_t argv[], value_t block);
 			static value_t case_equal(Class *obj, value_t other);
 
-			Class(Value::Type type) : Module(type), singleton(false) {}
+			Class(Type::Enum type) : Module(type), singleton(false) {}
 
 		public:
-			Class(Value::Type type, Class *instance_of, Class *superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
+			Class(Type::Enum type, Class *instance_of, Class *superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
 
 			bool singleton;
 			

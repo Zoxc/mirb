@@ -29,7 +29,7 @@ namespace Mirb
 	
 	value_t NilClass::rb_xor(value_t value)
 	{
-		return Value::test(value) ? value_true : value_false;
+		return value->test() ? value_true : value_false;
 	}
 	
 	void NilClass::initialize()

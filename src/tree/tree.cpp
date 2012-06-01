@@ -6,7 +6,7 @@ namespace Mirb
 	namespace Tree
 	{
 		Scope::Scope(Document *document, Fragment fragment, Scope *parent, Type type) :
-			PinnedHeader(Value::InternalScope),
+			PinnedHeader(Mirb::Type::InternalScope),
 			trapper(nullptr, true),
 			document(document),
 			final(0),

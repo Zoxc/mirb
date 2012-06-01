@@ -76,22 +76,22 @@ namespace Mirb
 
 	Class *internal_class_of(value_t obj)
 	{
-		Value::assert_valid(obj);
+		obj->assert_valid();
 
-		if(prelude_likely(Value::object_ref(obj)))
+		if(prelude_likely(obj->object_ref()))
 			return cast<Object>(obj)->instance_of;
 		else
-			return Value::class_of_literal(obj);
+			return obj->class_of_literal();
 	}
 	
 	bool is_real_class(Class *obj)
 	{
-		return !obj->singleton && obj->get_type() != Value::IClass;
+		return !obj->singleton && obj->value_type != Type::IClass;
 	}
 
 	Class *real_class(Class *obj)
 	{
-		Value::assert_valid(obj);
+		obj->assert_valid();
 
 		while(obj && !is_real_class(obj))
 			obj = obj->superclass;
@@ -127,9 +127,9 @@ namespace Mirb
 		return subclass_of(klass, internal_class_of(obj));
 	}
 	
-	value_t define_common(value_t under, Symbol *name, Value::Type type)
+	value_t define_common(value_t under, Symbol *name, Type::Enum type)
 	{
-		if(prelude_unlikely(!Value::of_type<Module>(under)))
+		if(prelude_unlikely(!of_type<Module>(under)))
 		{
 			auto under_str = inspect(under);
 
@@ -140,7 +140,7 @@ namespace Mirb
 
 		if(prelude_unlikely(existing != value_undef))
 		{
-			if(Value::type(existing) != type)
+			if(existing->type() != type)
 			{
 				auto existing_str = inspect(class_of(existing));
 
@@ -155,7 +155,7 @@ namespace Mirb
 
 	Class *define_class(value_t under, Symbol *name, Class *super)
 	{
-		value_t result = define_common(under, name, Value::Class);
+		value_t result = define_common(under, name, Type::Class);
 
 		if(result)
 			return cast<Class>(result);
@@ -169,12 +169,12 @@ namespace Mirb
 
 	Module *module_create_bare()
 	{
-		return Collector::allocate<Module>(Value::Module, context->module_class, nullptr);
+		return Collector::allocate<Module>(Type::Module, context->module_class, nullptr);
 	}
 
 	Module *define_module(value_t under, Symbol *name)
 	{
-		value_t result = define_common(under, name, Value::Module);
+		value_t result = define_common(under, name, Type::Module);
 
 		if(result)
 			return cast<Module>(result);
@@ -206,9 +206,9 @@ namespace Mirb
 
 			for (Class *i = obj->superclass; i; i = i->superclass)
 			{
-				switch(Value::type(i))
+				switch(i->type())
 				{
-					case Value::IClass:
+					case Type::IClass:
 						if(i->vars == module->vars)
 						{
 							if(!found_superclass)
@@ -218,7 +218,7 @@ namespace Mirb
 						}
 						break;
 
-					case Value::Class:
+					case Type::Class:
 						found_superclass = true;
 						break;
 
@@ -279,7 +279,7 @@ namespace Mirb
 
 	Class *class_create_bare(Class *super)
 	{
-		return Collector::allocate<Class>(Value::Class, context->class_class, super);
+		return Collector::allocate<Class>(Type::Class, context->class_class, super);
 	}
 
 	Class *class_create_singleton(value_t obj, Class *super)
@@ -297,7 +297,7 @@ namespace Mirb
 
 		set_var(singleton_class, context->syms.attached, object);
 
-		if(object->get_type() == Value::Class)
+		if(object->type() == Type::Class)
 		{
 			singleton_class->instance_of = singleton_class;
 
@@ -353,7 +353,7 @@ namespace Mirb
 
 	ValueMap *get_vars(value_t obj)
 	{
-		Value::assert_valid(obj);
+		obj->assert_valid();
 		
 		Object *object = try_cast<Object>(obj);
 
@@ -382,7 +382,7 @@ namespace Mirb
 
 	CharArray scope_path(Tuple<Module> *scope)
 	{
-		Value::assert_valid(scope);
+		scope->assert_valid();
 
 		CharArray result;
 		
@@ -416,7 +416,7 @@ namespace Mirb
 	
 	value_t test_const(Tuple<Module> *scope, Symbol *name)
 	{
-		Value::assert_valid(name);
+		name->assert_valid();
 		
 		for(size_t i = 0; i < scope->entries; ++i)
 		{
@@ -431,8 +431,8 @@ namespace Mirb
 	
 	value_t get_scoped_const(value_t obj, Symbol *name)
 	{
-		Value::assert_valid(obj);
-		Value::assert_valid(name);
+		obj->assert_valid();
+		name->assert_valid();
 
 		auto module = can_have_consts(obj);
 
@@ -455,8 +455,8 @@ namespace Mirb
 
 	value_t get_const(Tuple<Module> *scope, Symbol *name)
 	{
-		Value::assert_valid(scope);
-		Value::assert_valid(name);
+		scope->assert_valid();
+		name->assert_valid();
 
 		value_t result = test_const(scope, name);
 
@@ -468,7 +468,7 @@ namespace Mirb
 
 	void set_const(value_t obj, Symbol *name, value_t value)
 	{
-		Value::assert_valid(value);
+		value->assert_valid();
 
 		can_have_consts(obj);
 
@@ -487,7 +487,7 @@ namespace Mirb
 
 	void set_var(value_t obj, Symbol *name, value_t value)
 	{
-		Value::assert_valid(value);
+		value->assert_valid();
 
 		ValueMapAccess::set(get_vars(obj), name, value);
 	}
@@ -624,7 +624,7 @@ namespace Mirb
 	
 	Method *lookup_module(Module *module, Symbol *name)
 	{
-		Value::assert_valid(name);
+		name->assert_valid();
 
 		while(module != nullptr)
 		{
@@ -912,13 +912,13 @@ namespace Mirb
 	
 	value_t cast_integer(value_t value)
 	{
-		if(Value::type(value) == Value::Fixnum)
+		if(value->type() == Type::Fixnum)
 			return value;
 
 		auto method = respond_to(value, "to_i");
 
 		if(method)
-			return raise_cast<Value::Fixnum>(call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0));
+			return raise_cast<Type::Fixnum>(call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0));
 		else
 		{
 			CharArray obj = pretty_inspect(value);

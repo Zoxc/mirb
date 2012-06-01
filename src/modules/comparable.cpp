@@ -42,7 +42,7 @@ namespace Mirb
 
 		left = compare(obj, left, [&](intptr_t v) { return v >= 0; });
 
-		if(!Value::test(left))
+		if(!left->test())
 			return left;
 
 		return compare(obj, left, [&](intptr_t v) { return v <= 0; });

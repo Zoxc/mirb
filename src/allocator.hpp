@@ -11,7 +11,7 @@ namespace Mirb
 	// PinnedHeader are objects with a fixed memory address
 
 	class PinnedHeader:
-		public Value::Header
+		public Value
 	{
 		private:
 			#ifndef VALGRIND
@@ -20,23 +20,23 @@ namespace Mirb
 
 			friend class Collector;
 		public:
-			PinnedHeader(Value::Type type) : Value::Header(type) {}
+			PinnedHeader(Type::Enum type) : Value(type) {}
 	};
 	
 	class VariableBlock:
-		public Value::Header
+		public Value
 	{
 		private:
 		public:
-			VariableBlock(size_t bytes) : Value::Header(Value::InternalVariableBlock), bytes(bytes) {}
+			VariableBlock(size_t bytes) : Value(Type::InternalVariableBlock), bytes(bytes) {}
 
 			static VariableBlock &from_memory(const void *memory)
 			{
 				auto result = (VariableBlock *)((const char_t *)memory - sizeof(VariableBlock));
 				
-				Value::assert_alive(result);
+				result->assert_alive();
 
-				mirb_debug_assert(result->get_type() == Value::InternalVariableBlock);
+				mirb_debug_assert(result->type() == Type::InternalVariableBlock);
 
 				return *result;
 			}
@@ -55,7 +55,7 @@ namespace Mirb
 
 	class TupleBase
 	{
-		static Tuple<Value::Header> *allocate_value_tuple(size_t size);
+		static Tuple<Value> *allocate_value_tuple(size_t size);
 		static Tuple<Object> *allocate_tuple(size_t size);
 
 		template<class T> friend struct TupleUtil;
@@ -63,7 +63,7 @@ namespace Mirb
 
 	template<class T> struct TupleUtil
 	{
-		static const Value::Type type = Value::InternalTuple;
+		static const Type::Enum type = Type::InternalTuple;
 
 		template<typename F> static void mark(F mark, T *&field)
 		{
@@ -77,11 +77,11 @@ namespace Mirb
 		}
 	}; 
 
-	template<> struct TupleUtil<Value::Header>
+	template<> struct TupleUtil<Value>
 	{
-		static const Value::Type type = Value::InternalValueTuple;
+		static const Type::Enum type = Type::InternalValueTuple;
 
-		template<typename F> static void mark(F mark, Value::Header *&field)
+		template<typename F> static void mark(F mark, Value *&field)
 		{
 			mark(field);
 		}
@@ -93,11 +93,11 @@ namespace Mirb
 	};
 	
 	template<class T> class Tuple:
-		public Value::Header
+		public Value
 	{
 		private:
 		public:
-			Tuple(size_t entries) : Value::Header(TupleUtil<T>::type), entries(entries) {}
+			Tuple(size_t entries) : Value(TupleUtil<T>::type), entries(entries) {}
 
 			T *&operator[](size_t index)
 			{

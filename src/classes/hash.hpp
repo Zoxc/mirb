@@ -22,9 +22,9 @@ namespace Mirb
 			value_t get_default(value_t key);
 
 		public:
-			Hash() : Object(Value::Hash, context->hash_class), data(8), default_value(value_nil) {}
+			Hash() : Object(Type::Hash, context->hash_class), data(8), default_value(value_nil) {}
 
-			Hash(Class *instance_of) : Object(Value::Hash, instance_of), data(8), default_value(value_nil)
+			Hash(Class *instance_of) : Object(Type::Hash, instance_of), data(8), default_value(value_nil)
 			{
 				flag = false;
 				flag2 = false;

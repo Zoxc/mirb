@@ -155,9 +155,9 @@ namespace Mirb
 	
 	value_t Fixnum::coerce(int_t obj, value_t other)
 	{
-		switch(Value::type(other))
+		switch(other->type())
 		{
-			case Value::Bignum:
+			case Type::Bignum:
 			{
 				auto num = cast<Bignum>(other);
 
@@ -167,7 +167,7 @@ namespace Mirb
 					return Array::allocate_pair(num, Number(obj).to_bignum());
 			}
 
-			case Value::Fixnum:
+			case Type::Fixnum:
 				return Array::allocate_pair(other, from_int(obj));
 
 			default:

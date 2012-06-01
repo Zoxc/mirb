@@ -80,9 +80,9 @@ namespace Mirb
 	
 	value_t Bignum::coerce(Bignum *obj, value_t other)
 	{
-		switch(Value::type(other))
+		switch(other->type())
 		{
-			case Value::Fixnum:
+			case Type::Fixnum:
 			{
 				if(obj->number.can_be_fix())
 					return Array::allocate_pair(other, Fixnum::from_int(obj->number.to_intptr()));
@@ -90,7 +90,7 @@ namespace Mirb
 					return Array::allocate_pair(Number(Fixnum::to_int(other)).to_bignum(), obj);
 			}
 			
-			case Value::Bignum:
+			case Type::Bignum:
 				return Array::allocate_pair(other, obj);
 
 			default:

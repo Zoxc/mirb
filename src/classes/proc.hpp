@@ -13,7 +13,7 @@ namespace Mirb
 
 		public:
 			Proc(Class *instance_of, value_t self, Symbol *name, Tuple<Module> *scope, Block *block, Tuple<> *scopes) :
-				Object(Value::Proc, instance_of),
+				Object(Type::Proc, instance_of),
 				self(self),
 				name(name),
 				scope(scope),
