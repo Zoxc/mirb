@@ -99,6 +99,16 @@ namespace Mirb
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);
 	
+	template<typename T> value_t get_var(value_t obj, T &&name)
+	{
+		return get_var(obj, symbol_cast(std::forward<T>(name)));
+	}
+	
+	template<typename T> void set_var(value_t obj, T &&name, value_t value)
+	{
+		return set_var(obj, symbol_cast(std::forward<T>(name)), value);
+	}
+
 	Global *get_global_object(Symbol *name, bool force = false);
 	void set_global_object(Symbol *name, Global *global);
 	
@@ -108,6 +118,16 @@ namespace Mirb
 	value_t get_global(Symbol *name);
 	void set_global(Symbol *name, value_t value);
 	
+	template<typename T> value_t get_global(T &&name)
+	{
+		return get_global(scope, symbol_cast(std::forward<T>(name)));
+	}
+	
+	template<typename T> void set_global(T &&name, value_t value)
+	{
+		return set_global(obj, symbol_cast(std::forward<T>(name)), value);
+	}
+
 	void initialize_thread();
 	void initialize(bool console = false);
 	void finalize();

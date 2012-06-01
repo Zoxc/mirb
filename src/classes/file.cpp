@@ -341,7 +341,11 @@ namespace Mirb
 			file = Platform::open(path->string, access, create_mode);
 		});
 
-		return new (collector) IO(file, context->file_class);
+		auto result = new (collector) IO(file, context->file_class);
+
+		set_var(result, "@path", String::dup(path));
+
+		return result;
 	}
 	
 	value_t rb_open(String *path, String *mode, value_t block)
@@ -369,10 +373,17 @@ namespace Mirb
 		return File::open(path, mode);
 	}
 	
+	value_t rb_path(value_t file)
+	{
+		return get_var(file, "@path");
+	}
+	
 	void File::initialize()
 	{
 		context->file_class = define_class("File", context->io_class);
 		
+		method<Arg::Self<Arg::Value>, &rb_path>(context->file_class, "path");
+
 		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, &rb_new>(context->file_class, "new");
 		singleton_method<Arg::Class<String>, Arg::Optional<Arg::Class<String>>, Arg::Block, &rb_open>(context->file_class, "open");
 
