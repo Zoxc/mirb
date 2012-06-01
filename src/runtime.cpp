@@ -1100,15 +1100,23 @@ namespace Mirb
 #endif
 		context->loaded_files = Collector::allocate<Array>();
 
+		auto const_global = [&](const CharArray &name, value_t value) -> Global *{
+			auto global = new (collector) Global;
+			global->value = value;
+			global->read_only();
+			set_global_object(Symbol::get(name), global);
+			return global;
+		};
+		
+		context->loaded_files = Collector::allocate<Array>();
+		const_global("$LOADED_FEATURES", context->loaded_files);
+
 		{
 			context->load_paths = Collector::allocate<Array>();
 
-			auto global = new (collector) Global;
-			global->value = context->load_paths;
-			global->read_only();
+			auto global = const_global("$LOAD_PATH", context->load_paths);
 			set_global_object(Symbol::get("$:"), global);
 			set_global_object(Symbol::get("$-I"), global);
-			set_global_object(Symbol::get("$LOAD_PATH"), global);
 		}
 
 		initialize_thread_later();

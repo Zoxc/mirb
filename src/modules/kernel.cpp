@@ -146,7 +146,14 @@ namespace Mirb
 		
 		full_path = File::expand_path(filename);
 
-		loaded = !context->loaded_files->vector.each([&](value_t path) { return cast<String>(path)->string != full_path; });
+		loaded = !context->loaded_files->vector.each([&](value_t path) {
+			auto str = try_cast<String>(path);
+
+			if(str)
+				return str->string != full_path;
+			else
+				return true;
+		});
 
 		if(require && loaded)
 		{
