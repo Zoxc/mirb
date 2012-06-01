@@ -22,7 +22,7 @@ namespace Mirb
 		OnStack<1> os(obj);
 
 		bool result = delete_if(array, [&](value_t &value) {
-			return call_argv(obj, "==", 1, &value)->test();
+			return call(obj, "==", value)->test();
 		});
 
 		if(result)
@@ -96,7 +96,7 @@ namespace Mirb
 
 			for(size_t j = 0; j < other->vector.size(); ++j)
 			{
-				value_t result = call_argv(self->vector[i], context->syms.equal, 1, &other->vector[j]);
+				value_t result = call(self->vector[i], context->syms.equal, other->vector[j]);
 
 				if(result->test())
 				{
@@ -230,10 +230,8 @@ namespace Mirb
 
 				if(array)
 				{
-					value_t vsep = sep;
-					
 					if(sep)
-						desc = raise_cast<String>(call_argv(array, "join", 1, &vsep));
+						desc = raise_cast<String>(call(array, "join", sep));
 					else
 						desc = raise_cast<String>(call(array, "join"));
 				}
@@ -266,7 +264,7 @@ namespace Mirb
 			if(i >= array->size()) // Check for when the size has been modified
 				return value_false;
 
-			if(!call_argv(self->vector[i], "==", 1, &array->vector[i])->test())
+			if(!call(self->vector[i], "==", array->vector[i])->test())
 				return value_false;
 		}
 
@@ -284,7 +282,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->vector.size(); ++i)
 		{
-			yield_argv(block, 1, &self->vector[i]);
+			yield(block, self->vector[i]);
 		}
 
 		return self;
@@ -299,7 +297,7 @@ namespace Mirb
 			if(i >= self->vector.size())
 				return self;
 
-			yield_argv(block, 1, &self->vector[i]);
+			yield(block, self->vector[i]);
 		}
 
 		return self;
@@ -427,7 +425,7 @@ namespace Mirb
 		OnStack<1> os(block);
 
 		return Value::from_bool(delete_if(self, [&](value_t &value) {
-			return yield_argv(block, 1, &value)->test();
+			return yield(block, value)->test();
 		}));
 	}
 	
@@ -438,7 +436,7 @@ namespace Mirb
 		auto result = Array::dup(self);
 
 		delete_if(result, [&](value_t &value) {
-			return yield_argv(block, 1, &value)->test();
+			return yield(block, value)->test();
 		});
 
 		return result;

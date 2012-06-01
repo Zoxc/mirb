@@ -262,15 +262,9 @@ namespace Mirb
 	 */
 	value_t yield(value_t obj);
 	
-	#define MIRB_YIELD(i) \
-		template<typename T> value_t call(value_t obj MIRB_COMMA_BEFORE_LIST(MIRB_CALL_ARG, i)) \
-		{ \
-			value_t argv[i]; \
-			MIRB_LOCAL_STATEMENT_LIST(MIRB_CALL_STATEMENT, i) \
-			return yield_argv(obj, i, argv); \
-		};
+	#define MIRB_YIELD_HEADER(i) value_t yield(value_t obj MIRB_COMMA_BEFORE_LIST(MIRB_CALL_ARG, i));
 
-	MIRB_STATEMENT_LIST_NO_ZERO(MIRB_YIELD, MIRB_STATEMENT_MAX);
+	MIRB_STATEMENT_LIST_NO_ZERO(MIRB_YIELD_HEADER, MIRB_STATEMENT_MAX);
 		
 	/*
 	 * backtrace

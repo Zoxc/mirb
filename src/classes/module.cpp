@@ -67,8 +67,8 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			call_argv(argv[i], "append_features", 1, &obj);
-			call_argv(argv[i], "included", 1, &obj);
+			call(argv[i], "append_features", obj);
+			call(argv[i], "included", obj);
 		}
 
 		return obj;

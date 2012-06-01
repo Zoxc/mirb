@@ -70,13 +70,13 @@ namespace Mirb
 			auto array = try_cast<Array>(list);
 
 			if(!array)
-				return call_argv(list, "===", 1, &value)->test();
+				return call(list, "===", value)->test();
 
 			OnStack<1> os(array);
 
 			for(size_t i = 0; i < array->size(); ++i)
 			{
-				if(call_argv(array->get(i), "===", 1, &value)->test())
+				if(call(array->get(i), "===", value)->test())
 					return true;
 			}
 

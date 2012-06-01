@@ -82,11 +82,7 @@ namespace Mirb
 		OnStack<1> os(block);
 
 		for(int_t from = obj; from <= to; ++from)
-		{
-			value_t current = from_int(from);
-
-			yield_argv(block, 1, &current);
-		}
+			yield(block, from_int(from));
 
 		return from_int(obj);
 	}

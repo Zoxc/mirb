@@ -149,12 +149,12 @@ namespace Mirb
 	{
 		if(!of_type<Regexp>(regexp))
 		{
-			regexp = call_argv(context->regexp_class, "new", value_nil, 1, &regexp);
+			regexp = call(context->regexp_class, "new", regexp);
 
 			type_error(regexp, context->regexp_class);
 		}
 
-		return call_argv(regexp, "match", value_nil, 1, &self);
+		return call(regexp, "match", self);
 	}
 
 	value_t String::pattern(String *self, value_t other)
@@ -162,10 +162,7 @@ namespace Mirb
 		auto regexp = try_cast<Regexp>(other);
 
 		if(!regexp)
-		{
-			value_t obj = self;
-			return call_argv(other, "=~", 1, &obj);
-		}
+			return call(other, "=~", self);
 		
 		int ovector[Regexp::vector_size];
 		

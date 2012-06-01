@@ -22,6 +22,16 @@
 
 namespace Mirb
 {
+	#define MIRB_YIELD(i) \
+		value_t yield(value_t obj MIRB_COMMA_BEFORE_LIST(MIRB_CALL_ARG, i)) \
+		{ \
+			value_t argv[i]; \
+			MIRB_LOCAL_STATEMENT_LIST(MIRB_CALL_STATEMENT, i) \
+			return yield_argv(obj, i, argv); \
+		};
+
+	MIRB_STATEMENT_LIST_NO_ZERO(MIRB_YIELD, MIRB_STATEMENT_MAX);
+	
 	prelude_thread size_t stack_stop;
 	prelude_thread size_t stack_continue;
 
@@ -64,14 +74,12 @@ namespace Mirb
 
 	value_t coerce(value_t left, Symbol *name, value_t right)
 	{
-		auto result = raise_cast<Array>(call_argv(right, "coerce", 1, &left));
+		auto result = raise_cast<Array>(call(right, "coerce", left));
 
 		if(result->size() != 2)
 			raise(context->runtime_error, "Expected an array with a pair of values");
 
-		value_t last = result->get(1);
-
-		return call_argv(result->get(0), name, 1, &last);
+		return call(result->get(0), name, result->get(1));
 	}
 
 	Class *internal_class_of(value_t obj)
@@ -529,7 +537,7 @@ namespace Mirb
 	
 	int compare(value_t left, value_t right)
 	{
-		value_t result = call_argv(left, context->syms.compare, value_nil, 1, &right);
+		value_t result = call(left, context->syms.compare, right);
 		
 		if(!Value::is_fixnum(result))
 			raise(context->type_error, "<=> must return a Fixnum between -1 and 1");

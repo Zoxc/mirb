@@ -28,7 +28,7 @@ void report_exception(Exception *exception, bool recurse = true)
 		
 		context->console_error->print("\n");
 
-		call_argv(exception, "print", 1, &io);
+		call(exception, "print", io);
 	});
 	
 	if(exception)

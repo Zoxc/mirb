@@ -360,9 +360,7 @@ namespace Mirb
 				result->close();
 			});
 
-			value_t arg = result;
-
-			return yield_argv(block, 1, &arg);
+			return yield(block, result);
 		}
 		else
 			return result;

@@ -23,14 +23,7 @@ namespace Mirb
 	value_t Hash::get_default(value_t key)
 	{
 		if(flag)
-		{
-			value_t args[2];
-
-			args[0] = this;
-			args[1] = key;
-
-			return yield_argv(this, 2, args);
-		}
+			return yield(this->default_value, this, key);
 		else
 			return default_value;
 	}
@@ -102,12 +95,7 @@ namespace Mirb
 		OnStack<2> os(self, block);
 
 		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
-			value_t argv[2];
-			
-			argv[0] = key;
-			argv[1] = value;
-			
-			yield_argv(block, 2, argv);
+			yield(block, key, value);
 			return true;
 		});
 

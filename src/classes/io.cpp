@@ -93,10 +93,7 @@ namespace Mirb
 			CharArray line = io->stream->gets();
 
 			if(line.size())
-			{
-				value_t arg = line.to_string();
-				yield_argv(block, 1, &arg);
-			}
+				yield(block, line.to_string());
 			else
 				break;
 		}

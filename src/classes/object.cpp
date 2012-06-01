@@ -19,7 +19,7 @@ namespace Mirb
 	{
 		OnStack<1> os(obj);
 
-		yield_argv(block, 1, &obj);
+		yield(block, obj);
 
 		return obj;
 	}
@@ -72,14 +72,14 @@ namespace Mirb
 	
 	value_t Object::not_equal(value_t obj, value_t other)
 	{
-		value_t result = call_argv(obj, "==", 1, &other);
+		value_t result = call(obj, "==", other);
 
 		return Value::from_bool(!result->test());
 	}
 	
 	value_t Object::not_match(value_t obj, value_t other)
 	{
-		value_t result = call_argv(obj, "=~", 1, &other);
+		value_t result = call(obj, "=~", other);
 
 		return Value::from_bool(!result->test());
 	}
@@ -118,8 +118,8 @@ namespace Mirb
 
 		for(size_t i = 0; i < argc; ++i)
 		{
-			call_argv(argv[i], "extend_object", 1, &obj);
-			call_argv(argv[i], "extended", 1, &obj);
+			call(argv[i], "extend_object", obj);
+			call(argv[i], "extended", obj);
 		}
 
 		return obj;
@@ -162,7 +162,7 @@ namespace Mirb
 
 		OnStack<1> os(result);
 
-		call_argv(result, "initialize_copy", 1, &obj);
+		call(result, "initialize_copy", obj);
 
 		return result;
 	}
