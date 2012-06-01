@@ -32,6 +32,7 @@ namespace Mirb
 			static value_t rb_set(Array *self, size_t index, value_t value);
 			static value_t rb_flatten(Array *self);
 			static value_t rb_flatten_ex(Array *self);
+			static value_t rb_clear(Array *array);
 			static value_t join(Array *self, String *sep);
 			static value_t values_at(Array *self, size_t argc, value_t argv[]);
 			

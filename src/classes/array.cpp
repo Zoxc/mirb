@@ -17,6 +17,13 @@ namespace Mirb
 		return vector.size();
 	}
 	
+	value_t Array::rb_clear(Array *array)
+	{
+		array->vector.clear();
+
+		return array;
+	}
+
 	value_t Array::rb_delete(Array *array, value_t obj)
 	{
 		OnStack<1> os(obj);
@@ -522,6 +529,7 @@ namespace Mirb
 		
 		method<Self<Array>, &rb_sort>(context->array_class, "sort");
 		
+		method<Self<Array>, &rb_clear>(context->array_class, "clear");
 		method<Self<Array>, Value, &rb_delete>(context->array_class, "delete");
 
 		method<Self<Array>, &first>(context->array_class, "first");
