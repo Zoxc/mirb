@@ -2,6 +2,7 @@
 #include "value.hpp"
 #include "block.hpp"
 #include "on-stack.hpp"
+#include "finally.hpp"
 #include "classes/symbol.hpp"
 #include <functional>
 
@@ -18,20 +19,6 @@ namespace Mirb
 		}
 
 		Exception *value;
-	};
-	
-	struct Finally
-	{
-		std::function<void()> func;
-
-		template<typename F> Finally(F func) : func(func)
-		{
-		}
-
-		~Finally()
-		{
-			func();
-		}
 	};
 
 	value_t coerce(value_t left, Symbol *name, value_t right);

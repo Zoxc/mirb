@@ -118,7 +118,7 @@ namespace Mirb
 	{
 		auto array = Array::allocate();
 
-		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+		HashAccess::each_pair(self, [&](value_t key, value_t) -> bool {
 			array->vector.push(key);
 
 			return true;
@@ -131,7 +131,7 @@ namespace Mirb
 	{
 		auto array = Array::allocate();
 
-		HashAccess::each_pair(self, [&](value_t key, value_t value) -> bool {
+		HashAccess::each_pair(self, [&](value_t, value_t value) -> bool {
 			array->vector.push(value);
 
 			return true;
