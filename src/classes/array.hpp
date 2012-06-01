@@ -27,6 +27,7 @@ namespace Mirb
 			static value_t sub(Array *self, Array *other);
 			static value_t length(Array *self);
 			static value_t each(Array *self, value_t block);
+			static value_t reverse_each(Array *self, value_t block);
 			static value_t rb_get(Array *self, value_t index, value_t size);
 			static value_t rb_set(Array *self, size_t index, value_t value);
 			static value_t rb_flatten(Array *self);

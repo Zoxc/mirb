@@ -292,6 +292,21 @@ namespace Mirb
 		return self;
 	}
 	
+	value_t Array::reverse_each(Array *self, value_t block)
+	{
+		OnStack<2> os(self, block);
+
+		for(size_t i = self->vector.size(); i-- > 0;)
+		{
+			if(i >= self->vector.size())
+				return self;
+
+			yield_argv(block, 1, &self->vector[i]);
+		}
+
+		return self;
+	}
+	
 	value_t Array::rb_get(Array *self, value_t index, value_t size)
 	{
 		if(size)
@@ -535,6 +550,7 @@ namespace Mirb
 		method<Arg::Self<Arg::Class<Array>>, Arg::Optional<Arg::Class<String>>, &join>(context->array_class, "join");
 		method<Arg::Self<Arg::Class<Array>>, &to_s>(context->array_class, "to_s");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &each>(context->array_class, "each");
+		method<Arg::Self<Arg::Class<Array>>, Arg::Block, &reverse_each>(context->array_class, "reverse_each");
 		method<Arg::Self<Arg::Class<Array>>, Arg::Value, Arg::Optional<Arg::Value>, &rb_get>(context->array_class, "[]");
 		method<Arg::Self<Arg::Class<Array>>, Arg::UInt, Arg::Value, &rb_set>(context->array_class, "[]=");
 	}
