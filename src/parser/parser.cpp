@@ -42,7 +42,7 @@ namespace Mirb
 		lexer.load(document.data, document.length);
 	}
 	
-	void Parser::report(const SourceLoc &range, std::string text, Message::Severity severity)
+	void Parser::report(const SourceLoc &range, const CharArray &text, Message::Severity severity)
 	{
 		add_message(new Message(*this, range, severity, text), range);
 	}
@@ -54,7 +54,7 @@ namespace Mirb
 		return c >= 'A' && c <= 'Z';
 	}
 	
-	void Parser::error(std::string text)
+	void Parser::error(const CharArray &text)
 	{
 		report(lexer.lexeme, text);
 	}
@@ -90,7 +90,7 @@ namespace Mirb
 		i.insert(message);
 	}
 
-	bool Parser::close_pair(const std::string &name, const SourceLoc &range, Lexeme::Type what, bool skip)
+	bool Parser::close_pair(const CharArray &name, const SourceLoc &range, Lexeme::Type what, bool skip)
 	{
 		skip_lines();
 
@@ -1551,7 +1551,7 @@ namespace Mirb
 				break;
 		}
 
-		report(range, parameter ? "Not a valid parameter" : "Not an assignable expression");
+		report(range, parameter ? CharArray("Not a valid parameter") : CharArray("Not an assignable expression"));
 	}
 	
 	void Parser::process_multiple_lhs(Tree::MultipleExpressionsNode *node, bool parameter)
@@ -1835,7 +1835,7 @@ namespace Mirb
 
 							node->arguments.clear();
 							node->variadic = true;
-							node->arguments.append(new Tree::SplatNode(arguments));
+							node->arguments.append(new (fragment) Tree::SplatNode(arguments));
 						}
 						
 						auto result = new (fragment) Tree::CallNode;
@@ -1844,7 +1844,7 @@ namespace Mirb
 						result->method = mutated;
 						result->block_arg = node->block_arg;
 						result->variadic = true;
-						result->arguments.append(new Tree::SplatNode(arguments));
+						result->arguments.append(new (fragment) Tree::SplatNode(arguments));
 
 						if(node->range)
 							result->range = capture();

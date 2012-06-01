@@ -51,7 +51,7 @@ namespace Mirb
 
 			MemoryPool memory_pool;
 			
-			bool close_pair(const std::string &name, const SourceLoc &range, Lexeme::Type lexeme, bool skip = true);
+			bool close_pair(const CharArray &name, const SourceLoc &range, Lexeme::Type lexeme, bool skip = true);
 
 			Tree::VoidNode *raise_void(Tree::VoidNode *node)
 			{
@@ -61,7 +61,7 @@ namespace Mirb
 			
 			void load();
 			
-			void report(const SourceLoc &range, std::string text, Message::Severity severity = Message::MESSAGE_ERROR);
+			void report(const SourceLoc &range, const CharArray &text, Message::Severity severity = Message::MESSAGE_ERROR);
 			
 			Tree::Fragment fragment;
 			Tree::Scope *scope;
@@ -70,7 +70,7 @@ namespace Mirb
 			void unexpected(bool skip = true);
 			void expected(Lexeme::Type what, bool skip = false);
 			
-			void error(std::string text);
+			void error(const CharArray &text);
 			
 			template<typename F> Tree::VoidTrapper *trap(F func)
 			{

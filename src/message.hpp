@@ -20,7 +20,7 @@ namespace Mirb
 				SEVERITIES
 			};
 
-			Message(Parser &parser, const SourceLoc &range, Severity severity, std::string text);
+			Message(Parser &parser, const SourceLoc &range, Severity severity, const CharArray &text);
 
 			~Message()
 			{
