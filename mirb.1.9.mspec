@@ -10,6 +10,7 @@ class MSpecScript
 	
     '^rubyspec/core/basicobject',
     '^rubyspec/core/argf',
+    '^rubyspec/core/env',
     '^rubyspec/core/complex',
     '^rubyspec/core/continuation',
     '^rubyspec/core/binding',
