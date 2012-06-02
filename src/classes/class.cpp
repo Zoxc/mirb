@@ -6,6 +6,11 @@
 
 namespace Mirb
 {
+	value_t Class::rb_allocate(Class *instance_of)
+	{
+		return Collector::allocate<Class>(Type::Class, instance_of, context->object_class);
+	}
+	
 	Class *Class::create_initial(Class *superclass)
 	{
 		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Type::Class));
@@ -82,6 +87,7 @@ namespace Mirb
 
 	void Class::initialize()
 	{
+		method<Self<Class>, &rb_allocate>(context->class_class, "allocate");
 		method<Self<Class>, Value, &case_equal>(context->class_class, "===");
 		method<Self<Class>, &to_s>(context->class_class, "to_s");
 		method<Self<Module>, &rb_superclass>(context->class_class, "superclass");
