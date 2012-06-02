@@ -44,14 +44,14 @@ namespace Mirb
 
 		OnStack<1> os3(module);
 
-		out.color(Gray, Mirb::inspect(module));
+		out.color(Gray, Mirb::rescue_inspect(module));
 
 		value_t class_of_obj = class_of(self->obj);
 
 		if(class_of_obj != module)
 		{
 			out.color(Gray, "(");
-			out.color(Gray, Mirb::inspect(class_of_obj));
+			out.color(Gray, Mirb::rescue_inspect(class_of_obj));
 			out.color(Gray, ")");
 		}
 
@@ -61,7 +61,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			out.print(Mirb::inspect((*self->args)[i]));
+			out.print(Mirb::rescue_inspect((*self->args)[i]));
 			if(i < self->args->entries - 1)
 				out.print(", ");
 		}

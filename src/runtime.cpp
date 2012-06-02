@@ -316,7 +316,21 @@ namespace Mirb
 
 		return singleton_class;
 	}
-
+	
+	CharArray rescue_inspect(value_t obj)
+	{
+		try
+		{
+			return inspect(obj);
+		}
+		catch(InternalException e)
+		{
+			if(kind_of(context->standard_error, e.value))
+				return "<error: " + inspect(e.value) + ">";
+			else
+				throw;
+		}
+	}
 	CharArray inspect(value_t obj)
 	{
 		return inspect_obj(obj)->string.trim(300, "<....>");
