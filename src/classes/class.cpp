@@ -2,18 +2,13 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 
 namespace Mirb
 {
-	value_t Class::rb_allocate(Class *instance_of)
-	{
-		return Collector::allocate<Class>(Type::Class, instance_of, context->object_class);
-	}
-	
 	Class *Class::create_initial(Class *superclass)
 	{
-		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Type::Class));
+		Class *result = new (collector) Class(Type::Class);
 
 		result->superclass = superclass;
 
@@ -25,7 +20,7 @@ namespace Mirb
 		if(module->type() == Type::IClass)
 			module = module->original_module;
 
-		Class *result = Collector::setup_object<Class>(new (Collector::allocate_object<Class>()) Class(Type::IClass));
+		Class *result = new (collector) Class(Type::IClass);
 
 		result->superclass = superclass;
 		result->original_module = module;
@@ -37,7 +32,7 @@ namespace Mirb
 
 	value_t Class::to_s(Class *self)
 	{
-		value_t name = get_var(self, context->syms.classname);
+		value_t name = get_var(self, context->syms.classpath);
 		
 		if(name->test())
 			return name;
@@ -87,7 +82,8 @@ namespace Mirb
 
 	void Class::initialize()
 	{
-		method<Self<Class>, &rb_allocate>(context->class_class, "allocate");
+		internal_allocator<Class, &Context::class_class>();
+		
 		method<Self<Class>, Value, &case_equal>(context->class_class, "===");
 		method<Self<Class>, &to_s>(context->class_class, "to_s");
 		method<Self<Module>, &rb_superclass>(context->class_class, "superclass");

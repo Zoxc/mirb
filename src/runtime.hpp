@@ -83,6 +83,11 @@ namespace Mirb
 	value_t get_const(Tuple<Module> *scope, Symbol *name);
 	void set_const(value_t obj, Symbol *name, value_t value);
 	
+	template<typename T> void set_const(value_t obj, T &&name, value_t value)
+	{
+		return set_const(obj, symbol_cast(std::forward<T>(name)), value);
+	}
+	
 	value_t get_var_raw(value_t obj, Symbol *name);
 	value_t get_var(value_t obj, Symbol *name);
 	void set_var(value_t obj, Symbol *name, value_t value);

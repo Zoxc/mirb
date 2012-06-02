@@ -1,15 +1,15 @@
 #include "float.hpp"
 #include "../runtime.hpp"
 #include "../platform/platform.hpp"
-#include "../collector.hpp"
 #include "string.hpp"
 #include "fixnum.hpp"
+#include <limits>
 
 namespace Mirb
 {
 	Float *Float::allocate(double value)
 	{
-		return Collector::allocate<Float>(value);
+		return new (collector) Float(value);
 	}
 
 	value_t Float::to_s(Float *obj)
@@ -29,6 +29,11 @@ namespace Mirb
 		return Value::from_bool(obj->value == 0.0);
 	}
 	
+	value_t Float::neg(Float *obj)
+	{
+		return allocate(-obj->value);
+	}
+	
 	template<typename F, size_t string_length> value_t coerce_op(Float *obj, value_t other, const char (&string)[string_length], F func)
 	{
 		Float *right = try_cast<Float>(other);
@@ -41,17 +46,17 @@ namespace Mirb
 	
 	value_t Float::add(Float *obj, value_t other)
 	{
-		return coerce_op(obj, other, "+", [&](double right) { return Collector::allocate<Float>(obj->value + right); });
+		return coerce_op(obj, other, "+", [&](double right) { return allocate(obj->value + right); });
 	}
 	
 	value_t Float::sub(Float *obj, value_t other)
 	{
-		return coerce_op(obj, other, "-", [&](double right) { return Collector::allocate<Float>(obj->value - right); });
+		return coerce_op(obj, other, "-", [&](double right) { return allocate(obj->value - right); });
 	}
 	
 	value_t Float::mul(Float *obj, value_t other)
 	{
-		return coerce_op(obj, other, "*", [&](double right) { return Collector::allocate<Float>(obj->value * right); });
+		return coerce_op(obj, other, "*", [&](double right) { return allocate(obj->value * right); });
 	}
 	
 	value_t Float::div(Float *obj, value_t other)
@@ -60,7 +65,7 @@ namespace Mirb
 			if(prelude_unlikely(right == 0.0))
 				zero_division_error();
 
-			return Collector::allocate<Float>(obj->value / right);
+			return allocate(obj->value / right);
 		});
 	}
 
@@ -76,12 +81,16 @@ namespace Mirb
 		method<Self<Float>, &to_s>(context->float_class, "to_s");
 		method<Self<Value>, &to_f>(context->float_class, "to_f");
 		method<Self<Float>, &zero>(context->float_class, "zero?");
-		
+		method<Self<Float>, &neg>(context->float_class, "-@");
+
 		method<Self<Float>, Value, &add>(context->float_class, "+");
 		method<Self<Float>, Value, &sub>(context->float_class, "-");
 		method<Self<Float>, Value, &mul>(context->float_class, "*");
 		method<Self<Float>, Value, &div>(context->float_class, "/");
 		method<Self<Float>, Value, &compare>(context->float_class, "<=>");
+		
+		set_const(context->float_class, "MIN", Float::allocate(std::numeric_limits<double>::min())); 
+		set_const(context->float_class, "MAX", Float::allocate(std::numeric_limits<double>::max())); 
 	}
 };
 

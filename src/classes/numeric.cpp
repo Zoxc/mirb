@@ -33,11 +33,17 @@ namespace Mirb
 		
 		return Array::allocate_pair(left, right);
 	}
-
+	
+	value_t Numeric::pos(value_t obj)
+	{
+		return obj;
+	}
+	
 	void Numeric::initialize()
 	{
 		include_module(context->numeric_class, context->comparable_module);
 		
+		method<Self<Value>, &pos>(context->integer_class, "+@");
 		method<Self<Value>, &nonzero>(context->numeric_class, "nonzero?");
 		method<Self<Value>, Value, &coerce>(context->numeric_class, "coerce");
 	}

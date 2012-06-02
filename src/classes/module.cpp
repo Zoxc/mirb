@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "proc.hpp"
+#include "array.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "../value-map.hpp"
@@ -30,7 +31,7 @@ namespace Mirb
 
 	value_t Module::to_s(value_t obj)
 	{
-		value_t name = get_var(obj, context->syms.classname);
+		value_t name = get_var(obj, context->syms.classpath);
 
 		if(name->test())
 			return name;
@@ -145,6 +146,17 @@ namespace Mirb
 	value_t visibility_dummy(value_t obj, size_t, value_t[])
 	{
 		return obj;
+	}
+	
+	value_t nesting()
+	{
+		auto result = Array::allocate();
+		auto scope = context->frame->prev->scope;
+
+		for(size_t i = 0; i < scope->entries - 1; ++i)
+			result->vector.push((*scope)[i]);
+
+		return result;
 	}
 	
 	value_t Module::alias_method(Module *self, Symbol *new_name, Symbol *old_name)
@@ -263,12 +275,15 @@ namespace Mirb
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr_reader");
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
+		singleton_method<&nesting>(context->module_class, "nesting");
 		
 		method<Self<Module>, Arg::Count, Arg::Values, &module_function>(context->module_class, "module_function");
 		
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public");
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private");
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "protected");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public_class_method");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private_class_method");
 		
 		method<Self<Module>, Symbol, &const_defined>(context->module_class, "const_defined?");
 		method<Self<Module>, Symbol, &const_get>(context->module_class, "const_get");

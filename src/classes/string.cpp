@@ -6,28 +6,23 @@
 #include "range.hpp"
 #include "../number.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 
 namespace Mirb
 {
 	value_t String::from_symbol(Symbol *symbol)
 	{
-		return Collector::allocate<String>(symbol->string);
-	}
-	
-	value_t String::rb_allocate(Class *instance_of)
-	{
-		return Collector::allocate<String>(instance_of);
+		return new (collector) String(symbol->string);
 	}
 	
 	String *String::get(const CharArray &string)
 	{
-		return Collector::allocate<String>(string);
+		return new (collector) String(string);
 	}
 			
 	value_t String::from_string(const char *c_str)
 	{
-		return Collector::allocate<String>((const char_t *)c_str, std::strlen(c_str));
+		return new (collector) String((const char_t *)c_str, std::strlen(c_str));
 	}
 	
 	value_t String::inspect(String *self)
@@ -85,7 +80,7 @@ namespace Mirb
 	
 	value_t split(String *self, value_t sep)
 	{
-		auto result = Collector::allocate<Array>();
+		auto result = Array::allocate();
 
 		CharArray sep_str;
 
@@ -333,6 +328,13 @@ namespace Mirb
 
 		return result.to_string();
 	}
+	
+	value_t String::include(String *self, String *sub)
+	{
+		size_t index;
+
+		return Value::from_bool(self->string.index_of(sub->string, index));
+	}
 
 	value_t String::sprintf(String *self, value_t input)
 	{
@@ -444,8 +446,8 @@ namespace Mirb
 	
 	void String::initialize()
 	{
-		singleton_method<Self<Class>, &rb_allocate>(context->string_class, "allocate");
-
+		internal_allocator<String, &Context::string_class>();
+		
 		method<Self<Value>, Value, &match>(context->string_class, "match");
 		method<Self<Value>, &to_s>(context->string_class, "to_s");
 		method<Self<String>, &to_i>(context->string_class, "to_i");
@@ -453,6 +455,7 @@ namespace Mirb
 		method<Self<String>, Optional<String>, &chomp_ex>(context->string_class, "chomp!");
 		method<Self<String>, Value, &pattern>(context->string_class, "=~");
 		method<Self<String>, Value, &sprintf>(context->string_class, "%");
+		method<Self<String>, String, &include>(context->string_class, "include?");
 		method<Self<String>, Regexp, String, &gsub>(context->string_class, "gsub");
 		method<Self<String>, Regexp, String, &gsub_ex>(context->string_class, "gsub!");
 		method<Self<String>, &empty>(context->string_class, "empty?");

@@ -127,7 +127,22 @@ namespace Mirb
 
 		return *this;
 	}
+	
+	bool CharArray::index_of(const CharArray &other, size_t &index)
+	{
+		if(other.size() > length)
+			return false;
 
+		for(size_t i = 0; i <= length - other.size(); ++i)
+			if(equal(i, 0, other, other.size()))
+			{
+				index = i;
+				return true;
+			}
+
+		return false;
+	}
+	
 	int CharArray::to_i()
 	{
 		CharArray str = c_str();

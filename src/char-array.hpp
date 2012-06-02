@@ -91,6 +91,8 @@ namespace Mirb
 			CharArray ljust(size_t length, const CharArray &padding);
 			CharArray rjust(size_t length, const CharArray &padding);
 
+			bool index_of(const CharArray &other, size_t &index);
+
 			template<typename F> void split(F func, const CharArray &token) const
 			{
 				size_t last = 0;

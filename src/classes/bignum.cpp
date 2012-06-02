@@ -37,6 +37,17 @@ namespace Mirb
 	{
 		return obj->number.neg().to_value();
 	}
+	
+	value_t Bignum::pow(Bignum *obj, intptr_t other)
+	{
+		if(other < 0)
+			raise(context->argument_error, "Negative exponent not allowed with integers");
+
+		if(other > ULONG_MAX)
+			raise(context->argument_error, "The exponent is too high");
+
+		return obj->number.pow((unsigned long)other).to_value();
+	}
 
 	value_t Bignum::add(Bignum *obj, value_t other)
 	{
@@ -112,7 +123,8 @@ namespace Mirb
 		
 		method<Self<Bignum>, &zero>(context->bignum_class, "zero?");
 		method<Self<Bignum>, &neg>(context->bignum_class, "-@");
-
+		
+		method<Self<Bignum>, Arg::Fixnum, &pow>(context->bignum_class, "**");
 		method<Self<Bignum>, Value, &add>(context->bignum_class, "+");
 		method<Self<Bignum>, Value, &sub>(context->bignum_class, "-");
 		method<Self<Bignum>, Value, &mul>(context->bignum_class, "*");

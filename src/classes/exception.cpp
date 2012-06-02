@@ -4,7 +4,7 @@
 #include "array.hpp"
 #include "io.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 #include "class.hpp"
 #include "../block.hpp"
 #include "../document.hpp"
@@ -169,11 +169,6 @@ namespace Mirb
 		}
 	}
 	
-	value_t Exception::allocate(Class *instance_of)
-	{
-		return Collector::allocate<Exception>(Type::Exception, instance_of, nullptr, nullptr);
-	}
-	
 	value_t Exception::to_s(Exception *self)
 	{
 		if(self->message)
@@ -251,8 +246,8 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Self<Class>, &allocate>(context->exception_class, "allocate");
-
+		internal_allocator<Exception, &Context::exception_class>();
+		
 		method<Self<Exception>, Optional<String>, &rb_initialize>(context->exception_class, "initialize");
 		method<Self<Exception>, &rb_backtrace>(context->exception_class, "backtrace");
 		method<Self<Exception>, &to_s>(context->exception_class, "message");

@@ -4,7 +4,7 @@
 #include "array.hpp"
 #include "fixnum.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 #include "../number.hpp"
 #include <climits>
 
@@ -39,7 +39,7 @@ namespace Mirb
 
 	Regexp *Regexp::allocate(const CharArray &pattern)
 	{
-		Regexp *result = Collector::allocate<Regexp>(context->regexp_class);
+		Regexp *result = new (collector) Regexp(context->regexp_class);
 
 		result->pattern = pattern;
 		result->compile_pattern();
@@ -85,11 +85,6 @@ namespace Mirb
 		return value_nil;
 	}
 	
-	value_t Regexp::rb_allocate(Class *instance_of)
-	{
-		return Collector::allocate<Regexp>(instance_of);
-	}
-	
 	value_t Regexp::to_s(Regexp *obj)
 	{
 		return ("/" + obj->pattern  + "/").to_string();
@@ -115,7 +110,7 @@ namespace Mirb
 			match_data = value_nil;
 		else
 		{
-			auto data = Collector::allocate<Array>();
+			auto data = Array::allocate();
 
 			for (int i = 0; i < result; i++) {
 				data->vector.push(string->string.copy(ovector[2 * i], ovector[2 * i + 1] - ovector[2 * i]).to_string());
@@ -168,6 +163,8 @@ namespace Mirb
 	{
 		context->regexp_class = define_class("Regexp", context->object_class);
 		
+		internal_allocator<Regexp, &Context::regexp_class>();
+		
 		method<Self<Regexp>, &source>(context->regexp_class, "source");
 		method<Self<Regexp>, &to_s>(context->regexp_class, "to_s");
 		method<Self<Regexp>, Value, &rb_initialize>(context->regexp_class, "initialize");
@@ -177,7 +174,6 @@ namespace Mirb
 		
 		singleton_method<String, &escape>(context->regexp_class, "escape");
 		singleton_method<String, &escape>(context->regexp_class, "quote");
-		singleton_method<Self<Class>, &rb_allocate>(context->regexp_class, "allocate");
 	}
 };
 

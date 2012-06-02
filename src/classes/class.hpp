@@ -20,6 +20,7 @@ namespace Mirb
 
 		public:
 			Class(Type::Enum type, Class *instance_of, Class *superclass, bool singleton = false) : Module(type, instance_of, superclass), singleton(singleton) {}
+			Class(Class *instance_of) : Module(Type::Class, instance_of, context->object_class), singleton(false) {}
 
 			bool singleton;
 			

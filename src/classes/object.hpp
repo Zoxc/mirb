@@ -47,7 +47,6 @@ namespace Mirb
 				verify(instance_of);
 			}
 			
-			static value_t allocate(Class *instance_of);
 			static value_t to_s(value_t obj);
 
 			union

@@ -8,6 +8,7 @@ namespace Mirb
 		public Object
 	{
 		private:
+			static value_t neg(Float *obj);
 			static value_t zero(Float *obj);
 			static value_t to_s(Float *obj);
 			static value_t to_f(value_t obj);

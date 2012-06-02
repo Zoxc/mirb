@@ -1,5 +1,5 @@
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 #include "../classes.hpp"
 
 namespace Mirb
@@ -23,11 +23,6 @@ namespace Mirb
 	{
 		hash_value = (size_t)hash_number((size_t)this); // Note: The first two bits are constant
 		this->hashed = true;
-	}
-	
-	value_t Object::allocate(Class *instance_of)
-	{
-		return Collector::allocate<Object>(instance_of);
 	}
 	
 	value_t Object::tap(value_t obj, value_t block)
@@ -212,6 +207,8 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
+		internal_allocator<Object, &Context::object_class>();
+		
 		method<Self<Value>, Symbol, Value, &instance_variable_set>(context->object_class, "instance_variable_set");
 		method<Self<Value>, Symbol, &instance_variable_get>(context->object_class, "instance_variable_get");
 
@@ -243,8 +240,6 @@ namespace Mirb
 		method<Self<Value>, Optional<String>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
 		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
 		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
-
-		singleton_method<Self<Class>, &allocate>(context->object_class, "allocate");
 	}
 };
 

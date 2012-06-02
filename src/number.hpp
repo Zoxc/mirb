@@ -65,6 +65,8 @@ namespace Mirb
 			CharArray to_string(size_t base = 10) const;
 
 			Number neg() const;
+			
+			Number pow(mp_digit exp) const;
 
 			Number operator *(const Number &other) const;
 			Number operator /(const Number &other) const;

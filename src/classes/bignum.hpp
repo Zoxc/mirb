@@ -19,6 +19,7 @@ namespace Mirb
 			static value_t compare(Bignum *obj, value_t other);
 			static value_t zero(Bignum *obj);
 			static value_t coerce(Bignum *obj, value_t other);
+			static value_t pow(Bignum *obj, intptr_t other);
 
 		public:
 			static value_t to_string(const Number &number, intptr_t base);

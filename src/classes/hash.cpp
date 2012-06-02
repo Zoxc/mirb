@@ -4,15 +4,10 @@
 #include "bignum.hpp"
 #include "../runtime.hpp"
 #include "../recursion-detector.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 
 namespace Mirb
 {
-	value_t Hash::allocate(Class *instance_of)
-	{
-		return Collector::allocate<Hash>(instance_of);
-	}
-	
 	Hash *Hash::dup(Hash *other)
 	{
 		if(other->accessing())
@@ -155,8 +150,8 @@ namespace Mirb
 	{
 		context->hash_class = define_class("Hash", context->object_class);
 		
-		singleton_method<Self<Class>, &allocate>(context->hash_class, "allocate");
-
+		internal_allocator<Hash, &Context::hash_class>();
+		
 		method<Self<Hash>, Optional<Value>, Arg::Block, &rb_initialize>(context->hash_class, "initialize");
 		
 		method<Self<Hash>, &rb_empty>(context->hash_class, "empty?");
