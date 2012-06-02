@@ -69,6 +69,7 @@ namespace Mirb
 	 * pretty_inspect (calls Ruby code)
 	 */
 	CharArray pretty_inspect(value_t obj);
+	CharArray rescue_pretty_inspect(value_t obj);
 	
 	ValueMap *get_vars(value_t obj);
 	
