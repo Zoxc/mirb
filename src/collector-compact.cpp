@@ -283,7 +283,7 @@ namespace Mirb
 		static void func(CollectorStateForward &state)
 		{
 			value_t i = state.obj.pos;
-			size_t size = size_of_value(i);
+			size_t size = SizeOf<type>::func(i);
 
 			mirb_debug_assert((state.obj.pos >= state.free.pos) || state.obj.region != state.free.region);
 
@@ -295,13 +295,13 @@ namespace Mirb
 
 				update<false>(i, pos);
 
-				thread_children(i);
+				ThreadClass<type>::func(i);
 
 				state.prev = nullptr;
 			}
 			else
 			{
-				Type::action<FreeClass>(i->value_type, i);
+				FreeClass<type>::func(i);
 
 				if(state.prev)
 				{
@@ -349,33 +349,29 @@ namespace Mirb
 		for(auto i = symbol_pool_list.begin(); i != symbol_pool_list.end(); ++i)
 		{
 			update<false>(*i, *i);
-			thread_children(*i);
+			mirb_debug_assert((*i)->value_type == Type::Symbol);
+			ThreadClass<Type::Symbol>::func(*i);
 		}
 	}
 	
-	struct CollectorStateBackward
+	void Collector::update_backward()
 	{
 		RegionAllocator<true> free;
 		RegionWalker obj;
-		size_t size;
-	};
-	
-	template<Type::Enum type> struct UpdateBackward
-	{
-		typedef bool Result;
 
-		static bool func(CollectorStateBackward &state)
+		size_t size;
+
+		obj.load();
+
+		do
 		{
 		start:
-			value_t i = state.obj.pos;
-
-			size_t size = size_of_value(i); 
-
-			state.size = size;
+			value_t i = obj.pos;
+			size = size_of_value(i);
 
 			if(i->marked)
 			{
-				value_t pos = state.free.allocate(size);
+				value_t pos = free.allocate(size);
 
 				update<true>(i, pos);
 				move(i, pos, size);
@@ -390,33 +386,18 @@ namespace Mirb
 
 				if(i->value_type == Type::FreeBlock)
 				{
-					if(prelude_unlikely(!state.obj.jump((value_t)(i->*Value::thread_list), (Collector::Region *)((FreeBlock *)i)->next)))
-						return false;
+					if(prelude_unlikely(!obj.jump((value_t)(i->*Value::thread_list), (Region *)((FreeBlock *)i)->next)))
+						break;
 					else
 						goto start;
 				}
 			}
-
-			return true;
 		}
-	};
+		while(obj.step(size));
 
-	void Collector::update_backward()
-	{
-		CollectorStateBackward state;
+		free.update();
 
-		state.obj.load();
-
-		do
-		{
-			if(!Type::action<UpdateBackward>(state.obj.pos->value_type, state))
-				break;
-		}
-		while(state.obj.step(state.size));
-
-		state.free.update();
-
-		Collector::current = state.free.region;
+		Collector::current = free.region;
 
 		// Free regions and reset default page allocation count
 
