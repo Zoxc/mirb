@@ -7,6 +7,7 @@
 #include "classes/array.hpp"
 #include "classes/fixnum.hpp"
 #include "classes/file.hpp"
+#include "classes/float.hpp"
 #include "modules/kernel.hpp"
 #include "platform/platform.hpp"
 #include "block.hpp"
@@ -59,6 +60,54 @@ bool load_core_lib(const char *executable)
 	}
 
 	return true;
+}
+
+int run_file(int index, int argc, const char *argv[])
+{
+	load_core_lib(argv[0]);
+
+	CharArray exec = CharArray((const char_t *)argv[index++]);
+		
+	Array *new_argv = Collector::allocate<Array>();
+
+	for(int i = index; i < argc; ++i)
+	{
+		new_argv->vector.push(CharArray((const char_t *)argv[i]).to_string());
+	}
+
+	set_const(context->object_class, Symbol::get("ARGV"), new_argv);
+		
+	Exception *exception;
+
+	trap_exception(exception, [&] { Kernel::load(exec.to_string()); });
+
+	if(exception)
+	{
+		auto system_exit = try_cast<SystemExit>(exception);
+
+		if(system_exit)
+			return system_exit->result;
+
+		report_exception(exception);
+
+		return 1;
+	}
+	else
+		return 0;
+}
+
+void print_stats()
+{
+	Exception *exception;
+
+	trap_exception(exception, [&] {
+		context->console_output->puts("\nTime in GC: " + inspect(Float::allocate(Collector::bench.time())) + " ms");
+		context->console_output->puts("\nAverage time per GC: " + inspect(Float::allocate(Collector::bench.time() / Collector::collections)) + " ms");
+		context->console_output->puts("Number of collections: " + CharArray::uint(Collector::collections));
+		context->console_output->puts("Memory allocated: " + CharArray::uint((size_t)((Collector::memory + Collector::total_memory) / 1024)) + " KiB");
+		context->console_output->puts("Regions allocated: " + CharArray::uint(Collector::region_count));
+		context->console_output->puts("Regions freed: " + CharArray::uint(Collector::region_free_count));
+	});
 }
 
 int main(int argc, const char *argv[])
@@ -119,49 +168,26 @@ int main(int argc, const char *argv[])
 
 			return result;
 		}
-
-		load_core_lib(argv[0]);
-
-		CharArray exec = CharArray((const char_t *)argv[index++]);
 		
-		Array *new_argv = Collector::allocate<Array>();
-
-		for(int i = index; i < argc; ++i)
-		{
-			new_argv->vector.push(CharArray((const char_t *)argv[i]).to_string());
-		}
-
-		set_const(context->object_class, Symbol::get("ARGV"), new_argv);
+		Platform::BenchmarkResult bench;
 		
+		int result;
+
+		Platform::benchmark(bench, [&] {
+			result = run_file(index, argc, argv);
+		});
+
 		Exception *exception;
 
-		trap_exception(exception, [&] { Kernel::load(exec.to_string()); });
+		trap_exception(exception, [&] {
+			context->console_output->puts("\nTime overall: " + inspect(Float::allocate(bench.time())) + " ms");
+		});
 
-		if(exception)
-		{
-			auto system_exit = try_cast<SystemExit>(exception);
+		print_stats();
 
-			if(system_exit)
-			{
-				int result = system_exit->result;
+		Mirb::finalize();
 
-				Mirb::finalize();
-
-				return result;
-			}
-
-			report_exception(exception);
-
-			Mirb::finalize();
-
-			return 1;
-		}
-		else
-		{
-			Mirb::finalize();
-	
-			return 0;
-		}
+		return result;
 	}
 	
 	load_core_lib(argv[0]);
@@ -207,12 +233,8 @@ int main(int argc, const char *argv[])
 		}
 	}
 	
-	context->console_output->puts("\nNumber of collections: " + CharArray::uint(Collector::collections));
-	context->console_output->puts("Memory allocated: " + CharArray::uint((size_t)(Collector::memory / 1024)) + " KiB");
-	context->console_output->puts("Regions allocated: " + CharArray::uint(Collector::region_count));
-	context->console_output->puts("Regions freed: " + CharArray::uint(Collector::region_free_count));
-	context->console_output->puts("Exiting gracefully...");
-	
+	print_stats();
+
 	Mirb::finalize();
 	
 	return 0;

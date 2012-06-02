@@ -4,6 +4,7 @@
 #include "range.hpp"
 #include "../recursion-detector.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

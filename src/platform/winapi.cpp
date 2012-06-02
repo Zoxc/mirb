@@ -67,13 +67,9 @@ namespace Mirb
 			return nt_headers->OptionalHeader.SizeOfStackReserve;
 		}
 		
-		CharArray BenchmarkResult::format()
+		double BenchmarkResult::time()
 		{
-			std::stringstream result;
-
-			result << (((double)1000 * time.QuadPart) / (double)freq.QuadPart) << " ms";
-
-			return CharArray(result.str());
+			return (((double)1000 * data.QuadPart) / (double)freq.QuadPart);
 		}
 
 		void *allocate_region(size_t bytes)

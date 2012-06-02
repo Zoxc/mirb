@@ -3,6 +3,7 @@
 #include "support.hpp"
 #include "document.hpp"
 #include "number.hpp"
+#include "collector.hpp"
 #include "generic/source-loc.hpp"
 #include "classes/exceptions.hpp"
 #include "classes/string.hpp"

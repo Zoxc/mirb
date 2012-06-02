@@ -22,11 +22,13 @@
 
 namespace Mirb
 {
+	Platform::BenchmarkResult Collector::bench;
 	size_t Collector::collections = 0;
 	size_t Collector::region_count = 0;
 	size_t Collector::region_free_count = 0;
 	size_t Collector::region_allocs_since_collection = 0;
-	unsigned long long Collector::memory = 0;
+	uint64_t Collector::memory = 0;
+	uint64_t Collector::total_memory = 0;
 	bool Collector::pending = false;
 	bool Collector::enable_interrupts = false;
 	size_t Collector::pages = 32;
@@ -54,15 +56,25 @@ namespace Mirb
 	{
 		bytes += sizeof(VariableBlock);
 		bytes = align(bytes, mirb_object_align);
-						
-		VariableBlock *result = new (Collector::allocate_simple(bytes)) VariableBlock(bytes);
 
+		VariableBlock *result;
+
+		if(bytes > Collector::max_region_alloc)
+		{
+			result = new (std::malloc(bytes)) VariableBlock(bytes);
+			heap_list.append(result);
+		}
+		else
+		{
+			result = new (Collector::allocate_simple(bytes)) VariableBlock(bytes);
+
+			#ifdef VALGRIND
+				Collector::heap_list.append(result);
+			#endif
+		}
+		
 		#ifdef DEBUG		
 			result->block_size = bytes;
-		#endif
-
-		#ifdef VALGRIND
-			Collector::heap_list.append(result);
 		#endif
 
 		return result->data();
@@ -83,23 +95,12 @@ namespace Mirb
 			}
 		#endif
 
-		bytes += sizeof(VariableBlock);
-		bytes = align(bytes, mirb_object_align);
-						
-		VariableBlock *result = new (Collector::allocate_simple(bytes)) VariableBlock(bytes);
-
-		#ifdef DEBUG		
-			result->block_size = bytes;
-		#endif
-
-		#ifdef VALGRIND
-			Collector::heap_list.append(result);
-		#endif
+		void *result = allocate(bytes);
 
 		if(memory)
-			memcpy(result->data(), memory, old_size);
+			memcpy(result, memory, old_size);
 			
-		return result->data();
+		return result;
 	}
 
 	void dummy()
@@ -144,6 +145,8 @@ namespace Mirb
 	void Collector::collect()
 	{
 		region_allocs_since_collection = 0;
+		total_memory += memory;
+		memory = 0;
 
 		if(enable_interrupts)
 		{
@@ -152,14 +155,16 @@ namespace Mirb
 			if(pending_exception.compare_exchange_strong(expected, false) && expected)
 				raise(context->interrupt_class, "Aborted");
 		}
+		
+		Platform::benchmark(bench, [&] {
+			mark();
 
-		mark();
-
-		#ifdef VALGRIND
-			sweep();
-		#else
-			compact();
-		#endif
+			#ifdef VALGRIND
+				sweep();
+			#else
+				compact();
+			#endif
+		});
 
 		#ifdef DEBUG_MEMORY
 		{
@@ -222,14 +227,12 @@ namespace Mirb
 		}
 		else
 		{
-			region_allocs_since_collection++;
-
-			if(region_allocs_since_collection > 2)
+			if(memory > (512 + collections * 128) * page_size)
 				pending = true;
 		}
 
 		region = allocate_region(pages * page_size);
-		pages += pages >> 2;
+		pages += pages >> 1;
 
 		result = region->pos;
 

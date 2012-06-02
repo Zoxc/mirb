@@ -8,9 +8,14 @@ namespace Mirb
 		class BenchmarkResult
 		{
 			public:
-				LARGE_INTEGER time, freq;
+				LARGE_INTEGER data, freq;
 
-				CharArray format();
+				double time();
+
+				BenchmarkResult()
+				{
+					data.QuadPart = 0;
+				}
 		};
 		
 		void raise(const CharArray &message);
@@ -117,10 +122,8 @@ namespace Mirb
 			FindClose(handle);
 		}
 
-		template<typename T> BenchmarkResult benchmark(T work)
+		template<typename T> void benchmark(BenchmarkResult &result, T work)
 		{
-			BenchmarkResult result;
-
 			LARGE_INTEGER start, stop;
 
 			QueryPerformanceFrequency(&result.freq);
@@ -130,9 +133,7 @@ namespace Mirb
 
 			QueryPerformanceCounter(&stop);
 
-			result.time.QuadPart = stop.QuadPart - start.QuadPart;
-
-			return result;
+			result.data.QuadPart += stop.QuadPart - start.QuadPart;
 		};
 	};
 };

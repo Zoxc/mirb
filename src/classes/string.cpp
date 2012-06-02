@@ -6,6 +6,7 @@
 #include "range.hpp"
 #include "../number.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

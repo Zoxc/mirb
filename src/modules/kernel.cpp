@@ -6,11 +6,13 @@
 #include "../classes/exception.hpp"
 #include "../classes/exceptions.hpp"
 #include "../classes/file.hpp"
+#include "../classes/float.hpp"
 #include "../classes/fixnum.hpp"
 #include "../platform/platform.hpp"
 #include "../char-array.hpp"
 #include "../global.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {
@@ -35,18 +37,13 @@ namespace Mirb
 	
 	value_t Kernel::benchmark(value_t block)
 	{
-		CharArray result;
-		
-		OnStackString<1> os(result);
+		Platform::BenchmarkResult bench;
 
-		bool exception = false;
+		Platform::benchmark(bench, [&] {
+			yield(block);
+		});
 
-		result = Mirb::Platform::benchmark([&] {
-			if(!yield(block))
-				exception = true;
-		}).format();
-
-		return exception ? 0 : result.to_string();
+		return (inspect(Float::allocate(bench.time())) + " ms").to_string();
 	}
 	
 	value_t Kernel::eval(value_t obj, String *input)

@@ -4,6 +4,7 @@
 #include "bignum.hpp"
 #include "../runtime.hpp"
 #include "../recursion-detector.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

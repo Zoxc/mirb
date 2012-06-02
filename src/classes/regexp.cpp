@@ -4,6 +4,7 @@
 #include "array.hpp"
 #include "fixnum.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 #include "../number.hpp"
 #include <climits>
 

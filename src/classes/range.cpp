@@ -2,6 +2,7 @@
 #include "fixnum.hpp"
 #include "string.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

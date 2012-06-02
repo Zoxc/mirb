@@ -5,6 +5,7 @@
 #include "classes/string.hpp"
 #include "classes/hash.hpp"
 #include "classes/regexp.hpp"
+#include "collector.hpp"
 #include "runtime.hpp"
 
 namespace Mirb

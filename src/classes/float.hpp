@@ -20,6 +20,8 @@ namespace Mirb
 		public:
 			Float(double value) : Object(Type::Float, context->float_class), value(value) {}
 
+			static Float *allocate(double value);
+
 			double value;
 
 			static void initialize();

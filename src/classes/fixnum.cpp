@@ -6,6 +6,7 @@
 #include "array.hpp"
 #include "../char-array.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

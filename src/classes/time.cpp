@@ -2,6 +2,7 @@
 #include "float.hpp"
 #include "../runtime.hpp"
 #include "../platform/platform.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

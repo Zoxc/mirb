@@ -3,6 +3,7 @@
 #include "fixnum.hpp"
 #include "array.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

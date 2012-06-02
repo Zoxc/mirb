@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "../runtime.hpp"
+#include "../collector.hpp"
 
 namespace Mirb
 {

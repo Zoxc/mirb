@@ -24,11 +24,11 @@ namespace Mirb
 	};
 	
 	class VariableBlock:
-		public Value
+		public PinnedHeader
 	{
 		private:
 		public:
-			VariableBlock(size_t bytes) : Value(Type::InternalVariableBlock), bytes(bytes) {}
+			VariableBlock(size_t bytes) : PinnedHeader(Type::InternalVariableBlock), bytes(bytes) {}
 
 			static VariableBlock &from_memory(const void *memory)
 			{
@@ -93,11 +93,11 @@ namespace Mirb
 	};
 	
 	template<class T> class Tuple:
-		public Value
+		public PinnedHeader
 	{
 		private:
 		public:
-			Tuple(size_t entries) : Value(TupleUtil<T>::type), entries(entries) {}
+			Tuple(size_t entries) : PinnedHeader(TupleUtil<T>::type), entries(entries) {}
 
 			T *&operator[](size_t index)
 			{

@@ -8,6 +8,7 @@
 #include "char-array.hpp"
 #include "classes/object.hpp"
 #include "allocator.hpp"
+#include "platform/platform.hpp"
 
 namespace Mirb
 {
@@ -73,6 +74,8 @@ namespace Mirb
 			
 			static size_t region_allocs_since_collection;
 
+			static const size_t max_region_alloc = 0x200;
+
 			#ifdef VALGRIND
 				static LinkedList<Value::Header> heap_list;
 			#else
@@ -122,10 +125,13 @@ namespace Mirb
 				return object;
 			}
 		public:
+			static Platform::BenchmarkResult bench;
+
 			static size_t collections;
 			static size_t region_count;
 			static size_t region_free_count;
-			static unsigned long long memory;
+			static uint64_t memory;
+			static uint64_t total_memory;
 			static bool enable_interrupts;
 
 			/*
@@ -187,14 +193,25 @@ namespace Mirb
 			{
 				size_t size = sizeof(Tuple<T>) + entries * sizeof(T *);
 
-				auto tuple = new (allocate_simple(size)) Tuple<T>(entries);
-				
+				Tuple<T> *tuple;
+
+				if(size > max_region_alloc)
+				{
+					tuple = new (std::malloc(size)) Tuple<T>(entries);
+
+					heap_list.append(tuple);
+				}
+				else
+				{
+					tuple = new (allocate_simple(size)) Tuple<T>(entries);
+			
+					#ifdef VALGRIND
+						heap_list.append(tuple);
+					#endif
+				}
+
 				#ifdef DEBUG		
 					tuple->block_size = size;
-				#endif
-
-				#ifdef VALGRIND
-					heap_list.append(tuple);
 				#endif
 
 				return *tuple;

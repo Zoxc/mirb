@@ -1,11 +1,17 @@
 #include "float.hpp"
 #include "../runtime.hpp"
 #include "../platform/platform.hpp"
+#include "../collector.hpp"
 #include "string.hpp"
 #include "fixnum.hpp"
 
 namespace Mirb
 {
+	Float *Float::allocate(double value)
+	{
+		return Collector::allocate<Float>(value);
+	}
+
 	value_t Float::to_s(Float *obj)
 	{
 		char_t buffer[32];
