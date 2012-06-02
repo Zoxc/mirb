@@ -226,7 +226,12 @@ namespace Mirb
 			#endif
 		#endif
 	}
-
+	
+	bool Value::kind_of(Class *klass)
+	{
+		return subclass_of(klass, internal_class_of(this));
+	}
+	
 	Value::Value(const Value &other) : value_type(other.value_type), hashed(other.hashed), flag(other.flag), flag2(other.flag2)
 	{
 		setup();

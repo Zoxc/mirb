@@ -130,11 +130,6 @@ namespace Mirb
 		return false;
 	}
 
-	bool kind_of(Class *klass, value_t obj)
-	{
-		return subclass_of(klass, internal_class_of(obj));
-	}
-	
 	value_t define_common(value_t under, Symbol *name, Type::Enum type)
 	{
 		if(prelude_unlikely(!of_type<Module>(under)))
@@ -325,7 +320,7 @@ namespace Mirb
 		}
 		catch(InternalException e)
 		{
-			if(kind_of(context->standard_error, e.value))
+			if(e.value->kind_of(context->standard_error))
 				return "<error: " + inspect(e.value) + ">";
 			else
 				throw;
@@ -579,7 +574,7 @@ namespace Mirb
 
 	void type_error(value_t value, Class *expected)
 	{
-		if(prelude_unlikely(!kind_of(expected, value)))
+		if(prelude_unlikely(!value->kind_of(expected)))
 		{
 			CharArray value_str = pretty_inspect(value);
 

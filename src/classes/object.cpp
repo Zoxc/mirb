@@ -145,9 +145,9 @@ namespace Mirb
 		return Fixnum::from_size_t(hash_value(obj)); // TODO: Make a proper object_id
 	}
 	
-	value_t Object::kind_of(value_t obj, Class *klass)
+	value_t Object::rb_kind_of(value_t obj, Class *klass)
 	{
-		return Value::from_bool(Mirb::kind_of(klass, obj));
+		return Value::from_bool(obj->kind_of(klass));
 	}
 	
 	value_t Object::respond_to(value_t obj, Symbol *name)
@@ -226,8 +226,8 @@ namespace Mirb
 		method<Self<Value>, &klass>(context->object_class, "class");
 		method<&dummy>(context->object_class, "freeze");
 		method<Self<Value>, Symbol, &respond_to>(context->object_class, "respond_to?");
-		method<Self<Value>, Class, &kind_of>(context->object_class, "is_a?");
-		method<Self<Value>, Class, &kind_of>(context->object_class, "kind_of?");
+		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "is_a?");
+		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "kind_of?");
 		method<&dummy>(context->object_class, "frozen?");
 		method<Value, &pattern>(context->object_class, "=~");
 		method<Value, &initialize_copy>(context->object_class, "initialize_copy");

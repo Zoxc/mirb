@@ -66,7 +66,7 @@ namespace Mirb
 	
 	value_t Class::case_equal(Class *obj, value_t other)
 	{
-		return Value::from_bool(Mirb::kind_of(obj, other));
+		return Value::from_bool(other->kind_of(obj));
 	}
 
 	value_t Class::rb_new(value_t obj, size_t argc, value_t argv[], value_t block)

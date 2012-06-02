@@ -499,7 +499,7 @@ exception_block_handler: // The test block will jump back here
 						{
 							auto klass = try_cast<Class>(list->get(i));
 
-							if(klass && kind_of(klass, frame.exception))
+							if(klass && frame.exception->kind_of(klass))
 								goto run_handler;
 						}
 
@@ -508,7 +508,7 @@ exception_block_handler: // The test block will jump back here
 
 					case StandardException:
 					{
-						if(!kind_of(context->standard_error, frame.exception))
+						if(!frame.exception->kind_of(context->standard_error))
 							continue;
 						else
 							break;

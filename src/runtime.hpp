@@ -28,7 +28,6 @@ namespace Mirb
 	bool map_index(intptr_t index, size_t size, size_t &result);
 	
 	bool subclass_of(Class *super, Class *c);
-	bool kind_of(Class *klass, value_t obj);
 	Class *internal_class_of(value_t obj) prelude_nonnull(1);
 	bool is_real_class(Class *obj);
 	Class *real_class(Class *obj) prelude_nonnull(1);

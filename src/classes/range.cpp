@@ -113,7 +113,7 @@ namespace Mirb
 				return Value::from_bool(compare(self->high, value) >= 0);
 		} catch(const InternalException &e)
 		{
-			if(!Mirb::kind_of(context->standard_error, e.value))
+			if(!e.value->kind_of(context->standard_error))
 				throw;
 
 			return value_false;
