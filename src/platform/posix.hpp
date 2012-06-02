@@ -20,6 +20,10 @@ namespace Mirb
 
 			public:
 				virtual void print(const CharArray &string);
+				virtual pos_t pos();
+				virtual pos_t size();
+				virtual CharArray read(size_t length);
+				virtual void seek(pos_t val, PosType type);
 
 				NativeStream(int fd);
 				~NativeStream();

@@ -15,7 +15,7 @@ namespace Mirb
 		CharArray native_path(const CharArray &path)
 		{
 			if(!path.size())
-				raise(context->system_call_error, "Empty path");
+				throw empty_path_error();
 
 			return File::expand_path(path, cwd());
 		}

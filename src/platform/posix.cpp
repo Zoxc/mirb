@@ -184,7 +184,7 @@ namespace Mirb
 			if(mode != Open)
 				flags |= O_CREAT;
 
-			int fd = ::open(file.c_str_ref(), flags);
+			int fd = ::open(file.c_str_ref(), flags, 0777);
 
 			if(fd == -1)
 				raise("Unable to open file '" + path + "'");
@@ -227,6 +227,63 @@ namespace Mirb
 		{
 			if(write(fd, string.str_ref(), string.size()) == -1)
 				raise("Unable to write to file descriptor");
+		}
+
+		CharArray NativeStream::read(size_t length)
+		{
+			CharArray buf;
+			buf.buffer(length);
+
+			ssize_t result = ::read(fd, buf.str_ref(), buf.size());
+
+			if(result < 0)
+				raise("Unable to read from file descriptor");
+
+			buf.shrink((size_t)result);
+			return buf;
+		}
+
+		Stream::pos_t NativeStream::pos()
+		{
+			off_t result = lseek(fd, 0, SEEK_CUR);
+
+			if(result == (off_t)-1)
+				raise("Unable to get stream position");
+
+			return result;
+		}
+
+		Stream::pos_t NativeStream::size()
+		{
+			struct stat st;
+
+			if(fstat(fd, &st) != 0)
+				raise("Unable to get file size from descriptor");
+
+			return st.st_size;
+		}
+
+		void NativeStream::seek(pos_t val, PosType type)
+		{
+			int pos;
+
+			switch(type)
+			{
+				case FromStart:
+					pos = SEEK_SET;
+					break;
+
+				case FromCurrent:
+					pos = SEEK_CUR;
+					break;
+
+				case FromEnd:
+					pos = SEEK_END;
+					break;
+			};
+
+			if(lseek(fd, val, pos) == (off_t)-1)
+				raise("Unable to seek in file descriptor");
 		}
 
 		ConsoleStream *console_stream(ConsoleStreamType type)
