@@ -61,13 +61,9 @@ namespace Mirb
 				return 1024 * 64;
 		}
 		
-		CharArray BenchmarkResult::format()
+		double BenchmarkResult::time()
 		{
-			std::stringstream result;
-
-			result << ((double)time / 1000) << " ms";
-
-			return CharArray(result.str());
+			return (double)data / 1000;
 		}
 
 		void *allocate_region(size_t bytes)

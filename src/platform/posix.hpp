@@ -37,15 +37,18 @@ namespace Mirb
 		class BenchmarkResult
 		{
 			public:
-				uint64_t time; 
+				uint64_t data;
 
-				CharArray format();
+				double time();
+
+				BenchmarkResult()
+				{
+					data = 0;
+				}
 		};
 
-		template<typename T> BenchmarkResult benchmark(T work)
+		template<typename T> void benchmark(BenchmarkResult &result, T work)
 		{
-			BenchmarkResult result;
-
 			timeval start, stop;
 
 			gettimeofday(&start, 0); 
@@ -54,9 +57,7 @@ namespace Mirb
 
 			gettimeofday(&stop, 0); 
 
-			result.time = ((uint64_t)stop.tv_sec * 1000000 + stop.tv_usec) - ((uint64_t)start.tv_sec * 1000000 + start.tv_usec);
-			
-			return result;
+			result.data += ((uint64_t)stop.tv_sec * 1000000 + stop.tv_usec) - ((uint64_t)start.tv_sec * 1000000 + start.tv_usec);
 		};
 
 		template<typename F> void list_dir(const CharArray &path, bool skip_special, F func)
