@@ -7,7 +7,7 @@
 
 namespace Mirb
 {
-	value_t Bignum::to_s(Bignum *self, intptr_t base)
+	value_t Bignum::to_string(const Number &number, intptr_t base)
 	{
 		if(base == Fixnum::undef)
 			base = 10;
@@ -15,7 +15,12 @@ namespace Mirb
 		if(base < 2 || base > 64)
 			raise(context->argument_error, "Base must be in 2..64");
 
-		return String::get(self->number.to_string());
+		return String::get(number.to_string());
+	}
+
+	value_t Bignum::to_s(Bignum *self, intptr_t base)
+	{
+		return to_string(self->number, base);
 	}
 	
 	template<typename F, size_t string_length> value_t coerce_op(Bignum *obj, value_t other, const char (&string)[string_length], F func)

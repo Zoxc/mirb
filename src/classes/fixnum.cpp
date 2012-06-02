@@ -51,13 +51,9 @@ namespace Mirb
 		return Value::from_bool(obj == 0);
 	}
 	
-	value_t Fixnum::to_s(int_t obj)
+	value_t Fixnum::to_s(int_t obj, intptr_t base)
 	{
-		char_t buffer[15];
-
-		size_t length = sprintf((char *)buffer, "%d", (int)obj);
-
-		return CharArray(buffer, length).to_string();
+		return Bignum::to_string(Number(obj), base);
 	}
 	
 	value_t Fixnum::to_f(int_t obj)
@@ -174,7 +170,7 @@ namespace Mirb
 
 	void Fixnum::initialize()
 	{
-		method<Self<Arg::Fixnum>, &to_s>(context->fixnum_class, "to_s");
+		method<Self<Arg::Fixnum>, Optional<Arg::Fixnum>, &to_s>(context->fixnum_class, "to_s");
 		method<Self<Arg::Fixnum>, &to_f>(context->fixnum_class, "to_f");
 		method<Self<Arg::Fixnum>, &zero>(context->fixnum_class, "zero?");
 		method<Self<Arg::Fixnum>, Arg::Block, &times>(context->fixnum_class, "times");

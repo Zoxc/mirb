@@ -21,6 +21,8 @@ namespace Mirb
 			static value_t coerce(Bignum *obj, value_t other);
 
 		public:
+			static value_t to_string(const Number &number, intptr_t base);
+
 			Number number;
 
 			Bignum(intptr_t value) : Object(Type::Bignum, context->bignum_class), number(value) {}
