@@ -154,6 +154,7 @@ namespace Mirb
 
 		bool step_region()
 		{
+		start:
 			region = region->entry.next;
 
 			if(region)
@@ -161,7 +162,7 @@ namespace Mirb
 				pos = (value_t)region->data();
 
 				if(pos == (value_t)region->pos)
-					return step_region();
+					goto start;
 
 				test(pos);
 
@@ -227,24 +228,9 @@ namespace Mirb
 				region->pos = (char_t *)pos;
 		}
 
-		value_t allocate_region(size_t size)
-		{
-			update();
-
-			region = region->entry.next;
-
-			if(region)
-			{
-				pos = (value_t)region->data();
-
-				return allocate(size);
-			}
-			else
-				mirb_debug_abort("Ran out of free space!");
-		}
-
 		value_t allocate(size_t size)
 		{
+		start:
 			value_t result = pos;
 
 			mirb_debug_assert(region->area_contains(pos));
@@ -252,8 +238,22 @@ namespace Mirb
 			value_t next = (value_t)((size_t)pos + size);
 
 			if((size_t)next > (size_t)region->end)
-				return allocate_region(size);
+			{
+				update();
 
+				region = region->entry.next;
+
+				if(region)
+				{
+					pos = (value_t)region->data();
+
+					goto start;
+				}
+				else
+					mirb_debug_abort("Ran out of free space!");
+			}
+
+			mirb_debug_assert(size <= (size_t)region->end);
 			mirb_debug_assert(region->area_contains(next));
 
 			pos = next;

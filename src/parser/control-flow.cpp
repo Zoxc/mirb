@@ -414,7 +414,7 @@ namespace Mirb
 
 		trapper->target = node;
 		
-		close_pair(node->inverted ? "until loop" : "while loop", range, Lexeme::KW_END);
+		close_pair(node->inverted ? CharArray("until loop") : "while loop", range, Lexeme::KW_END);
 		
 		return node;
 	}
