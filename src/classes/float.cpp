@@ -14,11 +14,9 @@ namespace Mirb
 
 	value_t Float::to_s(Float *obj)
 	{
-		char_t buffer[32];
-
-		size_t length = sprintf((char *)buffer, "%f", obj->value);
-
-		return CharArray(buffer, length).to_string();
+		std::stringstream buffer;
+		buffer << obj->value;
+		return CharArray(buffer.str()).to_string();
 	}
 	
 	value_t Float::to_f(value_t obj)
