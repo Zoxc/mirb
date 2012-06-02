@@ -4,6 +4,21 @@
 
 namespace Mirb
 {
+	Object::Object(const Object &other) : Value(other), instance_of(other.instance_of), vars(nullptr), hash_value(other.hash_value)
+	{
+		if(other.vars)
+		{
+			vars = Collector::allocate<ValueMap>();
+
+			Object *other_obj = (Object *)&other;
+
+			ValueMapAccess::each_pair(other_obj->vars, [&](value_t key, value_t value) -> bool {
+				ValueMapAccess::set(vars, key, value);
+				return true;
+			});
+		}
+	}
+
 	void Object::generate_hash()
 	{
 		hash_value = (size_t)hash_number((size_t)this); // Note: The first two bits are constant

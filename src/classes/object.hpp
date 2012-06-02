@@ -35,7 +35,7 @@ namespace Mirb
 			friend class Module;
 			friend class Symbol;
 		public:
-			Object(const Object &other) : Value(other), instance_of(other.instance_of), vars(nullptr), hash_value(other.hash_value) {}
+			Object(const Object &other);
 
 			Object(Type::Enum type, Class *instance_of) : Value(type), instance_of(instance_of), vars(nullptr)
 			{
