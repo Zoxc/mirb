@@ -262,69 +262,77 @@ namespace Mirb
 		}
 	};
 
+	struct CollectorStateForward
+	{
+		RegionAllocator<false> free;
+		RegionWalker obj;
+		value_t prev;
+		bool more;
+
+		CollectorStateForward()
+		{
+			prev = nullptr;
+			more = obj.load();
+		}
+	};
+	
+	template<Type::Enum type> struct UpdateForward
+	{
+		typedef void Result;
+
+		static void func(CollectorStateForward &state)
+		{
+			value_t i = state.obj.pos;
+			size_t size = size_of_value(i);
+
+			mirb_debug_assert((state.obj.pos >= state.free.pos) || state.obj.region != state.free.region);
+
+			state.more = state.obj.step(size);
+
+			if(i->marked)
+			{
+				value_t pos = state.free.allocate(size);
+
+				update<false>(i, pos);
+
+				thread_children(i);
+
+				state.prev = nullptr;
+			}
+			else
+			{
+				Type::action<FreeClass>(i->value_type, i);
+
+				if(state.prev)
+				{
+					state.prev->value_type = Type::FreeBlock;
+
+					#ifdef DEBUG
+						state.prev->block_size = sizeof(FreeBlock);
+					#endif
+
+					((FreeBlock *)state.prev)->next = (void *)state.obj.region;
+					state.prev->*Value::thread_list = (value_t *)state.obj.pos;
+				}
+				else
+				{
+					state.prev = i;
+				}
+			}
+
+		}
+	};
+
 	void Collector::update_forward()
 	{
 		ThreadFunc func;
 
 		each_root(func);
 
-		RegionAllocator<false> free;
-		RegionWalker obj;
-
-		size_t size;
-#ifdef MIRB_GC_SKIP_BLOCKS
-		value_t prev = nullptr;
-#endif
-		bool more;
-
-		obj.load();
-
-		do
-		{
-			value_t i = obj.pos;
-			size = size_of_value(i);
-
-			mirb_debug_assert((obj.pos >= free.pos) || obj.region != free.region);
-
-			more = obj.step(size);
-
-			if(i->marked)
-			{
-				value_t pos = free.allocate(size);
-
-				update<false>(i, pos);
-
-				thread_children(i);
-
-#ifdef MIRB_GC_SKIP_BLOCKS
-				prev = nullptr;
-#endif
-			}
-			else
-			{
-				Type::action<FreeClass>(i->value_type, i);
-
-#ifdef MIRB_GC_SKIP_BLOCKS
-				if(prev)
-				{
-					prev->value_type = Type::FreeBlock;
-
-					#ifdef DEBUG
-						prev->block_size = sizeof(FreeBlock);
-					#endif
-
-					((FreeBlock *)prev)->next = (void *)obj.region;
-					prev->*Value::thread_list = (value_t *)obj.pos;
-				}
-				else
-				{
-					prev = i;
-				}
-#endif
-			}
-
-		}
-		while(more);
+		CollectorStateForward state;
+		
+		while(state.more)
+			Type::action<UpdateForward>(state.obj.pos->value_type, state);
 
 		for(auto i = heap_list.begin(); i != heap_list.end(); ++i)
 		{
@@ -344,25 +352,30 @@ namespace Mirb
 			thread_children(*i);
 		}
 	}
-
-	void Collector::update_backward()
+	
+	struct CollectorStateBackward
 	{
 		RegionAllocator<true> free;
 		RegionWalker obj;
-
 		size_t size;
+	};
+	
+	template<Type::Enum type> struct UpdateBackward
+	{
+		typedef bool Result;
 
-		obj.load();
-
-		do
+		static bool func(CollectorStateBackward &state)
 		{
 		start:
-			value_t i = obj.pos;
-			size = size_of_value(i);
+			value_t i = state.obj.pos;
+
+			size_t size = size_of_value(i); 
+
+			state.size = size;
 
 			if(i->marked)
 			{
-				value_t pos = free.allocate(size);
+				value_t pos = state.free.allocate(size);
 
 				update<true>(i, pos);
 				move(i, pos, size);
@@ -375,22 +388,35 @@ namespace Mirb
 					i->alive = false;
 				#endif
 
-#ifdef MIRB_GC_SKIP_BLOCKS
 				if(i->value_type == Type::FreeBlock)
 				{
-					if(prelude_unlikely(!obj.jump((value_t)(i->*Value::thread_list), (Region *)((FreeBlock *)i)->next)))
-						break;
+					if(prelude_unlikely(!state.obj.jump((value_t)(i->*Value::thread_list), (Collector::Region *)((FreeBlock *)i)->next)))
+						return false;
 					else
 						goto start;
 				}
-#endif
 			}
+
+			return true;
 		}
-		while(obj.step(size));
+	};
 
-		free.update();
+	void Collector::update_backward()
+	{
+		CollectorStateBackward state;
 
-		Collector::current = free.region;
+		state.obj.load();
+
+		do
+		{
+			if(!Type::action<UpdateBackward>(state.obj.pos->value_type, state))
+				break;
+		}
+		while(state.obj.step(state.size));
+
+		state.free.update();
+
+		Collector::current = state.free.region;
 
 		// Free regions and reset default page allocation count
 
@@ -451,10 +477,10 @@ namespace Mirb
 			do
 			{
 				mirb_debug_assert(obj.pos->marked == false);
-				mirb_debug_assert(((obj.pos)->*Value::Header::thread_list) == Value::Header::list_end);
-				mirb_debug_assert(((obj.pos)->*Value::Header::mark_list) == Value::Header::list_end);
+				mirb_debug_assert(((obj.pos)->*Value::thread_list) == Value::list_end);
+				mirb_debug_assert(((obj.pos)->*Value::mark_list) == Value::list_end);
 
-				Value::assert_valid(obj.pos);
+				obj.pos->assert_valid();
 			}
 			while(obj.step(size_of_value(obj.pos)));
 		}

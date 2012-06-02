@@ -106,6 +106,7 @@ namespace Mirb
 			
 			friend class Class;
 			friend class Value;
+			template<Type::Enum type> friend struct UpdateBackward;
 			
 			template<class T> static void *allocate_pinned_object()
 			{

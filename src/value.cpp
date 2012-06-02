@@ -221,8 +221,8 @@ namespace Mirb
 			assert_valid_light();
 				
 			#ifdef DEBUG_MEMORY
-				if(object_ref(obj))
-					assert_valid_extended(obj);
+				if(object_ref())
+					assert_valid_extended();
 			#endif
 		#endif
 	}

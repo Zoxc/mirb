@@ -173,9 +173,7 @@ namespace Mirb
 			while(frame)
 			{
 				for(size_t i = 0; i < frame->argc; ++i)
-				{
-					Value::assert_valid(frame->argv[i]);
-				}
+					frame->argv[i]->assert_valid();
 
 				frame = frame->prev;
 			}
