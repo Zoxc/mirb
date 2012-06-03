@@ -61,7 +61,7 @@ namespace Mirb
 				result += CharArray(c);
 			else
 			{
-				if(c < 32 || c > 127)
+				if(c < 32 || c >= 127)
 					result +=  "\\x" + Number((intptr_t)c).to_string(16).rjust(2, "0");
 				else
 					result +=  "\\" + CharArray(c);

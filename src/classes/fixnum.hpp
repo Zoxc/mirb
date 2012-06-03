@@ -19,6 +19,7 @@ namespace Mirb
 		static_assert(sizeof(int_t) == sizeof(size_t), "int_t must be pointer sized");
 		
 		value_t zero(int_t obj);
+		value_t chr(int_t obj);
 		value_t to_s(int_t obj, intptr_t base);
 		value_t to_f(int_t obj);
 		value_t times(int_t obj, value_t block);

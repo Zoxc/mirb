@@ -46,6 +46,14 @@ namespace Mirb
 		return (Fixnum::int_t)obj >> 1;
 	}
 	
+	value_t Fixnum::chr(int_t obj)
+	{
+		if(obj < 0 || obj > 255)
+			raise(context->argument_error, "Invalid character point");
+
+		return CharArray(obj).to_string();
+	}
+	
 	value_t Fixnum::zero(int_t obj)
 	{
 		return Value::from_bool(obj == 0);
@@ -175,6 +183,7 @@ namespace Mirb
 		method<Self<Arg::Fixnum>, &zero>(context->fixnum_class, "zero?");
 		method<Self<Arg::Fixnum>, Arg::Block, &times>(context->fixnum_class, "times");
 		method<Self<Arg::Fixnum>, Arg::Fixnum, Arg::Block, &upto>(context->fixnum_class, "upto");
+		method<Self<Arg::Fixnum>, &chr>(context->fixnum_class, "chr");
 		
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 
