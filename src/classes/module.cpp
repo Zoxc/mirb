@@ -193,6 +193,32 @@ namespace Mirb
 		return value;
 	}
 	
+	void Module::instance_methods(Array *array, bool super)
+	{
+		if(methods)
+			ValueMapAccess::each_pair(methods, [&](value_t key, value_t value) -> bool {
+				if(value != value_undef)
+					array->vector.push(key);
+
+				return true;
+			});
+
+		if(super)
+		{
+			if(superclass)
+				superclass->instance_methods(array, true);
+		}
+	}
+	
+	value_t Module::rb_instance_methods(Module *obj, value_t super)
+	{
+		auto result = Array::allocate();
+
+		obj->instance_methods(result, super ? super->test() : true);
+
+		return result;
+	}
+	
 	value_t Module::module_function(Module *obj, size_t argc, value_t argv[])
 	{
 		Class *meta = obj->instance_of;
@@ -272,6 +298,11 @@ namespace Mirb
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
 		singleton_method<&nesting>(context->module_class, "nesting");
+		
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "public_instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "protected_instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "private_instance_methods");
 		
 		method<Self<Module>, Arg::Count, Arg::Values, &module_function>(context->module_class, "module_function");
 		
