@@ -681,12 +681,22 @@ namespace Mirb
 		raise(context->name_error, "Undefined method '" + name->string + (in ? CharArray("' in ") :  CharArray("' for ")) + obj_str);
 	}
 	
-	Method *lookup_method(Module *module, Symbol *name, value_t obj)
+	Method *lookup_module_method(Module *module, Symbol *name)
 	{
 		Method *result = lookup_module(module, name);
 
 		if(!result)
-			method_error(name, obj, false);
+		{
+			if(module->type() == Type::Module)
+			{
+				result = lookup_module(context->object_class, name);
+
+				if(result)
+					return result;
+			}
+
+			method_error(name, module, true);
+		}
 
 		return result;
 	}
@@ -698,7 +708,12 @@ namespace Mirb
 
 	Method *lookup(value_t obj, Symbol *name)
 	{
-		return lookup_method(internal_class_of(obj), name, obj);
+		Method *result = lookup_module(internal_class_of(obj), name);
+
+		if(!result)
+			method_error(name, obj, false);
+
+		return result;
 	}
 
 	Method *lookup_super(Module *module, Symbol *name)

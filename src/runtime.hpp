@@ -180,7 +180,7 @@ namespace Mirb
 	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input = false);
 	
 	Method *lookup_module(Module *module, Symbol *name);
-	Method *lookup_method(Module *module, Symbol *name, value_t obj);
+	Method *lookup_module_method(Module *module, Symbol *name);
 
 	Method *respond_to(value_t obj, Symbol *name);
 	

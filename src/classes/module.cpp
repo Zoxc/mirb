@@ -161,7 +161,7 @@ namespace Mirb
 	
 	value_t Module::alias_method(Module *self, Symbol *new_name, Symbol *old_name)
 	{
-		auto method = lookup_method(self, old_name, self);
+		auto method = lookup_module_method(self, old_name);
 
 		self->set_method(new_name, method);
 
@@ -201,11 +201,8 @@ namespace Mirb
 		{
 			auto symbol = raise_cast<Symbol>(argv[i]);
 
-			auto method = obj->get_method(symbol);
+			auto method = lookup_module_method(obj, symbol); 
 			
-			if(prelude_unlikely(!method || method == value_undef))
-				method_error(symbol, obj, true);
-
 			meta->set_method(symbol, method);
 		}
 
@@ -234,8 +231,7 @@ namespace Mirb
 		if(obj->get_method(name) == value_undef)
 			return obj;
 
-		if(!lookup_module(obj, name))
-			method_error(name, obj, true);
+		lookup_module_method(obj, name);
 
 		obj->set_method(name, value_undef);
 
