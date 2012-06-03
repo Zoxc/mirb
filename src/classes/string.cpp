@@ -25,6 +25,16 @@ namespace Mirb
 		return new (collector) String((const char_t *)c_str, std::strlen(c_str));
 	}
 	
+	value_t String::rb_each_char(String *self, value_t block)
+	{
+		OnStack<2> os(self, block);
+
+		for(size_t i = 0; i < self->string.size(); ++i)
+			yield(block, CharArray(self->string[i]).to_string());
+		
+		return self;
+	}
+	
 	value_t String::inspect(String *self)
 	{
 		CharArray result = "\"";
@@ -488,6 +498,7 @@ namespace Mirb
 		method<Self<String>, Arg::UInt, Optional<String>, &ljust>(context->string_class, "ljust");
 		method<Self<String>, Arg::UInt, Optional<String>, &rjust>(context->string_class, "rjust");
 		method<Self<String>, Optional<Value>, &split>(context->string_class, "split");
+		method<Self<String>, Arg::Block, &rb_each_char>(context->string_class, "each_char");
 		method<Self<String>, &inspect>(context->string_class, "inspect");
 		method<Self<String>, &to_sym>(context->string_class, "to_sym");
 		method<Self<String>, String, &String::compare>(context->string_class, "<=>");
