@@ -38,9 +38,6 @@ namespace Mirb
 	Class *define_class(value_t under, Symbol *name, Class *super);
 	Module *define_module(value_t under, Symbol *name);
 	
-	Class *define_scoped_class(value_t obj, Symbol *name, Class *super);
-	Module *define_scoped_module(value_t obj, Symbol *name);
-	
 	Class *define_class(const CharArray &name, Class *super);
 	Module *define_module(const CharArray &name);
 

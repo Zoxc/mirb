@@ -79,13 +79,19 @@ namespace Mirb
 
 		return result;
 	}
-
+	
+	value_t inherited(value_t klass)
+	{
+		return value_nil;
+	}
+	
 	void Class::initialize()
 	{
 		internal_allocator<Class, &Context::class_class>();
 		
 		method<Self<Class>, Value, &case_equal>(context->class_class, "===");
 		method<Self<Class>, &to_s>(context->class_class, "to_s");
+		method<Value, &inherited>(context->class_class, "inherited");
 		method<Self<Module>, &rb_superclass>(context->class_class, "superclass");
 		method<Self<Value>, Arg::Count, Arg::Values, Arg::Block, &rb_new>(context->class_class, "new");
 	}

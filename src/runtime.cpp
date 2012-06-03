@@ -167,6 +167,13 @@ namespace Mirb
 		
 		class_name(obj, cast<Module>(under), name);
 
+		if(!context->bootstrap)
+		{
+			OnStack<1> os(obj);
+
+			call(super, "inherited", obj);
+		}
+
 		return obj;
 	}
 
@@ -1023,8 +1030,6 @@ namespace Mirb
 		context->fixnum_class = define_class("Fixnum", context->integer_class);
 
 		Value::initialize_class_table();
-
-		context->bootstrap = false;
 	}
 
 	void setup_main()
@@ -1092,6 +1097,8 @@ namespace Mirb
 		Object::initialize();
 		Module::initialize();
 		
+		context->bootstrap = false;
+
 		Kernel::initialize();
 		
 		TrueClass::initialize();
