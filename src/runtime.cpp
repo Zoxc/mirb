@@ -962,13 +962,20 @@ namespace Mirb
 	
 	value_t cast_integer(value_t value)
 	{
-		if(value->type() == Type::Fixnum)
+		if(value->kind_of(context->integer_class))
 			return value;
 
 		auto method = respond_to(value, "to_i");
 
 		if(method)
-			return raise_cast<Type::Fixnum>(call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0));
+		{
+			auto result = call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0);
+			
+			if(!result->kind_of(context->integer_class))
+				type_error(result, context->integer_class);
+
+			return result;
+		}
 		else
 		{
 			CharArray obj = rescue_pretty_inspect(value);
