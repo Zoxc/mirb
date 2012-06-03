@@ -118,9 +118,15 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t String::to_i(String *self)
+	value_t String::to_i(String *self, intptr_t base)
 	{
-		return Fixnum::from_int(self->string.to_i());
+		if(base == Fixnum::undef)
+			base = 10;
+
+		if(base < 2 || base > 64)
+			raise(context->argument_error, "Base must be in 2..64");
+
+		return Number(self->string, base).to_value();
 	}
 	
 	value_t chomp(String *self, String *seperator)
@@ -450,7 +456,7 @@ namespace Mirb
 		
 		method<Self<Value>, Value, &match>(context->string_class, "match");
 		method<Self<Value>, &to_s>(context->string_class, "to_s");
-		method<Self<String>, &to_i>(context->string_class, "to_i");
+		method<Self<String>, Optional<Arg::Fixnum>, &to_i>(context->string_class, "to_i");
 		method<Self<String>, Optional<String>, &chomp>(context->string_class, "chomp");
 		method<Self<String>, Optional<String>, &chomp_ex>(context->string_class, "chomp!");
 		method<Self<String>, Value, &pattern>(context->string_class, "=~");

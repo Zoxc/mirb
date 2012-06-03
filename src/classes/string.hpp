@@ -12,7 +12,7 @@ namespace Mirb
 			static value_t rb_get(String *self, value_t index, value_t size);
 			static value_t inspect(String *self);
 			static value_t to_s(value_t self);
-			static value_t to_i(String *self);
+			static value_t to_i(String *self, intptr_t base);
 			static value_t empty(String *self);
 			static value_t sprintf(String *self, value_t input);
 			static value_t ljust(String *self, size_t length, String *other);
