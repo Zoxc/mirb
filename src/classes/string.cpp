@@ -434,6 +434,14 @@ namespace Mirb
 		return Fixnum::from_size_t(self->string.size());
 	}
 	
+	value_t String::ord(String *self)
+	{
+		if(self->string.size() < 1)
+			raise(context->argument_error, "Can't get ordinal of a multicharacter string");
+
+		return Fixnum::from_size_t(self->string[0]);
+	}
+	
 	value_t String::gsub(String *self, Regexp *pattern, String *replacement)
 	{
 		bool changed;
@@ -470,6 +478,7 @@ namespace Mirb
 		
 		method<Self<String>, &length>(context->string_class, "length");
 		method<Self<String>, &length>(context->string_class, "size");
+		method<Self<String>, &ord>(context->string_class, "ord");
 
 		method<Self<String>, &downcase>(context->string_class, "downcase");
 		method<Self<String>, &downcase_self>(context->string_class, "downcase!");
