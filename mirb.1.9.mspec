@@ -8,9 +8,6 @@ class MSpecScript
   set :core, [
     'rubyspec/core',
 	
-    '^rubyspec/core/string/pack',
-    '^rubyspec/core/string/unpack',
-    '^rubyspec/core/numeric',
     '^rubyspec/core/rational',
     '^rubyspec/core/signal',
     '^rubyspec/core/basicobject',
@@ -23,6 +20,7 @@ class MSpecScript
     '^rubyspec/core/fiber',
     '^rubyspec/core/threadgroup',
     '^rubyspec/core/thread',
+    '^rubyspec/core/mutex',
     '^rubyspec/core/process'
   ]
   
