@@ -94,6 +94,14 @@ namespace Mirb
 			return str;
 		}
 		
+		void remove_file(const CharArray &path)
+		{
+			auto file = native_null_path(path);
+
+			if(::remove(file.c_str_ref()) != 0)
+				raise("Unable to remove file '" + path + "'");
+		}
+
 		void remove_dir(const CharArray &path)
 		{
 			auto dir = native_null_path(path);

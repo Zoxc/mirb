@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "array.hpp"
 #include "fixnum.hpp"
+#include "../number.hpp"
 #include "../recursion-detector.hpp"
 
 namespace Mirb
@@ -267,6 +268,20 @@ namespace Mirb
 		return Value::from_bool(Platform::has_size(path->string));
 	}
 
+	value_t rb_delete(size_t argc, value_t argv[])
+	{
+		Platform::wrap([&] {
+			for(size_t i = 0; i < argc; ++i)
+			{
+				auto str = raise_cast<String>(argv[i]);
+
+				Platform::remove_file(str->string);
+			}
+		});
+
+		return Number(argc).to_value();
+	}
+
 	value_t directory(String *path)
 	{
 		return Value::from_bool(Platform::is_directory(path->string));
@@ -399,6 +414,7 @@ namespace Mirb
 		singleton_method<String, &exists>(context->file_class, "exist?");
 		singleton_method<String, &path>(context->file_class, "path");
 		singleton_method<String, &rb_size>(context->file_class, "size?");
+		singleton_method<Arg::Count, Arg::Values, &rb_delete>(context->file_class, "delete");
 		singleton_method<String, &file>(context->file_class, "file?");
 		singleton_method<String, &directory>(context->file_class, "directory?");
 		singleton_method<String, &executable>(context->file_class, "executable?");
