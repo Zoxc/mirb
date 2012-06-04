@@ -1478,30 +1478,30 @@ namespace Mirb
 			return var_count++;
 		}
 
-		var_t ByteCodeGenerator::block_arg(Tree::Scope *scope, var_t break_dst)
+		var_t ByteCodeGenerator::block_arg(Tree::Scope *new_scope, var_t break_dst)
 		{
 			var_t var = no_var;
 			
-			if(scope)
+			if(new_scope)
 			{
 				var = create_var();
 
-				scope->break_dst = break_dst;
+				new_scope->break_dst = break_dst;
 
-				auto *block_attach = defer(scope);
+				auto *block_attach = defer(new_scope);
 				
-				VariableGroup group(this, scope->referenced_scopes.size());
+				VariableGroup group(this, new_scope->referenced_scopes.size());
 
-				for(size_t i = 0; i < scope->referenced_scopes.size(); ++i)
+				for(size_t i = 0; i < new_scope->referenced_scopes.size(); ++i)
 				{
-					if(scope->referenced_scopes[i] == this->scope)
+					if(new_scope->referenced_scopes[i] == this->scope)
 						gen<MoveOp>(group[i], heap_var);
 					else
-						gen<LookupOp>(group[i], scope->referenced_scopes.index_of(scope->referenced_scopes[i]));
+						gen<LookupOp>(group[i], this->scope->referenced_scopes.index_of(new_scope->referenced_scopes[i]));
 				}
 
-				if(scope->break_id != Tree::Scope::no_break_id)
-					final->break_targets[scope->break_id] = break_dst;
+				if(new_scope->break_id != Tree::Scope::no_break_id)
+					final->break_targets[new_scope->break_id] = break_dst;
 
 				gen<ClosureOp>(var, block_attach, group.size, group.use());
 			}
