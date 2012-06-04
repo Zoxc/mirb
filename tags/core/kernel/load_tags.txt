@@ -66,3 +66,6 @@ SpecTag:fails::Kernel.load does not add the loaded path to $LOADED_FEATURES
 SpecTag:fails::Kernel.load raises a LoadError if passed a non-extensioned path that does not exist but a .rb extensioned path does exist
 SpecTag:fails::Kernel.load sets the enclosing scope to an anonymous module if passed true for 'wrap'
 SpecTag:fails::Kernel.load (shell expansion) expands a tilde to the HOME environment variable as the path to load
+SpecTag:fails::Kernel#load (path resolution) with an unreadable file raises a LoadError
+SpecTag:fails::Kernel.load (path resolution) with an unreadable file raises a LoadError
+FileTag:fails
