@@ -184,7 +184,7 @@ namespace Mirb
 	{
 		auto result = Array::allocate();
 
-		bool mod;
+		bool mod = false;
 
 		self->flatten(result->vector, mod);
 
@@ -193,7 +193,7 @@ namespace Mirb
 
 	value_t Array::rb_flatten_ex(Array *self)
 	{
-		bool mod;
+		bool mod = false;
 
 		VectorType new_vector;
 
