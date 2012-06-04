@@ -394,6 +394,8 @@ namespace Mirb
 		Op(UnwindEnsure)
 			if(prelude_unlikely(frame.exception != 0))
 				goto handle_exception;
+			else
+				thread_context->exception = 0;
 		EndOp
 
 		Op(UnwindFilter)
@@ -522,6 +524,7 @@ exception_block_handler: // The test block will jump back here
 				if(handler->var != no_var)
 					vars[handler->var] = frame.exception;
 					
+				thread_context->exception = frame.exception;
 				frame.exception = 0;
 
 				ip = ip_start + handler->rescue_label.address;

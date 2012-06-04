@@ -8,6 +8,11 @@ namespace Mirb
 	LinkedList<ThreadContext> thread_contexts;
 	prelude_thread ThreadContext *thread_context;
 
+	ThreadContext::ThreadContext() :
+		exception(0)
+	{
+	}
+
 	Context::Context() :
 		bootstrap(true),
 		frame(0),

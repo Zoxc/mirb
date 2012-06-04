@@ -17,10 +17,17 @@ namespace Mirb
 
 			CharArray current_directory;
 
+			Exception *exception;
+
 			template<typename F> void mark(F mark)
 			{
 				mark(current_directory);
+
+				if(exception)
+					mark(exception);
 			}
+
+			ThreadContext();
 	};
 
 	class Context

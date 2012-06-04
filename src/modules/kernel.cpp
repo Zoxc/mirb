@@ -267,6 +267,13 @@ namespace Mirb
 			else
 				type_error(first, "Exception subclass or String");
 		}
+		else
+		{
+			if(!thread_context->exception)
+				raise(context->argument_error, "No exception to rethrow");
+
+			throw InternalException(thread_context->exception);
+		}
 
 		Exception *exception = Collector::allocate<Exception>(instance_of, message, Mirb::backtrace());
 
