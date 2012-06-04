@@ -198,6 +198,28 @@ namespace Mirb
 			#endif
 		}
 	
+		bool has_size(const CharArray &file) throw()
+		{
+			bool result = false;
+			
+			try
+			{
+				CharArray name = to_win_path(file);
+
+				to_tchar(name , [&](const TCHAR *buffer, size_t) {
+					WIN32_FILE_ATTRIBUTE_DATA data;
+
+					if(GetFileAttributesEx(buffer, GetFileExInfoStandard, &data) != 0)
+						result = data.nFileSizeHigh != 0 || data.nFileSizeLow != 0;
+				});
+			}
+			catch(empty_path_error)
+			{
+			}
+
+			return result;
+		}
+		
 		DWORD attributes(const CharArray &path)
 		{
 			DWORD attrib; 
@@ -233,6 +255,14 @@ namespace Mirb
 			return from_short_win_path(buffer);
 		}
 		
+		void remove_file(const CharArray &path)
+		{
+			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
+				if(DeleteFile(buffer) == 0)
+					raise("Unable to remove file '" + path + "'");
+			});
+		}
+
 		void remove_dir(const CharArray &path)
 		{
 			to_tchar(to_win_path(path), [&](const TCHAR *buffer, size_t) {
