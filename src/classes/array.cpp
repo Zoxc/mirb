@@ -434,9 +434,9 @@ namespace Mirb
 	
 	value_t Array::reject(Array *self, value_t block)
 	{
-		OnStack<1> os(block);
-
 		auto result = Array::dup(self);
+		
+		OnStack<2> os(result, block);
 
 		delete_if(result, [&](value_t &value) {
 			return yield(block, value)->test();
