@@ -193,7 +193,7 @@ namespace Mirb
 		
 		Chunk *Chunk::create(size_t size)
 		{
-			uint8_t *memory = (uint8_t *)malloc(sizeof(Chunk) + size);
+			uint8_t *memory = (uint8_t *)std::malloc(sizeof(Chunk) + size);
 			
 			mirb_runtime_assert(memory);
 			
