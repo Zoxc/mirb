@@ -43,7 +43,7 @@ namespace Mirb
 		if(other < 0)
 			raise(context->argument_error, "Negative exponent not allowed with integers");
 
-		if(other > ULONG_MAX)
+		if((size_t)other > (size_t)ULONG_MAX)
 			raise(context->argument_error, "The exponent is too high");
 
 		return obj->number.pow((unsigned long)other).to_value();

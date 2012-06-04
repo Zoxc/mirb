@@ -80,7 +80,7 @@ namespace Mirb
 		return result;
 	}
 	
-	value_t inherited(value_t klass)
+	value_t inherited(value_t)
 	{
 		return value_nil;
 	}
