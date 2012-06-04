@@ -1,0 +1,10 @@
+SpecTag:fails::Enumerable#take requires an argument
+SpecTag:fails::Enumerable#take when passed an argument returns the first count elements if given a count
+SpecTag:fails::Enumerable#take when passed an argument returns an empty array when passed count on an empty array
+SpecTag:fails::Enumerable#take when passed an argument returns an empty array when passed count == 0
+SpecTag:fails::Enumerable#take when passed an argument returns an array containing the first element when passed count == 1
+SpecTag:fails::Enumerable#take when passed an argument raises an ArgumentError when count is negative
+SpecTag:fails::Enumerable#take when passed an argument returns the entire array when count > length
+SpecTag:fails::Enumerable#take when passed an argument tries to convert the passed argument to an Integer using #to_int
+SpecTag:fails::Enumerable#take when passed an argument gathers whole arrays as elements when each yields multiple
+SpecTag:fails::Enumerable#take when passed an argument consumes only what is needed

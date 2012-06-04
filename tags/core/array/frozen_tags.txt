@@ -1,0 +1,4 @@
+SpecTag:fails::Array#frozen? returns true if array is frozen
+SpecTag:fails::Array#frozen? returns true for an array being sorted by #sort!
+SpecTag:fails::Array#frozen? returns false for an array being sorted by #sort!
+SpecTag:fails::Array#frozen? returns false for an array being sorted by #sort

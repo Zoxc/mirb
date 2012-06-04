@@ -1,0 +1,12 @@
+SpecTag:fails::Array#pack with format '@' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format '@' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format '@' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format '@' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format '@' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format '@' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format '@' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format '@' moves the insertion point to the index specified by the count modifier
+SpecTag:fails::Array#pack with format '@' does not consume any elements
+SpecTag:fails::Array#pack with format '@' extends the string with NULL bytes if the string size is less than the count
+SpecTag:fails::Array#pack with format '@' truncates the string if the string size is greater than the count
+SpecTag:fails::Array#pack with format '@' implicitly has a count of one when no count modifier is passed

@@ -1,0 +1,6 @@
+SpecTag:fails::Symbol#succ returns a successor
+SpecTag:fails::Symbol#succ propagates a 'carry'
+SpecTag:fails::Symbol#succ increments non-alphanumeric characters when no alphanumeric characters are present
+SpecTag:fails::Symbol#next returns a successor
+SpecTag:fails::Symbol#next propagates a 'carry'
+SpecTag:fails::Symbol#next increments non-alphanumeric characters when no alphanumeric characters are present

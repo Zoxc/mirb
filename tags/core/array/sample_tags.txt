@@ -1,0 +1,8 @@
+SpecTag:fails::Array#sample selects a random value from the array
+SpecTag:fails::Array#sample returns nil for empty arrays
+SpecTag:fails::Array#sample passed a number n as an argument raises ArgumentError for a negative n
+SpecTag:fails::Array#sample passed a number n as an argument returns different random values from the array
+SpecTag:fails::Array#sample passed a number n as an argument tries to convert n to an Integer using #to_int
+SpecTag:fails::Array#sample passed a number n as an argument returns all values with n big enough
+SpecTag:fails::Array#sample passed a number n as an argument returns [] for empty arrays or if n <= 0
+SpecTag:fails::Array#sample passed a number n as an argument does not return subclass instances with Array subclass

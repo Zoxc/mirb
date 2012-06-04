@@ -1,0 +1,16 @@
+SpecTag:fails::Array#uniq returns an array with no duplicates
+SpecTag:fails::Array#uniq properly handles recursive arrays
+SpecTag:fails::Array#uniq uses eql? semantics
+SpecTag:fails::Array#uniq compares elements first with hash
+SpecTag:fails::Array#uniq does not compare elements with different hash codes via eql?
+SpecTag:fails::Array#uniq compares elements with matching hash codes with #eql?
+SpecTag:fails::Array#uniq compares elements based on the value returned from the block
+SpecTag:fails::Array#uniq returns subclass instance on Array subclasses
+SpecTag:fails::Array#uniq! modifies the array in place
+SpecTag:fails::Array#uniq! returns self
+SpecTag:fails::Array#uniq! properly handles recursive arrays
+SpecTag:fails::Array#uniq! returns nil if no changes are made to the array
+SpecTag:fails::Array#uniq! raises a RuntimeError on a frozen array when the array is modified
+SpecTag:fails::Array#uniq! raises a RuntimeError on a frozen array when the array would not be modified
+SpecTag:fails::Array#uniq! doesn't yield to the block on a frozen array
+SpecTag:fails::Array#uniq! compares elements based on the value returned from the block

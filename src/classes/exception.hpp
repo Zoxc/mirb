@@ -49,7 +49,6 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(Class *instance_of);
 			static value_t to_s(Exception *obj);
 			static value_t rb_backtrace(Exception *self);
 			static value_t rb_initialize(Exception *obj, String *message);
@@ -63,6 +62,7 @@ namespace Mirb
 		public:
 			Exception(Type::Enum type, Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(type, instance_of), message(message), backtrace(backtrace) {}
 			Exception(Class *instance_of, String *message, Tuple<StackFrame> *backtrace) : Object(Type::Exception, instance_of), message(message), backtrace(backtrace) {}
+			Exception(Class *instance_of) : Object(Type::Exception, instance_of), message(nullptr), backtrace(nullptr) {}
 			
 			String *message;
 			Tuple<StackFrame> *backtrace;

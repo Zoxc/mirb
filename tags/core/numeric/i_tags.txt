@@ -1,0 +1,3 @@
+SpecTag:fails::Numeric#i returns a Complex object
+SpecTag:fails::Numeric#i sets the real part to 0
+SpecTag:fails::Numeric#i sets the imaginary part to self

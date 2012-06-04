@@ -1,0 +1,8 @@
+SpecTag:fails::Float#angle returns NaN if NaN
+SpecTag:fails::Float#angle returns self if NaN
+SpecTag:fails::Float#angle returns 0 if positive
+SpecTag:fails::Float#angle returns 0 if +0.0
+SpecTag:fails::Float#angle returns 0 if +Infinity
+SpecTag:fails::Float#angle returns Pi if negative
+SpecTag:fails::Float#angle returns Pi if -0.0
+SpecTag:fails::Float#angle returns Pi if -Infinity

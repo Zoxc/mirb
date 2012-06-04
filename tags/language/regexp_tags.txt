@@ -1,0 +1,10 @@
+SpecTag:fails::Literal Regexps matches against $_ (last input) in a conditional if no explicit matchee provided
+SpecTag:fails::Literal Regexps caches the Regexp object
+SpecTag:fails::Literal Regexps supports paired delimiters with %r
+SpecTag:fails::Literal Regexps supports grouping constructs that are also paired delimiters
+SpecTag:fails::Literal Regexps allows second part of paired delimiters to be used as non-paired delimiters
+SpecTag:fails::Literal Regexps supports non-paired delimiters delimiters with %r
+SpecTag:fails::Literal Regexps disallows alphabets as non-paired delimiter with %r
+SpecTag:fails::Literal Regexps allows unescaped / to be used with %r
+SpecTag:fails::Literal Regexps supports g (named backreference)
+SpecTag:fails::Literal Regexps supports character class composition

@@ -6,28 +6,33 @@
 #include "range.hpp"
 #include "../number.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 
 namespace Mirb
 {
 	value_t String::from_symbol(Symbol *symbol)
 	{
-		return Collector::allocate<String>(symbol->string);
-	}
-	
-	value_t String::rb_allocate(Class *instance_of)
-	{
-		return Collector::allocate<String>(instance_of);
+		return new (collector) String(symbol->string);
 	}
 	
 	String *String::get(const CharArray &string)
 	{
-		return Collector::allocate<String>(string);
+		return new (collector) String(string);
 	}
 			
 	value_t String::from_string(const char *c_str)
 	{
-		return Collector::allocate<String>((const char_t *)c_str, std::strlen(c_str));
+		return new (collector) String((const char_t *)c_str, std::strlen(c_str));
+	}
+	
+	value_t String::rb_each_char(String *self, value_t block)
+	{
+		OnStack<2> os(self, block);
+
+		for(size_t i = 0; i < self->string.size(); ++i)
+			yield(block, CharArray(self->string[i]).to_string());
+		
+		return self;
 	}
 	
 	value_t String::inspect(String *self)
@@ -59,7 +64,7 @@ namespace Mirb
 
 				default:
 				{
-					if(c < 32 || c > 127)
+					if(c < 32 || c >= 127)
 						result +=  "\\x" + Number((intptr_t)c).to_string(16).rjust(2, "0");
 					else
 						result += c;
@@ -85,7 +90,7 @@ namespace Mirb
 	
 	value_t split(String *self, value_t sep)
 	{
-		auto result = Collector::allocate<Array>();
+		auto result = Array::allocate();
 
 		CharArray sep_str;
 
@@ -123,9 +128,15 @@ namespace Mirb
 		return self;
 	}
 	
-	value_t String::to_i(String *self)
+	value_t String::to_i(String *self, intptr_t base)
 	{
-		return Fixnum::from_int(self->string.to_i());
+		if(base == Fixnum::undef)
+			base = 10;
+
+		if(base < 2 || base > 64)
+			raise(context->argument_error, "Base must be in 2..64");
+
+		return Number(self->string, base).to_value();
 	}
 	
 	value_t chomp(String *self, String *seperator)
@@ -333,6 +344,13 @@ namespace Mirb
 
 		return result.to_string();
 	}
+	
+	value_t String::include(String *self, String *sub)
+	{
+		size_t index;
+
+		return Value::from_bool(self->string.index_of(sub->string, index));
+	}
 
 	value_t String::sprintf(String *self, value_t input)
 	{
@@ -426,6 +444,14 @@ namespace Mirb
 		return Fixnum::from_size_t(self->string.size());
 	}
 	
+	value_t String::ord(String *self)
+	{
+		if(self->string.size() < 1)
+			raise(context->argument_error, "Can't get ordinal of a multicharacter string");
+
+		return Fixnum::from_size_t(self->string[0]);
+	}
+	
 	value_t String::gsub(String *self, Regexp *pattern, String *replacement)
 	{
 		bool changed;
@@ -444,15 +470,16 @@ namespace Mirb
 	
 	void String::initialize()
 	{
-		singleton_method<Self<Class>, &rb_allocate>(context->string_class, "allocate");
-
+		internal_allocator<String, &Context::string_class>();
+		
 		method<Self<Value>, Value, &match>(context->string_class, "match");
 		method<Self<Value>, &to_s>(context->string_class, "to_s");
-		method<Self<String>, &to_i>(context->string_class, "to_i");
+		method<Self<String>, Optional<Arg::Fixnum>, &to_i>(context->string_class, "to_i");
 		method<Self<String>, Optional<String>, &chomp>(context->string_class, "chomp");
 		method<Self<String>, Optional<String>, &chomp_ex>(context->string_class, "chomp!");
 		method<Self<String>, Value, &pattern>(context->string_class, "=~");
 		method<Self<String>, Value, &sprintf>(context->string_class, "%");
+		method<Self<String>, String, &include>(context->string_class, "include?");
 		method<Self<String>, Regexp, String, &gsub>(context->string_class, "gsub");
 		method<Self<String>, Regexp, String, &gsub_ex>(context->string_class, "gsub!");
 		method<Self<String>, &empty>(context->string_class, "empty?");
@@ -461,6 +488,7 @@ namespace Mirb
 		
 		method<Self<String>, &length>(context->string_class, "length");
 		method<Self<String>, &length>(context->string_class, "size");
+		method<Self<String>, &ord>(context->string_class, "ord");
 
 		method<Self<String>, &downcase>(context->string_class, "downcase");
 		method<Self<String>, &downcase_self>(context->string_class, "downcase!");
@@ -470,6 +498,7 @@ namespace Mirb
 		method<Self<String>, Arg::UInt, Optional<String>, &ljust>(context->string_class, "ljust");
 		method<Self<String>, Arg::UInt, Optional<String>, &rjust>(context->string_class, "rjust");
 		method<Self<String>, Optional<Value>, &split>(context->string_class, "split");
+		method<Self<String>, Arg::Block, &rb_each_char>(context->string_class, "each_char");
 		method<Self<String>, &inspect>(context->string_class, "inspect");
 		method<Self<String>, &to_sym>(context->string_class, "to_sym");
 		method<Self<String>, String, &String::compare>(context->string_class, "<=>");

@@ -1,0 +1,2 @@
+SpecTag:fails::String#intern returns the symbol corresponding to self
+SpecTag:fails::String#intern special cases +(binary) and -(binary)

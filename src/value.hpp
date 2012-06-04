@@ -112,6 +112,8 @@ namespace Mirb
 		bool object_ref();
 		Mirb::Class *class_of_literal();
 		bool test();
+		
+		bool kind_of(Class *klass);
 
 		static Type::Enum type_table[literal_count];
 

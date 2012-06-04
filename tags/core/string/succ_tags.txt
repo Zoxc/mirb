@@ -1,0 +1,10 @@
+SpecTag:fails::String#succ returns an empty string for empty strings
+SpecTag:fails::String#succ returns the successor by increasing the rightmost alphanumeric (digit => digit, letter => letter with same case)
+SpecTag:fails::String#succ increases non-alphanumerics (via ascii rules) if there are no alphanumerics
+SpecTag:fails::String#succ increases the next best alphanumeric (jumping over non-alphanumerics) if there is a carry
+SpecTag:fails::String#succ increases the next best character if there is a carry for non-alphanumerics
+SpecTag:fails::String#succ adds an additional character (just left to the last increased one) if there is a carry and no character left to increase
+SpecTag:fails::String#succ returns subclass instances when called on a subclass
+SpecTag:fails::String#succ taints the result if self is tainted
+SpecTag:fails::String#succ! is equivalent to succ, but modifies self in place (still returns self)
+SpecTag:fails::String#succ! raises a RuntimeError if self is frozen

@@ -1,0 +1,6 @@
+SpecTag:fails::Method#unbind returns an UnboundMethod
+SpecTag:fails::Method#unbind returns a String containing 'UnboundMethod'
+SpecTag:fails::Method#unbind returns a String containing the method name
+SpecTag:fails::Method#unbind returns a String containing the Module the method is defined in
+SpecTag:fails::Method#unbind returns a String containing the Module the method is referenced from
+SpecTag:fails::Method#unbind rebinding UnboundMethod to Method's obj produces exactly equivalent Methods

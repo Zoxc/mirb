@@ -1,0 +1,8 @@
+SpecTag:fails::File\003A\003AStat#zero? returns true if the file is empty
+SpecTag:fails::File\003A\003AStat#zero? returns false if the file is not empty
+SpecTag:fails::File\003A\003AStat#zero? accepts an object that has a #to_path method
+SpecTag:fails::File\003A\003AStat#zero? returns true for NUL
+SpecTag:fails::File\003A\003AStat#zero? raises an ArgumentError if not passed one argument
+SpecTag:fails::File\003A\003AStat#zero? raises a TypeError if not passed a String type
+SpecTag:fails::File\003A\003AStat#zero? returns true inside a block opening a file if it is empty
+SpecTag:fails::File\003A\003AStat#zero? returns true for a directory

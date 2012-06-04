@@ -1,0 +1,8 @@
+SpecTag:fails::Regexps with modifers supports /i (case-insensitive)
+SpecTag:fails::Regexps with modifers supports /m (multiline)
+SpecTag:fails::Regexps with modifers supports /x (extended syntax)
+SpecTag:fails::Regexps with modifers supports /o (once)
+SpecTag:fails::Regexps with modifers invokes substitutions for /o only once
+SpecTag:fails::Regexps with modifers supports (?imx-imx) (inline modifiers)
+SpecTag:fails::Regexps with modifers supports (?imx-imx\003Aexpr) (scoped inline modifiers)
+SpecTag:fails::Regexps with modifers supports . with /m

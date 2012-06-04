@@ -1,0 +1,2 @@
+SpecTag:fails::File.sticky? returns false if file does not exist
+SpecTag:fails::File.sticky? returns false if the file has not sticky bit set

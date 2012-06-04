@@ -1,0 +1,9 @@
+SpecTag:fails::Array#combination returns an enumerator when no block is provided
+SpecTag:fails::Array#combination returns self when a block is given
+SpecTag:fails::Array#combination yields nothing for out of bounds length and return self
+SpecTag:fails::Array#combination yields the expected combinations
+SpecTag:fails::Array#combination yields nothing if the argument is out of bounds
+SpecTag:fails::Array#combination yields a copy of self if the argument is the size of the receiver
+SpecTag:fails::Array#combination yields [] when length is 0
+SpecTag:fails::Array#combination yields a partition consisting of only singletons
+SpecTag:fails::Array#combination generates from a defensive copy, ignoring mutations

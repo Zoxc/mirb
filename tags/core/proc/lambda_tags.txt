@@ -1,0 +1,11 @@
+SpecTag:fails::Proc#lambda? returns true if the Proc was created from a block with the lambda keyword
+SpecTag:fails::Proc#lambda? returns false if the Proc was created from a block with the proc keyword
+SpecTag:fails::Proc#lambda? returns false if the Proc was created from a block with Proc.new
+SpecTag:fails::Proc#lambda? is preserved when passing a Proc with & to the lambda keyword
+SpecTag:fails::Proc#lambda? is preserved when passing a Proc with & to the proc keyword
+SpecTag:fails::Proc#lambda? is preserved when passing a Proc with & to Proc.new
+SpecTag:fails::Proc#lambda? returns false if the Proc was created from a block with &
+SpecTag:fails::Proc#lambda? is preserved when the Proc was passed using &
+SpecTag:fails::Proc#lambda? returns true for a Method converted to a Proc
+SpecTag:fails::Proc#lambda? is preserved when a Proc is curried
+SpecTag:fails::Proc#lambda? is preserved when a curried Proc is called without enough arguments

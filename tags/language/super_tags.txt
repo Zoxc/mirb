@@ -1,0 +1,10 @@
+SpecTag:fails::The super keyword searches class methods
+SpecTag:fails::The super keyword calls the method on the calling class including modules
+SpecTag:fails::The super keyword searches class methods including modules
+SpecTag:fails::The super keyword raises an error error when super method does not exist
+SpecTag:fails::The super keyword supers up appropriate name even if used for multiple method names
+SpecTag:fails::The super keyword can't be used with implicit arguments from a method defined with define_method
+SpecTag:fails::The super keyword calls method_missing when a superclass method is not found
+SpecTag:fails::The super keyword sees the included version of a module a method is alias from
+SpecTag:fails::The super keyword passes along modified rest args when they weren't originally empty
+SpecTag:fails::The super keyword passes along modified rest args when they were originally empty

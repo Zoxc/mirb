@@ -1,0 +1,5 @@
+SpecTag:fails::Numeric#rectangular returns an Array
+SpecTag:fails::Numeric#rectangular returns a two-element Array
+SpecTag:fails::Numeric#rectangular returns self as the first element
+SpecTag:fails::Numeric#rectangular returns 0 as the last element
+SpecTag:fails::Numeric#rectangular raises an ArgumentError if given any arguments

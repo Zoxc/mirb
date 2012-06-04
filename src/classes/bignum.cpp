@@ -7,7 +7,7 @@
 
 namespace Mirb
 {
-	value_t Bignum::to_s(Bignum *self, intptr_t base)
+	value_t Bignum::to_string(const Number &number, intptr_t base)
 	{
 		if(base == Fixnum::undef)
 			base = 10;
@@ -15,7 +15,12 @@ namespace Mirb
 		if(base < 2 || base > 64)
 			raise(context->argument_error, "Base must be in 2..64");
 
-		return String::get(self->number.to_string());
+		return String::get(number.to_string(base));
+	}
+
+	value_t Bignum::to_s(Bignum *self, intptr_t base)
+	{
+		return to_string(self->number, base);
 	}
 	
 	template<typename F, size_t string_length> value_t coerce_op(Bignum *obj, value_t other, const char (&string)[string_length], F func)
@@ -31,6 +36,17 @@ namespace Mirb
 	value_t Bignum::neg(Bignum *obj)
 	{
 		return obj->number.neg().to_value();
+	}
+	
+	value_t Bignum::pow(Bignum *obj, intptr_t other)
+	{
+		if(other < 0)
+			raise(context->argument_error, "Negative exponent not allowed with integers");
+
+		if(other > ULONG_MAX)
+			raise(context->argument_error, "The exponent is too high");
+
+		return obj->number.pow((unsigned long)other).to_value();
 	}
 
 	value_t Bignum::add(Bignum *obj, value_t other)
@@ -107,7 +123,8 @@ namespace Mirb
 		
 		method<Self<Bignum>, &zero>(context->bignum_class, "zero?");
 		method<Self<Bignum>, &neg>(context->bignum_class, "-@");
-
+		
+		method<Self<Bignum>, Arg::Fixnum, &pow>(context->bignum_class, "**");
 		method<Self<Bignum>, Value, &add>(context->bignum_class, "+");
 		method<Self<Bignum>, Value, &sub>(context->bignum_class, "-");
 		method<Self<Bignum>, Value, &mul>(context->bignum_class, "*");

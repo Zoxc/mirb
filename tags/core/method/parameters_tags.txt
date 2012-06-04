@@ -1,0 +1,36 @@
+SpecTag:fails::Method#parameters returns an empty Array when the method expects no arguments
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aname]] for a method expecting one required argument called 'name'
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab]] for a method expecting two required arguments called 'a' and 'b''
+SpecTag:fails::Method#parameters returns [[\003Ablock,\003Ablk]] for a method expecting one block argument called 'a'
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Ablock,\003Ab] for a method expecting a required argument ('a') and a block argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Ablock,\003Ac] for a method expecting two required arguments ('a','b') and a block argument ('c')
+SpecTag:fails::Method#parameters returns [[\003Aopt,\003Aa]] for a method expecting one optional argument ('a')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab]] for a method expecting one required argument ('a') and one optional argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Aopt,\003Ac]] for a method expecting one required argument ('a') and two optional arguments ('b','c')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Aopt,\003Ac]] for a method expecting two required arguments ('a','b') and one optional arguments ('c')
+SpecTag:fails::Method#parameters returns [[\003Aopt,\003Aa],[\003Ablock,\003Ab]] for a method expecting one required argument ('a') and one block argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Ablock,\003Ac]] for a method expecting one required argument ('a'), one optional argument ('b'), and a block ('c')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Aopt,\003Ac],[\003Ablock,\003Ad]] for a method expecting one required argument ('a'), two optional arguments ('b','c'), and a block ('d')
+SpecTag:fails::Method#parameters returns [[\003Arest,\003Aa]] for a method expecting a single splat argument ('a')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Arest,\003Ab]] for a method expecting a splat argument ('a') and a required argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Arest,\003Ac]] for a method expecting two required arguments ('a','b') and a splat argument ('c')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Arest,\003Ac]] for a method expecting a required argument ('a','b'), an optional argument ('b'), and a splat argument ('c')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Aopt,\003Ab],[\003Arest,\003Ad]] for a method expecting two required arguments ('a','b'), an optional argument ('c'), and a splat argument ('d')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Aopt,\003Ac],[\003Arest,\003Ad]] for a method expecting a required argument ('a'), two optional arguments ('b','c'), and a splat argument ('d')
+SpecTag:fails::Method#parameters returns [[\003Arest,\003Aa],[\003Ablock,\003Ab]] for a method expecting a splat argument ('a') and a block argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Arest,\003Ab],[\003Ablock,\003Ac]] for a method expecting a required argument ('a'), a splat argument ('b'), and a block ('c')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Arest,\003Ac],[\003Ablock,\003Ad]] for a method expecting two required arguments ('a','b'), a splat argument ('c'), and a block ('d')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Aopt,\003Ab],[\003Arest,\003Ac],[\003Ablock,\003Ad]] for a method expecting a required argument ('a'), a splat argument ('c'), and a block ('d')
+SpecTag:fails::Method#parameters returns [[\003Areq,\003Aa],[\003Areq,\003Ab],[\003Aopt,\003Ac],[\003Ablock,\003Ad]] for a method expecting two required arguments ('a','b'), an optional argument ('c'), a splat argument ('d'), and a block ('e')
+SpecTag:fails::Method#parameters returns [[\003Arest,\003Aa],[\003Areq,\003Ab]] for a method expecting a splat argument ('a') and a required argument ('b')
+SpecTag:fails::Method#parameters returns [[\003Arest,\003Aa],[\003Areq,\003Ab],[\003Areq,\003Ac]] for a method expecting a splat argument ('a') and two required arguments ('b','c')
+SpecTag:fails::Method#parameters returns [[\003Arest,\003Aa],[\003Areq,\003Ab],[\003Ablock,\003Ac]] for a method expecting a splat argument ('a'), a required argument ('b'), and a block ('c')
+SpecTag:fails::Method#parameters works with ->(){} as the value of an optional argument
+SpecTag:fails::Method#parameters returns [] for a define_method method with explicit no-args || specification
+SpecTag:fails::Method#parameters returns [[\003Arest, \003Ax]] for a define_method method with rest arg 'x' only
+SpecTag:fails::Method#parameters returns [[\003Areq, \003Ax]] for a define_method method expecting one required argument 'x'
+SpecTag:fails::Method#parameters returns [[\003Areq, \003Ax], [\003Areq, \003Ay]] for a define_method method expecting two required arguments 'x' and 'y'
+SpecTag:fails::Method#parameters returns [] for a define_method method with no args specification
+SpecTag:fails::Method#parameters returns [[\003Areq]] for a define_method method with a grouping as its only argument
+SpecTag:fails::Method#parameters returns [[\003Aopt, \003Ax]] for a define_method method with an optional argument 'x'
+SpecTag:fails::Method#parameters it returns [[\003Arest]] for a Method generated by respond_to_missing?

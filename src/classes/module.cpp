@@ -2,6 +2,7 @@
 #include "symbol.hpp"
 #include "string.hpp"
 #include "proc.hpp"
+#include "array.hpp"
 #include "../runtime.hpp"
 #include "../collector.hpp"
 #include "../value-map.hpp"
@@ -30,7 +31,7 @@ namespace Mirb
 
 	value_t Module::to_s(value_t obj)
 	{
-		value_t name = get_var(obj, context->syms.classname);
+		value_t name = get_var(obj, context->syms.classpath);
 
 		if(name->test())
 			return name;
@@ -147,9 +148,20 @@ namespace Mirb
 		return obj;
 	}
 	
+	value_t nesting()
+	{
+		auto result = Array::allocate();
+		auto scope = context->frame->prev->scope;
+
+		for(size_t i = 0; i < scope->entries - 1; ++i)
+			result->vector.push((*scope)[i]);
+
+		return result;
+	}
+	
 	value_t Module::alias_method(Module *self, Symbol *new_name, Symbol *old_name)
 	{
-		auto method = lookup_method(self, old_name, self);
+		auto method = lookup_module_method(self, old_name);
 
 		self->set_method(new_name, method);
 
@@ -181,6 +193,32 @@ namespace Mirb
 		return value;
 	}
 	
+	void Module::instance_methods(Array *array, bool super)
+	{
+		if(methods)
+			ValueMapAccess::each_pair(methods, [&](value_t key, value_t value) -> bool {
+				if(value != value_undef)
+					array->vector.push(key);
+
+				return true;
+			});
+
+		if(super)
+		{
+			if(superclass)
+				superclass->instance_methods(array, true);
+		}
+	}
+	
+	value_t Module::rb_instance_methods(Module *obj, value_t super)
+	{
+		auto result = Array::allocate();
+
+		obj->instance_methods(result, super ? super->test() : true);
+
+		return result;
+	}
+	
 	value_t Module::module_function(Module *obj, size_t argc, value_t argv[])
 	{
 		Class *meta = obj->instance_of;
@@ -189,11 +227,8 @@ namespace Mirb
 		{
 			auto symbol = raise_cast<Symbol>(argv[i]);
 
-			auto method = obj->get_method(symbol);
+			auto method = lookup_module_method(obj, symbol); 
 			
-			if(prelude_unlikely(!method || method == value_undef))
-				method_error(symbol, obj, true);
-
 			meta->set_method(symbol, method);
 		}
 
@@ -222,8 +257,7 @@ namespace Mirb
 		if(obj->get_method(name) == value_undef)
 			return obj;
 
-		if(!lookup_module(obj, name))
-			method_error(name, obj, true);
+		lookup_module_method(obj, name);
 
 		obj->set_method(name, value_undef);
 
@@ -263,12 +297,20 @@ namespace Mirb
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_reader>(context->module_class, "attr_reader");
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_writer>(context->module_class, "attr_writer");
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
+		singleton_method<&nesting>(context->module_class, "nesting");
+		
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "public_instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "protected_instance_methods");
+		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "private_instance_methods");
 		
 		method<Self<Module>, Arg::Count, Arg::Values, &module_function>(context->module_class, "module_function");
 		
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public");
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private");
 		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "protected");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "public_class_method");
+		method<Self<Value>, Arg::Count, Arg::Values, &Mirb::visibility_dummy>(context->module_class, "private_class_method");
 		
 		method<Self<Module>, Symbol, &const_defined>(context->module_class, "const_defined?");
 		method<Self<Module>, Symbol, &const_get>(context->module_class, "const_get");

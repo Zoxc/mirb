@@ -1,0 +1,8 @@
+SpecTag:fails::Hash.[] creates a Hash; values can be provided as the argument list
+SpecTag:fails::Hash.[] creates a Hash; values can be provided as one single hash
+SpecTag:fails::Hash.[] creates a Hash; values can be provided as a list of value-pairs in an array
+SpecTag:fails::Hash.[] raises an ArgumentError when passed an odd number of arguments
+SpecTag:fails::Hash.[] calls to_hash
+SpecTag:fails::Hash.[] returns an instance of a subclass when passed an Array
+SpecTag:fails::Hash.[] returns an instance of the class it's called on
+SpecTag:fails::Hash.[] does not call #initialize on the subclass instance

@@ -1,0 +1,2 @@
+SpecTag:fails::Regexp#hash is provided
+SpecTag:fails::Regexp#hash is based on the text and options of Regexp

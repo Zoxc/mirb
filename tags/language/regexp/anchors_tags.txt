@@ -1,0 +1,5 @@
+SpecTag:fails::Regexps with anchors supports ^ (line start anchor)
+SpecTag:fails::Regexps with anchors supports $ (line end anchor)
+SpecTag:fails::Regexps with anchors supports \\Z (string end anchor, including before trailing \\n)
+SpecTag:fails::Regexps with anchors supports \\b (word boundary)
+SpecTag:fails::Regexps with anchors supports \\B (non-word-boundary)

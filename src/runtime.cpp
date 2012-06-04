@@ -63,11 +63,11 @@ namespace Mirb
 	{
 		OnStack<1> os(left);
 
-		CharArray left_str = pretty_inspect(left);
+		CharArray left_str = rescue_pretty_inspect(left);
 		
 		OnStackString<1> oss(left_str);
 		
-		CharArray right_str = pretty_inspect(right);
+		CharArray right_str = rescue_pretty_inspect(right);
 		
 		raise(context->type_error, "Unable to coerce values " + left_str + " and " + right_str);
 	}
@@ -130,16 +130,11 @@ namespace Mirb
 		return false;
 	}
 
-	bool kind_of(Class *klass, value_t obj)
-	{
-		return subclass_of(klass, internal_class_of(obj));
-	}
-	
 	value_t define_common(value_t under, Symbol *name, Type::Enum type)
 	{
 		if(prelude_unlikely(!of_type<Module>(under)))
 		{
-			auto under_str = inspect(under);
+			auto under_str = rescue_inspect(under);
 
 			raise(context->type_error, "Invalid constant scope '" + under_str + "'");
 		}
@@ -150,7 +145,7 @@ namespace Mirb
 		{
 			if(existing->type() != type)
 			{
-				auto existing_str = inspect(class_of(existing));
+				auto existing_str = rescue_inspect(class_of(existing));
 
 				raise(context->type_error,  "Constant already exists with type " + existing_str);
 			}
@@ -171,6 +166,13 @@ namespace Mirb
 		Class *obj = class_create_unnamed(super);
 		
 		class_name(obj, cast<Module>(under), name);
+
+		if(!context->bootstrap)
+		{
+			OnStack<1> os(obj);
+
+			call(super, "inherited", obj);
+		}
 
 		return obj;
 	}
@@ -316,7 +318,22 @@ namespace Mirb
 
 		return singleton_class;
 	}
-
+	
+	CharArray rescue_inspect(value_t obj)
+	{
+		try
+		{
+			return inspect(obj);
+		}
+		catch(InternalException e)
+		{
+			if(e.value->kind_of(context->standard_error))
+				return "<error: " + inspect(e.value) + ">";
+			else
+				throw;
+		}
+	}
+	
 	CharArray inspect(value_t obj)
 	{
 		return inspect_obj(obj)->string.trim(300, "<....>");
@@ -349,6 +366,16 @@ namespace Mirb
 			return cast<String>(Object::to_s(obj));
 	}
 
+	CharArray rescue_pretty_inspect(value_t obj)
+	{
+		OnStack<1> os(obj);
+		CharArray left = rescue_inspect(obj);
+		OnStackString<1> oss(left);
+		CharArray right = rescue_inspect(class_of(obj));
+
+		return left + ":" + right;
+	}
+	
 	CharArray pretty_inspect(value_t obj)
 	{
 		OnStack<1> os(obj);
@@ -382,7 +409,7 @@ namespace Mirb
 			return module;
 		else
 		{
-			auto obj_str = inspect(obj);
+			auto obj_str = rescue_inspect(obj);
 
 			raise(context->name_error, "Object " + obj_str + " can not contain constants");
 		}
@@ -399,7 +426,7 @@ namespace Mirb
 
 		for(size_t i = scope->entries; i-- > 0;)
 		{
-			result += inspect((*scope)[i]) + "::";
+			result += rescue_inspect((*scope)[i]) + "::";
 		}
 
 		return result;
@@ -456,7 +483,7 @@ namespace Mirb
 
 		OnStack<1> os(name);
 
-		auto obj_str = inspect(obj);
+		auto obj_str = rescue_inspect(obj);
 
 		raise(context->name_error, "Uninitialized constant " + obj_str + "::" + name->string);
 	}
@@ -558,20 +585,20 @@ namespace Mirb
 	void type_error(value_t value, const CharArray &expected)
 	{
 		OnStackString<1> os(expected);
-		CharArray value_str = pretty_inspect(value);
+		CharArray value_str = rescue_pretty_inspect(value);
 
 		raise(context->type_error, value_str + " was given when " + expected + " was expected");
 	}
 
 	void type_error(value_t value, Class *expected)
 	{
-		if(prelude_unlikely(!kind_of(expected, value)))
+		if(prelude_unlikely(!value->kind_of(expected)))
 		{
-			CharArray value_str = pretty_inspect(value);
+			CharArray value_str = rescue_pretty_inspect(value);
 
 			OnStackString<1> os(value_str);
 
-			CharArray expected_str = inspect(expected);
+			CharArray expected_str = rescue_inspect(expected);
 
 			raise(context->type_error, value_str + " was given when an object of type " + expected_str + " was expected");
 		}
@@ -656,17 +683,27 @@ namespace Mirb
 	{
 		OnStack<1> os(name);
 
-		CharArray obj_str = pretty_inspect(obj);
+		CharArray obj_str = rescue_pretty_inspect(obj);
 
 		raise(context->name_error, "Undefined method '" + name->string + (in ? CharArray("' in ") :  CharArray("' for ")) + obj_str);
 	}
 	
-	Method *lookup_method(Module *module, Symbol *name, value_t obj)
+	Method *lookup_module_method(Module *module, Symbol *name)
 	{
 		Method *result = lookup_module(module, name);
 
 		if(!result)
-			method_error(name, obj, false);
+		{
+			if(module->type() == Type::Module)
+			{
+				result = lookup_module(context->object_class, name);
+
+				if(result)
+					return result;
+			}
+
+			method_error(name, module, true);
+		}
 
 		return result;
 	}
@@ -678,7 +715,12 @@ namespace Mirb
 
 	Method *lookup(value_t obj, Symbol *name)
 	{
-		return lookup_method(internal_class_of(obj), name, obj);
+		Method *result = lookup_module(internal_class_of(obj), name);
+
+		if(!result)
+			method_error(name, obj, false);
+
+		return result;
 	}
 
 	Method *lookup_super(Module *module, Symbol *name)
@@ -689,7 +731,7 @@ namespace Mirb
 		{
 			OnStack<1> os(name);
 
-			CharArray module_value = pretty_inspect(module);
+			CharArray module_value = rescue_pretty_inspect(module);
 
 			raise(context->name_error, "No superclass method '" + name->string + "' for " + module_value);
 		}
@@ -912,7 +954,7 @@ namespace Mirb
 			return raise_cast<String>(call_argv(method, value, Symbol::get("to_s"), value_nil, 0, 0));
 		else
 		{
-			CharArray obj = pretty_inspect(value);
+			CharArray obj = rescue_pretty_inspect(value);
 
 			raise(context->type_error, "Unable to convert " + obj + " to string");
 		}
@@ -920,16 +962,23 @@ namespace Mirb
 	
 	value_t cast_integer(value_t value)
 	{
-		if(value->type() == Type::Fixnum)
+		if(value->kind_of(context->integer_class))
 			return value;
 
 		auto method = respond_to(value, "to_i");
 
 		if(method)
-			return raise_cast<Type::Fixnum>(call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0));
+		{
+			auto result = call_argv(method, value, Symbol::get("to_i"), value_nil, 0, 0);
+			
+			if(!result->kind_of(context->integer_class))
+				type_error(result, context->integer_class);
+
+			return result;
+		}
 		else
 		{
-			CharArray obj = pretty_inspect(value);
+			CharArray obj = rescue_pretty_inspect(value);
 
 			raise(context->type_error, "Unable to convert " + obj + " to integer");
 		}
@@ -988,8 +1037,6 @@ namespace Mirb
 		context->fixnum_class = define_class("Fixnum", context->integer_class);
 
 		Value::initialize_class_table();
-
-		context->bootstrap = false;
 	}
 
 	void setup_main()
@@ -1039,14 +1086,14 @@ namespace Mirb
 		Collector::initialize();
 
 		context = new Context;
-
+		context->console = console;
 		context->dummy_map = Collector::allocate<ValueMap>();
 
 		initialize_thread_initial();
 
 		Value::initialize_type_table();
 		
-		Platform::initialize(console);
+		Platform::initialize();
 
 		Lexer::setup_jump_table();
 
@@ -1057,6 +1104,8 @@ namespace Mirb
 		Object::initialize();
 		Module::initialize();
 		
+		context->bootstrap = false;
+
 		Kernel::initialize();
 		
 		TrueClass::initialize();

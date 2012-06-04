@@ -1,0 +1,7 @@
+SpecTag:fails::Numeric#coerce returns [other, self] if self and other are instances of the same class
+SpecTag:fails::Numeric#coerce calls #to_f to convert other if self responds to #to_f
+SpecTag:fails::Numeric#coerce returns [other.to_f, self.to_f] if self and other are instances of different classes
+SpecTag:fails::Numeric#coerce raises a TypeError when passed nil
+SpecTag:fails::Numeric#coerce raises a TypeError when passed a boolean
+SpecTag:fails::Numeric#coerce raises a TypeError when passed a Symbol
+SpecTag:fails::Numeric#coerce raises an ArgumentError when passed a String

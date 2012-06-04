@@ -29,6 +29,8 @@ module Signal
 	end
 end
 
+Struct = Class
+
 ENV = {}
 ENV['HOME'] = File.expand_path('../home', current_directory)
 

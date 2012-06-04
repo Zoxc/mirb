@@ -1,0 +1,4 @@
+SpecTag:fails::Hash#shift removes a pair from hash and return it
+SpecTag:fails::Hash#shift returns nil from an empty hash 
+SpecTag:fails::Hash#shift returns (computed) default for empty hashes
+SpecTag:fails::Hash#shift raises a RuntimeError if called on a frozen instance

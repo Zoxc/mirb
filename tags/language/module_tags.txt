@@ -1,0 +1,5 @@
+SpecTag:fails::The module keyword creates a new module with a non-qualified constant name
+SpecTag:fails::The module keyword creates a new module with a qualified constant name
+SpecTag:fails::The module keyword creates a new module with a variable qualified constant name
+SpecTag:fails::The module keyword reopens an existing module
+SpecTag:fails::The module keyword reopens a module included in Object

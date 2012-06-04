@@ -1,0 +1,6 @@
+SpecTag:fails::Array#drop removes the specified number of elements from the start of the array
+SpecTag:fails::Array#drop raises an ArgumentError if the number of elements specified is negative
+SpecTag:fails::Array#drop returns an empty Array if all elements are dropped
+SpecTag:fails::Array#drop returns an empty Array when called on an empty Array
+SpecTag:fails::Array#drop does not remove any elements when passed zero
+SpecTag:fails::Array#drop returns an empty Array if more elements than exist are dropped

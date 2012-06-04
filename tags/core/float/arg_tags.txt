@@ -1,0 +1,8 @@
+SpecTag:fails::Float#arg returns NaN if NaN
+SpecTag:fails::Float#arg returns self if NaN
+SpecTag:fails::Float#arg returns 0 if positive
+SpecTag:fails::Float#arg returns 0 if +0.0
+SpecTag:fails::Float#arg returns 0 if +Infinity
+SpecTag:fails::Float#arg returns Pi if negative
+SpecTag:fails::Float#arg returns Pi if -0.0
+SpecTag:fails::Float#arg returns Pi if -Infinity

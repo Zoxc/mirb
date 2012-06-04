@@ -1,0 +1,2 @@
+SpecTag:fails::File\003A\003AStat#chardev? returns true/false depending if the named file is a char device
+SpecTag:fails::File\003A\003AStat#chardev? accepts an object that has a #to_path method

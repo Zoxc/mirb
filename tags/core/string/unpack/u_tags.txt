@@ -1,0 +1,26 @@
+SpecTag:fails::String#unpack with format 'U' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'U' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'U' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'U' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'U' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'U' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'U' decodes Unicode codepoints as ASCII values
+SpecTag:fails::String#unpack with format 'U' decodes the number of characters specified by the count modifier
+SpecTag:fails::String#unpack with format 'U' implicitly has a count of one when no count modifier is passed
+SpecTag:fails::String#unpack with format 'U' decodes all remaining characters when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'U' decodes UTF-8 BMP codepoints
+SpecTag:fails::String#unpack with format 'U' decodes UTF-8 max codepoints
+SpecTag:fails::String#unpack with format 'U' does not decode any items for directives exceeding the input string size
+SpecTag:fails::String#unpack with format 'U' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with format 'U' ignores spaces between directives
+SpecTag:fails::String#unpack with format 'u' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'u' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'u' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'u' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'u' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'u' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'u' decodes an empty string as an empty string
+SpecTag:fails::String#unpack with format 'u' decodes the complete string ignoring newlines when given a single directive
+SpecTag:fails::String#unpack with format 'u' appends empty string to the array for directives exceeding the input size
+SpecTag:fails::String#unpack with format 'u' ignores the count or '*' modifier and decodes the entire string
+SpecTag:fails::String#unpack with format 'u' decodes all ascii characters

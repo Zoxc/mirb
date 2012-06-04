@@ -1,0 +1,9 @@
+SpecTag:fails::Hash literal {} should return an empty hash
+SpecTag:fails::Hash literal {} should return a new hash populated with the given elements
+SpecTag:fails::Hash literal freezes string keys on initialization
+SpecTag:fails::Hash literal checks duplicated keys on initialization
+SpecTag:fails::Hash literal accepts a hanging comma
+SpecTag:fails::Hash literal recognizes '=' at the end of the key
+SpecTag:fails::Hash literal new-style hash syntax constructs a new hash with the given elements
+SpecTag:fails::Hash literal new-style hash syntax ignores a hanging comma
+SpecTag:fails::Hash literal new-style hash syntax can mix and match syntax styles

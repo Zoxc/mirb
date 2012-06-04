@@ -1,0 +1,12 @@
+SpecTag:fails::Array#insert returns self
+SpecTag:fails::Array#insert inserts objects before the element at index for non-negative index
+SpecTag:fails::Array#insert appends objects to the end of the array for index == -1
+SpecTag:fails::Array#insert inserts objects after the element at index with negative index
+SpecTag:fails::Array#insert pads with nils if the index to be inserted to is past the end
+SpecTag:fails::Array#insert can insert before the first element with a negative index
+SpecTag:fails::Array#insert raises an IndexError if the negative index is out of bounds
+SpecTag:fails::Array#insert does nothing of no object is passed
+SpecTag:fails::Array#insert tries to convert the passed position argument to an Integer using #to_int
+SpecTag:fails::Array#insert raises an ArgumentError if no argument passed
+SpecTag:fails::Array#insert raises a RuntimeError on frozen arrays when the array is modified
+SpecTag:fails::Array#insert raises a RuntimeError on frozen arrays when the array would not be modified

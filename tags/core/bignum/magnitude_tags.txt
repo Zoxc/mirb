@@ -1,0 +1,1 @@
+SpecTag:fails::Bignum#magnitude returns the absolute value

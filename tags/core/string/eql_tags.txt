@@ -1,0 +1,4 @@
+SpecTag:fails::String#eql? returns true if self <=> string returns 0
+SpecTag:fails::String#eql? returns false if self <=> string does not return 0
+SpecTag:fails::String#eql? ignores subclass differences
+SpecTag:fails::String#eql? when given a non-String does not try to call #to_str on the given argument

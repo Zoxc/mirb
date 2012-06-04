@@ -1,0 +1,7 @@
+SpecTag:fails::String#capitalize returns a copy of self with the first character converted to uppercase and the remainder to lowercase
+SpecTag:fails::String#capitalize taints resulting string when self is tainted
+SpecTag:fails::String#capitalize is locale insensitive (only upcases a-z and only downcases A-Z)
+SpecTag:fails::String#capitalize returns subclass instances when called on a subclass
+SpecTag:fails::String#capitalize! capitalizes self in place
+SpecTag:fails::String#capitalize! returns nil when no changes are made
+SpecTag:fails::String#capitalize! raises a RuntimeError when self is frozen

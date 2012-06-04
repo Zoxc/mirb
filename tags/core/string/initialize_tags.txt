@@ -1,0 +1,10 @@
+SpecTag:fails::String#initialize with an argument returns self
+SpecTag:fails::String#initialize with an argument replaces the content of self with other
+SpecTag:fails::String#initialize with an argument taints self if other is tainted
+SpecTag:fails::String#initialize with an argument does not untaint self if other is untainted
+SpecTag:fails::String#initialize with an argument untrusts self if other is untrusted
+SpecTag:fails::String#initialize with an argument does not trust self if other is trusted
+SpecTag:fails::String#initialize with an argument replaces the encoding of self with that of other
+SpecTag:fails::String#initialize with an argument tries to convert other to string using to_str
+SpecTag:fails::String#initialize with an argument raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#initialize with an argument raises a RuntimeError on a frozen instance when self-replacing

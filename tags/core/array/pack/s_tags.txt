@@ -1,0 +1,25 @@
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'S' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'S' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'S' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'S' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'S' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'S' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 'S' raises a TypeError when passed a String
+SpecTag:fails::Array#pack with format 's' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 's' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 's' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 's' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 's' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 's' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 's' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 's' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 's' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 's' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 's' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 's' raises a TypeError when passed a String
+FileTag:fails

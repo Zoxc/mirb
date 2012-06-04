@@ -1,0 +1,8 @@
+SpecTag:fails::String#strip returns a new string with leading and trailing whitespace removed
+SpecTag:fails::String#strip returns a copy of self with trailing NULL bytes and whitespace
+SpecTag:fails::String#strip taints the result when self is tainted
+SpecTag:fails::String#strip! modifies self in place and returns self
+SpecTag:fails::String#strip! returns nil if no modifications where made
+SpecTag:fails::String#strip! modifies self removing trailing NULL bytes and whitespace
+SpecTag:fails::String#strip! raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#strip! raises a RuntimeError on a frozen instance that would not be modified

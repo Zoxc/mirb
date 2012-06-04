@@ -1,0 +1,2 @@
+SpecTag:fails::Numeric#<=> returns 0 if self equals other
+SpecTag:fails::Numeric#<=> returns nil if self does not equal other

@@ -1,0 +1,8 @@
+SpecTag:fails::String#=~ behaves the same way as index() when given a regexp
+SpecTag:fails::String#=~ raises a TypeError if a obj is a string
+SpecTag:fails::String#=~ invokes obj.=~ with self if obj is neither a string nor regexp
+SpecTag:fails::String#=~ sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#match matches the pattern against self starting at an optional index
+SpecTag:fails::String#match tries to convert pattern to a string via to_str
+SpecTag:fails::String#match raises a TypeError if pattern is not a regexp or a string
+SpecTag:fails::String#match sets $~ to MatchData of match or nil when there is none

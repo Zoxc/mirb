@@ -1,0 +1,4 @@
+SpecTag:fails::Symbol#upcase returns a Symbol
+SpecTag:fails::Symbol#upcase converts lowercase ASCII characters to their uppercase equivalents
+SpecTag:fails::Symbol#upcase leaves lowercase Unicode characters as they were
+SpecTag:fails::Symbol#upcase leaves non-alphabetic ASCII characters as they were

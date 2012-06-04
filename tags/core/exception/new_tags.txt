@@ -1,0 +1,4 @@
+SpecTag:fails::Exception.new creates a new instance of Exception
+SpecTag:fails::Exception.new sets the message of the Exception when passes a message
+SpecTag:fails::Exception.new returns 'Exception' for message when no message given
+SpecTag:fails::Exception.new returns the exception when it has a custom constructor

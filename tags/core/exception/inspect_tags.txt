@@ -1,0 +1,1 @@
+SpecTag:fails::Exception#inspect returns '#<Exception\003A Exception>' when no message given

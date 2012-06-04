@@ -1,0 +1,11 @@
+SpecTag:fails::Float#round returns the nearest Integer
+SpecTag:fails::Float#round raises FloatDomainError for exceptional values
+SpecTag:fails::Float#round rounds self to an optionally given precision
+SpecTag:fails::Float#round returns zero when passed a negative argument with magitude greater the magitude of the whole number portion of the Float
+SpecTag:fails::Float#round raises a TypeError when its argument can not be converted to an Integer
+SpecTag:fails::Float#round raises FloatDomainError for exceptional values when passed a non-positive precision
+SpecTag:fails::Float#round raises RangeError for NAN when passed a non-positive precision
+SpecTag:fails::Float#round returns self for exceptional values when passed a non-negative precision
+SpecTag:fails::Float#round works for corner cases
+SpecTag:fails::Float#round returns rounded values for big argument
+SpecTag:fails::Float#round returns rounded values for big values

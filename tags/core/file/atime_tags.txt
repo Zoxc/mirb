@@ -1,0 +1,4 @@
+SpecTag:fails::File.atime returns the last access time for the named file as a Time object
+SpecTag:fails::File.atime raises an Errno\003A\003AENOENT exception if the file is not found
+SpecTag:fails::File.atime accepts an object that has a #to_path method
+SpecTag:fails::File#atime returns the last access time to self

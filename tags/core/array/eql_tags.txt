@@ -1,0 +1,10 @@
+SpecTag:fails::Array#eql? returns true if other is the same array
+SpecTag:fails::Array#eql? returns true if corresponding elements are #eql?
+SpecTag:fails::Array#eql? returns false if other is shorter than self
+SpecTag:fails::Array#eql? returns false if other is longer than self
+SpecTag:fails::Array#eql? returns false immediately when sizes of the arrays differ
+SpecTag:fails::Array#eql? handles well recursive arrays
+SpecTag:fails::Array#eql? does not call #to_ary on its argument
+SpecTag:fails::Array#eql? does not call #to_ary on Array subclasses
+SpecTag:fails::Array#eql? ignores array class differences
+SpecTag:fails::Array#eql? returns false if any corresponding elements are not #eql?

@@ -1,0 +1,3 @@
+SpecTag:fails::String#upcase taints result when self is tainted
+SpecTag:fails::String#upcase returns a subclass instance for subclasses
+SpecTag:fails::String#upcase! raises a RuntimeError when self is frozen

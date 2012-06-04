@@ -1,0 +1,6 @@
+SpecTag:fails::Array#+ tries to convert the passed argument to an Array using #to_ary
+SpecTag:fails::Array#+ properly handles recursive arrays
+SpecTag:fails::Array#+ does return subclass instances with Array subclasses
+SpecTag:fails::Array#+ does not call to_ary on array subclasses
+SpecTag:fails::Array#+ does not get infected even if an original array is tainted
+SpecTag:fails::Array#+ does not infected even if an original array is untrusted

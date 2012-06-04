@@ -1,0 +1,8 @@
+SpecTag:fails::The yield call taking no arguments raises a LocalJumpError when the method is not passed a block
+SpecTag:fails::The yield call taking no arguments ignores assignment to the explicit block argument and calls the passed block
+SpecTag:fails::The yield call taking a single argument raises a LocalJumpError when the method is not passed a block
+SpecTag:fails::The yield call taking multiple arguments raises a LocalJumpError when the method is not passed a block
+SpecTag:fails::The yield call taking a single splatted argument raises a LocalJumpError when the method is not passed a block
+SpecTag:fails::The yield call taking a single splatted argument passes no values when give nil as an argument
+SpecTag:fails::The yield call taking multiple arguments with a splat raises a LocalJumpError when the method is not passed a block
+SpecTag:fails::The yield call taking multiple arguments with a splat does not pass an argument value if the splatted argument is nil

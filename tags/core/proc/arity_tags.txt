@@ -1,0 +1,24 @@
+SpecTag:fails::Proc#arity returns -1 for a block taking one optional argument
+SpecTag:fails::Proc#arity returns -1 for a block taking |a = 0, *b| argument 
+SpecTag:fails::Proc#arity returns -2 for a block taking |a, b = 0| argument 
+SpecTag:fails::Proc#arity returns -2 for a block taking |a, b = 0, c = 0| argument 
+SpecTag:fails::Proc#arity returns -2 for a block taking |(a, b), c = 0| argument 
+SpecTag:fails::Proc#arity returns 0 for a block taking no arguments
+SpecTag:fails::Proc#arity returns 0 for a block taking || arguments
+SpecTag:fails::Proc#arity returns 1 for a block taking |a| arguments
+SpecTag:fails::Proc#arity returns 1 for a block taking |a, | arguments
+SpecTag:fails::Proc#arity returns -2 for a block taking |a, *| arguments
+SpecTag:fails::Proc#arity returns -2 for a block taking |a, *b| arguments
+SpecTag:fails::Proc#arity returns -3 for a block taking |a, b, *c| arguments
+SpecTag:fails::Proc#arity returns 2 for a block taking |a, b| arguments
+SpecTag:fails::Proc#arity returns 3 for a block taking |a, b, c| arguments
+SpecTag:fails::Proc#arity returns -1 for a block taking |*| arguments
+SpecTag:fails::Proc#arity returns -1 for a block taking |*a| arguments
+SpecTag:fails::Proc#arity returns 1 for a block taking |(a, b)| arguments
+SpecTag:fails::Proc#arity returns 1 for a block taking |(a, *)| arguments
+SpecTag:fails::Proc#arity returns 1 for a block taking |(a, *b)| arguments
+SpecTag:fails::Proc#arity returns 2 for a block taking |a, (b, c)| arguments
+SpecTag:fails::Proc#arity returns 2 for a block taking |a, (b, *c)| arguments
+SpecTag:fails::Proc#arity returns 2 for a block taking |(a, b), c| arguments
+SpecTag:fails::Proc#arity returns -2 for a block taking |(a, b), *c| arguments
+SpecTag:fails::Proc#arity returns 2 for a block taking |(a, *b), c| arguments

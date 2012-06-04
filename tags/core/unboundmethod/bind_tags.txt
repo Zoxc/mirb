@@ -1,0 +1,6 @@
+SpecTag:fails::UnboundMethod#bind raises TypeError if object is not kind_of? the Module the method defined in
+SpecTag:fails::UnboundMethod#bind returns Method for any object that is kind_of? the Module method was extracted from
+SpecTag:fails::UnboundMethod#bind Method returned for obj is equal to one directly returned by obj.method
+SpecTag:fails::UnboundMethod#bind returns a callable method
+SpecTag:fails::UnboundMethod#bind binds a Parent's class method to any Child's class methods
+SpecTag:fails::UnboundMethod#bind will raise when binding a an object singleton's method to another object

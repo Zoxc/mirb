@@ -1,0 +1,2 @@
+SpecTag:fails::Time#hash returns a Fixnum
+SpecTag:fails::Time#hash is stable

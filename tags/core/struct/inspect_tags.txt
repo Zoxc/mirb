@@ -1,0 +1,2 @@
+SpecTag:fails::Struct#inspect returns a string representation of some kind
+SpecTag:fails::Struct#inspect returns a string representation without the class name for anonymous structs

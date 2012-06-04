@@ -1,0 +1,15 @@
+SpecTag:fails::Struct.new creates a constant in Struct namespace with string as first argument
+SpecTag:fails::Struct.new overwrites previously defined constants with string as first argument
+SpecTag:fails::Struct.new calls to_str on its first argument (constant name)
+SpecTag:fails::Struct.new creates a new anonymous class with nil first argument
+SpecTag:fails::Struct.new creates a new anonymous class with symbol arguments
+SpecTag:fails::Struct.new does not create a constant with symbol as first argument
+SpecTag:fails::Struct.new fails with invalid constant name as first argument
+SpecTag:fails::Struct.new raises a TypeError if object doesn't respond to to_sym
+SpecTag:fails::Struct.new raises a TypeError if object is not a Symbol
+SpecTag:fails::Struct.new processes passed block with instance_eval
+SpecTag:fails::Struct.new creates a constant in subclass' namespace
+SpecTag:fails::Struct.new creates an instance
+SpecTag:fails::Struct.new creates reader methods
+SpecTag:fails::Struct.new creates writer methods
+SpecTag:fails::Struct.new fails with too many arguments

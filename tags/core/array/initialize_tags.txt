@@ -1,0 +1,9 @@
+SpecTag:fails::Array#initialize preserves the object's identity even when changing its value
+SpecTag:fails::Array#initialize raise an ArgumentError if passed 3 or more arguments
+SpecTag:fails::Array#initialize raises a RuntimeError on frozen arrays
+SpecTag:fails::Array#initialize with no arguments makes the array empty
+SpecTag:fails::Array#initialize with (array) replaces self with the other array
+SpecTag:fails::Array#initialize with (array) calls #to_ary to convert the value to an array
+SpecTag:fails::Array#initialize with (array) does not call #to_ary on instances of Array or subclasses of Array
+SpecTag:fails::Array#initialize with (array) raises a TypeError if an Array type argument and a default object
+FileTag:fails

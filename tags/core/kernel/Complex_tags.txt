@@ -1,0 +1,10 @@
+SpecTag:fails::Kernel.Complex() when passed [Complex, Complex] returns a new Complex number based on the two given numbers
+SpecTag:fails::Kernel.Complex() when passed [Complex] returns the passed Complex number
+SpecTag:fails::Kernel.Complex() when passed [Integer, Integer] returns a new Complex number
+SpecTag:fails::Kernel.Complex() when passed [Integer] returns a new Complex number with 0 as the imaginary component
+SpecTag:fails::Kernel.Complex() when passed a Numeric which responds to #real? with false returns the passed argument
+SpecTag:fails::Kernel.Complex() when passed a Numeric which responds to #real? with true returns a Complex with the passed argument as the real component and 0 as the imaginary component
+SpecTag:fails::Kernel.Complex() when passed Numerics n1 and n2 and at least one responds to #real? with false returns n1 + n2 * Complex(0, 1)
+SpecTag:fails::Kernel.Complex() when passed two Numerics and both respond to #real? with true returns a Complex with the passed arguments as real and imaginary components respectively
+SpecTag:fails::Kernel.Complex() when passed a single non-Numeric coerces the passed argument using #to_c
+SpecTag:fails::Kernel.Complex() when passed a non-Numeric second argument raises TypeError

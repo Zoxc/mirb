@@ -1,0 +1,40 @@
+SpecTag:fails::Time#strftime formats time according to the directives in the given format string
+SpecTag:fails::Time#strftime supports week of year format with %U and %W
+SpecTag:fails::Time#strftime supports mm/dd/yy formatting with %D
+SpecTag:fails::Time#strftime supports HH\003AMM\003ASS formatting with %T
+SpecTag:fails::Time#strftime supports 12-hr formatting with %l
+SpecTag:fails::Time#strftime supports AM/PM formatting with %p
+SpecTag:fails::Time#strftime returns the abbreviated weekday with %a
+SpecTag:fails::Time#strftime returns the full weekday with %A
+SpecTag:fails::Time#strftime returns the abbreviated month with %b
+SpecTag:fails::Time#strftime returns the full month with %B
+SpecTag:fails::Time#strftime returns the day of the month with %d
+SpecTag:fails::Time#strftime returns the 24-based hour with %H
+SpecTag:fails::Time#strftime returns the 12-based hour with %I
+SpecTag:fails::Time#strftime returns the Julian date with %j
+SpecTag:fails::Time#strftime returns the month with %m
+SpecTag:fails::Time#strftime returns the minute with %M
+SpecTag:fails::Time#strftime returns the second with %S
+SpecTag:fails::Time#strftime returns the enumerated day of the week with %w
+SpecTag:fails::Time#strftime returns the date alone with %x
+SpecTag:fails::Time#strftime returns the time alone with %X
+SpecTag:fails::Time#strftime returns the year wihout a century with %y
+SpecTag:fails::Time#strftime returns the year with %Y
+SpecTag:fails::Time#strftime returns the timezone with %Z
+SpecTag:fails::Time#strftime returns the fractional seconds digits, default is 9 digits (nanosecond) with %N
+SpecTag:fails::Time#strftime supports GNU modificators
+SpecTag:fails::Time#strftime supports the '-' modifier to drop leading zeros
+SpecTag:fails::Time#strftime with %L formats the milliseconds of of the second
+SpecTag:fails::Time#strftime with %N formats the nanoseconds of of the second with %N
+SpecTag:fails::Time#strftime with %N formats the milliseconds of of the second with %3N
+SpecTag:fails::Time#strftime with %N formats the microseconds of of the second with %6N
+SpecTag:fails::Time#strftime with %N formats the nanoseconds of of the second with %9N
+SpecTag:fails::Time#strftime with %N formats the picoseconds of of the second with %12N
+SpecTag:fails::Time#strftime with %z formats a UTC time offset as '+0000'
+SpecTag:fails::Time#strftime with %z formats a local time with positive UTC offset as '+HHMM'
+SpecTag:fails::Time#strftime with %z formats a local time with negative UTC offset as '-HHMM'
+SpecTag:fails::Time#strftime with %z formats a time with fixed positive offset as '+HHMM'
+SpecTag:fails::Time#strftime with %z formats a time with fixed negative offset as '-HHMM'
+SpecTag:fails::Time#strftime with %z formats a time with fixed offset as '+/-HH\003AMM' with '\003A' specifier
+SpecTag:fails::Time#strftime with %z formats a time with fixed offset as '+/-HH\003AMM\003ASS' with '\003A\003A' specifier
+SpecTag:fails::Time#strftime with %z rounds fixed offset to the nearest second

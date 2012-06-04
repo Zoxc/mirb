@@ -1,0 +1,8 @@
+SpecTag:fails::Array#- properly handles recursive arrays
+SpecTag:fails::Array#- tries to convert the passed arguments to Arrays using #to_ary
+SpecTag:fails::Array#- does not return subclass instance for Array subclasses
+SpecTag:fails::Array#- does not call to_ary on array subclasses
+SpecTag:fails::Array#- removes an item identified as equivalent via #hash and #eql?
+SpecTag:fails::Array#- doesn't remove an item with the same hash but not #eql?
+SpecTag:fails::Array#- removes an identical item even when its #eql? isn't reflexive
+SpecTag:fails::Array#- is not destructive

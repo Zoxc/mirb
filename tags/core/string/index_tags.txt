@@ -1,0 +1,20 @@
+SpecTag:fails::String#index with object raises a TypeError if obj isn't a String, Fixnum or Regexp
+SpecTag:fails::String#index with object doesn't try to convert obj to an Integer via to_int
+SpecTag:fails::String#index with object tries to convert obj to a string via to_str
+SpecTag:fails::String#index with String behaves the same as String#index(char) for one-character strings
+SpecTag:fails::String#index with String returns the index of the first occurrence of the given substring
+SpecTag:fails::String#index with String doesn't set $~
+SpecTag:fails::String#index with String ignores string subclasses
+SpecTag:fails::String#index with String starts the search at the given offset
+SpecTag:fails::String#index with String starts the search at offset + self.length if offset is negative
+SpecTag:fails::String#index with String returns nil if the substring isn't found
+SpecTag:fails::String#index with String converts start_offset to an integer via to_int
+SpecTag:fails::String#index with Regexp behaves the same as String#index(string) for escaped string regexps
+SpecTag:fails::String#index with Regexp returns the index of the first match of regexp
+SpecTag:fails::String#index with Regexp sets $~ to MatchData of match and nil when there's none
+SpecTag:fails::String#index with Regexp starts the search at the given offset
+SpecTag:fails::String#index with Regexp starts the search at offset + self.length if offset is negative
+SpecTag:fails::String#index with Regexp returns nil if the substring isn't found
+SpecTag:fails::String#index with Regexp returns nil if the Regexp matches the empty string and the offset is out of range
+SpecTag:fails::String#index with Regexp supports \\G which matches at the given start offset
+SpecTag:fails::String#index with Regexp converts start_offset to an integer via to_int

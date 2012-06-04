@@ -1,0 +1,3 @@
+SpecTag:fails::Range#initialize raises an ArgumentError if passed without or with only an argument
+SpecTag:fails::Range#initialize raises a NameError if passed with two or three arguments
+SpecTag:fails::Range#initialize raises an ArgumentError if passed with four or more arguments

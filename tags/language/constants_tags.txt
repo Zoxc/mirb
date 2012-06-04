@@ -1,0 +1,7 @@
+SpecTag:fails::Literal (A\003A\003AX) constant resolution sends #const_missing to the original class or module scope
+SpecTag:fails::Literal (A\003A\003AX) constant resolution raises a TypeError if a non-class or non-module qualifier is given
+SpecTag:fails::Literal (A\003A\003AX) constant resolution with statically assigned constants searches Object after searching other scopes
+SpecTag:fails::Literal (A\003A\003AX) constant resolution with dynamically assigned constants evaluates the right hand side before evaluating a constant path
+SpecTag:fails::Constant resolution within methods sends #const_missing to the original class or module scope
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches Object as a lexical scope only if Object is explicitly opened
+SpecTag:fails::Constant resolution within methods with ||= assignes constant if previously undefined

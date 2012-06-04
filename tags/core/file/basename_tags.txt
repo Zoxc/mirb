@@ -1,0 +1,14 @@
+SpecTag:fails::File.basename return the basename of a path (basic cases)
+SpecTag:fails::File.basename return the last component of the filename
+SpecTag:fails::File.basename return an string
+SpecTag:fails::File.basename return the basename for unix format
+SpecTag:fails::File.basename return the basename for edge cases
+SpecTag:fails::File.basename ignores a trailing directory separator
+SpecTag:fails::File.basename return the basename for unix suffix
+SpecTag:fails::File.basename raises a TypeError if the arguments are not String types
+SpecTag:fails::File.basename accepts an object that has a #to_path method
+SpecTag:fails::File.basename raises an ArgumentError if passed more than two arguments
+SpecTag:fails::File.basename return the basename for windows
+SpecTag:fails::File.basename return basename windows unc
+SpecTag:fails::File.basename return basename windows forward slash
+SpecTag:fails::File.basename return basename with windows suffix

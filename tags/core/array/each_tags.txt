@@ -1,0 +1,2 @@
+SpecTag:fails::Array#each yields each element to a block that takes multiple arguments
+SpecTag:fails::Array#each returns an Enumerator if no block given

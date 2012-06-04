@@ -1,0 +1,12 @@
+SpecTag:fails::String#chop returns a new string with the last character removed
+SpecTag:fails::String#chop removes both characters if the string ends with \\r\\n
+SpecTag:fails::String#chop returns an empty string when applied to an empty string
+SpecTag:fails::String#chop returns a new string when applied to an empty string
+SpecTag:fails::String#chop taints result when self is tainted
+SpecTag:fails::String#chop untrusts result when self is untrusted
+SpecTag:fails::String#chop returns subclass instances when called on a subclass
+SpecTag:fails::String#chop! behaves just like chop, but in-place
+SpecTag:fails::String#chop! returns self if modifications were made
+SpecTag:fails::String#chop! returns nil when called on an empty string
+SpecTag:fails::String#chop! raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#chop! raises a RuntimeError on a frozen instance that would not be modified

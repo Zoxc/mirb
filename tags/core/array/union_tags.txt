@@ -1,0 +1,8 @@
+SpecTag:fails::Array#| returns an array of elements that appear in either array (union)
+SpecTag:fails::Array#| creates an array with no duplicates
+SpecTag:fails::Array#| creates an array with elements in order they are first encountered
+SpecTag:fails::Array#| properly handles recursive arrays
+SpecTag:fails::Array#| tries to convert the passed argument to an Array using #to_ary
+SpecTag:fails::Array#| acts as if using an intermediate hash to collect values
+SpecTag:fails::Array#| does not return subclass instances for Array subclasses
+SpecTag:fails::Array#| does not call to_ary on array subclasses

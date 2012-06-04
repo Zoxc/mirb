@@ -1,0 +1,1 @@
+SpecTag:fails::Time#asctime returns a canonical string representation of time

@@ -1,0 +1,1 @@
+SpecTag:fails::Float#truncate returns self truncated to an Integer

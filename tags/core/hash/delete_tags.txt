@@ -1,0 +1,4 @@
+SpecTag:fails::Hash#delete removes the entry and returns the deleted value
+SpecTag:fails::Hash#delete calls supplied block if the key is not found
+SpecTag:fails::Hash#delete returns nil if the key is not found when no block is given
+SpecTag:fails::Hash#delete raises a RuntimeError if called on a frozen instance

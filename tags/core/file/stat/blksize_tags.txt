@@ -1,0 +1,1 @@
+SpecTag:fails::File\003A\003AStat#blksize returns the blksize of a File\003A\003AStat object

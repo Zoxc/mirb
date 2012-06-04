@@ -1,0 +1,1 @@
+SpecTag:fails::Struct#length returns the number of attributes

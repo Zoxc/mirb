@@ -1,0 +1,11 @@
+SpecTag:fails::Fixnum#fdiv performs floating-point division between self and a Fixnum
+SpecTag:fails::Fixnum#fdiv performs floating-point division between self and a Bignum
+SpecTag:fails::Fixnum#fdiv performs floating-point division between self and a Float
+SpecTag:fails::Fixnum#fdiv returns NaN when the argument is NaN
+SpecTag:fails::Fixnum#fdiv returns Infinity when the argument is 0
+SpecTag:fails::Fixnum#fdiv returns -Infinity when the argument is 0 and self is negative
+SpecTag:fails::Fixnum#fdiv returns Infinity when the argument is 0.0
+SpecTag:fails::Fixnum#fdiv returns -Infinity when the argument is 0.0 and self is negative
+SpecTag:fails::Fixnum#fdiv raises a TypeError when argument isn't numeric
+SpecTag:fails::Fixnum#fdiv raises an ArgumentError when passed multiple arguments
+SpecTag:fails::Fixnum#fdiv follows the coercion protocol

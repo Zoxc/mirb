@@ -219,6 +219,15 @@ namespace Mirb
 
 		return result;
 	}
+	
+	Number Number::pow(mp_digit exp) const
+	{
+		Number result;
+
+		check(mp_expt_d(const_cast<mp_int *>(&num), exp, &result.num));
+
+		return result;
+	}
 
 	Number Number::operator *(const Number &other) const
 	{

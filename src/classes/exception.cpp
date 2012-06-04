@@ -4,7 +4,7 @@
 #include "array.hpp"
 #include "io.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 #include "class.hpp"
 #include "../block.hpp"
 #include "../document.hpp"
@@ -44,14 +44,14 @@ namespace Mirb
 
 		OnStack<1> os3(module);
 
-		out.color(Gray, Mirb::inspect(module));
+		out.color(Gray, Mirb::rescue_inspect(module));
 
 		value_t class_of_obj = class_of(self->obj);
 
 		if(class_of_obj != module)
 		{
 			out.color(Gray, "(");
-			out.color(Gray, Mirb::inspect(class_of_obj));
+			out.color(Gray, Mirb::rescue_inspect(class_of_obj));
 			out.color(Gray, ")");
 		}
 
@@ -61,7 +61,7 @@ namespace Mirb
 
 		for(size_t i = 0; i < self->args->entries; ++i)
 		{
-			out.print(Mirb::inspect((*self->args)[i]));
+			out.print(Mirb::rescue_inspect((*self->args)[i]));
 			if(i < self->args->entries - 1)
 				out.print(", ");
 		}
@@ -169,11 +169,6 @@ namespace Mirb
 		}
 	}
 	
-	value_t Exception::allocate(Class *instance_of)
-	{
-		return Collector::allocate<Exception>(Type::Exception, instance_of, nullptr, nullptr);
-	}
-	
 	value_t Exception::to_s(Exception *self)
 	{
 		if(self->message)
@@ -251,8 +246,8 @@ namespace Mirb
 	{
 		context->exception_class = define_class("Exception", context->object_class);
 
-		singleton_method<Self<Class>, &allocate>(context->exception_class, "allocate");
-
+		internal_allocator<Exception, &Context::exception_class>();
+		
 		method<Self<Exception>, Optional<String>, &rb_initialize>(context->exception_class, "initialize");
 		method<Self<Exception>, &rb_backtrace>(context->exception_class, "backtrace");
 		method<Self<Exception>, &to_s>(context->exception_class, "message");

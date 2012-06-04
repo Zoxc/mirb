@@ -1,0 +1,11 @@
+SpecTag:fails::String#getbyte returns an Integer if given a valid index
+SpecTag:fails::String#getbyte starts indexing at 0
+SpecTag:fails::String#getbyte counts from the end of the String if given a negative argument
+SpecTag:fails::String#getbyte returns an Integer between 0 and 255
+SpecTag:fails::String#getbyte regards a multi-byte character as having multiple bytes
+SpecTag:fails::String#getbyte mirrors the output of #bytes
+SpecTag:fails::String#getbyte interprets bytes relative to the String's encoding
+SpecTag:fails::String#getbyte returns nil for out-of-bound indexes
+SpecTag:fails::String#getbyte regards the empty String as containing no bytes
+SpecTag:fails::String#getbyte raises an ArgumentError unless given one argument
+SpecTag:fails::String#getbyte raises a TypeError unless its argument can be coerced into an Integer

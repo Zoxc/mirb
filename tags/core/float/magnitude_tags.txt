@@ -1,0 +1,4 @@
+SpecTag:fails::Float#magnitude returns the absolute value
+SpecTag:fails::Float#magnitude returns 0.0 if -0.0
+SpecTag:fails::Float#magnitude returns Infinity if -Infinity
+SpecTag:fails::Float#magnitude returns NaN if NaN

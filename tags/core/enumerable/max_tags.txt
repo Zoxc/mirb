@@ -1,0 +1,8 @@
+SpecTag:fails::Enumerable#max max should return the maximum element
+SpecTag:fails::Enumerable#max return the maximum element (basics cases)
+SpecTag:fails::Enumerable#max returns nil for an empty Enumerable 
+SpecTag:fails::Enumerable#max raises a NoMethodError for elements without #<=>
+SpecTag:fails::Enumerable#max raises an ArgumentError for incomparable elements
+SpecTag:fails::Enumerable#max return the maximum element (with block
+SpecTag:fails::Enumerable#max returns the minimum for enumerables that contain nils
+SpecTag:fails::Enumerable#max gathers whole arrays as elements when each yields multiple

@@ -1,0 +1,3 @@
+SpecTag:fails::Comparable#>= calls #<=> on self with other and returns true if #<=> returns 0 or any Integer greater than 0
+SpecTag:fails::Comparable#>= returns false if calling #<=> on self returns any Integer less than 0
+SpecTag:fails::Comparable#>= raises an ArgumentError if calling #<=> on self returns nil

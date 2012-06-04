@@ -1,0 +1,6 @@
+SpecTag:fails::Symbol#=~ returns the index of the beginning of the match
+SpecTag:fails::Symbol#=~ returns nil if there is no match
+SpecTag:fails::Symbol#=~ sets the last match pseudo-variables
+SpecTag:fails::Symbol#match returns the index of the beginning of the match
+SpecTag:fails::Symbol#match returns nil if there is no match
+SpecTag:fails::Symbol#match sets the last match pseudo-variables

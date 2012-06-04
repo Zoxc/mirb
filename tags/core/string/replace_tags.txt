@@ -1,0 +1,10 @@
+SpecTag:fails::String#replace returns self
+SpecTag:fails::String#replace replaces the content of self with other
+SpecTag:fails::String#replace taints self if other is tainted
+SpecTag:fails::String#replace does not untaint self if other is untainted
+SpecTag:fails::String#replace untrusts self if other is untrusted
+SpecTag:fails::String#replace does not trust self if other is trusted
+SpecTag:fails::String#replace replaces the encoding of self with that of other
+SpecTag:fails::String#replace tries to convert other to string using to_str
+SpecTag:fails::String#replace raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#replace raises a RuntimeError on a frozen instance when self-replacing

@@ -1,0 +1,3 @@
+SpecTag:fails::Array#include? returns true if object is present, false otherwise
+SpecTag:fails::Array#include? determines presence by using element == obj
+SpecTag:fails::Array#include? calls == on elements from left to right until success

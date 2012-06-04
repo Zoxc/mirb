@@ -8,7 +8,6 @@ namespace Mirb
 		public Object
 	{
 		private:
-			static value_t allocate(Class *instance_of);
 			static value_t to_s(Hash *self);
 			static value_t keys(Hash *self);
 			static value_t values(Hash *self);

@@ -1,0 +1,4 @@
+SpecTag:fails::A Symbol literal is a '\003A' followed by a single- or double-quoted string that may contain otherwise invalid characters
+SpecTag:fails::A Symbol literal can be created by the %s-delimited expression
+SpecTag:fails::A Symbol literal can contain null in the string
+SpecTag:fails::A Symbol literal can be an empty string

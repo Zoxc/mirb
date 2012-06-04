@@ -1,0 +1,1 @@
+SpecTag:fails::Range#first returns the first element of self

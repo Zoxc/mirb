@@ -1,0 +1,6 @@
+SpecTag:fails::Float#rationalize returns self as a simplified Rational with no argument
+SpecTag:fails::Float#rationalize simplifies self to the degree specified by a Rational argument
+SpecTag:fails::Float#rationalize simplifies self to the degree specified by a Float argument
+SpecTag:fails::Float#rationalize raises a FloatDomainError for Infinity
+SpecTag:fails::Float#rationalize raises a FloatDomainError for NaN
+SpecTag:fails::Float#rationalize raises ArgumentError when passed more than one argument

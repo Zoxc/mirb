@@ -1,0 +1,8 @@
+SpecTag:fails::Array#product returns converted arguments using \003Ato_ary
+SpecTag:fails::Array#product returns the expected result
+SpecTag:fails::Array#product has no required argument
+SpecTag:fails::Array#product returns an empty array when the argument is an empty array
+SpecTag:fails::Array#product does not attempt to produce an unreasonable number of products
+SpecTag:fails::Array#product when given a block yields all combinations in turn
+SpecTag:fails::Array#product when given a block will ignore unreasonable numbers of products and yield anyway
+SpecTag:fails::Array#product when given an empty block returns self

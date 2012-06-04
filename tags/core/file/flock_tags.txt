@@ -1,0 +1,4 @@
+SpecTag:fails::File#flock exclusively locks a file
+SpecTag:fails::File#flock non-exclusively locks a file
+SpecTag:fails::File#flock returns false if trying to lock an exclusively locked file
+SpecTag:fails::File#flock returns 0 if trying to lock a non-exclusively locked file

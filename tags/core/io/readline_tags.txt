@@ -1,0 +1,6 @@
+SpecTag:fails::IO#readline returns the next line on the stream
+SpecTag:fails::IO#readline goes back to first position after a rewind
+SpecTag:fails::IO#readline returns characters after the position set by #seek
+SpecTag:fails::IO#readline raises EOFError on end of stream
+SpecTag:fails::IO#readline raises IOError on closed stream
+SpecTag:fails::IO#readline assigns the returned line to $_

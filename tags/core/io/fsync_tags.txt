@@ -1,0 +1,2 @@
+SpecTag:fails::IO#fsync raises an IOError on closed stream
+SpecTag:fails::IO#fsync writes the buffered data to permanent storage

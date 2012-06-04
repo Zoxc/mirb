@@ -1,0 +1,6 @@
+SpecTag:fails::IO#binmode returns self
+SpecTag:fails::IO#binmode raises an IOError on closed stream
+SpecTag:fails::IO#binmode sets external encoding to binary
+SpecTag:fails::IO#binmode sets internal encoding to nil
+SpecTag:fails::IO#binmode? is true after a call to IO#binmode
+SpecTag:fails::IO#binmode? propagates to dup'ed IO objects

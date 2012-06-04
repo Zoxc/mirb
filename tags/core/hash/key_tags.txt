@@ -1,0 +1,9 @@
+SpecTag:fails::Hash#key? returns true if argument is a key
+SpecTag:fails::Hash#key? returns true if the key's matching value was nil
+SpecTag:fails::Hash#key? returns true if the key's matching value was false
+SpecTag:fails::Hash#key? returns true if the key is nil
+SpecTag:fails::Hash#key? compares keys with the same #hash value via #eql?
+SpecTag:fails::Hash#key returns the corresponding key for value
+SpecTag:fails::Hash#key returns nil if the value is not found
+SpecTag:fails::Hash#key doesn't return default value if the value is not found
+SpecTag:fails::Hash#key compares values using ==

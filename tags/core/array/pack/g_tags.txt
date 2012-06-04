@@ -1,0 +1,54 @@
+SpecTag:fails::Array#pack with format 'G' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'G' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'G' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'G' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'G' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'G' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'G' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'G' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format 'G' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'G' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'G' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'G' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'G' raises a TypeError if a String does not represent a floating point number
+SpecTag:fails::Array#pack with format 'G' raises a TypeError when the object does not respond to #to_f
+SpecTag:fails::Array#pack with format 'G' encodes a positive Float
+SpecTag:fails::Array#pack with format 'G' encodes a negative Float
+SpecTag:fails::Array#pack with format 'G' converts an Integer to a Float
+SpecTag:fails::Array#pack with format 'G' raises a TypeError if passed a String representation of a floating point number
+SpecTag:fails::Array#pack with format 'G' encodes the number of array elements specified by the count modifier
+SpecTag:fails::Array#pack with format 'G' encodes all remaining elements when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'G' ignores NULL bytes between directives
+SpecTag:fails::Array#pack with format 'G' ignores spaces between directives
+SpecTag:fails::Array#pack with format 'G' encodes positive Infinity
+SpecTag:fails::Array#pack with format 'G' encodes negative Infinity
+SpecTag:fails::Array#pack with format 'G' encodes NaN
+SpecTag:fails::Array#pack with format 'G' encodes a positive Float outside the range of a single precision float
+SpecTag:fails::Array#pack with format 'G' encodes a negative Float outside the range of a single precision float
+SpecTag:fails::Array#pack with format 'g' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'g' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'g' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'g' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'g' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'g' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'g' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'g' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format 'g' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'g' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'g' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'g' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'g' raises a TypeError if a String does not represent a floating point number
+SpecTag:fails::Array#pack with format 'g' raises a TypeError when the object does not respond to #to_f
+SpecTag:fails::Array#pack with format 'g' encodes a positive Float
+SpecTag:fails::Array#pack with format 'g' encodes a negative Float
+SpecTag:fails::Array#pack with format 'g' converts an Integer to a Float
+SpecTag:fails::Array#pack with format 'g' raises a TypeError if passed a String representation of a floating point number
+SpecTag:fails::Array#pack with format 'g' encodes the number of array elements specified by the count modifier
+SpecTag:fails::Array#pack with format 'g' encodes all remaining elements when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'g' ignores NULL bytes between directives
+SpecTag:fails::Array#pack with format 'g' ignores spaces between directives
+SpecTag:fails::Array#pack with format 'g' encodes positive Infinity
+SpecTag:fails::Array#pack with format 'g' encodes negative Infinity
+SpecTag:fails::Array#pack with format 'g' encodes NaN
+SpecTag:fails::Array#pack with format 'g' encodes a positive Float outside the range of a single precision float
+SpecTag:fails::Array#pack with format 'g' encodes a negative Float outside the range of a single precision float

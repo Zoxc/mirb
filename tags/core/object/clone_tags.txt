@@ -1,0 +1,7 @@
+SpecTag:fails::Object#clone returns a new object duplicated from the original
+SpecTag:fails::Object#clone produces a shallow copy, contained objects are not recursively dupped
+SpecTag:fails::Object#clone calls #initialize_copy on the NEW object if available, passing in original object
+SpecTag:fails::Object#clone preserves tainted state from the original
+SpecTag:fails::Object#clone does not preserve the object_id
+SpecTag:fails::Object#clone preserves untrusted state from the original
+SpecTag:fails::Object#clone preserves frozen state from the original

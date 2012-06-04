@@ -1,0 +1,6 @@
+SpecTag:fails::Bignum#% returns the modulus obtained from dividing self by the given argument
+SpecTag:fails::Bignum#% raises a ZeroDivisionError when the given argument is 0
+SpecTag:fails::Bignum#% raises a ZeroDivisionError when the given argument is 0 and a Float
+SpecTag:fails::Bignum#modulo returns the modulus obtained from dividing self by the given argument
+SpecTag:fails::Bignum#modulo raises a ZeroDivisionError when the given argument is 0
+SpecTag:fails::Bignum#modulo raises a ZeroDivisionError when the given argument is 0 and a Float

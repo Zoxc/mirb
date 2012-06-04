@@ -1,0 +1,39 @@
+SpecTag:fails::Time#utc? returns true if time represents a time in UTC (GMT)
+SpecTag:fails::Time.utc creates a time based on given values, interpreted as UTC (GMT)
+SpecTag:fails::Time.utc creates a time based on given C-style gmtime arguments, interpreted as UTC (GMT)
+SpecTag:fails::Time.utc accepts 1 argument (year)
+SpecTag:fails::Time.utc accepts 2 arguments (year, month)
+SpecTag:fails::Time.utc accepts 3 arguments (year, month, day)
+SpecTag:fails::Time.utc accepts 4 arguments (year, month, day, hour)
+SpecTag:fails::Time.utc accepts 5 arguments (year, month, day, hour, minute)
+SpecTag:fails::Time.utc accepts nil month, day, hour, minute, and second
+SpecTag:fails::Time.utc handles a String year
+SpecTag:fails::Time.utc coerces the year with #to_int
+SpecTag:fails::Time.utc handles a String month given as a numeral
+SpecTag:fails::Time.utc handles a String month given as a short month name
+SpecTag:fails::Time.utc coerces the month with #to_str
+SpecTag:fails::Time.utc coerces the month with #to_int
+SpecTag:fails::Time.utc handles a String day
+SpecTag:fails::Time.utc coerces the day with #to_int
+SpecTag:fails::Time.utc handles a String hour
+SpecTag:fails::Time.utc coerces the hour with #to_int
+SpecTag:fails::Time.utc handles a String minute
+SpecTag:fails::Time.utc coerces the minute with #to_int
+SpecTag:fails::Time.utc handles a String second
+SpecTag:fails::Time.utc coerces the second with #to_int
+SpecTag:fails::Time.utc interprets all numerals as base 10
+SpecTag:fails::Time.utc ignores fractional seconds as a Float
+SpecTag:fails::Time.utc handles fractional seconds as a Float
+SpecTag:fails::Time.utc handles fractional seconds as a Rational
+SpecTag:fails::Time.utc accepts various year ranges
+SpecTag:fails::Time.utc handles string arguments
+SpecTag:fails::Time.utc handles float arguments
+SpecTag:fails::Time.utc raises an ArgumentError for out of range values
+SpecTag:fails::Time.utc handles microseconds
+SpecTag:fails::Time.utc ignores fractional microseconds as a Float
+SpecTag:fails::Time.utc handles fractional microseconds as a Float
+SpecTag:fails::Time.utc handles fractional microseconds as a Rational
+SpecTag:fails::Time.utc ignores fractional seconds if a passed whole number of microseconds
+SpecTag:fails::Time.utc ignores fractional seconds if a passed fractional number of microseconds
+SpecTag:fails::Time#utc returns the utc representation of time
+FileTag:fails

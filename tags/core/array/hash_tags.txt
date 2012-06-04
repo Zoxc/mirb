@@ -1,0 +1,8 @@
+SpecTag:fails::Array#hash returns the same fixnum for arrays with the same content
+SpecTag:fails::Array#hash properly handles recursive arrays
+SpecTag:fails::Array#hash returns the same hash for equal recursive arrays
+SpecTag:fails::Array#hash returns the same hash for equal recursive arrays through hashes
+SpecTag:fails::Array#hash calls to_int on result of calling hash on each element
+SpecTag:fails::Array#hash ignores array class differences
+SpecTag:fails::Array#hash returns same hash code for arrays with the same content
+SpecTag:fails::Array#hash returns the same value if arrays are #eql?

@@ -1,0 +1,7 @@
+SpecTag:fails::Regexp#=~ returns nil if there is no match
+SpecTag:fails::Regexp#=~ returns nil if the object is nil
+SpecTag:fails::Regexp#match returns nil if there is no match
+SpecTag:fails::Regexp#match returns nil if the object is nil
+SpecTag:fails::Regexp#~ matches against the contents of $_
+SpecTag:fails::Regexp#match on a successful match returns a MatchData object
+SpecTag:fails::Regexp#match on a successful match resets $~ if passed nil

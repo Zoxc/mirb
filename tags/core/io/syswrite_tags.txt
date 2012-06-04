@@ -1,0 +1,13 @@
+SpecTag:fails::IO#syswrite on a file writes all of the string's bytes but does not buffer them
+SpecTag:fails::IO#syswrite on a file warns if called immediately after a buffered IO#write
+SpecTag:fails::IO#syswrite on a file does not warn if called after IO#write with intervening IO#sysread
+SpecTag:fails::IO#syswrite on a file writes to the actual file position when called after buffered IO#read
+SpecTag:fails::IO#syswrite coerces the argument to a string using to_s
+SpecTag:fails::IO#syswrite checks if the file is writable if writing more than zero bytes
+SpecTag:fails::IO#syswrite returns the number of bytes written
+SpecTag:fails::IO#syswrite invokes to_s on non-String argument
+SpecTag:fails::IO#syswrite writes all of the string's bytes without buffering if mode is sync
+SpecTag:fails::IO#syswrite does not warn if called after IO#read
+SpecTag:fails::IO#syswrite writes to the current position after IO#read
+SpecTag:fails::IO#syswrite advances the file position by the count of given bytes
+SpecTag:fails::IO#syswrite raises IOError on closed stream

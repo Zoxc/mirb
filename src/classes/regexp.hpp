@@ -15,7 +15,6 @@ namespace Mirb
 			static value_t source(Regexp *obj);
 			static value_t escape(String *str);
 			static value_t rb_initialize(Regexp *obj, value_t pattern);
-			static value_t rb_allocate(Class *instance_of);
 			static value_t rb_match(Regexp *obj, String *string);
 			static value_t rb_pattern(Regexp *self, String *str);
 			static value_t case_equal(Regexp *self, value_t other);

@@ -1,0 +1,4 @@
+SpecTag:fails::Class#allocate returns an instance of self
+SpecTag:fails::Class#allocate returns a fully-formed instance of Module
+SpecTag:fails::Class#allocate does not call initialize on the new instance
+SpecTag:fails::Class#allocate raises TypeError for #superclass

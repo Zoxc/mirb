@@ -1,0 +1,4 @@
+SpecTag:fails::Enumerable#select returns all elements for which the block is not false
+SpecTag:fails::Enumerable#select returns an enumerator when no block given
+SpecTag:fails::Enumerable#select passes through the values yielded by #each_with_index
+SpecTag:fails::Enumerable#select gathers whole arrays as elements when each yields multiple

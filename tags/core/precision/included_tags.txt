@@ -1,0 +1,2 @@
+SpecTag:fails::Precision.included raises a TypeError when a class mixed with Precision does not specify induced_from
+SpecTag:fails::Precision.included doesn't raise a TypeError when a class mixed with Precision specifies induced_from

@@ -1,0 +1,2 @@
+SpecTag:fails::File.grpowned? returns false if the file exist
+SpecTag:fails::File.grpowned? returns false if file the does not exist

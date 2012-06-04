@@ -1,0 +1,3 @@
+SpecTag:fails::Regexp#eql? is true if self and other have the same pattern
+SpecTag:fails::Regexp#eql? is true if self and other have the same character set code
+SpecTag:fails::Regexp#eql? is true if other has the same #casefold? values

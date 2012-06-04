@@ -1,0 +1,3 @@
+SpecTag:fails::IO#lines returns an Enumerator
+SpecTag:fails::IO#lines returns a line when accessed
+SpecTag:fails::IO#lines yields each line to the passed block

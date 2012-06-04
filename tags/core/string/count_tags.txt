@@ -1,0 +1,7 @@
+SpecTag:fails::String#count counts occurrences of chars from the intersection of the specified sets
+SpecTag:fails::String#count raises an ArgumentError when given no arguments
+SpecTag:fails::String#count negates sets starting with ^
+SpecTag:fails::String#count counts all chars in a sequence
+SpecTag:fails::String#count raises if the given sequences are invalid
+SpecTag:fails::String#count calls #to_str to convert each set arg to a String
+SpecTag:fails::String#count raises a TypeError when a set arg can't be converted to a string

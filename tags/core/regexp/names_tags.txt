@@ -1,0 +1,6 @@
+SpecTag:fails::Regexp#names returns an Array
+SpecTag:fails::Regexp#names returns an empty Array if there are no named captures
+SpecTag:fails::Regexp#names returns each named capture as a String
+SpecTag:fails::Regexp#names returns all of the named captures
+SpecTag:fails::Regexp#names works with nested named captures
+SpecTag:fails::Regexp#names returns each capture name only once

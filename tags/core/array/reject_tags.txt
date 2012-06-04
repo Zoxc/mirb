@@ -1,0 +1,11 @@
+SpecTag:fails::Array#reject returns a new array without elements for which block is true
+SpecTag:fails::Array#reject properly handles recursive arrays
+SpecTag:fails::Array#reject returns subclass instance on Array subclasses
+SpecTag:fails::Array#reject returns an Enumerator if no block given
+SpecTag:fails::Array#reject! removes elements for which block is true
+SpecTag:fails::Array#reject! properly handles recursive arrays
+SpecTag:fails::Array#reject! returns nil when called on an Array emptied with #shift
+SpecTag:fails::Array#reject! returns nil if no changes are made
+SpecTag:fails::Array#reject! raises a RuntimeError on a frozen array
+SpecTag:fails::Array#reject! raises a RuntimeError on an empty frozen array
+SpecTag:fails::Array#reject! returns an Enumerator if no block given

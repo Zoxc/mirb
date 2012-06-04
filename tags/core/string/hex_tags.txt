@@ -1,0 +1,7 @@
+SpecTag:fails::String#hex treats leading characters of self as a string of hex digits
+SpecTag:fails::String#hex does not accept a sequence of underscores as part of a number
+SpecTag:fails::String#hex takes an optional sign
+SpecTag:fails::String#hex takes an optional 0x
+SpecTag:fails::String#hex requires that the sign is in front of the 0x if present
+SpecTag:fails::String#hex returns 0 on error
+SpecTag:fails::String#hex returns 0 if sequence begins with underscore

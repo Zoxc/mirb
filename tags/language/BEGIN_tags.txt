@@ -1,0 +1,6 @@
+SpecTag:fails::The BEGIN keyword runs in a new isolated scope
+SpecTag:fails::The BEGIN keyword does not access variables outside the eval scope
+SpecTag:fails::The BEGIN keyword runs in a shared scope
+SpecTag:fails::The BEGIN keyword accesses variables outside the eval scope
+SpecTag:fails::The BEGIN keyword runs first in a given code unit
+SpecTag:fails::The BEGIN keyword runs multiple begins in FIFO order

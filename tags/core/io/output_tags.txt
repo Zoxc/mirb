@@ -1,0 +1,3 @@
+SpecTag:fails::IO#<< writes an object to the IO stream
+SpecTag:fails::IO#<< calls #to_s on the object to print it
+SpecTag:fails::IO#<< raises an error if the stream is closed

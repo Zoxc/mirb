@@ -1,0 +1,2 @@
+SpecTag:fails::IO includes File\003A\003AConstants
+SpecTag:fails::IO includes Enumerable

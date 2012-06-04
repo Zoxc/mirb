@@ -1,0 +1,25 @@
+FileTag:fails
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'I' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'I' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'I' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'I' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'I' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'I' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 'I' raises a TypeError when passed a String
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'i' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'i' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'i' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'i' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'i' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'i' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 'i' raises a TypeError when passed a String

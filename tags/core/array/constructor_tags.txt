@@ -1,0 +1,2 @@
+SpecTag:fails::Array.[] returns a new array populated with the given elements
+SpecTag:fails::Array[] is a synonym for .[]

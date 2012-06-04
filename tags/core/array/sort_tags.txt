@@ -1,0 +1,28 @@
+SpecTag:fails::Array#sort does not affect the original Array
+SpecTag:fails::Array#sort sorts already-sorted Arrays
+SpecTag:fails::Array#sort sorts reverse-sorted Arrays
+SpecTag:fails::Array#sort properly handles recursive arrays
+SpecTag:fails::Array#sort uses #<=> of elements in order to sort
+SpecTag:fails::Array#sort may take a block which is used to determine the order of objects a and b described as -1, 0 or +1
+SpecTag:fails::Array#sort raises an error when a given block returns nil
+SpecTag:fails::Array#sort does not call #<=> on contained objects when invoked with a block
+SpecTag:fails::Array#sort does not call #<=> on elements when invoked with a block even if Array is large (Rubinius #412)
+SpecTag:fails::Array#sort does not freezes self during being sorted
+SpecTag:fails::Array#sort returns the specified value when it would break in the given block
+SpecTag:fails::Array#sort uses the sign of Bignum block results as the sort result
+SpecTag:fails::Array#sort compares values returned by block with 0
+SpecTag:fails::Array#sort raises an error if objects can't be compared
+SpecTag:fails::Array#sort handles a large array that has been pruned
+SpecTag:fails::Array#sort returns subclass instance on Array subclasses
+SpecTag:fails::Array#sort! sorts array in place using <=>
+SpecTag:fails::Array#sort! sorts array in place using block value if a block given
+SpecTag:fails::Array#sort! returns self if the order of elements changed
+SpecTag:fails::Array#sort! returns self even if makes no modification
+SpecTag:fails::Array#sort! properly handles recursive arrays
+SpecTag:fails::Array#sort! uses #<=> of elements in order to sort
+SpecTag:fails::Array#sort! does not call #<=> on contained objects when invoked with a block
+SpecTag:fails::Array#sort! does not call #<=> on elements when invoked with a block even if Array is large (Rubinius #412)
+SpecTag:fails::Array#sort! completes when supplied a block that always returns the same result
+SpecTag:fails::Array#sort! raises a RuntimeError on a frozen array
+SpecTag:fails::Array#sort! returns the specified value when it would break in the given block
+SpecTag:fails::Array#sort! makes some modification even if finished sorting when it would break in the given block

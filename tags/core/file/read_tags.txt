@@ -1,0 +1,1 @@
+SpecTag:fails::File.read raises a Errno\003A\003AEACCES when passed a path that is a directory

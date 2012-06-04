@@ -1,0 +1,3 @@
+SpecTag:fails::Class.inherited is invoked with the child Class when self is subclassed
+SpecTag:fails::Class.inherited is called by super from a method provided by an included module
+SpecTag:fails::Class.inherited is called by super even when marked as a private class method

@@ -1,0 +1,3 @@
+SpecTag:fails::Struct#hash returns the same fixnum for structs with the same content
+SpecTag:fails::Struct#hash returns the same value if structs are #eql?
+SpecTag:fails::Struct#hash returns the same hash for recursive structs

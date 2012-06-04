@@ -1,0 +1,3 @@
+SpecTag:fails::IO\003A\003ASEEK_SET is defined
+SpecTag:fails::IO\003A\003ASEEK_CUR is defined
+SpecTag:fails::IO\003A\003ASEEK_END is defined

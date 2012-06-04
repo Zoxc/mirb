@@ -1,0 +1,14 @@
+SpecTag:fails::IO#write on a file writes all of the string's bytes but buffers them
+SpecTag:fails::IO#write on a file does not check if the file is writable if writing zero bytes
+SpecTag:fails::IO#write on a file returns a length of 0 when writing a blank string
+SpecTag:fails::IO#write coerces the argument to a string using to_s
+SpecTag:fails::IO#write checks if the file is writable if writing more than zero bytes
+SpecTag:fails::IO#write returns the number of bytes written
+SpecTag:fails::IO#write invokes to_s on non-String argument
+SpecTag:fails::IO#write writes all of the string's bytes without buffering if mode is sync
+SpecTag:fails::IO#write does not warn if called after IO#read
+SpecTag:fails::IO#write writes to the current position after IO#read
+SpecTag:fails::IO#write advances the file position by the count of given bytes
+SpecTag:fails::IO#write raises IOError on closed stream
+SpecTag:fails::IO#write on Windows normalizes line endings in text mode
+SpecTag:fails::IO#write on Windows does not normalize line endings in binary mode

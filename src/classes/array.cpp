@@ -4,7 +4,7 @@
 #include "range.hpp"
 #include "../recursion-detector.hpp"
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 
 namespace Mirb
 {
@@ -53,14 +53,9 @@ namespace Mirb
 	
 	Array *Array::allocate()
 	{
-		return Collector::allocate<Array>(context->array_class);
+		return new (collector) Array(context->array_class);
 	}
 
-	value_t Array::rb_allocate(Class *instance_of)
-	{
-		return Collector::allocate<Array>(instance_of);
-	}
-	
 	value_t Array::shift(Array *self)
 	{
 		if(self->vector.size())
@@ -327,7 +322,7 @@ namespace Mirb
 
 			length = std::min((size_t)length, self->vector.size() - start);
 
-			auto result = Collector::allocate<Array>();
+			auto result = Array::allocate();
 			
 			result->vector.push_entries(&self->vector[start], length);
 
@@ -352,7 +347,7 @@ namespace Mirb
 
 			range->convert_to_index(start, length, self->vector.size());
 
-			auto result = Collector::allocate<Array>();
+			auto result = Array::allocate();
 
 			result->vector.push_entries(&self->vector[start], length);
 
@@ -439,9 +434,9 @@ namespace Mirb
 	
 	value_t Array::reject(Array *self, value_t block)
 	{
-		OnStack<1> os(block);
-
 		auto result = Array::dup(self);
+		
+		OnStack<2> os(result, block);
 
 		delete_if(result, [&](value_t &value) {
 			return yield(block, value)->test();
@@ -515,6 +510,8 @@ namespace Mirb
 	{
 		context->array_class = define_class("Array", context->object_class);
 		
+		internal_allocator<Array, &Context::array_class>();
+		
 		include_module(context->array_class, context->enumerable_module);
 		
 		method<Self<Array>, Array, &concat>(context->array_class, "concat");
@@ -526,8 +523,6 @@ namespace Mirb
 		method<Self<Array>, Arg::Block, &reject_ex>(context->array_class, "reject!");
 		method<Self<Array>, Arg::Block, &reject_ex>(context->array_class, "delete_if");
 
-		singleton_method<Self<Class>, &rb_allocate>(context->array_class, "allocate");
-		
 		method<Self<Array>, &rb_sort>(context->array_class, "sort");
 		
 		method<Self<Array>, &rb_clear>(context->array_class, "clear");

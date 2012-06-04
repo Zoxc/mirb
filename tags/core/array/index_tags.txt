@@ -1,0 +1,6 @@
+SpecTag:fails::Array#index returns the index of the first element == to object
+SpecTag:fails::Array#index returns 0 if first element == to object
+SpecTag:fails::Array#index returns size-1 if only last element == to object
+SpecTag:fails::Array#index returns nil if no element == to object
+SpecTag:fails::Array#index accepts a block instead of an argument
+SpecTag:fails::Array#index ignore the block if there is an argument

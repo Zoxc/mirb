@@ -1,0 +1,2 @@
+SpecTag:fails::Float#hash is provided
+SpecTag:fails::Float#hash is stable

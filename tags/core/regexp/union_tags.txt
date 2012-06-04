@@ -1,0 +1,6 @@
+SpecTag:fails::Regexp.union returns /(?!)/ when passed no arguments
+SpecTag:fails::Regexp.union returns a regular expression that will match passed arguments
+SpecTag:fails::Regexp.union quotes any string arguments
+SpecTag:fails::Regexp.union raises ArgumentError if the kcodes conflict
+SpecTag:fails::Regexp.union uses to_str to convert arguments (if not Regexp)
+SpecTag:fails::Regexp.union accepts a single array of patterns as arguments

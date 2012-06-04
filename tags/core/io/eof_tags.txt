@@ -1,0 +1,14 @@
+SpecTag:fails::IO#eof? returns true on an empty stream that has just been opened
+SpecTag:fails::IO#eof? raises IOError on stream not opened for reading
+SpecTag:fails::IO#eof? returns false when not at end of file
+SpecTag:fails::IO#eof? returns true after reading with read with no parameters
+SpecTag:fails::IO#eof? returns true after reading with read
+SpecTag:fails::IO#eof? returns true after reading with sysread
+SpecTag:fails::IO#eof? returns true after reading with readlines
+SpecTag:fails::IO#eof? returns false on just opened non-empty stream
+SpecTag:fails::IO#eof? does not consume the data from the stream
+SpecTag:fails::IO#eof? raises IOError on closed stream
+SpecTag:fails::IO#eof? raises IOError on stream closed for reading by close_read
+SpecTag:fails::IO#eof? returns true on one-byte stream after single-byte read
+SpecTag:fails::IO#eof? returns true on receiving side of Pipe when writing side is closed
+SpecTag:fails::IO#eof? returns false on receiving side of Pipe when writing side wrote some data

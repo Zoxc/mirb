@@ -1,0 +1,5 @@
+SpecTag:fails::Numeric#polar returns a two-element Array
+SpecTag:fails::Numeric#polar sets the first value to the absolute value of self
+SpecTag:fails::Numeric#polar sets the last value to 0 if self is positive
+SpecTag:fails::Numeric#polar sets the last value to Pi if self is negative
+SpecTag:fails::Numeric#polar returns [NaN, NaN] if self is NaN

@@ -1,0 +1,4 @@
+SpecTag:fails::Regexp#inspect returns a formatted string that would eval to the same regexp
+SpecTag:fails::Regexp#inspect correctly escapes forward slashes /
+SpecTag:fails::Regexp#inspect escapes 2 slashes in a row properly
+SpecTag:fails::Regexp#inspect does not over escape

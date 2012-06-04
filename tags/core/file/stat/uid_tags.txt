@@ -1,0 +1,1 @@
+SpecTag:fails::File\003A\003AStat#uid returns the owner attribute of a File\003A\003AStat object

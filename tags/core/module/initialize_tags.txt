@@ -1,0 +1,2 @@
+SpecTag:fails::Module#initialize accepts a block
+SpecTag:fails::Module#initialize is called on subclasses

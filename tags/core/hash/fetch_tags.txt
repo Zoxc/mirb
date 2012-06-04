@@ -1,0 +1,6 @@
+SpecTag:fails::Hash#fetch returns the value for key
+SpecTag:fails::Hash#fetch raises an KeyError if key is not found
+SpecTag:fails::Hash#fetch returns default if key is not found when passed a default
+SpecTag:fails::Hash#fetch returns value of block if key is not found when passed a block
+SpecTag:fails::Hash#fetch gives precedence to the default block over the default argument when passed both
+SpecTag:fails::Hash#fetch raises an ArgumentError when not passed one or two arguments

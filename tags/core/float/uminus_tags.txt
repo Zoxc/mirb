@@ -1,0 +1,5 @@
+SpecTag:fails::Float#-@ negates self
+SpecTag:fails::Float#-@ negates self at Float boundaries
+SpecTag:fails::Float#-@ returns negative infinity for positive infinity
+SpecTag:fails::Float#-@ returns positive infinity for negative infinity
+SpecTag:fails::Float#-@ returns NaN for NaN

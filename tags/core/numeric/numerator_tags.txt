@@ -1,0 +1,2 @@
+SpecTag:fails::Numeric#numerator converts self to a Rational object then returns its numerator
+SpecTag:fails::Numeric#numerator works with Numeric subclasses

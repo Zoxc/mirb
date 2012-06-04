@@ -1,0 +1,60 @@
+SpecTag:fails::Predefined global $~ is set to contain the MatchData object of the last match if successful
+SpecTag:fails::Predefined global $~ is set to nil if the last match was unsuccessful
+SpecTag:fails::Predefined global $~ is set at the method-scoped level rather than block-scoped
+SpecTag:fails::Predefined global $~ raises an error if assigned an object not nil or instanceof MatchData
+SpecTag:fails::Predefined global $& is equivalent to MatchData#[0] on the last match $~
+SpecTag:fails::Predefined global $` is equivalent to MatchData#pre_match on the last match $~
+SpecTag:fails::Predefined global $' is equivalent to MatchData#post_match on the last match $~
+SpecTag:fails::Predefined global $+ is equivalent to $~.captures.last
+SpecTag:fails::Predefined globals $1..N are equivalent to $~[N]
+SpecTag:fails::Predefined global $stdout is the same as $DEFAULT_OUTPUT from 'English' library
+SpecTag:fails::Predefined global $stdout raises TypeError error if assigned to nil
+SpecTag:fails::Predefined global $stdout raises TypeError error if assigned to object that doesn't respond to #write
+SpecTag:fails::Predefined global $! remains nil after a failed core class "checked" coercion against a class that defines method_missing
+SpecTag:fails::Predefined global $, raises TypeError if assigned a non-String
+SpecTag:fails::Predefined global $_ is set to the last line read by e.g. StringIO#gets
+SpecTag:fails::Predefined global $_ is set at the method-scoped level rather than block-scoped
+SpecTag:fails::Execution variable $\003A does not include '.' when the taint check level > 1
+SpecTag:fails::Global variable $" is an alias for $LOADED_FEATURES
+SpecTag:fails::Global variable $" is read-only
+SpecTag:fails::Global variable $< is read-only
+SpecTag:fails::Global variable $FILENAME is read-only
+SpecTag:fails::Global variable $? is read-only
+SpecTag:fails::Global variable $-a is read-only
+SpecTag:fails::Global variable $-l is read-only
+SpecTag:fails::Global variable $-p is read-only
+SpecTag:fails::Global variable $-d is an alias of $DEBUG
+SpecTag:fails::Global variable $-v is an alias of $VERBOSE
+SpecTag:fails::Global variable $-w is an alias of $VERBOSE
+SpecTag:fails::The predefined standard objects includes ARGF
+SpecTag:fails::The predefined global constants includes RUBY_RELEASE_DATE
+SpecTag:fails::The predefined global constants includes TOPLEVEL_BINDING
+SpecTag:fails::Processing RUBYOPT adds the -I path to $LOAD_PATH
+SpecTag:fails::Processing RUBYOPT sets $DEBUG to true for '-d'
+SpecTag:fails::Processing RUBYOPT prints the version number for '-v'
+SpecTag:fails::Processing RUBYOPT sets $VERBOSE to true for '-w'
+SpecTag:fails::Processing RUBYOPT sets $VERBOSE to true for '-W'
+SpecTag:fails::Processing RUBYOPT sets $VERBOSE to nil for '-W0'
+SpecTag:fails::Processing RUBYOPT sets $VERBOSE to false for '-W1'
+SpecTag:fails::Processing RUBYOPT sets $VERBOSE to true for '-W2'
+SpecTag:fails::Processing RUBYOPT requires the file for '-r'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-a'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-p'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-n'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-y'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-c'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-s'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-h'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '--help'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-l'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-S'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-e'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-i'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-x'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-C'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-X'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-F'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '-0'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '--copyright'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '--version'
+SpecTag:fails::Processing RUBYOPT raises a RuntimeError for '--yydebug'

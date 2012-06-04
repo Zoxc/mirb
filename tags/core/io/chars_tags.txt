@@ -1,0 +1,5 @@
+SpecTag:fails::IO#chars returns an enumerator of the next chars from the stream
+SpecTag:fails::IO#chars yields each character
+SpecTag:fails::IO#chars returns an enumerator for a closed stream
+SpecTag:fails::IO#chars raises an IOError when an enumerator created on a closed stream is accessed
+SpecTag:fails::IO#chars raises an IOError when the stream for the enumerator is closed

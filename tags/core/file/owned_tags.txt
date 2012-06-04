@@ -1,0 +1,2 @@
+SpecTag:fails::File.owned? returns false if file does not exist
+SpecTag:fails::File.owned? returns true if the file exist and is owned by the user

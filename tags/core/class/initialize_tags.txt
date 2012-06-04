@@ -1,0 +1,3 @@
+SpecTag:fails::Class#initialize is private
+SpecTag:fails::Class#initialize raises a TypeError when called on already initialized classes
+SpecTag:fails::Class#initialize raises a TypeError when called on BasicObject

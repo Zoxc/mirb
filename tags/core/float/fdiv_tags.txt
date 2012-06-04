@@ -1,0 +1,13 @@
+SpecTag:fails::Float#fdiv performs floating-point division between self and a Fixnum
+SpecTag:fails::Float#fdiv performs floating-point division between self and a Bignum
+SpecTag:fails::Float#fdiv performs floating-point division between self and a Float
+SpecTag:fails::Float#fdiv returns NaN when the argument is NaN
+SpecTag:fails::Float#fdiv returns Infinity when the argument is 0.0
+SpecTag:fails::Float#fdiv returns -Infinity when the argument is 0.0 and self is negative
+SpecTag:fails::Float#fdiv returns Infinity when the argument is 0
+SpecTag:fails::Float#fdiv returns -Infinity when the argument is 0 and self is negative
+SpecTag:fails::Float#fdiv returns 0.0 when the argument is Infinity
+SpecTag:fails::Float#fdiv returns -0.0 when the argument is -Infinity
+SpecTag:fails::Float#fdiv performs floating-point division between self and a Rational
+SpecTag:fails::Float#fdiv performs floating-point division between self and a Complex
+SpecTag:fails::Float#fdiv raises an ArgumentError when passed multiple arguments

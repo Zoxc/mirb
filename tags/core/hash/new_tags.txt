@@ -1,0 +1,5 @@
+SpecTag:fails::Hash.new creates an empty Hash if passed no arguments
+SpecTag:fails::Hash.new creates a new Hash with default object if passed a default argument 
+SpecTag:fails::Hash.new does not create a copy of the default argument
+SpecTag:fails::Hash.new creates a Hash with a default_proc if passed a block
+SpecTag:fails::Hash.new raises an ArgumentError if passed both default argument and default block

@@ -1,0 +1,19 @@
+SpecTag:fails::The break statement in a captured block when the invocation of the scope creating the block is still active raises a LocalJumpError when invoking the block from the scope creating the block
+SpecTag:fails::The break statement in a captured block when the invocation of the scope creating the block is still active raises a LocalJumpError when invoking the block from a method
+SpecTag:fails::The break statement in a captured block when the invocation of the scope creating the block is still active raises a LocalJumpError when yielding to the block
+SpecTag:fails::The break statement in a lambda when the invocation of the scope creating the lambda is still active returns a value to the method scope below invoking the lambda
+SpecTag:fails::The break statement in a lambda when the invocation of the scope creating the lambda is still active returns a value to a block scope invoking the lambda in a method below
+SpecTag:fails::The break statement in a lambda when the invocation of the scope creating the lambda is still active raises a LocalJumpError when yielding to a lambda passed as a block argument
+SpecTag:fails::The break statement in a lambda created at the toplevel returns a value when invoking from the toplevel
+SpecTag:fails::The break statement in a lambda created at the toplevel returns a value when invoking from a method
+SpecTag:fails::The break statement in a lambda created at the toplevel returns a value when invoking from a block
+SpecTag:fails::The break statement in a lambda from a scope that has returned returns a value to the method scope invoking the lambda
+SpecTag:fails::The break statement in a lambda from a scope that has returned returns a value to the block scope invoking the lambda in a method
+SpecTag:fails::Break inside a while loop with a value exits the loop and returns the value
+SpecTag:fails::Break inside a while loop with a splat exits the loop and makes the splat an Array
+SpecTag:fails::Break inside a while loop with a splat treats nil as an empty array
+SpecTag:fails::Break inside a while loop with a splat preserves an array as is
+SpecTag:fails::Break inside a while loop with a splat wraps a non-Array in an Array
+SpecTag:fails::Executing break from within a block returns from the original invoking method even in case of chained calls
+SpecTag:fails::Executing break from within a block runs ensures when continuing upward
+SpecTag:fails::Executing break from within a block doesn't run ensures in the destination method

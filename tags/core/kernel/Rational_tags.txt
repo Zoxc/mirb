@@ -1,0 +1,13 @@
+FileTag:fails
+SpecTag:fails::Kernel.Rational raises a TypeError if the first argument is nil
+SpecTag:fails::Kernel.Rational raises a TypeError if the second argument is nil
+SpecTag:fails::Kernel.Rational raises a TypeError if the first argument is a Symbol
+SpecTag:fails::Kernel.Rational raises a TypeError if the second argument is a Symbol
+SpecTag:fails::Kernel.Rational passed two integers returns a new Rational number
+SpecTag:fails::Kernel.Rational passed two integers reduces the Rational
+SpecTag:fails::Kernel.Rational when passed a String converts the String to a Rational using the same method as String#to_r
+SpecTag:fails::Kernel.Rational when passed a String scales the Rational value of the first argument by the Rational value of the second
+SpecTag:fails::Kernel.Rational when passed a String does not use the same method as Float#to_r
+SpecTag:fails::Kernel.Rational when passed a Numeric calls #to_r to convert the first argument to a Rational
+SpecTag:fails::Kernel.Rational when passed a Complex returns a Rational from the real part if the imaginary part is 0
+SpecTag:fails::Kernel.Rational when passed a Complex raises a RangeError if the imaginary part is not 0

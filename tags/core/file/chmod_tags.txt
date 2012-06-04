@@ -1,0 +1,13 @@
+SpecTag:fails::File#chmod returns 0 if successful
+SpecTag:fails::File#chmod always succeeds with any numeric values
+SpecTag:fails::File#chmod invokes to_int on non-integer argument
+SpecTag:fails::File#chmod with '0444' makes file readable and executable but not writable
+SpecTag:fails::File#chmod with '0644' makes file readable and writable and also executable
+SpecTag:fails::File.chmod returns the number of files modified
+SpecTag:fails::File.chmod always succeeds with any numeric values
+SpecTag:fails::File.chmod accepts an object that has a #to_path method
+SpecTag:fails::File.chmod throws a TypeError if the given path is not coercable into a string
+SpecTag:fails::File.chmod invokes to_int on non-integer argument
+SpecTag:fails::File.chmod invokes to_str on non-string file names
+SpecTag:fails::File.chmod with '0444' makes file readable and executable but not writable
+SpecTag:fails::File.chmod with '0644' makes file readable and writable and also executable

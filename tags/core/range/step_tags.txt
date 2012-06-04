@@ -1,0 +1,44 @@
+SpecTag:fails::Range#step returns an enumerator when no block is given
+SpecTag:fails::Range#step returns self
+SpecTag:fails::Range#step raises TypeError if step 
+SpecTag:fails::Range#step calls #to_int to coerce step to an Integer
+SpecTag:fails::Range#step raises a TypeError if step does not respond to #to_int
+SpecTag:fails::Range#step raises a TypeError if #to_int does not return an Integer
+SpecTag:fails::Range#step coerces the argument to integer by invoking to_int
+SpecTag:fails::Range#step raises a TypeError if the first element does not respond to #succ
+SpecTag:fails::Range#step raises an ArgumentError if step is 0
+SpecTag:fails::Range#step raises an ArgumentError if step is 0.0
+SpecTag:fails::Range#step raises an ArgumentError if step is negative
+SpecTag:fails::Range#step with inclusive end and Integer values yields Integer values incremented by 1 and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with inclusive end and Integer values yields Integer values incremented by an Integer step
+SpecTag:fails::Range#step with inclusive end and Integer values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with inclusive end and Float values yields Float values incremented by 1 and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with inclusive end and Float values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with inclusive end and Float values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with inclusive end and Float values returns Float values of 'step * n + begin <= end'
+SpecTag:fails::Range#step with inclusive end and Integer, Float values yields Float values incremented by 1 and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with inclusive end and Integer, Float values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with inclusive end and Integer, Float values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with inclusive end and Float, Integer values yields Float values incremented by 1 and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with inclusive end and Float, Integer values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with inclusive end and Float, Integer values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with inclusive end and String values yields String values incremented by #succ and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with inclusive end and String values yields String values incremented by #succ called Integer step times
+SpecTag:fails::Range#step with inclusive end and String values raises a TypeError when passed a Float step
+SpecTag:fails::Range#step with inclusive end and String values calls #succ on begin and each element returned by #succ
+SpecTag:fails::Range#step with exclusive end and Integer values yields Integer values incremented by 1 and less than end when not passed a step
+SpecTag:fails::Range#step with exclusive end and Integer values yields Integer values incremented by an Integer step
+SpecTag:fails::Range#step with exclusive end and Integer values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with exclusive end and Float values yields Float values incremented by 1 and less than end when not passed a step
+SpecTag:fails::Range#step with exclusive end and Float values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with exclusive end and Float values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with exclusive end and Float values returns Float values of 'step * n + begin < end'
+SpecTag:fails::Range#step with exclusive end and Integer, Float values yields Float values incremented by 1 and less than end when not passed a step
+SpecTag:fails::Range#step with exclusive end and Integer, Float values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with exclusive end and Integer, Float values yields an Float and then Float values incremented by a Float step
+SpecTag:fails::Range#step with exclusive end and Float, Integer values yields Float values incremented by 1 and less than end when not passed a step
+SpecTag:fails::Range#step with exclusive end and Float, Integer values yields Float values incremented by an Integer step
+SpecTag:fails::Range#step with exclusive end and Float, Integer values yields Float values incremented by a Float step
+SpecTag:fails::Range#step with exclusive end and String values yields String values incremented by #succ and less than or equal to end when not passed a step
+SpecTag:fails::Range#step with exclusive end and String values yields String values incremented by #succ called Integer step times
+SpecTag:fails::Range#step with exclusive end and String values raises a TypeError when passed a Float step

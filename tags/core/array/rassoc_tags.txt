@@ -1,0 +1,4 @@
+SpecTag:fails::Array#rassoc returns the first contained array whose second element is == object
+SpecTag:fails::Array#rassoc properly handles recursive arrays
+SpecTag:fails::Array#rassoc calls elem == obj on the second element of each contained array
+SpecTag:fails::Array#rassoc does not check the last element in each contained but speficically the second

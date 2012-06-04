@@ -1,5 +1,5 @@
 #include "../runtime.hpp"
-#include "../collector.hpp"
+#include "../internal.hpp"
 #include "../classes.hpp"
 
 namespace Mirb
@@ -23,11 +23,6 @@ namespace Mirb
 	{
 		hash_value = (size_t)hash_number((size_t)this); // Note: The first two bits are constant
 		this->hashed = true;
-	}
-	
-	value_t Object::allocate(Class *instance_of)
-	{
-		return Collector::allocate<Object>(instance_of);
 	}
 	
 	value_t Object::tap(value_t obj, value_t block)
@@ -145,9 +140,9 @@ namespace Mirb
 		return Fixnum::from_size_t(hash_value(obj)); // TODO: Make a proper object_id
 	}
 	
-	value_t Object::kind_of(value_t obj, Class *klass)
+	value_t Object::rb_kind_of(value_t obj, Class *klass)
 	{
-		return Value::from_bool(Mirb::kind_of(klass, obj));
+		return Value::from_bool(obj->kind_of(klass));
 	}
 	
 	value_t Object::respond_to(value_t obj, Symbol *name)
@@ -212,6 +207,8 @@ namespace Mirb
 	
 	void Object::initialize()
 	{
+		internal_allocator<Object, &Context::object_class>();
+		
 		method<Self<Value>, Symbol, Value, &instance_variable_set>(context->object_class, "instance_variable_set");
 		method<Self<Value>, Symbol, &instance_variable_get>(context->object_class, "instance_variable_get");
 
@@ -226,8 +223,8 @@ namespace Mirb
 		method<Self<Value>, &klass>(context->object_class, "class");
 		method<&dummy>(context->object_class, "freeze");
 		method<Self<Value>, Symbol, &respond_to>(context->object_class, "respond_to?");
-		method<Self<Value>, Class, &kind_of>(context->object_class, "is_a?");
-		method<Self<Value>, Class, &kind_of>(context->object_class, "kind_of?");
+		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "is_a?");
+		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "kind_of?");
 		method<&dummy>(context->object_class, "frozen?");
 		method<Value, &pattern>(context->object_class, "=~");
 		method<Value, &initialize_copy>(context->object_class, "initialize_copy");
@@ -243,8 +240,6 @@ namespace Mirb
 		method<Self<Value>, Optional<String>, Arg::Block, &instance_eval>(context->object_class, "instance_eval");
 		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "send");
 		method<Self<Value>, Symbol, Arg::Count, Arg::Values, &rb_send>(context->object_class, "__send__");
-
-		singleton_method<Self<Class>, &allocate>(context->object_class, "allocate");
 	}
 };
 

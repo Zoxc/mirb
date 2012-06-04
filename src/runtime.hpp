@@ -28,7 +28,6 @@ namespace Mirb
 	bool map_index(intptr_t index, size_t size, size_t &result);
 	
 	bool subclass_of(Class *super, Class *c);
-	bool kind_of(Class *klass, value_t obj);
 	Class *internal_class_of(value_t obj) prelude_nonnull(1);
 	bool is_real_class(Class *obj);
 	Class *real_class(Class *obj) prelude_nonnull(1);
@@ -38,9 +37,6 @@ namespace Mirb
 	
 	Class *define_class(value_t under, Symbol *name, Class *super);
 	Module *define_module(value_t under, Symbol *name);
-	
-	Class *define_scoped_class(value_t obj, Symbol *name, Class *super);
-	Module *define_scoped_module(value_t obj, Symbol *name);
 	
 	Class *define_class(const CharArray &name, Class *super);
 	Module *define_module(const CharArray &name);
@@ -59,6 +55,7 @@ namespace Mirb
 	 * inspect_obj (calls Ruby code)
 	 */
 	CharArray inspect(value_t obj);
+	CharArray rescue_inspect(value_t obj);
 
 	/*
 	 * inspect (calls Ruby code)
@@ -69,6 +66,7 @@ namespace Mirb
 	 * pretty_inspect (calls Ruby code)
 	 */
 	CharArray pretty_inspect(value_t obj);
+	CharArray rescue_pretty_inspect(value_t obj);
 	
 	ValueMap *get_vars(value_t obj);
 	
@@ -81,6 +79,11 @@ namespace Mirb
 	value_t get_scoped_const(value_t obj, Symbol *name);
 	value_t get_const(Tuple<Module> *scope, Symbol *name);
 	void set_const(value_t obj, Symbol *name, value_t value);
+	
+	template<typename T> void set_const(value_t obj, T &&name, value_t value)
+	{
+		return set_const(obj, symbol_cast(std::forward<T>(name)), value);
+	}
 	
 	value_t get_var_raw(value_t obj, Symbol *name);
 	value_t get_var(value_t obj, Symbol *name);
@@ -174,7 +177,7 @@ namespace Mirb
 	value_t eval(value_t self, Symbol *method_name, Tuple<Module> *scope, const char_t *input, size_t length, const CharArray &filename, bool free_input = false);
 	
 	Method *lookup_module(Module *module, Symbol *name);
-	Method *lookup_method(Module *module, Symbol *name, value_t obj);
+	Method *lookup_module_method(Module *module, Symbol *name);
 
 	Method *respond_to(value_t obj, Symbol *name);
 	

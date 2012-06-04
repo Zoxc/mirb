@@ -1,0 +1,4 @@
+SpecTag:fails::File.rename renames a file 
+SpecTag:fails::File.rename raises an Errno\003A\003AENOENT if the source does not exist
+SpecTag:fails::File.rename raises an ArgumentError if not passed two arguments
+SpecTag:fails::File.rename raises a TypeError if not passed String types

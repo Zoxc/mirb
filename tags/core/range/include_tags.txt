@@ -1,0 +1,2 @@
+SpecTag:fails::Range#include? returns true if other is an element of self
+SpecTag:fails::Range#include? compares values using <=>

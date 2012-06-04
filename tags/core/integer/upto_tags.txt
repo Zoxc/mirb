@@ -1,0 +1,3 @@
+SpecTag:fails::Integer#upto [stop] when self and stop are Fixnums yields while increasing self until it is greater than floor of a Float endpoint
+SpecTag:fails::Integer#upto [stop] when self and stop are Fixnums raises an ArgumentError for non-numeric endpoints
+SpecTag:fails::Integer#upto [stop] when self and stop are Fixnums returns an Enumerator

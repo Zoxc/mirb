@@ -1,0 +1,8 @@
+SpecTag:fails::File\003A\003AStat.size? returns the size of the file if it exists and is not empty
+SpecTag:fails::File\003A\003AStat.size? accepts a String-like (to_str) parameter
+SpecTag:fails::File\003A\003AStat.size? accepts an object that has a #to_path method
+SpecTag:fails::File\003A\003AStat.size? returns nil if file_name is empty
+SpecTag:fails::File\003A\003AStat.size returns the size of the file if it exists and is not empty
+SpecTag:fails::File\003A\003AStat.size accepts a String-like (to_str) parameter
+SpecTag:fails::File\003A\003AStat.size accepts an object that has a #to_path method
+SpecTag:fails::File\003A\003AStat.size returns 0 if the file is empty

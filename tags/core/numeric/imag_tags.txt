@@ -1,0 +1,2 @@
+SpecTag:fails::Numeric#imag returns 0
+SpecTag:fails::Numeric#imag raises an ArgumentError if given any arguments

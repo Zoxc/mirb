@@ -1,0 +1,8 @@
+SpecTag:fails::Enumerable#min min should return the minimum element
+SpecTag:fails::Enumerable#min return the minimun (basic cases)
+SpecTag:fails::Enumerable#min returns nil for an empty Enumerable 
+SpecTag:fails::Enumerable#min raises a NoMethodError for elements without #<=>
+SpecTag:fails::Enumerable#min raises an ArgumentError for incomparable elements
+SpecTag:fails::Enumerable#min return the minimun when using a block rule
+SpecTag:fails::Enumerable#min returns the minimum for enumerables that contain nils
+SpecTag:fails::Enumerable#min gathers whole arrays as elements when each yields multiple

@@ -1,0 +1,57 @@
+SpecTag:fails::Array#slice! removes and return the element at index
+SpecTag:fails::Array#slice! removes and returns length elements beginning at start
+SpecTag:fails::Array#slice! properly handles recursive arrays
+SpecTag:fails::Array#slice! calls to_int on start and length arguments
+SpecTag:fails::Array#slice! removes and return elements in range
+SpecTag:fails::Array#slice! calls to_int on range arguments
+SpecTag:fails::Array#slice! returns last element for consecutive calls at zero index
+SpecTag:fails::Array#slice! does not expand array with indices out of bounds
+SpecTag:fails::Array#slice! does not expand array with negative indices out of bounds
+SpecTag:fails::Array#slice! raises a RuntimeError on a frozen array
+SpecTag:fails::Array#slice returns the element at index with [index]
+SpecTag:fails::Array#slice returns the element at index from the end of the array with [-index]
+SpecTag:fails::Array#slice return count elements starting from index with [index, count]
+SpecTag:fails::Array#slice returns count elements starting at index from the end of array with [-index, count]
+SpecTag:fails::Array#slice returns the first count elements with [0, count]
+SpecTag:fails::Array#slice returns the subarray which is independent to self with [index,count]
+SpecTag:fails::Array#slice tries to convert the passed argument to an Integer using #to_int
+SpecTag:fails::Array#slice returns the elements specified by Range indexes with [m..n]
+SpecTag:fails::Array#slice returns elements specified by Range indexes except the element at index n with [m...n]
+SpecTag:fails::Array#slice returns elements that exist if range start is in the array but range end is not with [m..n]
+SpecTag:fails::Array#slice accepts Range instances having a negative m and both signs for n with [m..n] and [m...n]
+SpecTag:fails::Array#slice returns the subarray which is independent to self with [m..n]
+SpecTag:fails::Array#slice tries to convert Range elements to Integers using #to_int with [m..n] and [m...n]
+SpecTag:fails::Array#slice returns the same elements as [m..n] and [m...n] with Range subclasses
+SpecTag:fails::Array#slice returns nil for a requested index not in the array with [index]
+SpecTag:fails::Array#slice returns [] if the index is valid but length is zero with [index, length]
+SpecTag:fails::Array#slice returns nil if length is zero but index is invalid with [index, length]
+SpecTag:fails::Array#slice returns [] if index == array.size with [index, length]
+SpecTag:fails::Array#slice returns nil if index > array.size with [index, length]
+SpecTag:fails::Array#slice returns nil if length is negative with [index, length]
+SpecTag:fails::Array#slice returns nil if no requested index is in the array with [m..n]
+SpecTag:fails::Array#slice returns nil if range start is not in the array with [m..n]
+SpecTag:fails::Array#slice returns an empty array when m == n with [m...n]
+SpecTag:fails::Array#slice returns an empty array with [0...0]
+SpecTag:fails::Array#slice returns a subarray where m, n negatives and m < n with [m..n]
+SpecTag:fails::Array#slice returns an array containing the first element with [0..0]
+SpecTag:fails::Array#slice returns the entire array with [0..-1]
+SpecTag:fails::Array#slice returns all but the last element with [0...-1]
+SpecTag:fails::Array#slice returns [3] for [2..-1] out of [1, 2, 3]
+SpecTag:fails::Array#slice returns an empty array when m > n and m, n are positive with [m..n]
+SpecTag:fails::Array#slice returns an empty array when m > n and m, n are negative with [m..n]
+SpecTag:fails::Array#slice does not expand array when the indices are outside of the array bounds
+SpecTag:fails::Array#slice raises a RangeError when the start index is out of range of Fixnum
+SpecTag:fails::Array#slice raises a RangeError when the length is out of range of Fixnum
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [n, m]
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [-n, m]
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [n..m]
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [n...m]
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [-n..-m]
+SpecTag:fails::Array#slice with a subclass of Array returns a subclass instance with [-n...-m]
+SpecTag:fails::Array#slice with a subclass of Array returns an empty array when m == n with [m...n]
+SpecTag:fails::Array#slice with a subclass of Array returns an empty array with [0...0]
+SpecTag:fails::Array#slice with a subclass of Array returns an empty array when m > n and m, n are positive with [m..n]
+SpecTag:fails::Array#slice with a subclass of Array returns an empty array when m > n and m, n are negative with [m..n]
+SpecTag:fails::Array#slice with a subclass of Array returns [] if index == array.size with [index, length]
+SpecTag:fails::Array#slice with a subclass of Array returns [] if the index is valid but length is zero with [index, length]
+SpecTag:fails::Array#slice with a subclass of Array does not call #initialize on the subclass instance

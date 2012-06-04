@@ -1,0 +1,40 @@
+SpecTag:fails::A block taking |a| arguments does not call #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |a, b| arguments assigns one value yielded to the first argument
+SpecTag:fails::A block taking |a, b| arguments assigns 'nil' and 'nil' to the arguments when a single, empty Array is yielded
+SpecTag:fails::A block taking |a, b| arguments assigns the element of a single element Array to the first argument
+SpecTag:fails::A block taking |a, b| arguments destructures a single Array value yielded
+SpecTag:fails::A block taking |a, b| arguments destructures a splatted Array
+SpecTag:fails::A block taking |a, b| arguments calls #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |a, b| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |a, b| arguments does not call #to_ary if the object does not respond to #to_ary
+SpecTag:fails::A block taking |a, b| arguments raises an TypeError if #to_ary does not return an Array
+SpecTag:fails::A block taking |a, *b| arguments assigns 'nil' and '[]' to the arguments when a single, empty Array is yielded
+SpecTag:fails::A block taking |a, *b| arguments assigns the element of a single element Array to the first argument
+SpecTag:fails::A block taking |a, *b| arguments destructures a splatted Array
+SpecTag:fails::A block taking |a, *b| arguments destructures a single Array value assigning the remaining values to the rest argument
+SpecTag:fails::A block taking |a, *b| arguments calls #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |a, *b| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |a, *b| arguments raises an TypeError if #to_ary does not return an Array
+SpecTag:fails::A block taking |*| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |*| arguments does not call #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |*a| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |*a| arguments does not call #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |a, | arguments assigns nil to the argument when passed an empty Array
+SpecTag:fails::A block taking |a, | arguments assigns the argument the first element of the Array when passed a single Array
+SpecTag:fails::A block taking |a, | arguments calls #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |a, | arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |a, | arguments raises an TypeError if #to_ary does not return an Array
+SpecTag:fails::A block taking |(a, b)| arguments calls #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |(a, b)| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |(a, b)| arguments raises an TypeError if #to_ary does not return an Array
+SpecTag:fails::A block taking |(a, b), c| arguments destructures a single one-level Array value yielded
+SpecTag:fails::A block taking |(a, b), c| arguments destructures a single multi-level Array value yielded
+SpecTag:fails::A block taking |(a, b), c| arguments calls #to_ary to convert a single yielded object to an Array
+SpecTag:fails::A block taking |(a, b), c| arguments does not call #to_ary if the single yielded object is an Array
+SpecTag:fails::A block taking |(a, b), c| arguments does not call #to_ary if the object does not respond to #to_ary
+SpecTag:fails::A block taking |(a, b), c| arguments raises an TypeError if #to_ary does not return an Array
+SpecTag:fails::Block-local variables override shadowed variables from the outer scope
+SpecTag:fails::Post-args appear after a splat
+SpecTag:fails::Post-args are required
+SpecTag:fails::Post-args with required args gathers remaining args in the splat
+SpecTag:fails::Post-args with optional args gathers remaining args in the splat

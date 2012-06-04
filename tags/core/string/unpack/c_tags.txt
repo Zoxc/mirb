@@ -1,0 +1,28 @@
+SpecTag:fails::String#unpack with format 'C' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'C' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'C' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'C' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'C' decodes one byte for a single format character
+SpecTag:fails::String#unpack with format 'C' decodes two bytes for two format characters
+SpecTag:fails::String#unpack with format 'C' decodes the number of bytes requested by the count modifier
+SpecTag:fails::String#unpack with format 'C' decodes the remaining bytes when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'C' decodes the remaining bytes when passed the '*' modifer after another directive
+SpecTag:fails::String#unpack with format 'C' decodes zero bytes when no bytes remain and the '*' modifier is passed
+SpecTag:fails::String#unpack with format 'C' adds nil for each element requested beyond the end of the String
+SpecTag:fails::String#unpack with format 'C' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with format 'C' ignores spaces between directives
+SpecTag:fails::String#unpack with format 'C' decodes a byte with most significant bit set as a positive number
+SpecTag:fails::String#unpack with format 'c' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'c' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'c' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'c' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'c' decodes one byte for a single format character
+SpecTag:fails::String#unpack with format 'c' decodes two bytes for two format characters
+SpecTag:fails::String#unpack with format 'c' decodes the number of bytes requested by the count modifier
+SpecTag:fails::String#unpack with format 'c' decodes the remaining bytes when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'c' decodes the remaining bytes when passed the '*' modifer after another directive
+SpecTag:fails::String#unpack with format 'c' decodes zero bytes when no bytes remain and the '*' modifier is passed
+SpecTag:fails::String#unpack with format 'c' adds nil for each element requested beyond the end of the String
+SpecTag:fails::String#unpack with format 'c' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with format 'c' ignores spaces between directives
+SpecTag:fails::String#unpack with format 'c' decodes a byte with most significant bit set as a negative number

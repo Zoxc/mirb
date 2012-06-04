@@ -1,0 +1,9 @@
+SpecTag:fails::IO#putc calls #to_int to convert an object to a Integer
+SpecTag:fails::IO#putc raises IOError on a closed stream
+SpecTag:fails::IO#putc raises an TypeError when passed nil
+SpecTag:fails::IO#putc raises an TypeError when passed false
+SpecTag:fails::IO#putc raises an TypeError when passed true
+SpecTag:fails::IO#putc with a Fixnum argument writes one character as a String
+SpecTag:fails::IO#putc with a Fixnum argument writes the low byte as a String
+SpecTag:fails::IO#putc with a String argument writes one character
+SpecTag:fails::IO#putc with a String argument writes the first character

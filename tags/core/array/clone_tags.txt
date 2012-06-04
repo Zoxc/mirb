@@ -1,0 +1,6 @@
+SpecTag:fails::Array#clone returns an Array or a subclass instance
+SpecTag:fails::Array#clone produces a shallow copy where the references are directly copied
+SpecTag:fails::Array#clone creates a new array containing all elements or the original
+SpecTag:fails::Array#clone copies taint status from the original
+SpecTag:fails::Array#clone copies untrusted status from the original
+SpecTag:fails::Array#clone copies frozen status from the original

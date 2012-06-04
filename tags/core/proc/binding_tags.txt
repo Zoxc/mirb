@@ -1,0 +1,2 @@
+SpecTag:fails::Proc#binding returns a Binding instance
+SpecTag:fails::Proc#binding returns the binding associated with self

@@ -1,0 +1,5 @@
+SpecTag:fails::Fixnum#odd? is false for zero
+SpecTag:fails::Fixnum#odd? is false for even positive Fixnums
+SpecTag:fails::Fixnum#odd? is false for even negative Fixnums
+SpecTag:fails::Fixnum#odd? is true for odd positive Fixnums
+SpecTag:fails::Fixnum#odd? is true for odd negative Fixnums

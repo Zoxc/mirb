@@ -1,0 +1,19 @@
+SpecTag:fails::Operators ! ~ + is right-associative
+SpecTag:fails::Operators ** is right-associative
+SpecTag:fails::Operators ** has higher precedence than unary minus
+SpecTag:fails::Operators unary minus has higher precedence than * / %
+SpecTag:fails::Operators * / % are left-associative
+SpecTag:fails::Operators + - are left-associative
+SpecTag:fails::Operators + - have higher precedence than >> <<
+SpecTag:fails::Operators >> << are left-associative
+SpecTag:fails::Operators >> << have higher precedence than &
+SpecTag:fails::Operators & is left-associative
+SpecTag:fails::Operators & has higher precedence than ^ |
+SpecTag:fails::Operators ^ | are left-associative
+SpecTag:fails::Operators ^ | have higher precedence than <= < > >=
+SpecTag:fails::Operators <= < > >= are left-associative
+SpecTag:fails::Operators <=> == === != =~ !~ are non-associative
+SpecTag:fails::Operators || has higher precedence than .. ...
+SpecTag:fails::Operators .. ... are non-associative
+SpecTag:fails::Operators = %= /= -= += |= &= >>= <<= *= &&= ||= **= are right-associative
+SpecTag:fails::Operators = %= /= -= += |= &= >>= <<= *= &&= ||= **= have higher precedence than defined? operator

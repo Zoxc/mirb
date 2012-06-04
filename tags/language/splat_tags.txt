@@ -1,0 +1,4 @@
+SpecTag:fails::Splat operator used to assign a splatted object to an object assigns an empty array when the splatted object is nil
+SpecTag:fails::Splat operator used to assign a splatted object to an object assigns the returned value of to_a when the splatted object responds to to_a
+SpecTag:fails::Splat operator used to assign a splatted object to an object assigns the object in a new array when it responds to to_a but to_a returns nil
+SpecTag:fails::Splat operator used to assign a splatted object to a splatted reference assigns an empty array when the splatted object is nil

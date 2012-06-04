@@ -1,0 +1,2 @@
+SpecTag:fails::Numeric#imaginary returns 0
+SpecTag:fails::Numeric#imaginary raises an ArgumentError if given any arguments

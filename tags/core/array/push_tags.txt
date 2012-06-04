@@ -1,0 +1,2 @@
+SpecTag:fails::Array#push properly handles recursive arrays
+SpecTag:fails::Array#push raises a RuntimeError on a frozen array

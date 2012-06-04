@@ -1,0 +1,10 @@
+SpecTag:fails::Enumerable#inject with argument takes a block with an accumulator (with argument as initial value) and the current element. Value of block becomes new accumulator
+SpecTag:fails::Enumerable#inject produces an array of the accumulator and the argument when given a block with a *arg
+SpecTag:fails::Enumerable#inject can take two argument
+SpecTag:fails::Enumerable#inject ignores the block if two arguments
+SpecTag:fails::Enumerable#inject can take a symbol argument
+SpecTag:fails::Enumerable#inject without argument takes a block with an accumulator (with first element as initial value) and the current element. Value of block becomes new accumulator
+SpecTag:fails::Enumerable#inject gathers whole arrays as elements when each yields multiple
+SpecTag:fails::Enumerable#inject with inject arguments(legacy rubycon)
+SpecTag:fails::Enumerable#inject without inject arguments(legacy rubycon)
+SpecTag:fails::Enumerable#inject returns nil when fails(legacy rubycon)

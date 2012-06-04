@@ -1,0 +1,5 @@
+SpecTag:fails::Array#delete removes elements that are #== to object
+SpecTag:fails::Array#delete may be given a block that is executed if no element matches object
+SpecTag:fails::Array#delete raises a RuntimeError on a frozen array
+SpecTag:fails::Array#delete keeps tainted status
+SpecTag:fails::Array#delete keeps untrusted status

@@ -1,0 +1,1 @@
+SpecTag:fails::File\003A\003AStat#inspect produces a nicely formatted description of a File\003A\003AStat object

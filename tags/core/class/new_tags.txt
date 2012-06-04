@@ -1,0 +1,12 @@
+SpecTag:fails::Class.new with a block given uses the given block as the class' body
+SpecTag:fails::Class.new with a block given creates a subclass of the given superclass
+SpecTag:fails::Class.new with a block given runs the inherited hook after yielding the block
+SpecTag:fails::Class.new creates a new anonymous class
+SpecTag:fails::Class.new raises a TypeError if passed a metaclass
+SpecTag:fails::Class.new creates a class without a name
+SpecTag:fails::Class.new creates a class that can be given a name by assigning it to a constant
+SpecTag:fails::Class.new sets the new class' superclass to the given class
+SpecTag:fails::Class.new raises a TypeError when given a non-Class
+SpecTag:fails::Class#new returns a new instance of self
+SpecTag:fails::Class#new invokes #initialize on the new instance with the given args
+SpecTag:fails::Class#new passes the block to #initialize

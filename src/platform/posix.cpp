@@ -342,9 +342,9 @@ namespace Mirb
 			Collector::signal();
 		}
 
-		void initialize(bool console)
+		void initialize()
 		{
-			if(console)
+			if(context->console)
 				signal(SIGINT, signal_handler);
 		}
 		
