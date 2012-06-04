@@ -1,6 +1,8 @@
 #include "io.hpp"
 #include "string.hpp"
 #include "fixnum.hpp"
+#include "array.hpp"
+#include "../platform/platform.hpp"
 #include "../runtime.hpp"
 #include "../stream.hpp"
 
@@ -101,10 +103,35 @@ namespace Mirb
 		return io;
 	}
 
+	value_t IO::rb_readlines(String *path)
+	{
+		Stream *file;
+
+		Platform::wrap([&] {
+			file = Platform::open(path->string, Platform::Read, Platform::Open);
+		});
+
+		auto result = Array::allocate();
+
+		while(true)
+		{
+			CharArray line = file->gets();
+
+			if(line.size())
+				result->vector.push(line.to_string());
+			else
+				break;
+		}
+
+		return result;
+	}
+
 	void IO::initialize()
 	{
 		context->io_class = define_class("IO", context->object_class);
 		
+		singleton_method<String, &rb_readlines>(context->io_class, "readlines");
+
 		method<Self<IO>, &rb_close>(context->io_class, "close");
 		method<Self<IO>, Optional<Arg::Fixnum>, &rb_read>(context->io_class, "read");
 		method<Self<IO>, Arg::Block, &rb_each_line>(context->io_class, "each_line");
