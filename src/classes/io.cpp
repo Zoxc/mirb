@@ -111,6 +111,10 @@ namespace Mirb
 			file = Platform::open(path->string, Platform::Read, Platform::Open);
 		});
 
+		Finally finally([&] {
+			delete file;
+		});
+
 		auto result = Array::allocate();
 
 		while(true)
