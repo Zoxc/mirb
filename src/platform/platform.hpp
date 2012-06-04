@@ -69,6 +69,7 @@ namespace Mirb
 
 		ConsoleStream *console_stream(ConsoleStreamType type);
 
+		bool has_size(const CharArray &path) throw();
 		bool is_file(const CharArray &path) throw();
 		bool is_directory(const CharArray &path) throw();
 		bool is_executable(const CharArray &path) throw();

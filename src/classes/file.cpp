@@ -256,10 +256,15 @@ namespace Mirb
 	{
 		return Value::from_bool(Platform::file_exists(path->string));
 	}
-	
+
 	value_t file(String *path)
 	{
 		return Value::from_bool(Platform::is_file(path->string));
+	}
+
+	value_t rb_size(String *path)
+	{
+		return Value::from_bool(Platform::has_size(path->string));
 	}
 
 	value_t directory(String *path)
@@ -393,6 +398,7 @@ namespace Mirb
 		singleton_method<String, &exists>(context->file_class, "exists?");
 		singleton_method<String, &exists>(context->file_class, "exist?");
 		singleton_method<String, &path>(context->file_class, "path");
+		singleton_method<String, &rb_size>(context->file_class, "size?");
 		singleton_method<String, &file>(context->file_class, "file?");
 		singleton_method<String, &directory>(context->file_class, "directory?");
 		singleton_method<String, &executable>(context->file_class, "executable?");

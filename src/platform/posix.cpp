@@ -138,6 +138,16 @@ namespace Mirb
 			}
 		}
 
+		bool has_size(const CharArray &file) throw()
+		{
+			struct stat buf;
+
+			if(!stat(buf, file))
+				return false;
+
+			return buf.st_size != 0;
+		}
+
 		bool file_exists(const CharArray &file) throw()
 		{
 			struct stat buf;
