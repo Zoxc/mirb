@@ -81,7 +81,7 @@ namespace Mirb
 		void *allocate_region(size_t bytes);
 		void free_region(void *region, size_t bytes);
 		
-		void initialize(bool console);
+		void initialize();
 		void finalize();
 	};
 };

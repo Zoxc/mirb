@@ -113,6 +113,7 @@ namespace Mirb
 			Class *terminator;
 			
 			bool bootstrap;
+			bool console;
 
 			Frame *frame;
 

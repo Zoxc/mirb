@@ -473,9 +473,9 @@ namespace Mirb
 			print(string);
 		}
 
-		void initialize(bool console)
+		void initialize()
 		{
-			if(console)
+			if(context->console)
 			{
 				SetConsoleTitle(TEXT("mirb"));
 
@@ -486,6 +486,8 @@ namespace Mirb
 		
 		void finalize()
 		{
+			if(context->console)
+				SetConsoleCtrlHandler(ctrl_handler, FALSE); 
 		}
 	};
 };

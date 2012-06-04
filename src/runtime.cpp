@@ -1086,14 +1086,14 @@ namespace Mirb
 		Collector::initialize();
 
 		context = new Context;
-
+		context->console = console;
 		context->dummy_map = Collector::allocate<ValueMap>();
 
 		initialize_thread_initial();
 
 		Value::initialize_type_table();
 		
-		Platform::initialize(console);
+		Platform::initialize();
 
 		Lexer::setup_jump_table();
 
