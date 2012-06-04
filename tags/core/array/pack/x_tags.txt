@@ -1,0 +1,26 @@
+SpecTag:fails::Array#pack with format 'x' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'x' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'x' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'x' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'x' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'x' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'x' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format 'x' adds a NULL byte with an empty array
+SpecTag:fails::Array#pack with format 'x' adds a NULL byte without consuming an element
+SpecTag:fails::Array#pack with format 'x' is not affected by a previous count modifier
+SpecTag:fails::Array#pack with format 'x' adds multiple NULL bytes when passed a count modifier
+SpecTag:fails::Array#pack with format 'x' does not add a NULL byte if the count modifier is zero
+SpecTag:fails::Array#pack with format 'x' does not add a NULL byte when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'X' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'X' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'X' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'X' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'X' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'X' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'X' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format 'X' reduces the output string by one byte at the point it is encountered
+SpecTag:fails::Array#pack with format 'X' does not consume any elements
+SpecTag:fails::Array#pack with format 'X' reduces the output string by multiple bytes when passed a count modifier
+SpecTag:fails::Array#pack with format 'X' has no affect when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'X' raises an ArgumentError if the output string is empty
+SpecTag:fails::Array#pack with format 'X' raises an ArgumentError if the count modifier is greater than the bytes in the string

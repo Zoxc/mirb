@@ -1,0 +1,3 @@
+SpecTag:fails::Range#hash is provided
+SpecTag:fails::Range#hash generates the same hash values for Ranges with the same start, end and exclude_end? values
+SpecTag:fails::Range#hash generates a Fixnum for the hash value

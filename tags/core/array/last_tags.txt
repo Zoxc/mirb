@@ -1,0 +1,10 @@
+SpecTag:fails::Array#last returns the last count elements if given a count
+SpecTag:fails::Array#last returns an empty array when passed a count on an empty array
+SpecTag:fails::Array#last returns an empty array when count == 0
+SpecTag:fails::Array#last returns an array containing the last element when passed count == 1
+SpecTag:fails::Array#last returns the entire array when count > length
+SpecTag:fails::Array#last returns an array which is independent to the original when passed count
+SpecTag:fails::Array#last tries to convert the passed argument to an Integer usinig #to_int
+SpecTag:fails::Array#last raises a TypeError if the passed argument is not numeric
+SpecTag:fails::Array#last does not return subclass instance on Array subclasses
+SpecTag:fails::Array#last is not destructive

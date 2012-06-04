@@ -1,0 +1,1 @@
+SpecTag:fails::Errno\003A\003AEAGAIN is the same class as Errno\003A\003AEWOULDBLOCK if they represent the same errno value

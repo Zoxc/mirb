@@ -1,0 +1,4 @@
+SpecTag:fails::Float#abs returns the absolute value
+SpecTag:fails::Float#abs returns 0.0 if -0.0
+SpecTag:fails::Float#abs returns Infinity if -Infinity
+SpecTag:fails::Float#abs returns NaN if NaN

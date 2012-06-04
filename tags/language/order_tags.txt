@@ -1,0 +1,2 @@
+SpecTag:fails::A method call evaluates arguments after receiver
+SpecTag:fails::A method call evaluates block pass after receiver

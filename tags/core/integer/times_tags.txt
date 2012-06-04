@@ -1,0 +1,7 @@
+SpecTag:fails::Integer#times returns self
+SpecTag:fails::Integer#times yields each value from 0 to self - 1
+SpecTag:fails::Integer#times skips the current iteration when encountering 'next'
+SpecTag:fails::Integer#times skips all iterations when encountering 'break'
+SpecTag:fails::Integer#times executes a nested while loop containing a break expression
+SpecTag:fails::Integer#times executes a nested #times
+SpecTag:fails::Integer#times returns an Enumerator

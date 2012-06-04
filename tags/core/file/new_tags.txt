@@ -1,0 +1,20 @@
+SpecTag:fails::File.new returns a new File with mode string
+SpecTag:fails::File.new returns a new File with mode num
+SpecTag:fails::File.new returns a new File with modus num and permissions
+SpecTag:fails::File.new creates the file and returns writable descriptor when called with 'w' mode and r-o permissions
+SpecTag:fails::File.new opens the existing file, does not change permissions even when they are specified
+SpecTag:fails::File.new returns a new File with modus fd 
+SpecTag:fails::File.new creates a new file when use File\003A\003AEXCL mode 
+SpecTag:fails::File.new raises an Errorno\003A\003AEEXIST if the file exists when create a new file with File\003A\003ACREAT|File\003A\003AEXCL
+SpecTag:fails::File.new creates a new file when use File\003A\003AWRONLY|File\003A\003AAPPEND mode
+SpecTag:fails::File.new returns a new File when use File\003A\003AAPPEND mode
+SpecTag:fails::File.new returns a new File when use File\003A\003ARDONLY|File\003A\003AAPPEND mode
+SpecTag:fails::File.new returns a new File when use File\003A\003ARDONLY|File\003A\003AWRONLY mode
+SpecTag:fails::File.new creates a new file when use File\003A\003AWRONLY|File\003A\003ATRUNC mode
+SpecTag:fails::File.new coerces filename using to_str
+SpecTag:fails::File.new coerces filename using #to_path
+SpecTag:fails::File.new raises a TypeError if the first parameter can't be coerced to a string
+SpecTag:fails::File.new raises a TypeError if the first parameter is nil
+SpecTag:fails::File.new raises an Errno\003A\003AEBADF if the first parameter is an invalid file descriptor
+SpecTag:fails::File.new can't alter mode or permissions when opening a file
+SpecTag:fails::File.new opens directories

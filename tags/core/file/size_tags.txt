@@ -1,0 +1,20 @@
+SpecTag:fails::File.size? returns the size of the file if it exists and is not empty
+SpecTag:fails::File.size? accepts a String-like (to_str) parameter
+SpecTag:fails::File.size? accepts an object that has a #to_path method
+SpecTag:fails::File.size? calls #to_io to convert the argument to an IO
+SpecTag:fails::File.size? returns nil if file_name doesn't exist or has 0 size
+SpecTag:fails::File.size? returns nil if file_name is empty
+SpecTag:fails::File.size? accepts a File argument
+SpecTag:fails::File.size returns the size of the file if it exists and is not empty
+SpecTag:fails::File.size accepts a String-like (to_str) parameter
+SpecTag:fails::File.size accepts an object that has a #to_path method
+SpecTag:fails::File.size calls #to_io to convert the argument to an IO
+SpecTag:fails::File.size raises an error if file_name doesn't exist
+SpecTag:fails::File.size returns 0 if the file is empty
+SpecTag:fails::File.size accepts a File argument
+SpecTag:fails::File#size is an instance method
+SpecTag:fails::File#size returns the file's size as a Fixnum
+SpecTag:fails::File#size returns the file's size in bytes
+SpecTag:fails::File#size returns the file's current size even if modified
+SpecTag:fails::File#size raises an IOError on a closed file
+SpecTag:fails::File#size for an empty file returns 0

@@ -1,0 +1,6 @@
+SpecTag:fails::Enumerable#count returns size when no argument or a block
+SpecTag:fails::Enumerable#count counts nils if given nil as an argument
+SpecTag:fails::Enumerable#count accepts an argument for comparison using ==
+SpecTag:fails::Enumerable#count uses a block for comparison
+SpecTag:fails::Enumerable#count ignores the block when given an argument
+SpecTag:fails::Enumerable#count gathers initial args as elements when each yields multiple

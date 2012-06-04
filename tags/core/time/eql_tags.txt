@@ -1,0 +1,6 @@
+SpecTag:fails::Time#eql? returns true if self and other have the same whole number of seconds
+SpecTag:fails::Time#eql? returns false if self and other have differing whole numbers of seconds
+SpecTag:fails::Time#eql? returns true if self and other have the same number of microseconds
+SpecTag:fails::Time#eql? returns false if self and other have differing numbers of microseconds
+SpecTag:fails::Time#eql? returns false if self and other have differing fractional microseconds
+SpecTag:fails::Time#eql? returns false when given a non-time value

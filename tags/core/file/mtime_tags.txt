@@ -1,0 +1,3 @@
+SpecTag:fails::File.mtime returns the modification Time of the file
+SpecTag:fails::File.mtime raises an Errno\003A\003AENOENT exception if the file is not found
+SpecTag:fails::File#mtime returns the modification Time of the file

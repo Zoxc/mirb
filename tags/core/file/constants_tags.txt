@@ -1,0 +1,19 @@
+SpecTag:fails::File\003A\003AConstants match mode constants
+SpecTag:fails::File\003A\003AConstants the separator constant
+SpecTag:fails::File\003A\003AConstants the open mode constants
+SpecTag:fails::File\003A\003AConstants lock mode constants
+SpecTag:fails::File\003A\003AConstants File\003A\003ARDONLY
+SpecTag:fails::File\003A\003AConstants File\003A\003AWRONLY
+SpecTag:fails::File\003A\003AConstants File\003A\003ACREAT
+SpecTag:fails::File\003A\003AConstants File\003A\003ARDWR
+SpecTag:fails::File\003A\003AConstants File\003A\003AAPPEND
+SpecTag:fails::File\003A\003AConstants File\003A\003ATRUNC
+SpecTag:fails::File\003A\003AConstants File\003A\003ANONBLOCK
+SpecTag:fails::File\003A\003AConstants File\003A\003ALOCK_EX
+SpecTag:fails::File\003A\003AConstants File\003A\003ALOCK_NB
+SpecTag:fails::File\003A\003AConstants File\003A\003ALOCK_SH
+SpecTag:fails::File\003A\003AConstants File\003A\003ALOCK_UN
+SpecTag:fails::File\003A\003AConstants File\003A\003ASEPARATOR
+SpecTag:fails::File\003A\003AConstants File\003A\003ASeparator
+SpecTag:fails::File\003A\003AConstants File\003A\003APATH_SEPARATOR
+SpecTag:fails::File\003A\003AConstants File\003A\003AALT_SEPARATOR

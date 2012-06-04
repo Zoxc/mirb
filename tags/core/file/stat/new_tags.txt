@@ -1,0 +1,3 @@
+SpecTag:fails::File\003A\003AStat#initialize raises an exception if the file doesn't exist
+SpecTag:fails::File\003A\003AStat#initialize creates a File\003A\003AStat object for the given file
+SpecTag:fails::File\003A\003AStat#initialize calls #to_path on non-String arguments

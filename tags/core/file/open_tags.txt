@@ -1,0 +1,2 @@
+FileTag:fails
+SpecTag:fails::File.open opens directories

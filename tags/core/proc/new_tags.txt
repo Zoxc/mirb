@@ -1,0 +1,10 @@
+SpecTag:fails::Proc.new with an associated block raises a LocalJumpError when context of the block no longer exists
+SpecTag:fails::Proc.new with an associated block returns a subclass of Proc
+SpecTag:fails::Proc.new with an associated block calls initialize on the Proc object
+SpecTag:fails::Proc.new with an associated block returns a new Proc instance from the block passed to the containing method
+SpecTag:fails::Proc.new with an associated block called on a subclass of Proc returns an instance of the subclass
+SpecTag:fails::Proc.new with an associated block called on a subclass of Proc using a reified block parameter returns an instance of the subclass
+SpecTag:fails::Proc.new with an associated block called on a subclass of Proc that does not 'super' in 'initialize' still constructs a functional proc
+SpecTag:fails::Proc.new without a block raises an ArgumentError
+SpecTag:fails::Proc.new without a block raises an ArgumentError if invoked from within a method with no block
+SpecTag:fails::Proc.new without a block raises an ArgumentError if invoked on a subclass from within a method with no block

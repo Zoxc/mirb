@@ -1,0 +1,5 @@
+SpecTag:fails::File includes File\003A\003AConstants
+SpecTag:fails::File.file? returns true if the named file exists and is a regular file.
+SpecTag:fails::File.file? accepts an object that has a #to_path method
+SpecTag:fails::File.file? raises an ArgumentError if not passed one argument
+SpecTag:fails::File.file? raises a TypeError if not passed a String type

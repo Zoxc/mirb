@@ -1,0 +1,5 @@
+SpecTag:fails::Hash#include? returns true if argument is a key
+SpecTag:fails::Hash#include? returns true if the key's matching value was nil
+SpecTag:fails::Hash#include? returns true if the key's matching value was false
+SpecTag:fails::Hash#include? returns true if the key is nil
+SpecTag:fails::Hash#include? compares keys with the same #hash value via #eql?

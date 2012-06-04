@@ -1,0 +1,12 @@
+SpecTag:fails::String#chomp with separator removes carriage return (except \\r) chars multiple times when separator is an empty string
+SpecTag:fails::String#chomp with separator removes carriage return chars (\\n, \\r, \\r\\n) when separator is \\n
+SpecTag:fails::String#chomp with separator returns self if the separator is nil
+SpecTag:fails::String#chomp with separator returns an empty string when called on an empty string
+SpecTag:fails::String#chomp with separator uses $/ as the separator when none is given
+SpecTag:fails::String#chomp with separator taints result when self is tainted
+SpecTag:fails::String#chomp with separator calls #to_str to convert separator to a String
+SpecTag:fails::String#chomp with separator returns subclass instances when called on a subclass
+SpecTag:fails::String#chomp! with separator modifies self in place and returns self
+SpecTag:fails::String#chomp! with separator returns nil if no modifications were made
+SpecTag:fails::String#chomp! with separator raises a RuntimeError on a frozen instance when it is modified
+SpecTag:fails::String#chomp! with separator raises a RuntimeError on a frozen instance when it would not be modified

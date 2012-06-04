@@ -1,0 +1,2 @@
+SpecTag:fails::Bignum#- returns self minus the given Integer
+SpecTag:fails::Bignum#- raises a TypeError when given a non-Integer

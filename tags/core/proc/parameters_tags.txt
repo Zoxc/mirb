@@ -1,0 +1,12 @@
+SpecTag:fails::Proc#parameters returns an empty Array for a proc expecting no parameters
+SpecTag:fails::Proc#parameters returns an Array of Arrays for a proc expecting parameters
+SpecTag:fails::Proc#parameters sets the first element of each sub-Array to \003Aopt for optional arguments
+SpecTag:fails::Proc#parameters regards named parameters in procs as optional
+SpecTag:fails::Proc#parameters regards parameters with default values as optional
+SpecTag:fails::Proc#parameters sets the first element of each sub-Array to \003Areq for required arguments
+SpecTag:fails::Proc#parameters regards named parameters in lambdas as required
+SpecTag:fails::Proc#parameters sets the first element of each sub-Array to \003Arest for parameters prefixed with asterisks
+SpecTag:fails::Proc#parameters sets the first element of each sub-Array to \003Ablock for parameters prefixed with ampersands
+SpecTag:fails::Proc#parameters sets the second element of each sub-Array to the name of the argument
+SpecTag:fails::Proc#parameters ignores unnamed rest args
+SpecTag:fails::Proc#parameters adds nameless rest arg for "star" argument

@@ -1,0 +1,2 @@
+SpecTag:fails::`` returns the output of the executed sub-process
+SpecTag:fails::%x is the same as ``

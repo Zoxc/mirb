@@ -1,0 +1,19 @@
+SpecTag:fails::IO.pipe creates a two-ended pipe
+SpecTag:fails::IO.pipe returns two IO objects
+SpecTag:fails::IO.pipe returns instances of a subclass when called on a subclass
+SpecTag:fails::IO.pipe sets the external encoding of the read end to the default when passed no arguments
+SpecTag:fails::IO.pipe sets the internal encoding of the read end to the default when passed no arguments
+SpecTag:fails::IO.pipe sets the external encoding of the read end when passed an Encoding argument
+SpecTag:fails::IO.pipe sets the external and internal encodings of the read end when passed two Encoding arguments
+SpecTag:fails::IO.pipe sets the external encoding of the read end when passed the name of an Encoding
+SpecTag:fails::IO.pipe sets the external and internal encodings specified as a String and separated with a colon
+SpecTag:fails::IO.pipe sets the external and internal encoding when passed two String arguments
+SpecTag:fails::IO.pipe calls #to_str to convert the first argument to a String
+SpecTag:fails::IO.pipe calls #to_str to convert the second argument to a String
+SpecTag:fails::IO.pipe sets no external encoding for the write end
+SpecTag:fails::IO.pipe sets no internal encoding for the write end
+SpecTag:fails::IO.pipe passed a block yields two IO objects
+SpecTag:fails::IO.pipe passed a block returns the result of the block
+SpecTag:fails::IO.pipe passed a block closes both IO objects
+SpecTag:fails::IO.pipe passed a block closes both IO objects when the block raises
+SpecTag:fails::IO.pipe passed a block allows IO objects to be closed within the block

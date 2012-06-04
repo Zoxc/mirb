@@ -1,0 +1,17 @@
+SpecTag:fails::Array#map returns a copy of array with each element replaced by the value returned by block
+SpecTag:fails::Array#map does not return subclass instance
+SpecTag:fails::Array#map does not change self
+SpecTag:fails::Array#map returns the evaluated value of block if it broke in the block
+SpecTag:fails::Array#map returns an Enumerator when no block given
+SpecTag:fails::Array#map does not copy tainted status
+SpecTag:fails::Array#map does not copy untrusted status
+SpecTag:fails::Array#map! replaces each element with the value returned by block
+SpecTag:fails::Array#map! returns self
+SpecTag:fails::Array#map! returns the evaluated value of block but its contents is partially modified, if it broke in the block
+SpecTag:fails::Array#map! returns an Enumerator when no block given, and the enumerator can modify the original array
+SpecTag:fails::Array#map! keeps tainted status
+SpecTag:fails::Array#map! keeps untrusted status
+SpecTag:fails::Array#map! when frozen raises a RuntimeError
+SpecTag:fails::Array#map! when frozen raises a RuntimeError when empty
+SpecTag:fails::Array#map! when frozen raises a RuntimeError when calling #each on the returned Enumerator
+SpecTag:fails::Array#map! when frozen raises a RuntimeError when calling #each on the returned Enumerator when empty

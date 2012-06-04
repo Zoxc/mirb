@@ -1,0 +1,13 @@
+SpecTag:fails::Float#quo performs floating-point division between self and a Fixnum
+SpecTag:fails::Float#quo performs floating-point division between self and a Bignum
+SpecTag:fails::Float#quo performs floating-point division between self and a Float
+SpecTag:fails::Float#quo returns NaN when the argument is NaN
+SpecTag:fails::Float#quo returns Infinity when the argument is 0.0
+SpecTag:fails::Float#quo returns -Infinity when the argument is 0.0 and self is negative
+SpecTag:fails::Float#quo returns Infinity when the argument is 0
+SpecTag:fails::Float#quo returns -Infinity when the argument is 0 and self is negative
+SpecTag:fails::Float#quo returns 0.0 when the argument is Infinity
+SpecTag:fails::Float#quo returns -0.0 when the argument is -Infinity
+SpecTag:fails::Float#quo performs floating-point division between self and a Rational
+SpecTag:fails::Float#quo performs floating-point division between self and a Complex
+SpecTag:fails::Float#quo raises an ArgumentError when passed multiple arguments

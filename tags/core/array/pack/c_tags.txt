@@ -1,0 +1,44 @@
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'C' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'C' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'C' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'C' encodes the least significant eight bits of a positive number
+SpecTag:fails::Array#pack with format 'C' encodes the least significant eight bits of a negative number
+SpecTag:fails::Array#pack with format 'C' encodes a Float truncated as an Integer
+SpecTag:fails::Array#pack with format 'C' calls #to_int to convert the pack argument to an Integer
+SpecTag:fails::Array#pack with format 'C' encodes the number of array elements specified by the count modifier
+SpecTag:fails::Array#pack with format 'C' encodes all remaining elements when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'C' ignores NULL bytes between directives
+SpecTag:fails::Array#pack with format 'C' ignores spaces between directives
+SpecTag:fails::Array#pack with format 'C' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'C' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'C' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 'C' raises a TypeError when passed a String
+SpecTag:fails::Array#pack with format 'C' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'C' raises ArgumentError when the format modifier is '!'
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when passed nil
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when passed an Integer
+SpecTag:fails::Array#pack with format 'c' ignores whitespace in the format string
+SpecTag:fails::Array#pack with format 'c' calls #to_str to coerce the directives string
+SpecTag:fails::Array#pack with format 'c' taints the output string if the format string is tainted
+SpecTag:fails::Array#pack with format 'c' encodes the least significant eight bits of a positive number
+SpecTag:fails::Array#pack with format 'c' encodes the least significant eight bits of a negative number
+SpecTag:fails::Array#pack with format 'c' encodes a Float truncated as an Integer
+SpecTag:fails::Array#pack with format 'c' calls #to_int to convert the pack argument to an Integer
+SpecTag:fails::Array#pack with format 'c' encodes the number of array elements specified by the count modifier
+SpecTag:fails::Array#pack with format 'c' encodes all remaining elements when passed the '*' modifier
+SpecTag:fails::Array#pack with format 'c' ignores NULL bytes between directives
+SpecTag:fails::Array#pack with format 'c' ignores spaces between directives
+SpecTag:fails::Array#pack with format 'c' raises an ArgumentError if there are fewer elements than the format requires
+SpecTag:fails::Array#pack with format 'c' returns an empty String if count is zero
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when passed true
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when passed false
+SpecTag:fails::Array#pack with format 'c' returns an ASCII-8BIT string
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when the object does not respond to #to_int
+SpecTag:fails::Array#pack with format 'c' raises a TypeError when passed a String
+SpecTag:fails::Array#pack with format 'c' raises ArgumentError when the format modifier is '_'
+SpecTag:fails::Array#pack with format 'c' raises ArgumentError when the format modifier is '!'

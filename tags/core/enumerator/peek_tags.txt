@@ -1,0 +1,5 @@
+SpecTag:fails::Enumerator#peek returns the next element in self
+SpecTag:fails::Enumerator#peek does not advance the position of the current element
+SpecTag:fails::Enumerator#peek can be called repeatedly without advancing the position of the current element
+SpecTag:fails::Enumerator#peek works in concert with #rewind
+SpecTag:fails::Enumerator#peek raises StopIteration if called on a finished enumerator

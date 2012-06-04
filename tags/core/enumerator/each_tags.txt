@@ -1,0 +1,7 @@
+SpecTag:fails::Enumerator#each yields each element of self to the given block
+SpecTag:fails::Enumerator#each calls #each on the object given in the constructor by default
+SpecTag:fails::Enumerator#each calls #each on the underlying object until it's exhausted
+SpecTag:fails::Enumerator#each calls the method given in the constructor instead of #each
+SpecTag:fails::Enumerator#each calls the method given in the constructor until it's exhausted
+SpecTag:fails::Enumerator#each raises a NoMethodError if the object doesn't respond to #each
+SpecTag:fails::Enumerator#each returns an Enumerator if no block is given

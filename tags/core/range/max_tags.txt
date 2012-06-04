@@ -1,0 +1,9 @@
+SpecTag:fails::Range#max returns the maximum value in the range when called with no arguments
+SpecTag:fails::Range#max returns the maximum value in the Float range when called with no arguments
+SpecTag:fails::Range#max returns nil when the endpoint is less than the start point
+SpecTag:fails::Range#max returns nil when the endpoint is less than the start point in a Float range
+SpecTag:fails::Range#max given a block passes each pair of values in the range to the block
+SpecTag:fails::Range#max given a block passes each pair of elements to the block in reversed order
+SpecTag:fails::Range#max given a block calls #> and #< on the return value of the block
+SpecTag:fails::Range#max given a block returns the element the block determines to be the maximum
+SpecTag:fails::Range#max given a block returns nil when the endpoint is less than the start point

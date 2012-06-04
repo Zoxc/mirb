@@ -1,0 +1,8 @@
+SpecTag:fails::Fixnum#% returns the modulus obtained from dividing self by the given argument
+SpecTag:fails::Fixnum#% raises a ZeroDivisionError when the given argument is 0
+SpecTag:fails::Fixnum#% raises a ZeroDivisionError when the given argument is 0 and a Float
+SpecTag:fails::Fixnum#% raises a TypeError when given a non-Integer
+SpecTag:fails::Fixnum#modulo returns the modulus obtained from dividing self by the given argument
+SpecTag:fails::Fixnum#modulo raises a ZeroDivisionError when the given argument is 0
+SpecTag:fails::Fixnum#modulo raises a ZeroDivisionError when the given argument is 0 and a Float
+SpecTag:fails::Fixnum#modulo raises a TypeError when given a non-Integer

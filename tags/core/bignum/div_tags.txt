@@ -1,0 +1,4 @@
+SpecTag:fails::Bignum#div returns self divided by other
+SpecTag:fails::Bignum#div raises a ZeroDivisionError if other is zero and not a Float
+SpecTag:fails::Bignum#div returns a result of integer division of self by a float argument
+SpecTag:fails::Bignum#div raises ZeroDivisionError if the argument is Float zero

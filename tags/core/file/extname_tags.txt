@@ -1,0 +1,6 @@
+SpecTag:fails::File.extname returns the extension (the portion of file name in path after the period).
+SpecTag:fails::File.extname returns the extension (the portion of file name in path after the period).(edge cases)
+SpecTag:fails::File.extname returns only the last extension of a file with several dots
+SpecTag:fails::File.extname accepts an object that has a #to_path method
+SpecTag:fails::File.extname raises a TypeError if not passed a String type
+SpecTag:fails::File.extname raises an ArgumentError if not passed one argument

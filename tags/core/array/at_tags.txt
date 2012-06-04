@@ -1,0 +1,8 @@
+SpecTag:fails::Array#at returns the (n+1)'th element for the passed index n
+SpecTag:fails::Array#at returns nil if the given index is greater than or equal to the array's length
+SpecTag:fails::Array#at returns the (-n)'th elemet from the last, for the given negative index n
+SpecTag:fails::Array#at returns nil if the given index is less than -len, where len is length of the array
+SpecTag:fails::Array#at does not extend the array unless the given index is out of range
+SpecTag:fails::Array#at tries to convert the passed argument to an Integer using #to_int
+SpecTag:fails::Array#at raises a TypeError when the passed argument can't be coerced to Integer
+SpecTag:fails::Array#at raises an ArgumentError when 2 or more arguments is passed

@@ -1,0 +1,7 @@
+SpecTag:fails::Array#replace replaces the elements with elements from other array
+SpecTag:fails::Array#replace properly handles recursive arrays
+SpecTag:fails::Array#replace returns self
+SpecTag:fails::Array#replace does not make self dependent to the original array
+SpecTag:fails::Array#replace tries to convert the passed argument to an Array using #to_ary
+SpecTag:fails::Array#replace does not call #to_ary on Array subclasses
+SpecTag:fails::Array#replace raises a RuntimeError on a frozen array

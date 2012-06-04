@@ -1,0 +1,4 @@
+SpecTag:fails::IO#rewind positions the instance to the beginning of input
+SpecTag:fails::IO#rewind positions the instance to the beginning of input and clears EOF
+SpecTag:fails::IO#rewind sets lineno to 0
+SpecTag:fails::IO#rewind raises IOError on closed stream

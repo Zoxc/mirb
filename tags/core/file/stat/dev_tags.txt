@@ -1,0 +1,1 @@
+SpecTag:fails::File\003A\003AStat#dev returns the number of the device on which the file exists

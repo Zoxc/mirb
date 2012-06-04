@@ -1,0 +1,5 @@
+SpecTag:fails::String#reverse returns a new string with the characters of self in reverse order
+SpecTag:fails::String#reverse taints the result if self is tainted
+SpecTag:fails::String#reverse! reverses self in place and always returns self
+SpecTag:fails::String#reverse! raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#reverse! raises a RuntimeError on a frozen instance that would not be modified

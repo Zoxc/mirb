@@ -1,0 +1,9 @@
+SpecTag:fails::IO#lineno raises an IOError on a closed stream
+SpecTag:fails::IO#lineno returns the current line number
+SpecTag:fails::IO#lineno= raises an IOError on a closed stream
+SpecTag:fails::IO#lineno= calls #to_int on a non-numeric argument
+SpecTag:fails::IO#lineno= truncates a Float argument
+SpecTag:fails::IO#lineno= raises TypeError on nil argument
+SpecTag:fails::IO#lineno= sets the current line number to the given value
+SpecTag:fails::IO#lineno= does not change $.
+SpecTag:fails::IO#lineno= does not change $. until next read

@@ -1,0 +1,6 @@
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums does not yield when stop is greater than self
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums yields once when stop equals self
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums yields while decreasing self until it is less than stop
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums yields while decreasing self until it less than ceil for a Float endpoint
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums raises a ArgumentError for invalid endpoints
+SpecTag:fails::Integer#downto [stop] when self and stop are Fixnums returns an Enumerator

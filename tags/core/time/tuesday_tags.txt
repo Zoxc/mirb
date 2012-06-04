@@ -1,0 +1,2 @@
+SpecTag:fails::Time#tuesday? returns true if time represents Tuesday
+SpecTag:fails::Time#tuesday? returns false if time doesn't represent Tuesday

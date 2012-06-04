@@ -1,0 +1,1 @@
+SpecTag:fails::Float#eql? returns true if other is a Float equal to self

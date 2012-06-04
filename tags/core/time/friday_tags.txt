@@ -1,0 +1,2 @@
+SpecTag:fails::Time#friday? returns true if time represents Friday
+SpecTag:fails::Time#friday? returns false if time doesn't represent Friday

@@ -1,0 +1,4 @@
+SpecTag:fails::Float#infinite? returns nil for finite values
+SpecTag:fails::Float#infinite? returns 1 for positive infinity
+SpecTag:fails::Float#infinite? returns -1 for negative infinity
+SpecTag:fails::Float#infinite? returns nil for NaN

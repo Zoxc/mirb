@@ -1,0 +1,6 @@
+SpecTag:fails::Time#subsec returns 0 as a Fixnum for a Time with a whole number of seconds
+SpecTag:fails::Time#subsec returns the fractional seconds as a Rational for a Time constructed with a Rational number of seconds
+SpecTag:fails::Time#subsec returns the fractional seconds as a Rational for a Time constructed with a Float number of seconds
+SpecTag:fails::Time#subsec returns the fractional seconds as a Rational for a Time constructed with an Integer number of microseconds
+SpecTag:fails::Time#subsec returns the fractional seconds as a Rational for a Time constructed with an Rational number of microseconds
+SpecTag:fails::Time#subsec returns the fractional seconds as a Rational for a Time constructed with an Float number of microseconds

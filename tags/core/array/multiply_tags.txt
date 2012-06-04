@@ -1,0 +1,27 @@
+SpecTag:fails::Array#* tries to convert the passed argument to a String using #to_str
+SpecTag:fails::Array#* tires to convert the passed argument to an Integer using #to_int
+SpecTag:fails::Array#* raises a TypeError if the argument can neither be converted to a string nor an integer
+SpecTag:fails::Array#* converts the passed argument to a String rather than an Integer
+SpecTag:fails::Array#* raises a TypeError is the passed argument is nil
+SpecTag:fails::Array#* raises an ArgumentError when passed 2 or more arguments
+SpecTag:fails::Array#* raises an ArgumentError when passed no arguments
+SpecTag:fails::Array#* with an integer concatenates n copies of the array when passed an integer
+SpecTag:fails::Array#* with an integer does not return self even if the passed integer is 1
+SpecTag:fails::Array#* with an integer properly handles recursive arrays
+SpecTag:fails::Array#* with an integer raises an ArgumentError when passed a negative integer
+SpecTag:fails::Array#* with an integer copies the taint status of the original array even if the passed count is 0
+SpecTag:fails::Array#* with an integer copies the taint status of the original array even if the array is empty
+SpecTag:fails::Array#* with an integer copies the taint status of the original array if the passed count is not 0
+SpecTag:fails::Array#* with an integer copies the untrusted status of the original array even if the passed count is 0
+SpecTag:fails::Array#* with an integer copies the untrusted status of the original array even if the array is empty
+SpecTag:fails::Array#* with an integer copies the untrusted status of the original array if the passed count is not 0
+SpecTag:fails::Array#* with an integer with a subclass of Array returns a subclass instance
+SpecTag:fails::Array#* with an integer with a subclass of Array does not call #initialize on the subclass instance
+SpecTag:fails::Array#* with a string returns a string formed by concatenating each element.to_str separated by separator
+SpecTag:fails::Array#* with a string uses the same separator with nested arrays
+SpecTag:fails::Array#* with a string with a tainted separator does not taint the result if the array is empty
+SpecTag:fails::Array#* with a string with a tainted separator does not taint the result if the array has only one element
+SpecTag:fails::Array#* with a string with a tainted separator taints the result if the array has two or more elements
+SpecTag:fails::Array#* with a string with an untrusted separator does not untrust the result if the array is empty
+SpecTag:fails::Array#* with a string with an untrusted separator does not untrust the result if the array has only one element
+SpecTag:fails::Array#* with a string with an untrusted separator untrusts the result if the array has two or more elements

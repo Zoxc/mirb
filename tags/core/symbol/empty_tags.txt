@@ -1,0 +1,2 @@
+SpecTag:fails::Symbol#empty? returns true if self is empty
+SpecTag:fails::Symbol#empty? returns false if self is non-empty

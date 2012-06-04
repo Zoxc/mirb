@@ -1,0 +1,2 @@
+SpecTag:fails::Hash#keys returns an array with the keys in the order they were inserted
+SpecTag:fails::Hash#keys it uses the same order as #values

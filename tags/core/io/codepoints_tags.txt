@@ -1,0 +1,7 @@
+SpecTag:fails::IO#codepoints returns an Enumerator when passed no block
+SpecTag:fails::IO#codepoints yields each codepoint
+SpecTag:fails::IO#codepoints yields each codepoint starting from the current position
+SpecTag:fails::IO#codepoints raises an error if reading invalid sequence
+SpecTag:fails::IO#codepoints does not change $_
+SpecTag:fails::IO#codepoints raises an IOError when self is not readable
+SpecTag:fails::IO#codepoints calls the given block

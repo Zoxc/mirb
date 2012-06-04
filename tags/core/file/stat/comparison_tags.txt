@@ -1,0 +1,3 @@
+SpecTag:fails::File\003A\003AStat#<=> is able to compare files by the same modification times
+SpecTag:fails::File\003A\003AStat#<=> is able to compare files by different modification times
+SpecTag:fails::File\003A\003AStat#<=> includes Comparable and #== shows mtime equality between two File\003A\003AStat objects

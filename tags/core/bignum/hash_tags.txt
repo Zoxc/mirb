@@ -1,0 +1,2 @@
+SpecTag:fails::Bignum#hash is provided
+SpecTag:fails::Bignum#hash is stable

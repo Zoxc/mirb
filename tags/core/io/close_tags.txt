@@ -1,0 +1,8 @@
+SpecTag:fails::IO#close closes the stream
+SpecTag:fails::IO#close returns nil
+SpecTag:fails::IO#close raises an IOError reading from a closed IO
+SpecTag:fails::IO#close raises an IOError writing to a closed IO
+SpecTag:fails::IO#close raises an IOError if closed
+SpecTag:fails::IO#close on an IO.popen stream clears #pid
+SpecTag:fails::IO#close on an IO.popen stream sets $?
+SpecTag:fails::IO#close on an IO.popen stream waits for the child to exit

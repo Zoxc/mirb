@@ -1,0 +1,7 @@
+SpecTag:fails::Hash#each yields a [[key, value]] Array for each pair to a block expecting |*args|
+SpecTag:fails::Hash#each yields the key and value of each pair to a block expecting |key, value|
+SpecTag:fails::Hash#each yields the key only to a block expecting |key,|
+SpecTag:fails::Hash#each uses the same order as keys() and values()
+SpecTag:fails::Hash#each properly expands (or not) child class's 'each'-yielded args
+SpecTag:fails::Hash#each returns an Enumerator if called on a non-empty hash without a block
+SpecTag:fails::Hash#each returns an Enumerator if called on an empty hash without a block

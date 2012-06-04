@@ -1,0 +1,2 @@
+SpecTag:fails::Regexp#options returns a Fixnum bitvector of regexp options for the Regexp object
+SpecTag:fails::Regexp#options allows checking for presence of a certain option with bitwise &

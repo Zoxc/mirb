@@ -1,0 +1,5 @@
+SpecTag:fails::Array#shuffle returns the same values, in a usually different order
+SpecTag:fails::Array#shuffle is not destructive
+SpecTag:fails::Array#shuffle returns subclass instances with Array subclass
+SpecTag:fails::Array#shuffle! returns the same values, in a usually different order
+SpecTag:fails::Array#shuffle! raises a RuntimeError on a frozen array

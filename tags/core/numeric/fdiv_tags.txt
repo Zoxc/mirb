@@ -1,0 +1,6 @@
+SpecTag:fails::Numeric#fdiv coerces self with #to_f
+SpecTag:fails::Numeric#fdiv coerces other with #to_f
+SpecTag:fails::Numeric#fdiv performs floating-point division
+SpecTag:fails::Numeric#fdiv returns a Float
+SpecTag:fails::Numeric#fdiv returns Infinity if other is 0
+SpecTag:fails::Numeric#fdiv returns NaN if other is NaN

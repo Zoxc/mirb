@@ -1,0 +1,1 @@
+SpecTag:fails::Hash.allocate returns a fully-formed instance of Hash

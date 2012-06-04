@@ -1,0 +1,4 @@
+SpecTag:fails::Module#<= returns true if self is a subclass of, the same as or includes the given module
+SpecTag:fails::Module#<= returns nil if self is not related to the given module
+SpecTag:fails::Module#<= returns false if self is a superclass of or is included by the given module
+SpecTag:fails::Module#<= raises a TypeError if the argument is not a class/module

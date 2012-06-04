@@ -1,0 +1,7 @@
+SpecTag:fails::String#ljust with length, padding returns a new string of specified length with self left justified and padded with padstr
+SpecTag:fails::String#ljust with length, padding returns self if it's longer than or as long as the specified length
+SpecTag:fails::String#ljust with length, padding taints result when self or padstr is tainted
+SpecTag:fails::String#ljust with length, padding tries to convert length to an integer using to_int
+SpecTag:fails::String#ljust with length, padding tries to convert padstr to a string using to_str
+SpecTag:fails::String#ljust with length, padding returns subclass instances when called on subclasses
+SpecTag:fails::String#ljust with length, padding when padding is tainted and self is untainted returns a tainted string if and only if length is longer than self

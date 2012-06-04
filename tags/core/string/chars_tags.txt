@@ -1,0 +1,4 @@
+SpecTag:fails::String#chars passes each char in self to the given block
+SpecTag:fails::String#chars returns self
+SpecTag:fails::String#chars returns an enumerator when no block given
+SpecTag:fails::String#chars is unicode aware

@@ -1,0 +1,1 @@
+SpecTag:fails::Hash#empty? returns true if the hash has no entries

@@ -1,0 +1,29 @@
+SpecTag:fails::Array#join returns a string formed by concatenating each element.to_str separated by separator
+SpecTag:fails::Array#join uses the same separator with nested arrays
+SpecTag:fails::Array#join returns an empty string if the Array is empty
+SpecTag:fails::Array#join returns a US-ASCII string for an empty Array
+SpecTag:fails::Array#join returns a string formed by concatenating each String element separated by $,
+SpecTag:fails::Array#join attempts coercion via #to_str first
+SpecTag:fails::Array#join attempts coercion via #to_ary second
+SpecTag:fails::Array#join attempts coercion via #to_s third
+SpecTag:fails::Array#join raises a NoMethodError if an element does not respond to #to_str, #to_ary, or #to_s
+SpecTag:fails::Array#join represents a recursive element with '[...]'
+SpecTag:fails::Array#join raises an ArgumentError when the Array is recursive
+SpecTag:fails::Array#join taints the result if the Array is tainted and non-empty
+SpecTag:fails::Array#join does not taint the result if the Array is tainted but empty
+SpecTag:fails::Array#join taints the result if the result of coercing an element is tainted
+SpecTag:fails::Array#join untrusts the result if the Array is untrusted and non-empty
+SpecTag:fails::Array#join does not untrust the result if the Array is untrusted but empty
+SpecTag:fails::Array#join untrusts the result if the result of coercing an element is untrusted
+SpecTag:fails::Array#join uses the first encoding when other strings are compatible
+SpecTag:fails::Array#join uses the widest common encoding when other strings are incompatible
+SpecTag:fails::Array#join fails for arrays with incompatibly-encoded strings
+SpecTag:fails::Array#join does not separate elements when the passed separator is nil
+SpecTag:fails::Array#join calls #to_str to convert the separator to a String
+SpecTag:fails::Array#join does not call #to_str on the separator if the array is empty
+SpecTag:fails::Array#join with a tainted separator does not taint the result if the array is empty
+SpecTag:fails::Array#join with a tainted separator does not taint the result if the array has only one element
+SpecTag:fails::Array#join with a tainted separator taints the result if the array has two or more elements
+SpecTag:fails::Array#join with an untrusted separator does not untrust the result if the array is empty
+SpecTag:fails::Array#join with an untrusted separator does not untrust the result if the array has only one element
+SpecTag:fails::Array#join with an untrusted separator untrusts the result if the array has two or more elements

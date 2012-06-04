@@ -1,0 +1,10 @@
+SpecTag:fails::Array#<=> calls <=> left to right and return first non-0 result
+SpecTag:fails::Array#<=> returns 0 if the arrays are equal
+SpecTag:fails::Array#<=> returns -1 if the array is shorter than the other array
+SpecTag:fails::Array#<=> returns +1 if the array is longer than the other array
+SpecTag:fails::Array#<=> returns -1 if the arrays have same length and a pair of corresponding elements returns -1 for <=>
+SpecTag:fails::Array#<=> returns +1 if the arrays have same length and a pair of corresponding elements returns +1 for <=>
+SpecTag:fails::Array#<=> properly handles recursive arrays
+SpecTag:fails::Array#<=> tries to convert the passed argument to an Array using #to_ary
+SpecTag:fails::Array#<=> does not call #to_ary on Array subclasses
+SpecTag:fails::Array#<=> returns nil when the argument is not array-like

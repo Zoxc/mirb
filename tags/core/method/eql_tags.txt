@@ -1,0 +1,13 @@
+SpecTag:fails::Method#eql? returns true if methods are the same
+SpecTag:fails::Method#eql? returns true on aliased methods
+SpecTag:fails::Method#eql? returns true if the two core methods are aliases
+SpecTag:fails::Method#eql? returns false on a method which is neither aliased nor the same method
+SpecTag:fails::Method#eql? returns false for a method which is not bound to the same object
+SpecTag:fails::Method#eql? returns false if the two methods are bound to the same object but were defined independently
+SpecTag:fails::Method#eql? returns true if a method was defined using the other one
+SpecTag:fails::Method#eql? returns true for methods defined using the same block/proc
+SpecTag:fails::Method#eql? returns false if the two methods are bound to different objects, have the same names, and identical bodies
+SpecTag:fails::Method#eql? returns false if the argument is not a Method object
+SpecTag:fails::Method#eql? returns false if the argument is an unbound version of self
+SpecTag:fails::Method#eql? missing methods returns true for the same method missing
+SpecTag:fails::Method#eql? missing methods calls respond_to_missing? with true to include private methods

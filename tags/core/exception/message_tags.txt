@@ -1,0 +1,1 @@
+SpecTag:fails::Exception#message calls #to_s on self

@@ -1,0 +1,8 @@
+SpecTag:fails::IO#sysseek sets the offset
+SpecTag:fails::IO#sysseek converts arguments to Integers
+SpecTag:fails::IO#sysseek does not accept Bignums that don't fit in a C long
+SpecTag:fails::IO#sysseek raises IOError on closed stream
+SpecTag:fails::IO#sysseek moves the read position relative to the current position with SEEK_CUR
+SpecTag:fails::IO#sysseek raises an error when called after buffered reads
+SpecTag:fails::IO#sysseek moves the read position relative to the start with SEEK_SET
+SpecTag:fails::IO#sysseek moves the read position relative to the end with SEEK_END

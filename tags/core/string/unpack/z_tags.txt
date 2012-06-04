@@ -1,0 +1,15 @@
+SpecTag:fails::String#unpack with format 'Z' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'Z' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'Z' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'Z' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'Z' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'Z' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'Z' returns an empty string if the input is empty
+SpecTag:fails::String#unpack with format 'Z' returns empty strings for repeated formats if the input is empty
+SpecTag:fails::String#unpack with format 'Z' returns an empty string and does not decode any bytes when the count modifier is zero
+SpecTag:fails::String#unpack with format 'Z' implicitly has a count of one when no count is specified
+SpecTag:fails::String#unpack with format 'Z' decodes the number of bytes specified by the count modifier
+SpecTag:fails::String#unpack with format 'Z' decodes the number of bytes specified by the count modifier including whitespace bytes
+SpecTag:fails::String#unpack with format 'Z' decodes past whitespace bytes when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'Z' stops decoding at NULL bytes when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'Z' decodes the number of bytes specified by the count modifier and truncates the decoded string at the first NULL byte

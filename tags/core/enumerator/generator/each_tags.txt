@@ -1,0 +1,2 @@
+SpecTag:fails::Enumerator\003A\003AGenerator#each Supports enumeration with a block
+SpecTag:fails::Enumerator\003A\003AGenerator#each Raises a LocalJumpError if no block given

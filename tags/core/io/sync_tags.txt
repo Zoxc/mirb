@@ -1,0 +1,5 @@
+SpecTag:fails::IO#sync= sets the sync mode to true or false
+SpecTag:fails::IO#sync= accepts non-boolean arguments
+SpecTag:fails::IO#sync= raises an IOError on closed stream
+SpecTag:fails::IO#sync returns the current sync mode
+SpecTag:fails::IO#sync raises an IOError on closed stream

@@ -1,0 +1,13 @@
+SpecTag:fails::IO.select blocks for duration of timeout if there are no objects ready for I/O
+SpecTag:fails::IO.select returns immediately all objects that are ready for I/O when timeout is 0
+SpecTag:fails::IO.select returns nil after timeout if there are no objects ready for I/O
+SpecTag:fails::IO.select returns supplied objects when they are ready for I/O
+SpecTag:fails::IO.select leaves out IO objects for which there is no I/O ready
+SpecTag:fails::IO.select returns supplied objects correctly even when monitoring the same object in different arrays
+SpecTag:fails::IO.select invokes to_io on supplied objects that are not IO and returns the supplied objects
+SpecTag:fails::IO.select raises TypeError if supplied objects are not IO
+SpecTag:fails::IO.select raises a TypeError if the specified timeout value is not Numeric
+SpecTag:fails::IO.select raises TypeError if the first three arguments are not Arrays
+SpecTag:fails::IO.select raises an ArgumentError when passed a negative timeout
+SpecTag:fails::IO.select when passed nil for timeout sleeps forever
+SpecTag:fails::IO.select when passed nil for timeout sets the thread's status to 'sleep'

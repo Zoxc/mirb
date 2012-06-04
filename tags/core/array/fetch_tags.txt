@@ -1,0 +1,9 @@
+SpecTag:fails::Array#fetch returns the element at the passed index
+SpecTag:fails::Array#fetch counts negative indices backwards from end
+SpecTag:fails::Array#fetch raises an IndexError if there is no element at index
+SpecTag:fails::Array#fetch returns default if there is no element at index if passed a default value
+SpecTag:fails::Array#fetch returns the value of block if there is no element at index if passed a block
+SpecTag:fails::Array#fetch passes the original index argument object to the block, not the converted Integer
+SpecTag:fails::Array#fetch gives precedence to the default block over the default argument
+SpecTag:fails::Array#fetch tries to convert the passed argument to an Integer using #to_int
+SpecTag:fails::Array#fetch raises a TypeError when the passed argument can't be coerced to Integer

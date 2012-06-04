@@ -1,0 +1,4 @@
+SpecTag:fails::IO#readchar returns the next string from the stream
+SpecTag:fails::IO#readchar raises an EOFError when invoked at the end of the stream
+SpecTag:fails::IO#readchar raises IOError on closed stream
+SpecTag:fails::IO#readchar raises EOFError on empty stream

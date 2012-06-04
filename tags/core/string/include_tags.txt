@@ -1,0 +1,2 @@
+SpecTag:fails::String#include? with String ignores subclass differences
+SpecTag:fails::String#include? with String tries to convert other to string using to_str

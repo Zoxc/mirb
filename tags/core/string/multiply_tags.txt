@@ -1,0 +1,6 @@
+SpecTag:fails::String#* returns a new string containing count copies of self
+SpecTag:fails::String#* tries to convert the given argument to an integer using to_int
+SpecTag:fails::String#* raises an ArgumentError when given integer is negative
+SpecTag:fails::String#* raises a RangeError when given integer is a Bignum
+SpecTag:fails::String#* returns subclass instances
+SpecTag:fails::String#* always taints the result when self is tainted

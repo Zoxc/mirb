@@ -1,0 +1,4 @@
+SpecTag:fails::String#dup calls #initialize_copy on the new instance
+SpecTag:fails::String#dup does not copy singleton methods
+SpecTag:fails::String#dup does not copy modules included in the singleton class
+SpecTag:fails::String#dup does not copy constants defined in the singleton class

@@ -1,0 +1,3 @@
+SpecTag:fails::not() returns false if the argument is true
+SpecTag:fails::not() returns true if the argument is false
+SpecTag:fails::not() returns true if the argument is nil

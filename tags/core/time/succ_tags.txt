@@ -1,0 +1,2 @@
+SpecTag:fails::Time#succ returns a new time one second later than time
+SpecTag:fails::Time#succ returns a new instance

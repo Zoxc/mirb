@@ -1,0 +1,6 @@
+SpecTag:fails::Integer#next returns the next larger positive Fixnum
+SpecTag:fails::Integer#next returns the next larger negative Fixnum
+SpecTag:fails::Integer#next returns the next larger positive Bignum
+SpecTag:fails::Integer#next returns the next larger negative Bignum
+SpecTag:fails::Integer#next overflows a Fixnum to a Bignum
+SpecTag:fails::Integer#next underflows a Bignum to a Fixnum

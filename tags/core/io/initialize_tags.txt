@@ -1,0 +1,7 @@
+SpecTag:fails::IO#initialize reassociates the IO instance with the new descriptor when passed a Fixnum
+SpecTag:fails::IO#initialize calls #to_int to coerce the object passed as an fd
+SpecTag:fails::IO#initialize raises a TypeError when passed an IO
+SpecTag:fails::IO#initialize raises a TypeError when passed nil
+SpecTag:fails::IO#initialize raises a TypeError when passed a String
+SpecTag:fails::IO#initialize raises IOError on closed stream
+SpecTag:fails::IO#initialize raises an Errno\003A\003AEBADF when given an invalid file descriptor

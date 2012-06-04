@@ -1,0 +1,11 @@
+SpecTag:fails::String#unpack with format '@' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format '@' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format '@' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format '@' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format '@' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format '@' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format '@' moves the read index to the byte specified by the count
+SpecTag:fails::String#unpack with format '@' implicitly has a count of zero when count is not specified
+SpecTag:fails::String#unpack with format '@' has no effect when passed the '*' modifier
+SpecTag:fails::String#unpack with format '@' positions the read index one beyond the last readable byte in the String
+SpecTag:fails::String#unpack with format '@' raises an ArgumentError if the count exceeds the size of the String

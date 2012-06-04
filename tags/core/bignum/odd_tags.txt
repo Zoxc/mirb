@@ -1,0 +1,4 @@
+SpecTag:fails::Bignum#odd? returns true if self is odd and positive
+SpecTag:fails::Bignum#odd? returns true if self is odd and negative
+SpecTag:fails::Bignum#odd? returns false if self is even and positive
+SpecTag:fails::Bignum#odd? returns false if self is even and negative

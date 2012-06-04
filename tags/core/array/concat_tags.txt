@@ -1,0 +1,10 @@
+SpecTag:fails::Array#concat tries to convert the passed argument to an Array using #to_ary
+SpecTag:fails::Array#concat does not call #to_ary on Array subclasses
+SpecTag:fails::Array#concat raises a RuntimeError when Array is frozen and modification occurs
+SpecTag:fails::Array#concat raises a RuntimeError when Array is frozen and no modification occurs
+SpecTag:fails::Array#concat keeps tainted status
+SpecTag:fails::Array#concat is not infected by the other
+SpecTag:fails::Array#concat keeps the tainted status of elements
+SpecTag:fails::Array#concat keeps untrusted status
+SpecTag:fails::Array#concat is not infected untrustedness by the other
+SpecTag:fails::Array#concat keeps the untrusted status of elements

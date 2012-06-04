@@ -1,0 +1,2 @@
+SpecTag:fails::MatchData#string returns a copy of the match string
+SpecTag:fails::MatchData#string returns a frozen copy of the match string

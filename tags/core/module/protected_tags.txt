@@ -1,0 +1,3 @@
+SpecTag:fails::Module#protected makes an existing class method protected
+SpecTag:fails::Module#protected makes a public Object instance method protected in a new module
+SpecTag:fails::Module#protected makes a public Object instance method protected in Kernel

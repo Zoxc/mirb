@@ -1,0 +1,3 @@
+SpecTag:fails::Array#clear keeps tainted status
+SpecTag:fails::Array#clear keeps untrusted status
+SpecTag:fails::Array#clear raises a RuntimeError on a frozen array

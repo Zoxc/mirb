@@ -1,0 +1,2 @@
+SpecTag:fails::Range#member? returns true if other is an element of self
+SpecTag:fails::Range#member? compares values using <=>

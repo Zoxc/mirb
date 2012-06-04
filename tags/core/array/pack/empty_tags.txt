@@ -1,0 +1,2 @@
+SpecTag:fails::Array#pack with empty format returns an empty String
+SpecTag:fails::Array#pack with empty format returns a String with US-ASCII encoding

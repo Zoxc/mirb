@@ -1,0 +1,2 @@
+SpecTag:fails::Fixnum#* raises a TypeError when given a non-Integer
+SpecTag:fails::Fixnum#* overflows to Bignum when the result does not fit in Fixnum

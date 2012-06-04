@@ -1,0 +1,3 @@
+SpecTag:fails::Numeric#abs2 returns the square of the absolute value of self
+SpecTag:fails::Numeric#abs2 calls #* on self
+SpecTag:fails::Numeric#abs2 returns NaN when self is NaN

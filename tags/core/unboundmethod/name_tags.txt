@@ -1,0 +1,2 @@
+SpecTag:fails::UnboundMethod#name returns the name of the method
+SpecTag:fails::UnboundMethod#name returns the name even when aliased

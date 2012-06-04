@@ -1,0 +1,4 @@
+SpecTag:fails::Enumerable#include? returns true if any element == argument for numbers
+SpecTag:fails::Enumerable#include? returns true if any element == argument for other objects
+SpecTag:fails::Enumerable#include? returns true if any member of enum equals obj when == compare different classes (legacy rubycon)
+SpecTag:fails::Enumerable#include? gathers whole arrays as elements when each yields multiple

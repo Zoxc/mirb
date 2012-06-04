@@ -1,0 +1,6 @@
+SpecTag:fails::Enumerator.new creates a new custom enumerator with the given object, iterator and arguments
+SpecTag:fails::Enumerator.new creates a new custom enumerator that responds to #each
+SpecTag:fails::Enumerator.new creates a new custom enumerator that runs correctly
+SpecTag:fails::Enumerator.new aliases the second argument to \003Aeach
+SpecTag:fails::Enumerator.new doesn't check for the presence of the iterator method
+SpecTag:fails::Enumerator.new uses the latest define iterator method

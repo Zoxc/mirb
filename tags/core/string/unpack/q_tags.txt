@@ -1,0 +1,13 @@
+SpecTag:fails::String#unpack with format 'Q' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'Q' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'Q' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'Q' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'Q' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'Q' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'q' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'q' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'q' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'q' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'q' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'q' raises an ArgumentError when the format modifier is '!'
+FileTag:fails

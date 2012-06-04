@@ -1,0 +1,7 @@
+SpecTag:fails::File.unlink returns 0 when called without arguments
+SpecTag:fails::File.unlink deletes a single file
+SpecTag:fails::File.unlink deletes multiple files
+SpecTag:fails::File.unlink raises an TypeError if not passed a String type
+SpecTag:fails::File.unlink raises an Errno\003A\003AENOENT when the given file doesn't exist
+SpecTag:fails::File.unlink coerces a given parameter into a string if possible
+SpecTag:fails::File.unlink accepts an object that has a #to_path method

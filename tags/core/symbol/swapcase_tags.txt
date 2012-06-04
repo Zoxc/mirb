@@ -1,0 +1,7 @@
+SpecTag:fails::Symbol#swapcase returns a Symbol
+SpecTag:fails::Symbol#swapcase converts lowercase ASCII characters to their uppercase equivalents
+SpecTag:fails::Symbol#swapcase converts uppercase ASCII characters to their lowercase equivalents
+SpecTag:fails::Symbol#swapcase works with both upper- and lowercase ASCII characters in the same Symbol
+SpecTag:fails::Symbol#swapcase leaves uppercase Unicode characters as they were
+SpecTag:fails::Symbol#swapcase leaves lowercase Unicode characters as they were
+SpecTag:fails::Symbol#swapcase leaves non-alphabetic ASCII characters as they were

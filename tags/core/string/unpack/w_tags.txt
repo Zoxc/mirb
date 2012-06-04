@@ -1,0 +1,9 @@
+SpecTag:fails::String#unpack with directive 'w' ignores whitespace in the format string
+SpecTag:fails::String#unpack with directive 'w' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with directive 'w' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with directive 'w' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with directive 'w' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with directive 'w' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with directive 'w' decodes a BER-compressed integer
+SpecTag:fails::String#unpack with directive 'w' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with directive 'w' ignores spaces between directives

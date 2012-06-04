@@ -1,0 +1,6 @@
+SpecTag:fails::File.identical? returns true for a file and its link
+SpecTag:fails::File.identical? returns false if any of the files doesn't exist
+SpecTag:fails::File.identical? accepts an object that has a #to_path method
+SpecTag:fails::File.identical? raises an ArgumentError if not passed two arguments
+SpecTag:fails::File.identical? raises a TypeError if not passed String types
+SpecTag:fails::File.identical? returns true if both named files are identical

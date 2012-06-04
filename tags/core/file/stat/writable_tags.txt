@@ -1,0 +1,2 @@
+SpecTag:fails::File\003A\003AStat#writable? returns true if named file is writable by the effective user id of the process, otherwise false
+SpecTag:fails::File\003A\003AStat#writable? accepts an object that has a #to_path method

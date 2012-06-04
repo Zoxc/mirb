@@ -1,0 +1,2 @@
+SpecTag:fails::Numeric#denominator returns 1
+SpecTag:fails::Numeric#denominator works with Numeric subclasses

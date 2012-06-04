@@ -1,0 +1,5 @@
+SpecTag:fails::Struct anonymous class instance methods Enumerable methods should work
+SpecTag:fails::Struct anonymous class instance methods reader method should be a synonym for []
+SpecTag:fails::Struct anonymous class instance methods reader method should not interfere with undefined methods
+SpecTag:fails::Struct anonymous class instance methods writer method be a synonym for []=
+SpecTag:fails::Struct subclasses can be subclassed

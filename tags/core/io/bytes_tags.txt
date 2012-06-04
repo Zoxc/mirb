@@ -1,0 +1,4 @@
+SpecTag:fails::IO#bytes returns an enumerator of the next bytes from the stream
+SpecTag:fails::IO#bytes yields each byte
+SpecTag:fails::IO#bytes raises an IOError on closed stream
+SpecTag:fails::IO#bytes raises an IOError on an enumerator for a stream that has been closed

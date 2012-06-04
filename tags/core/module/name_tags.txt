@@ -1,0 +1,11 @@
+SpecTag:fails::Module#name is nil for an anonymous module
+SpecTag:fails::Module#name is nil when assigned to a constant in an anonymous module
+SpecTag:fails::Module#name is nil for a nested module created with the module keyword
+SpecTag:fails::Module#name is set when opened with the module keyword
+SpecTag:fails::Module#name is set when a nested module is opened with the module keyword
+SpecTag:fails::Module#name is set when assigning to a constant
+SpecTag:fails::Module#name is not modified when assigning to a new constant after it has been accessed
+SpecTag:fails::Module#name is set with a conditional assignment to a nested constant
+SpecTag:fails::Module#name is set with a conditional assignment to a constant
+SpecTag:fails::Module#name preserves the encoding in which the class was defined
+SpecTag:fails::Module#name is set when the anonymous outer module name is set

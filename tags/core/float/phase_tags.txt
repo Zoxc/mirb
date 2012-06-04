@@ -1,0 +1,8 @@
+SpecTag:fails::Float#phase returns NaN if NaN
+SpecTag:fails::Float#phase returns self if NaN
+SpecTag:fails::Float#phase returns 0 if positive
+SpecTag:fails::Float#phase returns 0 if +0.0
+SpecTag:fails::Float#phase returns 0 if +Infinity
+SpecTag:fails::Float#phase returns Pi if negative
+SpecTag:fails::Float#phase returns Pi if -0.0
+SpecTag:fails::Float#phase returns Pi if -Infinity

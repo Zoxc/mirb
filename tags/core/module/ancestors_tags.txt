@@ -1,0 +1,3 @@
+SpecTag:fails::Module#ancestors returns a list of modules included in self (including self)
+SpecTag:fails::Module#ancestors returns only modules and classes
+SpecTag:fails::Module#ancestors has 1 entry per module or class

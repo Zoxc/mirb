@@ -1,0 +1,68 @@
+SpecTag:fails::Kernel#load (path resolution) loads an absolute path
+SpecTag:fails::Kernel#load (path resolution) loads a non-canonical absolute path
+SpecTag:fails::Kernel#load (path resolution) loads a file defining many methods
+SpecTag:fails::Kernel#load (path resolution) raises a LoadError if the file does not exist
+SpecTag:fails::Kernel#load (path resolution) calls #to_str on non-String objects
+SpecTag:fails::Kernel#load (path resolution) raises a TypeError if passed an object that has #to_s but not #to_str
+SpecTag:fails::Kernel#load (path resolution) raises a TypeError if #to_str does not return a String
+SpecTag:fails::Kernel#load (path resolution) raises a TypeError if passed an object that has #to_path but not #to_str
+SpecTag:fails::Kernel#load (path resolution) calls #to_path on non-String objects
+SpecTag:fails::Kernel#load (path resolution) calls #to_path on a String
+SpecTag:fails::Kernel#load (path resolution) calls #to_str on non-String objects returned by #to_path
+SpecTag:fails::Kernel#load (path resolution) loads a ./ relative path from the current working directory with empty $LOAD_PATH
+SpecTag:fails::Kernel#load (path resolution) loads a ../ relative path from the current working directory with empty $LOAD_PATH
+SpecTag:fails::Kernel#load (path resolution) loads a ./ relative path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel#load (path resolution) loads a ../ relative path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel#load (path resolution) loads a non-canonical path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel#load (path resolution) resolves a filename against $LOAD_PATH entries
+SpecTag:fails::Kernel#load (path resolution) does not resolve a ./ relative path against $LOAD_PATH entries
+SpecTag:fails::Kernel#load (path resolution) does not resolve a ../ relative path against $LOAD_PATH entries
+SpecTag:fails::Kernel#load (path resolution) resolves a non-canonical path against $LOAD_PATH entries
+SpecTag:fails::Kernel#load (path resolution) loads a path with duplicate path separators
+SpecTag:fails::Kernel#load loads a non-extensioned file as a Ruby source file
+SpecTag:fails::Kernel#load loads a non .rb extensioned file as a Ruby source file
+SpecTag:fails::Kernel#load loads from the current working directory
+SpecTag:fails::Kernel#load loads a file that recursively requires itself
+SpecTag:fails::Kernel#load loads a file that recursively loads itself
+SpecTag:fails::Kernel#load loads a file each time the method is called
+SpecTag:fails::Kernel#load loads a file even when the name appears in $LOADED_FEATURES
+SpecTag:fails::Kernel#load loads a file that has been loaded by #require
+SpecTag:fails::Kernel#load does not cause #require with the same path to fail
+SpecTag:fails::Kernel#load does not add the loaded path to $LOADED_FEATURES
+SpecTag:fails::Kernel#load raises a LoadError if passed a non-extensioned path that does not exist but a .rb extensioned path does exist
+SpecTag:fails::Kernel#load sets the enclosing scope to an anonymous module if passed true for 'wrap'
+SpecTag:fails::Kernel#load (shell expansion) expands a tilde to the HOME environment variable as the path to load
+SpecTag:fails::Kernel.load (path resolution) loads an absolute path
+SpecTag:fails::Kernel.load (path resolution) loads a non-canonical absolute path
+SpecTag:fails::Kernel.load (path resolution) loads a file defining many methods
+SpecTag:fails::Kernel.load (path resolution) raises a LoadError if the file does not exist
+SpecTag:fails::Kernel.load (path resolution) calls #to_str on non-String objects
+SpecTag:fails::Kernel.load (path resolution) raises a TypeError if passed an object that has #to_s but not #to_str
+SpecTag:fails::Kernel.load (path resolution) raises a TypeError if #to_str does not return a String
+SpecTag:fails::Kernel.load (path resolution) raises a TypeError if passed an object that has #to_path but not #to_str
+SpecTag:fails::Kernel.load (path resolution) calls #to_path on non-String objects
+SpecTag:fails::Kernel.load (path resolution) calls #to_path on a String
+SpecTag:fails::Kernel.load (path resolution) calls #to_str on non-String objects returned by #to_path
+SpecTag:fails::Kernel.load (path resolution) loads a ./ relative path from the current working directory with empty $LOAD_PATH
+SpecTag:fails::Kernel.load (path resolution) loads a ../ relative path from the current working directory with empty $LOAD_PATH
+SpecTag:fails::Kernel.load (path resolution) loads a ./ relative path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel.load (path resolution) loads a ../ relative path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel.load (path resolution) loads a non-canonical path from the current working directory with non-empty $LOAD_PATH
+SpecTag:fails::Kernel.load (path resolution) resolves a filename against $LOAD_PATH entries
+SpecTag:fails::Kernel.load (path resolution) does not resolve a ./ relative path against $LOAD_PATH entries
+SpecTag:fails::Kernel.load (path resolution) does not resolve a ../ relative path against $LOAD_PATH entries
+SpecTag:fails::Kernel.load (path resolution) resolves a non-canonical path against $LOAD_PATH entries
+SpecTag:fails::Kernel.load (path resolution) loads a path with duplicate path separators
+SpecTag:fails::Kernel.load loads a non-extensioned file as a Ruby source file
+SpecTag:fails::Kernel.load loads a non .rb extensioned file as a Ruby source file
+SpecTag:fails::Kernel.load loads from the current working directory
+SpecTag:fails::Kernel.load loads a file that recursively requires itself
+SpecTag:fails::Kernel.load loads a file that recursively loads itself
+SpecTag:fails::Kernel.load loads a file each time the method is called
+SpecTag:fails::Kernel.load loads a file even when the name appears in $LOADED_FEATURES
+SpecTag:fails::Kernel.load loads a file that has been loaded by #require
+SpecTag:fails::Kernel.load does not cause #require with the same path to fail
+SpecTag:fails::Kernel.load does not add the loaded path to $LOADED_FEATURES
+SpecTag:fails::Kernel.load raises a LoadError if passed a non-extensioned path that does not exist but a .rb extensioned path does exist
+SpecTag:fails::Kernel.load sets the enclosing scope to an anonymous module if passed true for 'wrap'
+SpecTag:fails::Kernel.load (shell expansion) expands a tilde to the HOME environment variable as the path to load

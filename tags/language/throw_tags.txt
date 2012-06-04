@@ -1,0 +1,9 @@
+SpecTag:fails::The throw keyword abandons processing
+SpecTag:fails::The throw keyword supports a second parameter
+SpecTag:fails::The throw keyword uses nil as a default second parameter
+SpecTag:fails::The throw keyword only any object as its argument
+SpecTag:fails::The throw keyword does not convert strings to a symbol
+SpecTag:fails::The throw keyword unwinds stack from within a method
+SpecTag:fails::The throw keyword unwinds stack from within a lambda
+SpecTag:fails::The throw keyword raises an ArgumentError if outside of scope of a matching catch
+SpecTag:fails::The throw keyword raises a ArgumentError if used to exit a thread

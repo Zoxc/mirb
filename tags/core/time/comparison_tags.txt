@@ -1,0 +1,10 @@
+SpecTag:fails::Time#<=> returns 1 if the first argument is a point in time after the second argument
+SpecTag:fails::Time#<=> returns 0 if time is the same as other
+SpecTag:fails::Time#<=> returns -1 if the first argument is a point in time before the second argument
+SpecTag:fails::Time#<=> returns 1 if the first argument is a fraction of a microsecond after the second argument
+SpecTag:fails::Time#<=> returns 0 if time is the same as other, including fractional microseconds
+SpecTag:fails::Time#<=> returns -1 if the first argument is a fraction of a microsecond before the second argument
+SpecTag:fails::Time#<=> given a non-Time argument returns nil if argument <=> self returns nil
+SpecTag:fails::Time#<=> given a non-Time argument returns -1 if argument <=> self is greater than 0
+SpecTag:fails::Time#<=> given a non-Time argument returns 1 if argument <=> self is not greater than 0 and is less than 0
+SpecTag:fails::Time#<=> given a non-Time argument returns 0 if argument <=> self is neither greater than 0 nor less than 0

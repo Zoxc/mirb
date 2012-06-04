@@ -1,0 +1,23 @@
+SpecTag:fails::Array#fill returns self
+SpecTag:fails::Array#fill is destructive
+SpecTag:fails::Array#fill does not replicate the filler
+SpecTag:fails::Array#fill replaces all elements in the array with the filler if not given a index nor a length
+SpecTag:fails::Array#fill replaces all elements with the value of block (index given to block)
+SpecTag:fails::Array#fill raises a RuntimeError on a frozen array
+SpecTag:fails::Array#fill raises a RuntimeError on an empty frozen array
+SpecTag:fails::Array#fill raises an ArgumentError if 4 or more arguments are passed when no block given
+SpecTag:fails::Array#fill raises an ArgumentError if no argument passed and no block given
+SpecTag:fails::Array#fill raises an ArgumentError if 3 or more arguments are passed when a block given
+FileTag:fails
+SpecTag:fails::Array#fill with (filler, range) replaces elements in range with object
+SpecTag:fails::Array#fill with (filler, range) replaces all elements in range with the value of block
+SpecTag:fails::Array#fill with (filler, range) increases the Array size when necessary
+SpecTag:fails::Array#fill with (filler, range) raises a TypeError with range and length argument
+SpecTag:fails::Array#fill with (filler, range) replaces elements between the (-m)th to the last and the (n+1)th from the first if given an range m..n where m < 0 and n >= 0
+SpecTag:fails::Array#fill with (filler, range) replaces elements between the (-m)th and (-n)th to the last if given an range m..n where m < 0 and n < 0
+SpecTag:fails::Array#fill with (filler, range) replaces elements between the (m+1)th from the first and (-n)th to the last if given an range m..n where m >= 0 and n < 0
+SpecTag:fails::Array#fill with (filler, range) makes no modifications if given an range which implies a section of zero width
+SpecTag:fails::Array#fill with (filler, range) makes no modifications if given an range which implies a section of negative width
+SpecTag:fails::Array#fill with (filler, range) raise an exception if some of the given range lies before the first of the array
+SpecTag:fails::Array#fill with (filler, range) tries to convert the start and end of the passed range to Integers using #to_int
+SpecTag:fails::Array#fill with (filler, range) raises a TypeError if the start or end of the passed range is not numeric

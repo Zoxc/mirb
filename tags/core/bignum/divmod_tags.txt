@@ -1,0 +1,9 @@
+SpecTag:fails::Bignum#divmod returns an Array containing quotient and modulus obtained from dividing self by the given argument
+SpecTag:fails::Bignum#divmod raises a ZeroDivisionError when the given argument is 0
+SpecTag:fails::Bignum#divmod raises a FloatDomainError if other is NaN
+SpecTag:fails::Bignum#divmod raises a ZeroDivisionError when the given argument is 0 and a Float
+SpecTag:fails::Bignum#divmod raises a TypeError when the given argument is not an Integer
+SpecTag:fails::Bignum#divmod with q = floor(x/y), a = q*b + r, returns [q,r] when a < 0, b > 0 and |a| < b
+SpecTag:fails::Bignum#divmod with q = floor(x/y), a = q*b + r, returns [q,r] when a > 0, b < 0 and a > |b|
+SpecTag:fails::Bignum#divmod with q = floor(x/y), a = q*b + r, returns [q,r] when a > 0, b < 0 and a < |b|
+SpecTag:fails::Bignum#divmod with q = floor(x/y), a = q*b + r, returns [q,r] when a < 0, b < 0 and |a| < |b|

@@ -1,0 +1,3 @@
+SpecTag:fails::Module#private makes the target method uncallable from other types
+SpecTag:fails::Module#private makes a public Object instance method private in a new module
+SpecTag:fails::Module#private makes a public Object instance method private in Kernel

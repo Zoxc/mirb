@@ -1,0 +1,1 @@
+SpecTag:fails::Bignum#~ returns self with each bit flipped

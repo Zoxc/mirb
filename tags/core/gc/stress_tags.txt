@@ -1,0 +1,2 @@
+SpecTag:fails::GC.stress returns current status of GC stress mode
+SpecTag:fails::GC.stress= sets the stress mode

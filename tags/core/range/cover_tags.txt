@@ -1,0 +1,9 @@
+SpecTag:fails::Range#cover? raises an ArgumentError without exactly one argument
+SpecTag:fails::Range#cover? returns true if argument is equal to the first value of the range
+SpecTag:fails::Range#cover? returns true if argument is equal to the last value of the range
+SpecTag:fails::Range#cover? returns true if argument is less than the last value of the range and greater than the first value
+SpecTag:fails::Range#cover? returns true if argument is sole element in the range
+SpecTag:fails::Range#cover? returns false if range is empty
+SpecTag:fails::Range#cover? returns false if the range does not contain the argument
+SpecTag:fails::Range#cover? uses the range element's <=> to make the comparison
+SpecTag:fails::Range#cover? uses a continuous inclusion test

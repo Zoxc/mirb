@@ -1,0 +1,16 @@
+SpecTag:fails::String#oct treats numeric digits as base-8 digits by default
+SpecTag:fails::String#oct accepts numbers formatted as binary
+SpecTag:fails::String#oct accepts numbers formatted as hexadecimal
+SpecTag:fails::String#oct accepts numbers formatted as decimal
+SpecTag:fails::String#oct accepts a single underscore separating digits
+SpecTag:fails::String#oct does not accept a sequence of underscores as part of a number
+SpecTag:fails::String#oct ignores characters that are incorrect for the base-8 digits
+SpecTag:fails::String#oct returns 0 if no characters can be interpreted as a base-8 number
+SpecTag:fails::String#oct with a leading minus sign treats numeric digits as base-8 digits by default
+SpecTag:fails::String#oct with a leading minus sign accepts numbers formatted as binary
+SpecTag:fails::String#oct with a leading minus sign accepts numbers formatted as hexadecimal
+SpecTag:fails::String#oct with a leading minus sign accepts numbers formatted as decimal
+SpecTag:fails::String#oct with a leading plus sign treats numeric digits as base-8 digits by default
+SpecTag:fails::String#oct with a leading plus sign accepts numbers formatted as binary
+SpecTag:fails::String#oct with a leading plus sign accepts numbers formatted as hexadecimal
+SpecTag:fails::String#oct with a leading plus sign accepts numbers formatted as decimal

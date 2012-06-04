@@ -1,0 +1,2 @@
+SpecTag:fails::File\003A\003AStat#executable? raises an ArgumentError if not passed one argument
+SpecTag:fails::File\003A\003AStat#executable? raises a TypeError if not passed a String type

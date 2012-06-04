@@ -1,0 +1,12 @@
+SpecTag:fails::Array#permutation returns an Enumerator of all permutations when called without a block or arguments
+SpecTag:fails::Array#permutation returns an Enumerator of permutations of given length when called with an argument but no block
+SpecTag:fails::Array#permutation yields all permutations to the block then returns self when called with block but no arguments
+SpecTag:fails::Array#permutation yields all permutations of given length to the block then returns self when called with block and argument
+SpecTag:fails::Array#permutation returns the empty permutation ([[]]) when the given length is 0
+SpecTag:fails::Array#permutation returns the empty permutation([]) when called on an empty Array
+SpecTag:fails::Array#permutation returns no permutations when the given length has no permutations
+SpecTag:fails::Array#permutation handles duplicate elements correctly
+SpecTag:fails::Array#permutation handles nested Arrays correctly
+SpecTag:fails::Array#permutation truncates Float arguments
+SpecTag:fails::Array#permutation returns an Enumerator which works as expected even when the array was modified
+SpecTag:fails::Array#permutation generates from a defensive copy, ignoring mutations

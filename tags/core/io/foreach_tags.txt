@@ -1,0 +1,17 @@
+SpecTag:fails::IO.foreach raises TypeError if the first parameter is nil
+SpecTag:fails::IO.foreach raises Errno\003A\003AENOENT if the file does not exist
+SpecTag:fails::IO.foreach converts first parameter to string and uses as file name
+SpecTag:fails::IO.foreach returns an Enumerator when called without a block
+SpecTag:fails::IO.foreach with no separator argument yields a sequence of Strings that were separated by $/
+SpecTag:fails::IO.foreach with no separator argument updates $. with each yield
+SpecTag:fails::IO.foreach with nil as the separator argument yields a single string with entire content
+SpecTag:fails::IO.foreach with nil as the separator argument updates $. with each yield
+SpecTag:fails::IO.foreach with an empty String as the separator argument yields a sequence of paragraphs when the separator is an empty string
+SpecTag:fails::IO.foreach with an empty String as the separator argument updates $. with each yield
+SpecTag:fails::IO.foreach with an arbitrary String as the separator argument yields a sequence of Strings that were separated by r
+SpecTag:fails::IO.foreach with an arbitrary String as the separator argument updates $. with each yield
+SpecTag:fails::IO.foreach with an arbitrary String as the separator argument accepts non-ASCII data as separator
+SpecTag:fails::IO.foreach with an object as the separator argument calls #to_str once for each line read to convert it to a String
+SpecTag:fails::IO.foreach with an object as the separator argument calls #to_path on non-String arguments
+SpecTag:fails::IO.foreach when the filename starts with | gets data from the standard out of the subprocess
+SpecTag:fails::IO.foreach when the filename starts with | gets data from a fork when passed -

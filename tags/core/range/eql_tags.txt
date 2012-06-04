@@ -1,0 +1,3 @@
+SpecTag:fails::Range#eql? returns true if other has same begin, end, and exclude_end? values
+SpecTag:fails::Range#eql? returns false if other is no Range
+SpecTag:fails::Range#eql? returns true for subclasses to Range

@@ -1,0 +1,3 @@
+SpecTag:fails::Numeric#real returns self
+SpecTag:fails::Numeric#real raises an ArgumentError if given any arguments
+SpecTag:fails::Numeric#real? returns true

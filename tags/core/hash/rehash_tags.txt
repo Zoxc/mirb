@@ -1,0 +1,2 @@
+SpecTag:fails::Hash#rehash reorganizes the hash by recomputing all key hash codes
+SpecTag:fails::Hash#rehash raises a RuntimeError if called on a frozen instance

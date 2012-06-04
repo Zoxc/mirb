@@ -1,0 +1,4 @@
+SpecTag:fails::Fixnum#/ supports dividing negative numbers
+SpecTag:fails::Fixnum#/ does NOT raise ZeroDivisionError if the given argument is zero and is a Float
+SpecTag:fails::Fixnum#/ coerces fixnum and return self divided by other
+SpecTag:fails::Fixnum#/ raises a TypeError when given a non-Integer

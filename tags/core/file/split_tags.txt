@@ -1,0 +1,10 @@
+SpecTag:fails::File.split splits the string at the last '/' when the last component does not have an extension
+SpecTag:fails::File.split splits the string at the last '/' when the last component has an extension
+SpecTag:fails::File.split splits an empty string into a '.' and an empty string
+SpecTag:fails::File.split collapses multiple '/' characters and strips trailing ones
+SpecTag:fails::File.split splits the string at the last '\\' when the last component does not have an extension
+SpecTag:fails::File.split splits the string at the last '\\' when the last component has an extension
+SpecTag:fails::File.split raises an ArgumentError when not passed a single argument
+SpecTag:fails::File.split raises a TypeError if the argument is not a String type
+SpecTag:fails::File.split coerces the argument with to_str if it is not a String type
+SpecTag:fails::File.split accepts an object that has a #to_path method

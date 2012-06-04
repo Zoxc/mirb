@@ -1,0 +1,1 @@
+SpecTag:fails::Proc#clone returns a copy of self

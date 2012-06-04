@@ -1,0 +1,6 @@
+SpecTag:fails::Enumerable#minmax min should return the minimum element
+SpecTag:fails::Enumerable#minmax returns [nil, nil] for an empty Enumerable
+SpecTag:fails::Enumerable#minmax raises an ArgumentError when elements are incomparable
+SpecTag:fails::Enumerable#minmax raises a NoMethodError for elements without #<=>
+SpecTag:fails::Enumerable#minmax return the minimun when using a block rule
+SpecTag:fails::Enumerable#minmax gathers whole arrays as elements when each yields multiple

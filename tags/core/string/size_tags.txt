@@ -1,0 +1,1 @@
+SpecTag:fails::String#size returns the length of self

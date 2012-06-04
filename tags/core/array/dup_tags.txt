@@ -1,0 +1,7 @@
+SpecTag:fails::Array#dup returns an Array or a subclass instance
+SpecTag:fails::Array#dup produces a shallow copy where the references are directly copied
+SpecTag:fails::Array#dup creates a new array containing all elements or the original
+SpecTag:fails::Array#dup copies taint status from the original
+SpecTag:fails::Array#dup copies untrusted status from the original
+SpecTag:fails::Array#dup does not copy frozen status from the original
+SpecTag:fails::Array#dup does not copy singleton methods

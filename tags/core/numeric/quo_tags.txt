@@ -1,0 +1,6 @@
+SpecTag:fails::Numeric#quo returns the result of self divided by the given Integer as a Rational
+SpecTag:fails::Numeric#quo returns the result of self divided by the given Float as a Float
+SpecTag:fails::Numeric#quo returns the result of self divided by the given Bignum as a Float
+SpecTag:fails::Numeric#quo raises a ZeroDivisionError when the given Integer is 0
+SpecTag:fails::Numeric#quo returns the result of calling self#/ with other
+SpecTag:fails::Numeric#quo raises a TypeError when given a non-Integer

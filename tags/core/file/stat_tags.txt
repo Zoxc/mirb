@@ -1,0 +1,5 @@
+SpecTag:fails::File.stat returns a File\003A\003AStat object if the given file exists
+SpecTag:fails::File.stat returns a File\003A\003AStat object when called on an instance of File
+SpecTag:fails::File.stat accepts an object that has a #to_path method
+SpecTag:fails::File.stat raises an Errno\003A\003AENOENT if the file does not exist
+SpecTag:fails::File.stat returns information for a file that has been deleted but is still open

@@ -1,0 +1,32 @@
+SpecTag:fails::String#unpack with format 'M' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'M' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'M' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'M' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'M' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'M' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'M' decodes an empty string
+SpecTag:fails::String#unpack with format 'M' decodes the complete string ignoring newlines when given a single directive
+SpecTag:fails::String#unpack with format 'M' appends empty string to the array for directives exceeding the input size
+SpecTag:fails::String#unpack with format 'M' ignores the count or '*' modifier and decodes the entire string
+SpecTag:fails::String#unpack with format 'M' decodes the '=' character
+SpecTag:fails::String#unpack with format 'M' decodes an embedded space character
+SpecTag:fails::String#unpack with format 'M' decodes a space at the end of the pre-encoded string
+SpecTag:fails::String#unpack with format 'M' decodes an embedded tab character
+SpecTag:fails::String#unpack with format 'M' decodes a tab character at the end of the pre-encoded string
+SpecTag:fails::String#unpack with format 'M' decodes an embedded newline
+SpecTag:fails::String#unpack with format 'M' decodes pre-encoded byte values 33..60
+SpecTag:fails::String#unpack with format 'M' decodes pre-encoded byte values 62..126
+SpecTag:fails::String#unpack with format 'M' decodes pre-encoded byte values 0..31 except tab and newline
+SpecTag:fails::String#unpack with format 'M' decodes pre-encoded byte values 127..255
+SpecTag:fails::String#unpack with format 'm' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'm' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'm' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'm' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'm' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'm' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'm' decodes an empty string
+SpecTag:fails::String#unpack with format 'm' decodes the complete string ignoring newlines when given a single directive
+SpecTag:fails::String#unpack with format 'm' ignores the count or '*' modifier and decodes the entire string
+SpecTag:fails::String#unpack with format 'm' appends empty string to the array for directives exceeding the input size
+SpecTag:fails::String#unpack with format 'm' decodes all pre-encoded ascii byte values
+SpecTag:fails::String#unpack with format 'm' produces binary strings

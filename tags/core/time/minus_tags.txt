@@ -1,0 +1,11 @@
+SpecTag:fails::Time#- decrements the time by the specified amount
+SpecTag:fails::Time#- understands negative subtractions
+SpecTag:fails::Time#- does NOT round
+SpecTag:fails::Time#- accepts arguments that can be coerced into Rational
+SpecTag:fails::Time#- raises TypeError on argument that can't be coerced
+SpecTag:fails::Time#- raises TypeError on nil argument
+SpecTag:fails::Time#- tracks microseconds
+SpecTag:fails::Time#- returns a UTC time if self is UTC
+SpecTag:fails::Time#- returns a non-UTC time if self is non-UTC
+SpecTag:fails::Time#- returns a time with the same fixed offset as self
+SpecTag:fails::Time#- does not returns a subclass instance

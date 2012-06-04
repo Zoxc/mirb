@@ -1,0 +1,9 @@
+SpecTag:fails::Array literals [] accepts a literal hash without curly braces as its only parameter
+SpecTag:fails::Bareword array literal %W() always treats interpolated expressions as a single word
+SpecTag:fails::Bareword array literal treats whitespace as literals characters when escaped by a backslash
+SpecTag:fails::The unpacking splat operator (*) returns the array when applied to an array inside an empty array
+SpecTag:fails::The unpacking splat operator (*) unpacks the start and count arguments in an array slice assignment
+SpecTag:fails::The unpacking splat operator (*) unpacks arguments as if they were listed statically
+SpecTag:fails::Array literals [] accepts a literal hash without curly braces as its last parameter
+SpecTag:fails::Array literals [] treats splatted nil as no element
+SpecTag:fails::The unpacking splat operator (*) when applied to a non-Array value attempts to coerce it to Array if the object respond_to?(\003Ato_a)

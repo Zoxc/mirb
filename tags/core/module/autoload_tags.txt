@@ -1,0 +1,38 @@
+SpecTag:fails::Module#autoload? returns the name of the file that will be autoloaded
+SpecTag:fails::Module#autoload? returns nil if no file has been registered for a constant
+SpecTag:fails::Module#autoload registers a file to load the first time the named constant is accessed
+SpecTag:fails::Module#autoload sets the autoload constant in the constants table
+SpecTag:fails::Module#autoload loads the registered constant when it is accessed
+SpecTag:fails::Module#autoload loads the registered constant into a dynamically created class
+SpecTag:fails::Module#autoload loads the registered constant into a dynamically created module
+SpecTag:fails::Module#autoload loads the registered constant when it is opened as a class
+SpecTag:fails::Module#autoload loads the registered constant when it is opened as a module
+SpecTag:fails::Module#autoload loads the registered constant when it is inherited from
+SpecTag:fails::Module#autoload loads the registered constant when it is included
+SpecTag:fails::Module#autoload does not load the file when the constant is already set
+SpecTag:fails::Module#autoload loads a file with .rb extension when passed the name without the extension
+SpecTag:fails::Module#autoload does not load the file if the file is manually required
+SpecTag:fails::Module#autoload ignores the autoload request if the file is already loaded
+SpecTag:fails::Module#autoload retains the autoload even if the request to require fails
+SpecTag:fails::Module#autoload allows multiple autoload constants for a single file
+SpecTag:fails::Module#autoload runs for an exception condition class and doesn't trample the exception
+SpecTag:fails::Module#autoload does not remove the constant from the constant table if load fails
+SpecTag:fails::Module#autoload does not remove the constant from the constant table if the loaded files does not define it
+SpecTag:fails::Module#autoload return nil on refering the constant with defined?()
+SpecTag:fails::Module#autoload does not load the file when removing an autoload constant
+SpecTag:fails::Module#autoload does not load the file when accessing the constants table of the module
+SpecTag:fails::Module#autoload loads the file when opening a module that is the autoloaded constant
+SpecTag:fails::Module#autoload loads the file that defines subclass XX\003A\003AYY < YY and YY is a top level constant
+SpecTag:fails::Module#autoload does NOT raise a NameError when the autoload file did not define the constant and a module is opened with the same name
+SpecTag:fails::Module#autoload calls #to_path on non-string filenames
+SpecTag:fails::Module#autoload raises an ArgumentError when an empty filename is given
+SpecTag:fails::Module#autoload raises a NameError when the constant name starts with a lower case letter
+SpecTag:fails::Module#autoload raises a NameError when the constant name starts with a number
+SpecTag:fails::Module#autoload raises a NameError when the constant name has a space in it
+SpecTag:fails::Module#autoload shares the autoload request across dup'ed copies of modules
+SpecTag:fails::Module#autoload raises a TypeError if opening a class with a different superclass than the class defined in the autoload file
+SpecTag:fails::Module#autoload raises a TypeError if not passed a String or object respodning to #to_path for the filename
+SpecTag:fails::Module#autoload calls #to_path on non-String filename arguments
+SpecTag:fails::Module#autoload (concurrently) blocks a second thread while a first is doing the autoload
+SpecTag:fails::Module#autoload does not call Kernel#require or Kernel#load dynamically
+FileTag:fails

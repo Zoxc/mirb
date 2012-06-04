@@ -1,0 +1,4 @@
+SpecTag:fails::Float#finite? returns true for finite values
+SpecTag:fails::Float#finite? returns false for positive infinity
+SpecTag:fails::Float#finite? returns false for negative infinity
+SpecTag:fails::Float#finite? returns false for NaN

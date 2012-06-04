@@ -1,0 +1,6 @@
+SpecTag:fails::String#rpartition with String returns an array of substrings based on splitting on the given string
+SpecTag:fails::String#rpartition with String always returns 3 elements
+SpecTag:fails::String#rpartition with String accepts regexp
+SpecTag:fails::String#rpartition with String affects $~
+SpecTag:fails::String#rpartition with String converts its argument using \003Ato_str
+SpecTag:fails::String#rpartition with String raises error if not convertible to string

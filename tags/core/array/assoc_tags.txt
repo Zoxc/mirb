@@ -1,0 +1,3 @@
+SpecTag:fails::Array#assoc returns the first array whose 1st item is == obj or nil
+SpecTag:fails::Array#assoc calls == on first element of each array
+SpecTag:fails::Array#assoc ignores any non-Array elements

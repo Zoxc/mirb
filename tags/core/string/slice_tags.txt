@@ -1,0 +1,86 @@
+SpecTag:fails::String#slice returns the character code of the character at the given index
+SpecTag:fails::String#slice returns nil if index is outside of self
+SpecTag:fails::String#slice calls to_int on the given index
+SpecTag:fails::String#slice with index, length returns the substring starting at the given index with the given length
+SpecTag:fails::String#slice with index, length always taints resulting strings when self is tainted
+SpecTag:fails::String#slice with index, length returns nil if the offset falls outside of self
+SpecTag:fails::String#slice with index, length returns nil if the length is negative
+SpecTag:fails::String#slice with index, length calls to_int on the given index and the given length
+SpecTag:fails::String#slice with index, length returns subclass instances
+SpecTag:fails::String#slice with Range returns the substring given by the offsets of the range
+SpecTag:fails::String#slice with Range returns nil if the beginning of the range falls outside of self
+SpecTag:fails::String#slice with Range returns an empty string if range.begin is inside self and > real end
+SpecTag:fails::String#slice with Range always taints resulting strings when self is tainted
+SpecTag:fails::String#slice with Range returns subclass instances
+SpecTag:fails::String#slice with Range calls to_int on range arguments
+SpecTag:fails::String#slice with Range works with Range subclasses
+SpecTag:fails::String#slice with Regexp returns the matching portion of self
+SpecTag:fails::String#slice with Regexp returns nil if there is no match
+SpecTag:fails::String#slice with Regexp always taints resulting strings when self or regexp is tainted
+SpecTag:fails::String#slice with Regexp returns subclass instances
+SpecTag:fails::String#slice with Regexp sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#slice with Regexp, index returns the capture for the given index
+SpecTag:fails::String#slice with Regexp, index always taints resulting strings when self or regexp is tainted
+SpecTag:fails::String#slice with Regexp, index returns nil if there is no match
+SpecTag:fails::String#slice with Regexp, index returns nil if there is no capture for the given index
+SpecTag:fails::String#slice with Regexp, index calls to_int on the given index
+SpecTag:fails::String#slice with Regexp, index returns subclass instances
+SpecTag:fails::String#slice with Regexp, index sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#slice with Regexp, group returns the capture for the given name
+SpecTag:fails::String#slice with Regexp, group returns the last capture for duplicate names
+SpecTag:fails::String#slice with Regexp, group returns the innermost capture for nested duplicate names
+SpecTag:fails::String#slice with Regexp, group always taints resulting strings when self or regexp is tainted
+SpecTag:fails::String#slice with Regexp, group returns nil if there is no match
+SpecTag:fails::String#slice with Regexp, group raises an IndexError if there is no capture for the given name
+SpecTag:fails::String#slice with Regexp, group raises an IndexError when given the empty String as a group name
+SpecTag:fails::String#slice with Regexp, group returns subclass instances
+SpecTag:fails::String#slice with Regexp, group sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#slice with String returns other_str if it occurs in self
+SpecTag:fails::String#slice with String taints resulting strings when other is tainted
+SpecTag:fails::String#slice with String doesn't set $~
+SpecTag:fails::String#slice with String returns nil if there is no match
+SpecTag:fails::String#slice with String doesn't call to_str on its argument
+SpecTag:fails::String#slice with String returns a subclass instance when given a subclass instance
+SpecTag:fails::String#slice! with index deletes and return the char at the given position
+SpecTag:fails::String#slice! with index returns nil if idx is outside of self
+SpecTag:fails::String#slice! with index raises a RuntimeError if self is frozen
+SpecTag:fails::String#slice! with index calls to_int on index
+SpecTag:fails::String#slice! with index, length deletes and returns the substring at idx and the given length
+SpecTag:fails::String#slice! with index, length always taints resulting strings when self is tainted
+SpecTag:fails::String#slice! with index, length returns nil if the given position is out of self
+SpecTag:fails::String#slice! with index, length returns nil if the length is negative
+SpecTag:fails::String#slice! with index, length raises a RuntimeError if self is frozen
+SpecTag:fails::String#slice! with index, length calls to_int on idx and length
+SpecTag:fails::String#slice! with index, length returns subclass instances
+SpecTag:fails::String#slice! Range deletes and return the substring given by the offsets of the range
+SpecTag:fails::String#slice! Range returns nil if the given range is out of self
+SpecTag:fails::String#slice! Range always taints resulting strings when self is tainted
+SpecTag:fails::String#slice! Range returns subclass instances
+SpecTag:fails::String#slice! Range calls to_int on range arguments
+SpecTag:fails::String#slice! Range works with Range subclasses
+SpecTag:fails::String#slice! Range raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#slice! Range raises a RuntimeError on a frozen instance that would not be modified
+SpecTag:fails::String#slice! with Regexp deletes and returns the first match from self
+SpecTag:fails::String#slice! with Regexp returns nil if there was no match
+SpecTag:fails::String#slice! with Regexp always taints resulting strings when self or regexp is tainted
+SpecTag:fails::String#slice! with Regexp doesn't taint self when regexp is tainted
+SpecTag:fails::String#slice! with Regexp returns subclass instances
+SpecTag:fails::String#slice! with Regexp sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#slice! with Regexp raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::String#slice! with Regexp raises a RuntimeError on a frozen instance that would not be modified
+SpecTag:fails::String#slice! with Regexp, index deletes and returns the capture for idx from self
+SpecTag:fails::String#slice! with Regexp, index always taints resulting strings when self or regexp is tainted
+SpecTag:fails::String#slice! with Regexp, index doesn't taint self when regexp is tainted
+SpecTag:fails::String#slice! with Regexp, index returns nil if there was no match
+SpecTag:fails::String#slice! with Regexp, index returns nil if there is no capture for idx
+SpecTag:fails::String#slice! with Regexp, index calls to_int on idx
+SpecTag:fails::String#slice! with Regexp, index returns subclass instances
+SpecTag:fails::String#slice! with Regexp, index sets $~ to MatchData when there is a match and nil when there's none
+SpecTag:fails::String#slice! with Regexp, index raises a RuntimeError if self is frozen
+SpecTag:fails::String#slice! with String removes and returns the first occurrence of other_str from self
+SpecTag:fails::String#slice! with String taints resulting strings when other is tainted
+SpecTag:fails::String#slice! with String doesn't set $~
+SpecTag:fails::String#slice! with String returns nil if self does not contain other
+SpecTag:fails::String#slice! with String doesn't call to_str on its argument
+SpecTag:fails::String#slice! with String returns a subclass instance when given a subclass instance
+SpecTag:fails::String#slice! with String raises a RuntimeError if self is frozen

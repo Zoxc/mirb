@@ -1,0 +1,5 @@
+SpecTag:fails::Struct#eql? returns true if the other is the same object
+SpecTag:fails::Struct#eql? returns true if the other has all the same fields
+SpecTag:fails::Struct#eql? returns false if the other is a different object or has different fields
+SpecTag:fails::Struct#eql? handles recursive structures by returning false if a difference can be found 
+SpecTag:fails::Struct#eql? returns false if any corresponding elements are not #eql?

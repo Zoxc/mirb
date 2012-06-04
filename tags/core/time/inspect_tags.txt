@@ -1,0 +1,3 @@
+SpecTag:fails::Time.inspect formats the local time following the pattern 'yyyy-MM-dd HH\003Amm\003Ass Z'
+SpecTag:fails::Time.inspect formats the UTC time following the pattern 'yyyy-MM-dd HH\003Amm\003Ass UTC'
+SpecTag:fails::Time.inspect formats the fixed offset time following the pattern 'yyyy-MM-dd HH\003Amm\003Ass +/-HHMM'

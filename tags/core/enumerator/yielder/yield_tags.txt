@@ -1,0 +1,2 @@
+SpecTag:fails::Enumerator\003A\003AYielder#yield yields the value to the block
+SpecTag:fails::Enumerator\003A\003AYielder#yield returns the result of the block for the given value

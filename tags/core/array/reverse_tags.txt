@@ -1,0 +1,6 @@
+SpecTag:fails::Array#reverse returns a new array with the elements in reverse order
+SpecTag:fails::Array#reverse properly handles recursive arrays
+SpecTag:fails::Array#reverse returns subclass instance on Array subclasses
+SpecTag:fails::Array#reverse! reverses the elements in place
+SpecTag:fails::Array#reverse! properly handles recursive arrays
+SpecTag:fails::Array#reverse! raises a RuntimeError on a frozen array

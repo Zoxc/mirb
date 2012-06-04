@@ -1,0 +1,5 @@
+SpecTag:fails::Numeric#rect returns an Array
+SpecTag:fails::Numeric#rect returns a two-element Array
+SpecTag:fails::Numeric#rect returns self as the first element
+SpecTag:fails::Numeric#rect returns 0 as the last element
+SpecTag:fails::Numeric#rect raises an ArgumentError if given any arguments

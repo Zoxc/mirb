@@ -1,0 +1,13 @@
+SpecTag:fails::String#squeeze returns new string where runs of the same character are replaced by a single character when no args are given
+SpecTag:fails::String#squeeze only squeezes chars that are in the intersection of all sets given
+SpecTag:fails::String#squeeze negates sets starting with ^
+SpecTag:fails::String#squeeze squeezes all chars in a sequence
+SpecTag:fails::String#squeeze raises an ArgumentError when the parameter is out of sequence
+SpecTag:fails::String#squeeze taints the result when self is tainted
+SpecTag:fails::String#squeeze tries to convert each set arg to a string using to_str
+SpecTag:fails::String#squeeze raises a TypeError when one set arg can't be converted to a string
+SpecTag:fails::String#squeeze returns subclass instances when called on a subclass
+SpecTag:fails::String#squeeze! modifies self in place and returns self
+SpecTag:fails::String#squeeze! returns nil if no modifications were made
+SpecTag:fails::String#squeeze! raises an ArgumentError when the parameter is out of sequence
+SpecTag:fails::String#squeeze! raises a RuntimeError when self is frozen

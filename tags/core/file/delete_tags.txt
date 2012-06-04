@@ -1,0 +1,7 @@
+SpecTag:fails::File.delete returns 0 when called without arguments
+SpecTag:fails::File.delete deletes a single file
+SpecTag:fails::File.delete deletes multiple files
+SpecTag:fails::File.delete raises an TypeError if not passed a String type
+SpecTag:fails::File.delete raises an Errno\003A\003AENOENT when the given file doesn't exist
+SpecTag:fails::File.delete coerces a given parameter into a string if possible
+SpecTag:fails::File.delete accepts an object that has a #to_path method

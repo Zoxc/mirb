@@ -1,0 +1,9 @@
+SpecTag:fails::Symbol#capitalize returns a Symbol
+SpecTag:fails::Symbol#capitalize converts the first character to uppercase if it is ASCII
+SpecTag:fails::Symbol#capitalize leaves the first character alone if it is not an alphabetical ASCII character
+SpecTag:fails::Symbol#capitalize converts subsequent uppercase ASCII characters to their lowercase equivalents
+SpecTag:fails::Symbol#capitalize leaves ASCII characters already in the correct case as they were
+SpecTag:fails::Symbol#capitalize works with both upper- and lowercase ASCII characters in the same Symbol
+SpecTag:fails::Symbol#capitalize leaves uppercase Unicode characters as they were
+SpecTag:fails::Symbol#capitalize leaves lowercase Unicode characters as they were
+SpecTag:fails::Symbol#capitalize leaves non-alphabetic ASCII characters as they were

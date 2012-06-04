@@ -1,0 +1,11 @@
+SpecTag:fails::Integer#round returns self
+SpecTag:fails::Integer#round rounds itself as a float if passed a positive precision
+SpecTag:fails::Integer#round returns itself if passed zero
+SpecTag:fails::Integer#round returns itself rounded if passed a negative value
+SpecTag:fails::Integer#round returns 0 if passed a big negative value
+SpecTag:fails::Integer#round raises a RangeError when passed Float\003A\003AINFINITY
+SpecTag:fails::Integer#round raises a RangeError when passed a beyond signed int
+SpecTag:fails::Integer#round raises a TypeError when passed a String
+SpecTag:fails::Integer#round raises a TypeError when its argument cannot be converted to an Integer
+SpecTag:fails::Integer#round calls #to_int on the argument to convert it to an Integer
+SpecTag:fails::Integer#round raises a TypeError when #to_int does not return an Integer

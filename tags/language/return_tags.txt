@@ -1,0 +1,11 @@
+SpecTag:fails::The return keyword in a Thread raises a LocalJumpError if used to exit a thread
+SpecTag:fails::The return keyword when passed a splat calls 'to_a' on the splatted value first
+SpecTag:fails::The return keyword within a begin executes ensure before returning
+SpecTag:fails::The return keyword within a begin returns last value returned in ensure
+SpecTag:fails::The return keyword within a begin executes nested ensures before returning
+SpecTag:fails::The return keyword within a begin returns last value returned in nested ensures
+SpecTag:fails::The return keyword within a begin executes the ensure clause when begin/ensure are inside a lambda
+SpecTag:fails::The return keyword within a block causes lambda to return nil if invoked without any arguments
+SpecTag:fails::The return keyword within a block causes lambda to return nil if invoked with an empty expression
+SpecTag:fails::The return keyword within a block causes lambda to return the value passed to return
+SpecTag:fails::The return keyword within define_method stops at the method when the return is used directly

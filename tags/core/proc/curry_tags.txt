@@ -1,0 +1,22 @@
+SpecTag:fails::Proc#curry returns a Proc when called on a proc
+SpecTag:fails::Proc#curry returns a Proc when called on a lambda
+SpecTag:fails::Proc#curry calls the curried proc with the arguments if sufficient arguments have been given
+SpecTag:fails::Proc#curry returns a Proc that consumes the remainder of the arguments unless sufficient arguments have been given
+SpecTag:fails::Proc#curry can be called multiple times on the same Proc
+SpecTag:fails::Proc#curry can be passed superfluous arguments if created from a proc
+SpecTag:fails::Proc#curry raises an ArgumentError if passed superfluous arguments when created from a lambda
+SpecTag:fails::Proc#curry returns Procs with arities of -1
+SpecTag:fails::Proc#curry produces Procs that raise ArgumentError for #binding
+SpecTag:fails::Proc#curry produces Procs that return [[\003Arest]] for #parameters
+SpecTag:fails::Proc#curry produces Procs that return nil for #source_location
+SpecTag:fails::Proc#curry with arity argument accepts an optional Integer argument for the arity
+SpecTag:fails::Proc#curry with arity argument returns a Proc when called on a proc
+SpecTag:fails::Proc#curry with arity argument returns a Proc when called on a lambda
+SpecTag:fails::Proc#curry with arity argument retains the lambda-ness of the Proc on which its called
+SpecTag:fails::Proc#curry with arity argument raises an ArgumentError if called on a lambda that requires more than _arity_ arguments
+SpecTag:fails::Proc#curry with arity argument raises an ArgumentError if called on a lambda that requires fewer than _arity_ arguments
+SpecTag:fails::Proc#curry with arity argument calls the curried proc with the arguments if _arity_ arguments have been given
+SpecTag:fails::Proc#curry with arity argument returns a Proc that consumes the remainder of the arguments when fewer than _arity_ arguments are given
+SpecTag:fails::Proc#curry with arity argument can be specified multiple times on the same Proc
+SpecTag:fails::Proc#curry with arity argument raises an ArgumentError if passed more than _arity_ arguments when created from a lambda
+SpecTag:fails::Proc#curry with arity argument returns Procs with arities of -1 regardless of the value of _arity_

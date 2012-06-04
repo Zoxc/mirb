@@ -1,0 +1,5 @@
+SpecTag:fails::File.realpath returns '/' when passed '/'
+SpecTag:fails::File.realpath returns the real (absolute) pathname not containing symlinks
+SpecTag:fails::File.realpath uses base directory for interpreting relative pathname
+SpecTag:fails::File.realpath uses current directory for interpreting relative pathname
+SpecTag:fails::File.realpath raises a Errno\003A\003AELOOP if symlink points itself

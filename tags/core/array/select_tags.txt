@@ -1,0 +1,6 @@
+SpecTag:fails::Array#select returns an Enumerator if no block given
+SpecTag:fails::Array#select does not return subclass instance on Array subclasses
+SpecTag:fails::Array#select properly handles recursive arrays
+SpecTag:fails::Array#select! returns nil if no changes were made in the array
+SpecTag:fails::Array#select! deletes elements for which the block returns a false value
+SpecTag:fails::Array#select! returns an enumerator if no block is given

@@ -1,0 +1,1 @@
+SpecTag:fails::Float#< returns true if self is less than other

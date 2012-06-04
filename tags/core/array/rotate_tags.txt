@@ -1,0 +1,14 @@
+SpecTag:fails::Array#rotate returns a copy of the array when its length is one or zero
+SpecTag:fails::Array#rotate does not mutate the receiver
+SpecTag:fails::Array#rotate does not return self
+SpecTag:fails::Array#rotate returns subclass instance for Array subclasses
+SpecTag:fails::Array#rotate when passed no argument returns a copy of the array with the first element moved at the end
+SpecTag:fails::Array#rotate with an argument n returns a copy of the array with the first (n % size) elements moved at the end
+SpecTag:fails::Array#rotate with an argument n coerces the argument using to_int
+SpecTag:fails::Array#rotate with an argument n raises a TypeError if not passed an integer-like argument
+SpecTag:fails::Array#rotate! does nothing and returns self when the length is zero or one
+SpecTag:fails::Array#rotate! raises a RuntimeError on a frozen array
+SpecTag:fails::Array#rotate! when passed no argument moves the first element to the end and returns self
+SpecTag:fails::Array#rotate! with an argument n moves the first (n % size) elements at the end and returns self
+SpecTag:fails::Array#rotate! with an argument n coerces the argument using to_int
+SpecTag:fails::Array#rotate! with an argument n raises a TypeError if not passed an integer-like argument

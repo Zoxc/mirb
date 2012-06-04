@@ -1,0 +1,6 @@
+SpecTag:fails::Method#inspect returns a String
+SpecTag:fails::Method#inspect returns a String for methods defined with attr_accessor
+SpecTag:fails::Method#inspect returns a String containing 'Method'
+SpecTag:fails::Method#inspect returns a String containing the method name
+SpecTag:fails::Method#inspect returns a String containing the Module the method is defined in
+SpecTag:fails::Method#inspect returns a String containing the Module the method is referenced from

@@ -1,0 +1,5 @@
+SpecTag:fails::Integer#rationalize returns a Rational object
+SpecTag:fails::Integer#rationalize uses self as the numerator
+SpecTag:fails::Integer#rationalize uses 1 as the denominator
+SpecTag:fails::Integer#rationalize ignores a single argument
+SpecTag:fails::Integer#rationalize raises ArgumentError when passed more than one argument

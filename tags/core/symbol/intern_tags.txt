@@ -1,0 +1,2 @@
+SpecTag:fails::Symbol#intern returns self
+SpecTag:fails::Symbol#intern returns a Symbol

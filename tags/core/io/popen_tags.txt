@@ -1,0 +1,11 @@
+SpecTag:fails::IO.popen returns an open IO
+SpecTag:fails::IO.popen reads a read-only pipe
+SpecTag:fails::IO.popen raises IOError when writing a read-only pipe
+SpecTag:fails::IO.popen returns an instance of a subclass when called on a subclass
+SpecTag:fails::IO.popen coerces mode argument with #to_str
+SpecTag:fails::IO.popen starts returns a forked process if the command is -
+SpecTag:fails::IO.popen with a block yields an open IO to the block
+SpecTag:fails::IO.popen with a block yields an instance of a subclass when called on a subclass
+SpecTag:fails::IO.popen with a block closes the IO after yielding
+SpecTag:fails::IO.popen with a block allows the IO to be closed inside the block
+SpecTag:fails::IO.popen with a block returns the value of the block

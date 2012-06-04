@@ -1,0 +1,17 @@
+SpecTag:fails::Array#collect returns a copy of array with each element replaced by the value returned by block
+SpecTag:fails::Array#collect does not return subclass instance
+SpecTag:fails::Array#collect does not change self
+SpecTag:fails::Array#collect returns the evaluated value of block if it broke in the block
+SpecTag:fails::Array#collect returns an Enumerator when no block given
+SpecTag:fails::Array#collect does not copy tainted status
+SpecTag:fails::Array#collect does not copy untrusted status
+SpecTag:fails::Array#collect! replaces each element with the value returned by block
+SpecTag:fails::Array#collect! returns self
+SpecTag:fails::Array#collect! returns the evaluated value of block but its contents is partially modified, if it broke in the block
+SpecTag:fails::Array#collect! returns an Enumerator when no block given, and the enumerator can modify the original array
+SpecTag:fails::Array#collect! keeps tainted status
+SpecTag:fails::Array#collect! keeps untrusted status
+SpecTag:fails::Array#collect! when frozen raises a RuntimeError
+SpecTag:fails::Array#collect! when frozen raises a RuntimeError when empty
+SpecTag:fails::Array#collect! when frozen raises a RuntimeError when calling #each on the returned Enumerator
+SpecTag:fails::Array#collect! when frozen raises a RuntimeError when calling #each on the returned Enumerator when empty

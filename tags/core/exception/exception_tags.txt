@@ -1,0 +1,17 @@
+SpecTag:fails::Exception.exception creates a new instance of Exception
+SpecTag:fails::Exception.exception sets the message of the Exception when passes a message
+SpecTag:fails::Exception.exception returns 'Exception' for message when no message given
+SpecTag:fails::Exception.exception returns the exception when it has a custom constructor
+SpecTag:fails::Exception is a superclass of NoMemoryError
+SpecTag:fails::Exception is a superclass of ScriptError
+SpecTag:fails::Exception is a superclass of SignalException
+SpecTag:fails::Exception is a superclass of Interrupt
+SpecTag:fails::Exception is a superclass of StandardError
+SpecTag:fails::Exception is a superclass of SystemExit
+SpecTag:fails::Exception is a superclass of SystemStackError
+SpecTag:fails::Exception is a superclass of SecurityError
+SpecTag:fails::Exception is a superclass of EncodingError
+SpecTag:fails::Exception#exception returns self when passed no argument
+SpecTag:fails::Exception#exception returns self when passed self as an argument
+SpecTag:fails::Exception#exception returns an exception of the same class as self with the message given as argument
+SpecTag:fails::Exception#exception returns an exception of the same class as self with the message given as argument, but without reinitializing

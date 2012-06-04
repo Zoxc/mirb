@@ -1,0 +1,13 @@
+SpecTag:fails::String#delete returns a new string with the chars from the intersection of sets removed
+SpecTag:fails::String#delete raises an ArgumentError when given no arguments
+SpecTag:fails::String#delete negates sets starting with ^
+SpecTag:fails::String#delete deletes all chars in a sequence
+SpecTag:fails::String#delete respects backslash for escaping a -
+SpecTag:fails::String#delete raises if the given ranges are invalid
+SpecTag:fails::String#delete taints result when self is tainted
+SpecTag:fails::String#delete tries to convert each set arg to a string using to_str
+SpecTag:fails::String#delete raises a TypeError when one set arg can't be converted to a string
+SpecTag:fails::String#delete returns subclass instances when called on a subclass
+SpecTag:fails::String#delete! modifies self in place and returns self
+SpecTag:fails::String#delete! returns nil if no modifications were made
+SpecTag:fails::String#delete! raises a RuntimeError when self is frozen

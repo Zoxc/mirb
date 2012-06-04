@@ -1,0 +1,4 @@
+SpecTag:fails::SystemExit#initialize accepts a status
+SpecTag:fails::SystemExit#initialize accepts a message
+SpecTag:fails::SystemExit#initialize accepts a status and message
+SpecTag:fails::SystemExit#initialize sets the status to 0 by default

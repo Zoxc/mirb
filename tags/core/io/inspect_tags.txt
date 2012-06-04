@@ -1,0 +1,2 @@
+SpecTag:fails::IO#inspect contains the file descriptor number
+SpecTag:fails::IO#inspect contains "(closed)" if the stream is closed

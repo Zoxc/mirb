@@ -1,0 +1,49 @@
+SpecTag:fails::IO.open creates an IO instance from a Fixnum argument
+SpecTag:fails::IO.open calls #to_int on an object to convert to a Fixnum
+SpecTag:fails::IO.open accepts a \003Amode option
+SpecTag:fails::IO.open accepts a mode argument set to nil with a valid \003Amode option
+SpecTag:fails::IO.open accepts a mode argument with a \003Amode option set to nil
+SpecTag:fails::IO.open raises an error if passed modes two ways
+SpecTag:fails::IO.open uses the external encoding specified in the mode argument
+SpecTag:fails::IO.open uses the external and the internal encoding specified in the mode argument
+SpecTag:fails::IO.open uses the external encoding specified via the \003Aexternal_encoding option
+SpecTag:fails::IO.open uses the internal encoding specified via the \003Ainternal_encoding option
+SpecTag:fails::IO.open uses the colon-separated encodings specified via the \003Aencoding option
+SpecTag:fails::IO.open ingores the \003Aencoding option when the \003Aexternal_encoding option is present
+SpecTag:fails::IO.open ingores the \003Aencoding option when the \003Ainternal_encoding option is present
+SpecTag:fails::IO.open uses the encoding specified via the \003Amode option hash
+SpecTag:fails::IO.open ignores the \003Ainternal_encoding option when the same as the external encoding
+SpecTag:fails::IO.open sets internal encoding to nil when passed '-'
+SpecTag:fails::IO.open raises an error if passed encodings two ways
+SpecTag:fails::IO.open sets binmode from mode string
+SpecTag:fails::IO.open does not set binmode without being asked
+SpecTag:fails::IO.open sets binmode from \003Abinmode option
+SpecTag:fails::IO.open does not set binmode from false \003Abinmode
+SpecTag:fails::IO.open raises an error if passed binary/text mode two ways
+SpecTag:fails::IO.open raises an error when trying to set both binmode and textmode
+SpecTag:fails::IO.open sets external encoding to binary with binmode in mode string
+SpecTag:fails::IO.open sets external encoding to binary with \003Abinmode option
+SpecTag:fails::IO.open does not use binary encoding when mode encoding is specified
+SpecTag:fails::IO.open does not use binary encoding when \003Aencoding option is specified
+SpecTag:fails::IO.open does not use binary encoding when \003Aexternal_encoding option is specified
+SpecTag:fails::IO.open does not use binary encoding when \003Ainternal_encoding option is specified
+SpecTag:fails::IO.open accepts nil options
+SpecTag:fails::IO.open coerces mode with #to_str
+SpecTag:fails::IO.open coerces mode with #to_int
+SpecTag:fails::IO.open coerces mode with #to_str when passed in options
+SpecTag:fails::IO.open coerces mode with #to_int when passed in options
+SpecTag:fails::IO.open coerces \003Aencoding option with #to_str
+SpecTag:fails::IO.open coerces \003Aexternal_encoding option with #to_str
+SpecTag:fails::IO.open coerces \003Ainternal_encoding option with #to_str
+SpecTag:fails::IO.open coerces options as third argument with #to_hash
+SpecTag:fails::IO.open coerces options as second argument with #to_hash
+SpecTag:fails::IO.open raises ArgumentError if not passed a hash or nil for options
+SpecTag:fails::IO.open raises TypeError if passed a hash for mode and nil for options
+SpecTag:fails::IO.open raises an Errno\003A\003AEBADF if the file descriptor is not valid
+SpecTag:fails::IO.open raises an IOError if passed a closed stream
+SpecTag:fails::IO.open raises an Errno\003A\003AEINVAL if the new mode is not compatible with the descriptor's current mode
+SpecTag:fails::IO.open raises ArgumentError if passed an empty mode string
+SpecTag:fails::IO.open calls #close after yielding to the block
+SpecTag:fails::IO.open propagates an exception raised by #close that is not a StandardError
+SpecTag:fails::IO.open does not propagate a StandardError raised by #close
+SpecTag:fails::IO.open does not set last error when a StandardError raised by #close

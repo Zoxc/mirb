@@ -1,0 +1,4 @@
+SpecTag:fails::Hash#clear removes all key, value pairs
+SpecTag:fails::Hash#clear does not remove default values
+SpecTag:fails::Hash#clear does not remove default procs
+SpecTag:fails::Hash#clear raises a RuntimeError if called on a frozen instance

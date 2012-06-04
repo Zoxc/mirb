@@ -1,0 +1,4 @@
+SpecTag:fails::Regexps with back-references saves match data in the $~ pseudo-global variable
+SpecTag:fails::Regexps with back-references saves captures in numbered $[1-9] variables
+SpecTag:fails::Regexps with back-references will not clobber capture variables across threads
+SpecTag:fails::Regexps with back-references resets nested <n> backreference before match of outer subexpression

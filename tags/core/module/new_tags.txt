@@ -1,0 +1,2 @@
+SpecTag:fails::Module.new creates a new Module and passes it to the provided block
+SpecTag:fails::Module.new evaluates a passed block in the context of the module

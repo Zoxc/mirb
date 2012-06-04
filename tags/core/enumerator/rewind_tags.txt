@@ -1,0 +1,7 @@
+SpecTag:fails::Enumerator#rewind resets the enumerator to its initial state
+SpecTag:fails::Enumerator#rewind returns self
+SpecTag:fails::Enumerator#rewind has no effect on a new enumerator
+SpecTag:fails::Enumerator#rewind has no effect if called multiple, consecutive times
+SpecTag:fails::Enumerator#rewind works with peek to reset the position
+SpecTag:fails::Enumerator#rewind calls the enclosed object's rewind method if one exists
+SpecTag:fails::Enumerator#rewind does nothing if the object doesn't have a #rewind method

@@ -1,0 +1,5 @@
+SpecTag:fails::Float#/ returns self divided by other
+SpecTag:fails::Float#/ properly coerces objects
+SpecTag:fails::Float#/ returns +Infinity when dividing non-zero by zero of the same sign
+SpecTag:fails::Float#/ returns -Infinity when dividing non-zero by zero of opposite sign
+SpecTag:fails::Float#/ returns NaN when dividing zero by zero

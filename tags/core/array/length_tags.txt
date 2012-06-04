@@ -1,0 +1,2 @@
+SpecTag:fails::Array#length returns the number of elements
+SpecTag:fails::Array#length properly handles recursive arrays

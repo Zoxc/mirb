@@ -1,0 +1,3 @@
+SpecTag:fails::UnboundMethod#owner returns the owner of the method
+SpecTag:fails::UnboundMethod#owner returns the name even when aliased
+SpecTag:fails::UnboundMethod#owner returns the class/module it was defined in

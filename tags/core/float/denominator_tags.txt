@@ -1,0 +1,3 @@
+SpecTag:fails::Float#denominator returns an Integer
+SpecTag:fails::Float#denominator converts self to a Rational and returns the denominator
+SpecTag:fails::Float#denominator returns 1 for NaN and Infinity

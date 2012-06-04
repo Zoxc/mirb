@@ -1,0 +1,4 @@
+SpecTag:fails::Numeric#angle returns 0 if positive
+SpecTag:fails::Numeric#angle returns Pi if negative
+SpecTag:fails::Numeric#angle with a Numeric subclass returns 0 if self#<(0) returns false
+SpecTag:fails::Numeric#angle with a Numeric subclass returns Pi if self#<(0) returns true

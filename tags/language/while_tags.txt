@@ -1,0 +1,7 @@
+SpecTag:fails::The while expression returns value passed to break if interrupted by break
+SpecTag:fails::The while modifier returns value passed to break if interrupted by break
+SpecTag:fails::The while modifier with begin .. end block returns value passed to break if interrupted by break
+SpecTag:fails::The while modifier with begin .. end block runs block at least once (even if the expression is false)
+SpecTag:fails::The while modifier with begin .. end block evaluates condition after block execution
+SpecTag:fails::The while modifier with begin .. end block skips to end of body with next
+SpecTag:fails::The while modifier with begin .. end block restarts the current iteration without reevaluting condition with redo

@@ -1,0 +1,2 @@
+SpecTag:fails::Bignum#<= returns true if self is less than or equal to other
+SpecTag:fails::Bignum#<= raises an ArgumentError when given a non-Integer

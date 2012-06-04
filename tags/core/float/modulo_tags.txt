@@ -1,0 +1,14 @@
+SpecTag:fails::Float#% returns self modulo other
+SpecTag:fails::Float#% returns self when modulus is +Infinity
+SpecTag:fails::Float#% returns -Infinity when modulus is -Infinity
+SpecTag:fails::Float#% returns NaN when called on NaN or Infinities
+SpecTag:fails::Float#% returns NaN when modulus is NaN
+SpecTag:fails::Float#% returns -0.0 when called on -0.0 with a non zero modulus
+SpecTag:fails::Float#% raises a ZeroDivisionError if other is zero
+SpecTag:fails::Float#modulo returns self modulo other
+SpecTag:fails::Float#modulo returns self when modulus is +Infinity
+SpecTag:fails::Float#modulo returns -Infinity when modulus is -Infinity
+SpecTag:fails::Float#modulo returns NaN when called on NaN or Infinities
+SpecTag:fails::Float#modulo returns NaN when modulus is NaN
+SpecTag:fails::Float#modulo returns -0.0 when called on -0.0 with a non zero modulus
+SpecTag:fails::Float#modulo raises a ZeroDivisionError if other is zero

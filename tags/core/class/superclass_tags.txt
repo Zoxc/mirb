@@ -1,0 +1,2 @@
+SpecTag:fails::Class#superclass returns the superclass of self
+SpecTag:fails::Class#superclass for a singleton class of a class returns the singleton class of its superclass

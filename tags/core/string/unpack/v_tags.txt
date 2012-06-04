@@ -1,0 +1,32 @@
+SpecTag:fails::String#unpack with format 'V' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'V' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'V' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'V' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'V' decodes one int for a single format character
+SpecTag:fails::String#unpack with format 'V' decodes two ints for two format characters
+SpecTag:fails::String#unpack with format 'V' decodes the number of ints requested by the count modifier
+SpecTag:fails::String#unpack with format 'V' decodes the remaining ints when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'V' decodes the remaining ints when passed the '*' modifier after another directive
+SpecTag:fails::String#unpack with format 'V' does not decode an int when fewer bytes than an int remain and the '*' modifier is passed
+SpecTag:fails::String#unpack with format 'V' adds nil for each element requested beyond the end of the String
+SpecTag:fails::String#unpack with format 'V' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with format 'V' ignores spaces between directives
+SpecTag:fails::String#unpack with format 'V' decodes an int with most significant bit set as a positive number
+SpecTag:fails::String#unpack with format 'V' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'V' raises an ArgumentError when the format modifier is '!'
+SpecTag:fails::String#unpack with format 'v' ignores whitespace in the format string
+SpecTag:fails::String#unpack with format 'v' calls #to_str to coerce the directives string
+SpecTag:fails::String#unpack with format 'v' raises a TypeError when passed nil
+SpecTag:fails::String#unpack with format 'v' raises a TypeError when passed an Integer
+SpecTag:fails::String#unpack with format 'v' decodes one short for a single format character
+SpecTag:fails::String#unpack with format 'v' decodes two shorts for two format characters
+SpecTag:fails::String#unpack with format 'v' decodes the number of shorts requested by the count modifier
+SpecTag:fails::String#unpack with format 'v' decodes the remaining shorts when passed the '*' modifier
+SpecTag:fails::String#unpack with format 'v' decodes the remaining shorts when passed the '*' modifier after another directive
+SpecTag:fails::String#unpack with format 'v' does not decode a short when fewer bytes than a short remain and the '*' modifier is passed
+SpecTag:fails::String#unpack with format 'v' adds nil for each element requested beyond the end of the String
+SpecTag:fails::String#unpack with format 'v' ignores NULL bytes between directives
+SpecTag:fails::String#unpack with format 'v' ignores spaces between directives
+SpecTag:fails::String#unpack with format 'v' decodes a short with most significant bit set as a positive number
+SpecTag:fails::String#unpack with format 'v' raises an ArgumentError when the format modifier is '_'
+SpecTag:fails::String#unpack with format 'v' raises an ArgumentError when the format modifier is '!'

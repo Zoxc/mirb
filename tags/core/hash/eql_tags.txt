@@ -1,0 +1,16 @@
+SpecTag:fails::Hash#eql? does not compare values when keys don't match
+SpecTag:fails::Hash#eql? returns false when the numbers of keys differ without comparing any elements
+SpecTag:fails::Hash#eql? first compares keys via hash
+SpecTag:fails::Hash#eql? does not compare keys with different hash codes via eql?
+SpecTag:fails::Hash#eql? computes equality for recursive hashes
+SpecTag:fails::Hash#eql? doesn't call to_hash on objects
+SpecTag:fails::Hash#eql? computes equality for complex recursive hashes
+SpecTag:fails::Hash#eql? computes equality for recursive hashes & arrays
+SpecTag:fails::Hash#eql? compares values when keys match
+SpecTag:fails::Hash#eql? compares keys with eql? semantics
+SpecTag:fails::Hash#eql? returns true iff other Hash has the same number of keys and each key-value pair matches
+SpecTag:fails::Hash#eql? does not call to_hash on hash subclasses
+SpecTag:fails::Hash#eql? ignores hash class differences
+SpecTag:fails::Hash#eql? compares keys with matching hash codes via eql?
+SpecTag:fails::Hash#eql? compares the values in self to values in other hash
+SpecTag:fails::Hash#eql? returns true if other Hash has the same number of keys and each key-value pair matches, even though the default-value are not same

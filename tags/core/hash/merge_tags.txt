@@ -1,0 +1,15 @@
+SpecTag:fails::Hash#merge returns a new hash by combining self with the contents of other
+SpecTag:fails::Hash#merge sets any duplicate key to the value of block if passed a block
+SpecTag:fails::Hash#merge tries to convert the passed argument to a hash using #to_hash
+SpecTag:fails::Hash#merge does not call to_hash on hash subclasses
+SpecTag:fails::Hash#merge returns subclass instance for subclasses
+SpecTag:fails::Hash#merge processes entries with same order as each()
+SpecTag:fails::Hash#merge! adds the entries from other, overwriting duplicate keys. Returns self
+SpecTag:fails::Hash#merge! sets any duplicate key to the value of block if passed a block
+SpecTag:fails::Hash#merge! tries to convert the passed argument to a hash using #to_hash
+SpecTag:fails::Hash#merge! does not call to_hash on hash subclasses
+SpecTag:fails::Hash#merge! processes entries with same order as merge()
+SpecTag:fails::Hash#merge! raises a RuntimeError on a frozen instance that is modified
+SpecTag:fails::Hash#merge! checks frozen status before coercing an object with #to_hash
+SpecTag:fails::Hash#merge! raises a RuntimeError on a frozen instance that would not be modified
+SpecTag:fails::Hash#merge! does not raise an exception if changing the value of an existing key during iteration

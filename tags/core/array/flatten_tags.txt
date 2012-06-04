@@ -1,0 +1,19 @@
+SpecTag:fails::Array#flatten takes an optional argument that determines the level of recursion
+SpecTag:fails::Array#flatten returns dup when the level of recursion is 0
+SpecTag:fails::Array#flatten ignores negative levels
+SpecTag:fails::Array#flatten tries to convert passed Objects to Integers using #to_int
+SpecTag:fails::Array#flatten raises a TypeError when the passed Object can't be converted to an Integer
+SpecTag:fails::Array#flatten does not call flatten on elements
+SpecTag:fails::Array#flatten flattens any element which responds to #to_ary, using the return value of said method
+SpecTag:fails::Array#flatten returns subclass instance for Array subclasses
+SpecTag:fails::Array#flatten with a non-Array object in the Array ignores the return value of #to_ary if it is nil
+SpecTag:fails::Array#flatten with a non-Array object in the Array raises a TypeError if the return value of #to_ary is not an Array
+SpecTag:fails::Array#flatten! takes an optional argument that determines the level of recursion
+SpecTag:fails::Array#flatten! returns nil when the level of recursion is 0
+SpecTag:fails::Array#flatten! treats negative levels as no arguments
+SpecTag:fails::Array#flatten! tries to convert passed Objects to Integers using #to_int
+SpecTag:fails::Array#flatten! raises a TypeError when the passed Object can't be converted to an Integer
+SpecTag:fails::Array#flatten! does not call flatten! on elements
+SpecTag:fails::Array#flatten! flattens any elements which responds to #to_ary, using the return value of said method
+SpecTag:fails::Array#flatten! raises a RuntimeError on frozen arrays when the array is modified
+SpecTag:fails::Array#flatten! raises a RuntimeError on frozen arrays when the array would not be modified

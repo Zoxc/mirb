@@ -1,0 +1,4 @@
+SpecTag:fails::MatchData#eql? returns true if both operands have equal target strings, patterns, and match positions
+SpecTag:fails::MatchData#eql? returns false if the operands have different target strings
+SpecTag:fails::MatchData#eql? returns false if the operands have different patterns
+SpecTag:fails::MatchData#eql? returns false if the argument is not a MatchData object

@@ -1,0 +1,4 @@
+SpecTag:fails::String.new returns a new string given a string argument
+SpecTag:fails::String.new returns an instance of a subclass
+SpecTag:fails::String.new raises TypeError on inconvertible object
+SpecTag:fails::String.new returns a binary String

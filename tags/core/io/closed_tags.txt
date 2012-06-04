@@ -1,0 +1,2 @@
+SpecTag:fails::IO#closed? returns true on closed stream
+SpecTag:fails::IO#closed? returns false on open stream

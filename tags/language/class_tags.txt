@@ -1,0 +1,13 @@
+SpecTag:fails::A class definition has no class variables
+SpecTag:fails::A class definition raises a TypeError if inheriting from a metaclass
+SpecTag:fails::A class definition allows the declaration of class variables in the body
+SpecTag:fails::A class definition stores instance variables defined in the class body in the class object
+SpecTag:fails::A class definition allows the declaration of class variables in a class method
+SpecTag:fails::A class definition allows the definition of class-level instance variables in a class method
+SpecTag:fails::A class definition allows the declaration of class variables in an instance method
+SpecTag:fails::A class definition allows the definition of Constants
+SpecTag:fails::An outer class definition contains the inner classes
+SpecTag:fails::A class definition extending an object (sclass) allows accessing the block of the original scope
+SpecTag:fails::A class definition extending an object (sclass) can use return to cause the enclosing method to return
+SpecTag:fails::Reopening a class raises a TypeError when superclasses mismatch
+SpecTag:fails::Reopening a class adds new methods to subclasses

@@ -1,0 +1,7 @@
+SpecTag:fails::Array.new returns an instance of a subclass
+SpecTag:fails::Array.new raise an ArgumentError if passed 3 or more arguments
+SpecTag:fails::Array.new with (array) returns an array initialized to the other array
+SpecTag:fails::Array.new with (array) calls #to_ary to convert the value to an array
+SpecTag:fails::Array.new with (array) does not call #to_ary on instances of Array or subclasses of Array
+SpecTag:fails::Array.new with (array) raises a TypeError if an Array type argument and a default object
+FileTag:fails

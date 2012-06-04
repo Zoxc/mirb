@@ -1,0 +1,10 @@
+SpecTag:fails::Float#CONSTANTS the DIG value is  15
+SpecTag:fails::Float#CONSTANTS the EPSILON value is 
+SpecTag:fails::Float#CONSTANTS the MANT_DIG is 53
+SpecTag:fails::Float#CONSTANTS the MAX_10_EXP is 308
+SpecTag:fails::Float#CONSTANTS the MIN_10_EXP is -308
+SpecTag:fails::Float#CONSTANTS the MAX_EXP is 1024
+SpecTag:fails::Float#CONSTANTS the MIN_EXP is -1021
+SpecTag:fails::Float#CONSTANTS the RADIX is 2
+SpecTag:fails::Float#CONSTANTS the INFINITY is the positive infinity
+SpecTag:fails::Float#CONSTANTS the NAN is 'not a number'

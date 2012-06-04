@@ -1,0 +1,2 @@
+SpecTag:fails::File.setgid? returns false if the file was just made
+SpecTag:fails::File.setgid? returns false if the file does not exist

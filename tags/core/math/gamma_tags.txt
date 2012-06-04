@@ -1,0 +1,32 @@
+SpecTag:fails::Math.gamma returns +infinity given 0
+SpecTag:fails::Math.gamma returns Math.sqrt(Math\003A\003API) given 0.5
+SpecTag:fails::Math.gamma returns 1! given 2
+SpecTag:fails::Math.gamma returns 2! given 3
+SpecTag:fails::Math.gamma returns 3! given 4
+SpecTag:fails::Math.gamma returns 4! given 5
+SpecTag:fails::Math.gamma returns 5! given 6
+SpecTag:fails::Math.gamma returns 6! given 7
+SpecTag:fails::Math.gamma returns 7! given 8
+SpecTag:fails::Math.gamma returns 8! given 9
+SpecTag:fails::Math.gamma returns 9! given 10
+SpecTag:fails::Math.gamma returns 10! given 11
+SpecTag:fails::Math.gamma returns 11! given 12
+SpecTag:fails::Math.gamma returns 12! given 13
+SpecTag:fails::Math.gamma returns 13! given 14
+SpecTag:fails::Math.gamma returns 14! given 15
+SpecTag:fails::Math.gamma returns 15! given 16
+SpecTag:fails::Math.gamma returns 16! given 17
+SpecTag:fails::Math.gamma returns 17! given 18
+SpecTag:fails::Math.gamma returns 18! given 19
+SpecTag:fails::Math.gamma returns 19! given 20
+SpecTag:fails::Math.gamma returns 20! given 21
+SpecTag:fails::Math.gamma returns 21! given 22
+SpecTag:fails::Math.gamma returns 22! given 23
+SpecTag:fails::Math.gamma returns good numerical approximation for gamma(3.2)
+SpecTag:fails::Math.gamma returns good numerical approximation for gamma(-2.15)
+SpecTag:fails::Math.gamma returns good numerical approximation for gamma(0.00001)
+SpecTag:fails::Math.gamma returns good numerical approximation for gamma(-0.00001)
+SpecTag:fails::Math.gamma raises Math\003A\003ADomainError given -1
+SpecTag:fails::Math.gamma returns +infinity given +infinity
+SpecTag:fails::Math.gamma raises Math\003A\003ADomainError given negative infinity
+SpecTag:fails::Math.gamma returns NaN given NaN
