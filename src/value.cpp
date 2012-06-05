@@ -237,7 +237,7 @@ namespace Mirb
 		setup();
 	}
 
-	Value::Value(Type::Enum type) : value_type(type), hashed(false), flag(false)
+	Value::Value(Type::Enum type) : value_type(type), hashed(false), flag(false), flag2(false)
 	{
 		setup();
 	}
