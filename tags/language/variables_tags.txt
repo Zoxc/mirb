@@ -18,14 +18,9 @@ SpecTag:fails::Basic multiple assignment with a splatted single RHS value does n
 SpecTag:fails::Assigning multiple values calls #to_ary on RHS arg if the corresponding LHS var is a splat
 SpecTag:fails::Assigning multiple values allows complex parallel assignment
 SpecTag:fails::Assigning multiple values allows a lhs arg to be used in another lhs args parallel assignment
-SpecTag:fails::Unconditional operator assignment 'var op= expr' is equivalent to 'var = var op expr'
-SpecTag:fails::Unconditional operator assignment 'obj.meth op= expr' is equivalent to 'obj.meth = obj.meth op expr'
 SpecTag:fails::Conditional operator assignment 'obj.meth op= expr' may not assign at all, depending on the truthiness of lhs
-SpecTag:fails::Operator assignment 'obj.meth op= expr' evaluates lhs one time
-SpecTag:fails::Unconditional operator assignment 'obj[idx] op= expr' is equivalent to 'obj[idx] = obj[idx] op expr'
 SpecTag:fails::Conditional operator assignment 'obj[idx] op= expr' may not assign at all, depending on the truthiness of lhs
 SpecTag:fails::Operator assignment 'obj[idx] op= expr' handles complex index (idx) arguments
 SpecTag:fails::Operator assignment 'obj[idx] op= expr' returns result of rhs not result of []=
 SpecTag:fails::Multiple assignments with grouping rhs cannot use parameter grouping, it is a syntax error
-SpecTag:fails::Scope of variables instance variables not overwritten by local variable in each block
 SpecTag:fails::A local variable in a #define_method scope shares the lexical scope containing the call to #define_method

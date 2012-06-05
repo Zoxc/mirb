@@ -68,4 +68,3 @@ SpecTag:fails::Kernel.load sets the enclosing scope to an anonymous module if pa
 SpecTag:fails::Kernel.load (shell expansion) expands a tilde to the HOME environment variable as the path to load
 SpecTag:fails::Kernel#load (path resolution) with an unreadable file raises a LoadError
 SpecTag:fails::Kernel.load (path resolution) with an unreadable file raises a LoadError
-FileTag:fails

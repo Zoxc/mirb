@@ -14,6 +14,5 @@ SpecTag:fails::Break inside a while loop with a splat exits the loop and makes t
 SpecTag:fails::Break inside a while loop with a splat treats nil as an empty array
 SpecTag:fails::Break inside a while loop with a splat preserves an array as is
 SpecTag:fails::Break inside a while loop with a splat wraps a non-Array in an Array
-SpecTag:fails::Executing break from within a block returns from the original invoking method even in case of chained calls
 SpecTag:fails::Executing break from within a block runs ensures when continuing upward
 SpecTag:fails::Executing break from within a block doesn't run ensures in the destination method

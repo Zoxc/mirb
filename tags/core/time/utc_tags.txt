@@ -36,7 +36,6 @@ SpecTag:fails::Time.utc handles fractional microseconds as a Rational
 SpecTag:fails::Time.utc ignores fractional seconds if a passed whole number of microseconds
 SpecTag:fails::Time.utc ignores fractional seconds if a passed fractional number of microseconds
 SpecTag:fails::Time#utc returns the utc representation of time
-FileTag:fails
 SpecTag:fails::Time.utc raises an ArgumentError for out of range year
 SpecTag:fails::Time.utc raises an ArgumentError for out of range month
 SpecTag:fails::Time.utc raises an ArgumentError for out of range day

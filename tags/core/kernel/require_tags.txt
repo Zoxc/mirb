@@ -108,4 +108,3 @@ SpecTag:fails::Kernel.require (shell expansion) performs tilde expansion on a .r
 SpecTag:fails::Kernel.require (shell expansion) performs tilde expansion on a non-extensioned file before storing paths in $LOADED_FEATURES
 SpecTag:fails::Kernel#require (path resolution) with an unreadable file raises a LoadError
 SpecTag:fails::Kernel.require (path resolution) with an unreadable file raises a LoadError
-FileTag:fails

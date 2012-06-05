@@ -42,4 +42,3 @@ SpecTag:fails::Array#pack with format 'n' encodes the number of array elements s
 SpecTag:fails::Array#pack with format 'n' encodes all remaining elements when passed the '*' modifier
 SpecTag:fails::Array#pack with format 'n' ignores NULL bytes between directives
 SpecTag:fails::Array#pack with format 'n' ignores spaces between directives
-FileTag:fails

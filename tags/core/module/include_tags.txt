@@ -2,9 +2,7 @@ SpecTag:fails::Module#include calls #append_features(self) in reversed order on 
 SpecTag:fails::Module#include adds all ancestor modules when a previously included module is included again
 SpecTag:fails::Module#include raises a TypeError when the argument is not a Module
 SpecTag:fails::Module#include does not raise a TypeError when the argument is an instance of a subclass of Module
-SpecTag:fails::Module#include imports constants to modules and classes
 SpecTag:fails::Module#include does not import methods to modules and classes
-SpecTag:fails::Module#include attaches the module as the caller's immediate ancestor
 SpecTag:fails::Module#include doesn't include module if it is included in a super class
 SpecTag:fails::Module#include recursively includes new mixins
 SpecTag:fails::Module#include preserves ancestor order

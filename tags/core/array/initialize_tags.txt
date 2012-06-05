@@ -6,7 +6,6 @@ SpecTag:fails::Array#initialize with (array) replaces self with the other array
 SpecTag:fails::Array#initialize with (array) calls #to_ary to convert the value to an array
 SpecTag:fails::Array#initialize with (array) does not call #to_ary on instances of Array or subclasses of Array
 SpecTag:fails::Array#initialize with (array) raises a TypeError if an Array type argument and a default object
-FileTag:fails
 SpecTag:fails::Array#initialize with (size, object=nil) sets the array to size and fills with the object
 SpecTag:fails::Array#initialize with (size, object=nil) sets the array to size and fills with nil when object is omitted
 SpecTag:fails::Array#initialize with (size, object=nil) raises an ArgumentError if size is negative

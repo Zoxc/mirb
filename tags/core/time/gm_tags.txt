@@ -1,4 +1,3 @@
-FileTag:fails
 SpecTag:fails::Time.gm creates a time based on given values, interpreted as UTC (GMT)
 SpecTag:fails::Time.gm creates a time based on given C-style gmtime arguments, interpreted as UTC (GMT)
 SpecTag:fails::Time.gm accepts 1 argument (year)

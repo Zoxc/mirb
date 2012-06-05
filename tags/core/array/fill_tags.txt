@@ -8,7 +8,6 @@ SpecTag:fails::Array#fill raises a RuntimeError on an empty frozen array
 SpecTag:fails::Array#fill raises an ArgumentError if 4 or more arguments are passed when no block given
 SpecTag:fails::Array#fill raises an ArgumentError if no argument passed and no block given
 SpecTag:fails::Array#fill raises an ArgumentError if 3 or more arguments are passed when a block given
-FileTag:fails
 SpecTag:fails::Array#fill with (filler, range) replaces elements in range with object
 SpecTag:fails::Array#fill with (filler, range) replaces all elements in range with the value of block
 SpecTag:fails::Array#fill with (filler, range) increases the Array size when necessary

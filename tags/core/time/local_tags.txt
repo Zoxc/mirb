@@ -35,7 +35,6 @@ SpecTag:fails::Time.local handles fractional microseconds as a Float
 SpecTag:fails::Time.local handles fractional microseconds as a Rational
 SpecTag:fails::Time.local ignores fractional seconds if a passed whole number of microseconds
 SpecTag:fails::Time.local ignores fractional seconds if a passed fractional number of microseconds
-FileTag:fails
 SpecTag:fails::Time.local raises an ArgumentError for out of range year
 SpecTag:fails::Time.local raises an ArgumentError for out of range month
 SpecTag:fails::Time.local raises an ArgumentError for out of range day

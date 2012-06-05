@@ -3,6 +3,4 @@ SpecTag:fails::self in a metaclass body (class << obj) is FalseClass for false
 SpecTag:fails::self in a metaclass body (class << obj) is NilClass for nil
 SpecTag:fails::self in a metaclass body (class << obj) raises a TypeError for symbols
 SpecTag:fails::A constant on a metaclass cannot be accessed via object\003A\003ACONST
-SpecTag:fails::A constant on a metaclass appears in the metaclass constant list
-SpecTag:fails::A constant on a metaclass does not appear in the object's class constant list
 SpecTag:fails::A constant on a metaclass is not preserved when the object is duped

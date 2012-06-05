@@ -18,7 +18,6 @@ SpecTag:fails::IO#readlines raises an IOError if the stream is opened for append
 SpecTag:fails::IO#readlines raises an IOError if the stream is opened for write only
 SpecTag:fails::IO.readlines when not passed a separator returns an Array containing lines of file_name based on $/
 SpecTag:fails::IO.readlines when not passed a separator raises an Errno\003A\003AENOENT error when the passed file_name does not exist
-SpecTag:fails::IO.readlines when not passed a separator does not change $_
 SpecTag:fails::IO.readlines when not passed a separator tries to convert the passed file_name to a String using #to_str
 SpecTag:fails::IO.readlines when passed nil as a separator returns the contents as a single String
 SpecTag:fails::IO.readlines when passed an empty String as a separator returns an Array containing all paragraphs

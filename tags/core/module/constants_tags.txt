@@ -4,6 +4,5 @@ SpecTag:fails::Module.constants returns Module's constants when given a paramete
 SpecTag:fails::Module#constants returns an array of Symbol names of all constants defined in the moduleand all included modules
 SpecTag:fails::Module#constants returns all constants including inherited when passed true
 SpecTag:fails::Module#constants returns all constants including inherited when passed some object
-SpecTag:fails::Module#constants includes names of constants defined after a module is included
 SpecTag:fails::Module#constants doesn't returns inherited constants when passed false
 SpecTag:fails::Module#constants doesn't returns inherited constants when passed nil
