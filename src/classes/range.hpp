@@ -13,6 +13,7 @@ namespace Mirb
 			static value_t last(Range *self);
 			static value_t exclude_end(Range *self);
 			static value_t include(Range *self, value_t value);
+			static value_t equal(Range *self, value_t value);
 
 		public:
 			Range(value_t low, value_t high, bool exclusive) : Object(Type::Range, context->range_class), low(low), high(high)

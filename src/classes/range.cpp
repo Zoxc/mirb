@@ -120,12 +120,31 @@ namespace Mirb
 		}
 	}
 	
+	value_t Range::equal(Range *self, value_t value)
+	{
+		Range *other = try_cast<Range>(value);
+
+		if(!other)
+			return false;
+
+		OnStack<2> os(self, other);
+		
+		if(!call(self->low, "==", other->low)->test())
+			return value_false;
+
+		if(!call(self->high, "==", other->high)->test())
+			return value_false;
+
+		return Value::from_bool(self->flag == other->flag);
+	}
+	
 	void Range::initialize()
 	{
 		context->range_class = define_class("Range", context->object_class);
 		
 		method<Self<Range>, Value, &include>(context->range_class, "include?");
 		method<Self<Range>, Value, &include>(context->range_class, "===");
+		method<Self<Range>, Value, &equal>(context->range_class, "==");
 		method<Self<Range>, &exclude_end>(context->range_class, "exclude_end?");
 		method<Self<Range>, &first>(context->range_class, "first");
 		method<Self<Range>, &last>(context->range_class, "last");
