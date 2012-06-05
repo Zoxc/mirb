@@ -270,7 +270,7 @@ namespace Mirb
 		else
 		{
 			if(!thread_context->exception)
-				raise(context->argument_error, "No exception to rethrow");
+				throw InternalException(new (collector) Exception(context->runtime_error, nullptr, Mirb::backtrace()));
 
 			throw InternalException(thread_context->exception);
 		}
