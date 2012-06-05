@@ -16,6 +16,10 @@
 
 namespace Mirb
 {
+	Regexp::Regexp(const Regexp &other) : Object(other), pattern(other.pattern), re(nullptr)
+	{
+	}
+
 	Regexp::~Regexp()
 	{
 		if(re)

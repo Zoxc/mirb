@@ -22,7 +22,8 @@ namespace Mirb
 
 		public:
 			static const size_t vector_size = 16 * 3;
-
+			
+			Regexp(const Regexp &other);
 			Regexp(Class *instance_of) : Object(Type::Regexp, instance_of), re(nullptr) {}
 
 			static const bool finalizer = true;
