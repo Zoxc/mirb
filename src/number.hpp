@@ -67,6 +67,8 @@ namespace Mirb
 			Number neg() const;
 			
 			Number pow(mp_digit exp) const;
+			Number lshift(size_t shift) const;
+			Number rshift(size_t shift) const;
 
 			Number operator *(const Number &other) const;
 			Number operator /(const Number &other) const;

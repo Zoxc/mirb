@@ -220,6 +220,86 @@ namespace Mirb
 		return result;
 	}
 	
+	Number Number::lshift(size_t shift) const
+	{
+		if(shift > (size_t)INT_MAX)
+			raise(context->argument_error, "Shift value too high");
+
+		Number result;
+
+		check(mp_mul_2d(const_cast<mp_int *>(&num), (int)shift, &result.num));
+
+		return result;
+	}
+	
+	// Number::rshift is adopted from the Rubinius project. See LICENSE.rubinius
+
+	Number Number::rshift(size_t shift) const
+	{
+		if(shift > (size_t)INT_MAX)
+			raise(context->argument_error, "Shift value too high");
+		
+		if((shift / DIGIT_BIT) >= num.used)
+		{
+			if(num.sign == MP_ZPOS)
+				return Number((intptr_t)0);
+			else
+				return Number((intptr_t)-1);
+		}
+
+		if(shift == 0)
+			return *this;
+
+		Number result;
+
+		check(mp_div_2d(const_cast<mp_int *>(&num), (int)shift, &result.num, 0));
+
+		// Because mp_int is not stored in twos complement format for
+		// negative values, we have to simulate the effects of being
+		// twos complement. Namely, if we shift past a set bit, we have
+		// to subtract 1 because that show up as the shifted twos
+		// complement representation.
+		//
+		// Observe:
+		//
+		// 10:55 MenTaLguY: 5 is 0101, -5 is 1011
+		// 10:55 MenTaLguY: 0101 >> 1 = 0010, 1011 >> 1 = 1101
+		// 10:56 MenTaLguY: 2 and -3 respectively
+		//
+		// and
+		//
+		// 10:57 MenTaLguY: 6 = 0110 and -6 = 1010
+		//    0110 >> 1 == 0011, 1010 >> 1 == 1101
+		//    3 and -3, respectively
+		//
+
+		if(num.sign == MP_NEG)
+		{
+			bool bit_inside_shift = false;
+			int full_digits = shift / DIGIT_BIT;
+
+			for(int d = 0; d < full_digits; d++)
+			{
+				if(DIGIT(&num, d) != 0)
+				{
+					bit_inside_shift = true;
+					break;
+				}
+			}
+
+			if(!bit_inside_shift)
+			{
+				intptr_t shift_mask = ((intptr_t)1 << (shift % DIGIT_BIT)) - 1;
+				bit_inside_shift = (DIGIT(&num, full_digits) & shift_mask) != 0;
+			}
+
+			if(bit_inside_shift)
+				return result - Number((intptr_t)1);
+		}
+
+		return result;
+	}
+
 	Number Number::pow(mp_digit exp) const
 	{
 		Number result;

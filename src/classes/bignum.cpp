@@ -114,6 +114,22 @@ namespace Mirb
 				coerce_error(other, obj);
 		};
 	}
+	
+	value_t Bignum::lshift(Bignum *obj, intptr_t shift)
+	{
+		if(shift < 0)
+			return rshift(obj, -shift);
+
+		return obj->number.lshift(shift).to_value();
+	}
+	
+	value_t Bignum::rshift(Bignum *obj, intptr_t shift)
+	{
+		if(shift < 0)
+			return lshift(obj, -shift);
+		
+		return obj->number.rshift(shift).to_value();
+	}
 
 	void Bignum::initialize()
 	{
@@ -124,6 +140,9 @@ namespace Mirb
 		method<Self<Bignum>, &zero>(context->bignum_class, "zero?");
 		method<Self<Bignum>, &neg>(context->bignum_class, "-@");
 		
+		method<Self<Bignum>, Arg::Fixnum, &lshift>(context->bignum_class, "<<");
+		method<Self<Bignum>, Arg::Fixnum, &rshift>(context->bignum_class, ">>");
+
 		method<Self<Bignum>, Arg::Fixnum, &pow>(context->bignum_class, "**");
 		method<Self<Bignum>, Value, &add>(context->bignum_class, "+");
 		method<Self<Bignum>, Value, &sub>(context->bignum_class, "-");

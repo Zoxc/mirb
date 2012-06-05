@@ -64,7 +64,7 @@ namespace Mirb
 		return Value::from_bool(obj == 0);
 	}
 	
-	value_t Fixnum::to_s(int_t obj, intptr_t base)
+	value_t Fixnum::to_s(int_t obj, int_t base)
 	{
 		return Bignum::to_string(Number(obj), base);
 	}
@@ -116,6 +116,8 @@ namespace Mirb
 	}
 	
 	const intptr_t sqrt_long_max = (intptr_t)1 << ((sizeof(intptr_t) * CHAR_BIT - 1) / 2);
+	
+	// Fixnum::mul is adopted from the Rubinius project. See LICENSE.rubinius
 
 	value_t Fixnum::mul(int_t obj, value_t other)
 	{
@@ -164,7 +166,7 @@ namespace Mirb
 		return from_int(~obj);
 	}
 	
-	value_t Fixnum::pow(int_t obj, intptr_t other)
+	value_t Fixnum::pow(int_t obj, int_t other)
 	{
 		if(other < 0)
 			raise(context->argument_error, "Negative exponent not allowed with integers");
@@ -197,6 +199,36 @@ namespace Mirb
 		};
 	}
 
+	// Fixnum::lshift is adopted from the Rubinius project. See LICENSE.rubinius
+
+	value_t Fixnum::lshift(int_t obj, int_t shift)
+	{
+		if(shift < 0)
+			return rshift(obj, -shift);
+
+		int_t abs = obj < 0 ? -obj : obj;
+
+		if((shift >= width) || ((abs >> (width - shift)) > 0))
+			return Number(obj).lshift(shift).to_bignum();
+		
+		return from_int(obj << shift);
+	}
+	
+	// Fixnum::rshift is adopted from the Rubinius project. See LICENSE.rubinius
+
+	value_t Fixnum::rshift(int_t obj, int_t shift)
+	{
+		if(shift < 0)
+			return lshift(obj, -shift);
+
+		int_t abs = obj < 0 ? -obj : obj;
+
+		if(shift >= bits)
+			return from_int(obj >= 0 ? 0 : -1);
+		
+		return from_int(obj >> shift);
+	}
+
 	void Fixnum::initialize()
 	{
 		method<Self<Arg::Fixnum>, Optional<Arg::Fixnum>, &to_s>(context->fixnum_class, "to_s");
@@ -207,6 +239,9 @@ namespace Mirb
 		method<Self<Arg::Fixnum>, &chr>(context->fixnum_class, "chr");
 		method<&rb_size>(context->fixnum_class, "size");
 		
+		method<Self<Arg::Fixnum>, Arg::Fixnum, &lshift>(context->fixnum_class, "<<");
+		method<Self<Arg::Fixnum>, Arg::Fixnum, &rshift>(context->fixnum_class, ">>");
+
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 		method<Self<Arg::Fixnum>, &invert>(context->fixnum_class, "~");
 		method<Self<Arg::Fixnum>, Arg::Fixnum, &pow>(context->fixnum_class, "**");
