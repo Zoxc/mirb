@@ -267,14 +267,15 @@ namespace Mirb
 		else
 		{
 			if(!under_path)
-				return;
+				goto name;
 		
 			new_path = under_path->string + "::" + name->string;
 		}
 
-		set_var(obj, context->syms.classname, String::from_symbol(name));
 		set_var(obj, context->syms.classpath, new_path.to_string());
 
+	name:
+		set_var(obj, context->syms.classname, String::from_symbol(name));
 		set_const(under, name, obj);
 	}
 
