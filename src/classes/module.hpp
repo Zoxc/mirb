@@ -23,6 +23,7 @@ namespace Mirb
 			static value_t define_method(Module *obj, Symbol *name, Proc *proc, value_t block);
 			static value_t module_eval(Module *obj, String *string, value_t block);
 			static value_t rb_instance_methods(Module *obj, value_t super);
+			static value_t rb_constants(Module *obj, value_t super);
 			
 			Module(Type::Enum type) : Object(type), methods(nullptr), superclass(nullptr) {}
 
@@ -44,6 +45,7 @@ namespace Mirb
 			void set_method(Symbol *name, value_t method);
 			
 			void instance_methods(Array *array, bool super);
+			void constants(Array *array, bool super);
 
 			static value_t alias_method(Module *self, Symbol *new_name, Symbol *old_name);
 

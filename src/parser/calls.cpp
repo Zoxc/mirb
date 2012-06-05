@@ -227,7 +227,7 @@ namespace Mirb
 		
 		bool has_args = has_arguments();
 		bool can_be_var = default_var && !has_args;
-		bool constant = symbol && is_constant(symbol);
+		bool constant = symbol && symbol->is_constant();
 
 		if(can_be_var && !has_args) // Variable or constant
 		{
@@ -282,7 +282,7 @@ namespace Mirb
 
 						bool has_args = has_arguments();
 
-						if(has_args || !is_constant(symbol))
+						if(has_args || !symbol->is_constant())
 						{
 							return alloc_call_node(child, symbol, range, has_args);
 						}

@@ -193,6 +193,32 @@ namespace Mirb
 		return value;
 	}
 	
+	void Module::constants(Array *array, bool super)
+	{
+		if(vars)
+			ValueMapAccess::each_pair(vars, [&](value_t key, value_t value) -> bool {
+				if(cast<Symbol>(key)->is_constant())
+					array->vector.push(key);
+
+				return true;
+			});
+
+		if(super)
+		{
+			if(superclass)
+				superclass->constants(array, true);
+		}
+	}
+	
+	value_t Module::rb_constants(Module *obj, value_t super)
+	{
+		auto result = Array::allocate();
+
+		obj->constants(result, super ? super->test() : true);
+
+		return result;
+	}
+	
 	void Module::instance_methods(Array *array, bool super)
 	{
 		if(methods)
@@ -299,6 +325,7 @@ namespace Mirb
 		method<Self<Module>, Arg::Count, Arg::Values, &attr_accessor>(context->module_class, "attr_accessor");
 		singleton_method<&nesting>(context->module_class, "nesting");
 		
+		method<Self<Module>, Optional<Value>, &rb_constants>(context->module_class, "constants");
 		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "instance_methods");
 		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "public_instance_methods");
 		method<Self<Module>, Optional<Value>, &rb_instance_methods>(context->module_class, "protected_instance_methods");

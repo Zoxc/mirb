@@ -47,13 +47,6 @@ namespace Mirb
 		add_message(new Message(*this, range, severity, text), range);
 	}
 
-	bool Parser::is_constant(Symbol *symbol)
-	{
-		const char_t c = *symbol->string.raw();
-		
-		return c >= 'A' && c <= 'Z';
-	}
-	
 	void Parser::error(const CharArray &text)
 	{
 		report(lexer.lexeme, text);
@@ -242,7 +235,7 @@ namespace Mirb
 				
 	Tree::Node *Parser::parse_variable(Symbol *symbol, SourceLoc *range)
 	{
-		if(is_constant(symbol))
+		if(symbol->is_constant())
 		{
 			return new (fragment) Tree::ConstantNode(nullptr, symbol, range);
 		}
@@ -1115,7 +1108,7 @@ namespace Mirb
 
 					Symbol *symbol = lexer.lexeme.symbol;
 
-					if(is_constant(symbol))
+					if(symbol->is_constant())
 					{
 						Tree::Node *result = new (fragment) Tree::ConstantNode(nullptr, symbol, range, true);
 

@@ -123,8 +123,6 @@ namespace Mirb
 			
 			void step_comma();
 
-			static bool is_constant(Symbol *symbol);
-						
 			static size_t operator_precedences[];
 
 			bool is_precedence_operator(Lexeme::Type op);

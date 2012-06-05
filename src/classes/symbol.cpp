@@ -26,6 +26,13 @@ namespace Mirb
 		return result;
 	}
 	
+	bool Symbol::is_constant()
+	{
+		const char_t c = string[0];
+		
+		return c >= 'A' && c <= 'Z';
+	}
+	
 	value_t Symbol::to_s(Symbol *self)
 	{
 		return self->string.to_string();

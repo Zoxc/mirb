@@ -32,6 +32,8 @@ namespace Mirb
 				return hash_value;
 			}
 
+			bool is_constant();
+
 			CharArray string;
 
 			Symbol *next;
