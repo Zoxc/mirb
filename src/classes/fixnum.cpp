@@ -164,6 +164,17 @@ namespace Mirb
 		return from_int(~obj);
 	}
 	
+	value_t Fixnum::pow(int_t obj, intptr_t other)
+	{
+		if(other < 0)
+			raise(context->argument_error, "Negative exponent not allowed with integers");
+
+		if((size_t)other > (size_t)ULONG_MAX)
+			raise(context->argument_error, "The exponent is too high");
+
+		return Number(obj).pow((unsigned long)other).to_value();
+	}
+
 	value_t Fixnum::coerce(int_t obj, value_t other)
 	{
 		switch(other->type())
@@ -198,6 +209,7 @@ namespace Mirb
 		
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 		method<Self<Arg::Fixnum>, &invert>(context->fixnum_class, "~");
+		method<Self<Arg::Fixnum>, Arg::Fixnum, &pow>(context->fixnum_class, "**");
 
 		method<Self<Arg::Fixnum>, Value, &add>(context->fixnum_class, "+");
 		method<Self<Arg::Fixnum>, Value, &sub>(context->fixnum_class, "-");

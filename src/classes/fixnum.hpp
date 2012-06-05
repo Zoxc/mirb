@@ -26,6 +26,7 @@ namespace Mirb
 		value_t to_f(int_t obj);
 		value_t times(int_t obj, value_t block);
 		value_t upto(int_t obj, int_t arg, value_t block);
+		value_t pow(int_t obj, intptr_t other);
 		value_t neg(int_t obj);
 		value_t add(int_t obj, value_t other);
 		value_t sub(int_t obj, value_t other);
