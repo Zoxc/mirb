@@ -159,6 +159,11 @@ namespace Mirb
 		return from_int(-obj);
 	}
 	
+	value_t Fixnum::invert(int_t obj)
+	{
+		return from_int(~obj);
+	}
+	
 	value_t Fixnum::coerce(int_t obj, value_t other)
 	{
 		switch(other->type())
@@ -192,6 +197,7 @@ namespace Mirb
 		method<&rb_size>(context->fixnum_class, "size");
 		
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
+		method<Self<Arg::Fixnum>, &invert>(context->fixnum_class, "~");
 
 		method<Self<Arg::Fixnum>, Value, &add>(context->fixnum_class, "+");
 		method<Self<Arg::Fixnum>, Value, &sub>(context->fixnum_class, "-");
