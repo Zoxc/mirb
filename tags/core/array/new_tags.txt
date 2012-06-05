@@ -5,3 +5,13 @@ SpecTag:fails::Array.new with (array) calls #to_ary to convert the value to an a
 SpecTag:fails::Array.new with (array) does not call #to_ary on instances of Array or subclasses of Array
 SpecTag:fails::Array.new with (array) raises a TypeError if an Array type argument and a default object
 FileTag:fails
+SpecTag:fails::Array.new with (size, object=nil) returns an array of size filled with object
+SpecTag:fails::Array.new with (size, object=nil) returns an array of size filled with nil when object is omitted
+SpecTag:fails::Array.new with (size, object=nil) raises an ArgumentError if size is negative
+SpecTag:fails::Array.new with (size, object=nil) raises an ArgumentError if size is too large
+SpecTag:fails::Array.new with (size, object=nil) calls #to_int to convert the size argument to an Integer when object is given
+SpecTag:fails::Array.new with (size, object=nil) calls #to_int to convert the size argument to an Integer when object is not given
+SpecTag:fails::Array.new with (size, object=nil) raises a TypeError if the size argument is not an Integer type
+SpecTag:fails::Array.new with (size, object=nil) yields the index of the element and sets the element to the value of the block
+SpecTag:fails::Array.new with (size, object=nil) uses the block value instead of using the default value
+SpecTag:fails::Array.new with (size, object=nil) returns the value passed to break

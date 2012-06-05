@@ -36,3 +36,12 @@ SpecTag:fails::Time.mktime handles fractional microseconds as a Rational
 SpecTag:fails::Time.mktime ignores fractional seconds if a passed whole number of microseconds
 SpecTag:fails::Time.mktime ignores fractional seconds if a passed fractional number of microseconds
 FileTag:fails
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range year
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range month
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range day
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range hour
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range minute
+SpecTag:fails::Time.mktime raises an ArgumentError for out of range second
+SpecTag:fails::Time.mktime raises ArgumentError when given 9 arguments
+SpecTag:fails::Time.mktime raises ArgumentError when given 11 arguments
+SpecTag:fails::Time.mktime returns subclass instances

@@ -35,3 +35,12 @@ SpecTag:fails::Time.gm handles fractional microseconds as a Float
 SpecTag:fails::Time.gm handles fractional microseconds as a Rational
 SpecTag:fails::Time.gm ignores fractional seconds if a passed whole number of microseconds
 SpecTag:fails::Time.gm ignores fractional seconds if a passed fractional number of microseconds
+SpecTag:fails::Time.gm raises an ArgumentError for out of range year
+SpecTag:fails::Time.gm raises an ArgumentError for out of range month
+SpecTag:fails::Time.gm raises an ArgumentError for out of range day
+SpecTag:fails::Time.gm raises an ArgumentError for out of range hour
+SpecTag:fails::Time.gm raises an ArgumentError for out of range minute
+SpecTag:fails::Time.gm raises an ArgumentError for out of range second
+SpecTag:fails::Time.gm raises ArgumentError when given 9 arguments
+SpecTag:fails::Time.gm raises ArgumentError when given 11 arguments
+SpecTag:fails::Time.gm returns subclass instances

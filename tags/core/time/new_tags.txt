@@ -39,3 +39,12 @@ SpecTag:fails::Time.new with a utc_offset argument with an argument that respond
 SpecTag:fails::Time.new with a utc_offset argument with an argument that responds to #to_r coerces using #to_r
 SpecTag:fails::Time.new with a utc_offset argument with an argument that responds to #to_str coerces using #to_str
 FileTag:fails
+SpecTag:fails::Time.new raises an ArgumentError for out of range year
+SpecTag:fails::Time.new raises an ArgumentError for out of range month
+SpecTag:fails::Time.new raises an ArgumentError for out of range day
+SpecTag:fails::Time.new raises an ArgumentError for out of range hour
+SpecTag:fails::Time.new raises an ArgumentError for out of range minute
+SpecTag:fails::Time.new raises an ArgumentError for out of range second
+SpecTag:fails::Time.new raises ArgumentError when given 9 arguments
+SpecTag:fails::Time.new raises ArgumentError when given 11 arguments
+SpecTag:fails::Time.new returns subclass instances
