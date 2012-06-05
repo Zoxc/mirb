@@ -1395,7 +1395,7 @@ namespace Mirb
 				skip_lines();
 			
 				node->left = result;
-				node->right = parse_operator_expression(allow_multiple);
+				node->right = parse_precedence_operator();
 				
 				return node;
 			});
