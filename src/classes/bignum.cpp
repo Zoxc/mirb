@@ -130,6 +130,21 @@ namespace Mirb
 		
 		return obj->number.rshift(shift).to_value();
 	}
+	
+	value_t Bignum::bitwise_and(Bignum *obj, value_t other)
+	{
+		return obj->number.bitwise_and(Number::from_value(other)).to_value();
+	}
+	
+	value_t Bignum::bitwise_xor(Bignum *obj, value_t other)
+	{
+		return obj->number.bitwise_xor(Number::from_value(other)).to_value();
+	}
+
+	value_t Bignum::bitwise_or(Bignum *obj, value_t other)
+	{
+		return obj->number.bitwise_or(Number::from_value(other)).to_value();
+	}
 
 	void Bignum::initialize()
 	{
@@ -142,6 +157,9 @@ namespace Mirb
 		
 		method<Self<Bignum>, Arg::Fixnum, &lshift>(context->bignum_class, "<<");
 		method<Self<Bignum>, Arg::Fixnum, &rshift>(context->bignum_class, ">>");
+		method<Self<Bignum>, Value, &bitwise_and>(context->bignum_class, "&");
+		method<Self<Bignum>, Value, &bitwise_xor>(context->bignum_class, "^");
+		method<Self<Bignum>, Value, &bitwise_or>(context->bignum_class, "|");
 
 		method<Self<Bignum>, Arg::Fixnum, &pow>(context->bignum_class, "**");
 		method<Self<Bignum>, Value, &add>(context->bignum_class, "+");

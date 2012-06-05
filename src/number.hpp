@@ -38,6 +38,8 @@ namespace Mirb
 			Number(const void *storage, size_t size);
 			~Number();
 
+			static Number from_value(value_t input);
+
 			static void initialize();
 			static void finalize();
 			
@@ -69,6 +71,9 @@ namespace Mirb
 			Number pow(mp_digit exp) const;
 			Number lshift(size_t shift) const;
 			Number rshift(size_t shift) const;
+			Number bitwise_and(const Number &other) const;
+			Number bitwise_xor(const Number &other) const;
+			Number bitwise_or(const Number &other) const;
 
 			Number operator *(const Number &other) const;
 			Number operator /(const Number &other) const;

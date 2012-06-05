@@ -94,6 +94,21 @@ namespace Mirb
 		check(mp_init(&num));
 	}
 	
+	Number Number::from_value(value_t input)
+	{
+		switch(input->type())
+		{
+			case Type::Bignum:
+				return cast<Bignum>(input)->number;
+
+			case Type::Fixnum:
+				return Number(Fixnum::to_int(input));
+
+			default:
+				type_error(input, "Fixnum or Bignum");
+		};
+	}
+
 	Number::Number(Number &&other) : num(other.num)
 	{
 		other.num.dp = 0;
@@ -220,6 +235,33 @@ namespace Mirb
 		return result;
 	}
 	
+	Number Number::bitwise_and(const Number &other) const
+	{
+		Number result;
+
+		mp_and(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num), &result.num);
+
+		return result;
+	}
+	
+	Number Number::bitwise_xor(const Number &other) const
+	{
+		Number result;
+
+		mp_xor(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num), &result.num);
+
+		return result;
+	}
+	
+	Number Number::bitwise_or(const Number &other) const
+	{
+		Number result;
+
+		mp_or(const_cast<mp_int *>(&num), const_cast<mp_int *>(&other.num), &result.num);
+
+		return result;
+	}
+	
 	Number Number::lshift(size_t shift) const
 	{
 		if(shift > (size_t)INT_MAX)
@@ -239,7 +281,7 @@ namespace Mirb
 		if(shift > (size_t)INT_MAX)
 			raise(context->argument_error, "Shift value too high");
 		
-		if((shift / DIGIT_BIT) >= num.used)
+		if((shift / DIGIT_BIT) >= (size_t)num.used)
 		{
 			if(num.sign == MP_ZPOS)
 				return Number((intptr_t)0);

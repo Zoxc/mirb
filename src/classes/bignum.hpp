@@ -22,6 +22,9 @@ namespace Mirb
 			static value_t pow(Bignum *obj, intptr_t other);
 			static value_t lshift(Bignum *obj, intptr_t shift);
 			static value_t rshift(Bignum *obj, intptr_t shift);
+			static value_t bitwise_and(Bignum *obj, value_t other);
+			static value_t bitwise_xor(Bignum *obj, value_t other);
+			static value_t bitwise_or(Bignum *obj, value_t other);
 
 		public:
 			static value_t to_string(const Number &number, intptr_t base);

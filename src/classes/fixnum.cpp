@@ -228,6 +228,51 @@ namespace Mirb
 		
 		return from_int(obj >> shift);
 	}
+	
+	value_t Fixnum::bitwise_and(int_t obj, value_t other)
+	{
+		switch(other->type())
+		{
+			case Type::Bignum:
+				return Number(obj).bitwise_and(cast<Bignum>(other)->number).to_value();
+
+			case Type::Fixnum:
+				return from_int(obj & to_int(other));
+
+			default:
+				type_error(other, "Fixnum or Bignum");
+		};
+	}
+	
+	value_t Fixnum::bitwise_xor(int_t obj, value_t other)
+	{
+		switch(other->type())
+		{
+			case Type::Bignum:
+				return Number(obj).bitwise_xor(cast<Bignum>(other)->number).to_value();
+
+			case Type::Fixnum:
+				return from_int(obj ^ to_int(other));
+
+			default:
+				type_error(other, "Fixnum or Bignum");
+		};
+	}
+
+	value_t Fixnum::bitwise_or(int_t obj, value_t other)
+	{
+		switch(other->type())
+		{
+			case Type::Bignum:
+				return Number(obj).bitwise_or(cast<Bignum>(other)->number).to_value();
+
+			case Type::Fixnum:
+				return from_int(obj | to_int(other));
+
+			default:
+				type_error(other, "Fixnum or Bignum");
+		};
+	}
 
 	void Fixnum::initialize()
 	{
@@ -241,6 +286,9 @@ namespace Mirb
 		
 		method<Self<Arg::Fixnum>, Arg::Fixnum, &lshift>(context->fixnum_class, "<<");
 		method<Self<Arg::Fixnum>, Arg::Fixnum, &rshift>(context->fixnum_class, ">>");
+		method<Self<Arg::Fixnum>, Value, &bitwise_and>(context->fixnum_class, "&");
+		method<Self<Arg::Fixnum>, Value, &bitwise_xor>(context->fixnum_class, "^");
+		method<Self<Arg::Fixnum>, Value, &bitwise_or>(context->fixnum_class, "|");
 
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 		method<Self<Arg::Fixnum>, &invert>(context->fixnum_class, "~");

@@ -39,6 +39,9 @@ namespace Mirb
 		value_t coerce(int_t obj, value_t other);
 		value_t lshift(int_t obj, int_t shift);
 		value_t rshift(int_t obj, int_t shift);
+		value_t bitwise_and(int_t obj, value_t other);
+		value_t bitwise_xor(int_t obj, value_t other);
+		value_t bitwise_or(int_t obj, value_t other);
 
 		value_t from_size_t(size_t value);
 		size_t to_size_t(value_t obj);
