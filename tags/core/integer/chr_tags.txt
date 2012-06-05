@@ -1,4 +1,3 @@
-SpecTag:fails::Integer#chr without argument returns a String
 SpecTag:fails::Integer#chr without argument raises a RangeError is self is less than 0
 SpecTag:fails::Integer#chr without argument when Encoding.default_internal is nil raises a RangeError is self is greater than 255
 SpecTag:fails::Integer#chr without argument when Encoding.default_internal is nil and self is between 0 and 127 (inclusive) returns a US-ASCII String

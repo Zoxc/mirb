@@ -1,6 +1,5 @@
 SpecTag:fails::String#inspect taints the result if self is tainted
 SpecTag:fails::String#inspect untrusts the result if self is untrusted
-SpecTag:fails::String#inspect does not return a subclass instance
 SpecTag:fails::String#inspect returns a string with special characters replaced with \\<char> notation
 SpecTag:fails::String#inspect returns a string with # not escaped when followed by any other character
 SpecTag:fails::String#inspect When default external is UTF-8 returns a string with non-printing characters replaced by \\u notation for Unicode strings

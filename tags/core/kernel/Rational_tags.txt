@@ -10,3 +10,4 @@ SpecTag:fails::Kernel.Rational when passed a String does not use the same method
 SpecTag:fails::Kernel.Rational when passed a Numeric calls #to_r to convert the first argument to a Rational
 SpecTag:fails::Kernel.Rational when passed a Complex returns a Rational from the real part if the imaginary part is 0
 SpecTag:fails::Kernel.Rational when passed a Complex raises a RangeError if the imaginary part is not 0
+SpecTag:fails::Kernel.Rational passed Integer returns a new Rational number with 1 as the denominator

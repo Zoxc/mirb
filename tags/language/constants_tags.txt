@@ -5,3 +5,24 @@ SpecTag:fails::Literal (A\003A\003AX) constant resolution with dynamically assig
 SpecTag:fails::Constant resolution within methods sends #const_missing to the original class or module scope
 SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches Object as a lexical scope only if Object is explicitly opened
 SpecTag:fails::Constant resolution within methods with ||= assignes constant if previously undefined
+SpecTag:fails::Literal (A\003A\003AX) constant resolution with dynamically assigned constants returns the updated value when a constant is reassigned
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the immediate class or module scope first
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches a module included in the immediate class before the superclass
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the superclass before a module included in the superclass
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches a module included in the superclass
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the superclass chain
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the lexical scope of the method not the receiver's immediate class
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the lexical scope of a singleton method
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches the lexical scope of a block
+SpecTag:fails::Constant resolution within methods with statically assigned constants searches Object as a lexical scope only if Object is explicitly opened
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the immediate class or module scope first
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches a module included in the immediate class before the superclass
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the superclass before a module included in the superclass
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches a module included in the superclass
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the superclass chain
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the lexical scope of the method not the receiver's immediate class
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the lexical scope of a singleton method
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants does not search the lexical scope of the caller
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants searches the lexical scope of a block
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants returns the updated value when a constant is reassigned
+SpecTag:fails::Constant resolution within methods with dynamically assigned constants does not search the lexical scope of qualifying modules
