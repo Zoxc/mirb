@@ -54,6 +54,11 @@ namespace Mirb
 		return CharArray(obj).to_string();
 	}
 	
+	value_t Fixnum::rb_size()
+	{
+		return Fixnum::from_int(sizeof(int_t));
+	}
+	
 	value_t Fixnum::zero(int_t obj)
 	{
 		return Value::from_bool(obj == 0);
@@ -184,6 +189,7 @@ namespace Mirb
 		method<Self<Arg::Fixnum>, Arg::Block, &times>(context->fixnum_class, "times");
 		method<Self<Arg::Fixnum>, Arg::Fixnum, Arg::Block, &upto>(context->fixnum_class, "upto");
 		method<Self<Arg::Fixnum>, &chr>(context->fixnum_class, "chr");
+		method<&rb_size>(context->fixnum_class, "size");
 		
 		method<Self<Arg::Fixnum>, &neg>(context->fixnum_class, "-@");
 
