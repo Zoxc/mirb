@@ -11,3 +11,13 @@ SpecTag:fails::File.chmod invokes to_int on non-integer argument
 SpecTag:fails::File.chmod invokes to_str on non-string file names
 SpecTag:fails::File.chmod with '0444' makes file readable and executable but not writable
 SpecTag:fails::File.chmod with '0644' makes file readable and writable and also executable
+SpecTag:fails::File#chmod with '0222' makes file writable but not readable or executable
+SpecTag:fails::File#chmod with '0444' makes file readable but not writable or executable
+SpecTag:fails::File#chmod with '0666' makes file readable and writable but not executable
+SpecTag:fails::File#chmod with '0111' makes file executable but not readable or writable
+SpecTag:fails::File#chmod modifies the permission bits of the files specified
+SpecTag:fails::File.chmod with '0222' makes file writable but not readable or executable
+SpecTag:fails::File.chmod with '0444' makes file readable but not writable or executable
+SpecTag:fails::File.chmod with '0666' makes file readable and writable but not executable
+SpecTag:fails::File.chmod with '0111' makes file executable but not readable or writable
+SpecTag:fails::File.chmod modifies the permission bits of the files specified

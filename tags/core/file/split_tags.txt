@@ -8,3 +8,4 @@ SpecTag:fails::File.split raises an ArgumentError when not passed a single argum
 SpecTag:fails::File.split raises a TypeError if the argument is not a String type
 SpecTag:fails::File.split coerces the argument with to_str if it is not a String type
 SpecTag:fails::File.split accepts an object that has a #to_path method
+SpecTag:fails::File.split does not split a string that contains '\\'

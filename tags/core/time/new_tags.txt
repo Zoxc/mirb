@@ -47,3 +47,4 @@ SpecTag:fails::Time.new raises an ArgumentError for out of range second
 SpecTag:fails::Time.new raises ArgumentError when given 9 arguments
 SpecTag:fails::Time.new raises ArgumentError when given 11 arguments
 SpecTag:fails::Time.new returns subclass instances
+SpecTag:fails::Time.new creates a time based on the current system time

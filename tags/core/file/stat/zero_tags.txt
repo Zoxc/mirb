@@ -6,3 +6,5 @@ SpecTag:fails::File\003A\003AStat#zero? raises an ArgumentError if not passed on
 SpecTag:fails::File\003A\003AStat#zero? raises a TypeError if not passed a String type
 SpecTag:fails::File\003A\003AStat#zero? returns true inside a block opening a file if it is empty
 SpecTag:fails::File\003A\003AStat#zero? returns true for a directory
+SpecTag:fails::File\003A\003AStat#zero? returns true for /dev/null
+SpecTag:fails::File\003A\003AStat#zero? returns false for a directory

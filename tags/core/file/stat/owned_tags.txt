@@ -1,1 +1,2 @@
 SpecTag:fails::File\003A\003AStat#owned? returns true if the file is owned by the user
+SpecTag:fails::File\003A\003AStat#owned? returns false if the file is not owned by the user

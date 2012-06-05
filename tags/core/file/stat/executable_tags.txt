@@ -1,2 +1,5 @@
 SpecTag:fails::File\003A\003AStat#executable? raises an ArgumentError if not passed one argument
 SpecTag:fails::File\003A\003AStat#executable? raises a TypeError if not passed a String type
+SpecTag:fails::File\003A\003AStat#executable? returns true if named file is executable by the effective user id of the process, otherwise false
+SpecTag:fails::File\003A\003AStat#executable? return true if the argument is an executable file
+SpecTag:fails::File\003A\003AStat#executable? accepts an object that has a #to_path method

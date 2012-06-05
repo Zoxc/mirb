@@ -2,3 +2,4 @@ SpecTag:fails::File.file? returns true if the named file exists and is a regular
 SpecTag:fails::File.file? accepts an object that has a #to_path method
 SpecTag:fails::File.file? raises an ArgumentError if not passed one argument
 SpecTag:fails::File.file? raises a TypeError if not passed a String type
+SpecTag:fails::File.file? return true if the null device exists and is a regular file.

@@ -1,0 +1,9 @@
+SpecTag:fails::File.symlink create a symlink between a source and target file
+SpecTag:fails::File.symlink create a symbolic link
+SpecTag:fails::File.symlink accepts args that have #to_path methods
+SpecTag:fails::File.symlink raises an Errno\003A\003AEEXIST if the target already exists
+SpecTag:fails::File.symlink raises an ArgumentError if not called with two arguments
+SpecTag:fails::File.symlink raises a TypeError if not called with String types
+SpecTag:fails::File.symlink? returns true if the file is a link
+SpecTag:fails::File.symlink? accepts an object that has a #to_path method
+SpecTag:fails::File.symlink? returns false if the file does not exist

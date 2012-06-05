@@ -1,0 +1,4 @@
+SpecTag:fails::File.link link a file with another
+SpecTag:fails::File.link raises an Errno\003A\003AEEXIST if the target already exists
+SpecTag:fails::File.link raises an ArgumentError if not passed two arguments
+SpecTag:fails::File.link raises a TypeError if not passed String types

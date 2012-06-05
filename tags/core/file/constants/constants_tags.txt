@@ -16,3 +16,5 @@ SpecTag:fails::File\003A\003AConstants\003A\003ARDWR is defined
 SpecTag:fails::File\003A\003AConstants\003A\003ATRUNC is defined
 SpecTag:fails::File\003A\003AConstants\003A\003AWRONLY is defined
 SpecTag:fails::File\003A\003AConstants\003A\003ABINARY is defined
+SpecTag:fails::File\003A\003AConstants\003A\003ANOCTTY is defined
+SpecTag:fails::File\003A\003AConstants\003A\003ASYNC is defined

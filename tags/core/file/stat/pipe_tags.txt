@@ -1,1 +1,2 @@
 SpecTag:fails::File\003A\003AStat#pipe? returns false if the file is not a pipe
+SpecTag:fails::File\003A\003AStat#pipe? returns true if the file is a pipe

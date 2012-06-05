@@ -1,0 +1,2 @@
+SpecTag:fails::File\003A\003AStat#symlink? returns true if the file is a link
+SpecTag:fails::File\003A\003AStat#symlink? accepts an object that has a #to_path method

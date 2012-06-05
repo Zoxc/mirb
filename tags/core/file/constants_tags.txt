@@ -17,3 +17,4 @@ SpecTag:fails::File\003A\003AConstants File\003A\003ASEPARATOR
 SpecTag:fails::File\003A\003AConstants File\003A\003ASeparator
 SpecTag:fails::File\003A\003AConstants File\003A\003APATH_SEPARATOR
 SpecTag:fails::File\003A\003AConstants File\003A\003AALT_SEPARATOR
+SpecTag:fails::File\003A\003AConstants File\003A\003ANOCTTY

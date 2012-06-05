@@ -1,0 +1,2 @@
+SpecTag:fails::File.readlink return the name of the file referenced by the given link
+SpecTag:fails::File.readlink raises an Errno\003A\003AENOENT if called with an invalid argument

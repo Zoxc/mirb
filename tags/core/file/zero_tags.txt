@@ -7,3 +7,5 @@ SpecTag:fails::File.zero? raises a TypeError if not passed a String type
 SpecTag:fails::File.zero? returns true inside a block opening a file if it is empty
 SpecTag:fails::File.zero? returns true for a directory
 SpecTag:fails::File.zero? returns false if the file does not exist
+SpecTag:fails::File.zero? returns true for /dev/null
+SpecTag:fails::File.zero? returns false for a directory

@@ -5,3 +5,4 @@ SpecTag:fails::File.dirname accepts an object that has a #to_path method
 SpecTag:fails::File.dirname returns the return all the components of filename except the last one (Windows format)
 SpecTag:fails::File.dirname returns the return all the components of filename except the last one (windows unc)
 SpecTag:fails::File.dirname returns the return all the components of filename except the last one (forward_slash)
+SpecTag:fails::File.dirname returns all the components of filename except the last one (edge cases on non-windows)
