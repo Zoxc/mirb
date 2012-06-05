@@ -1,7 +1,0 @@
-SpecTag:fails::The loop expression repeats the given block until a break is called
-SpecTag:fails::The loop expression executes code in its own scope
-SpecTag:fails::The loop expression returns the value passed to break if interrupted by break
-SpecTag:fails::The loop expression returns nil if interrupted by break with no arguments
-SpecTag:fails::The loop expression skips to end of body with next
-SpecTag:fails::The loop expression restarts the current iteration with redo
-SpecTag:fails::The loop expression uses a spaghetti nightmare of redo, next and break

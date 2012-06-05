@@ -304,6 +304,22 @@ namespace Mirb
 	{
 		return cast_integer(value);
 	}
+	
+	value_t Kernel::rb_loop(value_t block)
+	{
+		try
+		{
+			while(true)
+				yield(block);
+		}
+		catch(const InternalException e)
+		{
+			if(!e.value->kind_of(context->stop_iteration_class))
+				throw;
+		}
+
+		return value_nil;
+	}
 
 	void Kernel::initialize()
 	{
@@ -311,6 +327,7 @@ namespace Mirb
 
 		include_module(context->object_class, context->kernel_module);
 		
+		method<Arg::Block, &rb_loop>(context->kernel_module, "loop");
 		method<Value, &Kernel::rb_cast_array>(context->kernel_module, "Array");
 		method<Value, &Kernel::rb_cast_string>(context->kernel_module, "String");
 		method<Value, &Kernel::rb_cast_integer>(context->kernel_module, "Integer");

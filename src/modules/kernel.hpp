@@ -12,6 +12,7 @@ namespace Mirb
 		value_t benchmark(value_t block);
 		value_t backtrace();
 		value_t block_given();
+		value_t rb_loop(value_t value);
 		value_t eval(value_t obj, String *input);
 		value_t load(String *filename);
 		value_t require(String *filename);

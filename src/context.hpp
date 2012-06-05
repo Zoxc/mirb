@@ -92,6 +92,9 @@ namespace Mirb
 			Class *load_error;
 			Class *system_call_error;
 			Class *zero_division_error;
+			Class *index_error;
+
+			Class *stop_iteration_class;
 
 			Module *kernel_module;
 			Module *comparable_module;
