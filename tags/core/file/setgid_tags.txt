@@ -1,2 +1,3 @@
 SpecTag:fails::File.setgid? returns false if the file was just made
 SpecTag:fails::File.setgid? returns false if the file does not exist
+SpecTag:fails::File.setgid? returns true when the gid bit is set

@@ -3,3 +3,5 @@ SpecTag:fails::File.umask always succeeds with any integer values
 SpecTag:fails::File.umask raises ArgumentError when more than one argument is provided
 SpecTag:fails::File.umask returns the current umask value for this process (basic)
 SpecTag:fails::File.umask returns the current umask value for this process
+SpecTag:fails::File.umask returns the current umask value for the process
+SpecTag:fails::File.umask invokes to_int on non-integer argument

@@ -1,2 +1,4 @@
 SpecTag:fails::File.grpowned? returns false if the file exist
 SpecTag:fails::File.grpowned? returns false if file the does not exist
+SpecTag:fails::File.grpowned? returns true if the file exist
+SpecTag:fails::File.grpowned? accepts an object that has a #to_path method

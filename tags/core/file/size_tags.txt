@@ -18,3 +18,5 @@ SpecTag:fails::File#size returns the file's size in bytes
 SpecTag:fails::File#size returns the file's current size even if modified
 SpecTag:fails::File#size raises an IOError on a closed file
 SpecTag:fails::File#size for an empty file returns 0
+SpecTag:fails::File#size returns the cached size of the file if subsequently deleted
+SpecTag:fails::File#size follows symlinks if necessary

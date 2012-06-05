@@ -9,3 +9,7 @@ SpecTag:fails::IO.popen with a block yields an instance of a subclass when calle
 SpecTag:fails::IO.popen with a block closes the IO after yielding
 SpecTag:fails::IO.popen with a block allows the IO to be closed inside the block
 SpecTag:fails::IO.popen with a block returns the value of the block
+SpecTag:fails::IO.popen writes to a write-only pipe
+SpecTag:fails::IO.popen raises IOError when reading a write-only pipe
+SpecTag:fails::IO.popen reads and writes a read/write pipe
+SpecTag:fails::IO.popen waits for the child to finish

@@ -54,3 +54,5 @@ SpecTag:fails::File.fnmatch? returns true if '/' in pattern match '/' in path wh
 SpecTag:fails::File.fnmatch? accepts an object that has a #to_path method
 SpecTag:fails::File.fnmatch? raises a TypeError if the first and second arguments are not string-like
 SpecTag:fails::File.fnmatch? does not raise a TypeError if the third argument can be coerced to an Integer
+SpecTag:fails::File.fnmatch doesn't match case sensitive characters on platfroms with case sensitive paths, when flags include FNM_SYSCASE
+SpecTag:fails::File.fnmatch? doesn't match case sensitive characters on platfroms with case sensitive paths, when flags include FNM_SYSCASE

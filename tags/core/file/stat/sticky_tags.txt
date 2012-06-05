@@ -1,0 +1,1 @@
+SpecTag:fails::File\003A\003AStat#sticky? returns true if the named file has the sticky bit, otherwise false
