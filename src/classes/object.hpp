@@ -26,6 +26,7 @@ namespace Mirb
 			static value_t rb_not(value_t obj);
 			static value_t extend(value_t obj, size_t argc, value_t argv[]);
 			static value_t rb_kind_of(value_t obj, Class *klass);
+			static value_t rb_instance_of(value_t obj, Class *klass);
 			static value_t respond_to(value_t obj, Symbol *name);
 			
 			void generate_hash();

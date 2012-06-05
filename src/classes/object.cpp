@@ -145,6 +145,11 @@ namespace Mirb
 		return Value::from_bool(obj->kind_of(klass));
 	}
 	
+	value_t Object::rb_instance_of(value_t obj, Class *klass)
+	{
+		return Value::from_bool(class_of(obj) == klass);
+	}
+	
 	value_t Object::respond_to(value_t obj, Symbol *name)
 	{
 		return Value::from_bool(Mirb::respond_to(obj, name) != 0);
@@ -225,6 +230,7 @@ namespace Mirb
 		method<Self<Value>, Symbol, &respond_to>(context->object_class, "respond_to?");
 		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "is_a?");
 		method<Self<Value>, Class, &rb_kind_of>(context->object_class, "kind_of?");
+		method<Self<Value>, Class, &rb_instance_of>(context->object_class, "instance_of?");
 		method<&dummy>(context->object_class, "frozen?");
 		method<Value, &pattern>(context->object_class, "=~");
 		method<Value, &initialize_copy>(context->object_class, "initialize_copy");
