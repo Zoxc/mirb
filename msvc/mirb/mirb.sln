@@ -1,18 +1,57 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mirb", "mirb.vcxproj", "{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cli", "..\cli\cli.vcxproj", "{17A92FD8-1DB6-4290-A452-4F87F36040D6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA} = {866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtommath", "..\..\..\Libraries\libtommath\libtommath_VS2008.vcxproj", "{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcre", "..\..\..\Libraries\pcre\pcre.vcxproj", "{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.Debug|Win32.Build.0 = Debug|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.MinSizeRel|Win32.ActiveCfg = Release|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.MinSizeRel|Win32.Build.0 = Release|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.RelWithDebInfo|Win32.Build.0 = Release|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.Release|Win32.ActiveCfg = Release|Win32
+		{17A92FD8-1DB6-4290-A452-4F87F36040D6}.Release|Win32.Build.0 = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.Debug|Win32.Build.0 = Debug|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.MinSizeRel|Win32.ActiveCfg = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.MinSizeRel|Win32.Build.0 = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.RelWithDebInfo|Win32.Build.0 = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.Release|Win32.ActiveCfg = Release|Win32
+		{42109FEE-B0B9-4FCD-9E56-2863BF8C55D2}.Release|Win32.Build.0 = Release|Win32
 		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.Debug|Win32.Build.0 = Debug|Win32
+		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.MinSizeRel|Win32.ActiveCfg = Release|Win32
+		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.MinSizeRel|Win32.Build.0 = Release|Win32
+		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.RelWithDebInfo|Win32.Build.0 = Release|Win32
 		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.Release|Win32.ActiveCfg = Release|Win32
 		{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}.Release|Win32.Build.0 = Release|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.Debug|Win32.Build.0 = Debug|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.Release|Win32.ActiveCfg = Release|Win32
+		{D96A1B92-7F42-4618-B4F6-64A88A8C61E1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

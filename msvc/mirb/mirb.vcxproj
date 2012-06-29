@@ -129,7 +129,6 @@
     <ClCompile Include="..\..\src\lexer\lexer.cpp" />
     <ClCompile Include="..\..\src\lexer\numbers.cpp" />
     <ClCompile Include="..\..\src\lexer\strings.cpp" />
-    <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\message.cpp" />
     <ClCompile Include="..\..\src\method.cpp" />
     <ClCompile Include="..\..\src\modules\comparable.cpp" />
@@ -156,6 +155,14 @@
     <ClCompile Include="..\..\src\value.cpp" />
     <ClCompile Include="..\..\src\vm.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\libtommath\libtommath_VS2008.vcxproj">
+      <Project>{42109fee-b0b9-4fcd-9e56-2863bf8c55d2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\pcre\pcre.vcxproj">
+      <Project>{d96a1b92-7f42-4618-b4f6-64a88a8c61e1}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{866BD5B5-F2BE-4734-BCF0-66EF9B8557BA}</ProjectGuid>
     <RootNamespace>mirb</RootNamespace>
@@ -163,13 +170,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v110</PlatformToolset>
@@ -187,11 +194,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\..\..\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>$(SolutionDir)..\..\vendor\udis86\libudis86\.libs;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\..\..\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
